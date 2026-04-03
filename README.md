@@ -1,6 +1,6 @@
 # Tsessebe
 
-A TypeScript port of [pandas](https://github.com/pandas-dev/pandas), built from first principles.
+A TypeScript port of [pandas](https://github.com/pandas-dev/pandas), built from first principles using [Autoloop](https://github.com/githubnext/autoloop) — an automated research and experimentation platform that runs iterative optimization loops on [GitHub Agentic Workflows](https://github.github.com/gh-aw/).
 
 **Package name:** `tsb` — all imports and internal usage use `tsb`, not `tsessebe`.
 
@@ -19,6 +19,3 @@ A TypeScript port of [pandas](https://github.com/pandas-dev/pandas), built from 
 - **Performance** — aggressive optimization throughout. Speed is a first-class concern.
 - **Exhaustive testing** — pandas' own test suite as a baseline, extended with property-based testing, fuzzing, and e2e coverage. Target: 100%.
 
-## Approach
-
-This port is being built using [autoloop](https://github.com/githubnext/autoloop) to systematically migrate pandas' Python codebase to TypeScript.
