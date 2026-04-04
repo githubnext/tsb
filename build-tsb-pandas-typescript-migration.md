@@ -10,11 +10,11 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-04T11:11:00Z |
-| Iteration Count | 18 |
-| Best Metric | 26 |
+| Last Run | 2026-04-04T11:42:00Z |
+| Iteration Count | 19 |
+| Best Metric | 30 |
 | Target Metric | — |
-| Branch | `autoloop/build-tsb-pandas-typescript-migration-io-18` |
+| Branch | `autoloop/build-tsb-pandas-typescript-migration-stats-19` |
 | PR | — |
 | Steering Issue | — |
 | Paused | false |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -30,7 +30,7 @@
 
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
-**Branch**: [`autoloop/build-tsb-pandas-typescript-migration-io-18`](../../tree/autoloop/build-tsb-pandas-typescript-migration-io-18)
+**Branch**: [`autoloop/build-tsb-pandas-typescript-migration-stats-19`](../../tree/autoloop/build-tsb-pandas-typescript-migration-stats-19)
 **Pull Request**: —
 **Steering Issue**: —
 
@@ -38,7 +38,7 @@
 
 ## 🎯 Current Priorities
 
-Reshaping done (metric=19). Window functions done (metric=22). I/O done (metric=26). Next priorities in order:
+Reshaping done (metric=19). Window functions done (metric=22). I/O done (metric=26). Stats done (metric=30). Next priorities:
 1. ~~**DateTime accessor** (`src/core/datetime.ts`)~~ — ✅ Done (Iteration 12)
 2. ~~**Sorting utilities** (`src/core/sort.ts`)~~ — ✅ Done (Iteration 13)
 3. ~~**Indexing/selection** (`src/core/indexing.ts`)~~ — ✅ Done (Iteration 14)
@@ -46,7 +46,8 @@ Reshaping done (metric=19). Window functions done (metric=22). I/O done (metric=
 5. ~~**Reshaping** (`src/reshape/`)~~ — ✅ Done (Iteration 16)
 6. ~~**Window functions** (`src/window/`)~~ — ✅ Done (Iteration 17)
 7. ~~**I/O utilities** (`src/io/`)~~ — ✅ Done (Iteration 18)
-8. **Statistical functions** (`src/stats/`) — describe, corr, cov, skew, kurtosis
+8. ~~**Statistical functions** (`src/stats/`)~~ — ✅ Done (Iteration 19)
+9. **Categorical data** (`src/core/categorical.ts`) — CategoricalDtype, factorize, pd.Categorical
 
 ---
 
@@ -68,9 +69,9 @@ Reshaping done (metric=19). Window functions done (metric=22). I/O done (metric=
 - Iter 17 (window): `useImportRestrictions` requires importing from barrel `../core/index.ts` not directly from `../core/frame.ts` etc. Biome auto-fix converts direct imports to `import type { X }` first; manually consolidate all into `import { DataFrame, Series } from "../core/index.ts"` + `import type { Index }`. `useBlockStatements`: one-liner `if/for` must have braces. `useNumberNamespace`: use `Number.NaN` not bare `NaN`.
 - Iter 18 (I/O): `useTopLevelRegex` — move regex literals out of functions to module top level. `exactOptionalPropertyTypes` — use conditional `? { index: rowIndex } : undefined` not `{ index: maybeUndefined }`. When parsing `unknown` JSON, `as Record<string, unknown>` after type guards is provably safe. `noUncheckedIndexedAccess` — use `colNames[ci]` with `if (colName !== undefined)` guard; avoid `as string` cast on array access. `Label[]` from `Scalar[]` — use `.map(v => v === null || typeof v === 'string' || typeof v === 'number' ? v : null)` not cast. Import `type { DataFrame }` and `type { Series }` as type-only is sufficient when used only as parameter types.
 
----
+- Iter 19 (stats): Adjusted Fisher–Pearson formulas for skew/kurtosis use sample std (ddof=1), not population std. Formula: G1 = n/((n-1)(n-2)) * Σ[(xi-x̄)/s]³; G2 = n(n+1)/((n-1)(n-2)(n-3)) * Σ[(xi-x̄)/s]⁴ − 3(n-1)²/((n-2)(n-3)). `biome check --fix` auto-fixes organizeImports formatting. No new circular deps needed — import from `../core/index.ts` barrel.
 
-## 🚧 Foreclosed Avenues
+---
 
 - *(none yet)*
 
@@ -85,17 +86,25 @@ Index, Dtype, Series, DataFrame all implemented.
 - ~~Arithmetic~~ ✅ (Iter 8) · ~~String accessor~~ ✅ (Iter 9) · ~~DateTime accessor~~ ✅ (Iter 12)
 - ~~Missing data~~ ✅ (Iter 11) · ~~Groupby~~ ✅ (Iter 6) · ~~concat~~ ✅ (Iter 7) · ~~merge~~ ✅ (Iter 10)
 - ~~Sorting utilities~~ ✅ (Iter 13) · ~~Indexing/selection~~ ✅ (Iter 14) · ~~Comparison/boolean ops~~ ✅ (Iter 15) · ~~Reshaping~~ ✅ (Iter 16) · ~~Window functions~~ ✅ (Iter 17)
-- ~~**I/O utilities**~~ ✅ (Iter 18)
-- **Next**: Statistical functions (describe/corr/cov/skew/kurtosis)
+- ~~**I/O utilities**~~ ✅ (Iter 18) · ~~**Statistical functions**~~ ✅ (Iter 19)
+- **Next**: Categorical data (`src/core/categorical.ts`) or MultiIndex
 
-### Phase 3+ — Stats, Advanced
-describe/corr/cov/skew/kurtosis · Categorical · MultiIndex · Timedelta · read_parquet
+### Phase 3+ — Advanced
+Categorical · MultiIndex · Timedelta · read_parquet · plotting
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 19 — 2026-04-04 11:42 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23978159484)
+
+- **Status**: ✅ Accepted
+- **Change**: `src/stats/` — `describe`/`describeDataFrame`, `corrSeries`/`corrDataFrame` (Pearson/Spearman/Kendall tau-b), `covSeries`/`covDataFrame` (sample covariance), `skewSeries`/`skewDataFrame` (G1), `kurtosisSeries`/`kurtosisDataFrame`/`kurtSeries`/`kurtDataFrame` (G2 excess).
+- **Metric**: 30 (previous best: 26, delta: +4)
+- **Commit**: 26daef2
+- **Notes**: 42 unit + 3 property-based tests. Key learning: adjusted formulas use sample std (ddof=1), not population std.
 
 ### Iteration 18 — 2026-04-04 11:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23977676601)
 
@@ -111,8 +120,8 @@ All iterations in reverse chronological order (newest first).
 - **Change**: `src/window/` — rolling/expanding/ewm.
 - **Metric**: 22 (delta: +3)
 
-### Iterations 9–18 (summary)
-- Iter 18 ✅ I/O: readCsv/readJson/toCsv/toJson (26) · Iter 17 ✅ window (22) · Iter 16 ✅ reshape (19)
+### Iterations 9–19 (summary)
+- Iter 19 ✅ stats: describe/corr/cov/skew/kurtosis (30) · Iter 18 ✅ I/O: readCsv/readJson/toCsv/toJson (26) · Iter 17 ✅ window (22) · Iter 16 ✅ reshape (19)
 - Iter 15 ✅ compare.ts (16) · Iter 14 ✅ indexing.ts (15) · Iter 13 ✅ sort.ts (14)
 - Iter 12 ✅ datetime.ts (13) · Iter 11 ✅ missing.ts (12) · Iter 10 ✅ merge (11) · Iter 9 ✅ strings.ts (10)
 
