@@ -10,11 +10,11 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-04T09:52:00Z |
-| Iteration Count | 15 |
-| Best Metric | 16 |
+| Last Run | 2026-04-04T10:12:00Z |
+| Iteration Count | 16 |
+| Best Metric | 19 |
 | Target Metric | — |
-| Branch | `autoloop/build-tsb-pandas-typescript-migration-compare-15` |
+| Branch | `autoloop/build-tsb-pandas-typescript-migration-reshape-16` |
 | PR | — |
 | Steering Issue | — |
 | Paused | false |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -30,7 +30,7 @@
 
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
-**Branch**: [`autoloop/build-tsb-pandas-typescript-migration-indexing-14-e855a3b-1775294315`](../../tree/autoloop/build-tsb-pandas-typescript-migration-indexing-14-e855a3b-1775294315)
+**Branch**: [`autoloop/build-tsb-pandas-typescript-migration-reshape-16`](../../tree/autoloop/build-tsb-pandas-typescript-migration-reshape-16)
 **Pull Request**: —
 **Steering Issue**: —
 
@@ -38,12 +38,13 @@
 
 ## 🎯 Current Priorities
 
-Comparison/boolean ops done (metric=16). Next priorities in order:
+Reshaping done (metric=19). Next priorities in order:
 1. ~~**DateTime accessor** (`src/core/datetime.ts`)~~ — ✅ Done (Iteration 12)
 2. ~~**Sorting utilities** (`src/core/sort.ts`)~~ — ✅ Done (Iteration 13)
 3. ~~**Indexing/selection** (`src/core/indexing.ts`)~~ — ✅ Done (Iteration 14)
 4. ~~**Comparison/boolean ops** (`src/core/compare.ts`)~~ — ✅ Done (Iteration 15)
-5. **Reshaping** (`src/reshape/`) — pivot, melt, stack, unstack
+5. ~~**Reshaping** (`src/reshape/`)~~ — ✅ Done (Iteration 16)
+6. **Window functions** (`src/window/`) — rolling, expanding, ewm
 
 ---
 
@@ -61,7 +62,7 @@ Comparison/boolean ops done (metric=16). Next priorities in order:
 - Iter 13 (sort): Use `import type { Index }` when only used as type annotation. Aggressive helper extraction needed for rank's 5-method algorithm. `biome check --write` auto-formats long signatures.
 - Iter 14 (indexing): Biome v2.4.x via npx is incompatible with project's biome.json (1.9.4 schema). Install `@biomejs/biome@1.9.4` in node_modules for correct linting. `resolveILocPositions`/`resolveLocPositions` hit complexity 15 limit — extract `boolMaskToPositions`, `normaliseSinglePos`, `labelToPositions`, `labelArrayToPositions`. `exactOptionalPropertyTypes`: use `?? null` not just undefined for `name` field in SeriesOptions. Use `import fc from "fast-check"` (default import), not `import * as fc`.
 
-- Iter 15 (compare): No circular deps — compare.ts imports Series/DataFrame. Null comparisons: all ops return false for null operands except `ne` which returns true. `logicalNotSeries` passes nulls through unchanged. DataFrame axis="columns" broadcasts Series by col name; axis="index" broadcasts by row label. Use `import type { Index }` for type-only usage.
+- Iter 16 (reshape): `pivot` uses `JSON.stringify` for composite keys (handles null/boolean labels). Complexity 15 limit: extract `collectRowKeys`/`accumulateCells`/`buildPivotTableData` for pivotTable; extract `buildMeltOutputs`/`buildStackOutputs`/`assembleStackResult` for melt/stack. Import `Series` type at top of module to avoid inline `import("...")` in function signatures. `biome check --fix --unsafe` auto-fixes `useAtIndex`/`useTemplate`/`useBlockStatements`.
 
 ---
 
@@ -79,8 +80,8 @@ Index, Dtype, Series, DataFrame all implemented.
 ### Phase 2 — Operations (active)
 - ~~Arithmetic~~ ✅ (Iter 8) · ~~String accessor~~ ✅ (Iter 9) · ~~DateTime accessor~~ ✅ (Iter 12)
 - ~~Missing data~~ ✅ (Iter 11) · ~~Groupby~~ ✅ (Iter 6) · ~~concat~~ ✅ (Iter 7) · ~~merge~~ ✅ (Iter 10)
-- ~~Sorting utilities~~ ✅ (Iter 13) · ~~Indexing/selection~~ ✅ (Iter 14) · ~~Comparison/boolean ops~~ ✅ (Iter 15) · **Next**: Reshaping (pivot/melt/stack/unstack)
-- **Later**: Reshaping (pivot/melt/stack/unstack) · Window functions (rolling/expanding/ewm)
+- ~~Sorting utilities~~ ✅ (Iter 13) · ~~Indexing/selection~~ ✅ (Iter 14) · ~~Comparison/boolean ops~~ ✅ (Iter 15) · ~~Reshaping~~ ✅ (Iter 16)
+- **Next**: Window functions (rolling/expanding/ewm)
 
 ### Phase 3+ — I/O, Stats, Advanced
 read_csv/json/parquet · to_csv/json · describe/corr/cov · Categorical · MultiIndex · Timedelta
@@ -90,6 +91,14 @@ read_csv/json/parquet · to_csv/json · describe/corr/cov · Categorical · Mult
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 16 — 2026-04-04 10:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23976785305)
+
+- **Status**: ✅ Accepted
+- **Change**: `src/reshape/` — pivot (strict wide-from-long), pivotTable (with 7 aggfuncs, multi-column index), melt (wide-to-long unpivot), stack/unstack (simplified wide↔long without MultiIndex).
+- **Metric**: 19 (previous best: 16, delta: +3)
+- **Commit**: 075baf8
+- **Notes**: 46 unit tests + 6 property-based tests. Biome lint + TypeScript typecheck clean. `JSON.stringify` composite keys for null/boolean-safe label encoding. Three helper extractions per complex function to comply with complexity≤15 rule.
 
 ### Iteration 15 — 2026-04-04 09:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23976407516)
 
