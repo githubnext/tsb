@@ -8,11 +8,11 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-04T18:47:32Z |
-| Iteration Count | 33 |
-| Best Metric | 38 |
+| Last Run | 2026-04-04T19:14:40Z |
+| Iteration Count | 34 |
+| Best Metric | 40 |
 | Target Metric | — |
-| Branch | `autoloop/build-tsb-pandas-typescript-migration-frequency-cut-33-e855a3b78c5d1965` |
+| Branch | `autoloop/build-tsb-pandas-typescript-migration-apply-dummies-34-0331b27` |
 | PR | — |
 | Steering Issue | — |
 | Paused | false |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -28,24 +28,30 @@
 
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
-**Branch**: `autoloop/build-tsb-pandas-typescript-migration-frequency-cut-33-e855a3b78c5d1965`
+**Branch**: `autoloop/build-tsb-pandas-typescript-migration-apply-dummies-34-0331b27`
 
 ---
 
 ## 🎯 Current Priorities
 
-Iter 33 complete (valueCounts/crosstab + cut/qcut, 38 files). Next candidates:
-- `apply` / `applyMap` standalone module (+1 file)
-- `get_dummies` one-hot encoding (+1 file, lost in iter 31)
-- `to_datetime` / `to_timedelta` parsing (+1-2 files, lost in iters 29-31)
-- To beat best_metric=38, need at least 2 new files per iteration (to reach 40+).
+Iter 34 complete (applyMap/pipe + valueCounts/crosstab + cut/qcut + getDummies/fromDummies, 40 files).
+Branch: `autoloop/build-tsb-pandas-typescript-migration-apply-dummies-34-0331b27` (40 files).
 
-**IMPORTANT**: Best branch is `autoloop/build-tsb-pandas-typescript-migration-frequency-cut-33-e855a3b78c5d1965`. If inaccessible, fall back to `origin/autoloop/build-tsb-pandas-typescript-migration-datetime-tz-25-01ffe236087c7f0a` (36 files).
+Next candidates to beat 40 (need 2+ new files):
+- `to_datetime` / `to_timedelta` parsing (+2 files — re-implement, previously lost in branch divergence)
+- `read_parquet` / `read_excel` I/O (+1-2 files)
+- `Series.plot` / `DataFrame.plot` (stub for plotting integration, +1 file)
+- `pivot_wider` / pivot helpers (+1 file)
+
+**IMPORTANT**: Best branch is `autoloop/build-tsb-pandas-typescript-migration-apply-dummies-34-0331b27` (40 files). If inaccessible, fall back to `origin/autoloop/build-tsb-pandas-typescript-migration-datetime-tz-25-01ffe236087c7f0a` (36 files).
 
 ---
 
 ## 📚 Lessons Learned
 
+- **apply.ts (Iter 34)**: `Series<T>` generic causes type inference issues in pipe tests — use `Series<Scalar>` explicit type. `cutToIntervals` must return `Array<Interval|null>` not `Series<Interval|null>` since Interval extends beyond Scalar constraint.
+- **get_dummies.ts (Iter 34)**: `encodeDummiesDataFrame` helper needed to avoid CC>15 in main `getDummies` function. Use `Set<string>` for O(1) column lookup.
+- **frequency.ts (Iter 34)**: Same pattern as Iter 33 but built on datetime-tz-25 base. `CrosstabNormalize = "all"|"index"|"columns"|false` confirmed.
 - **General**: `exactOptionalPropertyTypes`: use `?? null`. `noUncheckedIndexedAccess`: guard array accesses. CC≤15: extract helpers. `useTopLevelRegex`: move regex to top. `useNumberNamespace`: `Number.NaN`. `import fc from "fast-check"` (default). `useForOf` requires for-of not for-let-i.
 - **Imports**: import from `../../src/index.ts` (tests), barrel `../core/index.ts` (src). `import type` for type-only. `useDefaultSwitchClause`: default: in every switch.
 - **Build env**: bun not available — use `npm install` then `node_modules/.bin/biome` / `node_modules/.bin/tsc`. Pre-existing TS errors in window/io/tests — only validate new files have 0 errors.
@@ -66,13 +72,20 @@ Iter 33 complete (valueCounts/crosstab + cut/qcut, 38 files). Next candidates:
 
 ## 🔭 Future Directions
 
-✅ Done through Iter 33: Foundation, Index/Dtype/Series/DataFrame, GroupBy, concat, merge, ops, strings, missing, datetime, sort, indexing, compare, reshape, window, I/O, stats, categorical, MultiIndex, Timedelta, IntervalIndex, CategoricalIndex, DatetimeIndex, valueCounts/crosstab, cut/qcut.
+✅ Done through Iter 34: Foundation, Index/Dtype/Series/DataFrame, GroupBy, concat, merge, ops, strings, missing, datetime, sort, indexing, compare, reshape, window, I/O, stats, categorical, MultiIndex, Timedelta, IntervalIndex, CategoricalIndex, DatetimeIndex, valueCounts/crosstab, cut/qcut, applyMap/pipe, getDummies/fromDummies.
 
-**Next**: apply/applyMap · get_dummies · to_datetime/to_timedelta · read_parquet · plotting
+**Next**: to_datetime/to_timedelta (re-port, +2 files) · read_parquet (+1 file) · Series.plot stub · additional window functions
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 34 — 2026-04-04 19:14 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23985700746)
+
+- **Status**: ✅ Accepted
+- **Change**: `src/core/apply.ts` (applyMap/applyMapFrame/applyFrame/pipe) + `src/stats/frequency.ts` (valueCounts/crosstab) + `src/transform/cut.ts` (cut/qcut) + `src/transform/get_dummies.ts` (getDummies/fromDummies). 4 test files, 3 playground pages.
+- **Metric**: 40 (prev: 38, delta: **+2**) · **Commit**: 4e793db
+- **Notes**: Built on datetime-tz-25 base (36 files). Recovered from branch divergence. cutToIntervals returns `Array<Interval|null>` not Series due to Scalar constraint. `pipe` tests need explicit `Series<Scalar>` typing.
 
 ### Iteration 33 — 2026-04-04 18:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23985243056)
 
