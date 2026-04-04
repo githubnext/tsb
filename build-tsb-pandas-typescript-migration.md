@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-04T01:25:00Z |
-| Iteration Count | 3 |
-| Best Metric | 5 |
+| Last Run | 2026-04-04T03:55:00Z |
+| Iteration Count | 4 |
+| Best Metric | 6 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #aw_pr3 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted |
 
 ---
 
@@ -38,14 +38,9 @@
 
 ## 🎯 Current Priorities
 
-Index, Dtype, and Series are done. Next priority: implement **DataFrame** (`src/core/frame.ts`) — the 2-D labeled table that is pandas' central data structure. DataFrame needs:
-1. Constructor accepting column data (Record<string, Series | array> or array of rows)
-2. Shape, columns, index properties
-3. Column access (`df['col']` or `df.get('col')`) returning a Series
-4. Row/column selection (`.loc`, `.iloc`)
-5. Basic arithmetic and comparison operations
-6. `head()`, `tail()`, `describe()` display methods
-7. `dropna()`, `fillna()` missing value handling per column or row
+DataFrame is done. Next priority: implement **Indexing/Selection** (`src/core/indexing.ts`) — the pandas `.loc`, `.iloc`, `.at`, `.iat` protocol as standalone functions, plus **GroupBy** (`src/groupby/groupby.ts`) as the next high-value feature. GroupBy enables split-apply-combine workflows fundamental to data analysis.
+
+Alternatively: implement **concat** (`src/merge/concat.ts`) to combine DataFrames along an axis — needed before groupby can do anything useful in demos.
 
 ---
 
@@ -55,6 +50,7 @@ Index, Dtype, and Series are done. Next priority: implement **DataFrame** (`src/
 - Iteration 3: Series<T> is best implemented as a thin wrapper around a readonly array + Index<Label> + Dtype. The `exactOptionalPropertyTypes: true` setting means you can't pass `{ name: undefined }` where `name?: string | null` is expected — use conditional spreads. For test type safety with literal-inferred Index<1|2|3>, add explicit `<number>` type parameter to avoid literal type unions that break cross-index operations. The `noUncheckedIndexedAccess` flag requires explicit `as T | undefined` casts on array accesses in sorted iterators.
 - Iteration 2: Index<T> was already implemented by Copilot agent on `copilot/autoloop-build-tsb-pandas-migration`. Built on top of that work. Dtype system implemented as immutable singletons (cached with Map). `noUncheckedIndexedAccess: true` requires `as T | undefined` guards for array element access. Index<T> method signatures should accept `Label` (not T) for query/set ops to avoid TypeScript literal type inference issues.
 - The `autoloop/build-tsb-pandas-typescript-migration` branch should be created from the copilot branch (which has the most up-to-date work), not from main (which only has README).
+- Iteration 4: DataFrame is best implemented column-oriented (Map<string, Series<Scalar>>). There's a tension between Biome's `useLiteralKeys` (wants `d.a`) and TypeScript's `noPropertyAccessFromIndexSignature` (requires `d["a"]`) for Record<string, ...> types. Resolve by using `toEqual({...})` patterns in tests instead of property access on the record. Biome's `noParameterProperties` and `noExcessiveCognitiveComplexity` require extracting helper functions. The `noSecrets` nursery rule produces false positives for test descriptions containing "drop=false".
 
 ---
 
@@ -71,7 +67,8 @@ Index, Dtype, and Series are done. Next priority: implement **DataFrame** (`src/
 2. ~~**Dtype system** (`src/core/dtype.ts`)~~ — ✅ Done (Iteration 2)
 3. ~~**Series** (`src/core/series.ts`)~~ — ✅ Done (Iteration 3)
 4. **DataFrame** (`src/core/frame.ts`) — 2-D labeled table, column-oriented storage
-5. **Indexing/selection** (`src/core/indexing.ts`) — .loc, .iloc, .at, .iat
+5. ~~**DataFrame** (`src/core/frame.ts`)~~ — ✅ Done (Iteration 4)
+6. **Indexing/selection** (`src/core/indexing.ts`) — standalone .loc, .iloc, .at, .iat helpers; MultiIndex groundwork
 
 ### Phase 2 — Operations (iterations 6-15)
 6. Arithmetic operations (Series + Series, DataFrame + DataFrame, broadcasting)
@@ -102,6 +99,14 @@ Index, Dtype, and Series are done. Next priority: implement **DataFrame** (`src/
 ---
 
 ## 📊 Iteration History
+
+### Iteration 4 — 2026-04-04 03:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23970468437)
+
+- **Status**: ✅ Accepted
+- **Change**: Implemented `DataFrame` — column-oriented 2-D labeled table with constructors for column arrays/Series, row objects, and 2-D matrix; shape/ndim/empty; loc/iloc indexers; head/tail; assign/drop/select/rename; isna/notna/dropna/fillna; filter; sum/mean/min/max/std/count/describe; sortValues/sortIndex; apply; iteritems/iterrows; toRecords/toDict/toArray; resetIndex/setIndex; toString. Added comprehensive tests and interactive playground page.
+- **Metric**: 6 (previous best: 5, delta: +1)
+- **Commit**: 34e367a
+- **Notes**: Biome `useLiteralKeys` vs TypeScript `noPropertyAccessFromIndexSignature` conflict resolved by using `toEqual({...})` in tests. `noParameterProperties` requires explicit property declarations in indexer classes. Extracted `_compareRows` helper to satisfy `noExcessiveCognitiveComplexity`.
 
 ### Iteration 3 — 2026-04-04 01:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23968306924)
 
