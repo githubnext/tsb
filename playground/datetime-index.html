@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb — DatetimeIndex & date_range</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav class="breadcrumb">
+      <a href="index.html">tsb playground</a> › DatetimeIndex
+    </nav>
+
+    <h1>DatetimeIndex &amp; <code>date_range</code></h1>
+    <p class="tagline">
+      Timezone-aware datetime index — a TypeScript port of
+      <code>pandas.DatetimeIndex</code> and <code>pd.date_range</code>.
+    </p>
+
+    <!-- ─── 1. Constructing a DatetimeIndex ─── -->
+    <section>
+      <h2>1. Constructing a DatetimeIndex</h2>
+      <p>
+        A <code>DatetimeIndex</code> can be built from ISO strings, <code>Date</code>
+        objects, or millisecond timestamps.
+      </p>
+      <div class="demo-grid">
+        <pre class="code"><code id="code-construct">import { DatetimeIndex } from "tsb";
+
+// From ISO strings
+const idx = new DatetimeIndex([
+  "2024-01-15",
+  "2024-06-30",
+  "2024-12-31",
+]);
+
+console.log(idx.size);   // 3
+console.log(idx.values[0].toISOString());
+// "2024-01-15T00:00:00.000Z"
+
+// From ms timestamps
+const ms = DatetimeIndex.fromMs([
+  Date.UTC(2024, 0, 1),
+  Date.UTC(2024, 6, 1),
+]);</code></pre>
+        <div class="output-panel">
+          <h3>Output</h3>
+          <pre id="out-construct">Run to see output…</pre>
+          <button onclick="runConstruct()">▶ Run</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 2. date_range ─── -->
+    <section>
+      <h2>2. Generating ranges with <code>date_range</code></h2>
+      <p>
+        <code>date_range(start, options)</code> creates evenly-spaced datetime
+        sequences — just like <code>pd.date_range</code>.
+      </p>
+      <div class="demo-grid">
+        <pre class="code"><code id="code-range">import { date_range } from "tsb";
+
+// Daily range, 5 periods
+const daily = date_range("2024-01-01", {
+  periods: 5,
+  freq: "D",
+});
+console.log(daily.strftime("%Y-%m-%d"));
+// ["2024-01-01", ..., "2024-01-05"]
+
+// Monthly starts for Q1
+const monthly = date_range("2024-01-01", {
+  end: "2024-03-01",
+  freq: "MS",
+});
+console.log(monthly.month); // [1, 2, 3]
+
+// Hourly range
+const hourly = date_range("2024-01-01T00:00:00Z", {
+  periods: 6,
+  freq: "H",
+});
+console.log(hourly.hour); // [0,1,2,3,4,5]</code></pre>
+        <div class="output-panel">
+          <h3>Output</h3>
+          <pre id="out-range">Run to see output…</pre>
+          <button onclick="runRange()">▶ Run</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 3. Component accessors ─── -->
+    <section>
+      <h2>3. Component accessors</h2>
+      <p>
+        Access datetime components element-wise — mirrors pandas' vectorized
+        <code>.year</code>, <code>.month</code>, <code>.dayofweek</code>, etc.
+      </p>
+      <div class="demo-grid">
+        <pre class="code"><code id="code-components">import { date_range } from "tsb";
+
+const rng = date_range("2024-01-01", {
+  periods: 4,
+  freq: "QS",  // quarter starts
+});
+
+console.log(rng.year);    // [2024,2024,2024,2024]
+console.log(rng.month);   // [1, 4, 7, 10]
+console.log(rng.quarter); // [1, 2, 3, 4]
+console.log(rng.is_quarter_start); // [true,true,true,true]
+console.log(rng.is_leap_year);     // [true,true,true,true]
+console.log(rng.dayofweek); // 0=Mon … 6=Sun</code></pre>
+        <div class="output-panel">
+          <h3>Output</h3>
+          <pre id="out-components">Run to see output…</pre>
+          <button onclick="runComponents()">▶ Run</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 4. Formatting ─── -->
+    <section>
+      <h2>4. Formatting with <code>strftime</code></h2>
+      <p>
+        Format each datetime using strftime-style directives, matching pandas'
+        <code>DatetimeIndex.strftime</code>.
+      </p>
+      <div class="demo-grid">
+        <pre class="code"><code id="code-strftime">import { date_range } from "tsb";
+
+const rng = date_range("2024-01-01", {
+  periods: 3,
+  freq: "MS",
+});
+
+// ISO date
+console.log(rng.strftime("%Y-%m-%d"));
+
+// Full weekday + month
+console.log(rng.strftime("%A, %B %d %Y"));
+
+// Compact
+console.log(rng.strftime("%y/%m/%d %H:%M"));</code></pre>
+        <div class="output-panel">
+          <h3>Output</h3>
+          <pre id="out-strftime">Run to see output…</pre>
+          <button onclick="runStrftime()">▶ Run</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 5. Floor / Ceil / Round ─── -->
+    <section>
+      <h2>5. Floor, Ceil &amp; Round</h2>
+      <p>
+        Snap datetimes to the nearest frequency boundary, matching pandas'
+        <code>.floor()</code>, <code>.ceil()</code>, and <code>.round()</code>.
+      </p>
+      <div class="demo-grid">
+        <pre class="code"><code id="code-floor">import { DatetimeIndex } from "tsb";
+
+const idx = new DatetimeIndex([
+  "2024-01-15T10:37:25.123Z",
+  "2024-06-30T23:50:00.000Z",
+]);
+
+console.log(idx.floor("H").strftime("%H:%M:%S"));
+// ["10:00:00", "23:00:00"]
+
+console.log(idx.ceil("H").strftime("%H:%M:%S"));
+// ["11:00:00", "00:00:00"]
+
+console.log(idx.round("H").strftime("%H:%M:%S"));
+// ["11:00:00", "00:00:00"]
+
+// Floor to day
+console.log(idx.floor("D").strftime("%Y-%m-%d %H:%M"));</code></pre>
+        <div class="output-panel">
+          <h3>Output</h3>
+          <pre id="out-floor">Run to see output…</pre>
+          <button onclick="runFloor()">▶ Run</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 6. Timezone operations ─── -->
+    <section>
+      <h2>6. Timezone operations</h2>
+      <p>
+        <code>DatetimeTZDtype</code> represents timezone-aware datetime dtypes
+        (<code>datetime64[ns, tz]</code>). Use <code>tz_localize</code> and
+        <code>tz_convert</code> to work with timezones.
+      </p>
+      <div class="demo-grid">
+        <pre class="code"><code id="code-tz">import { DatetimeIndex, DatetimeTZDtype } from "tsb";
+
+// Create tz-aware dtype
+const dtype = new DatetimeTZDtype("America/New_York");
+console.log(dtype.toString());
+// "datetime64[ns, America/New_York]"
+
+// Localize naive index to UTC
+const naive = new DatetimeIndex(["2024-06-15T12:00:00Z"]);
+const utcIdx = naive.tz_localize("UTC");
+console.log(utcIdx.tz);    // "UTC"
+console.log(utcIdx.dtype.toString());
+
+// Convert timezone (only changes annotation, not UTC value)
+const nyIdx = utcIdx.tz_convert("America/New_York");
+console.log(nyIdx.tz);     // "America/New_York"
+// UTC timestamps are unchanged:
+console.log(nyIdx.asi8[0] === utcIdx.asi8[0]); // true</code></pre>
+        <div class="output-panel">
+          <h3>Output</h3>
+          <pre id="out-tz">Run to see output…</pre>
+          <button onclick="runTz()">▶ Run</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 7. Shift ─── -->
+    <section>
+      <h2>7. Shifting datetimes</h2>
+      <p>
+        Shift all datetimes by <em>n</em> periods of a given frequency — supports
+        both fixed (D, H, T, S) and calendar (MS, ME, QS, YS) frequencies.
+      </p>
+      <div class="demo-grid">
+        <pre class="code"><code id="code-shift">import { date_range } from "tsb";
+
+const rng = date_range("2024-01-01", {
+  periods: 3, freq: "MS",
+});
+console.log(rng.strftime("%Y-%m-%d"));
+// ["2024-01-01", "2024-02-01", "2024-03-01"]
+
+// Shift forward by 2 months
+const shifted = rng.shift(2, "MS");
+console.log(shifted.strftime("%Y-%m-%d"));
+// ["2024-03-01", "2024-04-01", "2024-05-01"]
+
+// Shift backward by 5 days
+const back = rng.shift(-5, "D");
+console.log(back.strftime("%Y-%m-%d"));</code></pre>
+        <div class="output-panel">
+          <h3>Output</h3>
+          <pre id="out-shift">Run to see output…</pre>
+          <button onclick="runShift()">▶ Run</button>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      // ── tiny runtime shim ────────────────────────────────────────────────────
+      // In a real deployment this would import from a bundled tsb build.
+      // For the playground we inline a minimal implementation.
+
+      function pad(n, w) { return String(n).padStart(w, "0"); }
+      const MONTH_ABBR = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const MONTH_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      const WEEKDAY_ABBR = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+      const WEEKDAY_FULL = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+      function coerceDate(v) {
+        if (v == null) return new Date(0);
+        if (v instanceof Date) return isNaN(v) ? new Date(0) : v;
+        const d = new Date(v);
+        return isNaN(d) ? new Date(0) : d;
+      }
+
+      function isLeap(y) { return (y%4===0&&y%100!==0)||y%400===0; }
+      function daysInMonth(y,m) { return new Date(Date.UTC(y,m,0)).getUTCDate(); }
+      function dayOfWeek(d) { return (d.getUTCDay()+6)%7; }
+      function dayOfYear(d) {
+        const y=d.getUTCFullYear(),m=d.getUTCMonth()+1,day=d.getUTCDate();
+        let doy=day;
+        for(let i=1;i<m;i++) doy+=daysInMonth(y,i);
+        return doy;
+      }
+      function isoWeek(d) {
+        const dt=new Date(d.getTime());
+        const dn=dt.getUTCDay()||7;
+        dt.setUTCDate(dt.getUTCDate()+4-dn);
+        const ys=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+        return Math.ceil(((dt-ys)/86400000+1)/7);
+      }
+      function quarter(d) { return Math.floor(d.getUTCMonth()/3)+1; }
+      function addMonths(d,n) {
+        const newM=d.getUTCMonth()+n;
+        const newY=d.getUTCFullYear()+Math.floor(newM/12);
+        const normM=((newM%12)+12)%12;
+        const maxDay=daysInMonth(newY,normM+1);
+        return new Date(Date.UTC(newY,normM,Math.min(d.getUTCDate(),maxDay)));
+      }
+      function monthStart(d){return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),1));}
+      function monthEnd(d){return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,0));}
+      function quarterStart(d){const qm=Math.floor(d.getUTCMonth()/3)*3;return new Date(Date.UTC(d.getUTCFullYear(),qm,1));}
+      function quarterEnd(d){const qm=Math.floor(d.getUTCMonth()/3)*3+2;return new Date(Date.UTC(d.getUTCFullYear(),qm+1,0));}
+      function yearStart(d){return new Date(Date.UTC(d.getUTCFullYear(),0,1));}
+      function yearEnd(d){return new Date(Date.UTC(d.getUTCFullYear(),11,31));}
+
+      const UNIT_ALIAS={s:"S",h:"H",min:"T",A:"YE",Y:"YE",AS:"YS",Q:"QE",M:"ME"};
+      const FIXED_MS={ns:.001,us:.001,ms:1,L:1,S:1000,T:60000,H:3600000,D:86400000,W:604800000};
+
+      function parseFreq(freq) {
+        const m=/^(\d+)?([A-Za-z]+)$/.exec(freq);
+        if (!m) throw new Error(`Invalid freq: ${freq}`);
+        const mult=m[1]?parseInt(m[1],10):1;
+        const unit=UNIT_ALIAS[m[2]]??m[2];
+        return {mult,unit};
+      }
+      function nextStep(d,unit,mult) {
+        switch(unit){
+          case "MS": return monthStart(addMonths(d,mult));
+          case "ME": return monthEnd(addMonths(monthStart(d),mult));
+          case "QS": return quarterStart(addMonths(d,mult*3));
+          case "QE": return quarterEnd(addMonths(quarterStart(d),mult*3));
+          case "YS": return yearStart(addMonths(d,mult*12));
+          case "YE": return yearEnd(addMonths(yearStart(d),mult*12));
+          default: throw new Error(`Unknown unit: ${unit}`);
+        }
+      }
+
+      function applyDir(d, ch) {
+        const y=d.getUTCFullYear(),mo=d.getUTCMonth()+1,day=d.getUTCDate();
+        const h=d.getUTCHours(),mi=d.getUTCMinutes(),s=d.getUTCSeconds();
+        const dow=dayOfWeek(d);
+        switch(ch){
+          case "Y": return pad(y,4); case "y": return pad(y%100,2);
+          case "m": return pad(mo,2); case "d": return pad(day,2);
+          case "H": return pad(h,2); case "I": return pad(h%12||12,2);
+          case "M": return pad(mi,2); case "S": return pad(s,2);
+          case "f": return pad(d.getUTCMilliseconds()*1000,6);
+          case "p": return h<12?"AM":"PM";
+          case "A": return WEEKDAY_FULL[dow]??""; case "a": return WEEKDAY_ABBR[dow]??"";
+          case "B": return MONTH_FULL[mo-1]??""; case "b": case "h": return MONTH_ABBR[mo-1]??"";
+          case "j": return pad(dayOfYear(d),3);
+          case "w": return String((dow+1)%7);
+          case "Z": return "UTC"; case "z": return "+0000";
+          case "%": return "%";
+          default: return "%"+ch;
+        }
+      }
+      function formatDate(d, fmt) {
+        let out="",i=0;
+        while(i<fmt.length){
+          if(fmt[i]==="%"&&i+1<fmt.length){out+=applyDir(d,fmt[i+1]);i+=2;}
+          else{out+=fmt[i];i++;}
+        }
+        return out;
+      }
+
+      class DatetimeTZDtype {
+        constructor(tz){this.tz=tz;this.kind="datetime";}
+        toString(){return `datetime64[ns, ${this.tz}]`;}
+        equals(o){return this.tz===o.tz;}
+      }
+
+      class DatetimeIndex {
+        constructor(data, opts={}) {
+          this._values=Object.freeze(data.map(coerceDate));
+          this.name=opts.name??null; this.tz=opts.tz??null;
+        }
+        static fromMs(ms,opts){return new DatetimeIndex(ms,opts);}
+        static fromStrings(ss,opts){return new DatetimeIndex(ss,opts);}
+        get size(){return this._values.length;}
+        get values(){return this._values;}
+        at(i){return this._values[i]??null;}
+        get asi8(){return this._values.map(d=>d.getTime());}
+        get year(){return this._values.map(d=>d.getUTCFullYear());}
+        get month(){return this._values.map(d=>d.getUTCMonth()+1);}
+        get day(){return this._values.map(d=>d.getUTCDate());}
+        get hour(){return this._values.map(d=>d.getUTCHours());}
+        get minute(){return this._values.map(d=>d.getUTCMinutes());}
+        get second(){return this._values.map(d=>d.getUTCSeconds());}
+        get dayofweek(){return this._values.map(d=>dayOfWeek(d));}
+        get quarter(){return this._values.map(d=>quarter(d));}
+        get is_quarter_start(){return this._values.map(d=>{const m=d.getUTCMonth()+1;return d.getUTCDate()===1&&(m===1||m===4||m===7||m===10);});}
+        get is_leap_year(){return this._values.map(d=>isLeap(d.getUTCFullYear()));}
+        get is_month_end(){return this._values.map(d=>{const y=d.getUTCFullYear(),m=d.getUTCMonth()+1;return d.getUTCDate()===daysInMonth(y,m);});}
+        get is_year_end(){return this._values.map(d=>d.getUTCMonth()===11&&d.getUTCDate()===31);}
+        get dtype(){return this.tz?new DatetimeTZDtype(this.tz):"datetime64[ns]";}
+        strftime(fmt){return this._values.map(d=>formatDate(d,fmt));}
+        floor(freq){const {mult,unit}=parseFreq(freq);const ms=(FIXED_MS[unit]??1)*mult;return new DatetimeIndex(this._values.map(d=>new Date(Math.floor(d.getTime()/ms)*ms)),{name:this.name,tz:this.tz});}
+        ceil(freq){const {mult,unit}=parseFreq(freq);const ms=(FIXED_MS[unit]??1)*mult;return new DatetimeIndex(this._values.map(d=>{const t=d.getTime(),r=t%ms;return new Date(r===0?t:t+(ms-r));}),{name:this.name,tz:this.tz});}
+        round(freq){const {mult,unit}=parseFreq(freq);const ms=(FIXED_MS[unit]??1)*mult;return new DatetimeIndex(this._values.map(d=>new Date(Math.round(d.getTime()/ms)*ms)),{name:this.name,tz:this.tz});}
+        shift(n,freq="D"){const {mult,unit}=parseFreq(freq);return new DatetimeIndex(this._values.map(d=>{if(FIXED_MS[unit]){return new Date(d.getTime()+(FIXED_MS[unit]??1)*mult*n);}let cur=d;for(let i=0;i<Math.abs(n);i++){cur=n>0?nextStep(cur,unit,1):nextStep(cur,unit,-1);}return cur;}),{name:this.name,tz:this.tz});}
+        tz_localize(tz){return new DatetimeIndex([...this._values],{name:this.name,tz});}
+        tz_convert(tz){return new DatetimeIndex([...this._values],{name:this.name,tz});}
+      }
+
+      function date_range(start,opts={}) {
+        const sd=coerceDate(start);
+        const freq=opts.freq??"D";
+        const {mult,unit}=parseFreq(freq);
+        let count=opts.periods??1;
+        if(opts.end){
+          const ed=coerceDate(opts.end);
+          if(FIXED_MS[unit]){const ms=(FIXED_MS[unit]??1)*mult;count=Math.floor((ed.getTime()-sd.getTime())/ms)+1;}
+          else{let c=0,cur=sd;while(cur.getTime()<=ed.getTime()){c++;cur=nextStep(cur,unit,mult);}count=c;}
+        }
+        const dates=[];
+        if(FIXED_MS[unit]){const ms=(FIXED_MS[unit]??1)*mult;for(let i=0;i<count;i++)dates.push(new Date(sd.getTime()+ms*i));}
+        else{dates.push(sd);let cur=sd;for(let i=1;i<count;i++){cur=nextStep(cur,unit,mult);dates.push(cur);}}
+        return new DatetimeIndex(dates,{tz:opts.tz??null,name:opts.name??null});
+      }
+
+      // ── demo runners ──────────────────────────────────────────────────────────
+      function out(id, ...args) {
+        document.getElementById(id).textContent = args.map(a =>
+          typeof a === "object" ? JSON.stringify(a, null, 2) : String(a)
+        ).join("\n");
+      }
+
+      window.runConstruct = () => {
+        const idx = new DatetimeIndex(["2024-01-15","2024-06-30","2024-12-31"]);
+        out("out-construct",
+          `size: ${idx.size}`,
+          `values[0]: ${idx.values[0].toISOString()}`,
+          `values[1]: ${idx.values[1].toISOString()}`,
+          `values[2]: ${idx.values[2].toISOString()}`,
+        );
+      };
+
+      window.runRange = () => {
+        const daily = date_range("2024-01-01", { periods: 5, freq: "D" });
+        const monthly = date_range("2024-01-01", { end: "2024-03-01", freq: "MS" });
+        const hourly = date_range("2024-01-01T00:00:00Z", { periods: 6, freq: "H" });
+        out("out-range",
+          "daily.strftime('%Y-%m-%d'):",
+          JSON.stringify(daily.strftime("%Y-%m-%d")),
+          "",
+          "monthly.month:",
+          JSON.stringify(monthly.month),
+          "",
+          "hourly.hour:",
+          JSON.stringify(hourly.hour),
+        );
+      };
+
+      window.runComponents = () => {
+        const rng = date_range("2024-01-01", { periods: 4, freq: "QS" });
+        out("out-components",
+          `year:  ${JSON.stringify(rng.year)}`,
+          `month: ${JSON.stringify(rng.month)}`,
+          `quarter: ${JSON.stringify(rng.quarter)}`,
+          `is_quarter_start: ${JSON.stringify(rng.is_quarter_start)}`,
+          `is_leap_year: ${JSON.stringify(rng.is_leap_year)}`,
+          `dayofweek: ${JSON.stringify(rng.dayofweek)}`,
+        );
+      };
+
+      window.runStrftime = () => {
+        const rng = date_range("2024-01-01", { periods: 3, freq: "MS" });
+        out("out-strftime",
+          "strftime('%Y-%m-%d'):",
+          JSON.stringify(rng.strftime("%Y-%m-%d")),
+          "",
+          "strftime('%A, %B %d %Y'):",
+          JSON.stringify(rng.strftime("%A, %B %d %Y")),
+          "",
+          "strftime('%y/%m/%d %H:%M'):",
+          JSON.stringify(rng.strftime("%y/%m/%d %H:%M")),
+        );
+      };
+
+      window.runFloor = () => {
+        const idx = new DatetimeIndex([
+          "2024-01-15T10:37:25.123Z",
+          "2024-06-30T23:50:00.000Z",
+        ]);
+        out("out-floor",
+          "floor('H'): " + JSON.stringify(idx.floor("H").strftime("%H:%M:%S")),
+          "ceil('H'):  " + JSON.stringify(idx.ceil("H").strftime("%H:%M:%S")),
+          "round('H'): " + JSON.stringify(idx.round("H").strftime("%H:%M:%S")),
+          "floor('D'): " + JSON.stringify(idx.floor("D").strftime("%Y-%m-%d %H:%M")),
+        );
+      };
+
+      window.runTz = () => {
+        const dtype = new DatetimeTZDtype("America/New_York");
+        const naive = new DatetimeIndex(["2024-06-15T12:00:00Z"]);
+        const utcIdx = naive.tz_localize("UTC");
+        const nyIdx = utcIdx.tz_convert("America/New_York");
+        out("out-tz",
+          `dtype.toString(): "${dtype.toString()}"`,
+          `utcIdx.tz: "${utcIdx.tz}"`,
+          `utcIdx.dtype.toString(): "${String(utcIdx.dtype)}"`,
+          `nyIdx.tz: "${nyIdx.tz}"`,
+          `UTC unchanged: ${nyIdx.asi8[0] === utcIdx.asi8[0]}`,
+        );
+      };
+
+      window.runShift = () => {
+        const rng = date_range("2024-01-01", { periods: 3, freq: "MS" });
+        const shifted = rng.shift(2, "MS");
+        const back = rng.shift(-5, "D");
+        out("out-shift",
+          "original:      " + JSON.stringify(rng.strftime("%Y-%m-%d")),
+          "shift(+2, MS): " + JSON.stringify(shifted.strftime("%Y-%m-%d")),
+          "shift(-5, D):  " + JSON.stringify(back.strftime("%Y-%m-%d")),
+        );
+      };
+    </script>
+  </body>
+</html>
