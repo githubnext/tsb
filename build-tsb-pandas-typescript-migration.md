@@ -10,11 +10,11 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-04T14:13:00Z |
-| Iteration Count | 24 |
-| Best Metric | 35 |
+| Last Run | 2026-04-04T14:45:00Z |
+| Iteration Count | 25 |
+| Best Metric | 36 |
 | Target Metric | — |
-| Branch | `autoloop/build-tsb-pandas-typescript-migration-categorical-index-24` |
+| Branch | `autoloop/build-tsb-pandas-typescript-migration-datetime-tz-25` |
 | PR | — |
 | Steering Issue | — |
 | Paused | false |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -30,7 +30,7 @@
 
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
-**Branch**: [`autoloop/build-tsb-pandas-typescript-migration-categorical-index-24`](../../tree/autoloop/build-tsb-pandas-typescript-migration-categorical-index-24)
+**Branch**: [`autoloop/build-tsb-pandas-typescript-migration-datetime-tz-25`](../../tree/autoloop/build-tsb-pandas-typescript-migration-datetime-tz-25)
 **Pull Request**: —
 **Steering Issue**: —
 
@@ -52,7 +52,8 @@ MultiIndex done (metric=33). Next priorities:
 11. ~~**Timedelta** (`src/core/timedelta.ts`)~~ — ✅ Done (Iteration 22)
 12. ~~**IntervalIndex** (`src/core/interval-index.ts`)~~ — ✅ Done (Iteration 23)
 13. ~~**CategoricalIndex** (`src/core/categorical-index.ts`)~~ — ✅ Done (Iteration 24)
-14. **DatetimeTZDtype / DatetimeTZIndex** (`src/core/datetime-tz.ts`) — timezone-aware datetime index, or next: `read_parquet`, `plotting`
+14. ~~**DatetimeTZDtype / DatetimeIndex**~~ (`src/core/datetime-index.ts`) — ✅ Done (Iteration 25)
+15. **Next**: `read_parquet` (binary Parquet I/O), `plotting` module, or `pd.to_datetime` / `pd.to_timedelta` utilities
 
 ---
 
@@ -61,6 +62,7 @@ MultiIndex done (metric=33). Next priorities:
 - **General**: `exactOptionalPropertyTypes`: use `?? null` not undefined. `noUncheckedIndexedAccess`: guard array accesses. Complexity ≤15: extract helpers. `useBlockStatements`: braces everywhere. `useTopLevelRegex`: move regex to top level. `useNumberNamespace`: `Number.NaN`. `import fc from "fast-check"` (default import). `biome check --write --unsafe` auto-fixes Array<T>→T[].
 - **Imports**: `useImportRestrictions` — import from barrel `../core/index.ts` not direct files. `import type` for type-only imports. Circular ESM deps (strings/datetime/categorical) are fine.
 - **Build env**: `bun` not available — use `node_modules/.bin/biome` and `node_modules/.bin/tsc`. Pre-existing TS errors in window/io/tests — only validate new file has 0 errors.
+- **DatetimeIndex** (Iter 25): `Date` is not a `Label` (Label = number|string|boolean|null), so `DatetimeIndex` cannot extend `Index<T>`. Implement as standalone class with own `_values: readonly Date[]` and Index-like interface. Timezone handling via `Intl.DateTimeFormat.formatToParts` works without dependencies but `applyPart` helper must be split from `applyParts` to keep cognitive complexity ≤15.
 - **CategoricalIndex** (Iter 24): Extends `Index<Label>` via `super(cat.toArray(), name)`. `fromCategorical` factory for clean construction. Monotonicity uses category-position codes when `ordered=true`. `sortByCategoryOrder` helper keeps `sortValues` complexity low by using codes for comparison. Category management delegates fully to `Categorical` instance methods. No barrel imports needed for `Categorical` (direct import from `./categorical.ts`).
 - **IntervalIndex** (Iter 23): `Interval` class needs no imports from core barrel (standalone numeric type). `intervalsOverlap` helper with touching-endpoint logic (both sides must include the shared point). `resolveRangeParams` extractor keeps `intervalRange` complexity low. `extractLeft/Right/Mid/Length` helpers for clean property getters. `maskContains`/`maskOverlaps` for vectorized ops. fromIntervals inherits `closed` from first element (empty→"right" default).
 - **Timedelta** (Iter 22): Store as ms integer. `floorDiv`/`floorMod` helpers for Python-style floor-division decomposition (components always non-negative). `Timedelta` NOT in `Scalar` type — `TimedeltaAccessor` accepts numbers (ms) or strings. Accessor's `_mapTd` returns ms numbers to stay within Scalar. Two top-level regex (PANDAS_RE + UNIT_RE) for biome compliance.
@@ -84,9 +86,10 @@ Index, Dtype, Series, DataFrame all implemented.
 - ~~**Timedelta**~~ ✅ (Iter 22)
 - ~~**IntervalIndex**~~ ✅ (Iter 23)
 - ~~**CategoricalIndex**~~ ✅ (Iter 24)
+- ~~**DatetimeIndex / DatetimeTZDtype**~~ ✅ (Iter 25)
 
 ### Phase 3+ — Advanced
-**Next**: DatetimeTZDtype/Index (`src/core/datetime-tz.ts`) — timezone-aware datetime handling (matching `pd.DatetimeTZDtype` and `pd.DatetimeIndex`). Or: `read_parquet` (binary format), `plotting` module.
+**Next**: `read_parquet` (binary Parquet I/O via pure TS), `pd.to_datetime` / `pd.to_timedelta` utilities, or `plotting` module (Vega/Canvas-based charting).
 
 ---
 
@@ -94,7 +97,12 @@ Index, Dtype, Series, DataFrame all implemented.
 
 All iterations in reverse chronological order (newest first).
 
-### Iteration 24 — 2026-04-04 14:13 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23980570547)
+### Iteration 25 — 2026-04-04 14:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23981104668)
+
+- **Status**: ✅ Accepted
+- **Change**: `src/core/datetime-index.ts` — `DatetimeIndex` (standalone class with Date[] storage, IANA timezone support via Intl API; component accessors; strftime; floor/ceil/round; shift; tz_localize/tz_convert) + `DatetimeTZDtype` + `date_range()` factory (fixed + calendar freqs)
+- **Metric**: 36 (previous best: 35, delta: +1) · **Commit**: 9bdd0f5
+- **Notes**: DatetimeIndex cannot extend `Index<T>` since Date is not a Label type; standalone class avoids the constraint. Intl API handles timezone offseting without dependencies. 70+ tests pass biome/tsc clean.
 
 - **Status**: ✅ Accepted
 - **Change**: `src/core/categorical-index.ts` — `CategoricalIndex` (extends `Index<Label>`, backed by `Categorical`; categories/codes/ordered/dtype; full category mgmt API; monotonicity/sort by code-position when ordered; `fromCategorical` factory)
