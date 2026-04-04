@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-03T19:10:35Z |
-| Iteration Count | 2 |
-| Best Metric | 4 |
+| Last Run | 2026-04-04T01:25:00Z |
+| Iteration Count | 3 |
+| Best Metric | 5 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | — |
+| PR | #aw_pr3 |
 | Steering Issue | — |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted |
 
 ---
 
@@ -31,26 +31,28 @@
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: —
+**Pull Request**: #aw_pr3
 **Steering Issue**: —
 
 ---
 
 ## 🎯 Current Priorities
 
-Index and Dtype are done. Next priority: implement **Series** (`src/core/series.ts`) — the 1-D labeled array that is pandas' primary data structure. Series needs:
-1. Constructor accepting data array + optional Index + optional dtype
-2. dtype inference via Dtype.inferFrom()
-3. Element access (at, iat, loc, iloc)
-4. Basic arithmetic (+, -, *, /)
-5. Statistical methods (sum, mean, min, max, std, var, count)
-6. Boolean operations and masking
+Index, Dtype, and Series are done. Next priority: implement **DataFrame** (`src/core/frame.ts`) — the 2-D labeled table that is pandas' central data structure. DataFrame needs:
+1. Constructor accepting column data (Record<string, Series | array> or array of rows)
+2. Shape, columns, index properties
+3. Column access (`df['col']` or `df.get('col')`) returning a Series
+4. Row/column selection (`.loc`, `.iloc`)
+5. Basic arithmetic and comparison operations
+6. `head()`, `tail()`, `describe()` display methods
+7. `dropna()`, `fillna()` missing value handling per column or row
 
 ---
 
 ## 📚 Lessons Learned
 
 - Iteration 1: Project structure established cleanly with Bun + Biome + strict TypeScript. The `types.ts` shared type file is the right home for `Scalar`, `Label`, `Axis`, `DtypeName`, etc.
+- Iteration 3: Series<T> is best implemented as a thin wrapper around a readonly array + Index<Label> + Dtype. The `exactOptionalPropertyTypes: true` setting means you can't pass `{ name: undefined }` where `name?: string | null` is expected — use conditional spreads. For test type safety with literal-inferred Index<1|2|3>, add explicit `<number>` type parameter to avoid literal type unions that break cross-index operations. The `noUncheckedIndexedAccess` flag requires explicit `as T | undefined` casts on array accesses in sorted iterators.
 - Iteration 2: Index<T> was already implemented by Copilot agent on `copilot/autoloop-build-tsb-pandas-migration`. Built on top of that work. Dtype system implemented as immutable singletons (cached with Map). `noUncheckedIndexedAccess: true` requires `as T | undefined` guards for array element access. Index<T> method signatures should accept `Label` (not T) for query/set ops to avoid TypeScript literal type inference issues.
 - The `autoloop/build-tsb-pandas-typescript-migration` branch should be created from the copilot branch (which has the most up-to-date work), not from main (which only has README).
 
@@ -67,7 +69,7 @@ Index and Dtype are done. Next priority: implement **Series** (`src/core/series.
 ### Phase 1 — Core Foundation (next 5 iterations)
 1. ~~**Index** (`src/core/index.ts`)~~ — ✅ Done (by Copilot agent, merged into our branch)
 2. ~~**Dtype system** (`src/core/dtype.ts`)~~ — ✅ Done (Iteration 2)
-3. **Series** (`src/core/series.ts`) — 1-D labeled array with dtype awareness — **NEXT**
+3. ~~**Series** (`src/core/series.ts`)~~ — ✅ Done (Iteration 3)
 4. **DataFrame** (`src/core/frame.ts`) — 2-D labeled table, column-oriented storage
 5. **Indexing/selection** (`src/core/indexing.ts`) — .loc, .iloc, .at, .iat
 
@@ -100,6 +102,14 @@ Index and Dtype are done. Next priority: implement **Series** (`src/core/series.
 ---
 
 ## 📊 Iteration History
+
+### Iteration 3 — 2026-04-04 01:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23968306924)
+
+- **Status**: ✅ Accepted
+- **Change**: Implemented Dtype system (16 immutable pandas-equivalent dtype singletons with `DtypeKind`, `itemsize`, type predicates, `canCastTo`, `commonType`, `inferFrom`) and full `Series<T>` (1-D labeled array with element access, arithmetic, comparison, boolean masking, statistical aggregation, sorting, missing-value handling, `map`, `isin`, `valueCounts`, conversion).
+- **Metric**: 5 (previous best: 4, delta: +1)
+- **Commit**: 36e76a5
+- **Notes**: Series and Dtype both land in one iteration. The `exactOptionalPropertyTypes` tsconfig requires conditional spreads when passing optional `name`. Biome's `useImportRestrictions` rule requires tests to import from the barrel (`src/core/index.ts`) rather than individual files — added Dtype+Series to core barrel. Literal type inference issues in tests fixed by adding explicit `<number>` type params.
 
 ### Iteration 2 — 2026-04-03 19:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23958625367)
 
