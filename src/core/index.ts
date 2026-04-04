@@ -7,3 +7,30 @@ export { Series } from "./series.ts";
 export type { SeriesOptions } from "./series.ts";
 export { DataFrame } from "./frame.ts";
 export type { DataFrameOptions } from "./frame.ts";
+export { alignSeries, alignedBinaryOp, alignDataFrames, alignedDataFrameBinaryOp } from "./ops.ts";
+export type { AlignJoin, SeriesAlignResult, DataFrameAlignResult } from "./ops.ts";
+export { StringAccessor } from "./strings.ts";
+export {
+  isna,
+  isnull,
+  notna,
+  notnull,
+  ffill,
+  ffillDataFrame,
+  bfill,
+  bfillDataFrame,
+  fillnaSeries,
+  fillnaDataFrame,
+  dropnaSeries,
+  dropnaDataFrame,
+  interpolate,
+  interpolateDataFrame,
+} from "./missing.ts";
+export type {
+  FillPropagateOptions,
+  FillnaMethod,
+  FillnaOptions,
+  DropnaOptions,
+  InterpolateMethod,
+  InterpolateOptions,
+} from "./missing.ts";
