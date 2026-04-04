@@ -7,7 +7,7 @@
  * then serves the playground on http://localhost:3000.
  */
 
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { extname, join } from "node:path";
 
 const PORT = 3000;
@@ -24,8 +24,8 @@ const MIME_TYPES: Record<string, string> = {
   ".svg": "image/svg+xml",
 };
 
-async function buildBundle() {
-  console.log("Building tsb browser bundle…");
+async function buildBundle(): Promise<void> {
+  console.info("Building tsb browser bundle…");
   const result = await Bun.build({
     entrypoints: [join(PROJECT_ROOT, "src", "index.ts")],
     outdir: DIST_DIR,
@@ -33,40 +33,39 @@ async function buildBundle() {
     minify: true,
   });
   if (!result.success) {
-    console.error("Build failed:");
     for (const log of result.logs) {
       console.error(log);
     }
     process.exit(1);
   }
-  console.log("  → playground/dist/index.js");
+  console.info("  → playground/dist/index.js");
 }
 
-function copyTypeScript() {
+async function copyTypeScript(): Promise<void> {
   const src = join(PROJECT_ROOT, "node_modules", "typescript", "lib", "typescript.js");
   const dest = join(DIST_DIR, "typescript.js");
-  if (!existsSync(src)) {
-    console.warn("⚠ TypeScript compiler not found at", src);
-    console.warn("  Run `npm install` first. CDN fallback will be used.");
+  const srcFile = Bun.file(src);
+  if (!(await srcFile.exists())) {
+    console.warn("⚠ TypeScript compiler not found. Run `npm install` first.");
     return;
   }
-  copyFileSync(src, dest);
-  console.log("  → playground/dist/typescript.js");
+  await Bun.write(dest, srcFile);
+  console.info("  → playground/dist/typescript.js");
 }
 
-async function main() {
+async function main(): Promise<void> {
   if (!existsSync(DIST_DIR)) {
     mkdirSync(DIST_DIR, { recursive: true });
   }
 
   await buildBundle();
-  copyTypeScript();
+  await copyTypeScript();
 
-  console.log(`\nPlayground ready at http://localhost:${PORT}\n`);
+  console.info(`\nPlayground ready at http://localhost:${PORT}\n`);
 
   Bun.serve({
     port: PORT,
-    fetch(req) {
+    fetch(req: Request): Response {
       const url = new URL(req.url);
       const pathname = url.pathname === "/" ? "/index.html" : url.pathname;
       const filePath = join(PLAYGROUND_DIR, pathname);
@@ -79,7 +78,7 @@ async function main() {
         headers: { "Content-Type": contentType },
       });
     },
-    error() {
+    error(): Response {
       return new Response("Not found", { status: 404 });
     },
   });
