@@ -10,11 +10,11 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-04T13:25:00Z |
-| Iteration Count | 22 |
-| Best Metric | 33 |
+| Last Run | 2026-04-04T13:49:00Z |
+| Iteration Count | 23 |
+| Best Metric | 34 |
 | Target Metric | — |
-| Branch | `autoloop/build-tsb-pandas-typescript-migration-timedelta-22` |
+| Branch | `autoloop/build-tsb-pandas-typescript-migration-interval-index-23` |
 | PR | — |
 | Steering Issue | — |
 | Paused | false |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -30,7 +30,7 @@
 
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
-**Branch**: [`autoloop/build-tsb-pandas-typescript-migration-multiindex-21`](../../tree/autoloop/build-tsb-pandas-typescript-migration-multiindex-21)
+**Branch**: [`autoloop/build-tsb-pandas-typescript-migration-interval-index-23`](../../tree/autoloop/build-tsb-pandas-typescript-migration-interval-index-23)
 **Pull Request**: —
 **Steering Issue**: —
 
@@ -50,7 +50,8 @@ MultiIndex done (metric=33). Next priorities:
 9. ~~**Categorical data** (`src/core/categorical.ts`)~~ — ✅ Done (Iteration 20)
 10. ~~**MultiIndex** (`src/core/multi-index.ts`)~~ — ✅ Done (Iteration 21)
 11. ~~**Timedelta** (`src/core/timedelta.ts`)~~ — ✅ Done (Iteration 22)
-12. **IntervalIndex** (`src/core/interval-index.ts`) — interval/range type with closed parameter
+12. ~~**IntervalIndex** (`src/core/interval-index.ts`)~~ — ✅ Done (Iteration 23)
+13. **CategoricalIndex** (`src/core/categorical-index.ts`) — Index of Categorical values, or next: `read_parquet`, `plotting`
 
 ---
 
@@ -59,6 +60,7 @@ MultiIndex done (metric=33). Next priorities:
 - **General**: `exactOptionalPropertyTypes`: use `?? null` not undefined. `noUncheckedIndexedAccess`: guard array accesses. Complexity ≤15: extract helpers. `useBlockStatements`: braces everywhere. `useTopLevelRegex`: move regex to top level. `useNumberNamespace`: `Number.NaN`. `import fc from "fast-check"` (default import). `biome check --write --unsafe` auto-fixes Array<T>→T[].
 - **Imports**: `useImportRestrictions` — import from barrel `../core/index.ts` not direct files. `import type` for type-only imports. Circular ESM deps (strings/datetime/categorical) are fine.
 - **Build env**: `bun` not available — use `node_modules/.bin/biome` and `node_modules/.bin/tsc`. Pre-existing TS errors in window/io/tests — only validate new file has 0 errors.
+- **IntervalIndex** (Iter 23): `Interval` class needs no imports from core barrel (standalone numeric type). `intervalsOverlap` helper with touching-endpoint logic (both sides must include the shared point). `resolveRangeParams` extractor keeps `intervalRange` complexity low. `extractLeft/Right/Mid/Length` helpers for clean property getters. `maskContains`/`maskOverlaps` for vectorized ops. fromIntervals inherits `closed` from first element (empty→"right" default).
 - **Timedelta** (Iter 22): Store as ms integer. `floorDiv`/`floorMod` helpers for Python-style floor-division decomposition (components always non-negative). `Timedelta` NOT in `Scalar` type — `TimedeltaAccessor` accepts numbers (ms) or strings. Accessor's `_mapTd` returns ms numbers to stay within Scalar. Two top-level regex (PANDAS_RE + UNIT_RE) for biome compliance.
 - **MultiIndex** (Iter 21): levels+codes compressed storage. Complexity extractors: `buildTargetCodes`/`filterByTargetCodes`/`compareAtLevel`/`makeSortComparator`. Avoid `toFrame()` (potential circular dep); use `toRecord()` instead.
 - **Stats** (Iter 19): skew/kurtosis use sample std (ddof=1). G1 = n/((n-1)(n-2))·Σ((xi-x̄)/s)³.
@@ -77,15 +79,25 @@ Index, Dtype, Series, DataFrame all implemented.
 - ~~Sorting utilities~~ ✅ (Iter 13) · ~~Indexing/selection~~ ✅ (Iter 14) · ~~Comparison/boolean ops~~ ✅ (Iter 15) · ~~Reshaping~~ ✅ (Iter 16) · ~~Window functions~~ ✅ (Iter 17)
 - ~~**I/O utilities**~~ ✅ (Iter 18) · ~~**Statistical functions**~~ ✅ (Iter 19) · ~~**Categorical data**~~ ✅ (Iter 20)
 - ~~**MultiIndex**~~ ✅ (Iter 21)
+- ~~**Timedelta**~~ ✅ (Iter 22)
+- ~~**IntervalIndex**~~ ✅ (Iter 23)
 
 ### Phase 3+ — Advanced
-**Next**: IntervalIndex (`src/core/interval-index.ts`) — interval type with closed parameter (left/right/both/neither), `pd.interval_range()`, overlaps, contains. · Then: `read_parquet`, plotting
+**Next**: CategoricalIndex (`src/core/categorical-index.ts`) — Index backed by Categorical for efficient string/category storage. Or: `read_parquet` (binary format support).
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 23 — 2026-04-04 13:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23980167283)
+
+- **Status**: ✅ Accepted
+- **Change**: `src/core/interval-index.ts` — `Interval` class (left/right/closed, contains, overlaps, mid, length, isOpen, isClosed, toString, equals) + `IntervalIndex` class (fromBreaks/fromArrays/fromIntervals factories, vectorized contains/overlaps, setClosed, Symbol.iterator, equals, toString) + `intervalRange()` (periods or freq, mirrors `pd.interval_range`)
+- **Metric**: 34 (previous best: 33, delta: +1)
+- **Commit**: 90ba966
+- **Notes**: 75 tests (72 unit + 3 property-based). Key: `Interval` is standalone (no barrel imports needed). `intervalsOverlap` helper handles touching-endpoint closed/open check. `resolveRangeParams` extractor keeps complexity ≤15. Empty `fromIntervals([])` defaults `closed` to "right".
 
 ### Iteration 22 — 2026-04-04 13:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23979784867)
 
