@@ -131,3 +131,10 @@ export {
 export type { CompareOp, SeriesOther, DataFrameOther } from "./stats/index.ts";
 export { shiftSeries, diffSeries, dataFrameShift, dataFrameDiff } from "./stats/index.ts";
 export type { ShiftDiffDataFrameOptions } from "./stats/index.ts";
+export { interpolateSeries, dataFrameInterpolate } from "./stats/index.ts";
+export type {
+  InterpolateMethod,
+  LimitDirection,
+  InterpolateOptions,
+  DataFrameInterpolateOptions,
+} from "./stats/index.ts";
