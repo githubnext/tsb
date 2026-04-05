@@ -17,6 +17,7 @@
  * ```
  */
 
+import { DataFrameGroupBy } from "../groupby/index.ts";
 import type { Label, Scalar } from "../types.ts";
 import { Index } from "./base-index.ts";
 import { RangeIndex } from "./range-index.ts";
@@ -443,6 +444,43 @@ export class DataFrame {
     return new DataFrame(transposedMap, statIndex);
   }
 
+  /**
+   * Pairwise Pearson correlation matrix for all numeric columns.
+   *
+   * Returns a symmetric DataFrame whose row-index and column labels are the
+   * numeric column names.  Diagonal entries are `1.0`.
+   *
+   * @param minPeriods - Minimum valid observation pairs (default 1).
+   *
+   * @example
+   * ```ts
+   * const df = new DataFrame({ a: [1, 2, 3], b: [4, 5, 6] });
+   * df.corr().col("a").at(0); // 1.0
+   * ```
+   */
+  corr(minPeriods = 1): DataFrame {
+    return buildPairwiseDf(this, (a, b) => a.corr(b, minPeriods));
+  }
+
+  /**
+   * Pairwise sample covariance matrix for all numeric columns.
+   *
+   * Returns a symmetric DataFrame whose row-index and column labels are the
+   * numeric column names.  Diagonal entries are the variance of each column.
+   *
+   * @param ddof       - Delta degrees of freedom (default 1).
+   * @param minPeriods - Minimum valid observation pairs (default 1).
+   *
+   * @example
+   * ```ts
+   * const df = new DataFrame({ a: [1, 2, 3], b: [2, 4, 6] });
+   * df.cov().col("a").at(0); // 1.0
+   * ```
+   */
+  cov(ddof = 1, minPeriods = 1): DataFrame {
+    return buildPairwiseDf(this, (a, b) => seriesCov(a, b, ddof, minPeriods));
+  }
+
   // ─── sorting ──────────────────────────────────────────────────────────────
 
   /**
@@ -598,6 +636,25 @@ export class DataFrame {
   /** Return a human-readable string representation of the DataFrame. */
   toString(): string {
     return formatDataFrame(this._columns, this.index, this.columns);
+  }
+
+  // ─── groupby ──────────────────────────────────────────────────────────────
+
+  /**
+   * Group the DataFrame by one or more columns.
+   *
+   * Returns a `DataFrameGroupBy` object that can be used to apply
+   * aggregation, transformation, or filtering operations on each group.
+   *
+   * @example
+   * ```ts
+   * df.groupby("dept").sum();
+   * df.groupby(["dept", "region"]).mean();
+   * ```
+   */
+  groupby(by: string | readonly string[]): DataFrameGroupBy {
+    const cols = typeof by === "string" ? [by] : [...by];
+    return new DataFrameGroupBy(this, cols);
   }
 
   // ─── private helpers ──────────────────────────────────────────────────────
@@ -766,6 +823,98 @@ function compareRows(
     }
   }
   return 0;
+}
+
+// ─── pairwise corr/cov helpers ────────────────────────────────────────────────
+
+/**
+ * Align two Series on their shared index labels and return paired numeric
+ * values, dropping pairs where either value is missing.
+ */
+function alignedNumericPairs(a: Series<Scalar>, b: Series<Scalar>): [number[], number[]] {
+  const bMap = new Map<string, number>();
+  for (let j = 0; j < b.index.size; j++) {
+    bMap.set(String(b.index.at(j)), j);
+  }
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for (let i = 0; i < a.index.size; i++) {
+    const label = String(a.index.at(i));
+    const j = bMap.get(label);
+    if (j === undefined) {
+      continue;
+    }
+    const av = a.values[i];
+    const bv = b.values[j];
+    if (
+      av === null ||
+      av === undefined ||
+      (typeof av === "number" && Number.isNaN(av)) ||
+      bv === null ||
+      bv === undefined ||
+      (typeof bv === "number" && Number.isNaN(bv)) ||
+      typeof av !== "number" ||
+      typeof bv !== "number"
+    ) {
+      continue;
+    }
+    xs.push(av);
+    ys.push(bv);
+  }
+  return [xs, ys];
+}
+
+/** Sample covariance of two aligned numeric arrays. */
+function seriesCov(a: Series<Scalar>, b: Series<Scalar>, ddof: number, minPeriods: number): number {
+  const [xs, ys] = alignedNumericPairs(a, b);
+  const n = xs.length;
+  if (n < minPeriods || n - ddof <= 0) {
+    return Number.NaN;
+  }
+  let mx = 0;
+  let my = 0;
+  for (let i = 0; i < n; i++) {
+    mx += xs[i] as number;
+    my += ys[i] as number;
+  }
+  mx /= n;
+  my /= n;
+  let s = 0;
+  for (let i = 0; i < n; i++) {
+    s += ((xs[i] as number) - mx) * ((ys[i] as number) - my);
+  }
+  return s / (n - ddof);
+}
+
+/** True when a column's dtype is numeric. */
+function isNumericCol(s: Series<Scalar>): boolean {
+  const k = s.dtype.kind;
+  return k === "int" || k === "uint" || k === "float";
+}
+
+/**
+ * Build a symmetric N×N DataFrame from a pairwise-value function applied to
+ * all numeric columns of `df`.
+ */
+function buildPairwiseDf(
+  df: DataFrame,
+  pairFn: (a: Series<Scalar>, b: Series<Scalar>) => number,
+): DataFrame {
+  const cols = df.columns.values.filter((c) => isNumericCol(df.col(c)));
+  const n = cols.length;
+  const idx = new Index<Label>([...cols]);
+  const colMap = new Map<string, Series<Scalar>>();
+
+  for (let j = 0; j < n; j++) {
+    const cj = cols[j] as string;
+    const vals: Scalar[] = Array.from({ length: n }) as Scalar[];
+    for (let i = 0; i < n; i++) {
+      vals[i] = pairFn(df.col(cols[i] as string), df.col(cj));
+    }
+    colMap.set(cj, new Series<Scalar>({ data: vals, index: idx }));
+  }
+
+  return new DataFrame(colMap, idx);
 }
 
 /** Compute [count, mean, std, min, max] stats for a column. */
