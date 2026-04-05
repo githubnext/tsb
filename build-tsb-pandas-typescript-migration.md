@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T22:50:00Z |
-| Iteration Count | 75 |
-| Best Metric | 31 |
+| Last Run | 2026-04-05T23:11:31Z |
+| Iteration Count | 76 |
+| Best Metric | 32 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #54 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -39,15 +39,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 31 files (iter 75). Next candidates:
+Now at 32 files (iter 76). Next candidates:
 - `src/core/interval.ts` — Interval / IntervalIndex
 - `src/core/categorical_index.ts` — CategoricalIndex
-- `src/stats/interpolate.ts` — `interpolate()` for Series (linear/polynomial)
+- `src/stats/fillna.ts` — `fillna()` for Series/DataFrame with value, method, and limit options
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 76 (interpolate, 31→32)**: `interpolateSeries`/`dataFrameInterpolate`. Methods: linear (interior-only), ffill/pad/zero (forward fill), bfill/backfill, nearest. `limit`/`limitDirection` parameters. Key lesson: linear fills ONLY interior gaps (between two known values), never leading/trailing — pandas convention. Helper functions `fillLinearGap`, `fillConstantRun`, `fillNearestGap` extracted to keep CC≤15. `assertNoMissingInRange` helper in test caused `noMisplacedAssertion` warning (acceptable false positive). `.at(-1)` for last-element access.
 - **Iter 75 (shift_diff, 30→31)**: `shiftSeries`/`diffSeries` and `dataFrameShift`/`dataFrameDiff`. `shiftVals` with separate positive/negative paths. `diffVals` supports positive/negative periods with `isFiniteNum` guard. Inline arrow functions need explicit return types (`(): Scalar[] =>`) for Biome `useExplicitType`. Property tests: length preserved; shift(n)+shift(-n) round-trips inner slice; shift fills nulls; diff equals current-previous for finite sequences.
 - **Iter 74 (compare, 29→30)**: `seriesEq`/`seriesNe`/`seriesLt`/`seriesGt`/`seriesLe`/`seriesGe` and DataFrame counterparts. `compareScalars` dispatch fn with `isComparable` guard. Returns `Scalar[]` (not `boolean[]`) so constructor types align. Property tests: lt+ge and gt+le partition every finite-numeric element (exactly one true, no overlap, no gap). Missing values (null/NaN) always yield false, matching pandas NaN convention.
 - **Iter 73 (where/mask, 28→29)**: `whereSeries`/`maskSeries`/`whereDataFrame`/`maskDataFrame`. Three condition types: element-wise predicate, boolean `Series`/array, boolean `DataFrame`. `applyCondition` shared helper with `keepWhenTrue` flag. `resolveSeriesCond` + `resolveDataFrameCond` dispatch functions. Missing column in cond-DataFrame defaults all-false. Property test: `where` + `mask` partition every element (exactly one keeps original).
@@ -69,9 +70,9 @@ Now at 31 files (iter 75). Next candidates:
 
 ## 🔭 Future Directions
 
-**Current state (iter 74)**: 30 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare.
+**Current state (iter 76)**: 32 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate.
 
-**Next**: Interval/IntervalIndex · CategoricalIndex · shift/diff
+**Next**: Interval/IntervalIndex · CategoricalIndex · fillna
 
 ---
 
@@ -79,58 +80,24 @@ Now at 31 files (iter 75). Next candidates:
 
 All iterations in reverse chronological order (newest first).
 
-### Iteration 75 — 2026-04-05 22:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24012145919)
+### Iteration 76 — 2026-04-05 23:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24012563442)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `src/stats/shift_diff.ts` — `shiftSeries`, `diffSeries`, `dataFrameShift`, `dataFrameDiff`. Position shifting (positive=lag, negative=lead) and discrete differences for Series and DataFrame.
-- **Metric**: 31 (previous: 30, delta: +1)
-- **Commit**: 3b646bd
-- **Notes**: `shiftVals` fills exposed positions with null; `diffVals` returns NaN when either operand is non-numeric. Explicit return types on inline arrow functions required by Biome `useExplicitType`. Full property test suite.
+- **Change**: Added `src/stats/interpolate.ts` — `interpolateSeries`, `dataFrameInterpolate`. Linear (interior-only), ffill/pad/zero, bfill/backfill, nearest methods with `limit`/`limitDirection` parameters.
+- **Metric**: 32 (previous: 31, delta: +1)
+- **Commit**: 6d87858
+- **Notes**: Linear only fills interior gaps (between two known values); leading/trailing left as-is. Helper extraction (`fillLinearGap`, `fillConstantRun`, `fillNearestGap`) keeps CC≤15. 39 tests pass including property-based tests.
 
-### Iteration 74 — 2026-04-05 22:09 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24011536762)
+### Iteration 75 — 2026-04-05 22:50 UTC — ✅ shift_diff (30→31) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24012145919)
+### Iteration 74 — 2026-04-05 22:09 UTC — ✅ compare (29→30) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24011536762)
+### Iteration 73 — 2026-04-05 21:50 UTC — ✅ where_mask (28→29) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24011120613)
+### Iteration 72 — 2026-04-05 21:25 UTC — ✅ value_counts (27→28) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24010521196)
+### Iteration 71 — 2026-04-05 20:46 UTC — ✅ elem_ops (26→27) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24010099827)
 
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/compare.ts` — `seriesEq/Ne/Lt/Gt/Le/Ge` and `dataFrameEq/Ne/Lt/Gt/Le/Ge`. Element-wise comparison ops for Series and DataFrame with scalar or Series/DataFrame operand.
-- **Metric**: 30 (previous: 29, delta: +1)
-- **Commit**: e2a3cad
-- **Notes**: `compareScalars` dispatch with `isComparable` guard. Returns `Scalar[]` (not `boolean[]`) for constructor compatibility. Missing values always yield false. Property tests verify lt+ge and gt+le partition.
-
-### Iteration 73 — 2026-04-05 21:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24011120613)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/where_mask.ts` — `whereSeries`, `maskSeries`, `whereDataFrame`, `maskDataFrame`. Conditional value selection/replacement with predicate, boolean Series/array, or boolean DataFrame conditions.
-- **Metric**: 29 (previous: 28, delta: +1)
-- **Commit**: e36528b
-- **Notes**: Three condition types unified by `resolveSeriesCond`/`resolveDataFrameCond` dispatch. `applyCondition` helper with `keepWhenTrue` flag shared by where/mask. Property test verifies where+mask partition every element.
-
-### Iteration 72 — 2026-04-05 21:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24010521196)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/value_counts.ts` — `valueCounts()` for Series and `dataFrameValueCounts()` for DataFrame. Count/proportion of unique values with sort, ascending, dropna options.
-- **Metric**: 28 (previous: 27, delta: +1)
-- **Commit**: 161cafe
-- **Notes**: `scalarKey` mapper for stable `Map` keys. Composite `"v1|v2|…"` label for DataFrame row combinations. Also wired up missing elem_ops barrel exports from iter 71.
-
-### Iteration 71 — 2026-04-05 20:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24010099827)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/elem_ops.ts` — `clip()`, `seriesAbs()`, `seriesRound()` for Series; `dataFrameClip/Abs/Round()` for DataFrame. Element-wise scalar transforms with missing-value propagation.
-- **Metric**: 27 (previous: 26, delta: +1)
-- **Commit**: 0e210db
-- **Notes**: `mapNumeric` helper applies fn to finite nums, passes null/NaN through. `Number.NEGATIVE_INFINITY`/`Number.POSITIVE_INFINITY` (not bare `Infinity`). `seriesAbs`/`seriesRound` names avoid collision with JS built-ins.
-
-### Iteration 70 — 2026-04-05 20:09 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24009460051)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/cum_ops.ts` — `cumsum()`, `cumprod()`, `cummax()`, `cummin()` for Series; `dataFrameCumsum/Cumprod/Cummax/Cummin()` for DataFrame. `skipna` + `axis` support.
-- **Metric**: 26 (previous: 25, delta: +1)
-- **Commit**: 86d00e9
-- **Notes**: `cumulateNum`/`cumulateSc` helpers. `poisoned` flag for skipna=false. `isFiniteNum`/`isNonNull` type guards. `buildRow` for axis=1. Biome: `Number.NaN`, `vals.at(-1)`.
-
+### Iteration 70 — 2026-04-05 20:09 UTC — ✅ cum_ops (25→26) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24009460051)
 ### Iteration 69 — 2026-04-05 19:44 UTC — ✅ nlargest/nsmallest (24→25) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24009034419)
-
-### Iteration 67 — 2026-04-05 18:47 UTC — ✅ MultiIndex (22→23) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24008035023)
 ### Iteration 68 — 2026-04-05 19:16 UTC — ✅ rank (23→24) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24008535770)
+### Iteration 67 — 2026-04-05 18:47 UTC — ✅ MultiIndex (22→23) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24008035023)
 ### Iters 60–66 — ✅ corr/cov(15), rolling(16), expanding×2(17–18), cat_accessor, melt+pivot(20), ewm(21), stack/unstack(22)
 ### Iterations 53–59 — ✅ GroupBy, merge, str, dt, describe/quantile, csv I/O, json I/O (metrics 8–14)
 ### Iterations 1–52 — ✅ Foundation + earlier pandas features (old branches)
