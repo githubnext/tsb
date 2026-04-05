@@ -16,3 +16,7 @@ export {
   kurtosisDataFrame,
   kurtDataFrame,
 } from "./moments.ts";
+
+// ─── linear algebra ───────────────────────────────────────────────────────────
+export { dot, outer, vadd, vsub, vscale, norm, matmul, transpose, matvec, lstsq, det } from "./linear-algebra.ts";
+export type { Vector, Matrix, LstsqResult } from "./linear-algebra.ts";

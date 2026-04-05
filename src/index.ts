@@ -263,8 +263,48 @@ export {
 } from "./core/index.ts";
 export type { ConvertDtypesOptions } from "./core/index.ts";
 
+// ─── accessor registration ────────────────────────────────────────────────────
+export {
+  registerSeriesAccessor,
+  registerDataFrameAccessor,
+  registerIndexAccessor,
+  getSeriesAccessor,
+  getDataFrameAccessor,
+  getIndexAccessor,
+  clearAccessorRegistry,
+  deregisterSeriesAccessor,
+  deregisterDataFrameAccessor,
+  deregisterIndexAccessor,
+  listSeriesAccessors,
+  listDataFrameAccessors,
+  listIndexAccessors,
+} from "./core/index.ts";
+export type {
+  SeriesAccessorFactory,
+  DataFrameAccessorFactory,
+  IndexAccessorFactory,
+} from "./core/index.ts";
+
+// ─── style / Styler ───────────────────────────────────────────────────────────
+export { Styler, styleDataFrame } from "./core/index.ts";
+export type { StylerFunc, HighlightOptions, GradientOptions } from "./core/index.ts";
+
+// ─── to_numeric ───────────────────────────────────────────────────────────────
+export { toNumeric, toNumericSeries, toNumericArray } from "./core/index.ts";
+export type { NumericErrors, ToNumericOptions } from "./core/index.ts";
+
+// ─── Period / PeriodIndex ─────────────────────────────────────────────────────
+export { Period, PeriodIndex, periodRange } from "./core/index.ts";
+export type { PeriodFreq } from "./core/index.ts";
+
 // ─── I/O: parquet / excel ─────────────────────────────────────────────────────
 export { readParquet } from "./io/index.ts";
 export type { ReadParquetOptions } from "./io/index.ts";
 export { readExcel } from "./io/index.ts";
 export type { ReadExcelOptions } from "./io/index.ts";
+export { toParquet, parquetSchema } from "./io/index.ts";
+export type { ToParquetOptions, ParquetColumnSchema, ParquetMetadata } from "./io/index.ts";
+
+// ─── stats: linear algebra ────────────────────────────────────────────────────
+export { dot, outer, vadd, vsub, vscale, norm, matmul, transpose, matvec, lstsq, det } from "./stats/index.ts";
+export type { Vector, Matrix, LstsqResult } from "./stats/index.ts";

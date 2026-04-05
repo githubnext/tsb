@@ -19,3 +19,7 @@ export type { ReadParquetOptions } from "./read_parquet.ts";
 
 export { readExcel } from "./read_excel.ts";
 export type { ReadExcelOptions } from "./read_excel.ts";
+
+// ─── to_parquet ───────────────────────────────────────────────────────────────
+export { toParquet, parquetSchema } from "./to_parquet.ts";
+export type { ToParquetOptions, ParquetColumnSchema, ParquetMetadata } from "./to_parquet.ts";

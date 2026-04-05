@@ -168,3 +168,37 @@ export {
   isFloatDtype,
 } from "./infer.ts";
 export type { ConvertDtypesOptions } from "./infer.ts";
+
+// ─── accessor registration ────────────────────────────────────────────────────
+export {
+  registerSeriesAccessor,
+  registerDataFrameAccessor,
+  registerIndexAccessor,
+  getSeriesAccessor,
+  getDataFrameAccessor,
+  getIndexAccessor,
+  clearAccessorRegistry,
+  deregisterSeriesAccessor,
+  deregisterDataFrameAccessor,
+  deregisterIndexAccessor,
+  listSeriesAccessors,
+  listDataFrameAccessors,
+  listIndexAccessors,
+} from "./accessor.ts";
+export type {
+  SeriesAccessorFactory,
+  DataFrameAccessorFactory,
+  IndexAccessorFactory,
+} from "./accessor.ts";
+
+// ─── style / Styler ───────────────────────────────────────────────────────────
+export { Styler, styleDataFrame } from "./style.ts";
+export type { StylerFunc, HighlightOptions, GradientOptions } from "./style.ts";
+
+// ─── to_numeric ───────────────────────────────────────────────────────────────
+export { toNumeric, toNumericSeries, toNumericArray } from "./numeric.ts";
+export type { NumericErrors, ToNumericOptions } from "./numeric.ts";
+
+// ─── Period / PeriodIndex ─────────────────────────────────────────────────────
+export { Period, PeriodIndex, periodRange } from "./period.ts";
+export type { PeriodFreq } from "./period.ts";
