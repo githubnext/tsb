@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T14:14:00Z |
-| Iteration Count | 58 |
-| Best Metric | 13 |
+| Last Run | 2026-04-05T14:45:57Z |
+| Iteration Count | 59 |
+| Best Metric | 14 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #49 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -39,15 +39,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 13 files (iter 58). Next candidates:
-- `src/io/json.ts` — read_json / to_json
+Now at 14 files (iter 59). Next candidates:
 - `src/core/cat_accessor.ts` — Series.cat categorical accessor
 - `src/stats/corr.ts` — DataFrame.corr(), DataFrame.cov(), Series.corr()
+- `src/reshape/pivot.ts` — DataFrame.pivot_table()
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 59 (readJson/toJson, 13→14)**: TypeScript's `noPropertyAccessFromIndexSignature` conflicts with Biome's `useLiteralKeys` for index-signature types. Solution: add a `getProp(obj, key)` helper that uses bracket notation internally — TypeScript is happy (bracket notation), Biome is happy (variable key, not string literal). `JsonValue` recursive type: use `interface JsonObject` with index signature + `type JsonValue = ... | JsonObject`. `useDefaultSwitchClause`: always add `default` clause to switches even when exhaustive. Test assertions: use specific interface types (not `Record<string,T>`) to avoid `noPropertyAccessFromIndexSignature` errors.
 - **Iter 58 (readCsv/toCsv, 12→13)**: All regex at top level. `Number.parseInt`/`Number.parseFloat`. Extract helpers to keep CC≤15 (`parseForcedBool`, `parseForcedInt`, `parseForcedFloat`). `noUncheckedIndexedAccess`: `lines[n] as string` for index access after bounds check. `Array.from({ length }, (): string[] => [])` — explicit return type for factory fn. Tests: `toBeNull()` for null values; avoid `as` casts in test assertions when possible.
 - **Iter 57 (describe+quantile, 11→12)**: `noNonNullAssertion` — replace `arr[i]!` with `arr[i] as T`. `useBlockStatements` requires `{ }` around single-line `if` returns. Biome auto-fix handles most formatting, `--unsafe` handles `useBlockStatements`. `Series<unknown>` not valid (unknown doesn't extend Scalar) — use `Series<Scalar>` in test casts. All-null Series has `object` dtype, not `float` — use explicit `dtype: Dtype.float64` to test empty numeric path.
 - **Iter 56 (datetime_accessor, 10→11)**: `DatetimeSeriesLike` same pattern as `StringSeriesLike` — include `dt` and `toArray()`. Split `expandDirective` → `expandDatePart + expandTimePart` for CC≤15. `unitMs` needs `default` clause. Format helpers need single-line signatures. Tests import from `src/index.ts` not `src/core/index.ts`. Prefix unused param with `_`.
@@ -65,15 +66,23 @@ Now at 13 files (iter 58). Next candidates:
 
 ## 🔭 Future Directions
 
-**New branch (iter 53–58)**: 13 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv.
+**New branch (iter 53–59)**: 14 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json.
 
-**Next**: json I/O · cat accessor · stats/corr · resample
+**Next**: cat accessor · stats/corr · pivot_table
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 59 — 2026-04-05 14:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24003815679)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/io/json.ts` — `readJson()` + `toJson()` JSON I/O. Five orient formats: records (array of row objects), split (columns/index/data), index (keyed by row label), columns (keyed by column), values (2-D array). Auto-detect orient from JSON shape. Null propagation, dtype override, indent option. 31 unit + property-based tests. Playground: `playground/json.html`.
+- **Metric**: 14 (previous: 13, delta: +1)
+- **Commit**: 3a94b08
+- **Notes**: `noPropertyAccessFromIndexSignature` conflicts with Biome `useLiteralKeys` on index-signature types — solved with a `getProp(obj, key)` helper. Always add `default` to exhaustive switch statements.
 
 ### Iteration 58 — 2026-04-05 14:14 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24003267099)
 
