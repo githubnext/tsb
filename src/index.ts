@@ -401,3 +401,19 @@ export type { ExpandingCovOptions } from "./window/index.ts";
 // ─── stats: bootstrap ─────────────────────────────────────────────────────────
 export { bootstrapCI, bootstrapMean, bootstrapMedian, bootstrapStd } from "./stats/index.ts";
 export type { BootstrapOptions, BootstrapResult } from "./stats/index.ts";
+
+// ─── I/O: read_xml ────────────────────────────────────────────────────────────
+export { readXml } from "./io/index.ts";
+export type { ReadXmlOptions } from "./io/index.ts";
+
+// ─── I/O: sql ────────────────────────────────────────────────────────────────
+export { readSql, toSql } from "./io/index.ts";
+export type { SqlConnection, ReadSqlOptions, ToSqlOptions } from "./io/index.ts";
+
+// ─── stats: contingency ──────────────────────────────────────────────────────
+export { contingencyTable, chi2Contingency, fisherExact } from "./stats/index.ts";
+export type { Chi2Result, FisherResult } from "./stats/index.ts";
+
+// ─── core: memory_usage ───────────────────────────────────────────────────────
+export { memoryUsage, dataFrameMemoryUsage } from "./core/index.ts";
+export type { MemoryUsageOptions } from "./core/index.ts";

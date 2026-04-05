@@ -32,3 +32,7 @@ export type { RollingPairwiseOptions } from "./pairwise.ts";
 // ─── bootstrap ────────────────────────────────────────────────────────────────
 export { bootstrapCI, bootstrapMean, bootstrapMedian, bootstrapStd } from "./bootstrap.ts";
 export type { BootstrapOptions, BootstrapResult } from "./bootstrap.ts";
+
+// ─── contingency ──────────────────────────────────────────────────────────────
+export { contingencyTable, chi2Contingency, fisherExact } from "./contingency.ts";
+export type { Chi2Result, FisherResult } from "./contingency.ts";

@@ -221,6 +221,10 @@ export {
 export type { OffsetUnit } from "./offsets.ts";
 export { BaseOffset } from "./offsets.ts";
 
+// ─── memory_usage ─────────────────────────────────────────────────────────────
+export { memoryUsage, dataFrameMemoryUsage } from "./memory_usage.ts";
+export type { MemoryUsageOptions } from "./memory_usage.ts";
+
 // ─── testing utilities ────────────────────────────────────────────────────────
 export {
   assertSeriesEqual,

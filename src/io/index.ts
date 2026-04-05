@@ -51,3 +51,11 @@ export type { ReadFwfOptions, ColSpec } from "./read_fwf.ts";
 // ─── read_html ────────────────────────────────────────────────────────────────
 export { readHtml } from "./read_html.ts";
 export type { ReadHtmlOptions } from "./read_html.ts";
+
+// ─── read_xml ─────────────────────────────────────────────────────────────────
+export { readXml } from "./read_xml.ts";
+export type { ReadXmlOptions } from "./read_xml.ts";
+
+// ─── sql ──────────────────────────────────────────────────────────────────────
+export { readSql, toSql } from "./sql.ts";
+export type { SqlConnection, ReadSqlOptions, ToSqlOptions } from "./sql.ts";
