@@ -9,6 +9,8 @@
 
 import { SeriesGroupBy } from "../groupby/index.ts";
 import type { Label, Scalar } from "../types.ts";
+import { EWM } from "../window/ewm.ts";
+import type { EwmOptions } from "../window/ewm.ts";
 import { Expanding } from "../window/expanding.ts";
 import type { ExpandingOptions } from "../window/expanding.ts";
 import { Rolling } from "../window/rolling.ts";
@@ -928,6 +930,25 @@ export class Series<T extends Scalar = Scalar> {
    */
   expanding(options?: ExpandingOptions): Expanding {
     return new Expanding(this, options);
+  }
+
+  // ─── ewm window ───────────────────────────────────────────────────────────
+
+  /**
+   * Provide an Exponentially Weighted Moving (EWM) view of the Series.
+   *
+   * @param options - {@link EwmOptions} specifying decay via `span`, `com`,
+   *                  `halflife`, or `alpha`.
+   *
+   * @example
+   * ```ts
+   * const s = new Series({ data: [1, 2, 3, 4, 5] });
+   * s.ewm({ span: 3 }).mean().toArray();
+   * // [1, 1.666..., 2.428..., 3.266..., 4.161...]
+   * ```
+   */
+  ewm(options: EwmOptions): EWM {
+    return new EWM(this, options);
   }
 
   // ─── groupby ──────────────────────────────────────────────────────────────

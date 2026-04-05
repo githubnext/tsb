@@ -19,6 +19,8 @@
 
 import { DataFrameGroupBy } from "../groupby/index.ts";
 import type { Label, Scalar } from "../types.ts";
+import { EWM } from "../window/ewm.ts";
+import type { EwmOptions } from "../window/ewm.ts";
 import { Expanding } from "../window/expanding.ts";
 import type { ExpandingOptions } from "../window/expanding.ts";
 import { Rolling } from "../window/rolling.ts";
@@ -680,6 +682,24 @@ export class DataFrame {
     return new DataFrameExpanding(this, options);
   }
 
+  // ─── ewm window ───────────────────────────────────────────────────────────
+
+  /**
+   * Provide an Exponentially Weighted Moving (EWM) view of the DataFrame.
+   *
+   * @param options - {@link EwmOptions} specifying decay via `span`, `com`,
+   *                  `halflife`, or `alpha`.
+   *
+   * @example
+   * ```ts
+   * const df = DataFrame.fromColumns({ a: [1, 2, 3] });
+   * df.ewm({ span: 2 }).mean();
+   * ```
+   */
+  ewm(options: EwmOptions): DataFrameEwm {
+    return new DataFrameEwm(this, options);
+  }
+
   // ─── groupby ──────────────────────────────────────────────────────────────
 
   /**
@@ -1172,5 +1192,68 @@ export class DataFrameExpanding {
    */
   apply(fn: (values: readonly number[]) => number): DataFrame {
     return this._applyColAgg((e) => e.apply(fn));
+  }
+}
+
+// ─── DataFrameEwm ─────────────────────────────────────────────────────────────
+
+/**
+ * Exponentially Weighted Moving helper for a {@link DataFrame}.
+ *
+ * Aggregations are applied independently to each numeric column.
+ *
+ * Obtain via {@link DataFrame.ewm}:
+ * ```ts
+ * const df = DataFrame.fromColumns({ a: [1, 2, 3, 4], b: [10, 20, 30, 40] });
+ * df.ewm({ span: 3 }).mean();
+ * // DataFrame with EWM mean applied column-by-column
+ * ```
+ */
+export class DataFrameEwm {
+  private readonly _df: DataFrame;
+  private readonly _options: EwmOptions;
+
+  constructor(df: DataFrame, options: EwmOptions) {
+    this._df = df;
+    this._options = options;
+  }
+
+  /** Apply a per-column aggregation method to produce a new DataFrame. */
+  private _applyColAgg(
+    method: (e: EWM) => { values: readonly Scalar[]; name: string | null },
+  ): DataFrame {
+    const colMap = new Map<string, Series<Scalar>>();
+    for (const colName of this._df.columns.values) {
+      const col = this._df.col(colName);
+      const result = method(new EWM(col, this._options));
+      colMap.set(
+        colName,
+        new Series<Scalar>({ data: result.values, index: col.index, name: result.name }),
+      );
+    }
+    return new DataFrame(colMap, this._df.index);
+  }
+
+  /** EWM mean for each column. */
+  mean(): DataFrame {
+    return this._applyColAgg((e) => e.mean());
+  }
+
+  /**
+   * EWM standard deviation for each column.
+   *
+   * @param bias - Whether to use biased (population) std. Defaults to `false`.
+   */
+  std(bias = false): DataFrame {
+    return this._applyColAgg((e) => e.std(bias));
+  }
+
+  /**
+   * EWM variance for each column.
+   *
+   * @param bias - Whether to use biased (population) variance. Defaults to `false`.
+   */
+  var(bias = false): DataFrame {
+    return this._applyColAgg((e) => e.var(bias));
   }
 }

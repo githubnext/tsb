@@ -5,7 +5,7 @@ export { Dtype } from "./dtype.ts";
 export type { DtypeKind, ItemSize } from "./dtype.ts";
 export { Series } from "./series.ts";
 export type { SeriesOptions } from "./series.ts";
-export { DataFrame, DataFrameRolling, DataFrameExpanding } from "./frame.ts";
+export { DataFrame, DataFrameRolling, DataFrameExpanding, DataFrameEwm } from "./frame.ts";
 export type { DataFrameOptions } from "./frame.ts";
 export { StringAccessor } from "./string_accessor.ts";
 export type { StringSeriesLike } from "./string_accessor.ts";
