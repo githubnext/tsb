@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T12:25:00Z |
-| Iteration Count | 54 |
-| Best Metric | 9 |
+| Last Run | 2026-04-05T12:49:00Z |
+| Iteration Count | 55 |
+| Best Metric | 10 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | — |
+| PR | #48 |
 | Steering Issue | — |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -31,7 +31,7 @@
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
 **Branch**: `autoloop/build-tsb-pandas-typescript-migration`
-**Pull Request**: —
+**Pull Request**: #48
 
 ---
 
@@ -39,18 +39,18 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Next candidates (continue building from the current 9-file baseline on the new branch):
-- `src/groupby/resample.ts` — time-based resampling (resample/asfreq)
-- `src/core/string_accessor.ts` — Series.str accessor (pandas StringMethods)
-- `src/core/datetime_accessor.ts` — Series.dt accessor
+Next candidates (continue building from the current 10-file baseline):
+- `src/core/datetime_accessor.ts` — Series.dt accessor (calendar components, strftime)
 - `src/stats/describe.ts` — describe() with percentiles
 - `src/io/json.ts` — read_json / to_json
+- `src/io/csv.ts` — add readCsv/toCsv (already on main branch)
 
 ---
 
 ## 📚 Lessons Learned
 
-- **Iter 53 (2 modules, 6→8, new branch)**: Main branch was reset to 6 files. New long-running branch created. GroupBy: `DataFrameGroupBy/SeriesGroupBy` with all agg methods + apply/transform. CSV I/O: `readCsv/toCsv` with full option set. Biome `useImportRestrictions` requires barrel files (src/groupby/index.ts, src/io/index.ts) — modules must import via directory index. `splitLine` CC > 15 → extract `stepInsideQuote`. `readCsv` CC > 15 → extract `filterLines / resolveNamesAndData / parseDataLines`.
+- **Iter 55 (string_accessor, 9→10)**: `StringSeriesLike` interface must include `str: StringAccessor` and `toArray()` to avoid circular deps while still being strongly typed in tests. Move all regex to top-level constants (Biome useTopLevelRegex). Extract sub-functions from `stripChars`/`doReplace` to keep CC≤15. Use `charAt(0)` instead of `s[0]!` to avoid noNonNullAssertion. No `as` casts needed since `withValues()` returns `Series<Scalar>`.
+- **Iter 54 (2 modules, 6→8, new branch)**: Main branch was reset to 6 files. New long-running branch created. GroupBy: `DataFrameGroupBy/SeriesGroupBy` with all agg methods + apply/transform. CSV I/O: `readCsv/toCsv` with full option set. Biome `useImportRestrictions` requires barrel files (src/groupby/index.ts, src/io/index.ts) — modules must import via directory index. `splitLine` CC > 15 → extract `stepInsideQuote`. `readCsv` CC > 15 → extract `filterLines / resolveNamesAndData / parseDataLines`.
 - **Iter 52 (5 modules, 96→101)**: survival.ts: `sortedEvents` helper reduces CC; all-zero numerator gives hazard=0 cleanly. timeseries.ts: `normAcv()` extracted to avoid nested ternary; `ldStep()` extracted from `levinsonDurbin` to satisfy CC≤15; ACF/PACF require symmetric Toeplitz construction. factor.ts: `leadingSingular` + `deflate` pattern for incremental SVD; `noUncheckedIndexedAccess` requires every `arr[i]` to have `?? 0` guard. bayesian.ts: all conjugate update functions are ~4 LOC; returning structured `BetaParams/NormalParams/etc` avoids `as` casts. style_advanced.ts: needed `Styler._df` + `_styles` + `_addStyle` to be `protected` (not private); `_applyByCol` / `_applyByRow` pattern satisfies CC≤15 for nested loops.
 - **Iter 51 (5 modules, 91→96)**: core/plotting.ts (`import type {Series/DataFrame}` avoids circular; `setPlotRenderer(null)` clears). core/arrow.ts (`readonly T[]` not ReadonlyArray; block statements; import sorting). core/window_apply.ts (`name: s.name ?? null` for exactOptionalPropertyTypes). io/read_sas.ts + io/read_spss.ts (injectable decoder stubs). Test mock: `decode: (): SasResult => result` for `useExplicitType`.
 - **Iter 50 (6 modules, 87→93)**: State stale (claimed 91, branch had 87). io/clipboard.ts (`CARRIAGE_RETURN_RE` top-level; `biome-ignore noSecrets`). `DataFrame.fromColumns({})` not `new DataFrame({data:{}})`. `meta["key"]` bracket notation.
@@ -75,6 +75,7 @@ Next candidates (continue building from the current 9-file baseline on the new b
 
 **New branch baseline (iter 53)**: 8 files — Series, DataFrame, GroupBy, CSV I/O + core infrastructure.
 **Iter 54**: merge.ts added (9 files). merge/concat both done.
+**Iter 55**: string_accessor.ts added (10 files). Series.str fully implemented.
 
 **Next on new branch**: string accessor · datetime accessor · stats/describe · json I/O · resample
 
@@ -83,6 +84,14 @@ Next candidates (continue building from the current 9-file baseline on the new b
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 55 — 2026-04-05 12:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24001823414)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/string_accessor.ts` — `Series.str` accessor with 35+ vectorised string methods: case (lower/upper/title/capitalize/swapcase), len, strip/lstrip/rstrip/pad/ljust/rjust/center/zfill, contains/startswith/endswith/match/fullmatch, find/rfind/count, replace/extract, split/rsplit/join/cat, slice/get/sliceReplace, repeat/wrap/encode, isalpha/isdigit/isalnum/islower/isupper/istitle/isspace. All methods null-propagating. Added `withValues()` to Series.
+- **Metric**: 10 (previous: 9, delta: +1)
+- **Commit**: 5f42c0c
+- **Notes**: `StringSeriesLike` interface needed `str` and `toArray()` to avoid circular deps. Top-level regex consts required by Biome. `stripChars` split into `stripWhitespace + stripCharSet` to reduce CC. `doReplace` split into `replaceAll + replaceN + buildReplaceRegex`.
 
 ### Iteration 54 — 2026-04-05 12:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24001239424)
 
