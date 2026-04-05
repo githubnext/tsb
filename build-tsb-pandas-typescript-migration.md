@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T16:10:53Z |
-| Iteration Count | 62 |
-| Best Metric | 17 |
+| Last Run | 2026-04-05T16:47:00Z |
+| Iteration Count | 63 |
+| Best Metric | 18 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #49 |
@@ -39,14 +39,15 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 17 files (iter 62). Next candidates:
-- `src/core/cat_accessor.ts` — Series.cat categorical accessor
+Now at 18 files (iter 63). Next candidates:
 - `src/reshape/pivot.ts` — DataFrame.pivot_table()
+- `src/reshape/melt.ts` — DataFrame.melt()
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 63 (expanding+cat, 16→18)**: Two features in one iteration to beat previous best (17 on a branch with fewer files). `CatHolder` class wraps `CatSeriesLike` to preserve explicit category list through chained calls (addCategories→removeUnused etc.). `noNestedTernary` in sort comparator — use explicit if/else. Import order matters for `organizeImports` lint rule. `(mapping as unknown as Record<string, unknown>)[key]` works for safe indexing after non-array narrowing.
 - **Iter 62 (expanding, 16→17)**: `ExpandingSeriesLike` interface (mirrors `RollingSeriesLike`) avoids circular imports. `DataFrameExpanding` appended to `frame.ts`. Default `minPeriods=1` (not window size like Rolling). `count()` ignores minPeriods (matches pandas). `std(0)` returns 0 for single-element (population std). Property tests: count non-decreasing, max≥min, sum/mean manual verification.
 - **Iter 61 (rolling, 15→16)**: Use `RollingSeriesLike` interface (like `StringSeriesLike`) to avoid circular imports. `DataFrameRolling` lives in `frame.ts` not `window/rolling.ts`. `_applyColAgg` takes `{ values, name }` return type and creates `Series<Scalar>` inline. `Array.from({length:n}, ():Scalar => null)` for null-init arrays.
 - **Iter 60 (corr/cov, 14→15)**: `Series.at()` label-based; use `.values[i]` for positional. `Index.filter()` doesn't exist — use `.values.filter()`. Extract helper functions for CC≤15.
@@ -65,15 +66,23 @@ Now at 17 files (iter 62). Next candidates:
 
 ## 🔭 Future Directions
 
-**New branch (iter 53–62)**: 17 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding.
+**New branch (iter 53–63)**: 18 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, cat accessor.
 
-**Next**: cat accessor · pivot_table
+**Next**: pivot_table · melt
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 63 — 2026-04-05 16:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24005927691)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/window/expanding.ts` (Expanding growing-window) + `src/core/cat_accessor.ts` (CategoricalAccessor / Series.cat). 80+ tests. Playground: `cat_accessor.html`.
+- **Metric**: 18 (previous: 17, delta: +1)
+- **Commit**: 03b0a28
+- **Notes**: Two features added to beat previous best. CatHolder internal class preserves category metadata through chained calls.
 
 ### Iteration 62 — 2026-04-05 16:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24005305086)
 
