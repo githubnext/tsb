@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — GroupBy &amp; CSV Tutorial</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    header h1 { font-size: 1.4rem; color: var(--accent); }
+    header a { color: #8b949e; font-size: 0.9rem; text-decoration: none; }
+    header a:hover { color: var(--accent); }
+    main {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    h2 { font-size: 1.5rem; margin: 2rem 0 0.5rem; color: var(--accent); }
+    h3 { font-size: 1.1rem; margin: 1.5rem 0 0.4rem; color: #cdd9e5; }
+    p { margin: 0.5rem 0 1rem; color: #8b949e; }
+    .example {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+    .example-header {
+      padding: 0.5rem 1rem;
+      background: #1c2128;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: #8b949e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    textarea {
+      width: 100%;
+      background: var(--surface);
+      color: var(--text);
+      border: none;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 1rem;
+      resize: vertical;
+      outline: none;
+      min-height: 120px;
+    }
+    .run-btn {
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 4px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .run-btn:hover { opacity: 0.85; }
+    .output {
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--green);
+      border-top: 1px solid var(--border);
+      white-space: pre;
+      overflow-x: auto;
+      min-height: 2rem;
+    }
+    .output.error { color: var(--red); }
+    code {
+      font-family: var(--font-mono);
+      background: #1c2128;
+      padding: 0.1em 0.3em;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #8b949e;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>tsb</h1>
+  <a href="index.html">← Back to index</a>
+  <span style="color:#8b949e;font-size:0.9rem;">GroupBy &amp; CSV I/O</span>
+</header>
+
+<main>
+  <h2>GroupBy &amp; CSV I/O</h2>
+  <p>
+    This tutorial covers two fundamental pandas operations:
+    <strong>GroupBy</strong> (split-apply-combine) and
+    <strong>CSV I/O</strong> (<code>readCsv</code> / <code>toCsv</code>).
+  </p>
+
+  <!-- ─── CSV I/O ──────────────────────────────────────────────────────────── -->
+  <h2>CSV I/O</h2>
+
+  <h3>1. Parse a CSV string</h3>
+  <p>
+    <code>readCsv(text)</code> converts a CSV string into a <code>DataFrame</code>.
+    Numbers, booleans, and missing values are automatically inferred.
+  </p>
+  <div class="example">
+    <div class="example-header">
+      <span>readCsv basics</span>
+      <button class="run-btn" onclick="runExample(this)">Run ▶</button>
+    </div>
+    <textarea>const { readCsv } = tsb;
+
+const csv = `name,age,score
+Alice,30,95.5
+Bob,25,87.0
+Carol,35,92.3
+NA,NA,NA`;
+
+const df = readCsv(csv);
+console.log("shape:", df.shape);
+console.log("columns:", df.columns.toArray());
+console.log("ages:", df.col("age").toArray());
+console.log("mean score:", df.col("score").mean());
+console.log("nulls in age:", df.col("age").isna().sum());</textarea>
+    <div class="output">Click "Run ▶" to execute</div>
+  </div>
+
+  <h3>2. Custom delimiter and options</h3>
+  <div class="example">
+    <div class="example-header">
+      <span>TSV / custom options</span>
+      <button class="run-btn" onclick="runExample(this)">Run ▶</button>
+    </div>
+    <textarea>const { readCsv } = tsb;
+
+// Tab-separated values
+const tsv = `product\tprice\tunits
+Apple\t1.20\t100
+Banana\t0.50\t200
+Cherry\t3.00\t50`;
+
+const df = readCsv(tsv, { sep: "\t" });
+console.log("Products:", df.col("product").toArray());
+console.log("Total revenue:", df.col("price").mul(df.col("units")).sum());
+
+// With comment lines
+const withComments = `# sales data for Q1
+a,b
+1,10
+2,20`;
+const df2 = readCsv(withComments, { comment: "#" });
+console.log("df2 shape:", df2.shape);</textarea>
+    <div class="output">Click "Run ▶" to execute</div>
+  </div>
+
+  <h3>3. Serialise to CSV with toCsv</h3>
+  <div class="example">
+    <div class="example-header">
+      <span>toCsv — serialise a DataFrame</span>
+      <button class="run-btn" onclick="runExample(this)">Run ▶</button>
+    </div>
+    <textarea>const { DataFrame, toCsv, readCsv } = tsb;
+
+const df = DataFrame.fromColumns({
+  city:  ["London", "Paris", "Tokyo"],
+  pop_m: [9, 11, 14],
+});
+
+// Without row index
+const csv = toCsv(df, { index: false });
+console.log("CSV output:\n" + csv);
+
+// Round-trip: parse it back
+const df2 = readCsv(csv);
+console.log("Round-trip shape:", df2.shape);
+console.log("Equal?", df.col("city").toArray().toString() === df2.col("city").toArray().toString());</textarea>
+    <div class="output">Click "Run ▶" to execute</div>
+  </div>
+
+  <!-- ─── GroupBy ────────────────────────────────────────────────────────────── -->
+  <h2>GroupBy</h2>
+
+  <h3>4. Basic aggregation</h3>
+  <p>
+    <code>groupBy(df, "col")</code> groups rows by a column.
+    Call <code>.sum()</code>, <code>.mean()</code>, <code>.count()</code>, etc.
+  </p>
+  <div class="example">
+    <div class="example-header">
+      <span>groupBy — sum / mean / count</span>
+      <button class="run-btn" onclick="runExample(this)">Run ▶</button>
+    </div>
+    <textarea>const { DataFrame, groupBy } = tsb;
+
+const df = DataFrame.fromColumns({
+  team:  ["Alpha", "Beta", "Alpha", "Beta", "Alpha"],
+  score: [10, 20, 30, 40, 50],
+  wins:  [1,  2,  3,  4,  5],
+});
+
+const g = groupBy(df, "team");
+console.log("ngroups:", g.ngroups);
+
+const sums = g.sum();
+console.log("Sum by team:");
+console.log(sums.toString());
+
+const means = g.mean();
+console.log("\nMean by team:");
+console.log(means.toString());</textarea>
+    <div class="output">Click "Run ▶" to execute</div>
+  </div>
+
+  <h3>5. Multi-key groupBy</h3>
+  <div class="example">
+    <div class="example-header">
+      <span>groupBy — multiple keys</span>
+      <button class="run-btn" onclick="runExample(this)">Run ▶</button>
+    </div>
+    <textarea>const { DataFrame, groupBy } = tsb;
+
+const df = DataFrame.fromColumns({
+  dept:   ["Eng", "Eng", "HR",  "HR",  "Eng"],
+  level:  ["Jr",  "Sr",  "Jr",  "Sr",  "Jr" ],
+  salary: [80,    120,   60,    90,    85   ],
+});
+
+const g = groupBy(df, ["dept", "level"]);
+console.log("Groups:", g.ngroups);
+
+const res = g.mean();
+console.log(res.toString());</textarea>
+    <div class="output">Click "Run ▶" to execute</div>
+  </div>
+
+  <h3>6. Custom apply + transform</h3>
+  <div class="example">
+    <div class="example-header">
+      <span>apply / transform</span>
+      <button class="run-btn" onclick="runExample(this)">Run ▶</button>
+    </div>
+    <textarea>const { DataFrame, groupBy } = tsb;
+
+const df = DataFrame.fromColumns({
+  team:  ["A", "A", "B", "B", "A"],
+  score: [10, 30, 20, 40, 50],
+});
+
+// apply: custom aggregation returning an object per group
+const g = groupBy(df, "team");
+const stats = g.apply((sub) => ({
+  max:   sub.col("score").max(),
+  range: sub.col("score").max() - sub.col("score").min(),
+}));
+console.log("Custom stats:");
+console.log(stats.toString());
+
+// transform: demean each group (output same length as input)
+const demeaned = g.transform((col) => col.sub(col.mean()));
+console.log("\nDemeaned scores:");
+console.log(demeaned.col("score").toArray());</textarea>
+    <div class="output">Click "Run ▶" to execute</div>
+  </div>
+
+  <h3>7. GroupBy with CSV data</h3>
+  <div class="example">
+    <div class="example-header">
+      <span>Real-world: load CSV then aggregate</span>
+      <button class="run-btn" onclick="runExample(this)">Run ▶</button>
+    </div>
+    <textarea>const { readCsv, groupBy } = tsb;
+
+const salesCsv = `region,product,revenue
+North,Widget,120
+South,Widget,90
+North,Gadget,200
+South,Gadget,150
+North,Widget,80
+South,Gadget,170`;
+
+const df = readCsv(salesCsv);
+console.log("Loaded:", df.shape, "rows");
+
+// Total revenue per region
+const byRegion = groupBy(df, "region").sum();
+console.log("\nRevenue by region:");
+console.log(byRegion.select(["region", "revenue"]).toString());
+
+// Count sales per product per region
+const byBoth = groupBy(df, ["region", "product"]).count();
+console.log("\nCount by region+product:");
+console.log(byBoth.select(["region", "product", "revenue"]).toString());</textarea>
+    <div class="output">Click "Run ▶" to execute</div>
+  </div>
+</main>
+
+<footer>tsb &mdash; a TypeScript port of pandas</footer>
+
+<script type="module">
+  // ─── minimal tsb shim for the playground ──────────────────────────────────
+  // In a full deployment this would import the built bundle.
+  // Here we inline a small subset sufficient for the examples above.
+
+  import { readCsv, toCsv, DataFrame, Series, groupBy, groupBySeries }
+    from "../src/index.ts";
+
+  window.tsb = { readCsv, toCsv, DataFrame, Series, groupBy, groupBySeries };
+</script>
+
+<script>
+  function runExample(btn) {
+    const block = btn.closest(".example");
+    const code = block.querySelector("textarea").value;
+    const out = block.querySelector(".output");
+    out.className = "output";
+    const lines = [];
+    const origLog = console.log;
+    console.log = (...args) => {
+      lines.push(args.map(String).join(" "));
+      origLog(...args);
+    };
+    try {
+      // Wrap in async IIFE so top-level await works
+      const fn = new Function("tsb", code);
+      const result = fn(window.tsb);
+      if (result && typeof result.then === "function") {
+        result.catch((e) => {
+          out.className = "output error";
+          out.textContent = String(e);
+        });
+      }
+      out.textContent = lines.join("\n") || "(no output)";
+    } catch (e) {
+      out.className = "output error";
+      out.textContent = String(e);
+    } finally {
+      console.log = origLog;
+    }
+  }
+</script>
+</body>
+</html>

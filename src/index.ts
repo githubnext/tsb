@@ -35,3 +35,10 @@ export { Series } from "./core/index.ts";
 export type { SeriesOptions } from "./core/index.ts";
 export { DataFrame } from "./core/index.ts";
 export type { DataFrameOptions } from "./core/index.ts";
+
+// GroupBy
+export { groupBy, groupBySeries, DataFrameGroupBy, SeriesGroupBy } from "./groupby/index.ts";
+
+// I/O
+export { readCsv, toCsv } from "./io/index.ts";
+export type { ReadCsvOptions, ToCsvOptions } from "./io/index.ts";
