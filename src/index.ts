@@ -385,3 +385,19 @@ export { evalDataFrame, queryDataFrame } from "./core/index.ts";
 // ─── I/O: to_string ───────────────────────────────────────────────────────────
 export { dataFrameToString, seriesToString } from "./io/index.ts";
 export type { ToStringOptions } from "./io/index.ts";
+
+// ─── I/O: read_fwf ────────────────────────────────────────────────────────────
+export { readFwf } from "./io/index.ts";
+export type { ReadFwfOptions, ColSpec } from "./io/index.ts";
+
+// ─── I/O: read_html ───────────────────────────────────────────────────────────
+export { readHtml } from "./io/index.ts";
+export type { ReadHtmlOptions } from "./io/index.ts";
+
+// ─── window: expanding corr/cov ───────────────────────────────────────────────
+export { expandingCorr, expandingCov, expandingCorrDF, expandingCovDF } from "./window/index.ts";
+export type { ExpandingCovOptions } from "./window/index.ts";
+
+// ─── stats: bootstrap ─────────────────────────────────────────────────────────
+export { bootstrapCI, bootstrapMean, bootstrapMedian, bootstrapStd } from "./stats/index.ts";
+export type { BootstrapOptions, BootstrapResult } from "./stats/index.ts";

@@ -28,3 +28,7 @@ export type { TestResult } from "./hypothesis.ts";
 // ─── pairwise statistics ──────────────────────────────────────────────────────
 export { pairwiseCorr, pairwiseCov, corrwith, rollingCorr, rollCov } from "./pairwise.ts";
 export type { RollingPairwiseOptions } from "./pairwise.ts";
+
+// ─── bootstrap ────────────────────────────────────────────────────────────────
+export { bootstrapCI, bootstrapMean, bootstrapMedian, bootstrapStd } from "./bootstrap.ts";
+export type { BootstrapOptions, BootstrapResult } from "./bootstrap.ts";

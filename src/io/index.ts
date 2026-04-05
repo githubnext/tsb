@@ -43,3 +43,11 @@ export type { ToLatexOptions, LatexColumnAlign } from "./to_latex.ts";
 // ─── to_string ────────────────────────────────────────────────────────────────
 export { dataFrameToString, seriesToString } from "./to_string.ts";
 export type { ToStringOptions } from "./to_string.ts";
+
+// ─── read_fwf ─────────────────────────────────────────────────────────────────
+export { readFwf } from "./read_fwf.ts";
+export type { ReadFwfOptions, ColSpec } from "./read_fwf.ts";
+
+// ─── read_html ────────────────────────────────────────────────────────────────
+export { readHtml } from "./read_html.ts";
+export type { ReadHtmlOptions } from "./read_html.ts";
