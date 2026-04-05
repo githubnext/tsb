@@ -10,12 +10,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T01:07:00Z |
-| Iteration Count | 41 |
-| Best Metric | 54 |
+| Last Run | 2026-04-05T02:30:00Z |
+| Iteration Count | 42 |
+| Best Metric | 60 |
 | Target Metric | — |
-| Branch | `work-branch-41` |
-| PR | #aw_pr41 |
+| Branch | `work-branch-41-a62d454c5d6737a7` |
+| PR | #45 |
 | Steering Issue | — |
 | Paused | false |
 | Pause Reason | — |
@@ -30,28 +30,29 @@
 
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
-**Branch**: `work-branch-41`
-**Pull Request**: #aw_pr41
+**Branch**: `work-branch-41-a62d454c5d6737a7`
+**Pull Request**: #45
 
 ---
 
 ## 🎯 Current Priorities
 
-Iter 41 complete (54 files). Branch has: core (27 files), io (6), stats (4), groupby (1), merge (2), reshape (4), window (3).
+Iter 42 complete (60 files). Added: accessor.ts, style.ts, numeric.ts, period.ts, stats/linear-algebra.ts, io/to_parquet.ts.
 
 Next candidates:
-- Add tests for new modules: io, stats, categorical, multi-index, timedelta, interval-index, categorical-index, datetime-index, infer, read_parquet, read_excel
-- Add playground pages for new modules
-- `src/core/style.ts` — DataFrame.style accessor stub (+1)
-- `src/io/to_parquet.ts` — parquet writer stub (+1)
-- `src/stats/linearalgebra.ts` — lstsq/solve (+1)
-- `src/core/accessor.ts` — generic accessor registration (+1)
+- Add playground pages for new modules (accessor, style, numeric, period, linear-algebra)
+- `src/core/sparse.ts` — SparseDtype/SparseArray (+1)
+- `src/core/offsets.ts` — DateOffset/BusinessDay (+1)
+- `src/io/to_excel.ts` — Excel writer stub (+1)
+- `src/core/testing.ts` — pd.testing (assert_frame_equal, assert_series_equal) (+1)
+- `src/core/window-rolling.ts` — rolling correlation/covariance (+1)
+- `src/stats/hypothesis.ts` — basic hypothesis testing (ttest, chi2) (+1)
 
 ---
 
 ## 📚 Lessons Learned
 
-- **Iter 41 (consolidation, 37→54)**: State claimed best_metric=52 but actual branch had only 37 files. Previous iter 40 "consolidation" was never committed to the tracked branch. Recovery: extract files from old branches via `git show <branch>:<file>`. Fixed to_json.ts type error (`Label` includes `boolean` so use `(string|number|boolean|null)[]` not `(string|number|null)[]`). Fixed globalThis index access (`obj["prop"]` not `obj.prop` for TS4111). Fixed import restrictions (use `../core/index.ts` not `../core/frame.ts`). Series constructor takes `SeriesOptions` (object), not positional args. `DataFrame.fromColumns` takes `Record<string, readonly Scalar[]>` not Series map.
+- **Iter 42 (6 new modules, 54→60)**: Added accessor.ts (registerSeriesAccessor/registerDataFrameAccessor/registerIndexAccessor), style.ts (Styler with highlight_max/min, background_gradient, applymap, render HTML), numeric.ts (toNumeric/toNumericSeries/toNumericArray), period.ts (Period/PeriodIndex/periodRange with 8 frequencies), stats/linear-algebra.ts (dot/outer/vadd/vsub/vscale/norm/matmul/transpose/matvec/lstsq/det), io/to_parquet.ts (toParquet JSON-Lines serializer with schema). Key: df.columns is `Index<string>` not array — use `.values`. Index has no `.iloc` — use `.values[i]`. Create CanonFreq type for canonical freq to avoid `never` errors in switch statements. Extract helpers to keep CC≤15.
 - **Iter 40 (15 modules consolidated, 37→52)**: The work-branch based on c35a31aa0 only had 37 files; scattered modules from iters 18-25 (io/stats/categorical/multiindex/timedelta/interval-index/categorical-index/datetime-index) were on separate branches never merged in. Used `git show <branch>:<file>` to extract files from old branches. `safeoutputs-create_pull_request` works with local branches that DON'T track a remote (work-branch). Biome `--unsafe --write` fixes block statement warnings. `Dtype.bool/float64/int64` etc. are properties not methods (no `()`). `SeriesOptions.name` is `string | null` not `string | undefined`. `DataFrame.fromColumns()` is the factory method (not `new DataFrame(record, options)`).
 - **Iter 39 (15 modules, 47→51)**: Largest single-iteration gain. Used cherry-pick from iter39 branch onto window-17 PR branch to work around push auth limitation. `safeoutputs-create_pull_request` requires local branch to track an existing remote ref — use `git checkout -b <remote-branch> --track origin/<remote-branch>`, cherry-pick changes, then call create_pull_request. biome `--write` fixes format+imports automatically after lint fixes.
 - **Iter 38 (shift/str-adv/apply/datetime-convert/rank/frequency/cut/dummies/assign/explode/wide-to-long)**: Added 11 files in one iteration from datetime-tz-25 base (36→47). Key: all lint issues must be resolved before commit. CC>15 requires extracting helper functions. Nested ternary must be replaced with if/else. `Array<T>(n).fill(v)` pattern for fixed-size arrays.
@@ -69,13 +70,21 @@ Next candidates:
 
 ## 🔭 Future Directions
 
-✅ Done through Iter 41: Foundation, Index/Dtype/Series/DataFrame, GroupBy, concat, merge, ops, strings, missing, datetime, sort, indexing, compare, reshape, window, I/O (csv/json/parquet-stub/excel-stub), stats (corr/cov/describe/moments), categorical, MultiIndex, Timedelta, IntervalIndex, CategoricalIndex, DatetimeIndex, valueCounts/crosstab, cut/qcut, applyMap/pipe, getDummies/fromDummies, to_datetime/to_timedelta, rankSeries, assignDataFrame/filterDataFrame, explodeSeries/explodeDataFrame, strAdvanced, shift/diff, wide_to_long, clip/clipDataFrame, where/mask, sample, cumulative(cumsum/cumprod/cummax/cummin), infer_objects/convertDtypes.
+✅ Done through Iter 42: Foundation, Index/Dtype/Series/DataFrame, GroupBy, concat, merge, ops, strings, missing, datetime, sort, indexing, compare, reshape, window, I/O (csv/json/parquet/excel-stub/to_parquet), stats (corr/cov/describe/moments/linear-algebra), categorical, MultiIndex, Timedelta, IntervalIndex, CategoricalIndex, DatetimeIndex, valueCounts/crosstab, cut/qcut, applyMap/pipe, getDummies/fromDummies, to_datetime/to_timedelta, rankSeries, assignDataFrame/filterDataFrame, explodeSeries/explodeDataFrame, strAdvanced, shift/diff, wide_to_long, clip/clipDataFrame, where/mask, sample, cumulative, infer_objects/convertDtypes, accessor API, Styler, to_numeric, Period/PeriodIndex, linear algebra.
 
-**Next**: tests + playground pages for new modules · style accessor · to_parquet stub · linear algebra · accessor registration
+**Next**: playground pages for new modules · sparse arrays · DateOffset/offsets · testing utils · hypothesis testing
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 42 — 2026-04-05 02:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23992371212)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 6 new modules: accessor.ts (extension accessor registration API), style.ts (Styler/DataFrame.style), numeric.ts (to_numeric), period.ts (Period/PeriodIndex/periodRange), stats/linear-algebra.ts (dot/matmul/lstsq/det), io/to_parquet.ts (JSON-Lines Parquet fallback serializer)
+- **Metric**: 60 (previous best: 54, delta: +6)
+- **Commit**: b0c2f6f
+- **Notes**: Key fix: `df.columns.values` not `df.columns` (Index, not array). `df.index.values[i]` not `df.index.iloc(i)`. Add CanonFreq type for switch exhaustiveness on PeriodFreq aliases. Extract CC>15 functions into axis-specific helpers.
 
 ### Iteration 41 — 2026-04-05 01:07 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/23991285675)
 
