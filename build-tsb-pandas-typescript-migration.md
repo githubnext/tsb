@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T15:45:28Z |
-| Iteration Count | 61 |
-| Best Metric | 16 |
+| Last Run | 2026-04-05T16:10:53Z |
+| Iteration Count | 62 |
+| Best Metric | 17 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #49 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -39,15 +39,15 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 16 files (iter 61). Next candidates:
+Now at 17 files (iter 62). Next candidates:
 - `src/core/cat_accessor.ts` — Series.cat categorical accessor
 - `src/reshape/pivot.ts` — DataFrame.pivot_table()
-- `src/window/expanding.ts` — Expanding window (similar to rolling but unbounded)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 62 (expanding, 16→17)**: `ExpandingSeriesLike` interface (mirrors `RollingSeriesLike`) avoids circular imports. `DataFrameExpanding` appended to `frame.ts`. Default `minPeriods=1` (not window size like Rolling). `count()` ignores minPeriods (matches pandas). `std(0)` returns 0 for single-element (population std). Property tests: count non-decreasing, max≥min, sum/mean manual verification.
 - **Iter 61 (rolling, 15→16)**: Use `RollingSeriesLike` interface (like `StringSeriesLike`) to avoid circular imports. `DataFrameRolling` lives in `frame.ts` not `window/rolling.ts`. `_applyColAgg` takes `{ values, name }` return type and creates `Series<Scalar>` inline. `Array.from({length:n}, ():Scalar => null)` for null-init arrays.
 - **Iter 60 (corr/cov, 14→15)**: `Series.at()` label-based; use `.values[i]` for positional. `Index.filter()` doesn't exist — use `.values.filter()`. Extract helper functions for CC≤15.
 - **Iter 59 (readJson/toJson, 13→14)**: `noPropertyAccessFromIndexSignature` + Biome `useLiteralKeys` conflict — use `getProp(obj,key)` helper. Always add `default` to exhaustive switches.
@@ -65,15 +65,22 @@ Now at 16 files (iter 61). Next candidates:
 
 ## 🔭 Future Directions
 
-**New branch (iter 53–61)**: 16 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling.
+**New branch (iter 53–62)**: 17 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding.
 
-**Next**: cat accessor · pivot_table · expanding window
+**Next**: cat accessor · pivot_table
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 62 — 2026-04-05 16:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24005305086)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/window/expanding.ts` — `Expanding` class with pandas-compatible growing-window API (mean/sum/std/var/min/max/count/median/apply). `ExpandingSeriesLike` interface avoids circular imports. `DataFrameExpanding` in `frame.ts`. 40+ tests with property tests. Playground: `playground/expanding.html`.
+- **Metric**: 17 (previous: 16, delta: +1)
+- **Commit**: 2a6fe1f
 
 ### Iteration 61 — 2026-04-05 15:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24004857590)
 
