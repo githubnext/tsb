@@ -432,3 +432,19 @@ export type { OrcDecoder, ReadOrcOptions } from "./io/index.ts";
 // ─── I/O: read_feather ────────────────────────────────────────────────────────
 export { readFeather, toFeather } from "./io/index.ts";
 export type { ArrowDecoder, ArrowEncoder, ReadFeatherOptions, ToFeatherOptions } from "./io/index.ts";
+
+// ─── stats: kruskal / friedman ────────────────────────────────────────────────
+export { kruskalWallis, friedmanTest } from "./stats/index.ts";
+export type { KruskalResult } from "./stats/index.ts";
+
+// ─── stats: mann-whitney / wilcoxon ──────────────────────────────────────────
+export { mannWhitneyU, wilcoxonSigned } from "./stats/index.ts";
+export type { MannWhitneyResult, WilcoxonResult } from "./stats/index.ts";
+
+// ─── stats: OLS/WLS regression ───────────────────────────────────────────────
+export { olsRegress, wlsRegress } from "./stats/index.ts";
+export type { RegressionResult } from "./stats/index.ts";
+
+// ─── I/O: clipboard ──────────────────────────────────────────────────────────
+export { readClipboard, toClipboard } from "./io/index.ts";
+export type { ReadClipboardOptions, ToClipboardOptions } from "./io/index.ts";

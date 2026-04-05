@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb · Nonparametric Tests &amp; Regression</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+      h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
+      h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; }
+      .subtitle { color: #555; margin-bottom: 2rem; }
+      .card { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem; }
+      textarea { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 0.88rem; border: 1px solid #ccc; border-radius: 4px; padding: 0.6rem; resize: vertical; background: #fff; }
+      button { background: #0969da; color: #fff; border: none; border-radius: 6px; padding: 0.45rem 1.1rem; cursor: pointer; font-size: 0.9rem; margin-top: 0.5rem; }
+      button:hover { background: #0752a3; }
+      pre { background: #1e1e1e; color: #d4d4d4; padding: 0.8rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; margin-top: 0.5rem; white-space: pre-wrap; }
+      .error { color: #c00; }
+      a { color: #0969da; }
+      nav { margin-bottom: 1.5rem; font-size: 0.9rem; }
+      table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+      th, td { border: 1px solid #ccc; padding: 0.35rem 0.6rem; font-size: 0.88rem; }
+      th { background: #f0f0f0; }
+    </style>
+  </head>
+  <body>
+    <nav><a href="index.html">← All features</a></nav>
+    <h1>Nonparametric Tests &amp; OLS/WLS Regression</h1>
+    <p class="subtitle">
+      Rank-based tests that don't assume normality:
+      <code>kruskalWallis</code>, <code>friedmanTest</code>, <code>mannWhitneyU</code>,
+      <code>wilcoxonSigned</code>. Plus <code>olsRegress</code> and <code>wlsRegress</code>
+      for linear regression with full diagnostics.
+    </p>
+
+    <h2>Kruskal-Wallis H test</h2>
+    <p>
+      Nonparametric one-way ANOVA. Tests whether multiple independent groups come from
+      the same distribution. Uses chi-squared approximation with tie correction.
+    </p>
+    <div class="card">
+      <textarea id="kw-code" rows="10">
+import { kruskalWallis } from "tsb";
+
+// Three clearly separated groups
+const groups = [
+  [1, 2, 3],
+  [10, 11, 12],
+  [20, 21, 22],
+];
+const result = kruskalWallis(groups);
+
+console.log("H statistic:", result.statistic.toFixed(4));
+console.log("p-value    :", result.pValue.toFixed(6));
+console.log("df         :", result.df);
+console.log(result.pValue < 0.05 ? "→ Significant difference" : "→ No significant difference");
+      </textarea>
+      <button onclick="run('kw-code', 'kw-out')">▶ Run</button>
+      <pre id="kw-out"></pre>
+    </div>
+
+    <h2>Friedman test</h2>
+    <p>
+      Nonparametric repeated-measures ANOVA. Ranks within each block (row) and tests
+      whether column (treatment) rank sums differ.
+    </p>
+    <div class="card">
+      <textarea id="fr-code" rows="12">
+import { friedmanTest } from "tsb";
+
+// 4 subjects rated 3 conditions — condition A is consistently highest
+const ratings = [
+  [9, 6, 3],   // subject 1
+  [8, 5, 2],   // subject 2
+  [7, 4, 1],   // subject 3
+  [10, 7, 4],  // subject 4
+];
+const result = friedmanTest(ratings);
+console.log("χ² statistic:", result.statistic.toFixed(4));
+console.log("p-value     :", result.pValue.toFixed(6));
+console.log("df          :", result.df);
+console.log(result.pValue < 0.05 ? "→ Treatment effects detected" : "→ No treatment effect");
+      </textarea>
+      <button onclick="run('fr-code', 'fr-out')">▶ Run</button>
+      <pre id="fr-out"></pre>
+    </div>
+
+    <h2>Mann-Whitney U test</h2>
+    <p>
+      Nonparametric two-sample test (Wilcoxon rank-sum). Tests whether two independent
+      samples come from the same distribution.
+    </p>
+    <div class="card">
+      <textarea id="mw-code" rows="12">
+import { mannWhitneyU } from "tsb";
+
+const control = [2.1, 3.5, 2.8, 3.1, 2.4];
+const treated = [5.2, 6.1, 4.9, 5.8, 6.3];
+
+const result = mannWhitneyU(control, treated);
+console.log("U statistic:", result.statistic);
+console.log("U1 (control > treated):", result.u1);
+console.log("U2 (treated > control):", result.u2);
+console.log("p-value:", result.pValue.toFixed(6));
+console.log(result.pValue < 0.05 ? "→ Groups differ significantly" : "→ No significant difference");
+      </textarea>
+      <button onclick="run('mw-code', 'mw-out')">▶ Run</button>
+      <pre id="mw-out"></pre>
+    </div>
+
+    <h2>Wilcoxon signed-rank test</h2>
+    <p>
+      Nonparametric paired-sample test. Tests whether matched pairs have the same
+      distribution (alternative to paired t-test).
+    </p>
+    <div class="card">
+      <textarea id="wx-code" rows="12">
+import { wilcoxonSigned } from "tsb";
+
+// Before/after measurements for 6 patients
+const before = [120, 135, 118, 140, 128, 125];
+const after  = [112, 130, 115, 132, 121, 118];
+
+const result = wilcoxonSigned(before, after);
+console.log("W statistic:", result.statistic);
+console.log("W+ (positive ranks):", result.wPlus);
+console.log("W- (negative ranks):", result.wMinus);
+console.log("p-value:", result.pValue.toFixed(6));
+console.log(result.pValue < 0.05 ? "→ Significant change" : "→ No significant change");
+      </textarea>
+      <button onclick="run('wx-code', 'wx-out')">▶ Run</button>
+      <pre id="wx-out"></pre>
+    </div>
+
+    <h2>OLS linear regression</h2>
+    <p>
+      Ordinary Least Squares: fits β in <em>y = Xβ</em>. Include a column of ones
+      for an intercept term. Returns coefficients, standard errors, t-stats, p-values,
+      confidence intervals, R², F-statistic.
+    </p>
+    <div class="card">
+      <textarea id="ols-code" rows="18">
+import { olsRegress } from "tsb";
+
+// Advertising spend → sales (with intercept column)
+//   X[:, 0] = ad spend; X[:, 1] = 1 (intercept)
+const X = [
+  [10, 1], [20, 1], [30, 1], [40, 1],
+  [50, 1], [60, 1], [70, 1], [80, 1],
+];
+const y = [15, 24, 35, 42, 58, 63, 72, 84];
+
+const r = olsRegress(y, X);
+
+console.log("Coefficients:");
+console.log("  slope    :", r.coefficients[0]?.toFixed(4));
+console.log("  intercept:", r.coefficients[1]?.toFixed(4));
+console.log("R²         :", r.rSquared.toFixed(4));
+console.log("Adj. R²    :", r.rSquaredAdj.toFixed(4));
+console.log("F-statistic:", r.fStatistic.toFixed(2), " p =", r.fPValue.toFixed(6));
+console.log("95% CI (slope):", r.confidenceIntervals[0]?.map(v => v.toFixed(4)));
+      </textarea>
+      <button onclick="run('ols-code', 'ols-out')">▶ Run</button>
+      <pre id="ols-out"></pre>
+    </div>
+
+    <h2>WLS regression — down-weighting outliers</h2>
+    <p>
+      Weighted Least Squares: assign lower weight to unreliable observations.
+      Equivalent to scaling the system by √w before fitting.
+    </p>
+    <div class="card">
+      <textarea id="wls-code" rows="18">
+import { wlsRegress, olsRegress } from "tsb";
+
+// True relationship: y = 2x + 1, but last point is a large outlier
+const X = [[1,1],[2,1],[3,1],[4,1],[5,1]];
+const y = [3, 5, 7, 9, 100];   // last value is an outlier
+
+// OLS — pulled toward outlier
+const ols = olsRegress(y, X);
+// WLS — outlier down-weighted
+const wls = wlsRegress(y, X, [1, 1, 1, 1, 0.001]);
+
+console.log("True slope: 2");
+console.log("OLS slope:", ols.coefficients[0]?.toFixed(3), " (pulled by outlier)");
+console.log("WLS slope:", wls.coefficients[0]?.toFixed(3), " (closer to truth)");
+console.log("");
+console.log("OLS R²:", ols.rSquared.toFixed(4));
+console.log("WLS R²:", wls.rSquared.toFixed(4));
+      </textarea>
+      <button onclick="run('wls-code', 'wls-out')">▶ Run</button>
+      <pre id="wls-out"></pre>
+    </div>
+
+    <h2>Clipboard I/O</h2>
+    <p>
+      Parse clipboard text (TSV or CSV) into a DataFrame with
+      <code>readClipboard</code>, and serialize back to TSV with
+      <code>toClipboard</code>.
+    </p>
+    <div class="card">
+      <textarea id="clip-code" rows="18">
+import { readClipboard, toClipboard } from "tsb";
+
+// Simulating clipboard content pasted from a spreadsheet (TSV)
+const clipboardText = `name\tage\tsalary
+Alice\t30\t75000
+Bob\t25\t60000
+Carol\t35\t90000`;
+
+const df = readClipboard(clipboardText);
+console.log("Parsed DataFrame:");
+console.log("  columns:", df.columns.values);
+console.log("  rows   :", df.shape[0]);
+console.log("  name[0]:", df.get("name")?.values[0]);
+console.log("  salary[2]:", df.get("salary")?.values[2]);
+
+// Convert back to TSV for clipboard
+const tsv = toClipboard(df);
+console.log("\nRound-trip TSV:");
+console.log(tsv);
+      </textarea>
+      <button onclick="run('clip-code', 'clip-out')">▶ Run</button>
+      <pre id="clip-out"></pre>
+    </div>
+
+    <script type="module" src="playground-runtime.js"></script>
+    <script>
+      async function run(codeId, outId) {
+        const code = document.getElementById(codeId).value;
+        const out = document.getElementById(outId);
+        out.textContent = "Running…";
+        try {
+          const result = await window.__tsb_run(code);
+          out.textContent = result;
+          out.className = "";
+        } catch (e) {
+          out.textContent = String(e);
+          out.className = "error";
+        }
+      }
+    </script>
+  </body>
+</html>

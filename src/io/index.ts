@@ -67,3 +67,7 @@ export type { OrcDecoder, ReadOrcOptions } from "./read_orc.ts";
 // ─── read_feather ─────────────────────────────────────────────────────────────
 export { readFeather, toFeather } from "./read_feather.ts";
 export type { ArrowDecoder, ArrowEncoder, ReadFeatherOptions, ToFeatherOptions } from "./read_feather.ts";
+
+// ─── clipboard ────────────────────────────────────────────────────────────────
+export { readClipboard, toClipboard } from "./read_clipboard.ts";
+export type { ReadClipboardOptions, ToClipboardOptions } from "./read_clipboard.ts";

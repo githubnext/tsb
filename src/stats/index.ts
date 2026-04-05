@@ -40,3 +40,15 @@ export type { Chi2Result, FisherResult } from "./contingency.ts";
 // ─── anova ────────────────────────────────────────────────────────────────────
 export { oneWayAnova, twoWayAnova } from "./anova.ts";
 export type { AnovaRow, OneWayAnovaResult, TwoWayAnovaResult, TwoWayAnovaOptions } from "./anova.ts";
+
+// ─── kruskal / friedman ───────────────────────────────────────────────────────
+export { kruskalWallis, friedmanTest } from "./kruskal.ts";
+export type { KruskalResult } from "./kruskal.ts";
+
+// ─── mann-whitney / wilcoxon ──────────────────────────────────────────────────
+export { mannWhitneyU, wilcoxonSigned } from "./mann_whitney.ts";
+export type { MannWhitneyResult, WilcoxonResult } from "./mann_whitney.ts";
+
+// ─── regression ───────────────────────────────────────────────────────────────
+export { olsRegress, wlsRegress } from "./regression.ts";
+export type { RegressionResult } from "./regression.ts";
