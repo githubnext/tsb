@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T17:12:06Z |
-| Iteration Count | 64 |
-| Best Metric | 20 |
+| Last Run | 2026-04-05T17:44:42Z |
+| Iteration Count | 65 |
+| Best Metric | 21 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #54 |
@@ -39,15 +39,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 20 files (iter 64). Next candidates:
-- `src/stats/ewm.ts` — Exponentially Weighted Moving (ewm) — mean/std/var/apply
+Now at 21 files (iter 65). Next candidates:
 - `src/core/multi_index.ts` — MultiIndex support
 - `src/reshape/stack_unstack.ts` — stack() / unstack()
+- `src/window/ewm.ts` — ✅ Done (iter 65)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 65 (ewm, 20→21)**: `EwmSeriesLike` must include `toArray()` (same as Rolling/Expanding patterns). Online algorithm: track S (weighted sum), W (sum of weights), W2 (sum of squared weights) for O(n) mean+var. Extract `computeCov`/`computeCorr` top-level helpers to keep `_covImpl`/`corr` CC≤15. EWM import needs alphabetical sort: `ewm.ts` before `expanding.ts` (e-w < e-x). Shorthand assignments (`*=`) required by biome for `Sxy *= decay` etc. Use `**` not `Math.pow`. EWM corr state tracks Sx, Sy, Sx2, Sy2, Sxy, W, W2 — all decay on missing if `ignoreNa=false`.
 - **Iter 64 (melt+pivot, 18→20)**: Two reshape features in one iteration. `melt()` uses helper functions to keep CC≤15: `requireColumns`, `resolveValueVars`, `initIdColData`, `appendIdRow`. `pivot()` decomposes into `fillPivotCells` + `fillPivotCell`. `pivotTable` uses `buildGroups` + `assembleResult` + `fillOutRow` + `buildOutColNames`. Column order for multi-value pivot: outer=valuesCols, inner=colHeaders (matches pandas MultiIndex convention). `noMisplacedAssertion`: use pure helper that returns value (not asserts) to extract logic from property tests.
 - **Iter 63 (expanding+cat, 16→18)**: Two features in one iteration to beat previous best (17 on a branch with fewer files). `CatHolder` class wraps `CatSeriesLike` to preserve explicit category list through chained calls (addCategories→removeUnused etc.). `noNestedTernary` in sort comparator — use explicit if/else. Import order matters for `organizeImports` lint rule. `(mapping as unknown as Record<string, unknown>)[key]` works for safe indexing after non-array narrowing.
 - **Iter 62 (expanding, 16→17)**: `ExpandingSeriesLike` interface (mirrors `RollingSeriesLike`) avoids circular imports. `DataFrameExpanding` appended to `frame.ts`. Default `minPeriods=1` (not window size like Rolling). `count()` ignores minPeriods (matches pandas). `std(0)` returns 0 for single-element (population std). Property tests: count non-decreasing, max≥min, sum/mean manual verification.
@@ -68,15 +69,23 @@ Now at 20 files (iter 64). Next candidates:
 
 ## 🔭 Future Directions
 
-**New branch (iter 53–63)**: 18 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, cat accessor.
+**New branch (iter 53–65)**: 21 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, cat accessor, reshape/melt, reshape/pivot.
 
-**Next**: ewm (exponentially weighted mean) · stack/unstack · MultiIndex
+**Next**: stack/unstack · MultiIndex
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 65 — 2026-04-05 17:44 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24006942040)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/window/ewm.ts` — EWM class with mean/std/var/cov/corr/apply. `DataFrameEwm` in `frame.ts`. Series.ewm() and DataFrame.ewm() methods. 55+ tests. Playground: `ewm.html`.
+- **Metric**: 21 (previous: 20, delta: +1)
+- **Commit**: 471773a
+- **Notes**: Online O(n) algorithm tracking S/W/W2 for mean and variance. Helper functions `computeCov`/`computeCorr` keep CC≤15. Reliability-weights Bessel correction for unbiased variance.
 
 ### Iteration 64 — 2026-04-05 17:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24006370785)
 
