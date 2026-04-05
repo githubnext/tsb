@@ -10,12 +10,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T16:47:00Z |
-| Iteration Count | 63 |
-| Best Metric | 18 |
+| Last Run | 2026-04-05T17:12:06Z |
+| Iteration Count | 64 |
+| Best Metric | 20 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | #49 |
+| PR | #54 |
 | Steering Issue | — |
 | Paused | false |
 | Pause Reason | — |
@@ -31,7 +31,7 @@
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
 **Branch**: `autoloop/build-tsb-pandas-typescript-migration`
-**Pull Request**: #49
+**Pull Request**: #54
 
 ---
 
@@ -39,14 +39,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 18 files (iter 63). Next candidates:
-- `src/reshape/pivot.ts` — DataFrame.pivot_table()
-- `src/reshape/melt.ts` — DataFrame.melt()
+Now at 20 files (iter 64). Next candidates:
+- `src/stats/ewm.ts` — Exponentially Weighted Moving (ewm) — mean/std/var/apply
+- `src/core/multi_index.ts` — MultiIndex support
+- `src/reshape/stack_unstack.ts` — stack() / unstack()
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 64 (melt+pivot, 18→20)**: Two reshape features in one iteration. `melt()` uses helper functions to keep CC≤15: `requireColumns`, `resolveValueVars`, `initIdColData`, `appendIdRow`. `pivot()` decomposes into `fillPivotCells` + `fillPivotCell`. `pivotTable` uses `buildGroups` + `assembleResult` + `fillOutRow` + `buildOutColNames`. Column order for multi-value pivot: outer=valuesCols, inner=colHeaders (matches pandas MultiIndex convention). `noMisplacedAssertion`: use pure helper that returns value (not asserts) to extract logic from property tests.
 - **Iter 63 (expanding+cat, 16→18)**: Two features in one iteration to beat previous best (17 on a branch with fewer files). `CatHolder` class wraps `CatSeriesLike` to preserve explicit category list through chained calls (addCategories→removeUnused etc.). `noNestedTernary` in sort comparator — use explicit if/else. Import order matters for `organizeImports` lint rule. `(mapping as unknown as Record<string, unknown>)[key]` works for safe indexing after non-array narrowing.
 - **Iter 62 (expanding, 16→17)**: `ExpandingSeriesLike` interface (mirrors `RollingSeriesLike`) avoids circular imports. `DataFrameExpanding` appended to `frame.ts`. Default `minPeriods=1` (not window size like Rolling). `count()` ignores minPeriods (matches pandas). `std(0)` returns 0 for single-element (population std). Property tests: count non-decreasing, max≥min, sum/mean manual verification.
 - **Iter 61 (rolling, 15→16)**: Use `RollingSeriesLike` interface (like `StringSeriesLike`) to avoid circular imports. `DataFrameRolling` lives in `frame.ts` not `window/rolling.ts`. `_applyColAgg` takes `{ values, name }` return type and creates `Series<Scalar>` inline. `Array.from({length:n}, ():Scalar => null)` for null-init arrays.
@@ -68,13 +70,21 @@ Now at 18 files (iter 63). Next candidates:
 
 **New branch (iter 53–63)**: 18 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, cat accessor.
 
-**Next**: pivot_table · melt
+**Next**: ewm (exponentially weighted mean) · stack/unstack · MultiIndex
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 64 — 2026-04-05 17:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24006370785)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/reshape/melt.ts` (melt wide→long) + `src/reshape/pivot.ts` (pivot + pivotTable). 29 tests. Playground: `melt.html`, `pivot.html`.
+- **Metric**: 20 (previous: 18, delta: +2)
+- **Commit**: 0519b8d
+- **Notes**: Two reshape features in one iteration. pivotTable supports 7 aggfuncs (mean/sum/count/min/max/first/last), fill_value, dropna. pivot requires unique (index, column) pairs.
 
 ### Iteration 63 — 2026-04-05 16:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24005927691)
 
