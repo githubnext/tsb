@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T20:09:00Z |
-| Iteration Count | 70 |
-| Best Metric | 26 |
+| Last Run | 2026-04-05T20:46:47Z |
+| Iteration Count | 71 |
+| Best Metric | 27 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #54 |
@@ -39,15 +39,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 26 files (iter 70). Next candidates:
+Now at 27 files (iter 71). Next candidates:
 - `src/core/interval.ts` — Interval / IntervalIndex
 - `src/core/categorical_index.ts` — CategoricalIndex
-- `src/stats/elem_ops.ts` — clip(), abs(), round() element-wise ops
+- `src/stats/value_counts.ts` — value_counts() for Series/DataFrame
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 71 (elem_ops, 26→27)**: `clip()`/`seriesAbs()`/`seriesRound()`/DataFrame variants as standalone stat functions. `mapNumeric` helper: applies `(v: number) => number` fn, propagates null/NaN unchanged via `isFiniteNum` guard. `makeClipFn(lo, hi)` returns closure using `Number.NEGATIVE_INFINITY`/`Number.POSITIVE_INFINITY` (not bare `Infinity/-Infinity` — Biome prefers `Number.*` forms). `makeRoundFn(decimals)` returns `Math.round` for `decimals===0`, else `(v) => Math.round(v*factor)/factor`. `Math.abs` passed directly as fn arg (type `(x: number) => number` matches). `colWiseElem` reusable helper for DataFrame column-wise transforms. Named exports `seriesAbs`/`seriesRound` (not `abs`/`round`) to avoid collision with built-ins.
 - **Iter 70 (cum_ops, 25→26)**: Cumulative ops as standalone stats functions. `cumulateNum` + `cumulateSc` core helpers. `skipna=true`: NaN positions return NaN/null but accumulator continues. `skipna=false`: `poisoned` flag propagates NaN. `isFiniteNum`/`isNonNull` type guards avoid unsafe `as number` casts. `NonNullScalar = number | string | boolean | bigint | Date`. DataFrame `colWiseCum` (axis=0) + `rowWiseCum` (axis=1). `buildRow` helper keeps CC≤15. `Number.NaN` not `NaN`. `vals.at(-1)` not `vals[vals.length-1]`.
 - **Iter 69 (nlargest/nsmallest, 24→25)**: Standalone stat functions `nlargestSeries`/`nsmallestSeries`/`nlargestDataFrame`/`nsmallestDataFrame`. `ValPos` interface for (value, position) pairs. `buildValidPairs` skips NaN/null. `selectAllPositions` creates `[...pairs]` copy before sort to avoid mutating `pairs`. `sortPairsByValAndPos` mutates pairs in-place (owned, safe). `Index.at(i)` returns `Label` (not `Label|undefined`) — no cast needed; `series.values[i] as Scalar` is safe after bounds. `cmpScalar` null-safe for DataFrame row comparison. `Array.from({length:n}, (_, i) => i)` for row indices — `_` prefix suppresses unused-param warning.
 - **Iter 68 (rank, 23→24)**: `rankSeries` + `rankDataFrame` as standalone stat functions (no circular deps). CC kept ≤15 by extracting `fillValidRanks` + `fillMissingRanks` helpers from `rankValues`. `noUncheckedIndexedAccess`: `Map.get(i)` returns `T|undefined` — check `!== undefined` before use. In `rankByRow`, array indexing `colData[j]` returns `number[]|undefined` — check before assign. `== null` (loose) catches both null and undefined for `r == null ? NaN : r`. `noExcessiveCognitiveComplexity`: ternary chains inside nested loops push CC over 15 even without `if` statements — extract helpers. `useBlockStatements`: all single-line `if` bodies must use `{}`. Remove unused imports (`Label` was imported but not needed once `Scalar` covers it).
@@ -83,6 +84,14 @@ Now at 26 files (iter 70). Next candidates:
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 71 — 2026-04-05 20:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24010099827)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/elem_ops.ts` — `clip()`, `seriesAbs()`, `seriesRound()` for Series; `dataFrameClip/Abs/Round()` for DataFrame. Element-wise scalar transforms with missing-value propagation.
+- **Metric**: 27 (previous: 26, delta: +1)
+- **Commit**: 0e210db
+- **Notes**: `mapNumeric` helper applies fn to finite nums, passes null/NaN through. `Number.NEGATIVE_INFINITY`/`Number.POSITIVE_INFINITY` (not bare `Infinity`). `seriesAbs`/`seriesRound` names avoid collision with JS built-ins.
 
 ### Iteration 70 — 2026-04-05 20:09 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24009460051)
 
