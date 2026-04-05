@@ -67,14 +67,50 @@ export type { CatSeriesLike } from "./core/index.ts";
 export { melt } from "./reshape/index.ts";
 export type { MeltOptions } from "./reshape/index.ts";
 export { pivot, pivotTable } from "./reshape/index.ts";
-export type { PivotOptions, PivotTableOptions, AggFuncName as PivotAggFuncName } from "./reshape/index.ts";
+export type {
+  PivotOptions,
+  PivotTableOptions,
+  AggFuncName as PivotAggFuncName,
+} from "./reshape/index.ts";
 export { stack, unstack, STACK_DEFAULT_SEP } from "./reshape/index.ts";
 export type { StackOptions, UnstackOptions } from "./reshape/index.ts";
 export { MultiIndex } from "./core/index.ts";
 export type { MultiIndexOptions } from "./core/index.ts";
 export { rankSeries, rankDataFrame } from "./stats/index.ts";
 export type { RankMethod, NaOption, RankOptions } from "./stats/index.ts";
-export { nlargestSeries, nsmallestSeries, nlargestDataFrame, nsmallestDataFrame } from "./stats/index.ts";
+export {
+  nlargestSeries,
+  nsmallestSeries,
+  nlargestDataFrame,
+  nsmallestDataFrame,
+} from "./stats/index.ts";
 export type { NKeep, NTopOptions, NTopDataFrameOptions } from "./stats/index.ts";
-export { cumsum, cumprod, cummax, cummin, dataFrameCumsum, dataFrameCumprod, dataFrameCummax, dataFrameCummin } from "./stats/index.ts";
+export {
+  cumsum,
+  cumprod,
+  cummax,
+  cummin,
+  dataFrameCumsum,
+  dataFrameCumprod,
+  dataFrameCummax,
+  dataFrameCummin,
+} from "./stats/index.ts";
 export type { CumOpsOptions, DataFrameCumOpsOptions } from "./stats/index.ts";
+export {
+  clip,
+  dataFrameClip,
+  seriesAbs,
+  dataFrameAbs,
+  seriesRound,
+  dataFrameRound,
+} from "./stats/index.ts";
+export type { ClipOptions, RoundOptions, DataFrameElemOptions } from "./stats/index.ts";
+export { valueCounts, dataFrameValueCounts } from "./stats/index.ts";
+export type { ValueCountsOptions, DataFrameValueCountsOptions } from "./stats/index.ts";
+export { whereSeries, maskSeries, whereDataFrame, maskDataFrame } from "./stats/index.ts";
+export type {
+  WherePredicate,
+  SeriesCond,
+  DataFrameCond,
+  WhereMaskOptions,
+} from "./stats/index.ts";
