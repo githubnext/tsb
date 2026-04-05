@@ -361,3 +361,27 @@ export type { ToLatexOptions, LatexColumnAlign } from "./io/index.ts";
 // ─── stats: pairwise ─────────────────────────────────────────────────────────
 export { pairwiseCorr, pairwiseCov, corrwith, rollingCorr, rollCov } from "./stats/index.ts";
 export type { RollingPairwiseOptions } from "./stats/index.ts";
+
+// ─── options ──────────────────────────────────────────────────────────────────
+export {
+  getOption,
+  setOption,
+  resetOption,
+  resetAllOptions,
+  describeOption,
+  listOptions,
+  registerOption,
+  OptionError,
+} from "./core/index.ts";
+export type { OptionDescriptor } from "./core/index.ts";
+
+// ─── json normalization ───────────────────────────────────────────────────────
+export { jsonNormalize, flattenJson } from "./core/index.ts";
+export type { JsonNormalizeOptions, JsonRecord, JsonValue } from "./core/index.ts";
+
+// ─── eval / query ─────────────────────────────────────────────────────────────
+export { evalDataFrame, queryDataFrame } from "./core/index.ts";
+
+// ─── I/O: to_string ───────────────────────────────────────────────────────────
+export { dataFrameToString, seriesToString } from "./io/index.ts";
+export type { ToStringOptions } from "./io/index.ts";

@@ -39,3 +39,7 @@ export type { ToHtmlOptions } from "./to_html.ts";
 // ─── to_latex ─────────────────────────────────────────────────────────────────
 export { toLatex, seriesToLatex } from "./to_latex.ts";
 export type { ToLatexOptions, LatexColumnAlign } from "./to_latex.ts";
+
+// ─── to_string ────────────────────────────────────────────────────────────────
+export { dataFrameToString, seriesToString } from "./to_string.ts";
+export type { ToStringOptions } from "./to_string.ts";

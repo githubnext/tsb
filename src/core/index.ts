@@ -236,3 +236,23 @@ export { NAType, NA, isNA, naIf, naOr } from "./na-type.ts";
 // ─── Flags ────────────────────────────────────────────────────────────────────
 export { Flags, DuplicateLabelError, labelsAreUnique, getDuplicateLabels } from "./flags.ts";
 export type { FlagsOptions } from "./flags.ts";
+
+// ─── options ──────────────────────────────────────────────────────────────────
+export {
+  getOption,
+  setOption,
+  resetOption,
+  resetAllOptions,
+  describeOption,
+  listOptions,
+  registerOption,
+  OptionError,
+} from "./option.ts";
+export type { OptionDescriptor } from "./option.ts";
+
+// ─── json normalization ───────────────────────────────────────────────────────
+export { jsonNormalize, flattenJson } from "./json.ts";
+export type { JsonNormalizeOptions, JsonRecord, JsonValue } from "./json.ts";
+
+// ─── eval / query ─────────────────────────────────────────────────────────────
+export { evalDataFrame, queryDataFrame } from "./eval.ts";
