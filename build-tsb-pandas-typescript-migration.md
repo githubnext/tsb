@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T19:16:00Z |
-| Iteration Count | 68 |
-| Best Metric | 24 |
+| Last Run | 2026-04-05T19:44:00Z |
+| Iteration Count | 69 |
+| Best Metric | 25 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #54 |
@@ -39,15 +39,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 24 files (iter 68). Next candidates:
+Now at 25 files (iter 69). Next candidates:
 - `src/core/interval.ts` — Interval / IntervalIndex
 - `src/core/categorical_index.ts` — CategoricalIndex
-- `src/core/nlargest.ts` — nlargest/nsmallest standalone utilities
+- `src/stats/cum_ops.ts` — cumsum, cumprod, cummax, cummin (cumulative ops)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 69 (nlargest/nsmallest, 24→25)**: Standalone stat functions `nlargestSeries`/`nsmallestSeries`/`nlargestDataFrame`/`nsmallestDataFrame`. `ValPos` interface for (value, position) pairs. `buildValidPairs` skips NaN/null. `selectAllPositions` creates `[...pairs]` copy before sort to avoid mutating `pairs`. `sortPairsByValAndPos` mutates pairs in-place (owned, safe). `Index.at(i)` returns `Label` (not `Label|undefined`) — no cast needed; `series.values[i] as Scalar` is safe after bounds. `cmpScalar` null-safe for DataFrame row comparison. `Array.from({length:n}, (_, i) => i)` for row indices — `_` prefix suppresses unused-param warning.
 - **Iter 68 (rank, 23→24)**: `rankSeries` + `rankDataFrame` as standalone stat functions (no circular deps). CC kept ≤15 by extracting `fillValidRanks` + `fillMissingRanks` helpers from `rankValues`. `noUncheckedIndexedAccess`: `Map.get(i)` returns `T|undefined` — check `!== undefined` before use. In `rankByRow`, array indexing `colData[j]` returns `number[]|undefined` — check before assign. `== null` (loose) catches both null and undefined for `r == null ? NaN : r`. `noExcessiveCognitiveComplexity`: ternary chains inside nested loops push CC over 15 even without `if` statements — extract helpers. `useBlockStatements`: all single-line `if` bodies must use `{}`. Remove unused imports (`Label` was imported but not needed once `Scalar` covers it).
 - **Iter 67 (MultiIndex, 22→23)**: Standalone class (no DataFrame method) avoids circular deps. Levels+codes internal representation (canonical pandas format). Factory methods: `fromTuples`, `fromArrays`, `fromProduct` (Cartesian). `cartesianProduct` helper: compute totals with a backward `for` loop (not `reduceRight` with spread — `noAccumulatingSpread`). `useSimplifiedLogicExpression`: replace `!a && !b` with `if (a || b) continue`. CC in comparison: split into `compareScalars` (non-null) + `comparePosition` (null-safe) + `compareTuples` (outer). `compareScalars` takes `number | string | boolean` not `Label` to avoid null comparison TS error. Tests import from `src/index.ts` barrel; `fc` as default import not namespace.
 - **Iter 65 (ewm, 20→21)**: `EwmSeriesLike` must include `toArray()` (same as Rolling/Expanding patterns). Online algorithm: track S (weighted sum), W (sum of weights), W2 (sum of squared weights) for O(n) mean+var. Extract `computeCov`/`computeCorr` top-level helpers to keep `_covImpl`/`corr` CC≤15. EWM import needs alphabetical sort: `ewm.ts` before `expanding.ts` (e-w < e-x). Shorthand assignments (`*=`) required by biome for `Sxy *= decay` etc. Use `**` not `Math.pow`. EWM corr state tracks Sx, Sy, Sx2, Sy2, Sxy, W, W2 — all decay on missing if `ignoreNa=false`.
@@ -72,15 +73,23 @@ Now at 24 files (iter 68). Next candidates:
 
 ## 🔭 Future Directions
 
-**New branch (iter 53–67)**: 23 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, cat accessor, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex.
+**New branch (iter 53–69)**: 25 files — Series, DataFrame, GroupBy, concat, merge, str accessor, dt accessor, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, cat accessor, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest.
 
-**Next**: Interval/IntervalIndex · rank() standalone
+**Next**: Interval/IntervalIndex · CategoricalIndex · cumulative ops (cumsum/cumprod/cummax/cummin)
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 69 — 2026-04-05 19:44 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24009034419)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/nlargest.ts` — `nlargestSeries()`, `nsmallestSeries()`, `nlargestDataFrame()`, `nsmallestDataFrame()` mirroring `pandas.Series.nlargest/nsmallest` and `DataFrame.nlargest/nsmallest`. `keep='first'/'last'/'all'` tie-handling. NaN/null excluded. Multi-column DataFrame sorting. 45+ unit tests + 5 property tests. Playground: `nlargest.html`.
+- **Metric**: 25 (previous: 24, delta: +1)
+- **Commit**: 9588f51
+- **Notes**: `ValPos` interface tracks (value, originalPosition). `selectAllPositions` uses `[...pairs]` copy before sorting to avoid mutating pairs needed by filter. `Index.at(i)` returns `Label` directly (not `T|undefined`). `cmpScalar` null-safe wrapper for DataFrame row comparison.
 
 ### Iteration 68 — 2026-04-05 19:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24008535770)
 
@@ -98,37 +107,6 @@ All iterations in reverse chronological order (newest first).
 - **Commit**: 986fef6
 - **Notes**: Levels+codes internal representation. `cartesianProduct` uses backward `for` not `reduceRight+spread`. `compareScalars(number|string|boolean)` not `Label` for TS compatibility.
 
-### Iteration 66 — 2026-04-05 18:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24007420044)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/reshape/stack_unstack.ts` — `stack()` + `unstack()`. 25+ unit tests + 4 property tests. Playground: `stack_unstack.html`.
-- **Metric**: 22 (previous: 21, delta: +1)
-- **Commit**: 83efe93
-- **Notes**: Standalone functions (not DataFrame methods) to avoid circular deps. Compound string labels `"rowLabel|colName"`. Round-trips: `unstack(stack(df,{dropna:false})) ≈ df` verified by property tests.
-
-### Iteration 65 — 2026-04-05 17:44 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24006942040)
-- **Status**: ✅ Accepted | **Metric**: 21 (+1) | **Commit**: 471773a
-- **Change**: `src/window/ewm.ts` — EWM mean/std/var/cov/corr/apply. Online O(n) S/W/W2 algorithm.
-
-### Iteration 64 — 2026-04-05 17:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24006370785)
-- **Status**: ✅ Accepted | **Metric**: 20 (+2) | **Commit**: 0519b8d
-- **Change**: `src/reshape/melt.ts` + `src/reshape/pivot.ts` (pivot+pivotTable, 7 aggfuncs).
-
-### Iteration 63 — 2026-04-05 16:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24005927691)
-- **Status**: ✅ Accepted | **Metric**: 18 (+1) | **Commit**: 03b0a28
-- **Change**: `src/window/expanding.ts` + `src/core/cat_accessor.ts`. CatHolder pattern.
-
-### Iteration 62 — 2026-04-05 16:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24005305086)
-- **Status**: ✅ Accepted | **Metric**: 17 (+1) | **Commit**: 2a6fe1f
-- **Change**: `src/window/expanding.ts` — Expanding growing-window API, ExpandingSeriesLike interface.
-
-### Iteration 61 — 2026-04-05 15:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24004857590)
-- **Status**: ✅ Accepted | **Metric**: 16 (+1) | **Commit**: 2874510
-- **Change**: `src/window/rolling.ts` — Rolling sliding-window API, RollingSeriesLike interface.
-
-### Iteration 60 — 2026-04-05 15:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24004259683)
-- **Status**: ✅ Accepted | **Metric**: 15 (+1) | **Commit**: a44aff5
-- **Change**: `src/stats/corr.ts` — pearsonCorr, dataFrameCorr, dataFrameCov.
-
-### Iterations 53–59 — ✅ CSV I/O, JSON I/O, describe/quantile, dt accessor, str accessor, merge, GroupBy (iters 53–59)
+### Iters 60–66 — ✅ corr/cov(15), rolling(16), expanding×2(17–18), cat_accessor, melt+pivot(20), ewm(21), stack/unstack(22)
+### Iterations 53–59 — ✅ GroupBy, merge, str, dt, describe/quantile, csv I/O, json I/O (metrics 8–14)
 ### Iterations 1–52 — ✅ Foundation + earlier pandas features (old branches)
