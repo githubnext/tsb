@@ -66,6 +66,8 @@ export type {
 } from "./fillna.ts";
 export { cut, qcut, cutIntervalIndex, qcutIntervalIndex } from "./cut.ts";
 export type { CutOptions, QCutOptions } from "./cut.ts";
+export { sampleSeries, sampleDataFrame } from "./sample.ts";
+export type { SampleSeriesOptions, SampleDataFrameOptions } from "./sample.ts";
 export { describe, quantile } from "./describe.ts";
 export type { DescribeOptions } from "./describe.ts";
 export { pearsonCorr, dataFrameCorr, dataFrameCov } from "./corr.ts";
