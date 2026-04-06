@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T22:46:00Z |
-| Iteration Count | 111 |
-| Best Metric | 66 |
+| Last Run | 2026-04-06T23:25:00Z |
+| Iteration Count | 112 |
+| Best Metric | 67 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -23,22 +23,22 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
-
 ---
 
 ## 🎯 Current Priorities
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 66 files (iter 111). Next candidates:
+Now at 67 files (iter 112). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/stats/value_counts_full.ts` — enhanced value_counts with bins/normalize
+- `src/stats/wide_to_long_enhanced.ts` — wide_to_long with stubvar / i / j options
 - `src/core/where_searchsorted.ts` — index-based alignment helpers
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 112 (valueCountsBinned)**: Internally calls `cut(series, bins)` to get interval labels, then counts per label. `cutIntervalIndex` provides ordered labels for the count map. Sort by count (default) or by interval (sort=false). With `exactOptionalPropertyTypes`, pass `series.name` directly (not `?? undefined`). Dtype must be a `Dtype` instance not a string literal.
 - **Iter 111 (searchsorted)**: Binary search using bisect algorithm. `side="left"` stops at first `a[mid] >= v`; `side="right"` stops at first `a[mid] > v`. NaN treated as greater than all numbers (consistent ordering). `argsortScalars` produces the `sorter` permutation. Internal `bisect()` helper accepts a `get(i)` accessor, making `sorter` support zero-cost (just re-route the accessor). 44 unit tests + 4 property-based tests (insertion preserves sort, left≤right, result in [0,n], sorter≡presorted).
 - **Iter 110 (natsort)**: Tokenise strings into alternating text/digit chunks with regex `/(\d+)/g`. Digit tokens compare numerically; text tokens compare lexicographically (optionally case-folded). `natArgSort` pre-computes keys then sorts indices — avoids re-tokenising on every comparison. Property tests (anti-symmetry, permutation correctness, argSort≡sorted) catch corner cases effectively.
 - **Iter 109 (combine_first)**: `buildLabelMap(idx)` helper creates `Map<string, number[]>` for O(1) label lookup. `Index.union()` handles the index union cleanly. The key insight: check `isMissing(selfVal)` before falling back to `other`. DataFrame path iterates union rows × union cols — straightforward nested loop with per-column Series construction.
@@ -63,13 +63,21 @@ Now at 66 files (iter 111). Next candidates:
 
 ## 🔭 Future Directions
 
-**State (iter 111)**: 66 files. Next: io/read_excel (XLSX zero-dep) · stats/value_counts_full (bins/normalize) · core alignment helpers
+**State (iter 112)**: 67 files. Next: io/read_excel (XLSX zero-dep) · core/where_searchsorted alignment helpers
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 112 — 2026-04-06 23:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24055806100)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/value_counts_full.ts` — `valueCountsBinned(series, N)` mirroring `pandas.Series.value_counts(bins=N)`.
+- **Metric**: 67 (previous: 66, delta: +1)
+- **Commit**: 25e8549
+- **Notes**: Uses `cut()+cutIntervalIndex()` internally. Supports sort/ascending/normalize. NaN/null excluded. 22 unit tests + 4 property-based tests.
 
 ### Iteration 111 — 2026-04-06 22:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24054920717)
 
@@ -126,9 +134,5 @@ All iterations in reverse chronological order (newest first).
 - **Status**: ✅ Accepted | **Metric**: 58 (+1) | **Commit**: 945b4a5
 - **Change**: `src/core/assign.ts` — dataFrameAssign() with callable support.
 
-### Iters 99–102 — ✅ named_agg (57), select_dtypes (56), memory_usage (55), Timestamp (54)
-### Iters 95–98 — ✅ to_numeric (53), json_normalize (52), wide_to_long (51), crosstab (50)
-### Iters 87–94 — ✅ get_dummies (48), factorize (49), datetime_tz (47), numeric_ops/pow_mod/add_sub_mul_div (44→46), DateOffset (42), date_range (43)
-### Iters 73–86 — ✅ where_mask, compare, shift_diff, interpolate, fillna, Interval, cut/qcut, sample, apply, CategoricalIndex, pipe, Period, Timedelta (28→41)
-### Iters 53–72 — ✅ Foundation + GroupBy, merge, str, dt, describe, csv/json, corr, rolling, expanding, ewm, stack/unstack, melt/pivot, value_counts, MultiIndex (8→28)
+### Iters 53–102 — ✅ (metrics 8→57): named_agg, select_dtypes, memory_usage, Timestamp, to_numeric, json_normalize, wide_to_long, crosstab, get_dummies, factorize, datetime_tz, numeric_ops, DateOffset, date_range, where_mask, compare, shift_diff, interpolate, fillna, Interval, cut/qcut, sample, apply, CategoricalIndex, pipe, Period, Timedelta, Foundation+GroupBy+merge+str+dt+describe+csv/json+corr+rolling+expanding+ewm+stack/unstack+melt/pivot+value_counts+MultiIndex
 ### Iterations 1–52 — ✅ Earlier work on diverged branches
