@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T21:26:00Z |
-| Iteration Count | 108 |
-| Best Metric | 63 |
+| Last Run | 2026-04-06T21:46:00Z |
+| Iteration Count | 109 |
+| Best Metric | 64 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -30,15 +30,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 63 files (iter 108). Next candidates:
+Now at 64 files (iter 109). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/natsort.ts` — natural-sort for string indexes / columns
-- `src/stats/combine_first.ts` — patch missing values in one Series/DataFrame with another
+- `src/stats/value_counts_full.ts` — enhanced value_counts with bins/normalize
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 109 (combine_first)**: `buildLabelMap(idx)` helper creates `Map<string, number[]>` for O(1) label lookup. `Index.union()` handles the index union cleanly. The key insight: check `isMissing(selfVal)` before falling back to `other`. DataFrame path iterates union rows × union cols — straightforward nested loop with per-column Series construction.
 - **Iter 108 (dropna standalone)**: `dropna(series)` dispatches to `s.dropna()`. DataFrame path: `axis=0` pre-fetches column arrays into a `Map` for efficient row scanning. `how='all'` checks `nullCount < checkCols.length`. `thresh` checks `nonNullCount >= thresh`. `subset` filters columns before scanning. `axis=1` scans each column's values. `_selectRows()` builds a boolean mask via `Set<number>` then calls `df.filter()`. `_selectCols()` delegates to `df.select()`. Zero `as` casts needed. 44 tests (unit + property-based).
 - **Iter 107 (notna/isna)**: `SeriesOptions.name` is `string | null` (not `string | undefined`) — pass `s.name` directly. The `missing()` helper `v === null || v === undefined || (typeof v === 'number' && Number.isNaN(v))` is the canonical missing test. `isnull`/`notnull` are simple `const` aliases. DataFrame overload builds a `Map<string, Series<Scalar>>` with `df.index`.
 - **Iter 106 (infer_dtype)**: `inferDtype(values, {skipna})` uses `unknown[]` input type so specialised objects like `Timestamp`, `Timedelta`, `Period`, `Interval` pass type-checks. `skipna=true` skips nulls; when all non-null kinds form a Set of size 1 the output is deterministic.
@@ -67,6 +68,14 @@ Now at 63 files (iter 108). Next candidates:
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 109 — 2026-04-06 21:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24052777878)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/combine_first.ts` — `combineFirstSeries` and `combineFirstDataFrame` mirroring `pandas.Series.combine_first` / `pandas.DataFrame.combine_first`.
+- **Metric**: 64 (previous: 63, delta: +1)
+- **Commit**: 9d3fb42
+- **Notes**: `buildLabelMap` helper builds label→positions for O(1) lookup. Union index via `Index.union()`. Self values take priority; null/NaN/undefined treated as missing. 30+ unit tests + 3 property-based tests.
 
 ### Iteration 108 — 2026-04-06 21:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24051533428)
 
