@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-05T23:45:49Z |
-| Iteration Count | 77 |
-| Best Metric | 33 |
+| Last Run | 2026-04-06T00:29:00Z |
+| Iteration Count | 78 |
+| Best Metric | 34 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #54 |
@@ -39,15 +39,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 33 files (iter 77). Next candidates:
-- `src/core/interval.ts` — Interval / IntervalIndex
+Now at 34 files (iter 78). Next candidates:
 - `src/core/categorical_index.ts` — CategoricalIndex
-- `src/merge/concat.ts` — concat with axis=0/1, ignore_index, keys
+- `src/stats/cut.ts` — pd.cut() / pd.qcut() using IntervalIndex
+- `apply()`/`applymap()` — element-wise function application
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 78 (interval, 33→34)**: `Interval`/`IntervalIndex`. `Interval` is a simple value class: `left`, `right`, `closed` mode (`right`/`left`/`both`/`neither`), `contains()`, `overlaps()`, `length`, `mid`, `isEmpty`. `IntervalIndex` is a standalone class (not extending `Index<Label>`) with factory methods `fromBreaks`/`fromArrays`/`fromIntervals`. Key helpers: `pointInInterval`, `includesLeft`/`includesRight`, `bracketLeft`/`bracketRight`. `noUncheckedIndexedAccess` safe: always use `this.left[i] as number` after bounds checks. Overlap logic for adjacent intervals: check `right === other.left` and test both closures.
 - **Iter 77 (fillna, 32→33)**: `fillnaSeries`/`fillnaDataFrame`. Three fill strategies: scalar value (constant fill), `ColumnFillMap` (per-column scalars for DataFrame), `Series<Scalar>` (index labels matched to column names). Methods: `ffill`/`pad` (forward fill) and `bfill`/`backfill` (backward fill). `limit` caps consecutive fills per run. `axis=0/1` for DataFrame method fills. `isColumnFillMap` type guard distinguishes plain objects from Series/DataFrame. `isMissing` helper covers null/undefined/NaN. No dependency on `FillMethod` from types.ts (defined locally as `FillnaMethod` to avoid confusion).
 - **Iter 76 (interpolate, 31→32)**: `interpolateSeries`/`dataFrameInterpolate`. Methods: linear (interior-only), ffill/pad/zero (forward fill), bfill/backfill, nearest. `limit`/`limitDirection` parameters. Key lesson: linear fills ONLY interior gaps (between two known values), never leading/trailing — pandas convention. Helper functions `fillLinearGap`, `fillConstantRun`, `fillNearestGap` extracted to keep CC≤15. `assertNoMissingInRange` helper in test caused `noMisplacedAssertion` warning (acceptable false positive). `.at(-1)` for last-element access.
 - **Iter 75 (shift_diff, 30→31)**: `shiftSeries`/`diffSeries` and `dataFrameShift`/`dataFrameDiff`. `shiftVals` with separate positive/negative paths. `diffVals` supports positive/negative periods with `isFiniteNum` guard. Inline arrow functions need explicit return types (`(): Scalar[] =>`) for Biome `useExplicitType`. Property tests: length preserved; shift(n)+shift(-n) round-trips inner slice; shift fills nulls; diff equals current-previous for finite sequences.
@@ -71,9 +72,9 @@ Now at 33 files (iter 77). Next candidates:
 
 ## 🔭 Future Directions
 
-**Current state (iter 77)**: 33 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna.
+**Current state (iter 78)**: 34 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval.
 
-**Next**: Interval/IntervalIndex · CategoricalIndex · concat with axis/keys
+**Next**: CategoricalIndex · pd.cut()/pd.qcut() (using IntervalIndex) · apply()/applymap()
 
 ---
 
@@ -81,21 +82,16 @@ Now at 33 files (iter 77). Next candidates:
 
 All iterations in reverse chronological order (newest first).
 
-### Iteration 77 — 2026-04-05 23:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24013124690)
+### Iteration 78 — 2026-04-06 00:29 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24013890896)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `src/stats/fillna.ts` — `fillnaSeries`, `fillnaDataFrame`. Scalar, ColumnFillMap, Series fill values; ffill/pad and bfill/backfill methods; `limit` and `axis` options.
-- **Metric**: 33 (previous: 32, delta: +1)
-- **Commit**: c6d0b5e
-- **Notes**: `isColumnFillMap` type guard distinguishes plain objects from Series. `fillForward`/`fillBackward` helpers keep CC≤15. 35+ tests including property-based tests verifying correctness of fill values.
+- **Change**: Added `src/core/interval.ts` — `Interval` and `IntervalIndex` mirroring `pandas.Interval`/`pandas.IntervalIndex`.
+- **Metric**: 34 (previous: 33, delta: +1)
+- **Commit**: f90a171
+- **Notes**: `Interval` supports 4 closure modes; `IntervalIndex` provides `fromBreaks()`, `get_loc()` for bin lookup, `contains()`, `overlaps()`, `filter()`, `rename()`, monotonicity checks. 60+ tests.
 
-### Iteration 76 — 2026-04-05 23:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24012563442)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/interpolate.ts` — `interpolateSeries`, `dataFrameInterpolate`. Linear (interior-only), ffill/pad/zero, bfill/backfill, nearest methods with `limit`/`limitDirection` parameters.
-- **Metric**: 32 (previous: 31, delta: +1)
-- **Commit**: 6d87858
-- **Notes**: Linear only fills interior gaps (between two known values); leading/trailing left as-is. Helper extraction (`fillLinearGap`, `fillConstantRun`, `fillNearestGap`) keeps CC≤15. 39 tests pass including property-based tests.
+### Iteration 77 — 2026-04-05 23:45 UTC — ✅ fillna (32→33) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24013124690)
+### Iteration 76 — 2026-04-05 23:11 UTC — ✅ interpolate (31→32) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24012563442)
 
 ### Iteration 75 — 2026-04-05 22:50 UTC — ✅ shift_diff (30→31) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24012145919)
 ### Iteration 74 — 2026-04-05 22:09 UTC — ✅ compare (29→30) — [Run](https://github.com/githubnext/tsessebe/actions/runs/24011536762)
