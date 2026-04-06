@@ -147,3 +147,5 @@ export type {
 } from "./stats/index.ts";
 export { Interval, IntervalIndex } from "./core/index.ts";
 export type { IntervalClosed, IntervalIndexOptions } from "./core/index.ts";
+export { cut, qcut, cutIntervalIndex, qcutIntervalIndex } from "./stats/index.ts";
+export type { CutOptions, QCutOptions } from "./stats/index.ts";
