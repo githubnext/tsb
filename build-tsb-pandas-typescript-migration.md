@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T22:13:00Z |
-| Iteration Count | 110 |
-| Best Metric | 65 |
+| Last Run | 2026-04-06T22:46:00Z |
+| Iteration Count | 111 |
+| Best Metric | 66 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -30,15 +30,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 65 files (iter 110). Next candidates:
+Now at 66 files (iter 111). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/stats/value_counts_full.ts` — enhanced value_counts with bins/normalize
-- `src/core/searchsorted.ts` — binary search on sorted Index/array
+- `src/core/where_searchsorted.ts` — index-based alignment helpers
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 111 (searchsorted)**: Binary search using bisect algorithm. `side="left"` stops at first `a[mid] >= v`; `side="right"` stops at first `a[mid] > v`. NaN treated as greater than all numbers (consistent ordering). `argsortScalars` produces the `sorter` permutation. Internal `bisect()` helper accepts a `get(i)` accessor, making `sorter` support zero-cost (just re-route the accessor). 44 unit tests + 4 property-based tests (insertion preserves sort, left≤right, result in [0,n], sorter≡presorted).
 - **Iter 110 (natsort)**: Tokenise strings into alternating text/digit chunks with regex `/(\d+)/g`. Digit tokens compare numerically; text tokens compare lexicographically (optionally case-folded). `natArgSort` pre-computes keys then sorts indices — avoids re-tokenising on every comparison. Property tests (anti-symmetry, permutation correctness, argSort≡sorted) catch corner cases effectively.
 - **Iter 109 (combine_first)**: `buildLabelMap(idx)` helper creates `Map<string, number[]>` for O(1) label lookup. `Index.union()` handles the index union cleanly. The key insight: check `isMissing(selfVal)` before falling back to `other`. DataFrame path iterates union rows × union cols — straightforward nested loop with per-column Series construction.
 - **Iter 108 (dropna standalone)**: `dropna(series)` dispatches to `s.dropna()`. DataFrame path: `axis=0` pre-fetches column arrays into a `Map` for efficient row scanning. `how='all'` checks `nullCount < checkCols.length`. `thresh` checks `nonNullCount >= thresh`. `subset` filters columns before scanning. `axis=1` scans each column's values. `_selectRows()` builds a boolean mask via `Set<number>` then calls `df.filter()`. `_selectCols()` delegates to `df.select()`. Zero `as` casts needed. 44 tests (unit + property-based).
@@ -62,13 +63,21 @@ Now at 65 files (iter 110). Next candidates:
 
 ## 🔭 Future Directions
 
-**State (iter 108)**: 63 files. Next: io/read_excel (XLSX zero-dep) · core/natsort (natural-sort for string indexes) · stats/combine_first (patch missing values between two Series/DataFrames)
+**State (iter 111)**: 66 files. Next: io/read_excel (XLSX zero-dep) · stats/value_counts_full (bins/normalize) · core alignment helpers
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 111 — 2026-04-06 22:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24054920717)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/searchsorted.ts` — `searchsorted`, `searchsortedMany`, `argsortScalars` mirroring `numpy.searchsorted` / `pandas.Index.searchsorted`.
+- **Metric**: 66 (previous: 65, delta: +1)
+- **Commit**: 2ad0e89
+- **Notes**: Bisect algorithm with `side="left"|"right"`. `sorter` support via `get(i)` accessor abstraction. Default comparator handles null/NaN/mixed types. 44 unit tests + 4 property tests.
 
 ### Iteration 110 — 2026-04-06 22:13 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24053743467)
 
