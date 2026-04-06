@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T16:48:24Z |
-| Iteration Count | 99 |
-| Best Metric | 54 |
+| Last Run | 2026-04-06T17:19:26Z |
+| Iteration Count | 100 |
+| Best Metric | 55 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -35,15 +35,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 54 files (iter 99). Next candidates:
+Now at 55 files (iter 100). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/stats/memory_usage.ts` — pd.DataFrame.memory_usage / Series.memory_usage
 - `src/core/named_agg.ts` — NamedAgg for GroupBy
+- `src/stats/select_dtypes.ts` — DataFrame.select_dtypes()
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 100 (memory_usage, 54→55)**: RangeIndex cost is constant 24 bytes (only start/stop/step). Variable-width dtypes use POINTER_SIZE=8 bytes/element shallow; deep=true uses `length*2+56` for strings (UTF-16 + V8 overhead). Returns `Series<number>` indexed by `["Index", ...colNames]`. 36 tests.
 - **Iter 99 (Timestamp, 53→54)**: Used `RawTimestamp` sentinel class for internal construction (avoids `Object.assign` + `Object.create` which breaks JS `#` private fields). TypeScript `private` keyword used for `_cachedParts` lazy compute. `getLocalParts()` uses `Intl.DateTimeFormat formatToParts` for tz-aware component extraction. `wallClockToUtc` uses two-step offset refinement for DST safety. `freqMs()` dispatches string freq aliases to ms values for floor/ceil/round. 134 unit + property tests.
 - **Iter 98 (to_numeric, 52→53)**: `tryConvert(v)` returns `{ok,value}` discriminated union. `Number(trimmed)` handles Infinity/-Infinity/hex. `"NaN"|"nan"|"NAN"` special-cased separately (Number("NaN") returns NaN which is fine, but guarding the empty-string case avoids false NaN for ""). `applyDowncast` handles float32 via `Float32Array` round-trip. Signed downcast uses `n | 0` (only for 32-bit range). Three overloads: scalar, array, Series. The `T extends Scalar` constraint is required on overloads or TypeScript can't verify `Series<number | T>` is valid.
 - **Iter 97 (json_normalize, 51→52)**: `jsonNormalize` uses recursive `flattenObject(obj, sep, maxLevel, prefix, depth)`. `getPath(obj, path[])` traverses nested keys. `normalizeWithPath` handles `recordPath` + meta extraction. Meta values from parent record are replicated to each child row. `toPathArray` normalizes `string | readonly string[]` paths. Arrays at leaf positions are JSON-stringified. Column insertion order is first-seen (union across all rows). Missing columns in any row get `null`. `rows ??= []` handles the edge case after chained intermediate path extraction.
@@ -69,15 +70,23 @@ Now at 54 files (iter 99). Next candidates:
 
 ## 🔭 Future Directions
 
-**Current state (iter 99)**: 54 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, io/json_normalize, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, reshape/wide_to_long, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut, stats/sample, stats/apply, core/categorical_index, stats/pipe, core/period, core/timedelta, core/date_offset, core/date_range, stats/numeric_ops, stats/pow_mod, stats/add_sub_mul_div, core/datetime_tz, stats/get_dummies, stats/factorize, stats/crosstab, stats/to_numeric, core/timestamp.
+**Current state (iter 100)**: 55 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, io/json_normalize, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, reshape/wide_to_long, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut, stats/sample, stats/apply, core/categorical_index, stats/pipe, core/period, core/timedelta, core/date_offset, core/date_range, stats/numeric_ops, stats/pow_mod, stats/add_sub_mul_div, core/datetime_tz, stats/get_dummies, stats/factorize, stats/crosstab, stats/to_numeric, core/timestamp, stats/memory_usage.
 
-**Next**: io/read_excel (XLSX zero-dep) · stats/memory_usage · core/named_agg
+**Next**: io/read_excel (XLSX zero-dep) · core/named_agg · stats/select_dtypes
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 100 — 2026-04-06 17:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24042025179)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/memory_usage.ts` — `seriesMemoryUsage` and `dataFrameMemoryUsage` mirroring `pandas.Series.memory_usage()` / `pandas.DataFrame.memory_usage()`.
+- **Metric**: 55 (previous: 54, delta: +1)
+- **Commit**: b76afce
+- **Notes**: RangeIndex cost is constant 24 bytes (only start/stop/step stored). Variable-width dtypes use POINTER_SIZE=8 bytes per element when shallow, actual string char data (length×2+56 overhead) when deep=true. 36 unit + property tests.
 
 ### Iteration 99 — 2026-04-06 16:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24040855852)
 
