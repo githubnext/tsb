@@ -159,3 +159,10 @@ export type { MemoryUsageOptions } from "./memory_usage.ts";
 
 export { selectDtypes } from "./select_dtypes.ts";
 export type { DtypeSelector, SelectDtypesOptions } from "./select_dtypes.ts";
+
+export { clipSeriesWithBounds, clipDataFrameWithBounds } from "./clip_with_bounds.ts";
+export type {
+  BoundArg,
+  SeriesClipBoundsOptions,
+  DataFrameClipBoundsOptions,
+} from "./clip_with_bounds.ts";

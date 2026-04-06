@@ -249,6 +249,12 @@ export { seriesMemoryUsage, dataFrameMemoryUsage } from "./stats/index.ts";
 export type { MemoryUsageOptions } from "./stats/index.ts";
 export { selectDtypes } from "./stats/index.ts";
 export type { DtypeSelector, SelectDtypesOptions } from "./stats/index.ts";
+export { clipSeriesWithBounds, clipDataFrameWithBounds } from "./stats/index.ts";
+export type {
+  BoundArg,
+  SeriesClipBoundsOptions,
+  DataFrameClipBoundsOptions,
+} from "./stats/index.ts";
 export { Timestamp } from "./core/index.ts";
 export type { TimestampOptions, TimestampComponents, TimestampUnit } from "./core/index.ts";
 export { dataFrameAssign } from "./core/index.ts";
