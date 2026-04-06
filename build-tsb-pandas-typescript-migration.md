@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T16:18:24Z |
-| Iteration Count | 98 |
-| Best Metric | 53 |
+| Last Run | 2026-04-06T16:48:24Z |
+| Iteration Count | 99 |
+| Best Metric | 54 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -35,15 +35,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 53 files (iter 98). Next candidates:
+Now at 54 files (iter 99). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/core/timestamp.ts` — pandas Timestamp class
 - `src/stats/memory_usage.ts` — pd.DataFrame.memory_usage / Series.memory_usage
+- `src/core/named_agg.ts` — NamedAgg for GroupBy
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 99 (Timestamp, 53→54)**: Used `RawTimestamp` sentinel class for internal construction (avoids `Object.assign` + `Object.create` which breaks JS `#` private fields). TypeScript `private` keyword used for `_cachedParts` lazy compute. `getLocalParts()` uses `Intl.DateTimeFormat formatToParts` for tz-aware component extraction. `wallClockToUtc` uses two-step offset refinement for DST safety. `freqMs()` dispatches string freq aliases to ms values for floor/ceil/round. 134 unit + property tests.
 - **Iter 98 (to_numeric, 52→53)**: `tryConvert(v)` returns `{ok,value}` discriminated union. `Number(trimmed)` handles Infinity/-Infinity/hex. `"NaN"|"nan"|"NAN"` special-cased separately (Number("NaN") returns NaN which is fine, but guarding the empty-string case avoids false NaN for ""). `applyDowncast` handles float32 via `Float32Array` round-trip. Signed downcast uses `n | 0` (only for 32-bit range). Three overloads: scalar, array, Series. The `T extends Scalar` constraint is required on overloads or TypeScript can't verify `Series<number | T>` is valid.
 - **Iter 97 (json_normalize, 51→52)**: `jsonNormalize` uses recursive `flattenObject(obj, sep, maxLevel, prefix, depth)`. `getPath(obj, path[])` traverses nested keys. `normalizeWithPath` handles `recordPath` + meta extraction. Meta values from parent record are replicated to each child row. `toPathArray` normalizes `string | readonly string[]` paths. Arrays at leaf positions are JSON-stringified. Column insertion order is first-seen (union across all rows). Missing columns in any row get `null`. `rows ??= []` handles the edge case after chained intermediate path extraction.
 - **Iter 96 (wide_to_long, 50→51)**: `wideToLong` uses per-stub precompiled regexes (`buildStubRegex`). `escapeRegex` guards against special chars in stub/sep. Suffix ordering is first-seen from left-to-right column scan. Missing stub×suffix combinations fill with `null`. `parseSuffix` returns `number` for purely numeric suffixes (`/^-?\d+(\.\d+)?$/`), else `string`. The `j` conflict check allows `j === stubname` (stub overwritten) but rejects clashes with unrelated existing columns.
@@ -68,9 +69,9 @@ Now at 53 files (iter 98). Next candidates:
 
 ## 🔭 Future Directions
 
-**Current state (iter 98)**: 53 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, io/json_normalize, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, reshape/wide_to_long, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut, stats/sample, stats/apply, core/categorical_index, stats/pipe, core/period, core/timedelta, core/date_offset, core/date_range, stats/numeric_ops, stats/pow_mod, stats/add_sub_mul_div, core/datetime_tz, stats/get_dummies, stats/factorize, stats/crosstab, stats/to_numeric.
+**Current state (iter 99)**: 54 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, io/json_normalize, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, reshape/wide_to_long, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut, stats/sample, stats/apply, core/categorical_index, stats/pipe, core/period, core/timedelta, core/date_offset, core/date_range, stats/numeric_ops, stats/pow_mod, stats/add_sub_mul_div, core/datetime_tz, stats/get_dummies, stats/factorize, stats/crosstab, stats/to_numeric, core/timestamp.
 
-**Next**: io/read_excel (XLSX zero-dep) · core/timestamp (pandas Timestamp class) · stats/memory_usage
+**Next**: io/read_excel (XLSX zero-dep) · stats/memory_usage · core/named_agg
 
 ---
 
@@ -78,30 +79,22 @@ Now at 53 files (iter 98). Next candidates:
 
 All iterations in reverse chronological order (newest first).
 
+### Iteration 99 — 2026-04-06 16:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24040855852)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/timestamp.ts` — `Timestamp` class mirroring `pandas.Timestamp` with full datetime scalar API.
+- **Metric**: 54 (previous: 53, delta: +1)
+- **Commit**: 42be823
+- **Notes**: `RawTimestamp` sentinel for internal construction avoids JS `#` field breakage with `Object.create`. `Intl.DateTimeFormat` for tz-aware component extraction. Two-step DST offset refinement for `wallClockToUtc`. 134 unit + property tests pass.
+
 ### Iteration 98 — 2026-04-06 16:18 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24039749079)
 
 - **Status**: ✅ Accepted
 - **Change**: Added `src/stats/to_numeric.ts` — `toNumeric(arg, opts?)` coerces scalars/arrays/Series to numeric types, mirroring `pandas.to_numeric()`.
 - **Metric**: 53 (previous: 52, delta: +1)
 - **Commit**: 70e1aeb
-- **Notes**: `errors: "raise"|"coerce"|"ignore"` and `downcast: "integer"|"unsigned"|"float"`. Conversion: strings via `Number()`, booleans → 0/1, bigints → Number(), null/undefined → NaN. 47 unit + property tests. `T extends Scalar` constraint required on generic overloads.
 
-### Iteration 97 — 2026-04-06 15:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24038653649)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/io/json_normalize.ts` — `jsonNormalize(data, options?)` to flatten nested JSON to a flat DataFrame, mirroring `pandas.json_normalize()`.
-- **Metric**: 52 (previous: 51, delta: +1)
-- **Commit**: c74a398
-- **Notes**: Recursive `flattenObject` with `maxLevel` depth guard. `recordPath` drills into nested arrays; `meta` replicates parent fields to each child row. Arrays at leaf positions stringify to JSON. 35+ unit + 4 property tests. Full playground page.
-
-### Iteration 96 — 2026-04-06 15:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24037601583)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/reshape/wide_to_long.ts` — `wideToLong(df, stubnames, i, j, options?)` for stub-based wide-to-long reshape mirroring `pandas.wide_to_long()`.
-- **Metric**: 51 (previous: 50, delta: +1)
-- **Commit**: a9a1db5
-- **Notes**: Groups related stub columns (A1, A2, B1, B2 → stubs A, B) into long format with j column for suffixes. Supports sep, custom suffix regex, regex-safe escaping, null-fill for missing combos. 30+ unit + 4 property tests.
-
+### Iters 96–97 — ✅ wide_to_long (50→51), json_normalize (51→52)
 ### Iters 92–95 — ✅ datetime_tz (46→47), get_dummies (47→48), factorize (48→49), crosstab (49→50)
 ### Iters 87–91 — ✅ DateOffset (41→42), date_range/DatetimeIndex (42→43), numeric_ops (43→44), pow_mod (44→45), add_sub_mul_div (45→46)
 ### Iters 73–86 — ✅ where_mask, compare, shift_diff, interpolate, fillna, Interval, cut/qcut, sample, apply, CategoricalIndex, pipe, Period, Timedelta, DateOffset (28→41)
