@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T00:29:00Z |
-| Iteration Count | 78 |
-| Best Metric | 34 |
+| Last Run | 2026-04-06T01:06:56Z |
+| Iteration Count | 79 |
+| Best Metric | 35 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #54 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -39,28 +39,23 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch `autoloop/build-tsb-pandas-typescript-migration` from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 34 files (iter 78). Next candidates:
+Now at 35 files (iter 79). Next candidates:
 - `src/core/categorical_index.ts` — CategoricalIndex
-- `src/stats/cut.ts` — pd.cut() / pd.qcut() using IntervalIndex
-- `apply()`/`applymap()` — element-wise function application
+- `apply()`/`applymap()` — element-wise function application on Series/DataFrame
 
 ---
 
 ## 📚 Lessons Learned
 
-- **Iter 78 (interval, 33→34)**: `Interval`/`IntervalIndex`. `Interval` is a simple value class: `left`, `right`, `closed` mode (`right`/`left`/`both`/`neither`), `contains()`, `overlaps()`, `length`, `mid`, `isEmpty`. `IntervalIndex` is a standalone class (not extending `Index<Label>`) with factory methods `fromBreaks`/`fromArrays`/`fromIntervals`. Key helpers: `pointInInterval`, `includesLeft`/`includesRight`, `bracketLeft`/`bracketRight`. `noUncheckedIndexedAccess` safe: always use `this.left[i] as number` after bounds checks. Overlap logic for adjacent intervals: check `right === other.left` and test both closures.
-- **Iter 77 (fillna, 32→33)**: `fillnaSeries`/`fillnaDataFrame`. Three fill strategies: scalar value (constant fill), `ColumnFillMap` (per-column scalars for DataFrame), `Series<Scalar>` (index labels matched to column names). Methods: `ffill`/`pad` (forward fill) and `bfill`/`backfill` (backward fill). `limit` caps consecutive fills per run. `axis=0/1` for DataFrame method fills. `isColumnFillMap` type guard distinguishes plain objects from Series/DataFrame. `isMissing` helper covers null/undefined/NaN. No dependency on `FillMethod` from types.ts (defined locally as `FillnaMethod` to avoid confusion).
-- **Iter 76 (interpolate, 31→32)**: `interpolateSeries`/`dataFrameInterpolate`. Methods: linear (interior-only), ffill/pad/zero (forward fill), bfill/backfill, nearest. `limit`/`limitDirection` parameters. Key lesson: linear fills ONLY interior gaps (between two known values), never leading/trailing — pandas convention. Helper functions `fillLinearGap`, `fillConstantRun`, `fillNearestGap` extracted to keep CC≤15. `assertNoMissingInRange` helper in test caused `noMisplacedAssertion` warning (acceptable false positive). `.at(-1)` for last-element access.
-- **Iter 75 (shift_diff, 30→31)**: `shiftSeries`/`diffSeries` and `dataFrameShift`/`dataFrameDiff`. `shiftVals` with separate positive/negative paths. `diffVals` supports positive/negative periods with `isFiniteNum` guard. Inline arrow functions need explicit return types (`(): Scalar[] =>`) for Biome `useExplicitType`. Property tests: length preserved; shift(n)+shift(-n) round-trips inner slice; shift fills nulls; diff equals current-previous for finite sequences.
-- **Iter 74 (compare, 29→30)**: `seriesEq`/`seriesNe`/`seriesLt`/`seriesGt`/`seriesLe`/`seriesGe` and DataFrame counterparts. `compareScalars` dispatch fn with `isComparable` guard. Returns `Scalar[]` (not `boolean[]`) so constructor types align. Property tests: lt+ge and gt+le partition every finite-numeric element (exactly one true, no overlap, no gap). Missing values (null/NaN) always yield false, matching pandas NaN convention.
-- **Iter 73 (where/mask, 28→29)**: `whereSeries`/`maskSeries`/`whereDataFrame`/`maskDataFrame`. Three condition types: element-wise predicate, boolean `Series`/array, boolean `DataFrame`. `applyCondition` shared helper with `keepWhenTrue` flag. `resolveSeriesCond` + `resolveDataFrameCond` dispatch functions. Missing column in cond-DataFrame defaults all-false. Property test: `where` + `mask` partition every element (exactly one keeps original).
-- **Iter 72 (value_counts, 27→28)**: `valueCounts`/`dataFrameValueCounts` as standalone stat functions. `scalarKey` mapper for stable Map keys. `buildCountMap` uses `Map<key,{label,count}>`. `df.get(name)` not `df.tryCol()`. `import type` for type-only imports. Biome: `as number` not `!` for non-null assertions. Wire barrel exports in same commit.
-- **Iter 71 (elem_ops, 26→27)**: `mapNumeric` helper + `makeClipFn`/`makeRoundFn` closures. `Number.NEGATIVE_INFINITY`/`Number.POSITIVE_INFINITY` not bare `Infinity`. Named exports `seriesAbs`/`seriesRound` avoid collision with built-ins. `colWiseElem` for DataFrame column-wise transforms.
-- **Iter 70 (cum_ops, 25→26)**: `cumulateNum`/`cumulateSc` helpers. `poisoned` flag for skipna=false. `isFiniteNum`/`isNonNull` type guards. `Number.NaN`, `vals.at(-1)`.
-- **Iters 67–69**: `nlargest`/`nsmallest`/`rank`/`MultiIndex` as standalone stat functions. CC≤15 by extracting helpers. `noUncheckedIndexedAccess`: check `Map.get()` before use. `Array.from({length:n},(_, i)=>i)` for row indices. `cartesianProduct` with backward loop not `reduceRight`.
-- **Iters 63–66**: EWM online algorithm O(n). `buildCellMap`+`buildOutputCols` for CC. `CatHolder` preserves metadata. `noNestedTernary` → explicit if/else. `**` not `Math.pow`. Shorthand assignments `*=`.
-- **Iters 57–62**: `RollingSeriesLike`/`ExpandingSeriesLike`/`EwmSeriesLike` interfaces avoid circular imports. `.values[i]` positional (not `.at()`). `getProp(obj,key)` for index-signature access. `noNonNullAssertion`: `as number` not `!`. `useBlockStatements`: wrap single-line `if`.
-- **Iters 53–56**: Accessor `*SeriesLike` pattern. Top-level regex. Barrel files for `useImportRestrictions`. `import type` for type-only imports. `useForOf` where index not needed.
+- **Iter 79 (cut/qcut, 34→35)**: Import from `"../core/index.ts"` barrel (not sub-files) for `useImportRestrictions`. `extractName()` must return `string | null` not `string | undefined` (exactOptionalPropertyTypes). Top-level regex vars required (`useTopLevelRegex`). Shared `cutCore()` + `assignBins()` + `resolveLabels()` keep CC≤15. `cutIntervalIndex()`/`qcutIntervalIndex()` expose bins for downstream use.
+- **Iter 78 (interval, 33→34)**: `IntervalIndex` standalone class (not extending `Index<Label>`). `noUncheckedIndexedAccess`: `this.left[i] as number` after bounds check. Overlap: check `right===other.left` and test both closures.
+- **Iters 73–77**: fillna (3 strategies: scalar/ColumnFillMap/Series), interpolate (linear=interior only), shift/diff, compare (NaN→false), where/mask (partition property).
+- **Iter 72 (value_counts, 27→28)**: `scalarKey` for stable Map keys. `df.get(name)` not `df.tryCol()`. `import type` for type-only. Biome: `as number` not `!`.
+- **Iters 70–71**: `mapNumeric`/`makeClipFn`. `Number.NEGATIVE_INFINITY`/`Number.POSITIVE_INFINITY`. `cumulateNum`/`cumulateSc` + `poisoned` flag for skipna=false.
+- **Iters 67–69**: CC≤15 by extracting helpers. `Array.from({length:n},(_, i)=>i)`. `cartesianProduct` backward loop.
+- **Iters 63–66**: EWM online O(n). `buildCellMap`+`buildOutputCols`. `noNestedTernary`→if/else. `**` not `Math.pow`.
+- **Iters 57–62**: `*SeriesLike` interfaces avoid circular imports. `getProp(obj,key)` for index-sig. `as number` not `!`. `useBlockStatements`.
+- **Iters 53–56**: Barrel files for `useImportRestrictions`. `import type`. `useForOf`. Top-level regex.
 
 ---
 
@@ -72,15 +67,23 @@ Now at 34 files (iter 78). Next candidates:
 
 ## 🔭 Future Directions
 
-**Current state (iter 78)**: 34 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval.
+**Current state (iter 79)**: 35 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut.
 
-**Next**: CategoricalIndex · pd.cut()/pd.qcut() (using IntervalIndex) · apply()/applymap()
+**Next**: CategoricalIndex · apply()/applymap()
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 79 — 2026-04-06 01:06 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24014588932)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/cut.ts` — `cut()` and `qcut()` mirroring `pandas.cut()`/`pandas.qcut()`.
+- **Metric**: 35 (previous: 34, delta: +1)
+- **Commit**: b93bc25
+- **Notes**: Equal-width and quantile binning; custom labels, integer codes; includeLowest; duplicates="drop"; cutIntervalIndex()/qcutIntervalIndex() helpers. 30+ tests plus property-based tests.
 
 ### Iteration 78 — 2026-04-06 00:29 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24013890896)
 
