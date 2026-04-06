@@ -68,6 +68,8 @@ export { cut, qcut, cutIntervalIndex, qcutIntervalIndex } from "./cut.ts";
 export type { CutOptions, QCutOptions } from "./cut.ts";
 export { sampleSeries, sampleDataFrame } from "./sample.ts";
 export type { SampleSeriesOptions, SampleDataFrameOptions } from "./sample.ts";
+export { applySeries, applymap, dataFrameApply } from "./apply.ts";
+export type { DataFrameApplyOptions } from "./apply.ts";
 export { describe, quantile } from "./describe.ts";
 export type { DescribeOptions } from "./describe.ts";
 export { pearsonCorr, dataFrameCorr, dataFrameCov } from "./corr.ts";
