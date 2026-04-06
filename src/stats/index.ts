@@ -140,3 +140,6 @@ export {
   dataFrameDiv,
   dataFrameRdiv,
 } from "./add_sub_mul_div.ts";
+
+export { getDummies, dataFrameGetDummies } from "./get_dummies.ts";
+export type { GetDummiesOptions, DataFrameGetDummiesOptions } from "./get_dummies.ts";

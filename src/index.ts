@@ -231,3 +231,5 @@ export {
   dataFrameDiv,
   dataFrameRdiv,
 } from "./stats/index.ts";
+export { getDummies, dataFrameGetDummies } from "./stats/index.ts";
+export type { GetDummiesOptions, DataFrameGetDummiesOptions } from "./stats/index.ts";
