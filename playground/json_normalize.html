@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb · json_normalize</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --surface: #161b22;
+        --border: #30363d;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --accent: #58a6ff;
+        --green: #3fb950;
+        --yellow: #d29922;
+        --red: #f85149;
+        --code-bg: #1f2937;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; }
+      header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+      header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+      header h1 { font-size: 1.4rem; font-weight: 600; }
+      main { max-width: 900px; margin: 0 auto; padding: 2rem; }
+      section { margin-bottom: 2.5rem; }
+      h2 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+      p { margin-bottom: 0.75rem; color: var(--muted); font-size: 0.95rem; }
+      code { background: var(--code-bg); padding: 0.1em 0.4em; border-radius: 4px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.88em; }
+      pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.85rem; font-family: "SFMono-Regular", Consolas, monospace; line-height: 1.5; }
+      .playground { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+      .field-row { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+      label { font-size: 0.88rem; color: var(--muted); }
+      textarea, input[type="text"] { background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.85rem; padding: 0.5rem; width: 100%; }
+      textarea { min-height: 120px; resize: vertical; }
+      button { background: var(--accent); color: #0d1117; border: none; border-radius: 4px; padding: 0.5rem 1.2rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+      button:hover { opacity: 0.85; }
+      .output { margin-top: 1rem; min-height: 60px; }
+      .output.error { color: var(--red); font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
+      table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+      th { background: var(--code-bg); color: var(--accent); padding: 0.4rem 0.6rem; text-align: left; border: 1px solid var(--border); }
+      td { padding: 0.35rem 0.6rem; border: 1px solid var(--border); }
+      tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="index.html">← tsb</a>
+      <h1>json_normalize</h1>
+    </header>
+    <main>
+
+      <section>
+        <h2>Overview</h2>
+        <p>
+          <code>jsonNormalize(data, options?)</code> flattens semi-structured (nested) JSON into
+          a flat <code>DataFrame</code> — mirroring <code>pandas.json_normalize()</code>.
+        </p>
+        <p>Key options:</p>
+        <ul style="color:var(--muted);font-size:0.95rem;padding-left:1.5rem;margin-bottom:0.75rem;">
+          <li><code>sep</code> — separator for nested key paths (default <code>"."</code>)</li>
+          <li><code>recordPath</code> — path to a nested array of child records</li>
+          <li><code>meta</code> — parent fields to attach to every child row</li>
+          <li><code>metaPrefix</code> / <code>recordPrefix</code> — column prefixes</li>
+          <li><code>maxLevel</code> — limit nesting depth</li>
+          <li><code>errors</code> — <code>"raise"</code> (default) or <code>"ignore"</code> for missing meta keys</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Example 1 — flatten nested dicts</h2>
+        <pre>import { jsonNormalize } from "tsb";
+
+const data = [
+  { id: 1, info: { name: "Alice", city: "NY" } },
+  { id: 2, info: { name: "Bob",   city: "LA" } },
+];
+
+const df = jsonNormalize(data);
+// id  info.name  info.city
+// 1   Alice      NY
+// 2   Bob        LA</pre>
+      </section>
+
+      <section>
+        <h2>Example 2 — recordPath + meta</h2>
+        <pre>const orders = [
+  { orderId: "A1", customer: "Alice", items: [{ sku: "X", qty: 2 }, { sku: "Y", qty: 1 }] },
+  { orderId: "B2", customer: "Bob",   items: [{ sku: "Z", qty: 5 }] },
+];
+
+const df = jsonNormalize(orders, {
+  recordPath: "items",
+  meta: ["orderId", "customer"],
+});
+// sku  qty  orderId  customer
+// X    2    A1       Alice
+// Y    1    A1       Alice
+// Z    5    B2       Bob</pre>
+      </section>
+
+      <section>
+        <h2>Example 3 — maxLevel</h2>
+        <pre>const data = [{ a: { b: { c: { d: 99 } } } }];
+
+jsonNormalize(data, { maxLevel: 1 });
+// a.b  →  {"c":{"d":99}}   (depth 2 is not expanded)</pre>
+      </section>
+
+      <section>
+        <h2>Interactive playground</h2>
+        <div class="playground">
+          <div class="field-row">
+            <label>JSON input (array of objects or single object)</label>
+            <textarea id="json-input">[
+  { "id": 1, "name": "Alice", "address": { "city": "NY", "zip": "10001" } },
+  { "id": 2, "name": "Bob",   "address": { "city": "LA", "zip": "90001" } }
+]</textarea>
+          </div>
+          <div class="field-row">
+            <label>recordPath (optional, e.g. <code>items</code> or <code>a.b</code> for nested)</label>
+            <input type="text" id="record-path" placeholder="leave blank for flat normalization" />
+          </div>
+          <div class="field-row">
+            <label>meta fields (comma-separated, e.g. <code>id,name</code>)</label>
+            <input type="text" id="meta-fields" placeholder="leave blank" />
+          </div>
+          <div class="field-row">
+            <label>sep (separator for nested keys, default <code>.</code>)</label>
+            <input type="text" id="sep" value="." style="width:4rem" />
+          </div>
+          <div class="field-row">
+            <label>maxLevel (blank = unlimited)</label>
+            <input type="text" id="max-level" placeholder="blank = unlimited" style="width:6rem" />
+          </div>
+          <button onclick="runExample()">Normalize →</button>
+          <div class="output" id="output"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <script type="module">
+      import { jsonNormalize } from "./tsb.js";
+
+      function dfToTable(df) {
+        const cols = [...df.columns.values];
+        if (cols.length === 0) return "<em style='color:var(--muted)'>empty DataFrame</em>";
+        let html = "<table><tr>";
+        for (const c of cols) html += `<th>${c}</th>`;
+        html += "</tr>";
+        const nRows = df.shape[0];
+        for (let r = 0; r < nRows; r++) {
+          html += "<tr>";
+          for (const c of cols) {
+            const v = df.col(c).values[r];
+            html += `<td>${v === null || v === undefined ? "<em style='color:var(--muted)'>null</em>" : v}</td>`;
+          }
+          html += "</tr>";
+        }
+        html += "</table>";
+        return html;
+      }
+
+      window.runExample = function () {
+        const out = document.getElementById("output");
+        try {
+          const rawJson = document.getElementById("json-input").value.trim();
+          const recordPathRaw = document.getElementById("record-path").value.trim();
+          const metaRaw = document.getElementById("meta-fields").value.trim();
+          const sep = document.getElementById("sep").value || ".";
+          const maxLevelRaw = document.getElementById("max-level").value.trim();
+
+          const data = JSON.parse(rawJson);
+          const opts = { sep };
+
+          if (recordPathRaw) {
+            const parts = recordPathRaw.split(".");
+            opts.recordPath = parts.length === 1 ? parts[0] : parts;
+          }
+          if (metaRaw) {
+            opts.meta = metaRaw.split(",").map(s => s.trim()).filter(Boolean);
+          }
+          if (maxLevelRaw !== "") {
+            const n = parseInt(maxLevelRaw, 10);
+            if (!isNaN(n)) opts.maxLevel = n;
+          }
+
+          const df = jsonNormalize(data, opts);
+          out.className = "output";
+          out.innerHTML = dfToTable(df);
+        } catch (e) {
+          out.className = "output error";
+          out.textContent = String(e);
+        }
+      };
+    </script>
+  </body>
+</html>

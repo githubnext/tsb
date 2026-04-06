@@ -51,6 +51,8 @@ export { readCsv, toCsv } from "./io/index.ts";
 export type { ReadCsvOptions, ToCsvOptions } from "./io/index.ts";
 export { readJson, toJson } from "./io/index.ts";
 export type { ReadJsonOptions, ToJsonOptions, JsonOrient } from "./io/index.ts";
+export { jsonNormalize } from "./io/index.ts";
+export type { JsonNormalizeOptions, JsonPath } from "./io/index.ts";
 export { pearsonCorr, dataFrameCorr, dataFrameCov } from "./stats/index.ts";
 export type { CorrMethod, CorrOptions, CovOptions } from "./stats/index.ts";
 export { Rolling } from "./window/index.ts";
