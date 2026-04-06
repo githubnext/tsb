@@ -212,3 +212,21 @@ export {
   seriesFloorDiv,
   dataFrameFloorDiv,
 } from "./stats/index.ts";
+export {
+  seriesAdd,
+  seriesRadd,
+  seriesSub,
+  seriesRsub,
+  seriesMul,
+  seriesRmul,
+  seriesDiv,
+  seriesRdiv,
+  dataFrameAdd,
+  dataFrameRadd,
+  dataFrameSub,
+  dataFrameRsub,
+  dataFrameMul,
+  dataFrameRmul,
+  dataFrameDiv,
+  dataFrameRdiv,
+} from "./stats/index.ts";

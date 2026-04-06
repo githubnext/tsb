@@ -121,3 +121,22 @@ export {
   seriesFloorDiv,
   dataFrameFloorDiv,
 } from "./pow_mod.ts";
+
+export {
+  seriesAdd,
+  seriesRadd,
+  seriesSub,
+  seriesRsub,
+  seriesMul,
+  seriesRmul,
+  seriesDiv,
+  seriesRdiv,
+  dataFrameAdd,
+  dataFrameRadd,
+  dataFrameSub,
+  dataFrameRsub,
+  dataFrameMul,
+  dataFrameRmul,
+  dataFrameDiv,
+  dataFrameRdiv,
+} from "./add_sub_mul_div.ts";
