@@ -166,3 +166,5 @@ export {
 
 export { Period, PeriodIndex } from "./core/index.ts";
 export type { PeriodFreq, PeriodIndexOptions } from "./core/index.ts";
+export { Timedelta, TimedeltaIndex } from "./core/index.ts";
+export type { TimedeltaComponents, TimedeltaIndexOptions } from "./core/index.ts";
