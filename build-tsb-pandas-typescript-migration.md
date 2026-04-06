@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T19:45:00Z |
-| Iteration Count | 104 |
-| Best Metric | 59 |
+| Last Run | 2026-04-06T19:49:18Z |
+| Iteration Count | 105 |
+| Best Metric | 60 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -35,15 +35,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 59 files (iter 104). Next candidates:
+Now at 60 files (iter 105). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/natsort.ts` — natural-sort for string indexes / columns
-- `src/reshape/pivot_table.ts` — full pivot_table with aggfunc, margins
+- `src/stats/infer_dtype.ts` — infer_dtype() utility mirroring pandas.api.types.infer_dtype
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 105 (pivotTableFull)**: Grand-total margins computed from raw data values (not re-aggregated cells) ensures mean/sum/count are all correct for "All" row/column. `marginValue()` helper concatenates all buckets for a fixed row or column key across all opposite keys. `sort=true` default mirrors pandas behavior. `rowKeyToLabel()` handles composite multi-key rows. The `as Label[]` cast removed since `Label[]` is directly assignable to `readonly Label[]`.
 - **Iter 104 (clip_with_bounds)**: `resolveBound()` helper unifies scalar/array/Series bounds into a per-element `(number|null)[]`. `Array.isArray` distinguishes arrays from Series at runtime. DataFrame element-wise clip handled by `_clipDFElementWise()`. When one bound is a DataFrame, the other is treated as scalar-only (array/Series non-DataFrame bounds are unsupported in element-wise mode — document the limitation).
 - **Iter 103 (dataFrameAssign)**: Callable specifiers need to receive the in-progress `working` DataFrame (updated after each step) — not the original `df`. The helper `_addOrReplaceColumn` preserves column order for replacements by iterating existing column names and substituting in-place. `import type { Scalar }` is sufficient — no need to import `Label` or `Index` in the assign module.
 - **Iter 102 (NamedAgg)**: Circular value imports between `groupby.ts` and `named_agg.ts` avoided by using only `import type` for cross-dependencies. The internal `_resolveColSpecs` type was updated from `ReadonlyMap<string, AggFn>` to `ReadonlyMap<string, { srcCol: string; fn: AggFn }>` to cleanly separate output column name from source column.
@@ -72,6 +73,14 @@ Now at 59 files (iter 104). Next candidates:
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 105 — 2026-04-06 19:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24048046275)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/reshape/pivot_table.ts` — `pivotTableFull()` with `margins`, `margins_name`, `sort` options. Mirrors `pandas.pivot_table`.
+- **Metric**: 60 (previous: 59, delta: +1)
+- **Commit**: abcd0e7
+- **Notes**: Grand totals computed from raw data buckets (not re-aggregated cells) — ensures correctness for mean/sum/count. `marginValue()` concatenates all buckets for a fixed key across opposite keys. 22 unit + 3 property tests.
 
 ### Iteration 104 — 2026-04-06 19:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24047121994)
 
