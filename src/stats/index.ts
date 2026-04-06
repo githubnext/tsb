@@ -166,3 +166,6 @@ export type {
   SeriesClipBoundsOptions,
   DataFrameClipBoundsOptions,
 } from "./clip_with_bounds.ts";
+
+export { inferDtype } from "./infer_dtype.ts";
+export type { InferredDtype, InferDtypeOptions } from "./infer_dtype.ts";

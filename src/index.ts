@@ -261,3 +261,5 @@ export { Timestamp } from "./core/index.ts";
 export type { TimestampOptions, TimestampComponents, TimestampUnit } from "./core/index.ts";
 export { dataFrameAssign } from "./core/index.ts";
 export type { AssignColSpec, AssignSpec } from "./core/index.ts";
+export { inferDtype } from "./stats/index.ts";
+export type { InferredDtype, InferDtypeOptions } from "./stats/index.ts";
