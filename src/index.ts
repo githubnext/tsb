@@ -243,3 +243,5 @@ export { crosstab, seriesCrosstab } from "./stats/index.ts";
 export type { AggFunc, Normalize, CrosstabOptions } from "./stats/index.ts";
 export { toNumeric, toNumericArray, toNumericScalar, toNumericSeries } from "./stats/index.ts";
 export type { ToNumericDowncast, ToNumericErrors, ToNumericOptions } from "./stats/index.ts";
+export { Timestamp } from "./core/index.ts";
+export type { TimestampOptions, TimestampComponents, TimestampUnit } from "./core/index.ts";
