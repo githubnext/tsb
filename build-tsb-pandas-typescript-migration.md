@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T06:50:00Z |
-| Iteration Count | 84 |
-| Best Metric | 39 |
+| Last Run | 2026-04-06T07:35:00Z |
+| Iteration Count | 85 |
+| Best Metric | 40 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -23,10 +23,6 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
-
----
-
-## 📋 Program Info
 
 **Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
@@ -39,14 +35,15 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 39 files (iter 84). Next candidates:
-- `src/core/period.ts` — Period and PeriodIndex
+Now at 40 files (iter 85). Next candidates:
+- `src/stats/timedelta.ts` — Timedelta support
 - `src/stats/clip_series_more.ts` — additional numeric ops
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 85 (Period/PeriodIndex, 39→40)**: Ordinal-based internal representation (ms → periods since epoch) cleanly handles all 8 frequencies. `normFreq()` with for-of over const tuple handles aliases (Y→A, min→T). Biome auto-fix can corrupt JSDoc comment delimiters; fix manually after auto-write. Top-level regex constants required by `useTopLevelRegex`. Switch exhaustiveness via explicit `default: throw` satisfies `useDefaultSwitchClause`.
 - **Iter 84 (pipe, 38→39)**: Variadic-generic pattern `<A extends unknown[], R>(fn: (x, ...args: A) => R, ...args: A)` gives full type inference. `pipeChain`/`dataFramePipeChain` use for-of loop. `pipeTo`/`dataFramePipeTo` splice value at positional index.
 - **Iter 83 (CategoricalIndex, 37→38)**: Standalone class. `buildCategoryMap` for O(1) look-up. `fromCodes` validates codes. `compareLabels` throws when `ordered=false`. `unionCategories`/`intersectCategories` on category sets. Use `{ }` blocks around single-statement `if`.
 - **Iter 82 (apply, 36→37)**: `applySeries`/`applymap`/`dataFrameApply`. Helper fns `extractRow`/`applyAxis0`/`applyAxis1` keep CC≤15. `import fc from "fast-check"` (default import). Import `Scalar` from `"../../src/index.ts"`.
@@ -65,15 +62,23 @@ Now at 39 files (iter 84). Next candidates:
 
 ## 🔭 Future Directions
 
-**Current state (iter 84)**: 39 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut, stats/sample, stats/apply, core/categorical_index, stats/pipe.
+**Current state (iter 85)**: 40 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut, stats/sample, stats/apply, core/categorical_index, stats/pipe, core/period.
 
-**Next**: Period/PeriodIndex · Timedelta
+**Next**: Timedelta · DateOffset · additional numeric ops
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 85 — 2026-04-06 07:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24023324081)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/period.ts` — `Period` and `PeriodIndex` mirroring `pandas.Period` / `pandas.PeriodIndex`.
+- **Metric**: 40 (previous: 39, delta: +1)
+- **Commit**: 37c28bf
+- **Notes**: Ordinal-based representation (periods since 1970-01-01). Supports A/Q/M/W/D/H/T/S frequencies with aliases Y→A, min→T. Period: fromDate, fromString, add, diff, compareTo, equals, contains, asfreq. PeriodIndex: fromRange, periodRange, fromPeriods, shift, sort, unique, asfreq. 65+ unit + property tests. Biome-clean.
 
 ### Iteration 84 — 2026-04-06 06:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24021812753)
 
