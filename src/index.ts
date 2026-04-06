@@ -235,3 +235,5 @@ export { getDummies, dataFrameGetDummies } from "./stats/index.ts";
 export type { GetDummiesOptions, DataFrameGetDummiesOptions } from "./stats/index.ts";
 export { factorize, seriesFactorize } from "./stats/index.ts";
 export type { FactorizeOptions, FactorizeResult } from "./stats/index.ts";
+export { crosstab, seriesCrosstab } from "./stats/index.ts";
+export type { AggFunc, Normalize, CrosstabOptions } from "./stats/index.ts";

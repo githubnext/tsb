@@ -146,3 +146,6 @@ export type { GetDummiesOptions, DataFrameGetDummiesOptions } from "./get_dummie
 
 export { factorize, seriesFactorize } from "./factorize.ts";
 export type { FactorizeOptions, FactorizeResult } from "./factorize.ts";
+
+export { crosstab, seriesCrosstab } from "./crosstab.ts";
+export type { AggFunc, Normalize, CrosstabOptions } from "./crosstab.ts";
