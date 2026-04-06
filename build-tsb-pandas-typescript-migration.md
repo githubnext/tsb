@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T17:47:57Z |
-| Iteration Count | 101 |
-| Best Metric | 56 |
+| Last Run | 2026-04-06T18:21:40Z |
+| Iteration Count | 102 |
+| Best Metric | 57 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -35,15 +35,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 56 files (iter 101). Next candidates:
+Now at 57 files (iter 102). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/core/named_agg.ts` — NamedAgg for GroupBy
 - `src/stats/clip_with_bounds.ts` — DataFrame.clip() enhancements with lower/upper Series
+- `src/core/assign.ts` — DataFrame.assign() for adding new columns via callables
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 102 (NamedAgg)**: Circular value imports between `groupby.ts` and `named_agg.ts` avoided by using only `import type` for cross-dependencies. The internal `_resolveColSpecs` type was updated from `ReadonlyMap<string, AggFn>` to `ReadonlyMap<string, { srcCol: string; fn: AggFn }>` to cleanly separate output column name from source column.
 - **Iter 101 (select_dtypes)**: `DataFrame.fromColumns` accepts only plain arrays — passing a `Series` with custom `Dtype` loses the dtype. Use `new DataFrame(new Map(...), rowIndex)` directly to preserve custom dtypes. `fc.float()` requires 32-bit boundaries — use `fc.double()` for general floats.
 - **Iter 100 (memory_usage)**: RangeIndex cost = constant 24 bytes. Variable-width dtypes: 8 bytes/element shallow; `length*2+56` for strings when deep=true.
 - **Iter 99 (Timestamp)**: `RawTimestamp` sentinel avoids JS `#` private field breakage. Two-step DST offset refinement for `wallClockToUtc`. `Intl.DateTimeFormat formatToParts` for tz-aware components.
@@ -62,13 +63,21 @@ Now at 56 files (iter 101). Next candidates:
 
 ## 🔭 Future Directions
 
-**State (iter 101)**: 56 files. Next: io/read_excel (XLSX zero-dep) · core/named_agg (NamedAgg for GroupBy)
+**State (iter 102)**: 57 files. Next: io/read_excel (XLSX zero-dep) · stats/clip (DataFrame.clip with Series bounds) · core/assign (DataFrame.assign())
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 102 — 2026-04-06 18:21 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24044453532)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/groupby/named_agg.ts` — `NamedAgg` class, `namedAgg()` factory, `NamedAggSpec` type, `isNamedAggSpec()` guard. Added `DataFrameGroupBy.aggNamed()` method.
+- **Metric**: 57 (previous: 56, delta: +1)
+- **Commit**: 9f8a10b
+- **Notes**: Mirrors `pandas.NamedAgg`. Avoids circular value imports by using `import type` across module boundary. Refactored `_resolveColSpecs`+`_runAgg` to track `srcCol` vs output col. 21 unit + property tests (all pass).
 
 ### Iteration 101 — 2026-04-06 17:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24043124230)
 
