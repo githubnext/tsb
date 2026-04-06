@@ -45,3 +45,5 @@ export { Timestamp } from "./timestamp.ts";
 export type { TimestampOptions, TimestampComponents, TimestampUnit } from "./timestamp.ts";
 export { dataFrameAssign } from "./assign.ts";
 export type { AssignColSpec, AssignSpec } from "./assign.ts";
+export { natCompare, natSorted, natSortKey, natArgSort } from "./natsort.ts";
+export type { NatSortOptions, NatSortedOptions } from "./natsort.ts";

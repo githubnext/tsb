@@ -429,6 +429,11 @@
           <p>Clip Series and DataFrame values with per-element bounds — <a href="clip_with_bounds.html" style="color: var(--accent);">interactive tutorial</a>. <code>clipSeriesWithBounds(s, { lower, upper })</code> and <code>clipDataFrameWithBounds(df, { lower, upper, axis })</code> extend scalar clip to accept a <strong>Series</strong> (label-aligned), a positional <strong>array</strong>, or an element-wise <strong>DataFrame</strong> as bounds. Mirrors <code>pandas.Series.clip(lower, upper)</code> with Series bounds.</p>
           <div class="status done">✅ Complete</div>
         </div>
+        <div class="feature-card">
+          <h3>🔤 natsort</h3>
+          <p>Natural-order string sorting — <a href="natsort.html" style="color: var(--accent);">interactive tutorial</a>. <code>natSorted(arr)</code> sorts strings so embedded numbers compare numerically ("file2" before "file10"). <code>natCompare(a, b)</code> is a drop-in comparator for <code>Array.sort</code>. <code>natSortKey(s)</code> exposes the internal token array; <code>natArgSort(arr)</code> returns permutation indices. Supports <code>ignoreCase</code>, <code>reverse</code>, and a <code>key</code> extractor for object arrays. Mirrors <code>natsort.natsorted()</code> / <code>pandas.Index.sort_values(key=natsort_keygen())</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
     </section>
   </main>
