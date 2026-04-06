@@ -23,3 +23,17 @@ export { Period, PeriodIndex } from "./period.ts";
 export type { PeriodFreq, PeriodIndexOptions } from "./period.ts";
 export { Timedelta, TimedeltaIndex } from "./timedelta.ts";
 export type { TimedeltaComponents, TimedeltaIndexOptions } from "./timedelta.ts";
+export {
+  Day,
+  Hour,
+  Minute,
+  Second,
+  Milli,
+  Week,
+  MonthEnd,
+  MonthBegin,
+  YearEnd,
+  YearBegin,
+  BusinessDay,
+} from "./date_offset.ts";
+export type { DateOffset, WeekOptions } from "./date_offset.ts";
