@@ -74,6 +74,8 @@ export type {
 } from "./reshape/index.ts";
 export { stack, unstack, STACK_DEFAULT_SEP } from "./reshape/index.ts";
 export type { StackOptions, UnstackOptions } from "./reshape/index.ts";
+export { wideToLong } from "./reshape/index.ts";
+export type { WideToLongOptions } from "./reshape/index.ts";
 export { MultiIndex } from "./core/index.ts";
 export type { MultiIndexOptions } from "./core/index.ts";
 export { rankSeries, rankDataFrame } from "./stats/index.ts";
