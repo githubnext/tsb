@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T05:07:00Z |
-| Iteration Count | 82 |
-| Best Metric | 37 |
+| Last Run | 2026-04-06T05:49:52Z |
+| Iteration Count | 83 |
+| Best Metric | 38 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -39,14 +39,15 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 37 files (iter 82). Next candidates:
-- `src/core/categorical_index.ts` — CategoricalIndex
+Now at 38 files (iter 83). Next candidates:
 - `src/stats/pipe.ts` — pipe/pipe-through for chained operations
+- `src/core/period.ts` — Period and PeriodIndex
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 83 (CategoricalIndex, 37→38)**: Standalone class (not extending `Index<Label>`). `buildCategoryMap` for O(1) label→code lookup. All mutations return new instances. `fromCodes` validates codes are in `[0, nCats)` or -1. `compareLabels` throws when `ordered=false`. `unionCategories`/`intersectCategories` operate on category sets while keeping left-side data. Biome auto-fix handles `useBlockStatements` — use `{ }` blocks around single-statement `if` throw/return.
 - **Iter 82 (apply, 36→37)**: `applySeries(series, fn(v,label))` / `applymap(df, fn(v,colName))` / `dataFrameApply(df, fn, {axis})`. Helper functions `extractRow`/`applyAxis0`/`applyAxis1` keep CC≤15. Use `import fc from "fast-check"` (default import, not namespace). Import `Scalar` from `"../../src/index.ts"` not `"../../src/types.ts"` (useImportRestrictions). Biome auto-formats multi-line function signatures onto one line when ≤100 cols.
 - **Iter 81 (sample, 35→36)**: xorshift32 RNG (zero deps). `buildCdf` + `rebuildCdf` pattern for weighted without-replacement. Use `Array.from({length}, fn)` instead of for-loops where index isn't needed (avoids `useForOf` lint). `(arr as number[]).findIndex((v) => r < v)` cleaner than manual loop. `resolveWeights` separates weight validation from CDF construction. Fisher-Yates partial shuffle for unweighted without-replacement.
 - **Iter 80 (apply/applymap, 35→36)**: `allSeries([])` must return `false` (vacuously-true empty case returns wrong type). Use `new Array(n).fill(v)` not `Array(n).fill(v)`. Extract small helpers (broadcastAxis0/1, expandAxis0/1, fillColBuffers) to keep CC≤15. `Series.values` is `readonly` — use separate mutable `Scalar[]` buffers for assembly.
@@ -70,15 +71,23 @@ Now at 37 files (iter 82). Next candidates:
 
 ## 🔭 Future Directions
 
-**Current state (iter 82)**: 37 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut, stats/sample, stats/apply.
+**Current state (iter 83)**: 38 files — Series, DataFrame, GroupBy, concat, merge, str/dt/cat accessors, stats/describe, io/csv, io/json, stats/corr, window/rolling, window/expanding, window/ewm, reshape/melt, reshape/pivot, reshape/stack_unstack, MultiIndex, stats/rank, stats/nlargest, stats/cum_ops, stats/elem_ops, stats/value_counts, stats/where_mask, stats/compare, stats/shift_diff, stats/interpolate, stats/fillna, core/interval, stats/cut, stats/sample, stats/apply, core/categorical_index.
 
-**Next**: CategoricalIndex · pipe
+**Next**: pipe · Period/PeriodIndex
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 83 — 2026-04-06 05:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24020523769)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/categorical_index.ts` — `CategoricalIndex` mirroring `pandas.CategoricalIndex`.
+- **Metric**: 38 (previous: 37, delta: +1)
+- **Commit**: 7444b7d
+- **Notes**: Standalone class with O(1) category look-up via Map. Full mutation API (rename/reorder/add/remove/set/removeUnused). Ordered comparison support. Set operations on category sets. 45+ unit + property tests. Biome-clean.
 
 ### Iteration 82 — 2026-04-06 05:07 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24019334747)
 
