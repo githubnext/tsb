@@ -45,6 +45,8 @@ export { DatetimeAccessor } from "./core/index.ts";
 export type { DatetimeSeriesLike } from "./core/index.ts";
 export { DataFrameGroupBy, SeriesGroupBy } from "./groupby/index.ts";
 export type { AggFn, AggName, AggSpec } from "./groupby/index.ts";
+export { NamedAgg, namedAgg, isNamedAggSpec } from "./groupby/index.ts";
+export type { NamedAggSpec } from "./groupby/index.ts";
 export { describe, quantile } from "./stats/index.ts";
 export type { DescribeOptions } from "./stats/index.ts";
 export { readCsv, toCsv } from "./io/index.ts";
