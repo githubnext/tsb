@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-06T19:49:18Z |
-| Iteration Count | 105 |
-| Best Metric | 60 |
+| Last Run | 2026-04-06T20:25:00Z |
+| Iteration Count | 106 |
+| Best Metric | 61 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -23,8 +23,6 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
-
-**Goal**: Build `tsb`, a complete TypeScript port of pandas, one feature at a time.
 **Metric**: `pandas_features_ported` (higher is better)
 **Branch**: `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258`
 **Pull Request**: #54
@@ -35,15 +33,16 @@
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 60 files (iter 105). Next candidates:
+Now at 61 files (iter 106). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/natsort.ts` — natural-sort for string indexes / columns
-- `src/stats/infer_dtype.ts` — infer_dtype() utility mirroring pandas.api.types.infer_dtype
+- `src/stats/notna.ts` — notna()/isna() element-wise null checks (pandas.notna / pandas.isna)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 106 (infer_dtype)**: `inferDtype(values, {skipna})` uses `unknown[]` input type (not `Scalar[]`) so specialised objects like `Timestamp`, `Timedelta`, `Period`, `Interval` pass type-checks cleanly. The `classifyOne()` helper uses `instanceof` guards in precedence order (Timestamp before Date, since Timestamp extends nothing but must not accidentally match Date). `skipna=true` skips nulls; when all non-null kinds form a Set of size 1 the output is deterministic. 45 tests (unit + property-based).
 - **Iter 105 (pivotTableFull)**: Grand-total margins computed from raw data values (not re-aggregated cells) ensures mean/sum/count are all correct for "All" row/column. `marginValue()` helper concatenates all buckets for a fixed row or column key across all opposite keys. `sort=true` default mirrors pandas behavior. `rowKeyToLabel()` handles composite multi-key rows. The `as Label[]` cast removed since `Label[]` is directly assignable to `readonly Label[]`.
 - **Iter 104 (clip_with_bounds)**: `resolveBound()` helper unifies scalar/array/Series bounds into a per-element `(number|null)[]`. `Array.isArray` distinguishes arrays from Series at runtime. DataFrame element-wise clip handled by `_clipDFElementWise()`. When one bound is a DataFrame, the other is treated as scalar-only (array/Series non-DataFrame bounds are unsupported in element-wise mode — document the limitation).
 - **Iter 103 (dataFrameAssign)**: Callable specifiers need to receive the in-progress `working` DataFrame (updated after each step) — not the original `df`. The helper `_addOrReplaceColumn` preserves column order for replacements by iterating existing column names and substituting in-place. `import type { Scalar }` is sufficient — no need to import `Label` or `Index` in the assign module.
@@ -74,6 +73,14 @@ Now at 60 files (iter 105). Next candidates:
 
 All iterations in reverse chronological order (newest first).
 
+### Iteration 106 — 2026-04-06 20:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24049095921)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/infer_dtype.ts` — `inferDtype()` function mirroring `pandas.api.types.infer_dtype`. Accepts `readonly unknown[] | Series`, returns a string dtype label.
+- **Metric**: 61 (previous: 60, delta: +1)
+- **Commit**: 3752995
+- **Notes**: `unknown[]` input type enables passing `Timestamp`/`Timedelta`/`Period`/`Interval` objects without casts. 45 tests (unit + property-based). All pass.
+
 ### Iteration 105 — 2026-04-06 19:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24048046275)
 
 - **Status**: ✅ Accepted
@@ -82,45 +89,25 @@ All iterations in reverse chronological order (newest first).
 - **Commit**: abcd0e7
 - **Notes**: Grand totals computed from raw data buckets (not re-aggregated cells) — ensures correctness for mean/sum/count. `marginValue()` concatenates all buckets for a fixed key across opposite keys. 22 unit + 3 property tests.
 
-### Iteration 104 — 2026-04-06 19:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24047121994)
+### Iteration 104 — 2026-04-06 19:45 UTC
+- **Status**: ✅ Accepted | **Metric**: 59 (+1) | **Commit**: 8b15cb0
+- **Change**: `src/stats/clip_with_bounds.ts` — clipSeriesWithBounds/clipDataFrameWithBounds with per-element Series/array/DataFrame bounds.
 
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/clip_with_bounds.ts` — `clipSeriesWithBounds` / `clipDataFrameWithBounds` with per-element Series/array/DataFrame bounds. Extends scalar-only `clip` from `elem_ops.ts`.
-- **Metric**: 59 (previous: 58, delta: +1)
-- **Commit**: 8b15cb0
-- **Notes**: `resolveBound()` helper unified all bound types into `(number|null)[]`. 32 unit + 4 property tests. DataFrame axis=0 (per-row) and axis=1 (per-column) both supported.
+### Iteration 103 — 2026-04-06 18:49 UTC
+- **Status**: ✅ Accepted | **Metric**: 58 (+1) | **Commit**: 945b4a5
+- **Change**: `src/core/assign.ts` — dataFrameAssign() with callable support; callables receive in-progress DataFrame.
 
-### Iteration 103 — 2026-04-06 18:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24045614643)
+### Iteration 102 — 2026-04-06 18:21 UTC
+- **Status**: ✅ Accepted | **Metric**: 57 (+1) | **Commit**: 9f8a10b
+- **Change**: `src/groupby/named_agg.ts` — NamedAgg class + DataFrameGroupBy.aggNamed().
 
-- **Status**: ✅ Accepted
-- **Change**: Added `src/core/assign.ts` — `dataFrameAssign()`, `AssignColSpec`, `AssignSpec`. Extended `DataFrame.assign()` instance method to accept callables.
-- **Metric**: 58 (previous: 57, delta: +1)
-- **Commit**: 945b4a5
-- **Notes**: Callables receive the in-progress DataFrame (updated after each prior spec). Helper `_addOrReplaceColumn` preserves column order on replacement. 18 unit + 4 property tests.
+### Iteration 101 — 2026-04-06 17:47 UTC
+- **Status**: ✅ Accepted | **Metric**: 56 (+1) | **Commit**: dd08080
+- **Change**: `src/stats/select_dtypes.ts` — selectDtypes(df, { include, exclude }).
 
-### Iteration 102 — 2026-04-06 18:21 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24044453532)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/groupby/named_agg.ts` — `NamedAgg` class, `namedAgg()` factory, `NamedAggSpec` type, `isNamedAggSpec()` guard. Added `DataFrameGroupBy.aggNamed()` method.
-- **Metric**: 57 (previous: 56, delta: +1)
-- **Commit**: 9f8a10b
-- **Notes**: Mirrors `pandas.NamedAgg`. Avoids circular value imports by using `import type` across module boundary. Refactored `_resolveColSpecs`+`_runAgg` to track `srcCol` vs output col. 21 unit + property tests (all pass).
-
-### Iteration 101 — 2026-04-06 17:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24043124230)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/select_dtypes.ts` — `selectDtypes(df, { include, exclude })` mirroring `pandas.DataFrame.select_dtypes()`.
-- **Metric**: 56 (previous: 55, delta: +1)
-- **Commit**: dd08080
-- **Notes**: Supports generic aliases ("number", "integer", "signed integer", "unsigned integer", "floating", "bool", "string", "datetime", "timedelta", "category") and concrete dtype names. `DataFrame.fromColumns` loses custom dtypes — must use constructor directly for tests. 30 unit + property tests.
-
-### Iteration 100 — 2026-04-06 17:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24042025179)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/memory_usage.ts` — `seriesMemoryUsage` and `dataFrameMemoryUsage` mirroring `pandas.Series.memory_usage()` / `pandas.DataFrame.memory_usage()`.
-- **Metric**: 55 (previous: 54, delta: +1)
-- **Commit**: b76afce
-- **Notes**: RangeIndex cost is constant 24 bytes (only start/stop/step stored). Variable-width dtypes use POINTER_SIZE=8 bytes per element when shallow, actual string char data (length×2+56 overhead) when deep=true. 36 unit + property tests.
+### Iteration 100 — 2026-04-06 17:19 UTC
+- **Status**: ✅ Accepted | **Metric**: 55 (+1) | **Commit**: b76afce
+- **Change**: `src/stats/memory_usage.ts` — seriesMemoryUsage / dataFrameMemoryUsage.
 
 ### Iteration 99 — 2026-04-06 16:48 UTC
 - **Status**: ✅ Accepted | **Metric**: 54 (+1) | **Commit**: 42be823
