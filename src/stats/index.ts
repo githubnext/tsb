@@ -143,3 +143,6 @@ export {
 
 export { getDummies, dataFrameGetDummies } from "./get_dummies.ts";
 export type { GetDummiesOptions, DataFrameGetDummiesOptions } from "./get_dummies.ts";
+
+export { factorize, seriesFactorize } from "./factorize.ts";
+export type { FactorizeOptions, FactorizeResult } from "./factorize.ts";
