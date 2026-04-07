@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-07T12:22:07Z |
-| Iteration Count | 127 |
-| Best Metric | 82 |
+| Last Run | 2026-04-07T12:50:39Z |
+| Iteration Count | 128 |
+| Best Metric | 83 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -26,16 +26,17 @@
 
 ## 🎯 Current Priorities
 
-**State (iter 127)**: 82 files. Next candidates:
+**State (iter 128)**: 83 files. Next candidates:
 - `src/stats/cut_extended.ts` — pd.cut with `ordered` dtype and per-bin labels + `retbins` option
 - `src/stats/wide_to_long_enhanced.ts` — wide_to_long with stubvar / i / j options
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/stats/covariance.ts` — rolling covariance and correlation (rolling().cov(), rolling().corr())
+- `src/stats/rolling_cross_corr.ts` — rolling cross-correlation (lag-based)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 128 (covariance)**: `rollingCov(x, y, w)` uses `pairedNums()` to extract positionally-aligned valid pairs in each window, then `sampleCov()` with ddof=1. `rollingCorr(x, y, w)` uses `pearsonCorrWindow()` — zero variance → NaN, insufficient pairs → null. DataFrames: column-wise dispatch via `df.col(name)` + `new DataFrame(resultCols, df.index)`. Scale-invariance property tested (multiply both series by positive scalars → same corr). `import fc from "fast-check"` (default import).
 - **Iter 127 (rolling_moments)**: `rollingSkew` uses Fisher-Pearson formula `G1 = sqrt(n(n-1))/(n-2) * g1` (requires n≥3). `rollingKurtosis` uses bias-corrected formula `G2 = (n+1)n(n-1)/((n-2)(n-3)) * (m4/m2²) - 3(n-1)²/((n-2)(n-3))` (requires n≥4). Both: use `new Series<Scalar>({data, index, name})` — NOT `withValues()`. DataFrame: `df.columns.values as string[]` + `df.col(name)` pattern. Default minPeriods for skew=3, kurt=4 (matching statistical requirement). Zero-variance windows → null.
 - **Iter 126 (abs/round)**: `absSeries`/`absDataFrame` — only transform `typeof v === "number" && !Number.isNaN(v)` values; pass everything else through. `roundSeries(s, d)` uses `Number(n.toFixed(d))` for positive d; for negative d uses `Math.round(n / 10^-d) * 10^-d`. DataFrame iteration uses `df.columns.values as string[]` + `df.col(name)` — not `for...of df` (no Symbol.iterator on DataFrame). Per-column dict for roundDataFrame: columns not in dict pass through unchanged.
 - **Iter 125 (autocorr)**: `autocorr(series, lag)` = Pearson correlation of `s[lag:]` vs `s[:-lag]`. Negative lags symmetric (|lag| used). Missing/non-numeric values silently dropped per-pair. Lag 0 → 1, zero variance → NaN, |lag|≥n → NaN. No bun available in sandbox — evaluate via find/grep/wc only.
@@ -68,6 +69,14 @@
 
 All iterations in reverse chronological order (newest first).
 
+### Iteration 128 — 2026-04-07 12:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24082160028)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/covariance.ts` — `rollingCov`, `rollingCorr`, `rollingCovDataFrame`, `rollingCorrDataFrame` mirroring `pandas.Series.rolling(n).cov(other)` / `.corr(other)`.
+- **Metric**: 83 (previous best: 82, delta: +1)
+- **Commit**: 784e6ee
+- **Notes**: `pairedNums()` extracts positionally-aligned valid pairs per window. `rollingCorr` returns NaN for zero-variance windows. DataFrames use column-wise dispatch. Scale-invariance, commutativity, and bounds [−1,1] verified with fast-check property tests.
+
 ### Iteration 127 — 2026-04-07 12:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24080990847)
 
 - **Status**: ✅ Accepted
@@ -76,37 +85,9 @@ All iterations in reverse chronological order (newest first).
 - **Commit**: 4eef894
 - **Notes**: Fisher-Pearson adjusted skew (n≥3) and bias-corrected excess kurtosis (n≥4). `minPeriods` defaults to statistical minimum. Scale/shift-invariant properties verified with fast-check.
 
-### Iteration 126 — 2026-04-07 11:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24079727260)
+### Iteration 126 — ✅ abs/round (81) · Iteration 125 — ✅ autocorr (80)
 
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/abs_round.ts` — `absSeries`, `roundSeries`, `absDataFrame`, `roundDataFrame` mirroring `pandas.Series.abs()`, `.round()`, `pandas.DataFrame.abs()`, `.round()`.
-- **Metric**: 81 (previous best: 80, delta: +1)
-- **Commit**: dfe5449
-- **Notes**: Non-numeric values (null/undefined/NaN/strings/booleans) pass through unchanged. `roundSeries(s, d)` uses `Number(n.toFixed(d))` for correct round-half-away-from-zero; negative decimals rounds to tens/hundreds. Per-column precision dict supported for DataFrame. 30 unit + 2 property-based tests.
-
-### Iteration 125 — 2026-04-07 11:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24078727612)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/autocorr.ts` — `autocorr(series, lag, options)` Pearson autocorrelation coefficient mirroring `pandas.Series.autocorr(lag)`.
-- **Metric**: 80 (previous best: 79, delta: +1)
-- **Commit**: 7b8ed12
-- **Notes**: Pairs `s[lag:]` with `s[:-lag]`, drops missing/non-numeric pairs, computes Pearson correlation. Negative lags treated symmetrically. 25 unit tests + 5 property-based tests covering arithmetic sequences, periodic signals, missing values, minPeriods, and scale/shift invariance.
-
-### Iteration 124 — 2026-04-07 10:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24077482397)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/mode.ts` — `modeSeries()` (most frequent value(s), sorted) and `modeDataFrame()` (column-wise mode with null padding). Mirrors `pandas.Series.mode()` and `pandas.DataFrame.mode()`.
-- **Metric**: 79 (previous best: 78, delta: +1)
-- **Commit**: 6e2e5a7
-- **Notes**: `computeMode()` builds a freq-map and returns all values at max frequency, sorted ascending via `compareForMode()`. DataFrame mode pads shorter columns with `null`. State file was 2 iterations behind (iter 123 readFwf not recorded); corrected.
-
-### Iteration 123 — 2026-04-07 09:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24075xxx)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/io/read_fwf.ts` — `readFwf()` fixed-width format reader. Mirrors `pandas.read_fwf()`.
-- **Metric**: 78 (previous best: 77, delta: +1)
-- **Commit**: 3ca9d3c
-- **Notes**: State file was not updated after this run (scheduling anomaly). Corrected in iter 124.
+### Iteration 124 — ✅ mode (79) · Iteration 123 — ✅ read_fwf (78)
 
 ### Iteration 122 — ✅ map/transform (77) · Iteration 121 — ✅ replace (76) · Iteration 120 — ✅ pct_change (75)
 
