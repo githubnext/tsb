@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-07T14:37:00Z |
-| Iteration Count | 130 |
-| Best Metric | 85 |
+| Last Run | 2026-04-07T15:32:49Z |
+| Iteration Count | 131 |
+| Best Metric | 86 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -22,19 +22,20 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 130)**: 85 files. Next candidates:
-- `src/stats/wide_to_long_enhanced.ts` — wide_to_long with stubvar / i / j options
+**State (iter 131)**: 86 files. Next candidates:
+- `src/reshape/wide_to_long_enhanced.ts` — wide_to_long with stubvar / i / j options
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/stats/cut_qcut_retbins_playground.ts` — playground page for cut_extended
+- `src/core/convert_dtypes.ts` — smart dtype inference/coercion (pandas convert_dtypes)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 131 (astype)**: `castOne(v, dt)` by dtype kind. null/undefined always preserved as null. `errors='raise'|'ignore'` — on ignore, failed casts → null. `dataFrameAstype` accepts single dtype (applies to all cols) or `Record<col, dtype>` (per-column). Raises `RangeError` for unknown columns in spec. Single dtype path uses `Dtype.from(name)` singleton.
 - **Iter 130 (cut_extended)**: `cutWithBins`/`qcutWithBins` return `{result, bins}` for retbins. `cutOrdered`/`qcutOrdered` return `{result, categories, ordered:true, bins}`. `compareCategories(a,b,cats)` → neg/zero/pos; null < any. `sortByCategory`. Property: antisymmetric, non-decreasing.
 - **Iter 129 (rolling_cross_corr)**: `crossCorr(x,y,{lags})` — pairs (x[i],y[i-l]). Lag fmt: `l<0→"lag_neg{|l|}"`. Symmetry: crossCorr(x,y,l)==crossCorr(y,x,-l).
 - **Iter 128 (covariance)**: `pairedNums()` per window + `sampleCov(ddof=1)`. Zero var → NaN. Scale-invariant.
@@ -65,6 +66,14 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 131 — 2026-04-07 15:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24089832656)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/astype.ts` — `astype(series, dtype)` and `dataFrameAstype(df, spec)` mirroring `pandas.Series.astype()` / `pandas.DataFrame.astype()`.
+- **Metric**: 86 (previous best: 85, delta: +1)
+- **Commit**: 8be0473
+- **Notes**: castOne() dispatch by DtypeKind. null always preserved. errors='raise'|'ignore'. dataFrameAstype accepts single dtype (all cols) or per-column Record. Property tests: int→string→int roundtrip; bool==(n!==0) for floats.
 
 ### Iteration 130 — 2026-04-07 14:37 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24087093397)
 
