@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-07T04:55:00Z |
-| Iteration Count | 118 |
-| Best Metric | 73 |
+| Last Run | 2026-04-07T05:37:21Z |
+| Iteration Count | 119 |
+| Best Metric | 74 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -22,13 +22,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
 **Note**: The main branch was reset to 6 files (earlier branches were not merged). Iter 53 re-establishes the new long-running branch from main (6 files → 8). The branch history in the state file (iters 1–52) reflects previous diverged work.
 
-Now at 73 files (iter 118). Next candidates:
+Now at 74 files (iter 119). Next candidates:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/stats/wide_to_long_enhanced.ts` — wide_to_long with stubvar / i / j options
 - `src/stats/clip_series.ts` — `Series.clip(lower, upper)` / `DataFrame.clip(lower, upper)` (separate from clip_with_bounds)
@@ -37,6 +37,7 @@ Now at 73 files (iter 118). Next candidates:
 
 ## 📚 Lessons Learned
 
+- **Iter 119 (unique/nunique)**: All missing sentinels (null, undefined, NaN) should map to the same key in `scalarKey()` for consistent de-duplication. Use `"__MISSING__"` sentinel key. Property tests for DataFrame construction must ensure all columns have the same row count — use `.chain()` to bind `nrows` before generating column arrays. `import type { DataFrame }` required (it's only used as a type parameter in function signatures). Nested ternary for axis normalisation triggers biome nursery rule — use `if/else` chain instead.
 - **Iter 118 (between)**: `between(series, left, right, options)` mirrors pandas `Series.between`. Four inclusive modes: `"both"` (default), `"neither"`, `"left"`, `"right"`. Guard with `isMissing()` before comparing — null/undefined/NaN always yield false. Missing bounds (null/NaN/undefined) short-circuit to all-false result. `as number` casts after `isMissing()` guard are provably safe (consistent with `compare.ts` pattern). Need to also merge prior sub-branch commits (iter 117 isin was on a sub-branch) before implementing next iteration.
 - **Iter 117 (isin)**: `isIsinDict()` guard distinguishes plain-object `IsinDict` from `Iterable` values by checking `!Array.isArray && !(instanceof Set) && Symbol.iterator not a function`. NaN never matches even if NaN is in the lookup Set (JS Set uses SameValueZero but we guard with `Number.isNaN` before the set lookup). `boolean extends Scalar` so `boolean[]` is directly assignable to `Scalar[]` without casts; keep `data: Scalar[]` for cleanliness.
 - **Iter 116 (explode)**: `Scalar` type does not include arrays, so `Array.isArray(v)` where `v: Scalar` narrows to `never`. Fix: widen to `readonly unknown[]` via implicit assignment (`const w: readonly unknown[] = series.values`) — no cast needed since `readonly Scalar[]` ⊆ `readonly unknown[]` (readonly arrays are covariant). `explodeSeries` accepts `Series<Scalar>` and returns `Series<Scalar>`. `explodeDataFrame` handles both single and multi-column explosion; empty arrays → null row. `Map.get()` returns `T | undefined`, use `!== undefined` guard rather than `as T` cast.
@@ -67,13 +68,21 @@ Now at 73 files (iter 118). Next candidates:
 
 ## 🔭 Future Directions
 
-**State (iter 117)**: 72 files. Next: io/read_excel (XLSX zero-dep) · stats/between · stats/wide_to_long_enhanced
+**State (iter 119)**: 74 files. Next: io/read_excel (XLSX zero-dep) · stats/wide_to_long_enhanced · stats/clip_series
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 119 — 2026-04-07 05:37 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24066140606)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/unique.ts` — `unique(series)`, `nunique(series)`, `dataFrameNunique(df)` mirroring `pandas.unique()`, `Series.nunique()`, `DataFrame.nunique()`.
+- **Metric**: 74 (previous: 73, delta: +1)
+- **Commit**: bd749fa
+- **Notes**: All missing sentinels (null/undefined/NaN) normalised to one category via `"__MISSING__"` key. `unique()` includes missing by default; `nunique()`/`dataFrameNunique()` exclude by default. 44 unit tests + 5 property-based tests; 100% coverage on unique.ts.
 
 ### Iteration 118 — 2026-04-07 04:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24064850163)
 
@@ -83,21 +92,7 @@ All iterations in reverse chronological order (newest first).
 - **Commit**: 0ea8063
 - **Notes**: Four inclusive modes (`"both"`, `"neither"`, `"left"`, `"right"`). Missing values (null/NaN/undefined) always yield false. Also merged iter-117 isin sub-branch commit into the main long-running branch. 40 unit tests + 5 property-based tests.
 
-### Iteration 117 — 2026-04-07 03:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24062941194)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/isin.ts` — `isin(series, values)` and `dataFrameIsin(df, values)` mirroring `pandas.Series.isin` / `pandas.DataFrame.isin`.
-- **Metric**: 72 (previous: 71, delta: +1)
-- **Commit**: 3b29902
-- **Notes**: `isIsinDict()` guard distinguishes plain-object per-column dicts from iterables (array/Set/generator) without unsafe casts. NaN never matches (like pandas). 44 unit tests + 5 property-based tests covering both Series and DataFrame paths.
-
-### Iteration 116 — 2026-04-07 02:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24061009779)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/explode.ts` — `explodeSeries` and `explodeDataFrame` mirroring `pandas.Series.explode` / `pandas.DataFrame.explode`.
-- **Metric**: 71 (previous: 70, delta: +1)
-- **Commit**: e700bbb
-- **Notes**: Array elements expand into individual rows; scalars/null stay as single rows; empty arrays → null row. `readonly Scalar[]` widened to `readonly unknown[]` (covariant) to enable `Array.isArray` narrowing without unsafe casts. 40 unit tests + 4 property-based tests.
+### Iters 116–118 — ✅ (metrics 71→73): explode, isin, between
 
 ### Iters 103–115 — ✅ (metrics 58→70): assign, clip_with_bounds, pivotTableFull, infer_dtype, notna/isna, dropna, combine_first, natsort, searchsorted, valueCountsBinned, duplicated, reindex, align
 ### Iters 53–102 — ✅ (metrics 8→57): named_agg, select_dtypes, memory_usage, Timestamp, to_numeric, json_normalize, wide_to_long, crosstab, get_dummies, factorize, datetime_tz, numeric_ops, DateOffset, date_range, where_mask, compare, shift_diff, interpolate, fillna, Interval, cut/qcut, sample, apply, CategoricalIndex, pipe, Period, Timedelta, Foundation+GroupBy+merge+str+dt+describe+csv/json+corr+rolling+expanding+ewm+stack/unstack+melt/pivot+value_counts+MultiIndex
