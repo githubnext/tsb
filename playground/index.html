@@ -465,6 +465,11 @@
           <p>Transform list-like elements into individual rows — <a href="explode.html" style="color: var(--accent);">interactive tutorial</a>. <code>explodeSeries(s)</code> expands each array element into its own row, repeating the original index label. <code>explodeDataFrame(df, col)</code> explodes one or more columns while repeating all other column values. Null/undefined stay as a single <code>null</code> row; empty arrays also produce a single <code>null</code> row. <code>ignoreIndex: true</code> resets the output index. Mirrors <code>pandas.Series.explode</code> and <code>pandas.DataFrame.explode</code>.</p>
           <div class="status done">✅ Complete</div>
         </div>
+        <div class="feature-card">
+          <h3>🔍 isin</h3>
+          <p>Element-wise membership testing — <a href="isin.html" style="color: var(--accent);">interactive tutorial</a>. <code>isin(series, values)</code> returns a boolean Series with <code>true</code> where each element is in the provided collection. <code>dataFrameIsin(df, values)</code> extends this to full DataFrames, supporting a shared collection or an <code>IsinDict</code> for per-column lookups. <code>NaN</code> is never a member; <code>null</code> matches <code>null</code>. Mirrors <code>pandas.Series.isin</code> and <code>pandas.DataFrame.isin</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
     </section>
   </main>

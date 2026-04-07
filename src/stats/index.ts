@@ -185,3 +185,6 @@ export type { KeepPolicy, DuplicatedDataFrameOptions, DuplicatedSeriesOptions } 
 
 export { explodeSeries, explodeDataFrame } from "./explode.ts";
 export type { ExplodeOptions, ExplodeDataFrameOptions } from "./explode.ts";
+
+export { isin, dataFrameIsin } from "./isin.ts";
+export type { IsinValues, IsinDict, DataFrameIsinValues } from "./isin.ts";
