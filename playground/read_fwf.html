@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb — readFwf</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav class="breadcrumb">
+      <a href="index.html">tsb playground</a> › readFwf
+    </nav>
+
+    <h1>readFwf — Fixed-Width Format I/O</h1>
+    <p class="intro">
+      <code>readFwf()</code> mirrors
+      <a href="https://pandas.pydata.org/docs/reference/api/pandas.read_fwf.html"
+        >pandas <code>read_fwf()</code></a
+      >.
+      Parse text where each column occupies a fixed range of character positions.
+      Column boundaries can be auto-inferred from whitespace, specified as
+      <code>colspecs</code> (<code>[start, end]</code> pairs), or provided as column
+      <code>widths</code>.
+    </p>
+
+    <section class="tutorial">
+      <h2>1 — Auto-infer column boundaries</h2>
+      <p>
+        Pass a text string to <code>readFwf()</code>.  The first row is the header.
+        Column boundaries are inferred automatically from where content appears.
+      </p>
+      <div class="editor" id="basic-editor">
+<pre class="code" contenteditable="true" spellcheck="false">const text = [
+  "Name       Age  Score",
+  "Alice       29   88.5",
+  "Bob         34   91.0",
+  "Charlie     22   79.3",
+].join("\n");
+
+const df = tsb.readFwf(text);
+console.log("shape:", df.shape);
+console.log("columns:", [...df.columns.values]);
+console.log("Name  dtype:", df.col("Name").dtype.name);
+console.log("Age   dtype:", df.col("Age").dtype.name);
+console.log("Score dtype:", df.col("Score").dtype.name);
+console.log("Names:", [...df.col("Name").values]);
+console.log("Ages :", [...df.col("Age").values]);
+</pre>
+      </div>
+      <button class="run-btn" data-editor="basic-editor">▶ Run</button>
+      <pre class="output" id="basic-editor-output"></pre>
+    </section>
+
+    <section class="tutorial">
+      <h2>2 — Explicit colspecs</h2>
+      <p>
+        Provide <code>[start, end]</code> pairs (end-exclusive, matching pandas) for
+        precise control over column extraction.  Useful when columns touch without
+        whitespace gaps.
+      </p>
+      <div class="editor" id="colspecs-editor">
+<pre class="code" contenteditable="true" spellcheck="false">const text = [
+  "Alice 29 88.5",
+  "Bob   34 91.0",
+].join("\n");
+
+const df = tsb.readFwf(text, {
+  colspecs: [[0, 6], [6, 9], [9, 13]],
+  header: null,
+  names: ["Name", "Age", "Score"],
+});
+console.log("Names:", [...df.col("Name").values]);
+console.log("Ages :", [...df.col("Age").values]);
+console.log("Scores:", [...df.col("Score").values]);
+</pre>
+      </div>
+      <button class="run-btn" data-editor="colspecs-editor">▶ Run</button>
+      <pre class="output" id="colspecs-editor-output"></pre>
+    </section>
+
+    <section class="tutorial">
+      <h2>3 — Column widths</h2>
+      <p>
+        If every column has a fixed width, supply a <code>widths</code> array.
+        The boundaries are computed automatically from the cumulative widths.
+      </p>
+      <div class="editor" id="widths-editor">
+<pre class="code" contenteditable="true" spellcheck="false">const text = [
+  "ID  Name     Score",
+  "1   Alice      88",
+  "2   Bob        91",
+  "3   Charlie    79",
+].join("\n");
+
+const df = tsb.readFwf(text, { widths: [4, 9, 5] });
+console.log("columns:", [...df.columns.values]);
+console.log("IDs   :", [...df.col("ID").values]);
+console.log("Names :", [...df.col("Name").values]);
+console.log("Scores:", [...df.col("Score").values]);
+</pre>
+      </div>
+      <button class="run-btn" data-editor="widths-editor">▶ Run</button>
+      <pre class="output" id="widths-editor-output"></pre>
+    </section>
+
+    <section class="tutorial">
+      <h2>4 — Comment lines and missing values</h2>
+      <p>
+        Lines starting with <code>comment</code> are ignored.  Cells containing
+        <code>"NA"</code>, <code>""</code>, or custom strings (via <code>naValues</code>)
+        become <code>null</code>.
+      </p>
+      <div class="editor" id="options-editor">
+<pre class="code" contenteditable="true" spellcheck="false">const text = [
+  "# Generated 2024-01-01",
+  "Name       Value",
+  "# unit: meters",
+  "Alice         42",
+  "Bob           NA",
+  "Charlie     -999",
+].join("\n");
+
+const df = tsb.readFwf(text, {
+  comment: "#",
+  naValues: ["-999"],
+});
+console.log("Names :", [...df.col("Name").values]);
+console.log("Values:", [...df.col("Value").values]);
+</pre>
+      </div>
+      <button class="run-btn" data-editor="options-editor">▶ Run</button>
+      <pre class="output" id="options-editor-output"></pre>
+    </section>
+
+    <section class="tutorial">
+      <h2>5 — skipRows, nRows, and indexCol</h2>
+      <p>
+        <code>skipRows</code> skips data rows after the header.  <code>nRows</code>
+        caps the number of rows read.  <code>indexCol</code> promotes a column to the
+        row index.
+      </p>
+      <div class="editor" id="index-editor">
+<pre class="code" contenteditable="true" spellcheck="false">const text = [
+  "id   name     score",
+  "1    Alice       88",
+  "2    Bob         91",
+  "3    Charlie     79",
+  "4    Diana       95",
+].join("\n");
+
+const df = tsb.readFwf(text, { indexCol: "id", nRows: 3 });
+console.log("shape  :", df.shape);
+console.log("columns:", [...df.columns.values]);
+console.log("index  :", [...df.index.values]);
+console.log("scores :", [...df.col("score").values]);
+</pre>
+      </div>
+      <button class="run-btn" data-editor="index-editor">▶ Run</button>
+      <pre class="output" id="index-editor-output"></pre>
+    </section>
+
+    <script type="module">
+      import * as tsb from "../src/index.ts";
+      window.tsb = tsb;
+
+      document.querySelectorAll(".run-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const editorId = btn.dataset.editor;
+          const editorEl = document.getElementById(editorId);
+          const outputEl = document.getElementById(editorId + "-output");
+          const code = editorEl.textContent;
+          const logs = [];
+          const origConsoleLog = console.log;
+          console.log = (...args) => logs.push(args.map(String).join(" "));
+          try {
+            const fn = new Function("tsb", code);
+            fn(tsb);
+            outputEl.textContent = logs.join("\n");
+            outputEl.className = "output success";
+          } catch (e) {
+            outputEl.textContent = String(e);
+            outputEl.className = "output error";
+          } finally {
+            console.log = origConsoleLog;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
