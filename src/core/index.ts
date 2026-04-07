@@ -49,3 +49,5 @@ export { natCompare, natSorted, natSortKey, natArgSort } from "./natsort.ts";
 export type { NatSortOptions, NatSortedOptions } from "./natsort.ts";
 export { searchsorted, searchsortedMany, argsortScalars } from "./searchsorted.ts";
 export type { SearchSortedSide, SearchSortedOptions } from "./searchsorted.ts";
+export { reindexSeries, reindexDataFrame } from "./reindex.ts";
+export type { ReindexMethod, ReindexSeriesOptions, ReindexDataFrameOptions } from "./reindex.ts";

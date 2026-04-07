@@ -276,3 +276,5 @@ export type { ValueCountsBinnedOptions } from "./stats/index.ts";
 
 export { duplicatedSeries, duplicatedDataFrame, dropDuplicatesSeries, dropDuplicatesDataFrame } from "./stats/index.ts";
 export type { KeepPolicy, DuplicatedDataFrameOptions, DuplicatedSeriesOptions } from "./stats/index.ts";
+export { reindexSeries, reindexDataFrame } from "./core/index.ts";
+export type { ReindexMethod, ReindexSeriesOptions, ReindexDataFrameOptions } from "./core/index.ts";
