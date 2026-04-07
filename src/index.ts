@@ -284,3 +284,9 @@ export type { AlignSeriesOptions, AlignDataFrameOptions } from "./core/index.ts"
 
 export { explodeSeries, explodeDataFrame } from "./stats/index.ts";
 export type { ExplodeOptions, ExplodeDataFrameOptions } from "./stats/index.ts";
+
+export { isin, dataFrameIsin } from "./stats/index.ts";
+export type { IsinValues, IsinDict, DataFrameIsinValues } from "./stats/index.ts";
+
+export { between } from "./stats/index.ts";
+export type { BetweenInclusive, BetweenOptions } from "./stats/index.ts";
