@@ -364,3 +364,6 @@ export type {
 
 export { crossCorr, rollingCrossCorr } from "./stats/index.ts";
 export type { CrossCorrOptions, RollingCrossCorrOptions } from "./stats/index.ts";
+
+export { astype, dataFrameAstype } from "./core/index.ts";
+export type { AstypeErrors, AstypeOptions, AstypeSpec } from "./core/index.ts";

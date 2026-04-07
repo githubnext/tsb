@@ -532,6 +532,11 @@
           <p>Cross-correlation and rolling cross-correlation at multiple lags — <a href="rolling_cross_corr.html" style="color: var(--accent);">interactive tutorial</a>. <code>crossCorr(x, y, {lags})</code> computes the full-series Pearson cross-correlation at each requested lag, returning a Series indexed by lag labels. <code>rollingCrossCorr(x, y, window, {lags})</code> computes windowed cross-correlation at each time position, returning a DataFrame with one column per lag. Mirrors <code>pandas.Series.rolling(w).corr(y.shift(-l))</code> for each lag <code>l</code>.</p>
           <div class="status done">✅ Complete</div>
         </div>
+        <div class="feature-card">
+          <h3>🔀 astype</h3>
+          <p>Cast a Series or DataFrame to a different dtype — <a href="astype.html" style="color: var(--accent);">interactive tutorial</a>. <code>astype(series, dtype)</code> converts all values to the target dtype (int, float, bool, string, object) with consistent null-preservation. <code>dataFrameAstype(df, spec)</code> accepts a single dtype or a per-column <code>Record&lt;string, dtype&gt;</code>. Mirrors <code>pandas.Series.astype()</code> and <code>pandas.DataFrame.astype()</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
     </section>
   </main>

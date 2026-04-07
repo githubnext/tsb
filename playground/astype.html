@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb · astype</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --surface: #161b22;
+        --border: #30363d;
+        --text: #c9d1d9;
+        --muted: #8b949e;
+        --accent: #58a6ff;
+        --green: #3fb950;
+        --orange: #d29922;
+        --red: #f85149;
+        --code-bg: #1f2937;
+        font-size: 16px;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.6; }
+      header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+      header a { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+      header a:hover { color: var(--accent); }
+      h1 { font-size: 1.4rem; color: var(--accent); }
+      main { max-width: 900px; margin: 0 auto; padding: 2rem; }
+      h2 { font-size: 1.2rem; margin: 2rem 0 0.75rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+      p { color: var(--muted); margin-bottom: 0.75rem; }
+      pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; font-family: "Fira Code", "Cascadia Code", monospace; font-size: 0.85rem; margin-bottom: 1rem; }
+      .demo { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+      .demo label { font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 0.3rem; }
+      .demo input, .demo select { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 0.4rem 0.6rem; font-size: 0.9rem; width: 100%; margin-bottom: 0.75rem; }
+      button { background: var(--accent); color: #0d1117; border: none; border-radius: 4px; padding: 0.45rem 1rem; font-size: 0.9rem; cursor: pointer; font-weight: 600; margin-right: 0.5rem; }
+      button:hover { opacity: 0.85; }
+      .result-box { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-top: 0.75rem; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; }
+      .result-box.good { border-color: var(--green); color: var(--green); }
+      .result-box.error { border-color: var(--red); color: var(--red); }
+      table { border-collapse: collapse; width: 100%; font-size: 0.85rem; margin-top: 0.5rem; }
+      th { background: var(--code-bg); color: var(--accent); text-align: left; padding: 0.4rem 0.75rem; border: 1px solid var(--border); }
+      td { padding: 0.35rem 0.75rem; border: 1px solid var(--border); color: var(--text); }
+      tr:hover td { background: var(--code-bg); }
+      .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.75rem; font-weight: 600; background: var(--code-bg); color: var(--accent); border: 1px solid var(--border); margin-left: 0.4rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="index.html">← tsb</a>
+      <h1>astype <span class="badge">dtype casting</span></h1>
+    </header>
+    <main>
+      <p>
+        <code>astype(series, dtype)</code> and <code>dataFrameAstype(df, spec)</code> mirror
+        <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.astype.html" style="color:var(--accent)">
+          pandas.Series.astype()</a>. Cast numeric, boolean, and string values to any supported dtype
+        with a consistent null-preservation rule.
+      </p>
+
+      <h2>Series astype</h2>
+      <p>Type values (comma-separated) and pick a target dtype:</p>
+      <div class="demo">
+        <label>Input values</label>
+        <input type="text" id="series-vals" value="1, 2.5, 3, null, 0" />
+        <label>Target dtype</label>
+        <select id="series-dtype">
+          <option value="int64">int64</option>
+          <option value="int32">int32</option>
+          <option value="float64" selected>float64</option>
+          <option value="float32">float32</option>
+          <option value="bool">bool</option>
+          <option value="string">string</option>
+          <option value="object">object</option>
+        </select>
+        <label>On error</label>
+        <select id="series-errors">
+          <option value="raise">raise (throw)</option>
+          <option value="ignore">ignore (→ null)</option>
+        </select>
+        <button onclick="runSeriesDemo()">Run</button>
+        <div id="series-output"></div>
+      </div>
+
+      <h2>DataFrame per-column cast</h2>
+      <p>Apply different dtypes to each column of a DataFrame:</p>
+      <div class="demo">
+        <label>Column "a" (numeric)</label>
+        <input type="text" id="col-a" value="1, 2, 3, 0" />
+        <label>Column "b" (string)</label>
+        <input type="text" id="col-b" value="10, 20, 30, 0" />
+        <label>Column "c" (boolean 0/1)</label>
+        <input type="text" id="col-c" value="1, 0, 1, 0" />
+        <label>Cast "a" to</label>
+        <select id="cast-a">
+          <option value="string">string</option>
+          <option value="float64">float64</option>
+          <option value="bool">bool</option>
+          <option value="">— (keep)</option>
+        </select>
+        <label>Cast "b" to</label>
+        <select id="cast-b">
+          <option value="int64" selected>int64</option>
+          <option value="float64">float64</option>
+          <option value="">— (keep)</option>
+        </select>
+        <label>Cast "c" to</label>
+        <select id="cast-c">
+          <option value="bool" selected>bool</option>
+          <option value="string">string</option>
+          <option value="">— (keep)</option>
+        </select>
+        <button onclick="runDfDemo()">Run</button>
+        <div id="df-output"></div>
+      </div>
+
+      <h2>Casting rules quick reference</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Source → Target</th>
+            <th>Rule</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>number → int*</td><td><code>Math.trunc(v)</code></td><td>2.9 → 2, −1.7 → −1</td></tr>
+          <tr><td>bool → int*</td><td>true→1, false→0</td><td>true → 1</td></tr>
+          <tr><td>string → int*</td><td><code>Number(v)</code> then trunc</td><td>"3.9" → 3</td></tr>
+          <tr><td>any → float*</td><td><code>Number(v)</code></td><td>"NaN" → NaN</td></tr>
+          <tr><td>number → bool</td><td>0/NaN → false, else true</td><td>0.0 → false</td></tr>
+          <tr><td>string → bool</td><td>""/0/false → false, else true</td><td>"false" → false</td></tr>
+          <tr><td>bool → string</td><td>Python capitalisation</td><td>true → "True"</td></tr>
+          <tr><td>null/undefined</td><td>preserved as null</td><td>null → null</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Code example</h2>
+      <pre>
+import { Series, DataFrame, astype, dataFrameAstype } from "tsb";
+
+// Cast strings to integers
+const s = new Series({ data: ["1", "2", "3"] });
+const ints = astype(s, "int64");
+// ints.values → [1, 2, 3]
+// ints.dtype.name → "int64"
+
+// Ignore unconvertible values instead of throwing
+const s2 = new Series({ data: ["a", "2", "3"] });
+const safe = astype(s2, "int64", { errors: "ignore" });
+// safe.values → [null, 2, 3]
+
+// Per-column cast on a DataFrame
+const df = DataFrame.fromColumns({
+  price: ["9.99", "14.99", "4.50"],
+  inStock: [1, 0, 1],
+});
+const cast = dataFrameAstype(df, { price: "float64", inStock: "bool" });
+// cast.col("price").values → [9.99, 14.99, 4.5]
+// cast.col("inStock").values → [true, false, true]
+      </pre>
+    </main>
+
+    <script type="module">
+      // Inline micro-implementation for the playground (mirrors src/core/astype.ts logic)
+
+      function castOne(v, dtypeName) {
+        if (v === null || v === undefined) return null;
+
+        const isInt = /^(int|uint)/.test(dtypeName);
+        const isFloat = /^float/.test(dtypeName);
+
+        if (isInt) {
+          if (typeof v === "boolean") return v ? 1 : 0;
+          if (typeof v === "number") {
+            if (!Number.isFinite(v)) throw new TypeError(`Cannot cast ${v} to ${dtypeName}`);
+            return Math.trunc(v);
+          }
+          if (typeof v === "string") {
+            const n = Number(v.trim());
+            if (!Number.isFinite(n)) throw new TypeError(`Cannot cast "${v}" to ${dtypeName}`);
+            return Math.trunc(n);
+          }
+          throw new TypeError(`Cannot cast ${typeof v} to ${dtypeName}`);
+        }
+
+        if (isFloat) {
+          if (typeof v === "boolean") return v ? 1.0 : 0.0;
+          if (typeof v === "number") return v;
+          if (typeof v === "string") {
+            const t = v.trim().toLowerCase();
+            if (t === "nan") return NaN;
+            if (t === "inf" || t === "infinity") return Infinity;
+            if (t === "-inf" || t === "-infinity") return -Infinity;
+            const n = Number(t);
+            if (isNaN(n)) throw new TypeError(`Cannot cast "${v}" to ${dtypeName}`);
+            return n;
+          }
+          throw new TypeError(`Cannot cast ${typeof v} to ${dtypeName}`);
+        }
+
+        if (dtypeName === "bool") {
+          if (typeof v === "boolean") return v;
+          if (typeof v === "number") return v !== 0 && !isNaN(v);
+          if (typeof v === "string") {
+            const l = v.trim().toLowerCase();
+            return l !== "" && l !== "0" && l !== "false";
+          }
+          throw new TypeError(`Cannot cast ${typeof v} to bool`);
+        }
+
+        if (dtypeName === "string") {
+          if (typeof v === "boolean") return v ? "True" : "False";
+          if (v instanceof Date) return v.toISOString();
+          return String(v);
+        }
+
+        return v; // object
+      }
+
+      function parseVals(str) {
+        return str.split(",").map(s => {
+          const t = s.trim();
+          if (t === "null" || t === "undefined" || t === "") return null;
+          if (t === "true") return true;
+          if (t === "false") return false;
+          const n = Number(t);
+          return isNaN(n) ? t : n;
+        });
+      }
+
+      function fmtVal(v) {
+        if (v === null) return '<span style="color:var(--muted)">null</span>';
+        if (typeof v === "boolean") return `<span style="color:var(--orange)">${v}</span>`;
+        if (typeof v === "number") return isNaN(v) ? '<span style="color:var(--red)">NaN</span>' : `<span style="color:var(--green)">${v}</span>`;
+        return `<span style="color:var(--accent)">"${v}"</span>`;
+      }
+
+      window.runSeriesDemo = function() {
+        const vals = parseVals(document.getElementById("series-vals").value);
+        const dtype = document.getElementById("series-dtype").value;
+        const errors = document.getElementById("series-errors").value;
+        const out = document.getElementById("series-output");
+
+        const results = [];
+        let errorMsg = null;
+
+        for (const v of vals) {
+          try {
+            results.push(castOne(v, dtype));
+          } catch (e) {
+            if (errors === "raise") {
+              errorMsg = e.message;
+              break;
+            }
+            results.push(null);
+          }
+        }
+
+        if (errorMsg) {
+          out.innerHTML = `<div class="result-box error">TypeError: ${errorMsg}</div>`;
+          return;
+        }
+
+        let html = "<table><tr><th>Index</th><th>Input</th><th>→</th><th>Output (${dtype})</th></tr>".replace("${dtype}", dtype);
+        vals.forEach((v, i) => {
+          html += `<tr><td>${i}</td><td>${fmtVal(v)}</td><td>→</td><td>${fmtVal(results[i])}</td></tr>`;
+        });
+        html += "</table>";
+        out.innerHTML = `<div class="result-box good">${html}</div>`;
+      };
+
+      window.runDfDemo = function() {
+        const colA = parseVals(document.getElementById("col-a").value);
+        const colB = parseVals(document.getElementById("col-b").value);
+        const colC = parseVals(document.getElementById("col-c").value);
+        const castA = document.getElementById("cast-a").value;
+        const castB = document.getElementById("cast-b").value;
+        const castC = document.getElementById("cast-c").value;
+        const out = document.getElementById("df-output");
+
+        function castCol(vals, dtype) {
+          if (!dtype) return vals;
+          return vals.map(v => {
+            try { return castOne(v, dtype); }
+            catch { return null; }
+          });
+        }
+
+        const n = Math.max(colA.length, colB.length, colC.length);
+        const rA = castCol(colA, castA);
+        const rB = castCol(colB, castB);
+        const rC = castCol(colC, castC);
+
+        let html = `<table><tr><th>#</th>
+          <th>a <small style="color:var(--muted)">${castA || "unchanged"}</small></th>
+          <th>b <small style="color:var(--muted)">${castB || "unchanged"}</small></th>
+          <th>c <small style="color:var(--muted)">${castC || "unchanged"}</small></th>
+        </tr>`;
+        for (let i = 0; i < n; i++) {
+          html += `<tr><td>${i}</td><td>${fmtVal(rA[i] ?? null)}</td><td>${fmtVal(rB[i] ?? null)}</td><td>${fmtVal(rC[i] ?? null)}</td></tr>`;
+        }
+        html += "</table>";
+        out.innerHTML = `<div class="result-box good">${html}</div>`;
+      };
+    </script>
+  </body>
+</html>
