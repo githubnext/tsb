@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-07T12:50:39Z |
-| Iteration Count | 128 |
-| Best Metric | 83 |
+| Last Run | 2026-04-07T13:34:56Z |
+| Iteration Count | 129 |
+| Best Metric | 84 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -26,16 +26,16 @@
 
 ## 🎯 Current Priorities
 
-**State (iter 128)**: 83 files. Next candidates:
+**State (iter 129)**: 84 files. Next candidates:
 - `src/stats/cut_extended.ts` — pd.cut with `ordered` dtype and per-bin labels + `retbins` option
 - `src/stats/wide_to_long_enhanced.ts` — wide_to_long with stubvar / i / j options
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/stats/rolling_cross_corr.ts` — rolling cross-correlation (lag-based)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 129 (rolling_cross_corr)**: `crossCorr(x,y,{lags})` uses `collectPairs(xs,ys,0,n,l)` to get (x[i],y[i-l]) pairs; lag label format: `l<0 → "lag_neg{|l|}"`, `l>=0 → "lag_{l}"`. `rollingCrossCorr` returns `new DataFrame(colMap, x.index)`. Index for crossCorr result: `new Index(labels)`. Property: lag-0 self-corr = 1 or NaN. Symmetry: `crossCorr(x,y,l) == crossCorr(y,x,-l)`.
 - **Iter 128 (covariance)**: `rollingCov(x, y, w)` uses `pairedNums()` to extract positionally-aligned valid pairs in each window, then `sampleCov()` with ddof=1. `rollingCorr(x, y, w)` uses `pearsonCorrWindow()` — zero variance → NaN, insufficient pairs → null. DataFrames: column-wise dispatch via `df.col(name)` + `new DataFrame(resultCols, df.index)`. Scale-invariance property tested (multiply both series by positive scalars → same corr). `import fc from "fast-check"` (default import).
 - **Iter 127 (rolling_moments)**: `rollingSkew` uses Fisher-Pearson formula `G1 = sqrt(n(n-1))/(n-2) * g1` (requires n≥3). `rollingKurtosis` uses bias-corrected formula `G2 = (n+1)n(n-1)/((n-2)(n-3)) * (m4/m2²) - 3(n-1)²/((n-2)(n-3))` (requires n≥4). Both: use `new Series<Scalar>({data, index, name})` — NOT `withValues()`. DataFrame: `df.columns.values as string[]` + `df.col(name)` pattern. Default minPeriods for skew=3, kurt=4 (matching statistical requirement). Zero-variance windows → null.
 - **Iter 126 (abs/round)**: `absSeries`/`absDataFrame` — only transform `typeof v === "number" && !Number.isNaN(v)` values; pass everything else through. `roundSeries(s, d)` uses `Number(n.toFixed(d))` for positive d; for negative d uses `Math.round(n / 10^-d) * 10^-d`. DataFrame iteration uses `df.columns.values as string[]` + `df.col(name)` — not `for...of df` (no Symbol.iterator on DataFrame). Per-column dict for roundDataFrame: columns not in dict pass through unchanged.
@@ -68,6 +68,14 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 129 — 2026-04-07 13:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24084133215)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/rolling_cross_corr.ts` — `crossCorr` and `rollingCrossCorr` implementing Pearson cross-correlation at multiple lags.
+- **Metric**: 84 (previous best: 83, delta: +1)
+- **Commit**: 03559cc
+- **Notes**: `crossCorr` returns Series indexed by lag labels; `rollingCrossCorr` returns DataFrame (rows=time, cols=lag). Lag semantics: lag l → pairs (x[i], y[i-l]). Symmetry: crossCorr(x,y,l) == crossCorr(y,x,-l). Property tests: bounds [−1,1], self-corr = 1 or NaN, row count invariant.
 
 ### Iteration 128 — 2026-04-07 12:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24082160028)
 
