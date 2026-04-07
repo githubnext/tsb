@@ -247,3 +247,20 @@ export type {
 
 export { crossCorr, rollingCrossCorr } from "./rolling_cross_corr.ts";
 export type { CrossCorrOptions, RollingCrossCorrOptions } from "./rolling_cross_corr.ts";
+
+export {
+  cutWithBins,
+  qcutWithBins,
+  cutOrdered,
+  qcutOrdered,
+  compareCategories,
+  sortByCategory,
+} from "./cut_extended.ts";
+export type {
+  CutBinsResult,
+  OrderedCutResult,
+  CutWithBinsOptions,
+  QCutWithBinsOptions,
+  CutOrderedOptions,
+  QCutOrderedOptions,
+} from "./cut_extended.ts";

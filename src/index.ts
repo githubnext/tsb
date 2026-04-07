@@ -158,6 +158,22 @@ export type {
 export { Interval, IntervalIndex } from "./core/index.ts";
 export type { IntervalClosed, IntervalIndexOptions } from "./core/index.ts";
 export { cut, qcut, cutIntervalIndex, qcutIntervalIndex } from "./stats/index.ts";
+export {
+  cutWithBins,
+  qcutWithBins,
+  cutOrdered,
+  qcutOrdered,
+  compareCategories,
+  sortByCategory,
+} from "./stats/index.ts";
+export type {
+  CutBinsResult,
+  OrderedCutResult,
+  CutWithBinsOptions,
+  QCutWithBinsOptions,
+  CutOrderedOptions,
+  QCutOrderedOptions,
+} from "./stats/index.ts";
 export type { CutOptions, QCutOptions } from "./stats/index.ts";
 export { sampleSeries, sampleDataFrame } from "./stats/index.ts";
 export type { SampleSeriesOptions, SampleDataFrameOptions } from "./stats/index.ts";
