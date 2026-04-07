@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-07T16:49:43Z |
-| Iteration Count | 133 |
-| Best Metric | 88 |
+| Last Run | 2026-04-07T17:24:45Z |
+| Iteration Count | 134 |
+| Best Metric | 89 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -22,19 +22,21 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 133)**: 88 files. Next candidates:
-- `src/reshape/wide_to_long_enhanced.ts` — wide_to_long with stubvar / i / j options
+**State (iter 134)**: 89 files. Next candidates:
+- `src/core/insert_pop.ts` — DataFrame.insert(loc, col, values) and DataFrame.pop(col)
+- `src/reshape/wide_to_long_enhanced.ts` — wide_to_long with value_name option, MultiIndex support
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/core/select_dtypes_enhanced.ts` — select_dtypes with include/exclude lists and numpy-style dtype aliases
+- `src/core/select_dtypes_enhanced.ts` — select_dtypes with include/exclude numpy-style aliases
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 134 (to_dict/from_dict)**: `toDictOriented(df, orient)` dispatches via switch — "dict"/"columns": column→rowLabel→value map; "list"/"series": column→array; "split": {index,columns,data}; "tight": split + index_names/column_names; "records": row array; "index": rowLabel→column→value. `fromDictOriented(data, orient)`: "columns" validates each value is array; "index" collects colSet from all row objects in insertion order; "split"/"tight" delegate to shared `buildFromRowsAndCols(rows,cols,index?)`. `labelsToIndex` promotes 0…n-1 integer labels to RangeIndex.
 - **Iter 133 (idxmin/idxmax)**: `findExtremumLabel(series, mode, skipna)` scans values comparing with `lessThan`/`greaterThan` helpers that handle number, string, boolean, Date. First occurrence wins for ties. skipna=false returns label of first missing value (null/undefined/NaN). DataFrame axis 0: per-column result indexed by column names. Axis 1: per-row result indexed by row labels with column name values.
 - **Iter 132 (convert_dtypes)**: `inferBestDtype()` checks allBool→bool, allInt (whole numbers)→int64, allFloat→float64, allStr→string, else object. Bool checked before int (booleans are typeof "number"=false, safe). Idempotent by construction. `castValue()` dispatches by dtype. `dataFrameConvertDtypes` wraps per-column. Options: convertBoolean, convertInteger, convertFloating, convertString all default true.
 - **Iter 131 (astype)**: `castOne(v, dt)` by dtype kind. null/undefined always preserved as null. `errors='raise'|'ignore'` — on ignore, failed casts → null. `dataFrameAstype` accepts single dtype (applies to all cols) or `Record<col, dtype>` (per-column). Raises `RangeError` for unknown columns in spec. Single dtype path uses `Dtype.from(name)` singleton.
@@ -68,6 +70,14 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 134 — 2026-04-07 17:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24094874359)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/to_from_dict.ts` — `toDictOriented(df, orient)` (8 orientations) and `fromDictOriented(data, orient)` (4 orientations), mirroring `pandas.DataFrame.to_dict()` and `pandas.DataFrame.from_dict()`.
+- **Metric**: 89 (previous best: 88, delta: +1)
+- **Commit**: d2a469d
+- **Notes**: All 8 `toDictOriented` orientations dispatched via switch with shared row/column iteration. `fromDictOriented` orient="index" collects column set in insertion order from all row objects. Shared `buildFromRowsAndCols` helper for "split" and "tight". `labelsToIndex` promotes 0…n-1 integer keys to RangeIndex. Property tests: split/tight round-trips preserve shape and values; records round-trip preserves first-row spot-check; index orient keys match row count.
 
 ### Iteration 133 — 2026-04-07 16:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24093345633)
 
