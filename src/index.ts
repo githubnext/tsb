@@ -281,3 +281,6 @@ export type { ReindexMethod, ReindexSeriesOptions, ReindexDataFrameOptions } fro
 
 export { alignSeries, alignDataFrame } from "./core/index.ts";
 export type { AlignSeriesOptions, AlignDataFrameOptions } from "./core/index.ts";
+
+export { explodeSeries, explodeDataFrame } from "./stats/index.ts";
+export type { ExplodeOptions, ExplodeDataFrameOptions } from "./stats/index.ts";

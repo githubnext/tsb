@@ -182,3 +182,6 @@ export type { ValueCountsBinnedOptions } from "./value_counts_full.ts";
 
 export { duplicatedSeries, duplicatedDataFrame, dropDuplicatesSeries, dropDuplicatesDataFrame } from "./duplicated.ts";
 export type { KeepPolicy, DuplicatedDataFrameOptions, DuplicatedSeriesOptions } from "./duplicated.ts";
+
+export { explodeSeries, explodeDataFrame } from "./explode.ts";
+export type { ExplodeOptions, ExplodeDataFrameOptions } from "./explode.ts";

@@ -459,6 +459,12 @@
           <p>Align two Series or DataFrames to a common axis — <a href="align.html" style="color: var(--accent);">interactive tutorial</a>. <code>alignSeries(a, b, { join? })</code> aligns two Series. <code>alignDataFrame(a, b, { join?, axis? })</code> aligns DataFrames on rows, columns, or both. Supports <code>join="outer"</code> (union, default), <code>"inner"</code> (intersection), <code>"left"</code>, <code>"right"</code> policies. Mirrors <code>pandas.Series.align</code> and <code>pandas.DataFrame.align</code>.</p>
           <div class="status done">✅ Complete</div>
         </div>
+
+        <div class="feature-card">
+          <h3>💥 explode</h3>
+          <p>Transform list-like elements into individual rows — <a href="explode.html" style="color: var(--accent);">interactive tutorial</a>. <code>explodeSeries(s)</code> expands each array element into its own row, repeating the original index label. <code>explodeDataFrame(df, col)</code> explodes one or more columns while repeating all other column values. Null/undefined stay as a single <code>null</code> row; empty arrays also produce a single <code>null</code> row. <code>ignoreIndex: true</code> resets the output index. Mirrors <code>pandas.Series.explode</code> and <code>pandas.DataFrame.explode</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
     </section>
   </main>
