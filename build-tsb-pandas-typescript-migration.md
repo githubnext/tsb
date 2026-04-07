@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-07T16:25:42Z |
-| Iteration Count | 132 |
-| Best Metric | 87 |
+| Last Run | 2026-04-07T16:49:43Z |
+| Iteration Count | 133 |
+| Best Metric | 88 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
 | PR | #54 |
@@ -22,11 +22,11 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 132)**: 87 files. Next candidates:
+**State (iter 133)**: 88 files. Next candidates:
 - `src/reshape/wide_to_long_enhanced.ts` — wide_to_long with stubvar / i / j options
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/select_dtypes_enhanced.ts` — select_dtypes with include/exclude lists and numpy-style dtype aliases
@@ -35,6 +35,7 @@
 
 ## 📚 Lessons Learned
 
+- **Iter 133 (idxmin/idxmax)**: `findExtremumLabel(series, mode, skipna)` scans values comparing with `lessThan`/`greaterThan` helpers that handle number, string, boolean, Date. First occurrence wins for ties. skipna=false returns label of first missing value (null/undefined/NaN). DataFrame axis 0: per-column result indexed by column names. Axis 1: per-row result indexed by row labels with column name values.
 - **Iter 132 (convert_dtypes)**: `inferBestDtype()` checks allBool→bool, allInt (whole numbers)→int64, allFloat→float64, allStr→string, else object. Bool checked before int (booleans are typeof "number"=false, safe). Idempotent by construction. `castValue()` dispatches by dtype. `dataFrameConvertDtypes` wraps per-column. Options: convertBoolean, convertInteger, convertFloating, convertString all default true.
 - **Iter 131 (astype)**: `castOne(v, dt)` by dtype kind. null/undefined always preserved as null. `errors='raise'|'ignore'` — on ignore, failed casts → null. `dataFrameAstype` accepts single dtype (applies to all cols) or `Record<col, dtype>` (per-column). Raises `RangeError` for unknown columns in spec. Single dtype path uses `Dtype.from(name)` singleton.
 - **Iter 130 (cut_extended)**: `cutWithBins`/`qcutWithBins` return `{result, bins}` for retbins. `cutOrdered`/`qcutOrdered` return `{result, categories, ordered:true, bins}`. `compareCategories(a,b,cats)` → neg/zero/pos; null < any. `sortByCategory`. Property: antisymmetric, non-decreasing.
@@ -68,6 +69,14 @@
 
 All iterations in reverse chronological order (newest first).
 
+### Iteration 133 — 2026-04-07 16:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24093345633)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/idxminmax.ts` — `idxmin`/`idxmax` for Series and `idxminDataFrame`/`idxmaxDataFrame` for DataFrame (axis 0 and 1, configurable skipna).
+- **Metric**: 88 (previous best: 87, delta: +1)
+- **Commit**: a3b2f93
+- **Notes**: `findExtremumLabel` handles numeric, string, boolean, Date with first-occurrence tie-breaking. DataFrame axis 0 returns Series indexed by column names; axis 1 returns Series indexed by row labels with column name values. Property tests: label in index, value ≤ all others (idxmin), value ≥ all others (idxmax), single-element series has idxmin == idxmax.
+
 ### Iteration 132 — 2026-04-07 16:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24092268181)
 
 - **Status**: ✅ Accepted
@@ -76,45 +85,7 @@ All iterations in reverse chronological order (newest first).
 - **Commit**: 2a9ff73
 - **Notes**: inferBestDtype() promotes whole-number floats→int64, floats→float64, bools→bool, strings→string. Idempotent. Options: convertBoolean/convertInteger/convertFloating/convertString all default true. Property tests: idempotent, null count preserved, type-correct output.
 
-### Iteration 131 — 2026-04-07 15:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24089832656)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/core/astype.ts` — `astype(series, dtype)` and `dataFrameAstype(df, spec)` mirroring `pandas.Series.astype()` / `pandas.DataFrame.astype()`.
-- **Metric**: 86 (previous best: 85, delta: +1)
-- **Commit**: 8be0473
-- **Notes**: castOne() dispatch by DtypeKind. null always preserved. errors='raise'|'ignore'. dataFrameAstype accepts single dtype (all cols) or per-column Record. Property tests: int→string→int roundtrip; bool==(n!==0) for floats.
-
-### Iteration 130 — 2026-04-07 14:37 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24087093397)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/cut_extended.ts` — `cutWithBins`/`qcutWithBins` (retbins), `cutOrdered`/`qcutOrdered` (ordered categorical), `compareCategories`, `sortByCategory`.
-- **Metric**: 85 (previous best: 84, delta: +1)
-- **Commit**: 4171a1e
-- **Notes**: mirrors pandas `cut(retbins=True)` and `CategoricalDtype(ordered=True)`. `compareCategories` is antisymmetric (property test). `sortByCategory` produces non-decreasing sequences. Self-contained module duplicating cut.ts helpers.
-
-### Iteration 129 — 2026-04-07 13:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24084133215)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/rolling_cross_corr.ts` — `crossCorr` and `rollingCrossCorr` implementing Pearson cross-correlation at multiple lags.
-- **Metric**: 84 (previous best: 83, delta: +1)
-- **Commit**: 03559cc
-- **Notes**: `crossCorr` returns Series indexed by lag labels; `rollingCrossCorr` returns DataFrame (rows=time, cols=lag). Lag semantics: lag l → pairs (x[i], y[i-l]). Symmetry: crossCorr(x,y,l) == crossCorr(y,x,-l). Property tests: bounds [−1,1], self-corr = 1 or NaN, row count invariant.
-
-### Iteration 128 — 2026-04-07 12:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24082160028)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/covariance.ts` — `rollingCov`, `rollingCorr`, `rollingCovDataFrame`, `rollingCorrDataFrame` mirroring `pandas.Series.rolling(n).cov(other)` / `.corr(other)`.
-- **Metric**: 83 (previous best: 82, delta: +1)
-- **Commit**: 784e6ee
-- **Notes**: `pairedNums()` extracts positionally-aligned valid pairs per window. `rollingCorr` returns NaN for zero-variance windows. DataFrames use column-wise dispatch. Scale-invariance, commutativity, and bounds [−1,1] verified with fast-check property tests.
-
-### Iteration 127 — 2026-04-07 12:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24080990847)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/rolling_moments.ts` — `rollingSkew`, `rollingKurtosis`, `rollingSkewDataFrame`, `rollingKurtosisDataFrame` mirroring `pandas.Series.rolling(n).skew()` / `.kurt()`
-- **Metric**: 82 (previous best: 81, delta: +1)
-- **Commit**: 4eef894
-- **Notes**: Fisher-Pearson adjusted skew (n≥3) and bias-corrected excess kurtosis (n≥4). `minPeriods` defaults to statistical minimum. Scale/shift-invariant properties verified with fast-check.
+### Iters 127–132 — ✅ (metrics 82→87): rolling_moments (82), covariance (83), rolling_cross_corr (84), cut_extended (85), astype (86), convert_dtypes (87)
 
 ### Iteration 126 — ✅ abs/round (81) · Iteration 125 — ✅ autocorr (80)
 
