@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb · pct_change</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --surface: #161b22;
+        --border: #30363d;
+        --text: #c9d1d9;
+        --muted: #8b949e;
+        --accent: #58a6ff;
+        --green: #3fb950;
+        --orange: #d29922;
+        --red: #f85149;
+        --code-bg: #1f2937;
+        font-size: 16px;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.6; }
+      header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+      header a { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+      header a:hover { color: var(--accent); }
+      h1 { font-size: 1.4rem; color: var(--accent); }
+      main { max-width: 900px; margin: 0 auto; padding: 2rem; }
+      h2 { font-size: 1.2rem; margin: 2rem 0 0.75rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+      p { color: var(--muted); margin-bottom: 0.75rem; }
+      pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; font-family: "Fira Code", "Cascadia Code", monospace; font-size: 0.85rem; margin-bottom: 1rem; }
+      .demo { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+      .demo label { font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 0.3rem; }
+      .demo input, .demo select { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 0.4rem 0.6rem; font-size: 0.9rem; width: 100%; margin-bottom: 0.75rem; }
+      .demo input[type=number] { width: 80px; }
+      button { background: var(--accent); color: #0d1117; border: none; border-radius: 4px; padding: 0.45rem 1rem; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
+      button:hover { opacity: 0.85; }
+      table { border-collapse: collapse; width: 100%; font-size: 0.85rem; margin-top: 0.5rem; }
+      th { background: var(--code-bg); color: var(--accent); text-align: left; padding: 0.4rem 0.75rem; border: 1px solid var(--border); }
+      td { padding: 0.35rem 0.75rem; border: 1px solid var(--border); font-family: monospace; }
+      td.nan { color: var(--muted); font-style: italic; }
+      td.inf { color: var(--orange); }
+      .badge { display: inline-block; background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.4rem; font-size: 0.78rem; font-family: monospace; margin: 0 2px; }
+      .note { color: var(--muted); font-size: 0.85rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="index.html">← tsb</a>
+      <h1>📈 pct_change</h1>
+    </header>
+    <main>
+      <p>
+        <code>pctChange(series, periods)</code> computes the element-wise percentage change
+        (<em>relative change</em>) between values separated by <code>periods</code> positions.
+        Mirrors <code>pandas.Series.pct_change()</code> and <code>pandas.DataFrame.pct_change()</code>.
+      </p>
+      <pre>
+// result[i] = (values[i] - values[i - periods]) / abs(values[i - periods])
+
+import { Series, pctChange, dataFramePctChange } from "tsb";
+
+const prices = new Series({ data: [100, 110, 121, 108.9], name: "price" });
+pctChange(prices).values;
+//  [NaN, 0.10, 0.10, -0.10]   ← 10% up, 10% up, 10% down
+      </pre>
+
+      <h2>Series — interactive demo</h2>
+      <div class="demo">
+        <label>Values (comma-separated; use "null" for missing)</label>
+        <input type="text" id="seriesInput" value="100, 110, 121, 108.9, 95" />
+        <label>periods</label>
+        <input type="number" id="seriesPeriods" value="1" min="-10" max="10" />
+        <button onclick="runSeries()">Compute</button>
+        <div id="seriesOut" style="margin-top:1rem;"></div>
+      </div>
+
+      <h2>DataFrame — interactive demo</h2>
+      <div class="demo">
+        <label>Column A (comma-separated)</label>
+        <input type="text" id="dfA" value="100, 110, 121, 133.1" />
+        <label>Column B (comma-separated)</label>
+        <input type="text" id="dfB" value="200, 220, 242, 266.2" />
+        <label>periods</label>
+        <input type="number" id="dfPeriods" value="1" min="-5" max="5" />
+        <label>axis</label>
+        <select id="dfAxis">
+          <option value="0">0 — column-wise (default)</option>
+          <option value="1">1 — row-wise</option>
+        </select>
+        <button onclick="runDataFrame()">Compute</button>
+        <div id="dfOut" style="margin-top:1rem;"></div>
+      </div>
+
+      <h2>API</h2>
+      <pre>
+import { pctChange, dataFramePctChange } from "tsb";
+
+// Series
+pctChange(series: Series&lt;Scalar&gt;, periods?: number): Series&lt;number&gt;
+
+// DataFrame
+dataFramePctChange(
+  df: DataFrame,
+  periods?: number,
+  options?: { axis?: 0 | 1 | "index" | "columns" }
+): DataFrame
+      </pre>
+
+      <h2>Behaviour notes</h2>
+      <ul style="color:var(--muted);font-size:0.9rem;line-height:2;list-style:inside disc;">
+        <li>The first <code>abs(periods)</code> values are <span class="badge">NaN</span> (no prior value).</li>
+        <li>Missing values (<code>null</code>, <code>undefined</code>, <code>NaN</code>) propagate as <span class="badge">NaN</span>.</li>
+        <li>A prior value of <code>0</code> yields <span class="badge">±Infinity</span> — matching pandas.</li>
+        <li><code>periods=0</code> yields all <span class="badge">NaN</span> (undefined 0/0 change).</li>
+        <li>Negative <code>periods</code> computes a forward look-ahead percentage change.</li>
+      </ul>
+    </main>
+
+    <script type="module">
+      // ─── minimal in-page tsb implementation for playground ───────────────────
+
+      function parseValues(str) {
+        return str.split(",").map(s => {
+          const t = s.trim();
+          if (t === "null" || t === "") return null;
+          if (t === "NaN") return NaN;
+          return parseFloat(t);
+        });
+      }
+
+      function pctChangeVals(vals, periods) {
+        const n = vals.length;
+        const out = new Array(n).fill(NaN);
+        if (periods === 0) return out;
+        for (let i = 0; i < n; i++) {
+          const cur = vals[i];
+          const priorIdx = i - periods;
+          if (priorIdx < 0 || priorIdx >= n) continue;
+          const prior = vals[priorIdx];
+          if (cur === null || cur === undefined || isNaN(cur)) continue;
+          if (prior === null || prior === undefined || isNaN(prior)) continue;
+          out[i] = (cur - prior) / Math.abs(prior);
+        }
+        return out;
+      }
+
+      function fmt(v) {
+        if (v === null || v === undefined) return '<td class="nan">null</td>';
+        if (typeof v === "number" && isNaN(v)) return '<td class="nan">NaN</td>';
+        if (!isFinite(v)) return `<td class="inf">${v > 0 ? "+∞" : "−∞"}</td>`;
+        return `<td>${v.toFixed(4)}</td>`;
+      }
+
+      function tableOf(headers, rows) {
+        const th = headers.map(h => `<th>${h}</th>`).join("");
+        const trs = rows.map(r => `<tr>${r.map(fmt).join("")}</tr>`).join("");
+        return `<table><tr>${th}</tr>${trs}</table>`;
+      }
+
+      window.runSeries = function() {
+        const vals = parseValues(document.getElementById("seriesInput").value);
+        const periods = parseInt(document.getElementById("seriesPeriods").value, 10);
+        const result = pctChangeVals(vals, periods);
+        const rows = vals.map((v, i) => [i, v, result[i]]);
+        document.getElementById("seriesOut").innerHTML = tableOf(["index", "value", `pct_change(periods=${periods})`], rows);
+      };
+
+      window.runDataFrame = function() {
+        const a = parseValues(document.getElementById("dfA").value);
+        const b = parseValues(document.getElementById("dfB").value);
+        const periods = parseInt(document.getElementById("dfPeriods").value, 10);
+        const axis = parseInt(document.getElementById("dfAxis").value, 10);
+        const n = Math.max(a.length, b.length);
+        const aFull = Array.from({length: n}, (_, i) => a[i] ?? null);
+        const bFull = Array.from({length: n}, (_, i) => b[i] ?? null);
+
+        let ra, rb;
+        if (axis === 0) {
+          ra = pctChangeVals(aFull, periods);
+          rb = pctChangeVals(bFull, periods);
+        } else {
+          // row-wise
+          ra = new Array(n).fill(NaN);
+          rb = new Array(n).fill(NaN);
+          for (let i = 0; i < n; i++) {
+            const row = [aFull[i], bFull[i]];
+            const rr = pctChangeVals(row, periods);
+            ra[i] = rr[0];
+            rb[i] = rr[1];
+          }
+        }
+
+        const rows = Array.from({length: n}, (_, i) => [i, aFull[i], bFull[i], ra[i], rb[i]]);
+        document.getElementById("dfOut").innerHTML = tableOf(
+          ["index", "A (input)", "B (input)", `A pct_change`, `B pct_change`],
+          rows
+        );
+      };
+
+      // run defaults on load
+      runSeries();
+      runDataFrame();
+    </script>
+  </body>
+</html>

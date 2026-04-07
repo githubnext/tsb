@@ -194,3 +194,6 @@ export type { BetweenInclusive, BetweenOptions } from "./between.ts";
 
 export { unique, nunique, dataFrameNunique } from "./unique.ts";
 export type { UniqueOptions, NuniqOptions, DataFrameNuniqOptions } from "./unique.ts";
+
+export { pctChange, dataFramePctChange } from "./pct_change.ts";
+export type { PctChangeOptions } from "./pct_change.ts";
