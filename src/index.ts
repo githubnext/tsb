@@ -290,3 +290,6 @@ export type { IsinValues, IsinDict, DataFrameIsinValues } from "./stats/index.ts
 
 export { between } from "./stats/index.ts";
 export type { BetweenInclusive, BetweenOptions } from "./stats/index.ts";
+
+export { unique, nunique, dataFrameNunique } from "./stats/index.ts";
+export type { UniqueOptions, NuniqOptions, DataFrameNuniqOptions } from "./stats/index.ts";

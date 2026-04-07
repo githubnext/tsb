@@ -191,3 +191,6 @@ export type { IsinValues, IsinDict, DataFrameIsinValues } from "./isin.ts";
 
 export { between } from "./between.ts";
 export type { BetweenInclusive, BetweenOptions } from "./between.ts";
+
+export { unique, nunique, dataFrameNunique } from "./unique.ts";
+export type { UniqueOptions, NuniqOptions, DataFrameNuniqOptions } from "./unique.ts";

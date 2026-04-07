@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — unique / nunique</title>
+  <script src="playground-runtime.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1   { font-size: 2rem; margin-bottom: .25rem; }
+    .subtitle { color: #555; margin-bottom: 2rem; }
+    section  { margin-bottom: 2.5rem; }
+    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
+    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
+    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
+    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
+    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
+    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
+    nav a { color: #0366d6; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    table { border-collapse: collapse; margin: .5rem 0; font-size: .875rem; }
+    th, td { border: 1px solid #ddd; padding: .3rem .75rem; text-align: center; }
+    th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+<nav><a href="index.html">← tsb playground</a></nav>
+<h1>unique / nunique</h1>
+<p class="subtitle">Unique values and unique-value counts — mirrors <code>pandas.unique()</code>, <code>Series.nunique()</code>, and <code>DataFrame.nunique()</code>.</p>
+
+<section>
+  <h2>Overview</h2>
+  <p>Three functions for working with unique values:</p>
+  <ul>
+    <li><strong><code>unique(series)</code></strong> — returns a new Series of unique values in <em>first-appearance order</em> (hash-table based, does NOT sort).</li>
+    <li><strong><code>nunique(series)</code></strong> — returns the count of distinct non-missing values.</li>
+    <li><strong><code>dataFrameNunique(df)</code></strong> — returns a Series of per-column (or per-row) unique-value counts.</li>
+  </ul>
+  <div class="note">
+    Missing values (<code>null</code>, <code>undefined</code>, <code>NaN</code>) are treated as a single distinct missing category.
+    By default <code>nunique</code> and <code>dataFrameNunique</code> exclude missing values (<code>dropna: true</code>),
+    while <code>unique</code> includes them (<code>dropna: false</code>) — matching pandas behaviour.
+  </div>
+</section>
+
+<section>
+  <h2>unique(series)</h2>
+  <pre><code>import { Series, unique } from "tsb";
+
+const s = new Series([3, 1, 2, 1, 3, null, null]);
+const u = unique(s);
+console.log(u.values);          // [3, 1, 2, null]  — first-appearance order
+console.log(u.values.length);   // 4
+
+// Exclude missing values
+const u2 = unique(s, { dropna: true });
+console.log(u2.values);  // [3, 1, 2]</code></pre>
+  <div class="output">[3, 1, 2, null]
+length: 4
+dropna=true: [3, 1, 2]</div>
+</section>
+
+<section>
+  <h2>nunique(series)</h2>
+  <pre><code>import { Series, nunique } from "tsb";
+
+const s = new Series([1, 2, 2, null, NaN]);
+console.log(nunique(s));                    // 2  (null and NaN excluded)
+console.log(nunique(s, { dropna: false })); // 3  (missing is one category)</code></pre>
+  <div class="output">dropna=true (default): 2
+dropna=false: 3</div>
+
+  <h3>String series</h3>
+  <pre><code>import { Series, nunique } from "tsb";
+
+const cities = new Series(["Paris", "London", "Paris", "Berlin", "London"]);
+console.log(nunique(cities)); // 3</code></pre>
+  <div class="output">3</div>
+</section>
+
+<section>
+  <h2>dataFrameNunique(df) — axis=0 (default)</h2>
+  <p>Count unique values per <strong>column</strong> (axis=0, the default).</p>
+  <pre><code>import { DataFrame, dataFrameNunique } from "tsb";
+
+const df = DataFrame.fromColumns({
+  animal: ["cat", "dog", "cat", "bird"],
+  legs:   [4, 4, 4, 2],
+  alive:  [true, true, true, null],
+});
+
+const result = dataFrameNunique(df);
+console.log(result.index.values); // ["animal", "legs", "alive"]
+console.log(result.values);       // [3, 2, 1]  (null excluded from "alive")</code></pre>
+  <div class="output">columns: ["animal", "legs", "alive"]
+counts:  [3, 2, 1]</div>
+</section>
+
+<section>
+  <h2>dataFrameNunique(df, { axis: 1 }) — per row</h2>
+  <p>Count unique values per <strong>row</strong> (axis=1).</p>
+  <pre><code>import { DataFrame, dataFrameNunique } from "tsb";
+
+const df = DataFrame.fromColumns({
+  a: [1, 2, 2],
+  b: [1, 3, 4],
+  c: [1, 2, 5],
+});
+
+const result = dataFrameNunique(df, { axis: 1 });
+console.log(result.values); // [1, 3, 3]
+// row 0: {1,1,1} → 1 unique
+// row 1: {2,3,2} → 2 unique
+// row 2: {2,4,5} → 3 unique</code></pre>
+  <div class="output">[1, 2, 3]</div>
+</section>
+
+<section>
+  <h2>Missing-value handling</h2>
+  <table>
+    <thead>
+      <tr><th>Function</th><th>Default <code>dropna</code></th><th>null / undefined / NaN treated as</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>unique()</code></td><td><code>false</code></td><td>One distinct category (included)</td></tr>
+      <tr><td><code>nunique()</code></td><td><code>true</code></td><td>Excluded from count</td></tr>
+      <tr><td><code>dataFrameNunique()</code></td><td><code>true</code></td><td>Excluded from count</td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <code>null</code>, <code>undefined</code>, and <code>NaN</code> are all normalised to the same missing
+    sentinel before de-duplication — consistent with pandas' NaN treatment.
+  </div>
+</section>
+
+<section>
+  <h2>API Reference</h2>
+  <pre><code>// unique
+unique(series: Series&lt;Scalar&gt;, options?: UniqueOptions): Series&lt;Scalar&gt;
+interface UniqueOptions {
+  dropna?: boolean; // default false — include missing values
+}
+
+// nunique
+nunique(series: Series&lt;Scalar&gt;, options?: NuniqOptions): number
+interface NuniqOptions {
+  dropna?: boolean; // default true — exclude missing values
+}
+
+// dataFrameNunique
+dataFrameNunique(df: DataFrame, options?: DataFrameNuniqOptions): Series&lt;number&gt;
+interface DataFrameNuniqOptions extends NuniqOptions {
+  axis?: 0 | 1 | "index" | "columns"; // default 0 — per-column
+  dropna?: boolean;                    // default true
+}</code></pre>
+</section>
+</body>
+</html>
