@@ -17,7 +17,7 @@ import type { Label, Scalar } from "../../src/index.ts";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
-function s(data: readonly Scalar[], name?: string | null): Series<Scalar> {
+function s(data: readonly Scalar[], name?: string): Series<Scalar> {
   return new Series({ data: [...data], ...(name !== undefined ? { name } : {}) });
 }
 
