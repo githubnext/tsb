@@ -26,6 +26,8 @@ safe-outputs:
   push-to-pull-request-branch:
     target: "*"
     max: 3
+    allowed-files:
+      - ".github/workflows/**"
   add-comment:
     max: 3
     target: "*"
