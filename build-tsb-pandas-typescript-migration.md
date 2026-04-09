@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T04:30:00Z |
-| Iteration Count | 139 |
-| Best Metric | 32 |
+| Last Run | 2026-04-09T05:17:00Z |
+| Iteration Count | 140 |
+| Best Metric | 33 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -22,19 +22,20 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 139)**: 32 files on PR #81 branch. cut/qcut added successfully. Next priorities:
+**State (iter 140)**: 33 files on PR #81 branch. window_extended added (sem/skew/kurt/quantile). Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/attrs.ts` — DataFrame/Series `.attrs` dict (user-defined metadata)
-- `src/stats/window_extended.ts` — additional rolling stats (ewm_std, ewm_var, rolling_sem)
+- `src/stats/sparse_ops.ts` — sparse/masked operations (where/mask with callable conditions)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 140 (window_extended)**: `rollingSem` = `std(ddof=1)/sqrt(n)`, requires n≥2. `rollingSkew` Fisher-Pearson formula, constant window→0, requires n≥3. `rollingKurt` Fisher excess kurtosis, constant→0, requires n≥4. `rollingQuantile` supports 5 interpolation methods; linear is pandas default. All share `applyWindow()` helper with configurable `minN`. Standalone module pattern (no modification to existing rolling.ts).
 - **Iter 139 (cut/qcut)**: `assignBins()` binary search: for right=true, find smallest i where v <= edges[i+1]; validate with v > binLo check. For right=false, find smallest i where edges[i+1] > v; last bin includes right edge. `qcut` always uses right=true/include_lowest=true. Integer bins: edges[0] slightly below min (mn - step*0.001) to include minimum value. `deduplicateEdges()` needed for uniform data with qcut.
 - **Iter 138 (to_from_dict + wide_to_long)**: PR #81 branch had only 29 files despite state claiming 30 — to_from_dict was never actually pushed. Fixed by adding both. `wideToLong`: `collectSuffixes()` scans all column names, matches `{stub}{sep}{suffix}` against anchored regex. Suffixes sorted numerically (integers) else lexicographically. Missing wide columns → null. Output column order: id cols, j, stub cols.
 - **Iter 135 (insert_pop)**: `insertColumn(df, loc, col, values)` rebuilds the ordered column Map inserting when `idx === loc`. `popColumn` iterates columns skipping the target, returns `{series, df}`. `reorderColumns` subsets. `moveColumn` wraps pop+insert. All non-mutating.
@@ -66,6 +67,14 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 140 — 2026-04-09 05:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24173724265)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/window_extended.ts` — `rollingSem`, `rollingSkew`, `rollingKurt`, `rollingQuantile`. 35+ unit tests + 3 property-based tests. Playground page `window_extended.html`.
+- **Metric**: 33 (previous best: 32, delta: +1)
+- **Commit**: `c02f7cf`
+- **Notes**: Standalone module with shared `applyWindow()` helper. Skew/kurt special-case `std=0` → return 0. `rollingQuantile` supports 5 interpolation methods (linear/lower/higher/midpoint/nearest).
 
 ### Iteration 139 — 2026-04-09 04:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24172139030)
 
