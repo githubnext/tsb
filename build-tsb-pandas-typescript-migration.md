@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T20:48:00Z |
-| Iteration Count | 150 |
-| Best Metric | 43 |
+| Last Run | 2026-04-09T21:19:08Z |
+| Iteration Count | 151 |
+| Best Metric | 44 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -26,15 +26,16 @@
 
 ## 🎯 Current Priorities
 
-**State (iter 150)**: 43 files on PR #81 branch. categorical_ops module added. Next priorities:
+**State (iter 151)**: 44 files on PR #81 branch. interval_ops module added. Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/accessor_extended.ts` — extended accessor methods for dt/str/cat
-- `src/stats/interval_ops.ts` — Interval/IntervalIndex helpers (contains, overlaps)
+- `src/stats/sparse_ops.ts` — sparse array representation (SparseArray, sparsify, densify)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 151 (interval_ops)**: `intervalIntersection` endpoint-closed logic must compare which interval "owns" the boundary — when `a.right < b.right`, `a` determines if `right` is closed; `b` has it interior. Point intervals `{left=right, closed≠"both"}` are empty. `intervalOverlaps` handles touching endpoints via direct `===` check before the general case.
 - **Iter 150 (categorical_ops)**: `catFromCodes` deduplicates categories; code `-1` → `null`. Set ops delegate to `cat.setCategories()`. `catCrossTab` uses `DataFrame.fromColumns`. `catRecode` dispatches on `typeof mapping === "function"`. `new DataFrame(colMap, index)` ≠ `DataFrame.fromColumns` — use static factory.
 - **Iter 149 (api_types)**: `isScalar` — primitives + Date only. `isFloat` — finite number with fractional part. `isComplexDtype` always false (JS has no complex type). `isExtensionArrayDtype` = string|object|datetime|timedelta|category.
 - **Iters 140–148**: `rollingSem`=std/√n. `rollingSkew` Fisher-Pearson. `linspace` pins last element to exact `stop`. `arange` accumulation avoids float drift. `strSplitExpand` n<0→unlimited. `pipe` 8 TypeScript overloads. `strGetDummies` sorted tokens. WeakMap attrs pattern.
@@ -51,13 +52,20 @@
 
 ## 🔭 Future Directions
 
-**State (iter 150)**: 43 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/interval_ops
+**State (iter 151)**: 44 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/sparse_ops
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 151 — 2026-04-09 21:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24213802069)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/interval_ops.ts` — 19 Interval/IntervalIndex functions: `makeInterval`, `intervalContains`, `intervalOverlaps`, `intervalIsEmpty`, `intervalEquals`, `intervalLength`, `intervalMidpoint`, `intervalToString`, `intervalUnion`, `intervalIntersection`, `fromBreaks`, `fromArrays`, `indexGet`, `indexGetIndexer`, `overlappingPairs`, `sortIntervals`, `mergeIntervals`, `coverageLength`, `intervalsFromBins`. 72 unit tests + 4 property tests.
+- **Metric**: 44 (previous best: 43, delta: +1)
+- **Commit**: `f25a0c6`
 
 ### Iteration 150 — 2026-04-09 20:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24212535793)
 
