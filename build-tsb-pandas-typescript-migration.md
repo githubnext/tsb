@@ -10,32 +10,33 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-07T17:24:45Z |
-| Iteration Count | 134 |
+| Last Run | 2026-04-09T00:24:43Z |
+| Iteration Count | 135 |
 | Best Metric | 89 |
 | Target Metric | — |
-| Branch | `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` |
-| PR | #54 |
+| Branch | `autoloop/build-tsb-pandas-typescript-migration` |
+| PR | #58 (iter135 branch: autoloop/build-tsb-pandas-typescript-migration-iter135) |
 | Steering Issue | — |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 134)**: 89 files. Next candidates:
-- `src/core/insert_pop.ts` — DataFrame.insert(loc, col, values) and DataFrame.pop(col)
+**State (iter 135)**: 89 files. Next candidates:
 - `src/reshape/wide_to_long_enhanced.ts` — wide_to_long with value_name option, MultiIndex support
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/select_dtypes_enhanced.ts` — select_dtypes with include/exclude numpy-style aliases
+- `src/core/to_from_dict.ts` — toDictOriented/fromDictOriented (to_dict/from_dict)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 135 (insert_pop)**: `insertColumn(df, loc, col, values)` rebuilds the ordered column Map by iterating `df.columns.values` and inserting the new column when `idx === loc` (handles end-of-columns via post-loop insert). Uses `df.get(col)` (returns undefined) for existence checks. `popColumn` iterates columns skipping the target, returns `{series, df}`. `reorderColumns` selects columns in the given order (can subset). `moveColumn` wraps pop+insert. All non-mutating. Key: `new DataFrame(map, df.index)` constructor works with regular Map (satisfies ReadonlyMap).
 - **Iter 134 (to_dict/from_dict)**: `toDictOriented(df, orient)` dispatches via switch — "dict"/"columns": column→rowLabel→value map; "list"/"series": column→array; "split": {index,columns,data}; "tight": split + index_names/column_names; "records": row array; "index": rowLabel→column→value. `fromDictOriented(data, orient)`: "columns" validates each value is array; "index" collects colSet from all row objects in insertion order; "split"/"tight" delegate to shared `buildFromRowsAndCols(rows,cols,index?)`. `labelsToIndex` promotes 0…n-1 integer labels to RangeIndex.
 - **Iter 133 (idxmin/idxmax)**: `findExtremumLabel(series, mode, skipna)` scans values comparing with `lessThan`/`greaterThan` helpers that handle number, string, boolean, Date. First occurrence wins for ties. skipna=false returns label of first missing value (null/undefined/NaN). DataFrame axis 0: per-column result indexed by column names. Axis 1: per-row result indexed by row labels with column name values.
 - **Iter 132 (convert_dtypes)**: `inferBestDtype()` checks allBool→bool, allInt (whole numbers)→int64, allFloat→float64, allStr→string, else object. Bool checked before int (booleans are typeof "number"=false, safe). Idempotent by construction. `castValue()` dispatches by dtype. `dataFrameConvertDtypes` wraps per-column. Options: convertBoolean, convertInteger, convertFloating, convertString all default true.
@@ -70,6 +71,14 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 135 — 2026-04-09 00:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24165728899)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/insert_pop.ts` — `insertColumn(df, loc, col, values)`, `popColumn(df, col)`, `reorderColumns(df, order)`, `moveColumn(df, col, newLoc)` mirroring `pandas.DataFrame.insert()` and `pandas.DataFrame.pop()`.
+- **Metric**: 89 (previous best: 88 on branch, delta: +1)
+- **Commit**: 6902458
+- **Notes**: All four functions are non-mutating (return new DataFrames). insertColumn rebuilds the ordered column Map at position loc. popColumn returns {series, df}. 40+ unit + 3 property-based tests.
 
 ### Iteration 134 — 2026-04-07 17:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24094874359)
 
