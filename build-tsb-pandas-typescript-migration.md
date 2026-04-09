@@ -10,32 +10,33 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T00:24:43Z |
-| Iteration Count | 135 |
-| Best Metric | 89 |
+| Last Run | 2026-04-09T01:30:00Z |
+| Iteration Count | 136 |
+| Best Metric | 30 |
 | Target Metric | — |
-| Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | #58 (iter135 branch: autoloop/build-tsb-pandas-typescript-migration-iter135) |
+| Branch | `autoloop/build-tsb-pandas-typescript-migration-iter136` |
+| PR | — |
 | Steering Issue | — |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 135)**: 89 files. Next candidates:
+**State (iter 136)**: 89 files on accumulated branch (c9103f2f lineage). Next candidates:
 - `src/reshape/wide_to_long_enhanced.ts` — wide_to_long with value_name option, MultiIndex support
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/select_dtypes_enhanced.ts` — select_dtypes with include/exclude numpy-style aliases
-- `src/core/to_from_dict.ts` — toDictOriented/fromDictOriented (to_dict/from_dict)
+- `src/core/insert_pop.ts` — insertColumn/popColumn (already done in iter135 branch but needs to be added to accumulated branch)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 136 (to_from_dict on accumulated branch)**: `toDictOriented(df, orient)` dispatches via switch — "dict"/"columns": column→rowLabel→value map using `labelKey()` helper; "list": plain arrays; "series": direct col refs; "split"/"tight": build rows with column-at-a-time iteration; "records": delegates to `df.toRecords()`; "index": rowLabel→col→value. `fromDictOriented`: "columns" → `DataFrame.fromColumns`; "index" collects colSet insertion order from all rows (missing fields → null); "split"/"tight" share same logic via `buildIndex()` helper that detects default range. Property tests: split round-trip preserves shape, records column count stable, index row count preserved. **Key**: Accumulated c9103f2f branch has 88 source files; adding to_from_dict gives 89.
 - **Iter 135 (insert_pop)**: `insertColumn(df, loc, col, values)` rebuilds the ordered column Map by iterating `df.columns.values` and inserting the new column when `idx === loc` (handles end-of-columns via post-loop insert). Uses `df.get(col)` (returns undefined) for existence checks. `popColumn` iterates columns skipping the target, returns `{series, df}`. `reorderColumns` selects columns in the given order (can subset). `moveColumn` wraps pop+insert. All non-mutating. Key: `new DataFrame(map, df.index)` constructor works with regular Map (satisfies ReadonlyMap).
 - **Iter 134 (to_dict/from_dict)**: `toDictOriented(df, orient)` dispatches via switch — "dict"/"columns": column→rowLabel→value map; "list"/"series": column→array; "split": {index,columns,data}; "tight": split + index_names/column_names; "records": row array; "index": rowLabel→column→value. `fromDictOriented(data, orient)`: "columns" validates each value is array; "index" collects colSet from all row objects in insertion order; "split"/"tight" delegate to shared `buildFromRowsAndCols(rows,cols,index?)`. `labelsToIndex` promotes 0…n-1 integer labels to RangeIndex.
 - **Iter 133 (idxmin/idxmax)**: `findExtremumLabel(series, mode, skipna)` scans values comparing with `lessThan`/`greaterThan` helpers that handle number, string, boolean, Date. First occurrence wins for ties. skipna=false returns label of first missing value (null/undefined/NaN). DataFrame axis 0: per-column result indexed by column names. Axis 1: per-row result indexed by row labels with column name values.
@@ -72,39 +73,21 @@
 
 All iterations in reverse chronological order (newest first).
 
+### Iteration 136 — 2026-04-09 01:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24166615896)
+
+- **Status**: ✅ Accepted
+- **Change**: `src/core/to_from_dict.ts` — `toDictOriented` (7 orientations) + `fromDictOriented` (4 orientations). 30 unit + 3 property tests. PR created for iter136 branch.
+- **Metric**: 30 (on iter136 branch based on iter135 29-file base, delta: +1)
+
 ### Iteration 135 — 2026-04-09 00:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24165728899)
 
-- **Status**: ✅ Accepted
-- **Change**: Added `src/core/insert_pop.ts` — `insertColumn(df, loc, col, values)`, `popColumn(df, col)`, `reorderColumns(df, order)`, `moveColumn(df, col, newLoc)` mirroring `pandas.DataFrame.insert()` and `pandas.DataFrame.pop()`.
-- **Metric**: 89 (previous best: 88 on branch, delta: +1)
-- **Commit**: 6902458
-- **Notes**: All four functions are non-mutating (return new DataFrames). insertColumn rebuilds the ordered column Map at position loc. popColumn returns {series, df}. 40+ unit + 3 property-based tests.
+- **Status**: ✅ Accepted (on iter135 branch, not accumulated)
+- **Change**: Added `src/core/insert_pop.ts` — `insertColumn`, `popColumn`, `reorderColumns`, `moveColumn`.
+- **Metric**: 89 on iter135 branch (29 files base + insert_pop); 88 on accumulated c9103f2f branch
 
-### Iteration 134 — 2026-04-07 17:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24094874359)
+### Iters 132–134 — ✅ (metrics 87→89 on various branches): idxminmax (88), convert_dtypes (87), to_from_dict (89)
 
-- **Status**: ✅ Accepted
-- **Change**: Added `src/core/to_from_dict.ts` — `toDictOriented(df, orient)` (8 orientations) and `fromDictOriented(data, orient)` (4 orientations), mirroring `pandas.DataFrame.to_dict()` and `pandas.DataFrame.from_dict()`.
-- **Metric**: 89 (previous best: 88, delta: +1)
-- **Commit**: d2a469d
-- **Notes**: All 8 `toDictOriented` orientations dispatched via switch with shared row/column iteration. `fromDictOriented` orient="index" collects column set in insertion order from all row objects. Shared `buildFromRowsAndCols` helper for "split" and "tight". `labelsToIndex` promotes 0…n-1 integer keys to RangeIndex. Property tests: split/tight round-trips preserve shape and values; records round-trip preserves first-row spot-check; index orient keys match row count.
-
-### Iteration 133 — 2026-04-07 16:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24093345633)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/stats/idxminmax.ts` — `idxmin`/`idxmax` for Series and `idxminDataFrame`/`idxmaxDataFrame` for DataFrame (axis 0 and 1, configurable skipna).
-- **Metric**: 88 (previous best: 87, delta: +1)
-- **Commit**: a3b2f93
-- **Notes**: `findExtremumLabel` handles numeric, string, boolean, Date with first-occurrence tie-breaking. DataFrame axis 0 returns Series indexed by column names; axis 1 returns Series indexed by row labels with column name values. Property tests: label in index, value ≤ all others (idxmin), value ≥ all others (idxmax), single-element series has idxmin == idxmax.
-
-### Iteration 132 — 2026-04-07 16:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24092268181)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `src/core/convert_dtypes.ts` — `convertDtypes(series)` and `dataFrameConvertDtypes(df)` mirroring `pandas.DataFrame.convert_dtypes()`.
-- **Metric**: 87 (previous best: 86, delta: +1)
-- **Commit**: 2a9ff73
-- **Notes**: inferBestDtype() promotes whole-number floats→int64, floats→float64, bools→bool, strings→string. Idempotent. Options: convertBoolean/convertInteger/convertFloating/convertString all default true. Property tests: idempotent, null count preserved, type-correct output.
-
-### Iters 127–132 — ✅ (metrics 82→87): rolling_moments (82), covariance (83), rolling_cross_corr (84), cut_extended (85), astype (86), convert_dtypes (87)
+### Iters 127–131 — ✅ (metrics 82→86): rolling_moments, covariance, rolling_cross_corr, cut_extended, astype
 
 ### Iteration 126 — ✅ abs/round (81) · Iteration 125 — ✅ autocorr (80)
 
