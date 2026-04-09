@@ -107,3 +107,6 @@ export {
 export type { ClipOptions, RoundOptions, DataFrameElemOptions } from "./stats/index.ts";
 export { valueCounts, dataFrameValueCounts } from "./stats/index.ts";
 export type { ValueCountsOptions, DataFrameValueCountsOptions } from "./stats/index.ts";
+
+export { insertColumn, popColumn, reorderColumns, moveColumn, dataFrameFromPairs } from "./core/index.ts";
+export type { PopResult } from "./core/index.ts";
