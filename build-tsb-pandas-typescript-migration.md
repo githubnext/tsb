@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T21:48:04Z |
-| Iteration Count | 152 |
-| Best Metric | 45 |
+| Last Run | 2026-04-09T22:16:46Z |
+| Iteration Count | 153 |
+| Best Metric | 46 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -22,19 +22,20 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 152)**: 45 files on PR #81 branch. interval_ops + sparse_ops added. Next priorities:
+**State (iter 153)**: 46 files on PR #81 branch. interval_ops + sparse_ops + hash_ops added. Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/accessor_extended.ts` — extended accessor methods for dt/str/cat
-- `src/stats/hash_ops.ts` — hash/hashing utilities (pd.util.hash_pandas_object)
+- `src/stats/clip_ops.ts` — clip/clamp utilities (pd.Series.clip)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 153 (interval_ops + sparse_ops + hash_ops)**: Three modules in one iteration (43→46). `intervalIntersection` endpoint-closure logic derived from which interval "owns" each endpoint. `SparseArray.sparseGet` uses O(log n) binary search over sorted indices. `hashScalar` uses FNV-1a 32-bit; `hashCombine` uses boost-style mixing. The iter136 branch had 43 files (not 45 as claimed by state), so three new modules were needed to beat best_metric=45.
 - **Iter 152 (interval_ops + sparse_ops)**: Two modules added in one iteration. `SparseArray` uses `(indices, values)` compact representation with O(log n) `sparseGet` via binary search. `sparseConcat` requires matching fill values — runtime check needed. `intervalOverlaps` touching endpoints require explicit `===` guard before general overlap test.
 - **Iter 151 (interval_ops)**: `intervalIntersection` endpoint-closed logic must compare which interval "owns" the boundary — when `a.right < b.right`, `a` determines if `right` is closed; `b` has it interior. Point intervals `{left=right, closed≠"both"}` are empty. `intervalOverlaps` handles touching endpoints via direct `===` check before the general case.
 - **Iter 150 (categorical_ops)**: `catFromCodes` deduplicates categories; code `-1` → `null`. Set ops delegate to `cat.setCategories()`. `catCrossTab` uses `DataFrame.fromColumns`. `catRecode` dispatches on `typeof mapping === "function"`. `new DataFrame(colMap, index)` ≠ `DataFrame.fromColumns` — use static factory.
@@ -53,13 +54,21 @@
 
 ## 🔭 Future Directions
 
-**State (iter 152)**: 45 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/hash_ops
+**State (iter 153)**: 46 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/clip_ops
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 153 — 2026-04-09 22:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24215990788)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/interval_ops.ts` (19 functions), `src/stats/sparse_ops.ts` (16 functions), `src/stats/hash_ops.ts` (9 functions — FNV-1a hashScalar, hashArray, hashIndex, hashCombine, hashSeries, hashRows, hashDataFrame, objectHash, hashPandasObject). Full tests and playground pages for all three.
+- **Metric**: 46 (previous best: 45, delta: +1)
+- **Commit**: `e446c5b`
+- **Notes**: Iter136 branch had 43 actual files vs claimed best of 45, so 3 modules were needed to beat the threshold. interval_ops and sparse_ops re-added (prior commits lost) plus new hash_ops module.
 
 ### Iteration 152 — 2026-04-09 21:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24214932952)
 
