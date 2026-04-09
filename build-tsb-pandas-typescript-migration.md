@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T14:39:26Z |
-| Iteration Count | 144 |
-| Best Metric | 37 |
+| Last Run | 2026-04-09T17:27:31Z |
+| Iteration Count | 145 |
+| Best Metric | 38 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -26,15 +26,16 @@
 
 ## 🎯 Current Priorities
 
-**State (iter 144)**: 37 files on PR #81 branch. attrs WeakMap registry added. Next priorities:
+**State (iter 145)**: 38 files on PR #81 branch. string_ops module added. Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/stats/string_ops.ts` — additional str accessor ops (pad, center, wrap, repeat, normalize)
 - `src/core/pipe_apply.ts` — DataFrame/Series `.pipe()` chaining and `.apply()` standalone
+- `src/stats/string_ops_extended.ts` — additional string ops (extractAll to DataFrame, etc.)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 145 (string_ops)**: Standalone string ops module. `strGetDummies` uses sorted unique tokens from first-seen order for stable column naming. `strExtractAll` stores matches as JSON-encoded `string[][]` (fits in Scalar; consumers `JSON.parse`). `strCharWidth` covers CJK/Hangul/fullwidth ranges. `instanceof Series` narrowing avoids `as` casts. `strRemovePrefix`/`strRemoveSuffix` use TypeScript overloads for scalar vs array/Series dispatch.
 - **Iter 144 (attrs)**: WeakMap registry pattern for out-of-band metadata. `withAttrs<T>(obj, attrs): T` preserves the concrete type for type-safe fluent API. `mergeAttrs` left-to-right merge with later-source-wins. `deleteAttr` cleans up the registry entry when last key removed. No class modification needed — works entirely via module-level functions.
 - **Iter 143 (rolling_apply)**: `rollingApply` standalone with `minPeriods`/`center`/`raw` options. `rollingAgg` applies multiple named fns in one pass → DataFrame. `dataFrameRollingAgg` flattens to `{col}_{aggName}` columns. Generator-based `windowIterator` yields `{met, nums, raw}` per position. TypeScript generator with explicit yield type works cleanly.
 - **Iter 142 (notna_isna)**: Module-level `isna`/`notna`/`isnull`/`notnull` via TypeScript overloads. `fillna`/`dropna` dispatch by `instanceof`. `_dropnaRows` uses `series.iat(i)`. `countna`/`countValid` avoid intermediate Series allocation.
@@ -56,13 +57,21 @@
 
 ## 🔭 Future Directions
 
-**State (iter 144)**: 37 files. Next: io/read_excel (zero-dep XLSX) · stats/string_ops standalone (pad/center/wrap/repeat) · core/pipe_apply standalone
+**State (iter 145)**: 38 files. Next: io/read_excel (zero-dep XLSX) · core/pipe_apply standalone
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 145 — 2026-04-09 17:27 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24203932812)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/string_ops.ts` — 8 standalone string operation functions: `strNormalize`, `strGetDummies`, `strExtractAll`, `strRemovePrefix`, `strRemoveSuffix`, `strTranslate`, `strCharWidth`, `strByteLength`. 50+ unit tests + 5 property-based tests. Playground page `string_ops.html`.
+- **Metric**: 38 (previous best: 37, delta: +1)
+- **Commit**: `f906316`
+- **Notes**: `strGetDummies` is the key new capability — produces one-hot DataFrame from delimited strings (mirrors pandas `str.get_dummies()`). `strExtractAll` stores matches as JSON-encoded `string[][]` to fit in Scalar type. All functions use `instanceof Series` narrowing to avoid `as` casts.
 
 ### Iteration 144 — 2026-04-09 14:39 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24196127191)
 
