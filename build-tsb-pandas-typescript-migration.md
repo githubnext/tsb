@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T09:31:10Z |
-| Iteration Count | 143 |
-| Best Metric | 36 |
+| Last Run | 2026-04-09T14:39:26Z |
+| Iteration Count | 144 |
+| Best Metric | 37 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -22,19 +22,20 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 143)**: 36 files on PR #81 branch. rollingApply/rollingAgg standalone module added. Next priorities:
+**State (iter 144)**: 37 files on PR #81 branch. attrs WeakMap registry added. Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/core/attrs.ts` — DataFrame/Series `.attrs` dict (user-defined metadata)
-- `src/stats/string_ops.ts` — str accessor vectorized ops (startswith, endswith, contains, extract)
+- `src/stats/string_ops.ts` — additional str accessor ops (pad, center, wrap, repeat, normalize)
+- `src/core/pipe_apply.ts` — DataFrame/Series `.pipe()` chaining and `.apply()` standalone
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 144 (attrs)**: WeakMap registry pattern for out-of-band metadata. `withAttrs<T>(obj, attrs): T` preserves the concrete type for type-safe fluent API. `mergeAttrs` left-to-right merge with later-source-wins. `deleteAttr` cleans up the registry entry when last key removed. No class modification needed — works entirely via module-level functions.
 - **Iter 143 (rolling_apply)**: `rollingApply` standalone with `minPeriods`/`center`/`raw` options. `rollingAgg` applies multiple named fns in one pass → DataFrame. `dataFrameRollingAgg` flattens to `{col}_{aggName}` columns. Generator-based `windowIterator` yields `{met, nums, raw}` per position. TypeScript generator with explicit yield type works cleanly.
 - **Iter 142 (notna_isna)**: Module-level `isna`/`notna`/`isnull`/`notnull` via TypeScript overloads. `fillna`/`dropna` dispatch by `instanceof`. `_dropnaRows` uses `series.iat(i)`. `countna`/`countValid` avoid intermediate Series allocation.
 - **Iter 141 (where_mask)**: `resolveSeriesCond()` handles boolean[], Series<boolean>, callable. `resolveDataFrameCond()` aligns by column name + row label. `df.columns.values` (string[]) not `df.columns` (Index) for typed keys.
@@ -55,13 +56,21 @@
 
 ## 🔭 Future Directions
 
-**State (iter 143)**: 36 files. Next: io/read_excel (zero-dep XLSX) · core/attrs (metadata dict) · stats/string_ops standalone
+**State (iter 144)**: 37 files. Next: io/read_excel (zero-dep XLSX) · stats/string_ops standalone (pad/center/wrap/repeat) · core/pipe_apply standalone
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 144 — 2026-04-09 14:39 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24196127191)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/attrs.ts` — WeakMap-based metadata registry with 13 exported functions: `getAttrs`, `setAttrs`, `updateAttrs`, `withAttrs`, `copyAttrs`, `mergeAttrs`, `clearAttrs`, `hasAttrs`, `getAttr`, `setAttr`, `deleteAttr`, `attrsCount`, `attrsKeys`. 40+ unit tests + 3 property-based tests. Playground page `attrs.html`.
+- **Metric**: 37 (previous best: 36, delta: +1)
+- **Commit**: `c7bf0f0`
+- **Notes**: WeakMap registry avoids mutating immutable Series/DataFrame instances. `withAttrs<T>` generic preserves concrete type for fluent API. `deleteAttr` prunes registry entry when last key is removed (no dangling empty records).
 
 ### Iteration 143 — 2026-04-09 09:31 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24182985389)
 
