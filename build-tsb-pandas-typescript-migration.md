@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T03:06:39Z |
-| Iteration Count | 138 |
-| Best Metric | 31 |
+| Last Run | 2026-04-09T04:30:00Z |
+| Iteration Count | 139 |
+| Best Metric | 32 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -22,19 +22,20 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 138)**: 31 files on PR #81 branch. to_from_dict.ts and wide_to_long.ts both committed successfully. Next priorities:
+**State (iter 139)**: 32 files on PR #81 branch. cut/qcut added successfully. Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/stats/cut_qcut_extended.ts` — ordered categorical cut/qcut with retbins, custom labels
 - `src/core/attrs.ts` — DataFrame/Series `.attrs` dict (user-defined metadata)
+- `src/stats/window_extended.ts` — additional rolling stats (ewm_std, ewm_var, rolling_sem)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 139 (cut/qcut)**: `assignBins()` binary search: for right=true, find smallest i where v <= edges[i+1]; validate with v > binLo check. For right=false, find smallest i where edges[i+1] > v; last bin includes right edge. `qcut` always uses right=true/include_lowest=true. Integer bins: edges[0] slightly below min (mn - step*0.001) to include minimum value. `deduplicateEdges()` needed for uniform data with qcut.
 - **Iter 138 (to_from_dict + wide_to_long)**: PR #81 branch had only 29 files despite state claiming 30 — to_from_dict was never actually pushed. Fixed by adding both. `wideToLong`: `collectSuffixes()` scans all column names, matches `{stub}{sep}{suffix}` against anchored regex. Suffixes sorted numerically (integers) else lexicographically. Missing wide columns → null. Output column order: id cols, j, stub cols.
 - **Iter 135 (insert_pop)**: `insertColumn(df, loc, col, values)` rebuilds the ordered column Map inserting when `idx === loc`. `popColumn` iterates columns skipping the target, returns `{series, df}`. `reorderColumns` subsets. `moveColumn` wraps pop+insert. All non-mutating.
 - **Iter 133 (idxmin/idxmax)**: `findExtremumLabel(series, mode, skipna)` scans values with `lessThan`/`greaterThan` helpers (number, string, boolean, Date). First occurrence wins ties. skipna=false returns label of first missing. DataFrame axis 0: per-column; axis 1: per-row.
@@ -65,6 +66,14 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 139 — 2026-04-09 04:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24172139030)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/cut_qcut.ts` — `cut()` (fixed-width/explicit bins) and `qcut()` (quantile-based). `BinResult { codes, labels, bins }`. Full options: `labels`, `right`, `include_lowest`, `precision`, `duplicates`. 30+ unit tests + 2 property-based tests. Playground page `cut_qcut.html`.
+- **Metric**: 32 (previous best: 31, delta: +1)
+- **Commit**: `7210f1f`
+- **Notes**: Binary search in `assignBins()` correctly handles all edge cases (include_lowest, right=false last bin). qcut always uses right=true with left-closed first bin (pandas semantics).
 
 ### Iteration 138 — 2026-04-09 03:06 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24170164603)
 
