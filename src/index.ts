@@ -151,6 +151,15 @@ export {
 } from "./core/index.ts";
 export type { Attrs } from "./core/index.ts";
 export {
+  pipe,
+  seriesApply,
+  seriesTransform,
+  dataFrameApply,
+  dataFrameApplyMap,
+  dataFrameTransform,
+  dataFrameTransformRows,
+} from "./core/index.ts";
+export {
   strNormalize,
   strGetDummies,
   strExtractAll,

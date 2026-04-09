@@ -299,6 +299,16 @@
           <p>Attach arbitrary key→value metadata to any <code>Series</code> or <code>DataFrame</code> via a <strong>WeakMap registry</strong>. Provides <code>getAttrs</code>, <code>setAttrs</code>, <code>updateAttrs</code>, <code>copyAttrs</code>, <code>withAttrs</code>, <code>mergeAttrs</code>, <code>clearAttrs</code>, <code>getAttr</code>, <code>setAttr</code>, <code>deleteAttr</code>, <code>attrsCount</code>, <code>attrsKeys</code>. Mirrors <code>pandas.DataFrame.attrs</code> / <code>pandas.Series.attrs</code>.</p>
           <div class="status done">✅ Complete</div>
         </div>
+        <div class="feature-card">
+          <h3><a href="string_ops.html" style="color: var(--accent); text-decoration: none;">🔤 string_ops — Standalone String Ops</a></h3>
+          <p>Module-level string utilities: <code>strNormalize</code> (Unicode NFC/NFD/NFKC/NFKD), <code>strGetDummies</code> (one-hot DataFrame), <code>strExtractAll</code> (all regex matches), <code>strRemovePrefix</code>, <code>strRemoveSuffix</code>, <code>strTranslate</code> (char-level substitution), <code>strCharWidth</code> (CJK-aware display width), <code>strByteLength</code>. Works on Series, arrays, or scalars.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="pipe_apply.html" style="color: var(--accent); text-decoration: none;">🔗 pipe_apply — Pipeline &amp; Apply Utilities</a></h3>
+          <p>Standalone equivalents of pandas' <code>pipe()</code> / <code>apply()</code> / <code>applymap()</code>: <code>pipe</code> (variadic type-safe pipeline), <code>seriesApply</code> (element-wise with label/pos context), <code>seriesTransform</code>, <code>dataFrameApply</code> (axis 0/1), <code>dataFrameApplyMap</code> (cell-wise), <code>dataFrameTransform</code> (column-wise), <code>dataFrameTransformRows</code> (row-wise).</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
     </section>
   </main>

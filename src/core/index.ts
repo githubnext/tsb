@@ -41,3 +41,12 @@ export {
   mergeAttrs,
 } from "./attrs.ts";
 export type { Attrs } from "./attrs.ts";
+export {
+  pipe,
+  seriesApply,
+  seriesTransform,
+  dataFrameApply,
+  dataFrameApplyMap,
+  dataFrameTransform,
+  dataFrameTransformRows,
+} from "./pipe_apply.ts";
