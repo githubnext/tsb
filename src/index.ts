@@ -3,7 +3,7 @@
  *
  * @packageDocumentation
  */
-// merged: 2026-04-09T10:40Z (main merged in, conflicts resolved)
+// merged: 2026-04-09T11:04Z (main merged in, conflicts resolved)
 
 // Core exports will be added here as features are implemented.
 // Each module is imported and re-exported from its feature file in src/.
