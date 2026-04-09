@@ -39,3 +39,5 @@ export {
   nsmallestDataFrame,
 } from "./nlargest.ts";
 export type { NKeep, NTopOptions, NTopDataFrameOptions } from "./nlargest.ts";
+export { cut, qcut } from "./cut_qcut.ts";
+export type { BinResult, CutOptions, QCutOptions } from "./cut_qcut.ts";

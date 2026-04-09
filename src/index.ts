@@ -114,3 +114,5 @@ export { toDictOriented, fromDictOriented } from "./core/index.ts";
 export type { ToDictOrient, FromDictOrient, DictSplit, DictTight, SplitInput } from "./core/index.ts";
 export { wideToLong } from "./reshape/index.ts";
 export type { WideToLongOptions } from "./reshape/index.ts";
+export { cut, qcut } from "./stats/index.ts";
+export type { BinResult, CutOptions, QCutOptions } from "./stats/index.ts";

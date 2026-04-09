@@ -269,6 +269,11 @@
           <p>Insert and remove DataFrame columns at precise positions. <code>insertColumn(df, loc, col, values)</code> inserts at integer position, <code>popColumn(df, col)</code> returns <code>{ series, df }</code>. Also includes <code>reorderColumns</code> and <code>moveColumn</code>. Mirrors <code>pandas.DataFrame.insert()</code> and <code>.pop()</code>.</p>
           <div class="status done">✅ Complete</div>
         </div>
+        <div class="feature-card">
+          <h3><a href="cut_qcut.html" style="color: var(--accent); text-decoration: none;">✂️ cut / qcut</a></h3>
+          <p>Bin continuous numeric data into discrete intervals. <code>cut()</code> uses fixed-width or explicit bin edges; <code>qcut()</code> uses quantile-based bins of equal population. Both return codes, labels, and bin edges. Mirrors <code>pandas.cut</code> and <code>pandas.qcut</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
     </section>
   </main>
