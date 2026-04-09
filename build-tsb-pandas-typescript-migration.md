@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T22:16:46Z |
-| Iteration Count | 153 |
-| Best Metric | 46 |
+| Last Run | 2026-04-09T23:05:00Z |
+| Iteration Count | 154 |
+| Best Metric | 47 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -22,19 +22,20 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-**State (iter 153)**: 46 files on PR #81 branch. interval_ops + sparse_ops + hash_ops added. Next priorities:
+**State (iter 154)**: 47 files on PR #81 branch. interval_ops + sparse_ops + hash_ops + clip_ops added. Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/accessor_extended.ts` — extended accessor methods for dt/str/cat
-- `src/stats/clip_ops.ts` — clip/clamp utilities (pd.Series.clip)
+- `src/stats/sample_stats.ts` — additional sample statistics (kurtosis, sem, mad)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 154 (interval_ops + sparse_ops + hash_ops + clip_ops)**: Four modules added (43→47). `sparseFillna` must update `fillValue` directly (not via dense/re-sparsify) so old-fill positions become new-fill when calling `sparseToDense`. `(0,5]` and `[5,10)` DO overlap at point 5 — touching endpoints where both are closed at that point. `new DataFrame(colMap)` throws; must use `DataFrame.fromColumns()`. `fc.float` needs 32-bit float boundaries; use `fc.integer` instead. `Math.tanh(1e6)===1` in JS, so tanh property test should check `<=1` not `<1`.
 - **Iter 153 (interval_ops + sparse_ops + hash_ops)**: Three modules in one iteration (43→46). `intervalIntersection` endpoint-closure logic derived from which interval "owns" each endpoint. `SparseArray.sparseGet` uses O(log n) binary search over sorted indices. `hashScalar` uses FNV-1a 32-bit; `hashCombine` uses boost-style mixing. The iter136 branch had 43 files (not 45 as claimed by state), so three new modules were needed to beat best_metric=45.
 - **Iter 152 (interval_ops + sparse_ops)**: Two modules added in one iteration. `SparseArray` uses `(indices, values)` compact representation with O(log n) `sparseGet` via binary search. `sparseConcat` requires matching fill values — runtime check needed. `intervalOverlaps` touching endpoints require explicit `===` guard before general overlap test.
 - **Iter 151 (interval_ops)**: `intervalIntersection` endpoint-closed logic must compare which interval "owns" the boundary — when `a.right < b.right`, `a` determines if `right` is closed; `b` has it interior. Point intervals `{left=right, closed≠"both"}` are empty. `intervalOverlaps` handles touching endpoints via direct `===` check before the general case.
@@ -54,13 +55,21 @@
 
 ## 🔭 Future Directions
 
-**State (iter 153)**: 46 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/clip_ops
+**State (iter 154)**: 47 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/sample_stats (kurtosis, sem, mad)
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 154 — 2026-04-09 23:05 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24217011821)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/interval_ops.ts` (19 functions), `src/stats/sparse_ops.ts` (16 functions), `src/stats/hash_ops.ts` (9 functions), `src/stats/clip_ops.ts` (7 functions — clipLower, clipUpper, clipByPercentile, winsorize, clipByIQR, tanhScaling, robustScale). 123 tests all pass.
+- **Metric**: 47 (previous best: 46, delta: +1)
+- **Commit**: `7fad35c`
+- **Notes**: Created canonical `autoloop/build-tsb-pandas-typescript-migration` branch from iter136 (43 files). sparseFillna must update fillValue directly. (0,5] and [5,10) DO overlap at point 5. DataFrame.fromColumns() required. fc.integer instead of fc.float for property tests.
 
 ### Iteration 153 — 2026-04-09 22:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24215990788)
 
