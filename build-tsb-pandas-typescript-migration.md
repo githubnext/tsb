@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T18:50:45Z |
-| Iteration Count | 148 |
-| Best Metric | 41 |
+| Last Run | 2026-04-09T19:45:00Z |
+| Iteration Count | 149 |
+| Best Metric | 42 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -26,15 +26,16 @@
 
 ## 🎯 Current Priorities
 
-**State (iter 148)**: 41 files on PR #81 branch. numeric_extended module added. Next priorities:
+**State (iter 149)**: 42 files on PR #81 branch. api_types module added. Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
-- `src/core/accessor_extended.ts` — extended accessor methods (dt.round, str.decode, cat.rename_categories)
-- `src/stats/categorical_ops.ts` — categorical operations (cat.rename_categories, cat.reorder_categories, etc.)
+- `src/core/accessor_extended.ts` — extended accessor methods for dt/str/cat
+- `src/stats/categorical_ops.ts` — standalone categorical helper functions
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 149 (api_types)**: `isScalar` — primitives + Date only. `isListLike` excludes strings, includes iterables + length objects. `isFloat` — finite number with fractional part (NaN/Infinity → false). `isHashable` — primitives only (objects not hashable in JS sense). Dtype predicates delegate to `Dtype` class methods, `isComplexDtype` always false (no complex type in TS/JS). `isExtensionArrayDtype` = string|object|datetime|timedelta|category.
 - **Iter 148 (numeric_extended)**: `digitize` 0-based indices (-1 for below first edge). `histogram` binary-search bin assignment, degenerate range ±0.5 trick. `linspace` last element pinned to exact `stop` to avoid float drift. `arange` uses `start + result.length * step` to avoid accumulation errors. `percentileOfScore` "rank"/"mean" = average of weak+strict. `zscore` propagates null, returns NaN for zero-std. `minMaxNormalize` all-equal → midpoint. `seriesDigitize` wraps `digitize` preserving index.
 - **Iter 147 (string_ops_extended)**: `strSplitExpand` uses `n<0` → unlimited splits, `n≥0` → manual loop. `strExtractGroups` parses named group names from `re.source` via `/\(\?<([^>]+)>/g`. `strPartition`/`strRPartition` overloads for scalar→tuple vs array/Series→DataFrame. `strMultiReplace` uses `.withValues()` to preserve Series index. `strDedent` applies per-element.
 - **Iter 146 (pipe_apply)**: `pipe` uses TypeScript overloads for 1-8 fns. `dataFrameApply` axis=1 builds row Series. `dataFrameTransformRows` partial update via `c in rowOut` check. `DataFrame.fromColumns(newData, { index: df.index })` preserves index.
@@ -58,7 +59,7 @@
 
 ## 🔭 Future Directions
 
-**State (iter 148)**: 41 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/categorical_ops
+**State (iter 149)**: 42 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/categorical_ops
 
 ---
 
@@ -66,7 +67,13 @@
 
 All iterations in reverse chronological order (newest first).
 
-### Iteration 148 — 2026-04-09 18:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24207537328)
+### Iteration 149 — 2026-04-09 19:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24209242279)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/core/api_types.ts` — 31 exported runtime type-checking predicates mirroring `pandas.api.types`: 16 value-level (`isScalar`, `isListLike`, `isArrayLike`, `isDictLike`, `isIterator`, `isNumber`, `isBool`, `isStringValue`, `isFloat`, `isInteger`, `isBigInt`, `isRegExp`, `isReCompilable`, `isMissing`, `isHashable`, `isDate`) + 15 dtype-level (`isNumericDtype`, `isIntegerDtype`, `isSignedIntegerDtype`, `isUnsignedIntegerDtype`, `isFloatDtype`, `isBoolDtype`, `isStringDtype`, `isDatetimeDtype`, `isTimedeltaDtype`, `isCategoricalDtype`, `isObjectDtype`, `isComplexDtype`, `isExtensionArrayDtype`, `isPeriodDtype`, `isIntervalDtype`). 60+ unit tests + 3 property-based tests. Playground page `api_types.html`.
+- **Metric**: 42 (previous best: 41, delta: +1)
+- **Commit**: `fdd70ce`
+- **Notes**: Dtype predicates delegate cleanly to `Dtype` class methods. `isComplexDtype` always returns false (JS has no complex type). `isFloat` excludes NaN/Infinity (not "float" in the pandas sense). `isHashable` restricted to primitives (objects not safely hashable as dict keys in JS).
 
 - **Status**: ✅ Accepted
 - **Change**: Added `src/stats/numeric_extended.ts` — 9 numpy/scipy-style numeric utility functions: `digitize` / `seriesDigitize` (bin values into intervals), `histogram` (frequency counts with density option), `linspace` / `arange` (number sequence generators), `percentileOfScore` (4 ranking kinds), `zscore` (z-score standardisation with ddof), `minMaxNormalize` (scale to custom range), `coefficientOfVariation` (std/|mean|). 55 unit tests + 4 property-based tests. Playground page `numeric_extended.html`.
