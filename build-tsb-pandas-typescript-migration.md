@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-09T18:24:06Z |
-| Iteration Count | 147 |
-| Best Metric | 40 |
+| Last Run | 2026-04-09T18:50:45Z |
+| Iteration Count | 148 |
+| Best Metric | 41 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #81 |
@@ -26,15 +26,16 @@
 
 ## 🎯 Current Priorities
 
-**State (iter 147)**: 40 files on PR #81 branch. string_ops_extended module added. Next priorities:
+**State (iter 148)**: 41 files on PR #81 branch. numeric_extended module added. Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/accessor_extended.ts` — extended accessor methods (dt.round, str.decode, cat.rename_categories)
-- `src/stats/numeric_extended.ts` — additional numeric ops (digitize, histogram, etc.)
+- `src/stats/categorical_ops.ts` — categorical operations (cat.rename_categories, cat.reorder_categories, etc.)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 148 (numeric_extended)**: `digitize` 0-based indices (-1 for below first edge). `histogram` binary-search bin assignment, degenerate range ±0.5 trick. `linspace` last element pinned to exact `stop` to avoid float drift. `arange` uses `start + result.length * step` to avoid accumulation errors. `percentileOfScore` "rank"/"mean" = average of weak+strict. `zscore` propagates null, returns NaN for zero-std. `minMaxNormalize` all-equal → midpoint. `seriesDigitize` wraps `digitize` preserving index.
 - **Iter 147 (string_ops_extended)**: `strSplitExpand` uses `n<0` → unlimited splits, `n≥0` → manual loop. `strExtractGroups` parses named group names from `re.source` via `/\(\?<([^>]+)>/g`. `strPartition`/`strRPartition` overloads for scalar→tuple vs array/Series→DataFrame. `strMultiReplace` uses `.withValues()` to preserve Series index. `strDedent` applies per-element.
 - **Iter 146 (pipe_apply)**: `pipe` uses TypeScript overloads for 1-8 fns. `dataFrameApply` axis=1 builds row Series. `dataFrameTransformRows` partial update via `c in rowOut` check. `DataFrame.fromColumns(newData, { index: df.index })` preserves index.
 - **Iter 145 (string_ops)**: `strGetDummies` sorted tokens. `strExtractAll` JSON-encodes `string[][]`. `instanceof Series` narrowing avoids `as` casts.
@@ -57,13 +58,21 @@
 
 ## 🔭 Future Directions
 
-**State (iter 146)**: 39 files. Next: io/read_excel (zero-dep XLSX) · stats/string_ops_extended
+**State (iter 148)**: 41 files. Next: io/read_excel (zero-dep XLSX) · core/accessor_extended · stats/categorical_ops
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 148 — 2026-04-09 18:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24207537328)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/numeric_extended.ts` — 9 numpy/scipy-style numeric utility functions: `digitize` / `seriesDigitize` (bin values into intervals), `histogram` (frequency counts with density option), `linspace` / `arange` (number sequence generators), `percentileOfScore` (4 ranking kinds), `zscore` (z-score standardisation with ddof), `minMaxNormalize` (scale to custom range), `coefficientOfVariation` (std/|mean|). 55 unit tests + 4 property-based tests. Playground page `numeric_extended.html`.
+- **Metric**: 41 (previous best: 40, delta: +1)
+- **Commit**: `7969a3d`
+- **Notes**: `arange` uses `start + result.length * step` accumulation pattern to avoid float drift. `linspace` pins last element to exact `stop`. `digitize` 0-based (−1 for below-first-edge). `minMaxNormalize` all-equal → midpoint of target range.
 
 ### Iteration 147 — 2026-04-09 18:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24206383170)
 
