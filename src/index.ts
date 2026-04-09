@@ -168,10 +168,22 @@ export {
   strTranslate,
   strCharWidth,
   strByteLength,
+  strSplitExpand,
+  strExtractGroups,
+  strPartition,
+  strRPartition,
+  strMultiReplace,
+  strIndent,
+  strDedent,
 } from "./stats/index.ts";
 export type {
   NormalizeForm,
   StrInput,
   GetDummiesOptions,
   ExtractAllOptions,
+  SplitExpandOptions,
+  ExtractGroupsOptions,
+  PartitionResult,
+  ReplacePair,
+  IndentOptions,
 } from "./stats/index.ts";

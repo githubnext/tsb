@@ -77,3 +77,19 @@ export type {
   GetDummiesOptions,
   ExtractAllOptions,
 } from "./string_ops.ts";
+export {
+  strSplitExpand,
+  strExtractGroups,
+  strPartition,
+  strRPartition,
+  strMultiReplace,
+  strIndent,
+  strDedent,
+} from "./string_ops_extended.ts";
+export type {
+  SplitExpandOptions,
+  ExtractGroupsOptions,
+  PartitionResult,
+  ReplacePair,
+  IndentOptions,
+} from "./string_ops_extended.ts";
