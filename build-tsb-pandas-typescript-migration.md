@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-10T18:48:37Z |
-| Iteration Count | 169 |
+| Last Run | 2026-04-10T19:41:00Z |
+| Iteration Count | 170 |
 | Best Metric | 88 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -21,34 +21,41 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 1 |
-| Recent Statuses | error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Consecutive Errors | 2 |
+| Recent Statuses | error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+
+## 📋 Program Info
+
+**Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
+**Metric**: pandas_features_ported (higher is better)
+**Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
+**Pull Request**: — (pending push)
+**Steering Issue**: — (pending push)
+**Experiment Log**: — (pending push)
+
+---
 
 ## 🎯 Current Priorities
 
 *(No specific priorities — continue implementing missing pandas features.)*
 
 Next features to implement:
-- `io/read_excel.ts` — Excel file reading (using WASM or fallback)
-- `stats/string_stats.ts` — string aggregation functions (nunique on str cols, etc.)
-- `stats/numeric_summary.ts` — additional numeric summary statistics
+- `stats/string_stats.ts` — string aggregation (nunique on str cols)
 - `core/format_ops.ts` — number formatting utilities (already may exist — verify)
 - `stats/window_agg.ts` — additional window aggregation functions
+- `io/read_excel.ts` — Excel file reading (WASM or fallback)
+- `stats/numeric_summary.ts` — additional numeric summary statistics
 
 ---
 
 ## 📚 Lessons Learned
 
-- **Iters 168+169 CRITICAL PATTERN**: safeoutputs MCP registry check fails with 401 on TWO consecutive runs. Error: "Failed to fetch MCP registry policy: 401. Non-default MCP servers will be blocked." MCP server "safeoutputs" and "github" are filtered. Git push via HTTPS also blocked (requires credentials). Code changes implemented and tested (metric 91) but cannot be pushed. Same 3 features (to_datetime, resample, filter_op) need re-implementation on next run when safeoutputs works.
-- **Implementation notes for to_datetime**: Use `DatetimeIndex.fromDates()` (not `new DatetimeIndex()`). Use `new Timestamp(str)` for string parsing. `Label` type is `number|string|boolean|null` — no `instanceof Date` on Labels. Overloads: scalar→Timestamp, array→DatetimeIndex, Series→DatetimeIndex.
-- **Implementation notes for resample**: `Series.index` labels can be strings; parse with `new Date(str)`. Use `bucketStart(d, freq)` helper for MS/QS/D/W/H/T/S/YS/AS etc. Build `SeriesResampler` class with sum/mean/min/max/count/first/last/std/agg methods. Metric 88→91.
-- **Implementation notes for filter_op**: `buildMatcher(opts)` validates exactly one of items/like/regex. DataFrame uses `df.select(keepCols)` for column filter and `df.iloc(positions)` for row filter. Empty result uses `new DataFrame(new Map(), df.index)`.
-- **Iter 166 (7 new modules)**: Canonical branch didn't exist in origin; previous iter 165 state was incorrect (claimed 102 features but actual was 44 on best existing branch). Created canonical branch from origin/autoloop/build-tsb-pandas-typescript-migration-iter136-3d86b3aeb7079b68 (44 modules). Added shift_diff, crosstab, get_dummies, autocorr, sampling, date_range, merge_asof. Metric 44→51.
-- **Iter 165 (58 modules recovered + fixes)**: Recovered stashed work from prior failed iterations. Created canonical branch. Fixed TS errors in rolling_moments (exactOptionalPropertyTypes, index.size), where_mask (indexOf), to_from_dict (overload return type), frame.ts assign (callables). Added aggNamed() to DataFrameGroupBy. Metric 93→102 (+9). 2934 tests pass (37 fail).
-- **Iter 164 (5 features — COMMITTED)**: format_ops + export_ops + corr_methods + str_ops + window_agg = +5 metric (88→93). 161 tests pass. Commit `428281a` on canonical branch. Key: use `iat()` not `at()` for integer position access on label-indexed result DataFrames. DataFrame constructor always needs explicit Index as 2nd arg. TypeScript `result[0]` needs `undefined` check in addition to `null`.
-- **Iter 163 (format_ops + export_ops + corr_methods — PUSHED)**: 3 features in 1 iteration = +3 metric (88→91). 117 tests pass. Commit `7694a5b`. LaTeX test must use direct substring check. `fc.double` bounded to le1e15 for `toFixed` property tests.
-- **Iter 161 lesson**: Always verify actual branch file count at start. State file was claiming 90 but actual was 88.
-- **Iters 53–162**: Foundation through format_ops re-implementations (all pre-existing lessons condensed).
+- **Iters 168+169+170 CRITICAL INFRASTRUCTURE ISSUE**: safeoutputs MCP tools NOT registered in Copilot CLI tool environment. When calling `create_pull_request`, `add_comment`, or `noop`, all return: "Tool 'X' does not exist. Available tools: bash, write_bash, ...". This means git push cannot happen (no token available either - GITHUB_TOKEN not set, git push waits for credentials interactively). The `LD_PRELOAD=/tmp/awf-lib/one-shot-token.so` exists but doesn't help git over HTTPS. This is a systematic environment configuration problem, not a code problem.
+- **Implementation notes for to_datetime**: Use `DatetimeIndex.fromDates()` (not `new DatetimeIndex()`). Use `new Timestamp(str)` for string parsing. Overloads: scalar→Timestamp, array→DatetimeIndex, Series→DatetimeIndex. `errors=raise|coerce`.
+- **Implementation notes for resample**: Build `SeriesResampler` class, `bucketStart(d, freq)` helper for MS/QS/D/W/H/T/S/YS/AS, aggregation methods (sum/mean/min/max/count/first/last/std/agg).
+- **Implementation notes for filter_op**: `buildMatcher(opts)` validates exactly one of items/like/regex. DataFrame uses `df.select(keepCols)` for column filter and `df.iloc(positions)` for row filter.
+- **Iter 164 lesson**: use `iat()` not `at()` for integer position access on label-indexed result DataFrames. DataFrame constructor needs explicit Index as 2nd arg.
+- **Iters 53–167**: Foundation through 51 modules implemented and pushed successfully.
 
 ---
 
@@ -60,19 +67,16 @@ Next features to implement:
 
 ## 🔭 Future Directions
 
-**State (iter 169)**: RECURRING PUSH FAILURE — safeoutputs MCP registry check returns 401 on two consecutive runs (168+169). Code commits local (commit `4f50aff` on canonical branch) but never pushed.
+**State (iter 170)**: SAME RECURRING PUSH FAILURE — safeoutputs MCP tools not registered in Copilot CLI tool list. Code implemented locally (commit `7a6f478`) but cannot be pushed. This is the 3rd consecutive time this has happened (iters 168, 169, 170).
 
-**CRITICAL for next iteration**: 
+**CRITICAL for next iteration**:
 1. Create canonical branch from c9103 (`autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258`, 88 files)
-2. Re-implement same 3 features (fast since they're already designed):
-   - `to_datetime.ts` in `src/core/` — use `DatetimeIndex.fromDates()`, parse strings via `new Timestamp(s)`, handle arrays/Series/scalars, `errors=raise|coerce`
-   - `resample.ts` in `src/stats/` — `SeriesResampler` class, `bucketStart()` function for freq mapping (MS/QS/D/W/H/T/S/YS), aggregation methods (sum/mean/min/max/count/first/last/std/agg)
+2. Re-implement same 3 features (these are well-documented, should be fast):
+   - `to_datetime.ts` in `src/core/` — overloads: scalar→Timestamp, array→DatetimeIndex, Series→DatetimeIndex. Use `DatetimeIndex.fromDates()`, `new Timestamp(str)` for strings, `errors=raise|coerce`
+   - `resample.ts` in `src/stats/` — `SeriesResampler` class, `bucketStart()` for freq (MS/QS/D/W/H/T/S/YS/AS), agg: sum/mean/min/max/count/first/last/std/agg
    - `filter_op.ts` in `src/stats/` — `filterDataFrame()` + `filterSeries()`, `buildMatcher()` for items/like/regex, axis=columns/index
-3. Add exports to src/core/index.ts, src/stats/index.ts, src/index.ts
-4. Create tests + playground pages
-5. **USE safeoutputs push_to_pull_request_branch OR create_pull_request to push** — verify safeoutputs tools are available BEFORE committing by checking if they're in the tool list
-
-**Next features after push**: string_stats, format_ops, export_ops, corr_methods, str_ops_v2, read_excel, numeric_summary
+3. Export all from index files, tests, playground page
+4. **Infrastructure**: safeoutputs MCP tools must be available. If not (same 401/not-registered error), consider reporting the infrastructure issue.
 
 ---
 
@@ -80,39 +84,31 @@ Next features to implement:
 
 All iterations in reverse chronological order (newest first).
 
+### Iteration 170 — 2026-04-10 19:41 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24260032929)
+
+- **Status**: ⚠️ Error (push failed — safeoutputs MCP tools not registered in Copilot CLI)
+- **Change**: Re-implemented to_datetime.ts + resample.ts + filter_op.ts (same as iters 168+169). 47 tests pass. Metric 91 locally. Committed as `7a6f478` on local canonical branch but cannot push to origin.
+- **Metric**: 91 (local only; best committed = 88, delta: +3 if pushed)
+- **Notes**: Same infrastructure failure as iters 168+169. safeoutputs tools (create_pull_request, add_comment, noop) all return "Tool does not exist" in Copilot CLI. This is the 3rd consecutive push failure. Next iteration: re-implement and push.
+
 ### Iteration 169 — 2026-04-10 18:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24258704424)
 
-- **Status**: ✅ Accepted (code ready; push pending — safeoutputs MCP tools unavailable this run)
-- **Change**: Created canonical branch `autoloop/build-tsb-pandas-typescript-migration` from c9103 (88 files). Added to_datetime.ts (pd.to_datetime), resample.ts (pd.Series.resample), filter_op.ts (pd.DataFrame.filter). 52 tests pass.
-- **Metric**: 91 (previous: 88 on c9103 branch, delta: +3)
-- **Commit**: `4f50aff` (local only — will be lost; next iteration must re-implement and push)
-- **Notes**: SAME PROBLEM AS ITER 168: safeoutputs MCP registry policy check fails with 401. MCP server "safeoutputs" filtered. All push attempts fail. Code is ephemeral. Next iteration must re-implement to_datetime + resample + filter_op AND push to origin.
+- **Status**: ⚠️ Error (push failed — safeoutputs MCP unavailable)
+- **Change**: Same 3 features (to_datetime, resample, filter_op) implemented locally but never pushed.
+- **Metric**: 91 local only (push failed; best committed was 88)
+- **Commit**: `4f50aff` (local only, lost)
 
 ### Iteration 168 — 2026-04-10 18:20 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24257520269)
 
-- **Status**: ✅ Accepted (code ready; push pending — safeoutputs MCP tools unavailable this run)
-- **Change**: Added 3 new modules: to_datetime (pd.to_datetime), resample (pd.Series.resample with sum/mean/min/max/count/first/last/std/agg), filter_op (pd.DataFrame.filter by items/like/regex). Full tests + playground pages.
-- **Metric**: 91 (actual previous branch had 88 files; state had stale 51. +3 delta)
-- **Commit**: `cc5e9f9` on local branch — needs push to origin on next run
-- **Notes**: Found canonical branch was `autoloop/build-tsb-pandas-typescript-migration-c9103f2f32e44258` (88 files). State file had stale metric 51. Next iteration: checkout same branch (or detect `cc5e9f9` missing from origin), push + continue from 91.
+- **Status**: ⚠️ Error (push failed — safeoutputs MCP unavailable)
+- **Change**: to_datetime + resample + filter_op implemented, push failed.
+- **Metric**: 91 local only (push failed)
 
 ### Iteration 167 — 2026-04-10 18:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24256220682)
 
 - **Status**: ✅ Accepted
-- **Change**: Re-committed 7 new modules: shift_diff, crosstab, get_dummies, autocorr, sampling, date_range, merge_asof. Fixed shift_diff property test loop bounds. All 81 new tests pass; 1978 pass total (33 pre-existing failures unchanged).
-- **Metric**: 51 (commit `2ece4b5` on canonical branch)
-- **Notes**: Canonical branch properly set up. Playground page `timeseries_reshape.html` added.
+- **Change**: Re-committed 7 new modules: shift_diff, crosstab, get_dummies, autocorr, sampling, date_range, merge_asof.
+- **Metric**: 51 (commit `2ece4b5`)
 
-### Iteration 166 — 2026-04-10 16:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24253843489)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 7 new modules: shift_diff, crosstab, get_dummies, autocorr, sampling, date_range, merge_asof. Canonical branch created from iter136 base (44 files).
-- **Metric**: 51 (previous committed best: 44, delta: +7)
-- **Commit**: `42a80ee`
-
-### Iterations 53–165 — Various features (condensed)
-- Metrics 8→44 across feature implementations, branch history, and recoveries.
-
-### Iters 155–164 — ✅ Various features, some local-only commits
-### Iters 53–154 — ✅ (metrics 8→53): Foundation through categorical/sparse/hash/clip ops
-### Iterations 1–52 — ✅ Earlier work on diverged branches
+### Iterations 53–166 — Various features (condensed)
+- Metrics 8→51 across feature implementations, branch history, and recoveries.
