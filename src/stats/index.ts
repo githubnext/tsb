@@ -128,3 +128,24 @@ export type {
   CatSortByFreqOptions,
   CatCrossTabOptions,
 } from "./categorical_ops.ts";
+export {
+  formatFloat,
+  formatPercent,
+  formatScientific,
+  formatEngineering,
+  formatThousands,
+  formatCurrency,
+  formatCompact,
+  makeFloatFormatter,
+  makePercentFormatter,
+  makeCurrencyFormatter,
+  applySeriesFormatter,
+  applyDataFrameFormatter,
+  seriesToString,
+  dataFrameToString,
+} from "./format_ops.ts";
+export type {
+  Formatter,
+  SeriesToStringOptions,
+  DataFrameToStringOptions,
+} from "./format_ops.ts";

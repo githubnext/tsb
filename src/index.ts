@@ -255,3 +255,24 @@ export type {
   CatSortByFreqOptions,
   CatCrossTabOptions,
 } from "./stats/index.ts";
+export {
+  formatFloat,
+  formatPercent,
+  formatScientific,
+  formatEngineering,
+  formatThousands,
+  formatCurrency,
+  formatCompact,
+  makeFloatFormatter,
+  makePercentFormatter,
+  makeCurrencyFormatter,
+  applySeriesFormatter,
+  applyDataFrameFormatter,
+  seriesToString,
+  dataFrameToString,
+} from "./stats/index.ts";
+export type {
+  Formatter,
+  SeriesToStringOptions,
+  DataFrameToStringOptions,
+} from "./stats/index.ts";
