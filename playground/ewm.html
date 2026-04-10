@@ -542,13 +542,12 @@ const ewmWeightedSum = s.ewm({ alpha: 0.5 }).apply((vals, weights) =>
 );
 console.log("weighted sum:", ewmWeightedSum.values);</textarea>
       <textarea class="playground-python" style="display:none">import pandas as pd
-import numpy as np
 
 s = pd.Series([1, 2, 3, 4, 5])
 
 # EWM weighted sum (equivalent to unadjusted numerator)
-# Note: pandas ewm.apply() does not pass weights; custom logic needed
-ewm_weighted_sum = s.ewm(alpha=0.5).apply(lambda vals: sum(vals), raw=True)
+# Note: pandas 3.0 removed ewm().apply(); use ewm().sum() instead
+ewm_weighted_sum = s.ewm(alpha=0.5).sum()
 print("weighted sum:", list(ewm_weighted_sum))</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
