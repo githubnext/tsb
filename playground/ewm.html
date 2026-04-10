@@ -548,7 +548,7 @@ s = pd.Series([1, 2, 3, 4, 5])
 
 # EWM weighted sum (equivalent to unadjusted numerator)
 # Note: pandas ewm.apply() does not pass weights; custom logic needed
-ewm_weighted_sum = s.ewm(alpha=0.5).apply(lambda vals: sum(vals))
+ewm_weighted_sum = s.ewm(alpha=0.5).apply(lambda vals: sum(vals), raw=True)
 print("weighted sum:", list(ewm_weighted_sum))</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>

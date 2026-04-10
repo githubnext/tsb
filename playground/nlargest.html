@@ -531,8 +531,8 @@ print("all-NaN size:", len(all_nan.nlargest(2)))
 
 # string values — lexicographic order
 words = pd.Series(["banana", "apple", "cherry"])
-print("largest strings:", words.nlargest(2).tolist())
-print("smallest strings:", words.nsmallest(2).tolist())</textarea>
+print("largest strings:", words.sort_values(ascending=False).head(2).tolist())
+print("smallest strings:", words.sort_values().head(2).tolist())</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>

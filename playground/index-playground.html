@@ -318,7 +318,7 @@ idx = pd.Index(["a", "b", "c", "a"])
 print("get_loc('b'):", idx.get_loc("b"))     # unique → single int
 print("get_loc('a'):", idx.get_loc("a"))     # duplicated → boolean mask
 print("contains 'c':", "c" in idx)
-print("isin(['a', 'c']):", idx.isin(["a", "c"]).to_list())</textarea>
+print("isin(['a', 'c']):", idx.isin(["a", "c"]).tolist())</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
@@ -386,7 +386,7 @@ console.log("argmax:", idx.argmax());</textarea>
 idx = pd.Index([30, 10, 20])
 
 print("sort_values:", idx.sort_values().to_list())
-print("argsort:   ", idx.argsort().to_list())
+print("argsort:   ", idx.argsort().tolist())
 print("min:", idx.min())
 print("max:", idx.max())
 print("argmin:", idx.argmin())
@@ -456,8 +456,8 @@ import numpy as np
 
 idx = pd.Index([1, None, 3])
 
-print("isna: ", idx.isna().to_list())
-print("notna:", idx.notna().to_list())
+print("isna: ", idx.isna().tolist())
+print("notna:", idx.notna().tolist())
 print("dropna:", idx.dropna().to_list())
 print("fillna(0):", idx.fillna(0).to_list())</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
