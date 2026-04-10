@@ -402,7 +402,7 @@ csv = """val
 first3 = pd.read_csv(io.StringIO(csv), nrows=3)
 print("nrows=3:", list(first3["val"]))
 
-skip2 = pd.read_csv(io.StringIO(csv), skiprows=2)
+skip2 = pd.read_csv(io.StringIO(csv), skiprows=range(1, 3))
 print("skiprows=2:", list(skip2["val"]))</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>

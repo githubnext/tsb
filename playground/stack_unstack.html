@@ -215,7 +215,7 @@ df = pd.DataFrame(
     index=["x", "y", "z"],
 )
 
-s = df.stack(dropna=False)
+s = df.stack()
 print("index:", list(s.index))
 print("values:", list(s.values))</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
@@ -261,13 +261,13 @@ df = pd.DataFrame(
     index=["a", "b", "c"],
 )
 
-# default: dropna=True
-s = df.stack(dropna=True)
+# default: stack preserves NaN, chain dropna() to remove
+s = df.stack().dropna()
 print("dropna=True  index:", list(s.index))
 print("dropna=True  values:", list(s.values))
 
-# keep nulls
-s_full = df.stack(dropna=False)
+# keep nulls (default in pandas 3.0)
+s_full = df.stack()
 print("dropna=False index:", list(s_full.index))
 print("dropna=False values:", list(s_full.values))</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
@@ -308,7 +308,7 @@ df = pd.DataFrame(
     index=["x", "y"],
 )
 
-s = df.stack(dropna=False)
+s = df.stack()
 recovered = s.unstack()
 
 print("index:", list(recovered.index))
@@ -355,8 +355,8 @@ df = pd.DataFrame(
     index=["jan", "feb", "mar"],
 )
 
-# stack drops nulls by default
-s = df.stack(dropna=True)
+# stack then drop nulls
+s = df.stack().dropna()
 
 # unstack with fill_value=0
 recovered = s.unstack(fill_value=0)
@@ -400,7 +400,7 @@ df = pd.DataFrame(
 )
 
 # pandas uses MultiIndex natively, no separator needed
-s = df.stack(dropna=False)
+s = df.stack()
 print("stacked index:", list(s.index))
 
 recovered = s.unstack()
@@ -455,8 +455,8 @@ df = pd.DataFrame(
     index=["Q1", "Q2", "Q3", "Q4"],
 )
 
-# Stack (drops nulls), filter to values > 80, then unstack
-s = df.stack(dropna=True)
+# Stack then drop nulls, filter to values > 80, then unstack
+s = df.stack().dropna()
 filtered = s[s > 80]
 result = filtered.unstack(fill_value=0)
 

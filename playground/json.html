@@ -216,10 +216,11 @@ console.log("columns:", [...df.columns.values]);
 console.log("names:", [...df.col("name").values]);
 console.log("ages:", [...df.col("age").values]);</textarea>
       <textarea class="playground-python" style="display:none">import pandas as pd
+import io
 
 json_text = '[{"name": "alice", "age": 30, "score": 88.5}, {"name": "bob", "age": 25, "score": 92.0}, {"name": "carol", "age": 35, "score": 75.3}]'
 
-df = pd.read_json(json_text)
+df = pd.read_json(io.StringIO(json_text))
 print("shape:", df.shape)
 print("columns:", list(df.columns))
 print("names:", list(df["name"]))
@@ -259,6 +260,7 @@ console.log("x:", [...df.col("x").values]);
 console.log("y:", [...df.col("y").values]);</textarea>
       <textarea class="playground-python" style="display:none">import pandas as pd
 import json
+import io
 
 data = json.dumps({
     "columns": ["x", "y"],
@@ -266,7 +268,7 @@ data = json.dumps({
     "data": [[1, 4], [2, 5], [3, 6]],
 })
 
-df = pd.read_json(data, orient="split")
+df = pd.read_json(io.StringIO(data), orient="split")
 print("orient auto-detected: split")
 print("shape:", df.shape)
 print("index:", list(df.index))
@@ -305,6 +307,7 @@ console.log("a:", [...df.col("a").values]);
 console.log("b:", [...df.col("b").values]);</textarea>
       <textarea class="playground-python" style="display:none">import pandas as pd
 import json
+import io
 
 data = json.dumps({
     "r0": {"a": 1, "b": "foo"},
@@ -312,7 +315,7 @@ data = json.dumps({
     "r2": {"a": 3, "b": "baz"},
 })
 
-df = pd.read_json(data, orient="index")
+df = pd.read_json(io.StringIO(data), orient="index")
 print("shape:", df.shape)
 print("index:", list(df.index))
 print("a:", list(df["a"]))
@@ -350,13 +353,14 @@ console.log("x:", [...df.col("x").values]);
 console.log("y:", [...df.col("y").values]);</textarea>
       <textarea class="playground-python" style="display:none">import pandas as pd
 import json
+import io
 
 data = json.dumps({
     "x": {"0": 10, "1": 20, "2": 30},
     "y": {"0": 1.1, "1": 2.2, "2": 3.3},
 })
 
-df = pd.read_json(data, orient="columns")
+df = pd.read_json(io.StringIO(data), orient="columns")
 print("shape:", df.shape)
 print("index:", list(df.index))
 print("x:", list(df["x"]))
@@ -389,10 +393,11 @@ console.log("shape:", df.shape);
 console.log("columns:", [...df.columns.values]);
 console.log("col 0:", [...df.col("0").values]);</textarea>
       <textarea class="playground-python" style="display:none">import pandas as pd
+import io
 
 json_text = "[[1, 2, 3], [4, 5, 6], [7, 8, 9]]"
 
-df = pd.read_json(json_text, orient="values")
+df = pd.read_json(io.StringIO(json_text), orient="values")
 print("shape:", df.shape)
 print("columns:", list(df.columns))
 print("col 0:", list(df[0]))</textarea>
@@ -474,6 +479,7 @@ console.log("x restored:", [...restored.col("x").values]);
 console.log("label restored:", [...restored.col("label").values]);
 console.log("shapes match:", JSON.stringify(original.shape) === JSON.stringify(restored.shape));</textarea>
       <textarea class="playground-python" style="display:none">import pandas as pd
+import io
 
 original = pd.DataFrame({
     "x": [1, 2, 3, 4, 5],
@@ -481,7 +487,7 @@ original = pd.DataFrame({
 })
 
 json_text = original.to_json(orient="split")
-restored = pd.read_json(json_text, orient="split")
+restored = pd.read_json(io.StringIO(json_text), orient="split")
 
 print("JSON:", json_text)
 print("x restored:", list(restored["x"]))
