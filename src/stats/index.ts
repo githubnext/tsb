@@ -39,3 +39,9 @@ export {
   nsmallestDataFrame,
 } from "./nlargest.ts";
 export type { NKeep, NTopOptions, NTopDataFrameOptions } from "./nlargest.ts";
+export { pctChangeSeries, pctChangeDataFrame } from "./pct_change.ts";
+export type {
+  PctChangeFillMethod,
+  PctChangeOptions,
+  DataFramePctChangeOptions,
+} from "./pct_change.ts";
