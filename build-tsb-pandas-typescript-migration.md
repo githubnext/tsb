@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-10T07:35:00Z |
-| Iteration Count | 158 |
+| Last Run | 2026-04-10T08:45:00Z |
+| Iteration Count | 159 |
 | Best Metric | 89 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -26,7 +26,7 @@
 
 ## 🎯 Current Priorities
 
-**State (iter 158)**: 89 files on canonical branch. format_ops re-added on top of c9103f2f32e44258 (88 files). Next priorities:
+**State (iter 159)**: 89 files on canonical branch. format_ops added (commit 6ba3f81). Next priorities:
 - `src/io/read_excel.ts` — Excel file reader (XLSX parsing, zero-dep)
 - `src/core/accessor_extended.ts` — extended accessor methods for dt/str/cat
 - `src/stats/window_extra.ts` — additional window operations (EWMA variance, etc.)
@@ -35,6 +35,7 @@
 
 ## 📚 Lessons Learned
 
+- **Iter 159 (format_ops commit)**: `fc.double({ noNaN, noDefaultInfinity })` still generates numbers up to ±MAX_VALUE; property tests checking `toFixed()` decimal count must bound range to ≤1e15 to avoid precision edge cases with very large numbers. `npm install -g bun --prefix /tmp/...` works for installing bun when not in PATH. The c9103f2f32e44258 branch has 88 non-index source files (correctly accounting for base-index.ts etc. which contain 'index.ts' in their filename but are not named exactly `index.ts`).
 - **Iter 158 (format_ops re-impl)**: `FormattableDataFrameLike` interface must use `col(name)` access (matching real DataFrame API) not `values: Scalar[][]`. `Series` constructor on c9103f2f branch takes `SeriesOptions<T>` (`{ data: T[] }`) not a plain array — test helpers must use `new Series({ data: values })`. `fc.array` minLength must be ≥ 1 when constructing Series to avoid empty-array spread error. `applyDataFrameFormatter` returns `Record<string, string[]>` rather than a DataFrame-like (avoids needing `withValues` on DataFrame).
 - **Iter 157 (format_ops)**: `exactOptionalPropertyTypes: true` means you can't pass `name: undefined` for an optional field — must build options object conditionally. `fc.float` in fast-check requires 32-bit float bounds (use `fc.double` instead for general floats). Canonical branch had 88 files (iter133) despite state showing 53 — state file was severely out of sync across iterations. Branch `c9103f2f32e44258` is the canonical one with the most content. 10 modules added (43→53). When creating canonical branch from iter136, prior accepted commits are not accessible — must re-implement. `npx bun` works when bun not in PATH. New modules 295 tests all pass. Pre-existing 37 failures are unrelated to new code.
 - **Iter 155 (sample_stats + boolean_ops + datetime_ops + missing_ops + string_search)**: Five modules added (43→48). `df.columns` is `Index<string>` not array → use `.values` for array methods. `DataFrame.fromColumns(data, { index: df.index })` takes `DataFrameOptions` not bare index. `new Index<Label>(arr)` takes `T[]` not `Index<T>`. Generic helpers returning `Series<T>` need `T extends Scalar`. Business day range correctly skips Sat/Sun. Linear interpolation handles leading/trailing NaN correctly.
@@ -64,6 +65,14 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 159 — 2026-04-10 08:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24234142492)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `src/stats/format_ops.ts` — 14 formatting functions (formatFloat/Percent/Scientific/Engineering/Thousands/Currency/Compact, 3 factories, applySeriesFormatter, applyDataFrameFormatter, seriesToString, dataFrameToString). 84 tests pass (unit + property-based). 100% coverage.
+- **Metric**: 89 (previous best: 88 on canonical branch, delta: +1)
+- **Commit**: `6ba3f81`
+- **Notes**: Successfully committed to canonical branch (c9103f2f32e44258 base). `fc.double` range must be bounded to ≤1e15 for `toFixed`-based property tests. Pushed to PR #81 via push_to_pull_request_branch.
 
 ### Iteration 158 — 2026-04-10 07:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24232000777)
 
