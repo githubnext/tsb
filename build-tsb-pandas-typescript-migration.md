@@ -10,12 +10,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T21:45:26Z |
-| Iteration Count | 212 |
-| Best Metric | 47 |
+| Last Run | 2026-04-11T22:23:00Z |
+| Iteration Count | 213 |
+| Best Metric | 48 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | #113 (hash-suffix; new canonical PR created for `autoloop/build-tsb-pandas-typescript-migration` in iter 212) |
+| PR | #new (canonical PR created for `autoloop/build-tsb-pandas-typescript-migration` in iter 213; see steering issue #107) |
 | Steering Issue | #107 |
 | Paused | false |
 | Pause Reason | — |
@@ -31,7 +31,7 @@
 **Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: #113 (hash-suffix; canonical PR being created for `autoloop/build-tsb-pandas-typescript-migration`)
+**Pull Request**: #new (canonical PR created in iter 213 for `autoloop/build-tsb-pandas-typescript-migration`)
 **Steering Issue**: #107
 **Experiment Log**: #3
 
@@ -41,13 +41,14 @@
 
 Next features to implement (prioritized by impact):
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser from scratch)
-- `stats/describe_categorical.ts` — describe() for categorical/string Series (check what's missing from existing describe.ts)
-- `window/rolling_apply.ts` — rolling/expanding apply with custom function
+- `stats/select_dtypes.ts` — DataFrame.selectDtypes(include/exclude) to filter columns by dtype
+- `window/rolling_apply.ts` — rolling/expanding apply already exists; consider `ewm` improvements
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 213**: `interpolate` — `stats/interpolate.ts`. Extract helpers (`fillLinearRun`, `classifyAreas`, `bisectLeft`, `chooseNearest`) to stay under complexity limit. `classifyAreas` precomputes inside/outside area for each position cleanly. Use `as Scalar`/`as number`/`as string` casts for `noUncheckedIndexedAccess` — same pattern as `na_ops.ts` uses `out[i] as Scalar`. `isMissing()` helper reuse pattern. `interpolateByColumns`/`interpolateByRows` extracted to reduce main function complexity. Metric: 48 (+1). Commit: ab037f6.
 - **Iter 212**: `factorize` + `wide_to_long` — Two features in one iteration to recover from iter 211's lost push. `noExcessiveCognitiveComplexity`: extract `collectUniques`, `buildCodes`, `compareLabels` helpers for factorize; extract `discoverSuffixMap`, `buildStubSourceData`, `accumulateRow` helpers for wideToLong. `useBlockStatements`: always use braces. `noNestedTernary`: use if/else chains. `useSimplifiedLogicExpression`: `!(a || b)` form. `useTopLevelRegex`: move `/^\d+$/` to module top-level. Metric: 47 (+1). Commit: 5b782a6.
 - **Iter 211**: `factorize`/`factorizeSeries` — `stats/factorize.ts`. With `noUncheckedIndexedAccess: true`, use `for (const [i, v] of values.entries())` instead of `values[i]` in a for loop to avoid `Scalar | undefined`. `codeMap.get(v) ?? naValue` handles the `undefined` case from Map.get. `rawUniques as readonly Label[]` cast is necessary since `Scalar` is wider than `Label` — same pattern used in crosstab.ts. Metric: 46 (+1). Commit: 620ff7a.
 - **Iter 210**: `explode` — `reshape/explode.ts`. For `Array.isArray(value)` where `value: Scalar` (Scalar has no array members), TypeScript narrows to `never` in the truthy branch. Fix: widen to `unknown` first (`const raw: unknown = value`), then `Array.isArray(raw)` narrows to `unknown[]`. Use `arr.map(c => (c ?? null) as Scalar)` for element extraction. `typeof column === "string"` is cleaner than `Array.isArray` for `string | readonly string[]` union. `DataFrame.fromColumns` accepts `Record<string, Scalar[]>` directly (no `as` cast to readonly needed). Metric: 45 (+1). Commit: 6434a78.
@@ -83,61 +84,11 @@ Next features to implement (prioritized by impact):
 
 ## 📊 Iteration History
 
-### Iteration 212 — 2026-04-11 21:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24292269871)
+### Iteration 213 — 2026-04-11 22:23 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24292676836)
+- **Status**: ✅ Accepted — Add `stats/interpolate.ts`: interpolateSeries/interpolateDataFrame. linear/pad/bfill/nearest; limit, limitDirection, limitArea; axis=0/1 for DataFrame. Metric: 48 (+1). Commit: ab037f6.
 
-- **Status**: ✅ Accepted
-- **Change**: Add `stats/factorize.ts` (factorize/factorizeSeries) and `reshape/wide_to_long.ts` (wideToLong). Factorize encodes values as integer codes with configurable sort/NA sentinel. wideToLong reshapes wide-format DataFrames to long by gathering stub-prefixed columns. 30+14 unit tests + 4+3 property-based tests. Playground pages for both.
-- **Metric**: 47 (previous best: 46, delta: +1)
-- **Commit**: 5b782a6 (branch: autoloop/build-tsb-pandas-typescript-migration)
-- **Notes**: Two features in one iter to recover from iter 211's lost push. Extract helpers to pass Biome complexity. `useTopLevelRegex` → move digit regex to module top. `useSimplifiedLogicExpression` → `!(a || b)`.
-
-### Iteration 211 — 2026-04-11 21:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24291664190)
-
-- **Status**: ✅ Accepted
-- **Change**: Add `stats/factorize.ts` — `factorize` and `factorizeSeries`. Encodes values as integer codes (0-based, occurrence order or sorted), returns codes + unique values. Supports NA sentinel (default -1), custom naValue, sort option. 30 unit + 4 property-based tests. Playground `factorize.html` with 8 demos.
-- **Metric**: 46 (previous best: 45, delta: +1)
-- **Commit**: 620ff7a (branch: autoloop/build-tsb-pandas-typescript-migration)
-- **Notes**: `for (const [i, v] of values.entries())` avoids `noUncheckedIndexedAccess` issues. `rawUniques as readonly Label[]` cast needed since Scalar is wider than Label — same pattern as crosstab.ts.
-
-### Iteration 210 — 2026-04-11 20:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24291234244)
-
-- **Status**: ✅ Accepted
-- **Change**: Add `reshape/explode.ts` — `explodeSeries` and `explodeDataFrame`. Explodes list-valued cells into individual rows. Supports multi-column explosion (zip-longest padding), null/empty array → null, scalars pass through, ignore_index option. 27 unit + 3 property-based tests. Playground `explode.html` with 8 demos.
-- **Metric**: 45 (previous best: 44, delta: +1)
-- **Commit**: 6434a78 (branch: autoloop/build-tsb-pandas-typescript-migration)
-- **Notes**: `Array.isArray(value)` where `value: Scalar` narrows to `never` — widen to `unknown` first. `typeof column === "string"` cleanly handles `string | readonly string[]`. `DataFrame.fromColumns` accepts `Record<string, Scalar[]>` directly without cast.
-
-### Iteration 209 — 2026-04-11 20:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24290574060)
-
-- **Status**: ✅ Accepted
-- **Change**: Add `reshape/pivot_table.ts` — `pivotTableFull` with full margins support. Mirrors `pandas.pivot_table()` with margins=true adding All row/column, margins_name customization, sort option, fill_value, dropna, and multiple index/column columns. 25 unit + 4 property-based tests. Playground `pivot_table.html` with 8 demos.
-- **Metric**: 44 (previous best: 43, delta: +1)
-- **Commit**: 0932ce7 (branch: autoloop/build-tsb-pandas-typescript-migration)
-- **Notes**: `noSecrets` flags sentinel strings → biome-ignore comment. `useAtIndex` → `.at(-1)`. `useShorthandArrayType` → `T[]`. `useSimplifiedLogicExpression` → `!(a || b)`. Local canonical branch tracks hash-suffix origin branch fine.
-
-### Iteration 208 — 2026-04-11 19:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24290127464)
-
-- **Status**: ✅ Accepted
-- **Change**: Add `stats/crosstab.ts` — `crosstab` and `crosstabSeries`. Cross-tabulation with count/custom aggfunc, normalize (all/index/columns), margins with custom name, dropna. 21 unit + property-based tests. Playground page `crosstab.html`.
-- **Metric**: 43 (previous best: 42, delta: +1)
-- **Commit**: 1ab2e7c (branch: autoloop/build-tsb-pandas-typescript-migration)
-- **Notes**: Split normalizeMatrix into 3 mode-specific helpers + 3 math helpers to pass Biome complexity check. Remove unused buildMatrix/buildColumnMap. Create canonical branch (not hash-suffix) — used create_pull_request since branch was new.
-
-### Iteration 207 — 2026-04-11 19:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24289641935)
-
-- **Status**: ✅ Accepted
-- **Change**: Add `stats/crosstab.ts` — `crosstab` and `crosstabSeries`. Cross-tabulation with count/custom aggfunc, normalize (all/index/columns), margins with custom name, dropna. 30 unit + property-based tests. Playground page `crosstab.html` (8 interactive demos).
-- **Metric**: 43 (previous best: 42, delta: +1)
-- **Commit**: dacdb21 (branch: autoloop/build-tsb-pandas-typescript-migration-531c0338e43e4af9)
-- **Notes**: Extract `pushObservation` helper for `buildCellMap`, `buildColumnMap`+`resolveFinalLayout` for `crosstab` to stay under Biome complexity limit. `noVoid` — don't use `void x` to suppress unused-var.
-
-### Iteration 206 — 2026-04-11 18:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24289114918)
-
-- **Status**: ✅ Accepted
-- **Change**: Add `stats/get_dummies.ts` — one-hot encoding. Metric: 42 (+1). Commit: f5a69ab
-
-### Iteration 205 — 2026-04-11 18:12 UTC
-- **Status**: ✅ Accepted — Add `stats/interval.ts`: Interval/IntervalIndex/intervalRange. Metric: 41 (+1). Commit: e58b620
+### Iters 205–212 — 2026-04-11 — ✅ (metrics 41→47)
+- 205: Interval/IntervalIndex/intervalRange. 206: getDummies/fromDummies. 207–208: crosstab. 209: pivotTableFull. 210: explode. 211: factorize. 212: factorize+wide_to_long.
 
 ### Iters 199–204 — 2026-04-11 — ✅ (metrics 36→40)
 - 199: sample. 200–201: clip_advanced, apply (lost on push). 202: fix exports + clip_advanced. 203: re-impl apply+clip. 204: cut/qcut.
@@ -145,4 +96,4 @@ Next features to implement (prioritized by impact):
 ### Iters 172–198 — 2026-04-10/11 — ✅ (metrics 29→36)
 - 172: na_ops. 173–192: push failures. 193: idxmin_idxmax (MCP fixed). 194–198: astype, replace, where_mask, diff_shift, duplicated.
 
-### Iters 53–171 — ✅/⚠️ (metrics 8→51: feature implementations and recoveries)
+### Iters 53–171 — ✅/⚠️ (metrics 8→29: feature implementations and recoveries)
