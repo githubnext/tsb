@@ -79,3 +79,10 @@ export type {
   ShiftOptions,
   DataFrameShiftOptions,
 } from "./diff_shift.ts";
+export {
+  duplicatedSeries,
+  duplicatedDataFrame,
+  dropDuplicatesSeries,
+  dropDuplicatesDataFrame,
+} from "./duplicated.ts";
+export type { KeepPolicy, DuplicatedOptions, DataFrameDuplicatedOptions } from "./duplicated.ts";

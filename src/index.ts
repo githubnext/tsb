@@ -149,3 +149,12 @@ export type {
   ShiftOptions,
   DataFrameShiftOptions,
 } from "./stats/index.ts";
+export {
+  duplicatedSeries,
+  duplicatedDataFrame,
+  dropDuplicatesSeries,
+  dropDuplicatesDataFrame,
+} from "./stats/index.ts";
+export type { KeepPolicy, DuplicatedOptions, DataFrameDuplicatedOptions } from "./stats/index.ts";
+export { sampleSeries, sampleDataFrame } from "./core/index.ts";
+export type { SampleOptions } from "./core/index.ts";
