@@ -10,12 +10,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T21:10:56Z |
-| Iteration Count | 211 |
-| Best Metric | 46 |
+| Last Run | 2026-04-11T21:45:26Z |
+| Iteration Count | 212 |
+| Best Metric | 47 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | #113 (hash-suffix; canonical PR being created for `autoloop/build-tsb-pandas-typescript-migration`) |
+| PR | #113 (hash-suffix; new canonical PR created for `autoloop/build-tsb-pandas-typescript-migration` in iter 212) |
 | Steering Issue | #107 |
 | Paused | false |
 | Pause Reason | — |
@@ -48,6 +48,7 @@ Next features to implement (prioritized by impact):
 
 ## 📚 Lessons Learned
 
+- **Iter 212**: `factorize` + `wide_to_long` — Two features in one iteration to recover from iter 211's lost push. `noExcessiveCognitiveComplexity`: extract `collectUniques`, `buildCodes`, `compareLabels` helpers for factorize; extract `discoverSuffixMap`, `buildStubSourceData`, `accumulateRow` helpers for wideToLong. `useBlockStatements`: always use braces. `noNestedTernary`: use if/else chains. `useSimplifiedLogicExpression`: `!(a || b)` form. `useTopLevelRegex`: move `/^\d+$/` to module top-level. Metric: 47 (+1). Commit: 5b782a6.
 - **Iter 211**: `factorize`/`factorizeSeries` — `stats/factorize.ts`. With `noUncheckedIndexedAccess: true`, use `for (const [i, v] of values.entries())` instead of `values[i]` in a for loop to avoid `Scalar | undefined`. `codeMap.get(v) ?? naValue` handles the `undefined` case from Map.get. `rawUniques as readonly Label[]` cast is necessary since `Scalar` is wider than `Label` — same pattern used in crosstab.ts. Metric: 46 (+1). Commit: 620ff7a.
 - **Iter 210**: `explode` — `reshape/explode.ts`. For `Array.isArray(value)` where `value: Scalar` (Scalar has no array members), TypeScript narrows to `never` in the truthy branch. Fix: widen to `unknown` first (`const raw: unknown = value`), then `Array.isArray(raw)` narrows to `unknown[]`. Use `arr.map(c => (c ?? null) as Scalar)` for element extraction. `typeof column === "string"` is cleaner than `Array.isArray` for `string | readonly string[]` union. `DataFrame.fromColumns` accepts `Record<string, Scalar[]>` directly (no `as` cast to readonly needed). Metric: 45 (+1). Commit: 6434a78.
 - **Iter 209**: `pivotTableFull` — `noSecrets` flags sentinel strings (use biome-ignore). `useAtIndex` → `.at(-1)`. `useShorthandArrayType`: `T[]`. `useSimplifiedLogicExpression`: `!(a || b)`. Metric: 44 (+1). Commit: 0932ce7.
@@ -74,13 +75,21 @@ Next features to implement (prioritized by impact):
 
 ## 🔭 Future Directions
 
-- `io/read_excel.ts` — Excel reading
-- `stats/describe_categorical.ts` — extend describe() for categorical
-- `stats/describe_categorical.ts` — describe() for categorical/string Series
+- `io/read_excel.ts` — Excel reading (requires xlsx parser from scratch)
+- `stats/describe_categorical.ts` — extend describe() for categorical/string Series
+- `window/rolling_apply.ts` — rolling/expanding apply with custom function (already exists in rolling.ts — check if expanding needs it)
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 212 — 2026-04-11 21:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24292269871)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `stats/factorize.ts` (factorize/factorizeSeries) and `reshape/wide_to_long.ts` (wideToLong). Factorize encodes values as integer codes with configurable sort/NA sentinel. wideToLong reshapes wide-format DataFrames to long by gathering stub-prefixed columns. 30+14 unit tests + 4+3 property-based tests. Playground pages for both.
+- **Metric**: 47 (previous best: 46, delta: +1)
+- **Commit**: 5b782a6 (branch: autoloop/build-tsb-pandas-typescript-migration)
+- **Notes**: Two features in one iter to recover from iter 211's lost push. Extract helpers to pass Biome complexity. `useTopLevelRegex` → move digit regex to module top. `useSimplifiedLogicExpression` → `!(a || b)`.
 
 ### Iteration 211 — 2026-04-11 21:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24291664190)
 
