@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-10T23:55:00Z |
-| Iteration Count | 176 |
-| Best Metric | 29 |
+| Last Run | 2026-04-11T00:27:00Z |
+| Iteration Count | 177 |
+| Best Metric | 28 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | — |
 | Steering Issue | — |
-| Paused | false |
-| Pause Reason | — |
+| Paused | true |
+| Pause Reason | 5 consecutive push failures: safeoutputs MCP tools not available in workflow runs |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 4 |
-| Recent Statuses | error, error, accepted, error, error, accepted, accepted, error, error, error |
+| Consecutive Errors | 5 |
+| Recent Statuses | error, error, error, accepted, error, error, accepted, accepted, error, error |
 
 ## 📋 Program Info
 
@@ -50,18 +50,14 @@ Next features to implement (prioritized by impact):
 
 ## 📚 Lessons Learned
 
-- **Iter 176 failure**: safeoutputs tools NOT available again (run 24269241132). pct_change fully implemented — 20 tests pass, biome clean. Commit `1ae6f5f` on local branch `autoloop/build-tsb-pandas-typescript-migration`. Same systematic failure as iters 173-175. Consecutive errors now at 4.
-- **Iter 175 failure**: safeoutputs tools STILL not available (run 24267579751). Code committed to local branch (57a5b3e) but not pushed. Same pattern as iters 173-174. This is a persistent workflow configuration issue. Consecutive errors now at 3.
-- **Iter 175 success NOTE**: Note above "Iter 175 success" entry is from a DIFFERENT run that also had pct_change. The note about "28 files" refers to an earlier successful run when branch was created fresh from main.
-- **Iter 172 success**: safeoutputs tools ARE available in Copilot CLI agentic workflow (as opposed to older runs). The background task agent can use create_pull_request. The key fix was using a general-purpose background agent to call safeoutputs tools.
-- **Current main state**: main branch has 28 features (not 88 as old state file said). The 88 was from old per-branch commits that were never merged into main. State file metric was stale.
-- **DataFrame API**: Use `df.columns.values` (readonly string[]) not `df.columns` directly for iteration. Constructor is `new DataFrame(colMap, index)` not `new DataFrame({data, index})`.
-- **Biome formatting**: overload signatures that exceed 100 chars need line breaks — `export function foo(\n  param,\n): ReturnType`.
-- **Import style**: Use `import fc from "fast-check"` (default), not `import * as fc`. Use `src/index.ts` for imports in tests, not deep file imports.
-- **Implementation notes for to_datetime**: Use `DatetimeIndex.fromDates()` (not `new DatetimeIndex()`). Use `new Timestamp(d)` (pass Date object, not string directly).
+- **Iters 173-177 (5 consecutive) failure**: safeoutputs MCP tools consistently NOT available in workflow runs since iter 172. Root cause unknown. Direct git push fails (GITHUB_TOKEN empty/restricted by one-shot-token.so). Sub-agents also cannot access safeoutputs tools. Program auto-paused at 5 consecutive errors. Action required from maintainer to fix workflow auth.
+- **Iter 172 success**: safeoutputs tools WERE available in Copilot CLI agentic workflow. The background task agent used create_pull_request. NOT reproducible since.
+- **Current main state**: main branch has 28 features. pct_change (metric 29) was implemented 5 times but never successfully pushed.
+- **pct_change implementation**: Committed to local branch `autoloop/build-tsb-pandas-typescript-migration` (commit 21b1e10, run 24270222763). Files: `src/stats/pct_change.ts`, `tests/stats/pct_change.test.ts`, `playground/pct_change.html`. Metric would be 29.
+- **DataFrame API**: Use `df.columns.values` (readonly string[]) not `df.columns` directly. Constructor is `new DataFrame(colMap, index)`.
+- **Biome formatting**: overload signatures that exceed 100 chars need line breaks.
+- **Import style**: Use `import fc from "fast-check"` (default). Use `src/index.ts` for imports in tests.
 - **Iter 164 lesson**: use `iat()` not `at()` for integer position access on label-indexed result DataFrames.
-- **Iter 174 push failure**: safeoutputs tools again not available. Both direct call and sub-agent call confirmed unavailable. Commit `a1b6e27` on branch `autoloop/build-tsb-pandas-typescript-migration` (local only). pct_change code is ready — next iteration should re-implement.
-- **Pattern**: Tools were intermittently available. Iter 175 confirmed they ARE available in this run.
 
 ---
 
@@ -74,7 +70,7 @@ Next features to implement (prioritized by impact):
 ## 🔭 Future Directions
 
 **Next priorities**:
-- `pct_change` — IMPLEMENTED AGAIN (iter 176, commit `1ae6f5f`, run 24269241132). Files ready: `src/stats/pct_change.ts`, `tests/stats/pct_change.test.ts`, `playground/pct_change.html`. Branch `autoloop/build-tsb-pandas-typescript-migration` exists locally only. Re-implement if branch is gone.
+- `pct_change` — IMPLEMENTED (iter 177, commit 21b1e10, run 24270222763). Files ready: `src/stats/pct_change.ts`, `tests/stats/pct_change.test.ts`, `playground/pct_change.html`. Branch `autoloop/build-tsb-pandas-typescript-migration` committed locally. Must fix push auth first.
 - `na_ops.ts` — isna/notna/ffill/bfill (was in iter 172 but branch was lost, not in main)
 - `where`/`mask` — conditional operations very common in pandas
 - `idxmin`/`idxmax` — frequently used in data analysis
@@ -86,6 +82,14 @@ Next features to implement (prioritized by impact):
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 177 — 2026-04-11 00:27 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24270222763)
+
+- **Status**: ⚠️ Error (push failure — safeoutputs MCP tools unavailable, 5th consecutive; auto-paused)
+- **Change**: Add `pct_change.ts` — `pctChangeSeries`/`pctChangeDataFrame` with periods, fillMethod (pad/ffill/backfill/bfill/null), limit, axis. Committed locally as 21b1e10.
+- **Metric**: 29 (main baseline 28, delta +1 if pushed)
+- **Commit**: 21b1e10 (local only on branch `autoloop/build-tsb-pandas-typescript-migration`)
+- **Notes**: Same push failure as iters 173-176. Program now auto-paused. Maintainer action required to fix workflow authentication so safeoutputs tools are available.
 
 ### Iteration 176 — 2026-04-10 23:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24269241132)
 
