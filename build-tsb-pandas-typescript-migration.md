@@ -10,12 +10,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T20:25:00Z |
-| Iteration Count | 209 |
-| Best Metric | 44 |
+| Last Run | 2026-04-11T20:46:00Z |
+| Iteration Count | 210 |
+| Best Metric | 45 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | #111 |
+| PR | #113 (hash-suffix; canonical PR being created for `autoloop/build-tsb-pandas-typescript-migration`) |
 | Steering Issue | #107 |
 | Paused | false |
 | Pause Reason | — |
@@ -31,7 +31,7 @@
 **Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: #111
+**Pull Request**: #113 (hash-suffix; canonical PR being created for `autoloop/build-tsb-pandas-typescript-migration`)
 **Steering Issue**: #107
 **Experiment Log**: #3
 
@@ -42,12 +42,13 @@
 Next features to implement (prioritized by impact):
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser from scratch)
 - `stats/describe_categorical.ts` — describe() for categorical/string Series (check what's missing from existing describe.ts)
-- `reshape/explode.ts` — explode list-type column cells into multiple rows
+- `window/rolling_apply.ts` — rolling/expanding apply with custom function
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 210**: `explode` — `reshape/explode.ts`. For `Array.isArray(value)` where `value: Scalar` (Scalar has no array members), TypeScript narrows to `never` in the truthy branch. Fix: widen to `unknown` first (`const raw: unknown = value`), then `Array.isArray(raw)` narrows to `unknown[]`. Use `arr.map(c => (c ?? null) as Scalar)` for element extraction. `typeof column === "string"` is cleaner than `Array.isArray` for `string | readonly string[]` union. `DataFrame.fromColumns` accepts `Record<string, Scalar[]>` directly (no `as` cast to readonly needed). Metric: 45 (+1). Commit: 6434a78.
 - **Iter 209**: `pivotTableFull` — `reshape/pivot_table.ts` with full margins support. Biome `noSecrets` flags internal sentinel strings (use biome-ignore comment). `useAtIndex` requires `.at(-1)` over `[length-1]`. `useShorthandArrayType`: `T[]` not `Array<T>`. `useSimplifiedLogicExpression`: `!(a || b)` not `!a && !b`. Canonical branch still tracking hash-suffix d50883e81cd4a027 — no issue with push since local branch is named canonically. Metric: 44 (+1). Commit: 0932ce7.
 - **Iter 208**: `crosstab`/`crosstabSeries` — `noExcessiveCognitiveComplexity` (max 15): split `normalizeMatrix` into `normalizeAll`/`normalizeByIndex`/`normalizeByColumns` + `sumAll`/`sumExcludeMargins`/`divideMatrix` helpers. Remove unused functions (`buildMatrix`, `buildColumnMap`). `DataFrame.fromColumns` options have no `name` field. Use `create_pull_request` when canonical branch `autoloop/build-tsb-pandas-typescript-migration` doesn't exist remotely (push_to_pull_request_branch fails). Metric: 43 (+1). Commit: 1ab2e7c.
 - **Iter 207**: `crosstab`/`crosstabSeries` — extract `pushObservation` helper to keep `buildCellMap` under complexity 15. Extract `buildColumnMap` + `resolveFinalLayout` to keep `crosstab` under 15. Remove `void rowname`/`void colname` (noVoid). Canonical branch is hash-suffix `531c0338e43e4af9` — check it out by name for push. Metric: 43 (+1).
@@ -56,12 +57,7 @@ Next features to implement (prioritized by impact):
 - **Iter 204**: `cut`/`qcut` — decompose `assignBins` to keep cognitive complexity under 15. `useCollapsedElseIf` requires removing `else { if (...) }` → `else if (...)`. `noExportedImports` means don't re-export types imported from other modules. Use `biome format --write` to auto-fix formatter issues. `as unknown as [T, U]` required for overload narrowing (not `(...) as [T, U]`).
 - **Iter 203**: Canonical branch `autoloop/build-tsb-pandas-typescript-migration` created from hash-suffix branch (iter 199 state, 37 files). Re-implemented `clip_advanced.ts` (lost from iter 200) and `apply.ts` (lost from iter 201). Biome `noExcessiveCognitiveComplexity` → decompose into axis helpers. `noUselessElse` → remove else after early returns. Metric: 39 (from 37, delta: +2).
 - **Iter 202**: `clipAdvancedSeries`/`clipAdvancedDataFrame` — canonical branch created from main. Fixed missing exports in src/index.ts, stats/index.ts, core/index.ts for modules from iters 172–199. `noNestedTernary` → use if/else for axis resolution. `ReadonlyArray<T>` → `readonly T[]` for Biome. Metric: 38 (from 37; also fixed index wiring).
-- **Iter 201**: `applySeries`/`applyDataFrame`/`applyExpandDataFrame`/`mapDataFrame` — Map<string,Series<Scalar>> is directly assignable to ReadonlyMap (no `as` cast needed). Biome `--write` auto-fixes formatter issues.
-- **Iter 200**: `clipAdvancedSeries`/`clipAdvancedDataFrame` — Series bounds use positional alignment; DataFrame bounds use element-wise. Biome `noNonNullAssertion` on 2D arrays → use `?.` optional chaining. `noUselessElse` requires `--unsafe` flag.
 - **Iter 199**: `sampleSeries`/`sampleDataFrame` — Import `Scalar` from `../../src/index.ts` (not `../../src/types.ts`) in tests to satisfy `useImportRestrictions`.
-- **Iter 197**: Decompose DataFrame operations into separate axis helpers (colWise/rowWise) to keep Biome cognitive complexity low.
-- **Iter 196**: Biome `noExcessiveCognitiveComplexity` (max 15): extract small helpers. Use `setCell()` helper to avoid `noNonNullAssertion` on matrix access.
-- **Iter 195**: DataFrame iteration: `for (const name of df.columns.values)` + `df.col(name)`. Biome `useExplicitType` requires explicit `: Scalar` return type on arrow functions.
 - **DataFrame API**: `df.columns.values` is `readonly string[]`. `df.index.size` (not `.length`). Use `DataFrame.fromColumns()` factory.
 - **Series options**: `dtype` must be a `Dtype` object; `name` accepts `string | null` (not `undefined`).
 - **Biome**: `useBlockStatements` auto-fixable with `--write --unsafe`. `Number.NaN`, `Number.POSITIVE_INFINITY` required. Use `import fc from "fast-check"` (default import).
@@ -85,6 +81,14 @@ Next features to implement (prioritized by impact):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 210 — 2026-04-11 20:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24291234244)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `reshape/explode.ts` — `explodeSeries` and `explodeDataFrame`. Explodes list-valued cells into individual rows. Supports multi-column explosion (zip-longest padding), null/empty array → null, scalars pass through, ignore_index option. 27 unit + 3 property-based tests. Playground `explode.html` with 8 demos.
+- **Metric**: 45 (previous best: 44, delta: +1)
+- **Commit**: 6434a78 (branch: autoloop/build-tsb-pandas-typescript-migration)
+- **Notes**: `Array.isArray(value)` where `value: Scalar` narrows to `never` — widen to `unknown` first. `typeof column === "string"` cleanly handles `string | readonly string[]`. `DataFrame.fromColumns` accepts `Record<string, Scalar[]>` directly without cast.
 
 ### Iteration 209 — 2026-04-11 20:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24290574060)
 
