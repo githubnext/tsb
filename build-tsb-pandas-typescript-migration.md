@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T15:45:00Z |
-| Iteration Count | 200 |
+| Last Run | 2026-04-11T16:25:00Z |
+| Iteration Count | 201 |
 | Best Metric | 38 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -41,13 +41,14 @@
 
 Next features to implement (prioritized by impact):
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser)
-- `stats/apply.ts` — apply arbitrary function along axis for Series/DataFrame
+- `stats/clip_advanced.ts` — clip with Series/DataFrame bounds (iter 200 lost, redo)
 - `groupby` extensions — transform, filter, apply
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 201**: `applySeries`/`applyDataFrame`/`applyExpandDataFrame`/`mapDataFrame` — Map<string,Series<Scalar>> is directly assignable to ReadonlyMap (no `as` cast needed). Biome `--write` auto-fixes formatter issues. Session MCP auth works with Authorization header + Mcp-Session-Id on all subsequent calls.
 - **Iter 200**: `clipAdvancedSeries`/`clipAdvancedDataFrame` — Series bounds use positional alignment; DataFrame bounds use element-wise. Biome `noNonNullAssertion` on 2D arrays → use `?.` optional chaining. `noUselessElse` requires `--unsafe` flag.
 - **Iter 199**: `sampleSeries`/`sampleDataFrame` — Import `Scalar` from `../../src/index.ts` (not `../../src/types.ts`) in tests to satisfy `useImportRestrictions`.
 - **Iter 197**: Decompose DataFrame operations into separate axis helpers (colWise/rowWise) to keep Biome cognitive complexity low.
@@ -76,6 +77,14 @@ Next features to implement (prioritized by impact):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 201 — 2026-04-11 16:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24286325434)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `stats/apply.ts` — `applySeries`, `applyDataFrame`, `applyExpandDataFrame`, `mapDataFrame`. Pandas-equivalent apply/map: element-wise (Series), reducing per col/row → Series, transforming per col/row → DataFrame, element-wise applymap. 35 tests (unit + fast-check). Playground page `apply.html`.
+- **Metric**: 38 (previous best: 37, delta: +1)
+- **Commit**: 2cc43c3 (branch: autoloop/build-tsb-pandas-typescript-migration-531c0338e43e4af9 → PR #111)
+- **Notes**: `Map<string,Series<Scalar>>` assignable to `ReadonlyMap` — no `as` cast needed. Biome `--write` fixes formatter. MCP session handshake with Authorization + Mcp-Session-Id headers works reliably.
 
 ### Iteration 200 — 2026-04-11 15:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24285870280)
 
