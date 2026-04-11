@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T10:01:00Z |
-| Iteration Count | 190 |
+| Last Run | 2026-04-11T10:13:00Z |
+| Iteration Count | 191 |
 | Best Metric | 31 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | — |
 | Steering Issue | — |
 | Paused | true |
-| Pause Reason | 18 consecutive push failures: safeoutputs MCP blocked (MCP registry 401). Iter 190 implemented astype (castScalar/astypeSeries/astypeDataFrame, commit 7466a39) on canonical branch. Metric = 31. Cannot push. Human intervention required to fix MCP registry token scope or push branch manually. |
+| Pause Reason | 19 consecutive push failures: safeoutputs MCP blocked (MCP registry 401). Iter 191 implemented replace.ts (replaceSeries/replaceDataFrame, commit 88bdfb3) on canonical branch. Metric = 31. Cannot push. Human intervention required to fix MCP registry token scope or push branch manually. |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 18 |
-| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error |
+| Consecutive Errors | 19 |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error |
 
 ## 📋 Program Info
 
@@ -40,18 +40,19 @@
 *(No specific priorities — continue implementing missing pandas features.)*
 
 Next features to implement (prioritized by impact):
-- `core/astype.ts` — DONE (iter 190, commit 7466a39)
-- `stats/replace.ts` — value substitution for Series and DataFrame
-- `stats/clip_and_round.ts` — clip values to a range
+- `core/astype.ts` — DONE (iter 190, commit 7466a39, locally committed on canonical branch)
+- `stats/replace.ts` — DONE (iter 191, commit 88bdfb3, locally committed on canonical branch)
+- `stats/clip_and_round.ts` — clip values to a range (already in elem_ops.ts, may need enhancement)
 - `io/read_excel.ts` — Excel file reading (WASM or fallback)
+- `stats/where_mask.ts` — conditional selection (iter 187, previously implemented)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iteration 191**: Implemented replace.ts on canonical branch (commit 88bdfb3, metric 31). replaceSeries/replaceDataFrame with scalar, array, array-pair, Record, Map modes. NaN-safe scalarEq comparison. Per-column DataFrame mode. 42 unit + 3 property tests, playground page. tsc 0 source errors. safeoutputs STILL blocked — 19th consecutive push failure.
 - **Iteration 190**: Implemented astype on canonical branch (commit 7466a39, metric 31). castScalar/astypeSeries/astypeDataFrame with full dtype coverage. Used isDtypeMapping() type guard to avoid as-casts. 40+ unit + 3 property tests, playground page. safeoutputs STILL blocked — 18th consecutive push failure.
 - **Iteration 189**: Implemented idxmin_idxmax on canonical branch (commit 9f17fa7, metric 31). Branch set up from dcf09ab (na_ops + pct_change). Key: use `isBetter()` helper to avoid `noExcessiveCognitiveComplexity` biome error. Type for Series params must be `Series<Scalar>` not `Series<unknown>`. safeoutputs STILL unavailable — 17th consecutive push failure.
-- **Iteration 188**: Implemented idxmin_idxmax on canonical branch (commit 4d8a0c9, metric 31). tsc clean, no source errors. safeoutputs tools STILL unavailable — same 401 MCP registry issue. 16th consecutive push failure. Code: `idxminSeries`/`idxmaxSeries`/`dataFrameIdxmin`/`dataFrameIdxmax` with `skipna` and `axis` options. Key: use `df.col(name).iat(r)` for element access by row position, not `df.iat()` (doesn't exist on DataFrame).
 - **Iteration 188**: `DataFrame.fromColumns(colMap, { index: [...] })` syntax for test DataFrames. `df.columns.values` returns `readonly string[]`. `df.index.values` returns `readonly Label[]`.
 - **Iteration 187 code ready (committed locally)**: Branch `autoloop/build-tsb-pandas-typescript-migration` has commit `6755c42` with where_mask (34 tests), na_ops, and pct_change. Metric = 31. Branch set up from `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db`. Cannot push — safeoutputs MCP blocked.
 - **Iter 173-187 (15 consecutive) failure**: safeoutputs MCP server blocked by policy — the MCP registry API at `https://api.github.com/copilot/mcp_registry` returns 401, so ALL non-default MCP servers (github, safeoutputs) are blocked. This means `create_issue`, `create_pull_request`, and `push_to_pull_request_branch` tools are unavailable. Git push also requires HTTPS auth. **Root cause: token used by Copilot CLI in this workflow lacks MCP registry scope. This requires human intervention to fix workflow configuration.**
@@ -76,16 +77,25 @@ Next features to implement (prioritized by impact):
 ## 🔭 Future Directions
 
 **Next priorities**:
-- `stats/idxmin_idxmax.ts` — DONE (iter 189, commit 9f17fa7, metric 31, locally committed)
-- `core/astype.ts` — DONE (iter 190, commit 7466a39, metric 31, locally committed)
-- `stats/replace.ts` — value substitution
-- `stats/clip_and_round.ts` — value clipping
+- `stats/idxmin_idxmax.ts` — DONE (iter 189, commit 9f17fa7, locally committed — needs push)
+- `core/astype.ts` — DONE (iter 190, commit 7466a39, locally committed — needs push)
+- `stats/replace.ts` — DONE (iter 191, commit 88bdfb3, locally committed — needs push)
+- `stats/where_mask.ts` — conditional value selection
+- `io/read_excel.ts` — Excel file reading
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 191 — 2026-04-11 10:13 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24280288419)
+
+- **Status**: ⚠️ Error (push failure — safeoutputs MCP blocked, 19th consecutive)
+- **Change**: Add `replace.ts` — `replaceSeries`/`replaceDataFrame` with scalar, array, array-pair, Record, Map replacement modes. Per-column DataFrame mode. NaN-safe lookup. 42 unit + 3 property tests. Playground page.
+- **Metric**: 31 (baseline 30 from canonical branch, +1 from replace; tsc 0 source errors)
+- **Commit**: 88bdfb3 (canonical branch `autoloop/build-tsb-pandas-typescript-migration` — cannot push — MCP 401)
+- **Notes**: Branch set up from dcf09ab (na_ops + pct_change). replace.ts committed on top. safeoutputs `push_to_pull_request_branch` returns "Tool does not exist". MCP registry still 401.
 
 ### Iteration 190 — 2026-04-11 10:01 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24279874429)
 
