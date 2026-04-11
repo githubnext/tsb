@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T15:30:00Z |
+| Last Run | 2026-04-11T14:55:00Z |
 | Iteration Count | 199 |
-| Best Metric | 37 |
+| Best Metric | 36 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #111 |
@@ -42,13 +42,13 @@
 Next features to implement (prioritized by impact):
 - `stats/clip_advanced.ts` — clip with per-element Series/DataFrame bounds
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser)
-- `groupby` extensions — transform, filter, apply
+- `stats/duplicated.ts` — duplicated/dropDuplicates for Series/DataFrame
 
 ---
 
 ## 📚 Lessons Learned
 
-- **Iter 199**: `sampleSeries`/`sampleDataFrame` — LCG-based seeded RNG (`randomState`) for deterministic results. Implement Fisher-Yates for unweighted WOR, exponential-key reservoir sampling for weighted WOR, and cumulative-probability scanning for WR. `core/sample.ts` imports directly from `./frame.ts`, `./base-index.ts`, `./series.ts` (not `./index.ts`) to avoid circular deps. `push_to_pull_request_branch` with PR #111 on branch alias `autoloop/...-531c0338e43e4af9` succeeded again.
+- **Iter 199**: `sampleSeries`/`sampleDataFrame` — Mulberry32 seeded PRNG, Fisher-Yates (uniform) + Gumbel-max trick (weighted) for without-replacement, CDF binary-search for with-replacement. Import `Scalar` from `../../src/index.ts` (not `../../src/types.ts`) in tests to satisfy `useImportRestrictions`.
 - **Iter 198**: `duplicatedSeries`/`duplicatedDataFrame`/`dropDuplicatesSeries`/`dropDuplicatesDataFrame` — use `scalarKey()` pattern (same as value_counts) for stable scalar/null/NaN/Date serialization. `push_to_pull_request_branch` requires creating a local branch alias matching the remote branch name (e.g. `autoloop/...-531c0338e43e4af9`) for incremental patch generation. PR #111 is the canonical draft PR.
 - **Iter 197**: `diffSeries`/`diffDataFrame`/`shiftSeries`/`shiftDataFrame` — decompose axis=0 (col-wise) vs axis=1 (row-wise) into separate helper functions to keep complexity low. `diffArray` yields null for non-finite values; `shiftArray` fills vacated positions with configurable `fillValue`. 35 tests (unit + fast-check). Canonical branch `autoloop/build-tsb-pandas-typescript-migration` first had its PR created this iteration.
 - **Iter 196**: `whereSeries`/`maskSeries` — Series and DataFrame where/mask. Refactor complex branch into small helpers (buildFromDataFrameCond, buildFrom2DArray, buildFromSeriesAxis0/1, buildFromCallable) to satisfy Biome's noExcessiveCognitiveComplexity (max 15). Use `setCell()` helper instead of `matrix[r]![c]` to avoid `noNonNullAssertion`. 33 tests (unit + fast-check properties).
@@ -80,20 +80,21 @@ Next features to implement (prioritized by impact):
 
 ## 📊 Iteration History
 
-### Iteration 199 — 2026-04-11 15:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24285279820)
+### Iteration 199 — 2026-04-11 14:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24284805137)
 
 - **Status**: ✅ Accepted
-- **Change**: Add `stats/duplicated.ts` (duplicatedSeries/DataFrame, dropDuplicates Series/DataFrame) and `core/sample.ts` (sampleSeries, sampleDataFrame with n/frac/replace/weights/randomState). 35+ tests each. Playground pages.
-- **Metric**: 37 (previous best: 36, delta: +1)
-- **Commit**: e629a2e (branch: autoloop/build-tsb-pandas-typescript-migration-531c0338e43e4af9 → PR #111)
-- **Notes**: duplicated reuses scalarKey() pattern. sample implements Fisher-Yates (WOR), exponential-key reservoir (weighted WOR), LCG seeded RNG. core/sample.ts imports from ./frame.ts etc. directly (not ./index.ts) to avoid circular deps.
+- **Change**: Add `core/sample.ts` — `sampleSeries`, `sampleDataFrame`. Supports `n`/`frac`, `replace`, `weights`, `randomState` (Mulberry32 PRNG), `ignoreIndex`, `axis=0/1`. 35 tests (unit + fast-check). Playground page `sample.html`.
+- **Metric**: 36 (previous best: 35, delta: +1)
+- **Commit**: 7d35121 (branch: autoloop/build-tsb-pandas-typescript-migration-531c0338e43e4af9 → PR #111)
+- **Notes**: Import `Scalar` type from `../../src/index.ts` in tests (not `../../src/types.ts`) to satisfy Biome `useImportRestrictions`. Fisher-Yates for uniform without-replacement, Gumbel-max trick for weighted, CDF binary-search for with-replacement.
 
 ### Iteration 198 — 2026-04-11 14:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24284243449)
 
-- **Status**: ✅ Accepted (but commit was lost from branch; recaptured in iter 199)
-- **Change**: Planned `stats/duplicated.ts` — commit showed accepted but didn't persist on branch (state drift: stated 36 but branch had 35).
+- **Status**: ✅ Accepted
+- **Change**: Add `stats/duplicated.ts` — `duplicatedSeries`, `duplicatedDataFrame`, `dropDuplicatesSeries`, `dropDuplicatesDataFrame`. Supports `keep="first"/"last"/false` and `subset` for DataFrames. 35 tests (unit + fast-check). Playground page `duplicated.html`.
 - **Metric**: 36 (previous best: 35, delta: +1)
-- **Commit**: 5218a72 (lost)
+- **Commit**: 5218a72 (branch: autoloop/build-tsb-pandas-typescript-migration-531c0338e43e4af9 → PR #111)
+- **Notes**: Reused `scalarKey()` pattern from value_counts. `push_to_pull_request_branch` requires local branch named exactly as the remote tracking branch for incremental patch computation.
 
 ### Iteration 197 — 2026-04-11 13:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24283807306)
 
