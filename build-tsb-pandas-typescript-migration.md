@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T07:49:00Z |
-| Iteration Count | 186 |
+| Last Run | 2026-04-11T08:22:00Z |
+| Iteration Count | 187 |
 | Best Metric | 31 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | — |
 | Steering Issue | — |
 | Paused | true |
-| Pause Reason | 14 consecutive push failures: safeoutputs MCP server blocked by policy (MCP registry API returns 401 — token lacks required scope). Git push also requires HTTPS auth. Both are infrastructure issues, not code issues. Human intervention needed to fix MCP registry token permissions. |
+| Pause Reason | 15 consecutive push failures: safeoutputs MCP server blocked by policy (MCP registry API returns 401 — token lacks required scope). create_pull_request and other safeoutputs tools unavailable. Local commit 6755c42 ready on canonical branch with where_mask (iter 187). Human intervention needed to fix MCP registry token permissions. |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 14 |
-| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error |
+| Consecutive Errors | 15 |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error, error |
 
 ## 📋 Program Info
 
@@ -49,7 +49,8 @@ Next features to implement (prioritized by impact):
 
 ## 📚 Lessons Learned
 
-- **Iter 173-186 (14 consecutive) failure**: safeoutputs MCP server blocked by policy — the MCP registry API at `https://api.github.com/copilot/mcp_registry` returns 401, so ALL non-default MCP servers (github, safeoutputs) are blocked. This means `create_issue`, `create_pull_request`, and `push_to_pull_request_branch` tools are unavailable. Git push also requires HTTPS auth. **Root cause: token used by Copilot CLI in this workflow lacks MCP registry scope. This requires human intervention to fix workflow configuration.**
+- **Iteration 187 code ready (committed locally)**: Branch `autoloop/build-tsb-pandas-typescript-migration` has commit `6755c42` with where_mask (34 tests), na_ops, and pct_change. Metric = 31. Branch set up from `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db`. Cannot push — safeoutputs MCP blocked.
+- **Iter 173-187 (15 consecutive) failure**: safeoutputs MCP server blocked by policy — the MCP registry API at `https://api.github.com/copilot/mcp_registry` returns 401, so ALL non-default MCP servers (github, safeoutputs) are blocked. This means `create_issue`, `create_pull_request`, and `push_to_pull_request_branch` tools are unavailable. Git push also requires HTTPS auth. **Root cause: token used by Copilot CLI in this workflow lacks MCP registry scope. This requires human intervention to fix workflow configuration.**
 - **Iteration 186 code is ready and committed locally**: Branch `autoloop/build-tsb-pandas-typescript-migration` has commit `2118cd6` with where_mask (31 tests), na_ops, pct_change, and pct_change bug fixes. 1218 tests pass. Metric = 31. When push becomes available, this commit should be pushed and a PR created.
 - **where_mask state (iter 185-186)**: Canonical branch now has 3 commits ahead of main: na_ops (02ac2d9), pct_change (c79755f), where_mask (2118cd6). All committed locally, cannot push.
 - **Canonical branch source (iter 183)**: Branch `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db` already has BOTH na_ops.ts (iter 172) and pct_change.ts (iter 174) pushed remotely. Setting up canonical branch should use this as the source. Metric = 30 with both features.
@@ -73,7 +74,7 @@ Next features to implement (prioritized by impact):
 - `stats/idxmin_idxmax.ts` — index label of min/max values
 - `core/astype.ts` — explicit dtype casting module
 - `stats/replace.ts` — value substitution
-- `stats/where_mask.ts` — DONE, committed as 2118cd6 (iter 186, with bug fixes to pct_change)
+- `stats/where_mask.ts` — DONE, committed as 6755c42 (iter 187, canonical branch local only)
 
 ---
 
@@ -81,7 +82,13 @@ Next features to implement (prioritized by impact):
 
 All iterations in reverse chronological order (newest first).
 
-### Iteration 186 — 2026-04-11 07:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24277963359)
+### Iteration 187 — 2026-04-11 08:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24278381788)
+
+- **Status**: ⚠️ Error (push failure — safeoutputs MCP server blocked by policy, 15th consecutive)
+- **Change**: Add `where_mask.ts` — `whereSeries`/`maskSeries`/`whereDataFrame`/`maskDataFrame` with boolean scalar, array, Series<boolean>, DataFrame (2-D), and predicate conditions. 31 unit + 3 property-based tests = 34 total. Biome clean. TypeScript clean (no new errors). Canonical branch committed as 6755c42 (on top of na_ops + pct_change from dcf09ab).
+- **Metric**: 31 (previous best: 31 local, delta: 0 net from dcf09ab branch; +1 vs last pushed on dcf09ab which was 30)
+- **Commit**: 6755c42 (local canonical branch `autoloop/build-tsb-pandas-typescript-migration` — cannot push — MCP registry 401)
+- **Notes**: Same root cause as iters 173-186. create_pull_request returns "Tool does not exist". safeoutputs MCP server still not registered. Code is clean and committed. Human must fix MCP token scope to allow pushing.
 
 - **Status**: ⚠️ Error (push failure — safeoutputs MCP server blocked by policy, 14th consecutive)
 - **Change**: Add `where_mask.ts` — `whereSeries`/`maskSeries`/`whereDataFrame`/`maskDataFrame` with boolean scalar, array, Series, DataFrame (1D and 2D), and predicate conditions. 31 unit + 3 property-based tests = 34 total. Also fix pct_change bugs (index.length → index.size, bare Infinity constants). 1218 total tests pass. Metric = 31.
