@@ -86,3 +86,22 @@ export {
   dropDuplicatesDataFrame,
 } from "./duplicated.ts";
 export type { KeepPolicy, DuplicatedOptions, DataFrameDuplicatedOptions } from "./duplicated.ts";
+export { clipAdvancedSeries, clipAdvancedDataFrame } from "./clip_advanced.ts";
+export type {
+  SeriesBound,
+  DataFrameBound,
+  ClipAdvancedSeriesOptions,
+  ClipAdvancedDataFrameOptions,
+} from "./clip_advanced.ts";
+export {
+  applySeries,
+  mapSeries,
+  applyDataFrame,
+  applyExpandDataFrame,
+  mapDataFrame,
+} from "./apply.ts";
+export type {
+  MapLookup,
+  ApplyDataFrameOptions,
+  ApplyExpandDataFrameOptions,
+} from "./apply.ts";

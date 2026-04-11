@@ -158,3 +158,22 @@ export {
 export type { KeepPolicy, DuplicatedOptions, DataFrameDuplicatedOptions } from "./stats/index.ts";
 export { sampleSeries, sampleDataFrame } from "./core/index.ts";
 export type { SampleOptions } from "./core/index.ts";
+export { clipAdvancedSeries, clipAdvancedDataFrame } from "./stats/index.ts";
+export type {
+  SeriesBound,
+  DataFrameBound,
+  ClipAdvancedSeriesOptions,
+  ClipAdvancedDataFrameOptions,
+} from "./stats/index.ts";
+export {
+  applySeries,
+  mapSeries,
+  applyDataFrame,
+  applyExpandDataFrame,
+  mapDataFrame,
+} from "./stats/index.ts";
+export type {
+  MapLookup,
+  ApplyDataFrameOptions,
+  ApplyExpandDataFrameOptions,
+} from "./stats/index.ts";
