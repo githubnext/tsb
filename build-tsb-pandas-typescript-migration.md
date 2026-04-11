@@ -10,26 +10,26 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T07:24:58Z |
-| Iteration Count | 185 |
+| Last Run | 2026-04-11T07:49:00Z |
+| Iteration Count | 186 |
 | Best Metric | 31 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | — |
 | Steering Issue | — |
 | Paused | true |
-| Pause Reason | 13 consecutive push failures: safeoutputs MCP tools not registered AND git push requires auth not available in Copilot CLI context |
+| Pause Reason | 14 consecutive push failures: safeoutputs MCP server blocked by policy (MCP registry API returns 401 — token lacks required scope). Git push also requires HTTPS auth. Both are infrastructure issues, not code issues. Human intervention needed to fix MCP registry token permissions. |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 13 |
-| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error |
+| Consecutive Errors | 14 |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error |
 
 ## 📋 Program Info
 
 **Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: — (cannot create — safeoutputs tools unavailable in Copilot CLI context)
+**Pull Request**: — (cannot create — safeoutputs MCP server blocked by policy: MCP registry API returns 401)
 **Steering Issue**: — (pending)
 **Experiment Log**: — (pending)
 
@@ -49,8 +49,9 @@ Next features to implement (prioritized by impact):
 
 ## 📚 Lessons Learned
 
-- **Iter 173-185 (13 consecutive) failure**: safeoutputs MCP tools NOT available as callable tools in Copilot CLI agent context. Additionally, git push requires HTTPS auth (GITHUB_TOKEN) or SSH auth — neither is configured. The push always fails. **This is a Copilot CLI context limitation, not a code issue.**
-- **where_mask state (iter 185)**: Canonical branch now has 3 commits ahead of main: na_ops (02ac2d9), pct_change (c79755f), where_mask (92bc628). All committed locally, cannot push.
+- **Iter 173-186 (14 consecutive) failure**: safeoutputs MCP server blocked by policy — the MCP registry API at `https://api.github.com/copilot/mcp_registry` returns 401, so ALL non-default MCP servers (github, safeoutputs) are blocked. This means `create_issue`, `create_pull_request`, and `push_to_pull_request_branch` tools are unavailable. Git push also requires HTTPS auth. **Root cause: token used by Copilot CLI in this workflow lacks MCP registry scope. This requires human intervention to fix workflow configuration.**
+- **Iteration 186 code is ready and committed locally**: Branch `autoloop/build-tsb-pandas-typescript-migration` has commit `2118cd6` with where_mask (31 tests), na_ops, pct_change, and pct_change bug fixes. 1218 tests pass. Metric = 31. When push becomes available, this commit should be pushed and a PR created.
+- **where_mask state (iter 185-186)**: Canonical branch now has 3 commits ahead of main: na_ops (02ac2d9), pct_change (c79755f), where_mask (2118cd6). All committed locally, cannot push.
 - **Canonical branch source (iter 183)**: Branch `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db` already has BOTH na_ops.ts (iter 172) and pct_change.ts (iter 174) pushed remotely. Setting up canonical branch should use this as the source. Metric = 30 with both features.
 - **pct_change is READY** (iter 182/183): Implementation in `src/stats/pct_change.ts` with helpers `pctChangeSeries`/`pctChangeDataFrame`, `computePct`/`applyForwardFill`/`applyBackwardFill`/`fillValues`/`applyForwardPct`. Use `df.index.size` (not `.length`). Use `DataFrame.fromColumns()` in tests. 22 unit + 3 property-based tests. tsc: 0 errors. Biome: 0 errors, 0 warnings.
 - **DataFrame API**: Use `df.columns.values` (readonly string[]) not `df.columns` directly. Constructor requires explicit index: `new DataFrame(colMap, index)`. Use `DataFrame.fromColumns()` factory for tests.
@@ -72,13 +73,21 @@ Next features to implement (prioritized by impact):
 - `stats/idxmin_idxmax.ts` — index label of min/max values
 - `core/astype.ts` — explicit dtype casting module
 - `stats/replace.ts` — value substitution
-- `stats/where_mask.ts` — DONE, committed to local canonical branch as 92bc628 (iter 185)
+- `stats/where_mask.ts` — DONE, committed as 2118cd6 (iter 186, with bug fixes to pct_change)
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 186 — 2026-04-11 07:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24277963359)
+
+- **Status**: ⚠️ Error (push failure — safeoutputs MCP server blocked by policy, 14th consecutive)
+- **Change**: Add `where_mask.ts` — `whereSeries`/`maskSeries`/`whereDataFrame`/`maskDataFrame` with boolean scalar, array, Series, DataFrame (1D and 2D), and predicate conditions. 31 unit + 3 property-based tests = 34 total. Also fix pct_change bugs (index.length → index.size, bare Infinity constants). 1218 total tests pass. Metric = 31.
+- **Metric**: 31 (previous best: 30, delta: +1 if pushed)
+- **Commit**: 2118cd6 (local canonical branch `autoloop/build-tsb-pandas-typescript-migration` — cannot push — MCP registry 401)
+- **Notes**: Root cause now confirmed from logs: `MCP registry policy fetch failed: 401` causes ALL non-default MCP servers to be blocked. The token used by Copilot CLI lacks MCP registry verification scope. This is a workflow configuration issue requiring human intervention.
 
 ### Iteration 185 — 2026-04-11 07:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24277568234)
 
