@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T16:47:00Z |
-| Iteration Count | 202 |
-| Best Metric | 38 |
+| Last Run | 2026-04-11T17:12:45Z |
+| Iteration Count | 203 |
+| Best Metric | 39 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #111 |
@@ -41,13 +41,14 @@
 
 Next features to implement (prioritized by impact):
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser)
-- `stats/apply.ts` — applySeries, applyDataFrame, mapDataFrame (iter 201 lost, redo)
 - `groupby` extensions — transform, filter, apply
+- `stats/cut.ts` — `cut`/`qcut` — binning continuous data into categories
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 203**: Canonical branch `autoloop/build-tsb-pandas-typescript-migration` created from hash-suffix branch (iter 199 state, 37 files). Re-implemented `clip_advanced.ts` (lost from iter 200) and `apply.ts` (lost from iter 201). Biome `noExcessiveCognitiveComplexity` → decompose into axis helpers. `noUselessElse` → remove else after early returns. Metric: 39 (from 37, delta: +2).
 - **Iter 202**: `clipAdvancedSeries`/`clipAdvancedDataFrame` — canonical branch created from main. Fixed missing exports in src/index.ts, stats/index.ts, core/index.ts for modules from iters 172–199. `noNestedTernary` → use if/else for axis resolution. `ReadonlyArray<T>` → `readonly T[]` for Biome. Metric: 38 (from 37; also fixed index wiring).
 - **Iter 201**: `applySeries`/`applyDataFrame`/`applyExpandDataFrame`/`mapDataFrame` — Map<string,Series<Scalar>> is directly assignable to ReadonlyMap (no `as` cast needed). Biome `--write` auto-fixes formatter issues.
 - **Iter 200**: `clipAdvancedSeries`/`clipAdvancedDataFrame` — Series bounds use positional alignment; DataFrame bounds use element-wise. Biome `noNonNullAssertion` on 2D arrays → use `?.` optional chaining. `noUselessElse` requires `--unsafe` flag.
@@ -72,12 +73,20 @@ Next features to implement (prioritized by impact):
 ## 🔭 Future Directions
 
 - `io/read_excel.ts` — Excel reading
-- `stats/apply.ts` — apply/map functions (iter 201 lost)
 - `groupby` extensions — transform, filter, apply
+- `stats/cut.ts` — binning continuous data (cut/qcut)
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 203 — 2026-04-11 17:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24287426738)
+
+- **Status**: ✅ Accepted
+- **Change**: Re-implement `stats/clip_advanced.ts` (lost from iter 200) and `stats/apply.ts` (lost from iter 201). Creates canonical branch from hash-suffix 531c (iter 199 state, 37 files). clip_advanced: `clipAdvancedSeries`/`clipAdvancedDataFrame` with scalar/array/Series/DataFrame bounds, axis=0/1 broadcasting. apply: `applySeries`, `mapSeries` (function/Map/object), `applyDataFrame` (reduce per col/row), `applyExpandDataFrame` (transform per col/row), `mapDataFrame` (element-wise). 25+ tests each. Playground pages clip_advanced.html, apply.html.
+- **Metric**: 39 (previous best: 38, delta: +1)
+- **Commit**: 073d74b (branch: autoloop/build-tsb-pandas-typescript-migration)
+- **Notes**: `noExcessiveCognitiveComplexity` → decompose resolveDataFrameBound and applyExpandDataFrame into focused helpers. `noUselessElse` → remove else clauses after early returns.
 
 ### Iteration 202 — 2026-04-11 16:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24286967611)
 
