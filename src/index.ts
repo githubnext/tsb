@@ -184,3 +184,5 @@ export type {
   CutResult,
   CutResultWithBins,
 } from "./stats/index.ts";
+export { Interval, IntervalIndex, intervalRange } from "./stats/index.ts";
+export type { ClosedType, IntervalOptions, IntervalRangeOptions } from "./stats/index.ts";

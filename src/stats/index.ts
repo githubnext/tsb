@@ -112,3 +112,5 @@ export type {
   CutResult,
   CutResultWithBins,
 } from "./cut.ts";
+export { Interval, IntervalIndex, intervalRange } from "./interval.ts";
+export type { ClosedType, IntervalOptions, IntervalRangeOptions } from "./interval.ts";
