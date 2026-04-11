@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T05:30:00Z |
-| Iteration Count | 182 |
+| Last Run | 2026-04-11T05:51:00Z |
+| Iteration Count | 183 |
 | Best Metric | 29 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | — |
 | Steering Issue | — |
 | Paused | true |
-| Pause Reason | 10 consecutive push failures: safeoutputs MCP tools not registered AND git push requires auth not available in Copilot CLI context |
+| Pause Reason | 11 consecutive push failures: safeoutputs MCP tools not registered AND git push requires auth not available in Copilot CLI context |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 10 |
-| Recent Statuses | error, error, error, error, error, error, error, error, error, error |
+| Consecutive Errors | 11 |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error |
 
 ## 📋 Program Info
 
@@ -50,8 +50,9 @@ Next features to implement (prioritized by impact):
 
 ## 📚 Lessons Learned
 
-- **Iter 173-182 (10 consecutive) failure**: safeoutputs MCP tools NOT available as callable tools in Copilot CLI agent context. Additionally, git push requires HTTPS auth (GITHUB_TOKEN) or SSH auth — neither is configured. The push always fails. **This is a Copilot CLI context limitation, not a code issue.**
-- **pct_change is READY** (iter 182): Code committed as 8745ebd (local branch only). Implementation: `src/stats/pct_change.ts` with helpers `pctChangeSeries`/`pctChangeDataFrame`, `computePct`/`applyForwardFill`/`applyBackwardFill`/`fillValues`/`applyForwardPct`. Use `df.index.size` (not `.length`). Use `DataFrame.fromColumns()` in tests. 22 unit + 3 property-based tests. tsc: 0 errors. Biome: 0 errors, 0 warnings. Metric: 29.
+- **Iter 173-183 (11 consecutive) failure**: safeoutputs MCP tools NOT available as callable tools in Copilot CLI agent context. Additionally, git push requires HTTPS auth (GITHUB_TOKEN) or SSH auth — neither is configured. The push always fails. **This is a Copilot CLI context limitation, not a code issue.**
+- **Canonical branch source (iter 183)**: Branch `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db` already has BOTH na_ops.ts (iter 172) and pct_change.ts (iter 174) pushed remotely. Setting up canonical branch should use this as the source. Metric = 30 with both features.
+- **pct_change is READY** (iter 182/183): Implementation in `src/stats/pct_change.ts` with helpers `pctChangeSeries`/`pctChangeDataFrame`, `computePct`/`applyForwardFill`/`applyBackwardFill`/`fillValues`/`applyForwardPct`. Use `df.index.size` (not `.length`). Use `DataFrame.fromColumns()` in tests. 22 unit + 3 property-based tests. tsc: 0 errors. Biome: 0 errors, 0 warnings.
 - **DataFrame API**: Use `df.columns.values` (readonly string[]) not `df.columns` directly. Constructor requires explicit index: `new DataFrame(colMap, index)`. Use `DataFrame.fromColumns()` factory for tests.
 - **Import style**: Use `import fc from "fast-check"` (default). Use `src/index.ts` for imports in tests. `fc.double` not `fc.float` for property tests.
 - **Biome**: `useBlockStatements` warnings auto-fixable with `--write --unsafe`. `noExcessiveCognitiveComplexity` requires extracting helper functions. Use `Number.NaN`, `Number.POSITIVE_INFINITY` etc (not bare `NaN`, `Infinity`).
@@ -68,11 +69,11 @@ Next features to implement (prioritized by impact):
 ## 🔭 Future Directions
 
 **Next priorities**:
-- `pct_change.ts` — READY as 8745ebd (local only). Re-implement from scratch on next push-capable iteration. All lessons documented above.
-- `na_ops.ts` — isna/notna/ffill/bfill (was in iter 172 but branch was lost, not in main)
-- `where`/`mask` — conditional operations very common in pandas
-- `idxmin`/`idxmax` — frequently used in data analysis
-- `replace` — value substitution
+- `pct_change.ts` AND `na_ops.ts` — ALREADY PUSHED to `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db` (commits c79755f and 02ac2d9). On push-capable iteration: use this branch as canonical base, metric = 30.
+- `stats/where_mask.ts` — conditional where/mask operations very common in pandas
+- `stats/idxmin_idxmax.ts` — index label of min/max values
+- `core/astype.ts` — explicit dtype casting module
+- `stats/replace.ts` — value substitution
 - `astype` — explicit dtype casting
 
 ---
@@ -80,6 +81,14 @@ Next features to implement (prioritized by impact):
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 183 — 2026-04-11 05:51 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24276030351)
+
+- **Status**: ⚠️ Error (push failure — safeoutputs MCP tools unavailable AND git requires auth, 11th consecutive)
+- **Change**: Established canonical branch `autoloop/build-tsb-pandas-typescript-migration` locally from `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db` which already contains na_ops.ts (iter 172) and pct_change.ts (iter 174). Metric = 30 locally. Branch cannot be pushed without auth.
+- **Metric**: 30 locally (main baseline 28, delta +2 if pushed)
+- **Commit**: c79755f (local canonical branch — cannot push without auth)
+- **Notes**: The dcf09ab branch (which WAS pushed in a previous run) already has both features. Canonical branch set up pointing to it. safeoutputs `create_pull_request` still returns "Tool does not exist" in this Copilot CLI context. Root cause unchanged.
 
 ### Iteration 182 — 2026-04-11 05:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24275320895)
 
