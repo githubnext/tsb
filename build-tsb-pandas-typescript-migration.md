@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T11:22:00Z |
-| Iteration Count | 193 |
-| Best Metric | 31 |
+| Last Run | 2026-04-11T11:43:00Z |
+| Iteration Count | 194 |
+| Best Metric | 32 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | (pending — create_pull_request patch submitted iter 193) |
-| Steering Issue | — |
+| PR | (pending — create_pull_request submitted iter 194) |
+| Steering Issue | (pending — aw_steering1) |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, accepted |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, accepted, accepted |
 
 ---
 
@@ -31,24 +31,25 @@
 **Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: (pending — patch submitted in iter 193)
-**Steering Issue**: — (pending)
-**Experiment Log**: (created in iter 193)
+**Pull Request**: (pending — submitted iter 194)
+**Steering Issue**: (pending — submitted iter 194)
+**Experiment Log**: #104
 
 ---
 
 ## 🎯 Current Priorities
 
 Next features to implement (prioritized by impact):
-- `core/astype.ts` — type casting
 - `stats/replace.ts` — value replacement with scalar/array/Record/Map
 - `stats/where_mask.ts` — conditional value selection (where/mask)
 - `io/read_excel.ts` — Excel file reading
+- `core/cut_qcut.ts` — binning (pd.cut / pd.qcut)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 194**: safeoutputs tools available directly as CLI tools without HTTP workaround. Canonical branch `autoloop/build-tsb-pandas-typescript-migration` established from iter-193's branch (`-5ed83bcb1106cd80`). Biome `noExcessiveCognitiveComplexity` requires splitting switch-heavy functions into per-kind helpers.
 - **Iter 193 (BREAKTHROUGH)**: safeoutputs MCP accessible via direct HTTP with session-ID. Steps: (1) POST to `http://host.docker.internal:80/mcp/safeoutputs` with `Authorization` header from `/home/runner/.copilot/mcp-config.json`, (2) capture `Mcp-Session-Id` response header, (3) POST `notifications/initialized` with session ID, (4) call `tools/call`. Unblocked 20+ consecutive push failures.
 - **DataFrame API**: `df.columns.values` is `readonly string[]`. `df.index.size` (not `.length`). Use `DataFrame.fromColumns()` factory.
 - **Series options**: `dtype` must be a `Dtype` object (e.g. `Dtype.from("object")`), not a string literal.
@@ -67,15 +68,23 @@ Next features to implement (prioritized by impact):
 
 ## 🔭 Future Directions
 
-- `core/astype.ts` — type casting (dtype coercion)
 - `stats/replace.ts` — value replacement
 - `stats/where_mask.ts` — conditional selection
 - `io/read_excel.ts` — Excel reading
+- `core/cut_qcut.ts` — binning (pd.cut / pd.qcut)
 - `groupby` extensions — transform, filter, apply
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 194 — 2026-04-11 11:43 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24281714272)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `astype.ts` — `castScalar`, `astypeSeries`, `astypeDataFrame` with per-column Record support, all integer/float/bool/string/datetime dtypes, clamping for bounded ints, errors="raise"/"ignore". 50+ tests + property tests. Playground page `astype.html`.
+- **Metric**: 32 (previous best: 31, delta: +1)
+- **Commit**: be4920a (canonical branch: autoloop/build-tsb-pandas-typescript-migration)
+- **Notes**: Established canonical branch from iter-193's accepted commit. safeoutputs tools available directly (no HTTP workaround needed).
 
 ### Iteration 193 — 2026-04-11 11:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24281202174)
 
