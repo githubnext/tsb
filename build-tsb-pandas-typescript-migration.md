@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T09:40:00Z |
-| Iteration Count | 189 |
+| Last Run | 2026-04-11T10:01:00Z |
+| Iteration Count | 190 |
 | Best Metric | 31 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | — |
 | Steering Issue | — |
 | Paused | true |
-| Pause Reason | 17 consecutive push failures: safeoutputs MCP server still blocked. Iteration 189 implemented idxmin_idxmax (commit 9f17fa7) on canonical branch `autoloop/build-tsb-pandas-typescript-migration`, set up from `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db` (which has na_ops + pct_change). Metric = 31. Cannot push — create_pull_request and push_to_pull_request_branch tools return "Tool does not exist". Human intervention required to fix MCP registry token scope or push the branch manually. |
+| Pause Reason | 18 consecutive push failures: safeoutputs MCP blocked (MCP registry 401). Iter 190 implemented astype (castScalar/astypeSeries/astypeDataFrame, commit 7466a39) on canonical branch. Metric = 31. Cannot push. Human intervention required to fix MCP registry token scope or push branch manually. |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 17 |
-| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error |
+| Consecutive Errors | 18 |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, error |
 
 ## 📋 Program Info
 
@@ -40,7 +40,7 @@
 *(No specific priorities — continue implementing missing pandas features.)*
 
 Next features to implement (prioritized by impact):
-- `core/astype.ts` — explicit dtype casting module
+- `core/astype.ts` — DONE (iter 190, commit 7466a39)
 - `stats/replace.ts` — value substitution for Series and DataFrame
 - `stats/clip_and_round.ts` — clip values to a range
 - `io/read_excel.ts` — Excel file reading (WASM or fallback)
@@ -49,6 +49,7 @@ Next features to implement (prioritized by impact):
 
 ## 📚 Lessons Learned
 
+- **Iteration 190**: Implemented astype on canonical branch (commit 7466a39, metric 31). castScalar/astypeSeries/astypeDataFrame with full dtype coverage. Used isDtypeMapping() type guard to avoid as-casts. 40+ unit + 3 property tests, playground page. safeoutputs STILL blocked — 18th consecutive push failure.
 - **Iteration 189**: Implemented idxmin_idxmax on canonical branch (commit 9f17fa7, metric 31). Branch set up from dcf09ab (na_ops + pct_change). Key: use `isBetter()` helper to avoid `noExcessiveCognitiveComplexity` biome error. Type for Series params must be `Series<Scalar>` not `Series<unknown>`. safeoutputs STILL unavailable — 17th consecutive push failure.
 - **Iteration 188**: Implemented idxmin_idxmax on canonical branch (commit 4d8a0c9, metric 31). tsc clean, no source errors. safeoutputs tools STILL unavailable — same 401 MCP registry issue. 16th consecutive push failure. Code: `idxminSeries`/`idxmaxSeries`/`dataFrameIdxmin`/`dataFrameIdxmax` with `skipna` and `axis` options. Key: use `df.col(name).iat(r)` for element access by row position, not `df.iat()` (doesn't exist on DataFrame).
 - **Iteration 188**: `DataFrame.fromColumns(colMap, { index: [...] })` syntax for test DataFrames. `df.columns.values` returns `readonly string[]`. `df.index.values` returns `readonly Label[]`.
@@ -76,7 +77,7 @@ Next features to implement (prioritized by impact):
 
 **Next priorities**:
 - `stats/idxmin_idxmax.ts` — DONE (iter 189, commit 9f17fa7, metric 31, locally committed)
-- `core/astype.ts` — explicit dtype casting module
+- `core/astype.ts` — DONE (iter 190, commit 7466a39, metric 31, locally committed)
 - `stats/replace.ts` — value substitution
 - `stats/clip_and_round.ts` — value clipping
 
@@ -85,6 +86,14 @@ Next features to implement (prioritized by impact):
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 190 — 2026-04-11 10:01 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24279874429)
+
+- **Status**: ⚠️ Error (push failure — safeoutputs MCP blocked, 18th consecutive)
+- **Change**: Add `astype.ts` — `castScalar`/`astypeSeries`/`astypeDataFrame`. Full dtype coverage (int8-64, uint8-64, float32/64, bool, string, datetime, object, category). Per-column DataFrame mapping. 40+ unit + 3 property tests. Playground page added.
+- **Metric**: 31 (new feature committed to canonical branch)
+- **Commit**: 7466a39 (canonical branch — cannot push — MCP 401)
+- **Notes**: Branch set up from dcf09ab (na_ops + pct_change), astype committed on top. Used isDtypeMapping() type guard to eliminate as-casts. MCP registry still 401.
 
 ### Iteration 189 — 2026-04-11 09:40 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24279399234)
 
