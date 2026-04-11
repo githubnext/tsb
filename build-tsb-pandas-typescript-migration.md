@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T17:45:02Z |
-| Iteration Count | 204 |
-| Best Metric | 40 |
+| Last Run | 2026-04-11T18:12:23Z |
+| Iteration Count | 205 |
+| Best Metric | 41 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #111 |
@@ -41,13 +41,14 @@
 
 Next features to implement (prioritized by impact):
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser)
-- `groupby` extensions — transform, filter, apply
-- `stats/interval.ts` — Interval type and IntervalIndex (pandas Interval objects)
+- `groupby` extensions — transform, filter, apply (already partially in groupby.ts — check what's missing)
+- `stats/describe_categorical.ts` — describe() for categorical/string Series
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 205**: `Interval`/`IntervalIndex`/`intervalRange` — import tests from `../../src/index.ts` (not `../../src/stats/index.ts`) to satisfy `useImportRestrictions`. Auto-fix formatter with `biome check --write`. Canonical branch did not exist remotely despite state file claiming it — had to re-create from hash-suffix branch.
 - **Iter 204**: `cut`/`qcut` — decompose `assignBins` to keep cognitive complexity under 15. `useCollapsedElseIf` requires removing `else { if (...) }` → `else if (...)`. `noExportedImports` means don't re-export types imported from other modules. Use `biome format --write` to auto-fix formatter issues. `as unknown as [T, U]` required for overload narrowing (not `(...) as [T, U]`).
 - **Iter 203**: Canonical branch `autoloop/build-tsb-pandas-typescript-migration` created from hash-suffix branch (iter 199 state, 37 files). Re-implemented `clip_advanced.ts` (lost from iter 200) and `apply.ts` (lost from iter 201). Biome `noExcessiveCognitiveComplexity` → decompose into axis helpers. `noUselessElse` → remove else after early returns. Metric: 39 (from 37, delta: +2).
 - **Iter 202**: `clipAdvancedSeries`/`clipAdvancedDataFrame` — canonical branch created from main. Fixed missing exports in src/index.ts, stats/index.ts, core/index.ts for modules from iters 172–199. `noNestedTernary` → use if/else for axis resolution. `ReadonlyArray<T>` → `readonly T[]` for Biome. Metric: 38 (from 37; also fixed index wiring).
@@ -74,12 +75,19 @@ Next features to implement (prioritized by impact):
 ## 🔭 Future Directions
 
 - `io/read_excel.ts` — Excel reading
-- `groupby` extensions — transform, filter, apply
-- `stats/interval.ts` — Interval type and IntervalIndex
+- `stats/describe_categorical.ts` — describe() for categorical/string Series
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 205 — 2026-04-11 18:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24288493950)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `stats/interval.ts` — `Interval`, `IntervalIndex`, `intervalRange`. Interval: all four closed types (left/right/both/neither), contains, overlaps, equals, length, mid. IntervalIndex: fromBreaks, fromArrays, fromIntervals, indexOf, overlapping, append, isMonotonic. intervalRange: by periods or freq. 60+ unit + fast-check tests. Playground page `interval.html` (8 interactive demos).
+- **Metric**: 41 (previous best: 40, delta: +1)
+- **Commit**: e58b620 (branch: autoloop/build-tsb-pandas-typescript-migration)
+- **Notes**: Canonical branch was not on remote despite state file claiming so — re-created from hash-suffix 531c. Import tests from `../../src/index.ts` for `useImportRestrictions`. Auto-fix formatter with `biome check --write`.
 
 ### Iteration 204 — 2026-04-11 17:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24288003426)
 
