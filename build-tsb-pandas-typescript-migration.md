@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T19:45:00Z |
-| Iteration Count | 208 |
-| Best Metric | 43 |
+| Last Run | 2026-04-11T20:25:00Z |
+| Iteration Count | 209 |
+| Best Metric | 44 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #111 |
@@ -42,12 +42,13 @@
 Next features to implement (prioritized by impact):
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser from scratch)
 - `stats/describe_categorical.ts` — describe() for categorical/string Series (check what's missing from existing describe.ts)
-- `reshape/pivot_table.ts` — pivot_table with aggfunc and margins (note: basic pivotTable already in pivot.ts, add margins support)
+- `reshape/explode.ts` — explode list-type column cells into multiple rows
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 209**: `pivotTableFull` — `reshape/pivot_table.ts` with full margins support. Biome `noSecrets` flags internal sentinel strings (use biome-ignore comment). `useAtIndex` requires `.at(-1)` over `[length-1]`. `useShorthandArrayType`: `T[]` not `Array<T>`. `useSimplifiedLogicExpression`: `!(a || b)` not `!a && !b`. Canonical branch still tracking hash-suffix d50883e81cd4a027 — no issue with push since local branch is named canonically. Metric: 44 (+1). Commit: 0932ce7.
 - **Iter 208**: `crosstab`/`crosstabSeries` — `noExcessiveCognitiveComplexity` (max 15): split `normalizeMatrix` into `normalizeAll`/`normalizeByIndex`/`normalizeByColumns` + `sumAll`/`sumExcludeMargins`/`divideMatrix` helpers. Remove unused functions (`buildMatrix`, `buildColumnMap`). `DataFrame.fromColumns` options have no `name` field. Use `create_pull_request` when canonical branch `autoloop/build-tsb-pandas-typescript-migration` doesn't exist remotely (push_to_pull_request_branch fails). Metric: 43 (+1). Commit: 1ab2e7c.
 - **Iter 207**: `crosstab`/`crosstabSeries` — extract `pushObservation` helper to keep `buildCellMap` under complexity 15. Extract `buildColumnMap` + `resolveFinalLayout` to keep `crosstab` under 15. Remove `void rowname`/`void colname` (noVoid). Canonical branch is hash-suffix `531c0338e43e4af9` — check it out by name for push. Metric: 43 (+1).
 - **Iter 206**: `getDummies`/`fromDummies` — fix `noExcessiveCognitiveComplexity` by splitting large functions into `collectLevels`, `buildIndicatorCol`, `buildNaCol`, `splitColName`, `inferSeriesName`, `findActiveLabel` helpers. Fix `noNestedTernary` with if/else. Import `Dtype` from `../core/index.ts` not `../core/dtype.ts` (`useImportRestrictions`). Canonical branch still tracked from hash-suffix 531c.
@@ -84,6 +85,14 @@ Next features to implement (prioritized by impact):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 209 — 2026-04-11 20:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24290574060)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `reshape/pivot_table.ts` — `pivotTableFull` with full margins support. Mirrors `pandas.pivot_table()` with margins=true adding All row/column, margins_name customization, sort option, fill_value, dropna, and multiple index/column columns. 25 unit + 4 property-based tests. Playground `pivot_table.html` with 8 demos.
+- **Metric**: 44 (previous best: 43, delta: +1)
+- **Commit**: 0932ce7 (branch: autoloop/build-tsb-pandas-typescript-migration)
+- **Notes**: `noSecrets` flags sentinel strings → biome-ignore comment. `useAtIndex` → `.at(-1)`. `useShorthandArrayType` → `T[]`. `useSimplifiedLogicExpression` → `!(a || b)`. Local canonical branch tracks hash-suffix origin branch fine.
 
 ### Iteration 208 — 2026-04-11 19:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24290127464)
 
