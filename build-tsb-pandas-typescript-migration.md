@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T06:55:00Z |
-| Iteration Count | 184 |
+| Last Run | 2026-04-11T07:24:58Z |
+| Iteration Count | 185 |
 | Best Metric | 31 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | — |
 | Steering Issue | — |
 | Paused | true |
-| Pause Reason | 12 consecutive push failures: safeoutputs MCP tools not registered AND git push requires auth not available in Copilot CLI context |
+| Pause Reason | 13 consecutive push failures: safeoutputs MCP tools not registered AND git push requires auth not available in Copilot CLI context |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 12 |
-| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error |
+| Consecutive Errors | 13 |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error |
 
 ## 📋 Program Info
 
@@ -49,9 +49,8 @@ Next features to implement (prioritized by impact):
 
 ## 📚 Lessons Learned
 
-- **Iter 173-184 (12 consecutive) failure**: safeoutputs MCP tools NOT available as callable tools in Copilot CLI agent context. Additionally, git push requires HTTPS auth (GITHUB_TOKEN) or SSH auth — neither is configured. The push always fails. **This is a Copilot CLI context limitation, not a code issue.**
-- **where_mask pattern (iter 184)**: Use separate helper functions `resolveSeriesBoolAt(cond: boolean | readonly boolean[] | Series, i)` and `resolveDataFrameCellBool(cond, colIdx, rowIdx, value, nRows, nCols)`. Avoid `Exclude<>` generics — use explicit union types. `if (typeof cond === "function") { flag = cond(v); } else { flag = resolveSeriesBoolAt(...); }` pattern avoids unsafe casts.
-- **Canonical branch state (iter 184)**: Local branch `autoloop/build-tsb-pandas-typescript-migration` has 3 commits ahead of main: na_ops (02ac2d9), pct_change (c79755f), where_mask (578e05f). Metric = 31.
+- **Iter 173-185 (13 consecutive) failure**: safeoutputs MCP tools NOT available as callable tools in Copilot CLI agent context. Additionally, git push requires HTTPS auth (GITHUB_TOKEN) or SSH auth — neither is configured. The push always fails. **This is a Copilot CLI context limitation, not a code issue.**
+- **where_mask state (iter 185)**: Canonical branch now has 3 commits ahead of main: na_ops (02ac2d9), pct_change (c79755f), where_mask (92bc628). All committed locally, cannot push.
 - **Canonical branch source (iter 183)**: Branch `origin/autoloop/build-tsb-pandas-typescript-migration-dcf09ab30313d8db` already has BOTH na_ops.ts (iter 172) and pct_change.ts (iter 174) pushed remotely. Setting up canonical branch should use this as the source. Metric = 30 with both features.
 - **pct_change is READY** (iter 182/183): Implementation in `src/stats/pct_change.ts` with helpers `pctChangeSeries`/`pctChangeDataFrame`, `computePct`/`applyForwardFill`/`applyBackwardFill`/`fillValues`/`applyForwardPct`. Use `df.index.size` (not `.length`). Use `DataFrame.fromColumns()` in tests. 22 unit + 3 property-based tests. tsc: 0 errors. Biome: 0 errors, 0 warnings.
 - **DataFrame API**: Use `df.columns.values` (readonly string[]) not `df.columns` directly. Constructor requires explicit index: `new DataFrame(colMap, index)`. Use `DataFrame.fromColumns()` factory for tests.
@@ -73,13 +72,21 @@ Next features to implement (prioritized by impact):
 - `stats/idxmin_idxmax.ts` — index label of min/max values
 - `core/astype.ts` — explicit dtype casting module
 - `stats/replace.ts` — value substitution
-- `stats/where_mask.ts` — DONE, committed to local canonical branch as 578e05f (iter 184)
+- `stats/where_mask.ts` — DONE, committed to local canonical branch as 92bc628 (iter 185)
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 185 — 2026-04-11 07:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24277568234)
+
+- **Status**: ⚠️ Error (push failure — safeoutputs MCP tools unavailable AND git requires auth, 13th consecutive)
+- **Change**: Add `where_mask.ts` — `whereSeries`/`maskSeries`/`whereDataFrame`/`maskDataFrame` with boolean scalar, array, Series, DataFrame, and predicate conditions. 20 unit + 3 property-based tests. Committed as 92bc628 to canonical branch (on top of na_ops 02ac2d9 + pct_change c79755f).
+- **Metric**: 31 (baseline 30 from dcf09ab, delta +1 from where_mask)
+- **Commit**: 92bc628 (local canonical branch `autoloop/build-tsb-pandas-typescript-migration` — cannot push without auth)
+- **Notes**: Full where/mask implementation complete. safeoutputs tools still not available. `create_pull_request` returns "Tool does not exist". Same root cause as iters 173-184.
 
 ### Iteration 184 — 2026-04-11 06:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24276998986)
 
