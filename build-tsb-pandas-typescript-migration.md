@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T13:40:00Z |
-| Iteration Count | 196 |
-| Best Metric | 34 |
+| Last Run | 2026-04-11T13:49:39Z |
+| Iteration Count | 197 |
+| Best Metric | 35 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | (pending creation) |
+| PR | (see PR created this run) |
 | Steering Issue | #107 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, error, error, error, error, error, error, error, error, error, error, error, error, error, error, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -31,7 +31,7 @@
 **Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: (pending creation)
+**Pull Request**: (PR created this iteration for `autoloop/build-tsb-pandas-typescript-migration`)
 **Steering Issue**: #107
 **Experiment Log**: #3
 
@@ -40,14 +40,15 @@
 ## 🎯 Current Priorities
 
 Next features to implement (prioritized by impact):
-- `io/read_excel.ts` — Excel file reading
-- `stats/clip_advanced.ts` — clip with Series/DataFrame bounds
-- `groupby` extensions — transform, filter, apply
+- `stats/duplicated.ts` — `duplicatedSeries`, `duplicatedDataFrame`, `dropDuplicates` (very commonly used)
+- `stats/clip_advanced.ts` — clip with per-element Series/DataFrame bounds
+- `io/read_excel.ts` — Excel file reading (requires xlsx parser)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 197**: `diffSeries`/`diffDataFrame`/`shiftSeries`/`shiftDataFrame` — decompose axis=0 (col-wise) vs axis=1 (row-wise) into separate helper functions to keep complexity low. `diffArray` yields null for non-finite values; `shiftArray` fills vacated positions with configurable `fillValue`. 35 tests (unit + fast-check). Canonical branch `autoloop/build-tsb-pandas-typescript-migration` first had its PR created this iteration.
 - **Iter 196**: `whereSeries`/`maskSeries` — Series and DataFrame where/mask. Refactor complex branch into small helpers (buildFromDataFrameCond, buildFrom2DArray, buildFromSeriesAxis0/1, buildFromCallable) to satisfy Biome's noExcessiveCognitiveComplexity (max 15). Use `setCell()` helper instead of `matrix[r]![c]` to avoid `noNonNullAssertion`. 33 tests (unit + fast-check properties).
 - **Iter 195**: `replaceSeries`/`replaceDataFrame` — scalar, array, Record, Map specs. DataFrame iteration is `for (const name of df.columns.values)` then `df.col(name)`. Biome `useExplicitType` requires `: Scalar` on all lambdas (not just top-level functions). 27 tests (unit + fast-check).
 - **Iter 194**: Canonical branch `autoloop/build-tsb-pandas-typescript-migration` (no suffix) now in use. `new DataFrame(colMap, df.index)` works for constructing DataFrames from column maps in stats/core modules — no `fromColumnMap` factory needed. Issues: experiment log #3, steering #107.
@@ -76,6 +77,14 @@ Next features to implement (prioritized by impact):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 197 — 2026-04-11 13:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24283807306)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `stats/diff_shift.ts` — `diffSeries`, `diffDataFrame`, `shiftSeries`, `shiftDataFrame`. Supports axis=0 (column-wise) and axis=1 (row-wise) for DataFrames. 35 tests (unit + fast-check properties). Playground page `diff_shift.html`. Also created canonical PR for `autoloop/build-tsb-pandas-typescript-migration`.
+- **Metric**: 35 (previous best: 34, delta: +1)
+- **Commit**: fc137cc (branch: autoloop/build-tsb-pandas-typescript-migration)
+- **Notes**: Decompose DataFrames operations into separate axis helpers (colWise/rowWise) to keep cognitive complexity low. `diffArray` returns null for non-finite values; `shiftArray` fills with configurable `fillValue`.
 
 ### Iteration 196 — 2026-04-11 13:40 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24283415842)
 
