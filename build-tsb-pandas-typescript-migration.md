@@ -10,12 +10,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T22:23:00Z |
-| Iteration Count | 213 |
-| Best Metric | 48 |
+| Last Run | 2026-04-11T22:55:00Z |
+| Iteration Count | 214 |
+| Best Metric | 49 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | #new (canonical PR created for `autoloop/build-tsb-pandas-typescript-migration` in iter 213; see steering issue #107) |
+| PR | #created-iter-214 (PR created for `autoloop/build-tsb-pandas-typescript-migration` in iter 214) |
 | Steering Issue | #107 |
 | Paused | false |
 | Pause Reason | — |
@@ -31,7 +31,7 @@
 **Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: #new (canonical PR created in iter 213 for `autoloop/build-tsb-pandas-typescript-migration`)
+**Pull Request**: Created in iter 214 for `autoloop/build-tsb-pandas-typescript-migration`
 **Steering Issue**: #107
 **Experiment Log**: #3
 
@@ -41,13 +41,13 @@
 
 Next features to implement (prioritized by impact):
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser from scratch)
-- `stats/select_dtypes.ts` — DataFrame.selectDtypes(include/exclude) to filter columns by dtype
 - `window/rolling_apply.ts` — rolling/expanding apply already exists; consider `ewm` improvements
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 214**: `selectDtypes` — `stats/select_dtypes.ts`. Use `import type` for DataFrame (it's only used as a type). Extract `validateNoOverlap` and `columnPasses` helpers to keep complexity under 15. `useExplicitLengthCheck`: use `(x?.length ?? 0) > 0` pattern for optional arrays. `fc.constantFrom<DtypeSpecifier>(...)` type param needed for property tests. Auto-format with `bunx biome format --write` to fix formatter diffs. Metric: 49 (+1). Commit: edf0fb4.
 - **Iter 213**: `interpolate` — `stats/interpolate.ts`. Extract helpers (`fillLinearRun`, `classifyAreas`, `bisectLeft`, `chooseNearest`) to stay under complexity limit. `classifyAreas` precomputes inside/outside area for each position cleanly. Use `as Scalar`/`as number`/`as string` casts for `noUncheckedIndexedAccess` — same pattern as `na_ops.ts` uses `out[i] as Scalar`. `isMissing()` helper reuse pattern. `interpolateByColumns`/`interpolateByRows` extracted to reduce main function complexity. Metric: 48 (+1). Commit: ab037f6.
 - **Iter 212**: `factorize` + `wide_to_long` — Two features in one iteration to recover from iter 211's lost push. `noExcessiveCognitiveComplexity`: extract `collectUniques`, `buildCodes`, `compareLabels` helpers for factorize; extract `discoverSuffixMap`, `buildStubSourceData`, `accumulateRow` helpers for wideToLong. `useBlockStatements`: always use braces. `noNestedTernary`: use if/else chains. `useSimplifiedLogicExpression`: `!(a || b)` form. `useTopLevelRegex`: move `/^\d+$/` to module top-level. Metric: 47 (+1). Commit: 5b782a6.
 - **Iter 211**: `factorize`/`factorizeSeries` — `stats/factorize.ts`. With `noUncheckedIndexedAccess: true`, use `for (const [i, v] of values.entries())` instead of `values[i]` in a for loop to avoid `Scalar | undefined`. `codeMap.get(v) ?? naValue` handles the `undefined` case from Map.get. `rawUniques as readonly Label[]` cast is necessary since `Scalar` is wider than `Label` — same pattern used in crosstab.ts. Metric: 46 (+1). Commit: 620ff7a.
@@ -83,6 +83,9 @@ Next features to implement (prioritized by impact):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 214 — 2026-04-11 22:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24293279696)
+- **Status**: ✅ Accepted — Add `stats/select_dtypes.ts`: selectDtypes(df, {include, exclude}). Generic aliases: number/integer/signed/unsigned/floating/bool/string/datetime/timedelta/category/object. Metric: 49 (+1). Commit: edf0fb4.
 
 ### Iteration 213 — 2026-04-11 22:23 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24292676836)
 - **Status**: ✅ Accepted — Add `stats/interpolate.ts`: interpolateSeries/interpolateDataFrame. linear/pad/bfill/nearest; limit, limitDirection, limitArea; axis=0/1 for DataFrame. Metric: 48 (+1). Commit: ab037f6.
