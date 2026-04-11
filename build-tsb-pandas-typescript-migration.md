@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-11T19:32:00Z |
-| Iteration Count | 207 |
+| Last Run | 2026-04-11T19:45:00Z |
+| Iteration Count | 208 |
 | Best Metric | 43 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -42,12 +42,13 @@
 Next features to implement (prioritized by impact):
 - `io/read_excel.ts` — Excel file reading (requires xlsx parser from scratch)
 - `stats/describe_categorical.ts` — describe() for categorical/string Series (check what's missing from existing describe.ts)
-- `reshape/pivot_table.ts` — pivot_table with aggfunc and margins
+- `reshape/pivot_table.ts` — pivot_table with aggfunc and margins (note: basic pivotTable already in pivot.ts, add margins support)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 208**: `crosstab`/`crosstabSeries` — `noExcessiveCognitiveComplexity` (max 15): split `normalizeMatrix` into `normalizeAll`/`normalizeByIndex`/`normalizeByColumns` + `sumAll`/`sumExcludeMargins`/`divideMatrix` helpers. Remove unused functions (`buildMatrix`, `buildColumnMap`). `DataFrame.fromColumns` options have no `name` field. Use `create_pull_request` when canonical branch `autoloop/build-tsb-pandas-typescript-migration` doesn't exist remotely (push_to_pull_request_branch fails). Metric: 43 (+1). Commit: 1ab2e7c.
 - **Iter 207**: `crosstab`/`crosstabSeries` — extract `pushObservation` helper to keep `buildCellMap` under complexity 15. Extract `buildColumnMap` + `resolveFinalLayout` to keep `crosstab` under 15. Remove `void rowname`/`void colname` (noVoid). Canonical branch is hash-suffix `531c0338e43e4af9` — check it out by name for push. Metric: 43 (+1).
 - **Iter 206**: `getDummies`/`fromDummies` — fix `noExcessiveCognitiveComplexity` by splitting large functions into `collectLevels`, `buildIndicatorCol`, `buildNaCol`, `splitColName`, `inferSeriesName`, `findActiveLabel` helpers. Fix `noNestedTernary` with if/else. Import `Dtype` from `../core/index.ts` not `../core/dtype.ts` (`useImportRestrictions`). Canonical branch still tracked from hash-suffix 531c.
 - **Iter 205**: `Interval`/`IntervalIndex`/`intervalRange` — import tests from `../../src/index.ts` (not `../../src/stats/index.ts`) to satisfy `useImportRestrictions`. Auto-fix formatter with `biome check --write`. Canonical branch did not exist remotely despite state file claiming it — had to re-create from hash-suffix branch.
@@ -76,13 +77,21 @@ Next features to implement (prioritized by impact):
 
 ## 🔭 Future Directions
 
-- `stats/crosstab.ts` — cross-tabulation
 - `io/read_excel.ts` — Excel reading
+- `stats/describe_categorical.ts` — extend describe() for categorical
 - `stats/describe_categorical.ts` — describe() for categorical/string Series
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 208 — 2026-04-11 19:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24290127464)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `stats/crosstab.ts` — `crosstab` and `crosstabSeries`. Cross-tabulation with count/custom aggfunc, normalize (all/index/columns), margins with custom name, dropna. 21 unit + property-based tests. Playground page `crosstab.html`.
+- **Metric**: 43 (previous best: 42, delta: +1)
+- **Commit**: 1ab2e7c (branch: autoloop/build-tsb-pandas-typescript-migration)
+- **Notes**: Split normalizeMatrix into 3 mode-specific helpers + 3 math helpers to pass Biome complexity check. Remove unused buildMatrix/buildColumnMap. Create canonical branch (not hash-suffix) — used create_pull_request since branch was new.
 
 ### Iteration 207 — 2026-04-11 19:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24289641935)
 
