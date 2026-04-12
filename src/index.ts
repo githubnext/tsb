@@ -257,3 +257,10 @@ export { toDatetime } from "./stats/index.ts";
 export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./stats/index.ts";
 export { toTimedelta, parseFrac, formatTimedelta, Timedelta } from "./stats/index.ts";
 export type { TimedeltaUnit, TimedeltaErrors, ToTimedeltaOptions } from "./stats/index.ts";
+export { dateRange, parseFreq, advanceDate, toDateInput } from "./stats/index.ts";
+export type {
+  DateRangeFreq,
+  DateRangeInclusive,
+  DateRangeOptions,
+  ParsedFreq,
+} from "./stats/index.ts";

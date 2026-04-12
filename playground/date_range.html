@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb — dateRange</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #222; }
+      h1 { font-size: 1.8rem; }
+      h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+      pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; overflow: auto; font-size: 0.85rem; }
+      code { font-family: "SFMono-Regular", Consolas, monospace; }
+      .tag { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 1px 8px; font-size: 0.75rem; font-weight: bold; }
+      table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+      th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+      th { background: #f6f8fa; }
+      textarea { width: 100%; font-family: monospace; font-size: 0.85rem; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+      .output { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 12px; margin-top: 8px; min-height: 40px; white-space: pre; font-family: monospace; font-size: 0.85rem; }
+      button { background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; cursor: pointer; font-size: 0.9rem; margin-top: 8px; }
+      button:hover { background: #1d4ed8; }
+      a { color: #2563eb; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; }
+      .row label { font-size: 0.85rem; color: #555; display: block; margin-bottom: 2px; }
+      .row input, .row select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; width: 180px; }
+    </style>
+  </head>
+  <body>
+    <p><a href="index.html">← tsb playground</a></p>
+    <h1>dateRange <span class="tag">stats</span></h1>
+    <p>
+      Generate a fixed-frequency sequence of <code>Date</code> objects — mirroring
+      <a href="https://pandas.pydata.org/docs/reference/api/pandas.date_range.html"
+        ><code>pandas.date_range()</code></a
+      >.
+    </p>
+    <p>
+      Specify at least <strong>two</strong> of <code>start</code>, <code>end</code>, and
+      <code>periods</code>. Use <code>freq</code> to control the step size.
+    </p>
+
+    <h2>Supported frequencies</h2>
+    <table>
+      <tr><th>Alias</th><th>Description</th><th>Example</th></tr>
+      <tr><td><code>"D"</code></td><td>Calendar day</td><td><code>dateRange({ start: "2024-01-01", periods: 7, freq: "D" })</code></td></tr>
+      <tr><td><code>"B"</code></td><td>Business day (Mon–Fri)</td><td><code>freq: "B"</code></td></tr>
+      <tr><td><code>"h"</code> / <code>"H"</code></td><td>Hour</td><td><code>freq: "h"</code></td></tr>
+      <tr><td><code>"min"</code> / <code>"T"</code></td><td>Minute</td><td><code>freq: "30min"</code></td></tr>
+      <tr><td><code>"s"</code> / <code>"S"</code></td><td>Second</td><td><code>freq: "s"</code></td></tr>
+      <tr><td><code>"ms"</code> / <code>"L"</code></td><td>Millisecond</td><td><code>freq: "ms"</code></td></tr>
+      <tr><td><code>"W"</code>, <code>"W-MON"</code> … <code>"W-SAT"</code></td><td>Weekly, anchored to weekday</td><td><code>freq: "W-MON"</code></td></tr>
+      <tr><td><code>"MS"</code></td><td>Month start</td><td><code>freq: "MS"</code></td></tr>
+      <tr><td><code>"ME"</code> / <code>"M"</code></td><td>Month end</td><td><code>freq: "ME"</code></td></tr>
+      <tr><td><code>"QS"</code></td><td>Quarter start</td><td><code>freq: "QS"</code></td></tr>
+      <tr><td><code>"QE"</code> / <code>"Q"</code></td><td>Quarter end</td><td><code>freq: "QE"</code></td></tr>
+      <tr><td><code>"YS"</code> / <code>"AS"</code></td><td>Year start (Jan 1)</td><td><code>freq: "YS"</code></td></tr>
+      <tr><td><code>"YE"</code> / <code>"A"</code> / <code>"Y"</code></td><td>Year end (Dec 31)</td><td><code>freq: "YE"</code></td></tr>
+      <tr><td><em>Multiplier</em></td><td>Integer prefix: <code>"2D"</code>, <code>"3H"</code>, <code>"6MS"</code></td><td><code>freq: "2D"</code></td></tr>
+    </table>
+
+    <h2>inclusive — endpoint control</h2>
+    <table>
+      <tr><th>Value</th><th>Start included</th><th>End included</th></tr>
+      <tr><td><code>"both"</code> (default)</td><td>✓</td><td>✓</td></tr>
+      <tr><td><code>"neither"</code></td><td>✗</td><td>✗</td></tr>
+      <tr><td><code>"left"</code></td><td>✓</td><td>✗</td></tr>
+      <tr><td><code>"right"</code></td><td>✗</td><td>✓</td></tr>
+    </table>
+
+    <h2>TypeScript usage</h2>
+    <pre><code>import { dateRange } from "tsb";
+
+// 5 daily dates starting 2024-01-01
+dateRange({ start: "2024-01-01", periods: 5 });
+// → [Jan 1, Jan 2, Jan 3, Jan 4, Jan 5]
+
+// Hourly between two timestamps
+dateRange({
+  start: "2024-01-01T00:00:00Z",
+  end:   "2024-01-01T06:00:00Z",
+  freq:  "h",
+});
+// → [00:00, 01:00, 02:00, 03:00, 04:00, 05:00, 06:00]
+
+// 6 month-starts starting Jan 2024
+dateRange({ start: "2024-01-01", periods: 6, freq: "MS" });
+// → [Jan 1, Feb 1, Mar 1, Apr 1, May 1, Jun 1]
+
+// Business days in a week
+dateRange({ start: "2024-01-01", end: "2024-01-07", freq: "B" });
+// → [Mon Jan 1, Tue Jan 2, Wed Jan 3, Thu Jan 4, Fri Jan 5]
+
+// Exclude endpoints with inclusive: "neither"
+dateRange({ start: "2024-01-01", end: "2024-01-05", inclusive: "neither" });
+// → [Jan 2, Jan 3, Jan 4]</code></pre>
+
+    <h2>Python / pandas equivalent</h2>
+    <textarea rows="14" readonly>
+import pandas as pd
+
+# 5 daily dates
+pd.date_range(start="2024-01-01", periods=5)
+
+# Hourly range
+pd.date_range(start="2024-01-01T00:00:00", end="2024-01-01T06:00:00", freq="h")
+
+# Monthly starts
+pd.date_range(start="2024-01-01", periods=6, freq="MS")
+
+# Business days
+pd.date_range(start="2024-01-01", end="2024-01-07", freq="B")
+
+# Exclude endpoints
+pd.date_range(start="2024-01-01", end="2024-01-05", inclusive="neither")
+    </textarea>
+
+    <h2>Live demo</h2>
+    <p>Fill in the options below and click <em>Generate</em>:</p>
+    <div class="row">
+      <div>
+        <label for="d-start">start</label>
+        <input id="d-start" type="text" value="2024-01-01" />
+      </div>
+      <div>
+        <label for="d-end">end (optional)</label>
+        <input id="d-end" type="text" placeholder="leave blank" />
+      </div>
+      <div>
+        <label for="d-periods">periods (optional)</label>
+        <input id="d-periods" type="number" value="8" min="1" max="100" />
+      </div>
+      <div>
+        <label for="d-freq">freq</label>
+        <select id="d-freq">
+          <option value="D" selected>D — daily</option>
+          <option value="B">B — business day</option>
+          <option value="h">h — hourly</option>
+          <option value="min">min — minute</option>
+          <option value="s">s — second</option>
+          <option value="W-MON">W-MON — weekly Mon</option>
+          <option value="MS">MS — month start</option>
+          <option value="ME">ME — month end</option>
+          <option value="QS">QS — quarter start</option>
+          <option value="QE">QE — quarter end</option>
+          <option value="YS">YS — year start</option>
+          <option value="YE">YE — year end</option>
+        </select>
+      </div>
+      <div>
+        <label for="d-incl">inclusive</label>
+        <select id="d-incl">
+          <option value="both" selected>both</option>
+          <option value="left">left</option>
+          <option value="right">right</option>
+          <option value="neither">neither</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="runDemo()">Generate</button>
+    <div class="output" id="out">—</div>
+
+    <script type="module">
+      import { dateRange } from "https://esm.sh/tsb@0.0.1";
+
+      window.runDemo = function () {
+        const out = document.getElementById("out");
+        try {
+          const startVal = document.getElementById("d-start").value.trim();
+          const endVal = document.getElementById("d-end").value.trim();
+          const periodsVal = document.getElementById("d-periods").value.trim();
+          const freq = document.getElementById("d-freq").value;
+          const inclusive = document.getElementById("d-incl").value;
+
+          const opts = { freq, inclusive };
+          if (startVal) opts.start = startVal;
+          if (endVal) opts.end = endVal;
+          if (periodsVal) opts.periods = Number(periodsVal);
+
+          const result = dateRange(opts);
+          if (result.length === 0) {
+            out.textContent = "(empty — no dates in range)";
+          } else {
+            out.textContent = result
+              .map((d, i) => `[${i}] ${d.toISOString().slice(0, 10)} (${d.toUTCString().slice(0, 3)})`)
+              .join("\n");
+          }
+        } catch (e) {
+          out.textContent = "Error: " + e.message;
+        }
+      };
+    </script>
+  </body>
+</html>
