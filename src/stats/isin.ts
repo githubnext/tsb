@@ -91,7 +91,7 @@ function isIsinDict(obj: DataFrameIsinValues): obj is IsinDict {
     typeof obj === "object" &&
     !Array.isArray(obj) &&
     !(obj instanceof Set) &&
-    typeof (obj as Record<string, unknown>)[Symbol.iterator] !== "function"
+    !Reflect.has(obj, Symbol.iterator)
   );
 }
 

@@ -198,7 +198,7 @@ function applyNearest(values: Scalar[], present: readonly boolean[]): Scalar[] {
       out[i] = rightVal[i];
     } else if (rd === -1) {
       out[i] = leftVal[i];
-    } else if (rd <= ld) {
+    } else if (rd !== undefined && ld !== undefined && rd <= ld) {
       // prefer right on tie
       out[i] = rightVal[i];
     } else {
@@ -252,7 +252,7 @@ export function reindexSeries<T extends Scalar>(
   series: Series<T>,
   newIndex: readonly Label[] | Index<Label>,
   options: ReindexSeriesOptions = {},
-): Series<T> {
+): Series<Scalar> {
   const { fillValue = null, method, limit } = options;
 
   const newIdx = toIndex(newIndex);
@@ -268,16 +268,19 @@ export function reindexSeries<T extends Scalar>(
     const key = String(newLabels[i]);
     const positions = labelMap.get(key);
     if (positions !== undefined && positions.length > 0) {
-      resultValues[i] = series.values[positions[0]] as Scalar;
-      present[i] = true;
+      const pos = positions[0];
+      if (pos !== undefined) {
+        resultValues[i] = series.values[pos] ?? null;
+        present[i] = true;
+      }
     }
   }
 
   const finalValues =
     method !== undefined ? applyFillMethod(resultValues, present, method, limit) : resultValues;
 
-  return new Series<T>({
-    data: finalValues as T[],
+  return new Series<Scalar>({
+    data: finalValues,
     index: newIdx,
     name: series.name,
   });

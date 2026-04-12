@@ -40,9 +40,9 @@ export class NamedAgg {
   /** Source column to read from the DataFrame. */
   readonly column: string;
   /** Aggregation to apply — a built-in name or a custom function. */
-  readonly aggfunc: AggName | AggFn;
+  readonly aggfunc: AggName | AggFn | string;
 
-  constructor(column: string, aggfunc: AggName | AggFn) {
+  constructor(column: string, aggfunc: AggName | AggFn | string) {
     this.column = column;
     this.aggfunc = aggfunc;
   }
@@ -59,7 +59,7 @@ export class NamedAgg {
  * });
  * ```
  */
-export function namedAgg(column: string, aggfunc: AggName | AggFn): NamedAgg {
+export function namedAgg(column: string, aggfunc: AggName | AggFn | string): NamedAgg {
   return new NamedAgg(column, aggfunc);
 }
 

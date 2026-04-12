@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
 import { DataFrame, Series, sampleDataFrame, sampleSeries } from "../../src/index.ts";
+import type { Label } from "../../src/index.ts";
 
 // ─── sampleSeries ─────────────────────────────────────────────────────────────
 
@@ -63,8 +64,9 @@ describe("sampleSeries — basic", () => {
 
   test("index is preserved by default", () => {
     const r = sampleSeries(s, { n: 2, randomState: 10 });
+    const allowed = new Set<Label>(["a", "b", "c", "d", "e"]);
     for (const label of r.index.toArray()) {
-      expect(["a", "b", "c", "d", "e"]).toContain(label);
+      expect(allowed.has(label)).toBe(true);
     }
   });
 

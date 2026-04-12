@@ -180,7 +180,7 @@ export function dataFrameMemoryUsage(
     names.push(colName);
     let mem: number;
     if (deep) {
-      mem = col.values.reduce((sum: number, v) => sum + deepScalarSize(v), 0);
+      mem = col.values.reduce((sum: number, v: Scalar) => sum + deepScalarSize(v), 0);
     } else {
       mem = col.size * shallowElemSize(col.dtype.itemsize);
     }

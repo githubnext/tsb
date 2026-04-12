@@ -76,7 +76,10 @@ describe("pipeSeries — basic usage", () => {
       received = x;
       return x;
     });
-    expect(received).toBe(s);
+    if (received === null) {
+      throw new Error("Expected callback to receive series");
+    }
+    expect(received === s).toBe(true);
   });
 });
 
@@ -157,7 +160,10 @@ describe("dataFramePipe — basic usage", () => {
       received = d;
       return d;
     });
-    expect(received).toBe(df);
+    if (received === null) {
+      throw new Error("Expected callback to receive dataframe");
+    }
+    expect(received === df).toBe(true);
   });
 
   test("fn can return a new DataFrame", () => {

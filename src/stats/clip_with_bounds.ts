@@ -21,7 +21,13 @@ import type { Label, Scalar } from "../types.ts";
 // ─── public types ─────────────────────────────────────────────────────────────
 
 /** A scalar numeric bound, a positional array, or a Series aligned by label. */
-export type BoundArg = number | null | undefined | readonly (number | null)[] | Series<Scalar>;
+export type BoundArg =
+  | number
+  | null
+  | undefined
+  | readonly (number | null)[]
+  | Series<Scalar>
+  | DataFrame;
 
 /** Options for {@link clipSeriesWithBounds}. */
 export interface SeriesClipBoundsOptions {

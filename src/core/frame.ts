@@ -96,16 +96,44 @@ export class DataFrame {
 
   // ─── construction ─────────────────────────────────────────────────────────
 
+  constructor(columns: ReadonlyMap<string, Series<Scalar>>, index: Index<Label>);
+  constructor(columns: Readonly<Record<string, Series<Scalar>>>, options?: DataFrameOptions);
   /**
    * Low-level constructor.  Prefer the static factory methods for typical use.
    *
-   * @param columns - Ordered map of column name → Series (all same length and index).
-   * @param index   - Row index (must match each Series' length).
+   * @param columns - Ordered map of column name → Series (all same length and index),
+   *   or a plain record of column name → Series.
+   * @param indexOrOptions - Row index for map input, or options for record input.
    */
-  constructor(columns: ReadonlyMap<string, Series<Scalar>>, index: Index<Label>) {
-    this._columns = columns;
-    this.index = index;
-    this.columns = new Index<string>([...columns.keys()]);
+  constructor(
+    columns: ReadonlyMap<string, Series<Scalar>> | Readonly<Record<string, Series<Scalar>>>,
+    indexOrOptions?: Index<Label> | DataFrameOptions,
+  ) {
+    if (columns instanceof Map) {
+      if (!(indexOrOptions instanceof Index)) {
+        throw new TypeError("DataFrame constructor requires an Index when columns is a Map");
+      }
+      this._columns = columns;
+      this.index = indexOrOptions;
+      this.columns = new Index<string>([...columns.keys()]);
+      return;
+    }
+
+    const entries = Object.entries(columns);
+    const colMap = new Map<string, Series<Scalar>>();
+    for (const [name, series] of entries) {
+      colMap.set(name, series);
+    }
+    const options = indexOrOptions instanceof Index ? { index: indexOrOptions } : indexOrOptions;
+    const firstSeries = entries[0]?.[1];
+    const inferredRows = firstSeries?.size ?? 0;
+    const rowIndex =
+      options?.index !== undefined
+        ? resolveRowIndex(inferredRows, options.index)
+        : (firstSeries?.index ?? defaultRowIndex(0));
+    this._columns = options?.index !== undefined ? reindexColumns(colMap, rowIndex) : colMap;
+    this.index = rowIndex;
+    this.columns = new Index<string>([...colMap.keys()]);
   }
 
   /**
@@ -252,6 +280,18 @@ export class DataFrame {
    */
   has(name: string): boolean {
     return this._columns.has(name);
+  }
+
+  /** Alias for {@link has}. */
+  hasColumn(name: string): boolean {
+    return this.has(name);
+  }
+
+  /** Iterate `(columnName, Series)` pairs in column order. */
+  *[Symbol.iterator](): IterableIterator<[string, Series<Scalar>]> {
+    for (const entry of this._columns) {
+      yield entry;
+    }
   }
 
   // ─── slicing ──────────────────────────────────────────────────────────────
@@ -848,7 +888,32 @@ function reindexColumns(
 ): Map<string, Series<Scalar>> {
   const result = new Map<string, Series<Scalar>>();
   for (const [name, series] of colMap) {
-    result.set(name, new Series({ data: series.values as Scalar[], index: newIndex }));
+    if (series.size === newIndex.size) {
+      result.set(
+        name,
+        new Series({
+          data: series.values,
+          index: newIndex,
+          dtype: series.dtype,
+          ...(series.name !== null ? { name: series.name } : {}),
+        }),
+      );
+      continue;
+    }
+
+    const resized: Scalar[] = new Array<Scalar>(newIndex.size);
+    for (let i = 0; i < newIndex.size; i++) {
+      resized[i] = series.values[i] ?? null;
+    }
+    result.set(
+      name,
+      new Series({
+        data: resized,
+        index: newIndex,
+        dtype: series.dtype,
+        ...(series.name !== null ? { name: series.name } : {}),
+      }),
+    );
   }
   return result;
 }

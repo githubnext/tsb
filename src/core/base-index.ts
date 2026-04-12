@@ -49,6 +49,11 @@ export class Index<T extends Label = Label> {
     return this._values.length;
   }
 
+  /** Alias for `size` to preserve array-like ergonomics. */
+  get length(): number {
+    return this._values.length;
+  }
+
   /** Shape tuple (always 1-D). */
   get shape(): [number] {
     return [this._values.length];
@@ -65,8 +70,8 @@ export class Index<T extends Label = Label> {
   }
 
   /** Snapshot of the underlying values as a plain array. */
-  get values(): readonly T[] {
-    return this._values;
+  get values(): T[] {
+    return [...this._values];
   }
 
   /** True when every label appears exactly once. */
