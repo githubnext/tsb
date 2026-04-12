@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T20:52:22Z |
-| Iteration Count | 17 |
-| Best Metric | 74 |
+| Last Run | 2026-04-12T21:12:20Z |
+| Iteration Count | 18 |
+| Best Metric | 83 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — (pending push) |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -58,14 +58,21 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (for iter 18+):
-1. `series_str_count`, `series_str_pad`, `series_str_center`, `series_str_zfill`
+Next functions to benchmark (for iter 19+):
+1. `series_str_center`, `series_str_lstrip`, `series_str_rstrip`, `series_str_rfind`
 2. `dataframe_info`, `series_str_extract`, `dataframe_transpose`, `dataframe_select_dtypes`
-3. `series_idxmax`, `series_to_frame`, `cumsum_by_group`, `nlargest_df`
+3. `series_idxmax`, `series_idxmin`, `series_to_frame`, `expanding_sum`, `expanding_std`
+4. `series_str_capitalize`, `series_str_swapcase` already added in iter 18
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 18 — 2026-04-12 21:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24316499673)
+- **Status**: ✅ Accepted
+- **Change**: Add 21 new benchmark pairs (83 total): str_upper, str_lower, str_len, str_strip, str_split, str_count, str_pad, str_zfill, str_title, str_startswith, str_endswith, str_find, str_replace, str_swapcase, series_quantile, dataframe_assign, dataframe_select, groupby_transform, groupby_size, rolling_sum, rolling_apply
+- **Metric**: 83 (previous best: 74, delta: +9) | **Commit**: 3256538
+- **Notes**: Created canonical branch from iter-14 (62 pairs), added 21 new pairs. Branch state from iters 15-17 lost (not pushed); re-added most from those iters here.
 
 ### Iteration 17 — 2026-04-12 20:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24316014460)
 - **Status**: ✅ Accepted
