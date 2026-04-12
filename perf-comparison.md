@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T13:30:00Z |
-| Iteration Count | 4 |
-| Best Metric | 5 |
+| Last Run | 2026-04-12T13:53:22Z |
+| Iteration Count | 5 |
+| Best Metric | 7 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #pending |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -48,9 +48,9 @@
 - Bun is not available in the gh-aw execution environment (GitHub blocks download). TypeScript benchmarks are written but cannot be executed during the iteration; they will run in CI.
 - Python benchmarks work fine with pandas installed via `pip3 install --break-system-packages pandas`.
 - The safeoutputs and github MCP servers are consistently unavailable (401 Bad Credentials). No GitHub operations (create PR, create issue, push branch) are possible. Only the branch commits and state file updates persist.
-- Each iteration must beat `best_metric` from the state file, which can be higher than what's actually on the remote main branch (due to previous local-only commits never pushed). It may be necessary to add 2-3 benchmark pairs per iteration to ensure the new metric exceeds the stated best.
+- Each iteration must beat `best_metric` from the state file, which can be higher than what's actually on the remote main branch (due to previous local-only commits never pushed). It is necessary to add 6+ benchmark pairs per iteration to ensure the new metric exceeds the stated best (since we're always starting from main with only 1 pair).
 - `playground/benchmarks.html` must handle null tsb values gracefully since tsb results require Bun and can't be produced in this environment. The JS now checks for null before accessing `.mean_ms`.
-- Adding 4 benchmark pairs per iteration is a safe strategy to beat the best_metric even if previous iterations' counts were not pushed to remote.
+- Since previous iterations' branches are never pushed to remote (safeoutputs unavailable), each iteration must start fresh from main (1 existing pair) and add enough new pairs to beat best_metric. Adding 6+ pairs per iteration is necessary to beat a best_metric of 5+.
 
 ---
 
@@ -67,13 +67,21 @@ Good next functions to benchmark (roughly in priority order):
 2. `rolling_mean` — rolling window mean
 3. `read_csv` — CSV parsing
 4. `describe` — statistical summary
-5. `groupby_mean` — groupby + mean aggregation
-6. `dataframe_creation` — multi-column DataFrame creation
-7. `series_arithmetic` — vectorized add/multiply
+5. `series_string_ops` — str accessor operations (upper, contains, etc.)
+6. `dataframe_sort` — sort_values on a DataFrame by multiple columns
+7. `series_value_counts` — value_counts on a Series
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 5 — 2026-04-12 13:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24308254920)
+
+- **Status**: ✅ Accepted (committed to branch; push pending PR creation — safeoutputs unavailable)
+- **Change**: Add 6 benchmark pairs: `dataframe_creation`, `series_arithmetic`, `groupby_mean`, `series_sort`, `dataframe_filter`, `concat`. Also updated `playground/benchmarks.html` to handle null tsb values gracefully.
+- **Metric**: 7 (previous best: 5, delta: +2)
+- **Commit**: 8806f85
+- **Notes**: Started fresh from main (1 existing pair). Added 6 pairs to reach metric=7. Python results: dataframe_creation=16.7ms, series_arithmetic=0.29ms, groupby_mean=6.76ms, series_sort=3.86ms, dataframe_filter=0.97ms, concat=0.27ms. Branch not yet pushed to remote due to safeoutputs unavailability.
 
 ### Iteration 4 — 2026-04-12 13:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24307811900)
 
