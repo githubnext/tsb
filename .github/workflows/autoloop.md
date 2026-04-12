@@ -836,6 +836,13 @@ Maintain a single open issue **per program** titled `[Autoloop: {program-name}] 
 ```markdown
 🤖 *Autoloop — an iterative optimization agent for this repository.*
 
+| | |
+|---|---|
+| **Branch** | [`autoloop/{program-name}`](https://github.com/{owner}/{repo}/tree/autoloop/{program-name}) |
+| **Pull Request** | #{pr_number} |
+| **Steering Issue** | #{steering_issue_number} |
+| **State File** | [`{program-name}.md`](https://github.com/{owner}/{repo}/blob/memory/autoloop/{program-name}.md) |
+
 ## Program
 
 **Goal**: {one-line summary from program.md}
@@ -863,6 +870,7 @@ Maintain a single open issue **per program** titled `[Autoloop: {program-name}] 
 - Iterations in **reverse chronological order** (newest first).
 - Each iteration heading links to its GitHub Actions run.
 - Use `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}` for the current run URL.
+- The **links table at the top** must always show the current branch, PR, steering issue, and state file. Update the PR number when a new PR is created. When creating a continuation issue for a new month, copy the links table from the previous issue.
 - Close the previous month's issue and create a new one at month boundaries.
 - Maximum 50 iterations per issue; create a continuation issue if exceeded.
 
