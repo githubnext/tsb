@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T15:46:00Z |
-| Iteration Count | 9 |
-| Best Metric | 22 |
+| Last Run | 2026-04-12T16:15:00Z |
+| Iteration Count | 10 |
+| Best Metric | 30 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #pending |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -53,6 +53,10 @@
 - On iteration 9, started from main (1 pair), added 21 pairs to reach metric=22. All 9 Future Directions consumed; updated with new targets.
 - `dataframe_apply` with row-wise lambda is slow in pandas (~47ms for 10k rows) — similar overhead expected for tsb. Reduced dataset to 10k rows for this benchmark.
 - `merge` (inner join on non-unique key) is slow in pandas (~60ms for 50k rows). This is a key benchmark to monitor tsb's hash-join implementation against.
+- On iteration 10, started from main (1 pair), added all 21 from iter 9 plus 8 new ones (melt, corr, cov, expanding_mean, series_map, dataframe_astype, cut, stack) for 30 total pairs. metric=30.
+- `series_map` with a 100k-element lookup dict is slow in pandas (~13.5ms). `dataframe_creation` with string column is notably slow (~50ms for 100k rows). `series_string_ops` takes ~16ms for 50k rows.
+- `corr` is faster than expected (~0.6ms for 10k rows, 5 cols). `cov` even faster (~0.17ms). `stack` is very fast (~0.34ms for 1k x 20).
+- `dataframe_astype` is fast in pandas (~0.68ms for 100k rows). `series_fillna` is similarly fast (~0.17ms). These are cheap scalar ops vectorized over arrays.
 
 ---
 
@@ -65,19 +69,27 @@
 ## 🔭 Future Directions
 
 Good next functions to benchmark (roughly in priority order):
-1. `melt` — unpivot a DataFrame from wide to long format
-2. `stack` / `unstack` — reshape using MultiIndex
-3. `cut` / `qcut` — binning operations on Series
-4. `resample` — time-series resampling
-5. `corr` — correlation matrix of a DataFrame
-6. `cov` — covariance matrix
-7. `expanding_mean` — expanding window mean
-8. `series_map` — element-wise map on a Series
-9. `dataframe_astype` — type casting columns
+1. `qcut` — quantile-based binning on Series
+2. `resample` — time-series resampling (requires DatetimeIndex)
+3. `crosstab` — cross-tabulation of two factors
+4. `diff` — element-wise difference (Series.diff)
+5. `pct_change` — percent change (Series.pct_change)
+6. `nlargest` / `nsmallest` — top-N elements
+7. `between` — boolean mask for range filter on Series
+8. `series_nunique` — count unique values
+9. `dataframe_head_tail` — df.head() / df.tail()
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 10 — 2026-04-12 16:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24310841712)
+
+- **Status**: ✅ Accepted
+- **Change**: Add 29 new benchmark pairs: re-add all 21 from iter 9 + 8 new ones (`melt`, `corr`, `cov`, `expanding_mean`, `series_map`, `dataframe_astype`, `cut`, `stack`). Fix `playground/benchmarks.html` null-safety. Update `results.json` with Python timings.
+- **Metric**: 30 (previous best: 22, delta: +8)
+- **Commit**: 1acb255
+- **Notes**: Started from main (1 pair). Python results: concat=1.01ms, corr=0.61ms, cov=0.17ms, cut=1.47ms, dataframe_apply=44.8ms, dataframe_astype=0.68ms, dataframe_creation=50.8ms, dataframe_dropna=0.69ms, dataframe_filter=0.82ms, dataframe_rename=0.11ms, dataframe_sort=5.3ms, describe=9.4ms, ewm_mean=0.82ms, expanding_mean=1.13ms, groupby_mean=7.6ms, melt=1.23ms, merge=0.64ms, pivot_table=6.1ms, read_csv=4.8ms, rolling_mean=1.18ms, series_arithmetic=0.13ms, series_cumsum=0.51ms, series_fillna=0.17ms, series_map=13.5ms, series_shift=0.05ms, series_sort=4.9ms, series_string_ops=16.2ms, series_value_counts=9.8ms, stack=0.34ms.
 
 ### Iteration 9 — 2026-04-12 15:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24310339206)
 
