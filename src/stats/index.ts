@@ -137,3 +137,19 @@ export type {
   SkewKurtSeriesOptions,
   SkewKurtDataFrameOptions,
 } from "./skew_kurt.ts";
+export { varSeries, semSeries, varDataFrame, semDataFrame } from "./sem_var.ts";
+export type { VarSemSeriesOptions, VarSemDataFrameOptions } from "./sem_var.ts";
+export {
+  nuniqueSeries,
+  nuniqueDataFrame,
+  anySeries,
+  allSeries,
+  anyDataFrame,
+  allDataFrame,
+} from "./nunique.ts";
+export type {
+  NuniqueSeriesOptions,
+  NuniqueDataFrameOptions,
+  AnyAllSeriesOptions,
+  AnyAllDataFrameOptions,
+} from "./nunique.ts";
