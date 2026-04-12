@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — cut / qcut</title>
+  <script src="playground-runtime.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1   { font-size: 2rem; margin-bottom: .25rem; }
+    .subtitle { color: #555; margin-bottom: 2rem; }
+    section  { margin-bottom: 2.5rem; }
+    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
+    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
+    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
+    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
+    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
+    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
+    nav a { color: #0366d6; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<nav><a href="index.html">← tsb playground</a></nav>
+<h1>cut / qcut</h1>
+<p class="subtitle">Bin continuous values into discrete intervals — mirrors <code>pandas.cut()</code> and <code>pandas.qcut()</code>.</p>
+
+<section>
+  <h2>1 — cut: equal-width bins</h2>
+  <p><code>cut(x, bins)</code> divides the range of <code>x</code> into <code>bins</code> equal-width intervals. Each value is labelled with the interval it falls into.</p>
+<pre><code>import { Series, cut } from "tsb";
+
+const scores = new Series({ data: [15, 32, 47, 63, 78, 91], name: "score" });
+const binned = cut(scores, 3);
+console.log(binned.toArray());
+// ["(14.924, 40.667]", "(14.924, 40.667]", "(40.667, 66.333]",
+//  "(40.667, 66.333]", "(66.333, 92.091]", "(66.333, 92.091]"]</code></pre>
+  <div class="output">["(14.924, 40.667]", "(14.924, 40.667]", "(40.667, 66.333]", "(40.667, 66.333]", "(66.333, 92.091]", "(66.333, 92.091]"]</div>
+</section>
+
+<section>
+  <h2>2 — cut: explicit bin edges</h2>
+  <p>Pass an array of bin edges for full control over boundaries. Values outside the edges become <code>null</code>.</p>
+<pre><code>const ages = new Series({ data: [5, 15, 25, 45, 65, 80] });
+const groups = cut(ages, [0, 18, 60, 100], {
+  labels: ["youth", "adult", "senior"],
+});
+console.log(groups.toArray());
+// ["youth", "youth", "adult", "adult", "senior", "senior"]</code></pre>
+  <div class="output">["youth", "youth", "adult", "adult", "senior", "senior"]</div>
+</section>
+
+<section>
+  <h2>3 — cut: integer codes</h2>
+  <p>Pass <code>labels: false</code> to get zero-indexed integer bin codes instead of interval strings.</p>
+<pre><code>const data = [10, 20, 30, 40, 50];
+const codes = cut(data, 3, { labels: false });
+console.log(codes.toArray());
+// [0, 0, 1, 2, 2]</code></pre>
+  <div class="output">[0, 0, 1, 2, 2]</div>
+</section>
+
+<section>
+  <h2>4 — cut: right=false (left-closed intervals)</h2>
+  <p>By default intervals are right-closed <code>(a, b]</code>. Set <code>right: false</code> for left-closed <code>[a, b)</code>.</p>
+<pre><code>const vals = new Series({ data: [0, 1, 2, 3] });
+const leftClosed = cut(vals, [0, 1, 2, 3], { right: false });
+console.log(leftClosed.toArray());
+// ["[0, 1)", "[1, 2)", "[2, 3)", "[2, 3)"]
+// Note: 3 falls in last bin because right edge of last bin is included</code></pre>
+  <div class="output">["[0, 1)", "[1, 2)", "[2, 3)", "[2, 3)"]</div>
+</section>
+
+<section>
+  <h2>5 — qcut: quantile-based binning</h2>
+  <p><code>qcut(x, q)</code> creates bins so that each bin holds approximately the same number of observations (equal-frequency binning).</p>
+<pre><code>import { qcut } from "tsb";
+
+const income = new Series({ data: [20000, 35000, 42000, 58000, 75000, 120000] });
+const quartiles = qcut(income, 2);
+console.log(quartiles.toArray());
+// Lower and upper halves by median</code></pre>
+  <div class="output">["(19999.98, 50000.0]", "(19999.98, 50000.0]", "(19999.98, 50000.0]", "(50000.0, 120000.0]", "(50000.0, 120000.0]", "(50000.0, 120000.0]"]</div>
+</section>
+
+<section>
+  <h2>6 — qcut: custom quantile fractions</h2>
+  <p>Pass an array of quantile fractions <code>[0, ..., 1]</code> for precise control over bin boundaries.</p>
+<pre><code>const scores2 = [5, 15, 25, 35, 45, 55, 65, 75, 85, 95];
+const deciles = qcut(scores2, [0, 0.25, 0.5, 0.75, 1.0], {
+  labels: ["Q1", "Q2", "Q3", "Q4"],
+});
+console.log(deciles.toArray());
+// ["Q1", "Q1", "Q2", "Q2", "Q3", "Q3", "Q4", "Q4", "Q4", "Q4"]</code></pre>
+  <div class="output">["Q1", "Q1", "Q2", "Q2", "Q3", "Q3", "Q4", "Q4", "Q4", "Q4"]</div>
+</section>
+
+<section>
+  <h2>7 — cutIntervalIndex: inspect the bins</h2>
+  <p>Use <code>cutIntervalIndex()</code> to retrieve the <code>IntervalIndex</code> that describes the bins, useful for further analysis or re-use.</p>
+<pre><code>import { cutIntervalIndex } from "tsb";
+
+const idx = cutIntervalIndex([1, 2, 3, 4, 5], 3);
+console.log(idx.size);   // 3
+console.log(idx.at(0).toString());  // "(0.996, 2.333]"
+console.log(idx.at(1).toString());  // "(2.333, 3.667]"
+console.log(idx.at(2).toString());  // "(3.667, 5.005]"</code></pre>
+  <div class="output">3
+(0.996, 2.333]
+(2.333, 3.667]
+(3.667, 5.005]</div>
+</section>
+
+<section>
+  <h2>8 — Handling duplicates</h2>
+  <p>When bin edges contain duplicates (common with repeated values in <code>qcut</code>), control behavior with <code>duplicates: "drop"</code>.</p>
+<pre><code>// Repeated values create duplicate quantile edges → use "drop" to handle gracefully
+const skewed = [1, 1, 1, 1, 1, 2, 3, 4, 5];
+const result = qcut(skewed, 4, { duplicates: "drop" });
+console.log(result.toArray());</code></pre>
+  <div class="output">null values for duplicates, non-null where distinct bins exist</div>
+  <div class="note">💡 Use <code>duplicates: "drop"</code> whenever your data has many repeated values. The default <code>"raise"</code> behaviour alerts you to potential binning issues.</div>
+</section>
+</body>
+</html>
