@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T06:50:00Z |
-| Iteration Count | 222 |
-| Best Metric | 57 |
+| Last Run | 2026-04-12T07:50:00Z |
+| Iteration Count | 223 |
+| Best Metric | 58 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #120 |
@@ -42,12 +42,13 @@
 Next features to implement (prioritized by impact):
 - `core/str_accessor` improvements or new string ops (findall, extractall)
 - `io/to_json_normalize.ts` — inverse of jsonNormalize (nested records from flat DataFrame)
-- `stats/nancumops.ts` — nansum, nanmean, nanmedian top-level functions
+- `stats/to_datetime.ts` — pd.to_datetime() parsing strings/timestamps to datetime values
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 223**: `nancumops` — 9 top-level nan-ignoring aggregate functions: nansum/nanmean/nanmedian/nanvar/nanstd/nanmin/nanmax/nanprod/nancount. All accept `readonly Scalar[] | Series<Scalar>`. `toValues()` helper dispatches via `Array.isArray`. `sortedAsc` for median. `as number` casts for noUncheckedIndexedAccess. 36 unit + 4 property tests. Playground: nancumops.html. Canonical branch restored. Metric: 58 (+1). Commit: f7ab898.
 - **Iter 222**: `to_numeric` — overloaded `toNumeric(scalar|array|Series, opts?)`. Extracts `convertString`/`convertUnknown` helpers to keep `convertScalar` ≤15 complexity. `useBlockStatements`: all if-branches wrapped. `convertUnknown` signature stays single-line for biome format. Remove unused type imports in tests. Export `Scalar` from `src/index.ts` for test imports. `import type { Index }` for value-unused imports. Metric: 57 (+1). Commit: 576ddbb.
 - **Iter 221**: `quantile` — `quantileSeries`/`quantileDataFrame`; 5 interpolation methods (linear/lower/higher/midpoint/nearest); multi-q returns Series/DataFrame; axis=0/1; numericOnly; skipna. `biome check --write --unsafe` fixes noNegationElse + NaN → Number.NaN. `Series<Scalar>` (not `Series<unknown>`) in tests + `import type { Scalar }`. 46 unit + 4 property tests. Metric: 56 (+1). Commit: a48560f.
 - **Iter 220**: `sem_var` + `nunique/any/all` — `stats/sem_var.ts`: `StatFn=(xs,ddof,minCount)=>number` for reducer callbacks; varSeries/semSeries/varDataFrame/semDataFrame with ddof/skipna/minCount/axis/numericOnly. Non-numeric cols without numericOnly return NaN. `stats/nunique.ts`: anyInSlice/allInSlice/rowValues helpers to keep anyDataFrame/allDataFrame complexity ≤15. Biome: `Array(n)` → `new Array(n)`, remove extra parens. Metric: 55 (+2). Commit: bb3f8f3.
@@ -78,12 +79,15 @@ Next features to implement (prioritized by impact):
 
 - `core/str_accessor` — more string methods on Series (findall, extractall, normalize)
 - `io/to_json_normalize.ts` — inverse of jsonNormalize (nested records from flat DataFrame)
-- `stats/nancumops.ts` — nansum, nanmean, nanmedian top-level functions
 - `stats/to_datetime.ts` — pd.to_datetime() parsing strings/timestamps to datetime values
+- `stats/to_timedelta.ts` — pd.to_timedelta() for duration parsing
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 223 — 2026-04-12 07:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24301503087)
+- **Status**: ✅ Accepted — Add `stats/nancumops.ts`: 9 nan-ignoring aggregate functions (nansum/nanmean/nanmedian/nanvar/nanstd/nanmin/nanmax/nanprod/nancount). Accept `readonly Scalar[] | Series<Scalar>`. `toValues()` dispatches via `Array.isArray`. `sortedAsc` helper for median. `as number` casts for noUncheckedIndexedAccess. Canonical branch restored from 480c452 base. 36 unit + 4 property tests. Playground: nancumops.html. Metric: 58 (+1). Commit: f7ab898.
 
 ### Iteration 222 — 2026-04-12 06:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24300571298)
 - **Status**: ✅ Accepted — Add `stats/to_numeric.ts`: toNumeric(scalar|array|Series, opts?) — mirrors pandas.to_numeric(). errors='raise'/'coerce'/'ignore'; downcast='integer'/'signed'/'unsigned'/'float'. Handles null/NaN, bool, bigint, Date. Extracted convertString/convertUnknown helpers to keep complexity ≤15. 50 unit + 5 property tests. Playground: to_numeric.html. Metric: 57 (+1). Commit: 576ddbb.
