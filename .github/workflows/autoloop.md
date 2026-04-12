@@ -45,6 +45,7 @@ safe-outputs:
     title-prefix: "[Autoloop] "
     labels: [automation, autoloop]
     protected-files: fallback-to-issue
+    preserve-branch-name: true
     max: 1
   push-to-pull-request-branch:
     target: "*"
