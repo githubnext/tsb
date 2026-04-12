@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T18:15:00Z |
-| Iteration Count | 13 |
-| Best Metric | 54 |
+| Last Run | 2026-04-12T18:48:00Z |
+| Iteration Count | 14 |
+| Best Metric | 62 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #pending |
-| Steering Issue | #pending |
+| PR | #134 |
+| Steering Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -31,8 +31,8 @@
 **Goal**: Systematically benchmark every tsb function against its pandas equivalent, one function per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: #128
-**Steering Issue**: #pending
+**Pull Request**: #134
+**Steering Issue**: #131
 
 ---
 
@@ -59,6 +59,10 @@
 - `series_abs`=0.04ms is the fastest operation benchmarked so far (pure element-wise vectorized op).
 - `isin`=0.67ms (100k elements, 2500-element test set), `clip`=0.71ms, `where`=0.23ms, `unstack`=0.40ms — all fast.
 - `safeoutputs` tools availability is inconsistent but improving. Canonical branch `autoloop/perf-comparison` is created fresh each iteration from main since previous iters' branches had wrong suffixed names.
+- `dataframe_apply_col` (axis=0, column-wise) at 0.32ms is ~140x faster than `dataframe_apply` (axis=1, row-wise) at 47ms. Column-wise pandas ops are much more efficient.
+- `string_contains`=11.67ms and `groupby_agg`=10.98ms are the most expensive new functions, both ~10-12ms for 100k rows.
+- `combine_first`=0.38ms is faster than expected for 100k-element Series with 33% NaN values.
+- `resample("1h").mean()` on 100k minute-frequency points (about 1667 hour buckets) takes only 1.36ms — very efficient.
 
 ---
 
@@ -70,21 +74,29 @@
 
 ## 🔭 Future Directions
 
-Good next functions to benchmark (roughly in priority order):
-1. `resample` — time-series resampling (requires DatetimeIndex)
-2. `explode` — explode list-like column to rows
-3. `pivot` — DataFrame.pivot() (reshape without aggregation)
-4. `combine_first` — combine two DataFrames, filling NaN
-5. `shift` with fill_value — Series.shift(1, fill_value=0)
-6. `groupby_agg` — groupby with multiple aggregation functions
-7. `dataframe_apply_col` — column-wise apply (faster than row-wise)
-8. `series_replace` — replace values with a mapping
-9. `dataframe_info` — dtypes, memory usage info
-10. `string_contains` — str.contains pattern matching
+Next functions to benchmark (items 1-8 completed in iter 14):
+1. `dataframe_info` — dtypes, memory usage info
+2. `shift_fill` — Series.shift(1, fill_value=0)
+3. `series_quantile` — quantile computation
+4. `dataframe_select_dtypes` — select columns by dtype
+5. `series_str_upper_lower` — str.upper(), str.lower()
+6. `dataframe_set_index` — set_index / reset_index
+7. `series_to_frame` — Series.to_frame()
+8. `dataframe_transpose` — DataFrame.T
+9. `series_idxmax` — index of maximum value
+10. `rolling_sum` — rolling window sum
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 14 — 2026-04-12 18:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24313773954)
+
+- **Status**: ✅ Accepted
+- **Change**: Add 40 new benchmark pairs (62 total): rank, clip, series_abs, where, isin, duplicated, drop_duplicates, interpolate, rolling_std, unstack, between, crosstab, diff, pct_change, nlargest, qcut, series_nunique, dataframe_head_tail, melt, corr, cov, expanding_mean, series_map, dataframe_astype, cut, stack, nsmallest, cummax, cummin, sample, mask, rolling_var + 10 new (resample, explode, pivot, combine_first, groupby_agg, dataframe_apply_col, series_replace, string_contains).
+- **Metric**: 62 (previous best: 54, delta: +8)
+- **Commit**: 2460d7e
+- **Notes**: New timings: resample=1.36ms, explode=1.03ms, pivot=0.85ms, combine_first=0.38ms, groupby_agg=10.98ms (multiple aggs), dataframe_apply_col=0.32ms, series_replace=2.76ms, string_contains=11.67ms. `dataframe_apply_col` (column-wise) is dramatically faster than row-wise apply. `string_contains` and `groupby_agg` are the new slowest ops. Re-created canonical branch from main (previous branch suffix names had been merged to main as PR #128).
 
 ### Iteration 13 — 2026-04-12 18:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24313139491)
 
