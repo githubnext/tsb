@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T19:31:00Z |
-| Iteration Count | 15 |
-| Best Metric | 72 |
+| Last Run | 2026-04-12T20:11:25Z |
+| Iteration Count | 16 |
+| Best Metric | 73 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -29,7 +29,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: — (new PR pending from iter 15)
+**Pull Request**: — (new PR pending from iter 16)
 **Steering Issue**: #131
 
 ---
@@ -58,14 +58,21 @@
 
 ## 🔭 Future Directions
 
-Next functions (previous 10 completed in iter 15):
-1. `cumsum_by_group`, `series_str_len`, `dataframe_query`, `series_map_dict`
-2. `groupby_transform`, `nlargest_df`, `series_str_split`, `dataframe_assign`
-3. `series_str_replace`, `rolling_apply`
+Next functions to benchmark (for iter 17+):
+1. `cumsum_by_group`, `series_map_dict`, `dataframe_query`, `nlargest_df`
+2. `series_str_count`, `series_str_pad`, `series_str_center`, `series_str_zfill`
+3. `dataframe_pipe`, `series_pipe`, `series_str_extract`, `dataframe_info`
+4. `series_str_upper`, `dataframe_set_index`, `series_to_frame`, `series_idxmax`
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 16 — 2026-04-12 20:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24315354129)
+- **Status**: ✅ Accepted
+- **Change**: Add 11 new benchmark pairs (73 total): series_quantile, groupby_transform, groupby_size, dataframe_assign, rolling_sum, rolling_apply, series_str_len, series_str_lower, series_str_strip, series_str_replace, series_str_split
+- **Metric**: 73 (previous best: 72, delta: +1) | **Commit**: f71ba91
+- **Notes**: Created canonical `autoloop/perf-comparison` branch from iter-14 branch (62 pairs). Previous iter 15 state was incorrectly recorded; actual branch had 62 pairs.
 
 ### Iteration 15 — 2026-04-12 19:31 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24314349429)
 - **Status**: ✅ Accepted
