@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T07:50:00Z |
-| Iteration Count | 223 |
+| Last Run | 2026-04-12T08:19:44Z |
+| Iteration Count | 224 |
 | Best Metric | 58 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -40,14 +40,16 @@
 ## 🎯 Current Priorities
 
 Next features to implement (prioritized by impact):
+- **RECOVER**: `stats/to_datetime.ts` — push failed in iter 224 (MCP blocked). See Lessons Learned for implementation details. Re-implement on canonical branch.
 - `core/str_accessor` improvements or new string ops (findall, extractall)
 - `io/to_json_normalize.ts` — inverse of jsonNormalize (nested records from flat DataFrame)
-- `stats/to_datetime.ts` — pd.to_datetime() parsing strings/timestamps to datetime values
+- `stats/to_timedelta.ts` — pd.to_timedelta() for duration parsing
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 224**: `to_datetime` — PUSH FAILED (MCP blocked). Code ready: `toDatetime(scalar|array|Series, opts?)`. Move all regex to top-level constants (RE_MDY, RE_DMY_DASH, etc.) for `useTopLevelRegex`. Use `../core/index.ts` for Series/Dtype imports. Overload: scalar→`Date|null`, array→`(Date|null)[]`, Series→`Series<Date|null>`. `errors='ignore'` returns original scalar (tests use `as unknown as string`). 42 unit + 4 property tests. Recover by re-implementing this file on canonical branch next iteration.
 - **Iter 223**: `nancumops` — 9 top-level nan-ignoring aggregate functions: nansum/nanmean/nanmedian/nanvar/nanstd/nanmin/nanmax/nanprod/nancount. All accept `readonly Scalar[] | Series<Scalar>`. `toValues()` helper dispatches via `Array.isArray`. `sortedAsc` for median. `as number` casts for noUncheckedIndexedAccess. 36 unit + 4 property tests. Playground: nancumops.html. Canonical branch restored. Metric: 58 (+1). Commit: f7ab898.
 - **Iter 222**: `to_numeric` — overloaded `toNumeric(scalar|array|Series, opts?)`. Extracts `convertString`/`convertUnknown` helpers to keep `convertScalar` ≤15 complexity. `useBlockStatements`: all if-branches wrapped. `convertUnknown` signature stays single-line for biome format. Remove unused type imports in tests. Export `Scalar` from `src/index.ts` for test imports. `import type { Index }` for value-unused imports. Metric: 57 (+1). Commit: 576ddbb.
 - **Iter 221**: `quantile` — `quantileSeries`/`quantileDataFrame`; 5 interpolation methods (linear/lower/higher/midpoint/nearest); multi-q returns Series/DataFrame; axis=0/1; numericOnly; skipna. `biome check --write --unsafe` fixes noNegationElse + NaN → Number.NaN. `Series<Scalar>` (not `Series<unknown>`) in tests + `import type { Scalar }`. 46 unit + 4 property tests. Metric: 56 (+1). Commit: a48560f.
@@ -85,6 +87,9 @@ Next features to implement (prioritized by impact):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 224 — 2026-04-12 08:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24302289084)
+- **Status**: ⚠️ Push failed — MCP servers blocked by policy. Code implemented locally (commit 81dfb68 on local branch, not pushed). toDatetime() fully implemented: scalar/array/Series overloads, unit=s/ms/us/ns, errors=raise/coerce/ignore, utc flag, ISO/US/compact formats. 42 unit + 4 property tests. Metric would be 59 (+1) if pushed. Recovery needed next iteration: re-implement stats/to_datetime.ts on the canonical branch.
 
 ### Iteration 223 — 2026-04-12 07:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24301503087)
 - **Status**: ✅ Accepted — Add `stats/nancumops.ts`: 9 nan-ignoring aggregate functions (nansum/nanmean/nanmedian/nanvar/nanstd/nanmin/nanmax/nanprod/nancount). Accept `readonly Scalar[] | Series<Scalar>`. `toValues()` dispatches via `Array.isArray`. `sortedAsc` helper for median. `as number` casts for noUncheckedIndexedAccess. Canonical branch restored from 480c452 base. 36 unit + 4 property tests. Playground: nancumops.html. Metric: 58 (+1). Commit: f7ab898.
