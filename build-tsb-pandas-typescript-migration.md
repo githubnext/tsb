@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T10:16:28Z |
-| Iteration Count | 228 |
+| Last Run | 2026-04-12T10:46:55Z |
+| Iteration Count | 229 |
 | Best Metric | 60 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, accepted, error, error, error, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, accepted, error, error, error, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -49,6 +49,7 @@ Next features to implement (prioritized by impact):
 
 ## 📚 Lessons Learned
 
+- **Iter 229**: `to_timedelta` — Successfully pushed after 5 prior failures. Checked out 480c452 branch (has to_datetime at 716a7f3). `(value as unknown) instanceof Timedelta` passthrough. RE_HUMAN_UNIT.lastIndex=0 reset. parseFrac() pads to 9 digits/1e6. formatTimedelta() for toString. applyErrors() helper. Commit 48a486c. Metric: 60 (first actual push at this level).
 - **Iter 226**: `to_timedelta` — PUSH FAILED (safeoutputs MCP blocked by policy, same as iters 224–225). Code committed locally as eb1f9ce on autoloop/build-tsb-pandas-typescript-migration, not pushed. `toTimedelta(scalar|array|Series, opts?)` + `Timedelta` class. Top-level regex: RE_PANDAS/RE_CLOCK/RE_HUMAN. Units: ns/us/ms/s/m/h/D/W. Timedelta: totalMs/days/hours/minutes/seconds/ms accessors; add/subtract/scale/abs/lt/gt/eq. `parseFrac` for sub-second precision. `formatTimedelta` for toString. 50+ unit + 4 property tests. Playground: to_timedelta.html. Metric would be 60 (+1 vs 59, +2 vs best 58). Recovery: re-implement on canonical branch next iter. NOTE: to_datetime (iter 225) IS on remote at 716a7f3.
 - **Iter 228**: `to_timedelta` — PUSH FAILED (safeoutputs MCP filtered by policy, same as iters 224–226). `toTimedelta(scalar|array|Series, opts?)` + `Timedelta` class fully implemented. applyErrors() helper for errors-handling. RE_HUMAN_UNIT global regex reset with lastIndex=0. parseFrac() pads to 9 digits / 1e6. formatTimedelta() exported. tsc --noEmit clean. 55+ unit + 4 property tests. Playground: to_timedelta.html. Commit: 987b281 local-only. Metric would be 60. Recovery: re-implement on canonical branch next iter.
 - **Iter 227**: `to_timedelta` — Successfully implemented `toTimedelta(scalar|array|Series, opts?) + Timedelta class` by checking out 480c452 branch (which had to_datetime from iter 225). `(value as unknown) instanceof Timedelta` pattern to allow Timedelta passthrough without TypeScript error (Timedelta not in Scalar union). `RE_HUMAN.lastIndex = 0` reset needed before re-using global regex in loop. `parseFrac()` pads to 9 digits then divides by 1e6 for ns→ms. Metric: 60 (+2 vs best 58). Commit: ca3f286 (push to canonical failed — code rebuilt in iter 228).
@@ -90,6 +91,10 @@ Next features to implement (prioritized by impact):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 229 — 2026-04-12 10:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24304871817)
+- **Status**: ✅ Accepted — Add `stats/to_timedelta.ts`: `toTimedelta(scalar|array|Series, opts?)` + `Timedelta` class. RE_PANDAS/RE_ISO/RE_HUMAN_UNIT top-level regexes. `applyErrors()` helper. `(value as unknown) instanceof Timedelta` passthrough. `parseFrac()` pads to 9 digits/1e6 for ns→ms. `formatTimedelta()` exported. Checked out 480c452 branch (has to_datetime). tsc --noEmit clean. 60+ unit + 4 property tests. Playground: to_timedelta.html. Metric: 60 (+1). Commit: 48a486c.
+- **Notes**: After 5 consecutive push failures (iters 224–228), successfully pushed on iter 229 by using `push_to_pull_request_branch` targeting PR #120.
 
 ### Iteration 228 — 2026-04-12 10:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24304305384)
 - **Status**: ⚠️ Push failed — safeoutputs MCP server filtered by policy (same issue as iters 224–226). `stats/to_timedelta.ts` + Timedelta class fully implemented and committed at 987b281 on local `autoloop/build-tsb-pandas-typescript-migration` branch (based on 480c452 which has to_datetime). applyErrors() helper, RE_HUMAN_UNIT.lastIndex reset, parseFrac(), formatTimedelta() exported. tsc --noEmit clean. 55+ tests + 4 property tests. Playground: to_timedelta.html. Metric would be 60 (branch actual: 59→60). Recovery: re-implement on canonical branch in next iteration.
