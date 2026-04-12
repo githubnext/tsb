@@ -888,27 +888,15 @@ function reindexColumns(
 ): Map<string, Series<Scalar>> {
   const result = new Map<string, Series<Scalar>>();
   for (const [name, series] of colMap) {
-    if (series.size === newIndex.size) {
-      result.set(
-        name,
-        new Series({
-          data: series.values,
-          index: newIndex,
-          dtype: series.dtype,
-          ...(series.name !== null ? { name: series.name } : {}),
-        }),
+    if (series.size !== newIndex.size) {
+      throw new RangeError(
+        `Index length ${newIndex.size} does not match data length ${series.size} for column "${name}"`,
       );
-      continue;
-    }
-
-    const resized: Scalar[] = new Array<Scalar>(newIndex.size);
-    for (let i = 0; i < newIndex.size; i++) {
-      resized[i] = series.values[i] ?? null;
     }
     result.set(
       name,
       new Series({
-        data: resized,
+        data: series.values,
         index: newIndex,
         dtype: series.dtype,
         ...(series.name !== null ? { name: series.name } : {}),

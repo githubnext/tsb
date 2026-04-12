@@ -5,6 +5,7 @@ import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
 import { DataFrame, NamedAgg, isNamedAggSpec, namedAgg } from "../../src/index.ts";
 import type { Scalar } from "../../src/types.ts";
+import type { AggName } from "../../src/groupby/index.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -270,7 +271,7 @@ describe("NamedAgg property tests", () => {
     fc.assert(
       fc.property(
         fc.string({ minLength: 1 }),
-        fc.constantFrom("sum", "mean", "min", "max", "count" as const),
+        fc.constantFrom<AggName>("sum", "mean", "min", "max", "count"),
         (col, agg) => {
           const spec = new NamedAgg(col, agg);
           expect(spec.column).toBe(col);

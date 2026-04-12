@@ -340,7 +340,25 @@ export class DataFrameGroupBy {
         throw new TypeError(`aggNamed: "${outCol}" must be a NamedAgg`);
       }
       const src = named.column;
-      const fn = resolveAgg(named.aggfunc as AggName | AggFn);
+      const aggSpec = named.aggfunc;
+      let fn: AggFn;
+      if (typeof aggSpec === "function") {
+        fn = resolveAgg(aggSpec);
+      } else if (
+        aggSpec === "sum" ||
+        aggSpec === "mean" ||
+        aggSpec === "min" ||
+        aggSpec === "max" ||
+        aggSpec === "count" ||
+        aggSpec === "std" ||
+        aggSpec === "first" ||
+        aggSpec === "last" ||
+        aggSpec === "size"
+      ) {
+        fn = resolveAgg(aggSpec);
+      } else {
+        throw new TypeError(`aggNamed: unsupported aggfunc "${aggSpec}" for column "${outCol}"`);
+      }
       const srcSeries = this._df.col(src);
       const srcVals = srcSeries.values as readonly Scalar[];
       resultCols[outCol] = this._groups.map((g) => fn(g.positions.map((p) => srcVals[p] as Scalar)));

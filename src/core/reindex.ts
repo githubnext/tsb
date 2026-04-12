@@ -252,7 +252,7 @@ export function reindexSeries<T extends Scalar>(
   series: Series<T>,
   newIndex: readonly Label[] | Index<Label>,
   options: ReindexSeriesOptions = {},
-): Series<Scalar> {
+): Series<T> {
   const { fillValue = null, method, limit } = options;
 
   const newIdx = toIndex(newIndex);
@@ -279,8 +279,8 @@ export function reindexSeries<T extends Scalar>(
   const finalValues =
     method !== undefined ? applyFillMethod(resultValues, present, method, limit) : resultValues;
 
-  return new Series<Scalar>({
-    data: finalValues,
+  return new Series<T>({
+    data: finalValues as T[],
     index: newIdx,
     name: series.name,
   });

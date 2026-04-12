@@ -202,7 +202,7 @@ export function crosstab(
   const buckets: Array<Array<number[] | undefined>> | null =
     values !== undefined
       ? Array.from({ length: nRows }, () =>
-          Array.from({ length: nCols }, () => undefined as number[] | undefined),
+          Array.from<undefined, number[] | undefined>({ length: nCols }, () => undefined),
         )
       : null;
 

@@ -125,7 +125,7 @@ export function alignSeries<L extends Scalar, R extends Scalar>(
   left: Series<L>,
   right: Series<R>,
   options: AlignSeriesOptions = {},
-): [Series<Scalar>, Series<Scalar>] {
+): [Series<L>, Series<R>] {
   const { join = "outer", fillValue = null } = options;
   const targetIdx = resolveIndex(left.index, right.index, join);
 

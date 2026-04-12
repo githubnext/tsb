@@ -70,8 +70,8 @@ export class Index<T extends Label = Label> {
   }
 
   /** Snapshot of the underlying values as a plain array. */
-  get values(): T[] {
-    return [...this._values];
+  get values(): readonly T[] {
+    return this._values;
   }
 
   /** True when every label appears exactly once. */

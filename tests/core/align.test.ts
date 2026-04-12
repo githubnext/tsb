@@ -4,11 +4,12 @@ import { DataFrame } from "../../src/core/frame.ts";
 import { Index } from "../../src/core/base-index.ts";
 import { Series } from "../../src/core/series.ts";
 import { alignSeries, alignDataFrame } from "../../src/core/align.ts";
+import type { Scalar } from "../../src/index.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-function ns(data: number[], labels: string[], name?: string): Series<number> {
-  return new Series<number>({
+function ns(data: number[], labels: string[], name?: string): Series<Scalar> {
+  return new Series<Scalar>({
     data,
     index: new Index<string>(labels),
     name: name ?? null,

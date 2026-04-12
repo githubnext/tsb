@@ -4,6 +4,7 @@ import { DataFrame } from "../../src/core/frame.ts";
 import { Index } from "../../src/core/base-index.ts";
 import { Series } from "../../src/core/series.ts";
 import { reindexDataFrame, reindexSeries } from "../../src/core/reindex.ts";
+import type { Scalar } from "../../src/index.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -11,8 +12,8 @@ function makeNumericSeries(
   data: number[],
   labels: string[],
   name?: string,
-): Series<number> {
-  return new Series<number>({
+): Series<Scalar> {
+  return new Series<Scalar>({
     data,
     index: new Index<string>(labels),
     name: name ?? null,
