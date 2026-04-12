@@ -10,12 +10,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T00:30:00Z |
-| Iteration Count | 216 |
-| Best Metric | 51 |
+| Last Run | 2026-04-12T01:20:00Z |
+| Iteration Count | 217 |
+| Best Metric | 52 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | — |
+| PR | #120 |
 | Steering Issue | #107 |
 | Paused | false |
 | Pause Reason | — |
@@ -31,7 +31,7 @@
 **Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: TBD (to be created for `autoloop/build-tsb-pandas-typescript-migration`)
+**Pull Request**: #120
 **Steering Issue**: #107
 **Experiment Log**: #3
 
@@ -40,14 +40,15 @@
 ## 🎯 Current Priorities
 
 Next features to implement (prioritized by impact):
-- `stats/describe_categorical.ts` — extend describe() for categorical/string Series
-- `core/str_accessor` improvements or new string ops
-- `window/ewm` improvements
+- `stats/skew_kurt.ts` — skewness and kurtosis (pandas: Series.skew(), Series.kurt())
+- `stats/sem_var.ts` — standard error of mean and variance aggregations
+- `core/str_accessor` improvements or new string ops (findall, extractall)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 217**: `mode` — `stats/mode.ts`. `modeSeries`/`modeDataFrame`. `compareScalars` uses if/else chain (not nested ternary) for `noNestedTernary`. Remove unused `Index` import (`noUnusedImports`). Long function signatures need breaking across lines for formatter (100-col limit). `modeDataFrame` with `axis=1` preserves original row index; result columns are 0-indexed strings. `numericOnly` filters by `dtype.kind` being `"int"|"uint"|"float"`. Metric: 52 (+1). Commit: cf1270d.
 - **Iter 216**: `jsonNormalize` — `io/json_normalize.ts`. Flatten nested JSON objects into DataFrames. `isJsonPrimitive` type guard for safe narrowing of `JsonValue` after `!isJsonObject && !Array.isArray` checks (avoids `as` casts). `navigatePath`: TypeScript narrows `cur` to `JsonObject` after `if (!isJsonObject(cur)) return null` guard, so `cur[key]` works without cast. `Array.isArray(data)` on `JsonObject | readonly JsonObject[]` gives `any[]`, assignable to `readonly JsonObject[]`. Helper decomposition: `flattenObject`, `flattenTopLevel`, `flattenRecordRows`, `buildMetaRecord`, `extractRecords`, `prefixRecord`, `primitiveOrStringify`, `navigatePath`. `DataFrame.fromRecords(flatRows)` works without cast (`Record<string,Scalar>[]` → `readonly Readonly<Record<string,Scalar>>[]` is covariant). Metric: 51 (+1). Commit: b26b44c.
 - **Iter 215**: `readExcel`/`xlsxSheetNames` — `io/read_excel.ts`. Full XLSX reader from scratch: ZIP binary parser (EOCD + central directory + local headers), DEFLATE via `node:zlib` `inflateRawSync` (biome-ignore noNodejsModules). XML parsing via `regexAll` generator (avoids `noAssignInExpressions`). `noExcessiveCognitiveComplexity`: extract `extractHeaderLabels`, `pivotToColumns`, `padHeaderLabels` helpers from `buildColumnarData`. `useNumberNamespace`: use `Number.parseInt`, `Number.isNaN`. Function signature `Uint8Array | ArrayBufferLike` (not `ArrayBuffer`) to accept `.buffer` property without casts. Property tests: use `fc.uniqueArray` to avoid duplicate headers causing shape mismatch. Metric: 50 (+1). Commit: 5748b07.
 - **Iter 214**: `selectDtypes` — `stats/select_dtypes.ts`. Use `import type` for DataFrame (it's only used as a type). Extract `validateNoOverlap` and `columnPasses` helpers to keep complexity under 15. `useExplicitLengthCheck`: use `(x?.length ?? 0) > 0` pattern for optional arrays. `fc.constantFrom<DtypeSpecifier>(...)` type param needed for property tests. Auto-format with `bunx biome format --write` to fix formatter diffs. Metric: 49 (+1). Commit: edf0fb4.
@@ -79,13 +80,17 @@ Next features to implement (prioritized by impact):
 
 ## 🔭 Future Directions
 
-- `stats/describe_categorical.ts` — extend describe() for categorical/string Series
+- `stats/skew_kurt.ts` — skewness and kurtosis for Series/DataFrame
+- `stats/sem_var.ts` — standard error of mean and variance
 - `io/to_json_normalize.ts` — inverse of jsonNormalize (nested records from flat DataFrame)
-- `core/str_accessor` — more string methods on Series
+- `core/str_accessor` — more string methods on Series (findall, extractall, normalize)
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 217 — 2026-04-12 01:20 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24295557098)
+- **Status**: ✅ Accepted — Add `stats/mode.ts`: modeSeries/modeDataFrame. All tied modes returned sorted ascending. DataFrame axis=0 (column-wise, with null-padding) or axis=1 (row-wise). dropna option. numericOnly for column-wise. 25 unit + 6 property tests. Playground: mode.html. Metric: 52 (+1). Commit: cf1270d.
 
 ### Iteration 216 — 2026-04-12 00:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24294949963)
 - **Status**: ✅ Accepted — Add `io/json_normalize.ts`: jsonNormalize(data, options?) — flatten nested JSON to DataFrame. recordPath, meta, metaPrefix, recordPrefix, sep, maxLevel, errors options. 26 tests (unit + fast-check property tests). Playground: json_normalize.html. Metric: 51 (+1). Commit: b26b44c.
