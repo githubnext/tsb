@@ -235,3 +235,9 @@ export type {
   AnyAllSeriesOptions,
   AnyAllDataFrameOptions,
 } from "./stats/index.ts";
+export { quantileSeries, quantileDataFrame } from "./stats/index.ts";
+export type {
+  QuantileInterpolation,
+  QuantileSeriesOptions,
+  QuantileDataFrameOptions,
+} from "./stats/index.ts";

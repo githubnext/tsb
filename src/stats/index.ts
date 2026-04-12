@@ -153,3 +153,9 @@ export type {
   AnyAllSeriesOptions,
   AnyAllDataFrameOptions,
 } from "./nunique.ts";
+export { quantileSeries, quantileDataFrame } from "./quantile.ts";
+export type {
+  QuantileInterpolation,
+  QuantileSeriesOptions,
+  QuantileDataFrameOptions,
+} from "./quantile.ts";
