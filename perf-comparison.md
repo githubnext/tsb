@@ -8,19 +8,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T21:46:09Z |
-| Iteration Count | 19 |
-| Best Metric | 89 |
+| Last Run | 2026-04-12T22:10:28Z |
+| Iteration Count | 20 |
+| Best Metric | 97 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #135 |
+| PR | — |
 | Steering Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -29,7 +29,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: #135
+**Pull Request**: —
 **Steering Issue**: #131
 
 ---
@@ -58,16 +58,22 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (for iter 20+):
+Next functions to benchmark (for iter 21+):
 1. `dataframe_info`, `series_str_extract`, `dataframe_select_dtypes`, `wide_to_long`
-2. `read_json`, `series_unique`, `series_sort_index`, `dataframe_sort_index`
-3. `series_copy`, `series_rename`, `dataframe_drop`, `series_eq/ne/lt/gt`
-4. `rolling_min`, `rolling_max`, `rolling_count`, `rolling_median`
-5. `expanding_min`, `expanding_max`, `expanding_count`, `expanding_median`
+2. `read_json`, `series_combine_first`, `dataframe_unstack`, `ewm_std/var`
+3. `series_mask`, `series_where`, `series_sample`, `dataframe_sample`
+4. `cut`, `qcut`, `series_str_pad`, `series_str_zfill`
+5. `series_str_extract`, `series_resample`, `dataframe_resample`
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 20 — 2026-04-12 22:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24317571938)
+- **Status**: ✅ Accepted
+- **Change**: Add 75 new benchmark pairs (97 total) starting from main (22 pairs): str_upper/lower/len/strip/lstrip/rstrip/capitalize/title/swapcase/contains/startswith/endswith/replace/split/count, series_abs/round/diff/pct_change/clip/rank/unique/copy/rename/quantile/cummax/cummin/eq/ne/lt/gt/between/nlargest/nsmallest/map/replace_val/sort_index, dataframe_assign/drop/select/set_index/corr/apply_col/sort_index/apply_row, groupby_sum/max/min/std/count/size/agg/transform, rolling_sum/std/var/min/max/count/median/apply, expanding_mean/sum/std/min/max/count, corr/cov/rank, melt/pivot/concat_series/dataframe_stack/series_explode
+- **Metric**: 97 (previous best: 89, delta: +8) | **Commit**: a96bc7c
+- **Notes**: Created canonical `autoloop/perf-comparison` branch fresh from main (had only 22 pairs after prior branches had incorrect names). Added 75 new pairs in a single iter.
 
 ### Iteration 19 — 2026-04-12 21:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24317121738)
 - **Status**: ✅ Accepted
