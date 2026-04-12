@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T12:14:27Z |
-| Iteration Count | 2 |
-| Best Metric | 3 |
+| Last Run | 2026-04-12T12:48:52Z |
+| Iteration Count | 3 |
+| Best Metric | 4 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #pending |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted |
 
 ---
 
@@ -48,6 +48,8 @@
 - Bun is not available in the gh-aw execution environment (GitHub blocks download). TypeScript benchmarks are written but cannot be executed during the iteration; they will run in CI.
 - Python benchmarks work fine with pandas installed via `pip3 install --break-system-packages pandas`.
 - The safeoutputs and github MCP servers are filtered when the MCP registry policy check fails (401 Bad Credentials). When this happens, no GitHub operations (create PR, create issue, push branch) are possible. The branch commits and state file updates are the only persistent outputs of the iteration.
+- Each iteration must beat `best_metric` from the state file, which can be higher than what's actually on the remote main branch (due to previous local-only commits never pushed). It may be necessary to add 2-3 benchmark pairs per iteration to ensure the new metric exceeds the stated best.
+- `playground/benchmarks.html` should handle null tsb values gracefully since tsb results require Bun and can't be produced in this environment.
 
 ---
 
@@ -60,24 +62,28 @@
 ## 🔭 Future Directions
 
 Good next functions to benchmark (roughly in priority order):
-1. `groupby_mean` — GroupBy aggregation (mean)
-2. `series_sort` — Series.sort_values()
-3. `dataframe_filter` — boolean mask / query
-4. `series_string_ops` — str accessor operations
-5. `concat` — concat two DataFrames
-6. `merge` — inner join on a key column
-7. `rolling_mean` — rolling window mean
-8. `read_csv` — CSV parsing
-9. `describe` — statistical summary
+1. `series_sort` — Series.sort_values()
+2. `dataframe_filter` — boolean mask / query
+3. `series_string_ops` — str accessor operations
+4. `concat` — concat two DataFrames
+5. `merge` — inner join on a key column
+6. `rolling_mean` — rolling window mean
+7. `read_csv` — CSV parsing
+8. `describe` — statistical summary
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 2 — 2026-04-12 12:14 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24306483112)
+### Iteration 3 — 2026-04-12 12:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24307099560)
 
-- **Status**: ✅ Accepted
-- **Change**: Add `dataframe_creation` (recovered from lost iter 1 branch) + `series_arithmetic` benchmark pairs
+- **Status**: ✅ Accepted (committed locally; push blocked by missing auth)
+- **Change**: Add `dataframe_creation`, `series_arithmetic`, `groupby_mean` benchmark pairs (3 functions)
+- **Metric**: 4 (previous best: 3, delta: +1)
+- **Commit**: eba7b2c (local branch only)
+- **Notes**: Re-added previously lost `dataframe_creation` and `series_arithmetic` plus new `groupby_mean`. Python results: dataframe_creation=19.4ms, series_arithmetic=0.118ms, groupby_mean=8.7ms. Also updated playground/benchmarks.html to handle null tsb values (pending Bun CI run) and updated results.json with pandas data. Branch push and PR/issue creation blocked by same 401 Bad Credentials issue as previous iterations.
+
+### Iteration 2 — 2026-04-12 12:14 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24306483112)
 - **Metric**: 3 (previous best: 2, delta: +1)
 - **Commit**: 1945940
 - **Notes**: Previous iteration's branch was never pushed to remote. This iteration re-adds `dataframe_creation` and adds `series_arithmetic` (add + mul on 100k-element Series). Python arithmetic benchmark shows ~0.164ms mean, confirming pandas vectorization is very fast for simple arithmetic.
