@@ -66,6 +66,13 @@ export type { ExpandingOptions, ExpandingSeriesLike } from "./window/index.ts";
 export { DataFrameExpanding } from "./core/index.ts";
 export { EWM } from "./window/index.ts";
 export type { EwmOptions, EwmSeriesLike } from "./window/index.ts";
+export {
+  rollingApply,
+  rollingAgg,
+  dataFrameRollingApply,
+  dataFrameRollingAgg,
+} from "./window/index.ts";
+export type { RollingApplyOptions, RollingAggOptions, AggFunctions } from "./window/index.ts";
 export { DataFrameEwm } from "./core/index.ts";
 export { CategoricalAccessor } from "./core/index.ts";
 export type { CatSeriesLike } from "./core/index.ts";
@@ -373,8 +380,14 @@ export type { ToDictOrient, FromDictOrient, DictSplit, DictTight } from "./core/
 export {
   catFromCodes,
   catUnionCategories,
+  catIntersectCategories,
+  catDiffCategories,
+  catEqualCategories,
   catSortByFreq,
+  catToOrdinal,
+  catFreqTable,
   catCrossTab,
+  catRecode,
 } from "./stats/index.ts";
 export type {
   CatFromCodesOptions,
@@ -387,6 +400,13 @@ export {
   formatScientific,
   formatEngineering,
   formatThousands,
+  formatCurrency,
+  formatCompact,
+  makeFloatFormatter,
+  makePercentFormatter,
+  makeCurrencyFormatter,
+  applySeriesFormatter,
+  applyDataFrameFormatter,
   seriesToString,
   dataFrameToString,
 } from "./stats/index.ts";
@@ -456,6 +476,4 @@ export type {
   RollingQuantileOptions,
 } from "./stats/index.ts";
 
-// iter136 features — window
-export { rollingApply, rollingAgg } from "./window/index.ts";
-export type { RollingApplyOptions, RollingAggOptions, AggFunctions } from "./window/index.ts";
+

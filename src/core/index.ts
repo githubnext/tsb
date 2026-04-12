@@ -15,6 +15,7 @@ export { CategoricalAccessor } from "./cat_accessor.ts";
 export type { CatSeriesLike } from "./cat_accessor.ts";
 export { MultiIndex } from "./multi_index.ts";
 export type { MultiIndexOptions } from "./multi_index.ts";
+
 export { Interval, IntervalIndex } from "./interval.ts";
 export type { IntervalClosed, IntervalIndexOptions } from "./interval.ts";
 export { CategoricalIndex } from "./categorical_index.ts";
@@ -55,10 +56,66 @@ export { alignSeries, alignDataFrame } from "./align.ts";
 export type { AlignSeriesOptions, AlignDataFrameOptions } from "./align.ts";
 export { astypeSeries, astype, castScalar } from "./astype.ts";
 export type { AstypeOptions, DataFrameAstypeOptions } from "./astype.ts";
-export { isScalar, isListLike, isArrayLike, isDictLike, isIterator } from "./api_types.ts";
-export { getAttrs, setAttrs, updateAttrs, copyAttrs } from "./attrs.ts";
+export {
+  isScalar,
+  isListLike,
+  isArrayLike,
+  isDictLike,
+  isIterator,
+  isNumber,
+  isBool,
+  isStringValue,
+  isFloat,
+  isInteger,
+  isBigInt,
+  isRegExp,
+  isReCompilable,
+  isMissing,
+  isHashable,
+  isDate,
+  isNumericDtype,
+  isIntegerDtype,
+  isSignedIntegerDtype,
+  isUnsignedIntegerDtype,
+  isFloatDtype,
+  isBoolDtype,
+  isStringDtype,
+  isDatetimeDtype,
+  isTimedeltaDtype,
+  isCategoricalDtype,
+  isObjectDtype,
+  isComplexDtype,
+  isExtensionArrayDtype,
+  isPeriodDtype,
+  isIntervalDtype,
+} from "./api_types.ts";
+export {
+  getAttrs,
+  setAttrs,
+  updateAttrs,
+  copyAttrs,
+  withAttrs,
+  clearAttrs,
+  hasAttrs,
+  getAttr,
+  setAttr,
+  deleteAttr,
+  attrsCount,
+  attrsKeys,
+  mergeAttrs,
+} from "./attrs.ts";
 export type { Attrs } from "./attrs.ts";
-export { insertColumn, popColumn, reorderColumns, moveColumn } from "./insert_pop.ts";
+export { insertColumn, popColumn, reorderColumns, moveColumn, dataFrameFromPairs } from "./insert_pop.ts";
 export type { PopResult } from "./insert_pop.ts";
 export { toDictOriented, fromDictOriented } from "./to_from_dict.ts";
-export type { ToDictOrient, FromDictOrient, DictSplit, DictTight } from "./to_from_dict.ts";
+export type { ToDictOrient, FromDictOrient, DictSplit, DictTight, SplitInput } from "./to_from_dict.ts";
+export {
+  pipe,
+  seriesApply,
+  seriesTransform,
+  dataFrameApply as dataFrameApplyPipe,
+  dataFrameApplyMap,
+  dataFrameTransform,
+  dataFrameTransformRows,
+} from "./pipe_apply.ts";
+

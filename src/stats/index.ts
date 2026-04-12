@@ -268,8 +268,14 @@ export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./to_datet
 export {
   catFromCodes,
   catUnionCategories,
+  catIntersectCategories,
+  catDiffCategories,
+  catEqualCategories,
   catSortByFreq,
+  catToOrdinal,
+  catFreqTable,
   catCrossTab,
+  catRecode,
 } from "./categorical_ops.ts";
 export type {
   CatFromCodesOptions,
@@ -283,6 +289,13 @@ export {
   formatScientific,
   formatEngineering,
   formatThousands,
+  formatCurrency,
+  formatCompact,
+  makeFloatFormatter,
+  makePercentFormatter,
+  makeCurrencyFormatter,
+  applySeriesFormatter,
+  applyDataFrameFormatter,
   seriesToString,
   dataFrameToString,
 } from "./format_ops.ts";
