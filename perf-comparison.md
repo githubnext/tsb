@@ -8,19 +8,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T20:11:25Z |
-| Iteration Count | 16 |
-| Best Metric | 73 |
+| Last Run | 2026-04-12T20:52:22Z |
+| Iteration Count | 17 |
+| Best Metric | 74 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | — |
+| PR | — (pending push) |
 | Steering Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -29,7 +29,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: — (new PR pending from iter 16)
+**Pull Request**: — (new PR created iter 17)
 **Steering Issue**: #131
 
 ---
@@ -58,15 +58,20 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (for iter 17+):
-1. `cumsum_by_group`, `series_map_dict`, `dataframe_query`, `nlargest_df`
-2. `series_str_count`, `series_str_pad`, `series_str_center`, `series_str_zfill`
-3. `dataframe_pipe`, `series_pipe`, `series_str_extract`, `dataframe_info`
-4. `series_str_upper`, `dataframe_set_index`, `series_to_frame`, `series_idxmax`
+Next functions to benchmark (for iter 18+):
+1. `series_str_count`, `series_str_pad`, `series_str_center`, `series_str_zfill`
+2. `dataframe_info`, `series_str_extract`, `dataframe_transpose`, `dataframe_select_dtypes`
+3. `series_idxmax`, `series_to_frame`, `cumsum_by_group`, `nlargest_df`
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 17 — 2026-04-12 20:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24316014460)
+- **Status**: ✅ Accepted
+- **Change**: Add 12 new benchmark pairs (74 total): series_str_upper, series_str_lower, series_str_len, series_str_strip, series_str_split, series_quantile, groupby_transform, groupby_size, dataframe_assign, dataframe_set_index, rolling_sum, rolling_apply
+- **Metric**: 74 (previous best: 73, delta: +1) | **Commit**: 1b79fc8
+- **Notes**: Created canonical `autoloop/perf-comparison` branch from iter-14 branch (62 pairs); iter 16 branch state lost. Added 12 new pairs.
 
 ### Iteration 16 — 2026-04-12 20:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24315354129)
 - **Status**: ✅ Accepted
