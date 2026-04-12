@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T14:16:44Z |
-| Iteration Count | 6 |
-| Best Metric | 9 |
+| Last Run | 2026-04-12T14:52:00Z |
+| Iteration Count | 7 |
+| Best Metric | 11 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #pending |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -48,10 +48,9 @@
 - Bun is not available in the gh-aw execution environment (GitHub blocks download). TypeScript benchmarks are written but cannot be executed during the iteration; they will run in CI.
 - Python benchmarks work fine with pandas installed via `pip3 install --break-system-packages pandas`.
 - The safeoutputs and github MCP servers are consistently unavailable (401 Bad Credentials). No GitHub operations (create PR, create issue, push branch) are possible. Only the branch commits and state file updates persist.
-- Each iteration must beat `best_metric` from the state file, which can be higher than what's actually on the remote main branch (due to previous local-only commits never pushed). It is necessary to add 6+ benchmark pairs per iteration to ensure the new metric exceeds the stated best (since we're always starting from main with only 1 pair).
-- `playground/benchmarks.html` must handle null tsb values gracefully since tsb results require Bun and can't be produced in this environment. The JS now checks for null before accessing `.mean_ms`.
-- Since previous iterations' branches are never pushed to remote (safeoutputs unavailable), each iteration must start fresh from main (1 existing pair) and add enough new pairs to beat best_metric. Adding 6+ pairs per iteration is necessary to beat a best_metric of 5+.
-- On iteration 6, `existing_pr` was null (no remote branch existed) and both TS and PY benchmarks came out at 9 pairs. The branch commit was pushed via `push_to_pull_request_branch` to the newly-created PR.
+- Each iteration must beat `best_metric` from the state file. Since previous iterations' branches often don't persist on remote, each iteration must start from main (1 existing pair) and add enough new pairs to beat the best_metric. Adding 10+ pairs per iteration is reliable.
+- `playground/benchmarks.html` must handle null tsb values gracefully since tsb results require Bun and can't be produced in this environment. The JS now checks for null before accessing `.mean_ms` and computes ratio only when both values are available.
+- On iteration 7, started from main (1 pair), added 10 pairs to reach metric=11. Python benchmarks all ran successfully in this environment.
 
 ---
 
@@ -64,17 +63,26 @@
 ## 🔭 Future Directions
 
 Good next functions to benchmark (roughly in priority order):
-1. `read_csv` — CSV parsing
-2. `describe` — statistical summary
-3. `series_string_ops` — str accessor operations (upper, contains, etc.)
-4. `dataframe_sort` — sort_values on a DataFrame by multiple columns
-5. `series_value_counts` — value_counts on a Series
-6. `pivot_table` — pivot aggregation
-7. `ewm_mean` — exponentially weighted mean
+1. `read_csv` — CSV parsing performance
+2. `series_string_ops` — str accessor operations (upper, lower, contains, etc.)
+3. `pivot_table` — pivot aggregation
+4. `ewm_mean` — exponentially weighted mean
+5. `dataframe_apply` — apply a function across rows/columns
+6. `series_fillna` — fill missing values
+7. `dataframe_dropna` — drop rows with missing values
+8. `dataframe_sort` — sort_values on a DataFrame by multiple columns
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 7 — 2026-04-12 14:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24309233650)
+
+- **Status**: ✅ Accepted
+- **Change**: Add 10 new benchmark pairs: `dataframe_creation`, `series_arithmetic`, `groupby_mean`, `series_sort`, `dataframe_filter`, `concat`, `merge`, `rolling_mean`, `describe`, `series_value_counts`. Fix `playground/benchmarks.html` null-safety for tsb values and ratio computation.
+- **Metric**: 11 (previous best: 9, delta: +2)
+- **Commit**: 9f8f1c2
+- **Notes**: Started from main (1 pair). Python results: dataframe_creation=17.7ms, series_arithmetic=0.18ms, groupby_mean=10.1ms, series_sort=4.7ms, dataframe_filter=1.0ms, concat=0.4ms, merge=0.7ms, rolling_mean=1.1ms, describe=6.0ms, series_value_counts=10.0ms.
 
 ### Iteration 6 — 2026-04-12 14:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24308688106)
 
