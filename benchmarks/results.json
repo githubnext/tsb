@@ -1,6 +1,39 @@
 {
   "benchmarks": [
     {
+      "function": "between",
+      "tsb": null,
+      "pandas": {
+        "function": "between",
+        "mean_ms": 0.16103834500000858,
+        "iterations": 200,
+        "total_ms": 32.207669000001715
+      },
+      "ratio": null
+    },
+    {
+      "function": "clip",
+      "tsb": null,
+      "pandas": {
+        "function": "clip",
+        "mean_ms": 1.990909230000284,
+        "iterations": 100,
+        "total_ms": 199.0909230000284
+      },
+      "ratio": null
+    },
+    {
+      "function": "combine_first",
+      "tsb": null,
+      "pandas": {
+        "function": "combine_first",
+        "mean_ms": 0.3822191200003999,
+        "iterations": 50,
+        "total_ms": 19.110956000019996
+      },
+      "ratio": null
+    },
+    {
       "function": "concat",
       "tsb": null,
       "pandas": {
@@ -12,6 +45,72 @@
       "ratio": null
     },
     {
+      "function": "corr",
+      "tsb": null,
+      "pandas": {
+        "function": "corr",
+        "mean_ms": 0.5609774200001993,
+        "iterations": 50,
+        "total_ms": 28.048871000009967
+      },
+      "ratio": null
+    },
+    {
+      "function": "cov",
+      "tsb": null,
+      "pandas": {
+        "function": "cov",
+        "mean_ms": 0.1933979199998248,
+        "iterations": 100,
+        "total_ms": 19.33979199998248
+      },
+      "ratio": null
+    },
+    {
+      "function": "crosstab",
+      "tsb": null,
+      "pandas": {
+        "function": "crosstab",
+        "mean_ms": 5.3182911999992175,
+        "iterations": 30,
+        "total_ms": 159.54873599997651
+      },
+      "ratio": null
+    },
+    {
+      "function": "cummax",
+      "tsb": null,
+      "pandas": {
+        "function": "cummax",
+        "mean_ms": 1.1497397300001921,
+        "iterations": 100,
+        "total_ms": 114.97397300001921
+      },
+      "ratio": null
+    },
+    {
+      "function": "cummin",
+      "tsb": null,
+      "pandas": {
+        "function": "cummin",
+        "mean_ms": 1.0978203100000883,
+        "iterations": 100,
+        "total_ms": 109.78203100000883
+      },
+      "ratio": null
+    },
+    {
+      "function": "cut",
+      "tsb": null,
+      "pandas": {
+        "function": "cut",
+        "mean_ms": 2.4623991599992223,
+        "iterations": 50,
+        "total_ms": 123.11995799996112
+      },
+      "ratio": null
+    },
+    {
       "function": "dataframe_apply",
       "tsb": null,
       "pandas": {
@@ -19,6 +118,28 @@
         "mean_ms": 47.161531699998704,
         "iterations": 10,
         "total_ms": 471.61531699998704
+      },
+      "ratio": null
+    },
+    {
+      "function": "dataframe_apply_col",
+      "tsb": null,
+      "pandas": {
+        "function": "dataframe_apply_col",
+        "mean_ms": 0.32499793999988924,
+        "iterations": 100,
+        "total_ms": 32.499793999988924
+      },
+      "ratio": null
+    },
+    {
+      "function": "dataframe_astype",
+      "tsb": null,
+      "pandas": {
+        "function": "dataframe_astype",
+        "mean_ms": 0.6506819100002303,
+        "iterations": 100,
+        "total_ms": 65.06819100002303
       },
       "ratio": null
     },
@@ -56,6 +177,17 @@
       "ratio": null
     },
     {
+      "function": "dataframe_head_tail",
+      "tsb": null,
+      "pandas": {
+        "function": "dataframe_head_tail",
+        "mean_ms": 0.06511352400002579,
+        "iterations": 1000,
+        "total_ms": 65.11352400002579
+      },
+      "ratio": null
+    },
+    {
       "function": "dataframe_rename",
       "tsb": null,
       "pandas": {
@@ -89,6 +221,39 @@
       "ratio": null
     },
     {
+      "function": "diff",
+      "tsb": null,
+      "pandas": {
+        "function": "diff",
+        "mean_ms": 0.14170949499998642,
+        "iterations": 200,
+        "total_ms": 28.341898999997284
+      },
+      "ratio": null
+    },
+    {
+      "function": "drop_duplicates",
+      "tsb": null,
+      "pandas": {
+        "function": "drop_duplicates",
+        "mean_ms": 1.1205483399999139,
+        "iterations": 50,
+        "total_ms": 56.027416999995694
+      },
+      "ratio": null
+    },
+    {
+      "function": "duplicated",
+      "tsb": null,
+      "pandas": {
+        "function": "duplicated",
+        "mean_ms": 1.3844710600005783,
+        "iterations": 50,
+        "total_ms": 69.22355300002891
+      },
+      "ratio": null
+    },
+    {
       "function": "ewm_mean",
       "tsb": null,
       "pandas": {
@@ -96,6 +261,39 @@
         "mean_ms": 1.7652839999982461,
         "iterations": 10,
         "total_ms": 17.65283999998246
+      },
+      "ratio": null
+    },
+    {
+      "function": "expanding_mean",
+      "tsb": null,
+      "pandas": {
+        "function": "expanding_mean",
+        "mean_ms": 1.7139983399999892,
+        "iterations": 50,
+        "total_ms": 85.69991699999946
+      },
+      "ratio": null
+    },
+    {
+      "function": "explode",
+      "tsb": null,
+      "pandas": {
+        "function": "explode",
+        "mean_ms": 1.02996705999999,
+        "iterations": 50,
+        "total_ms": 51.4983529999995
+      },
+      "ratio": null
+    },
+    {
+      "function": "groupby_agg",
+      "tsb": null,
+      "pandas": {
+        "function": "groupby_agg",
+        "mean_ms": 10.97728106666788,
+        "iterations": 30,
+        "total_ms": 329.3184320000364
       },
       "ratio": null
     },
@@ -111,6 +309,50 @@
       "ratio": null
     },
     {
+      "function": "interpolate",
+      "tsb": null,
+      "pandas": {
+        "function": "interpolate",
+        "mean_ms": 3.7753171000000902,
+        "iterations": 30,
+        "total_ms": 113.25951300000271
+      },
+      "ratio": null
+    },
+    {
+      "function": "isin",
+      "tsb": null,
+      "pandas": {
+        "function": "isin",
+        "mean_ms": 1.6645995200008201,
+        "iterations": 50,
+        "total_ms": 83.229976000041
+      },
+      "ratio": null
+    },
+    {
+      "function": "mask",
+      "tsb": null,
+      "pandas": {
+        "function": "mask",
+        "mean_ms": 0.5851815699998042,
+        "iterations": 100,
+        "total_ms": 58.51815699998042
+      },
+      "ratio": null
+    },
+    {
+      "function": "melt",
+      "tsb": null,
+      "pandas": {
+        "function": "melt",
+        "mean_ms": 2.064804379999714,
+        "iterations": 50,
+        "total_ms": 103.2402189999857
+      },
+      "ratio": null
+    },
+    {
       "function": "merge",
       "tsb": null,
       "pandas": {
@@ -118,6 +360,50 @@
         "mean_ms": 60.42320619999941,
         "iterations": 10,
         "total_ms": 604.2320619999941
+      },
+      "ratio": null
+    },
+    {
+      "function": "nlargest",
+      "tsb": null,
+      "pandas": {
+        "function": "nlargest",
+        "mean_ms": 2.1809330900003943,
+        "iterations": 100,
+        "total_ms": 218.09330900003943
+      },
+      "ratio": null
+    },
+    {
+      "function": "nsmallest",
+      "tsb": null,
+      "pandas": {
+        "function": "nsmallest",
+        "mean_ms": 1.172936479999862,
+        "iterations": 100,
+        "total_ms": 117.2936479999862
+      },
+      "ratio": null
+    },
+    {
+      "function": "pct_change",
+      "tsb": null,
+      "pandas": {
+        "function": "pct_change",
+        "mean_ms": 1.1997432100000083,
+        "iterations": 200,
+        "total_ms": 239.94864200000166
+      },
+      "ratio": null
+    },
+    {
+      "function": "pivot",
+      "tsb": null,
+      "pandas": {
+        "function": "pivot",
+        "mean_ms": 0.8490880499999776,
+        "iterations": 100,
+        "total_ms": 84.90880499999776
       },
       "ratio": null
     },
@@ -133,6 +419,28 @@
       "ratio": null
     },
     {
+      "function": "qcut",
+      "tsb": null,
+      "pandas": {
+        "function": "qcut",
+        "mean_ms": 7.631286899999168,
+        "iterations": 30,
+        "total_ms": 228.93860699997504
+      },
+      "ratio": null
+    },
+    {
+      "function": "rank",
+      "tsb": null,
+      "pandas": {
+        "function": "rank",
+        "mean_ms": 8.728866699999571,
+        "iterations": 50,
+        "total_ms": 436.44333499997856
+      },
+      "ratio": null
+    },
+    {
       "function": "read_csv",
       "tsb": null,
       "pandas": {
@@ -144,6 +452,17 @@
       "ratio": null
     },
     {
+      "function": "resample",
+      "tsb": null,
+      "pandas": {
+        "function": "resample",
+        "mean_ms": 1.357887120000214,
+        "iterations": 50,
+        "total_ms": 67.8943560000107
+      },
+      "ratio": null
+    },
+    {
       "function": "rolling_mean",
       "tsb": null,
       "pandas": {
@@ -151,6 +470,50 @@
         "mean_ms": 1.71982609999759,
         "iterations": 10,
         "total_ms": 17.1982609999759
+      },
+      "ratio": null
+    },
+    {
+      "function": "rolling_std",
+      "tsb": null,
+      "pandas": {
+        "function": "rolling_std",
+        "mean_ms": 3.0888083800005006,
+        "iterations": 50,
+        "total_ms": 154.44041900002503
+      },
+      "ratio": null
+    },
+    {
+      "function": "rolling_var",
+      "tsb": null,
+      "pandas": {
+        "function": "rolling_var",
+        "mean_ms": 2.3259480600006555,
+        "iterations": 50,
+        "total_ms": 116.29740300003277
+      },
+      "ratio": null
+    },
+    {
+      "function": "sample",
+      "tsb": null,
+      "pandas": {
+        "function": "sample",
+        "mean_ms": 1.8081685200002084,
+        "iterations": 100,
+        "total_ms": 180.81685200002084
+      },
+      "ratio": null
+    },
+    {
+      "function": "series_abs",
+      "tsb": null,
+      "pandas": {
+        "function": "series_abs",
+        "mean_ms": 0.04412354999999479,
+        "iterations": 200,
+        "total_ms": 8.824709999998959
       },
       "ratio": null
     },
@@ -172,7 +535,7 @@
         "function": "series_creation",
         "mean_ms": 7.607,
         "iterations": 50,
-        "total_ms": 380.349
+        "total_ms": 380.35
       },
       "ratio": null
     },
@@ -195,6 +558,39 @@
         "mean_ms": 0.18527670000025864,
         "iterations": 20,
         "total_ms": 3.705534000005173
+      },
+      "ratio": null
+    },
+    {
+      "function": "series_map",
+      "tsb": null,
+      "pandas": {
+        "function": "series_map",
+        "mean_ms": 1.7419646666667177,
+        "iterations": 30,
+        "total_ms": 52.25894000000153
+      },
+      "ratio": null
+    },
+    {
+      "function": "series_nunique",
+      "tsb": null,
+      "pandas": {
+        "function": "series_nunique",
+        "mean_ms": 0.9312331699999277,
+        "iterations": 200,
+        "total_ms": 186.24663399998553
+      },
+      "ratio": null
+    },
+    {
+      "function": "series_replace",
+      "tsb": null,
+      "pandas": {
+        "function": "series_replace",
+        "mean_ms": 2.7626269599988973,
+        "iterations": 50,
+        "total_ms": 138.13134799994486
       },
       "ratio": null
     },
@@ -241,7 +637,51 @@
         "total_ms": 92.12644899997713
       },
       "ratio": null
+    },
+    {
+      "function": "stack",
+      "tsb": null,
+      "pandas": {
+        "function": "stack",
+        "mean_ms": 0.40035767000006217,
+        "iterations": 100,
+        "total_ms": 40.03576700000622
+      },
+      "ratio": null
+    },
+    {
+      "function": "string_contains",
+      "tsb": null,
+      "pandas": {
+        "function": "string_contains",
+        "mean_ms": 11.66764360000002,
+        "iterations": 50,
+        "total_ms": 583.382180000001
+      },
+      "ratio": null
+    },
+    {
+      "function": "unstack",
+      "tsb": null,
+      "pandas": {
+        "function": "unstack",
+        "mean_ms": 0.8087003100001766,
+        "iterations": 100,
+        "total_ms": 80.87003100001766
+      },
+      "ratio": null
+    },
+    {
+      "function": "where",
+      "tsb": null,
+      "pandas": {
+        "function": "where",
+        "mean_ms": 0.5678684399998701,
+        "iterations": 100,
+        "total_ms": 56.78684399998701
+      },
+      "ratio": null
     }
   ],
-  "timestamp": "2026-04-12T15:46:00Z"
+  "timestamp": "2026-04-12T18:48:00Z"
 }
