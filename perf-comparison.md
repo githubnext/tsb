@@ -8,19 +8,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T21:12:20Z |
-| Iteration Count | 18 |
-| Best Metric | 83 |
+| Last Run | 2026-04-12T21:46:09Z |
+| Iteration Count | 19 |
+| Best Metric | 89 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | — (pending push) |
+| PR | #135 |
 | Steering Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -29,7 +29,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: — (new PR created iter 17)
+**Pull Request**: #135
 **Steering Issue**: #131
 
 ---
@@ -58,15 +58,22 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (for iter 19+):
-1. `series_str_center`, `series_str_lstrip`, `series_str_rstrip`, `series_str_rfind`
-2. `dataframe_info`, `series_str_extract`, `dataframe_transpose`, `dataframe_select_dtypes`
-3. `series_idxmax`, `series_idxmin`, `series_to_frame`, `expanding_sum`, `expanding_std`
-4. `series_str_capitalize`, `series_str_swapcase` already added in iter 18
+Next functions to benchmark (for iter 20+):
+1. `dataframe_info`, `series_str_extract`, `dataframe_select_dtypes`, `wide_to_long`
+2. `read_json`, `series_unique`, `series_sort_index`, `dataframe_sort_index`
+3. `series_copy`, `series_rename`, `dataframe_drop`, `series_eq/ne/lt/gt`
+4. `rolling_min`, `rolling_max`, `rolling_count`, `rolling_median`
+5. `expanding_min`, `expanding_max`, `expanding_count`, `expanding_median`
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 19 — 2026-04-12 21:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24317121738)
+- **Status**: ✅ Accepted
+- **Change**: Add 27 new benchmark pairs (89 total): str_upper, str_lower, str_len, str_strip, str_lstrip, str_rstrip, str_capitalize, str_swapcase, str_center, str_find, str_rfind, str_startswith, str_endswith, str_replace, str_split, str_count, str_pad, str_zfill, str_title, series_quantile, dataframe_assign, dataframe_select, groupby_transform, groupby_size, rolling_sum, expanding_sum, expanding_std
+- **Metric**: 89 (previous best: 83, delta: +6) | **Commit**: b6b8ee0
+- **Notes**: Created canonical branch from iter-14 (62 pairs); previous iters 15-18 had wrong branch names. Added 27 new pairs covering all str accessor ops and several non-str ops.
 
 ### Iteration 18 — 2026-04-12 21:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24316499673)
 - **Status**: ✅ Accepted
