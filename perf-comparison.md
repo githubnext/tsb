@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T16:15:00Z |
-| Iteration Count | 10 |
-| Best Metric | 30 |
+| Last Run | 2026-04-12T17:10:00Z |
+| Iteration Count | 11 |
+| Best Metric | 38 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #pending |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -47,16 +47,15 @@
 - The evaluation metric counts benchmark file pairs (matching `.ts` + `.py`), not whether they actually ran. File creation alone advances the metric.
 - Bun is not available in the gh-aw execution environment (GitHub blocks download). TypeScript benchmarks are written but cannot be executed during the iteration; they will run in CI.
 - Python benchmarks work fine with pandas installed via `pip3 install --break-system-packages pandas`.
-- The safeoutputs and github MCP servers are consistently unavailable (401 Bad Credentials). No GitHub operations (create PR, create issue, push branch) are possible. Only the branch commits and state file updates persist.
-- Each iteration must beat `best_metric` from the state file. Since previous iterations' branches often don't persist on remote, each iteration must start from main (1 existing pair) and add enough new pairs to beat the best_metric. Adding 10+ pairs per iteration is reliable.
+- The safeoutputs tools are now working (iteration 11 successfully created PR via safeoutputs). Previous failures were transient auth issues.
+- Each iteration must beat `best_metric` from the state file. Since previous iterations' branches often don't persist on remote, each iteration must start from main (1 existing pair) and add enough new pairs to beat the best_metric. Adding 8+ new pairs per iteration is reliable.
 - `playground/benchmarks.html` must handle null tsb values gracefully since tsb results require Bun and can't be produced in this environment. The JS checks for null before accessing `.mean_ms` and computes ratio only when both values are available.
-- On iteration 9, started from main (1 pair), added 21 pairs to reach metric=22. All 9 Future Directions consumed; updated with new targets.
-- `dataframe_apply` with row-wise lambda is slow in pandas (~47ms for 10k rows) — similar overhead expected for tsb. Reduced dataset to 10k rows for this benchmark.
-- `merge` (inner join on non-unique key) is slow in pandas (~60ms for 50k rows). This is a key benchmark to monitor tsb's hash-join implementation against.
-- On iteration 10, started from main (1 pair), added all 21 from iter 9 plus 8 new ones (melt, corr, cov, expanding_mean, series_map, dataframe_astype, cut, stack) for 30 total pairs. metric=30.
-- `series_map` with a 100k-element lookup dict is slow in pandas (~13.5ms). `dataframe_creation` with string column is notably slow (~50ms for 100k rows). `series_string_ops` takes ~16ms for 50k rows.
-- `corr` is faster than expected (~0.6ms for 10k rows, 5 cols). `cov` even faster (~0.17ms). `stack` is very fast (~0.34ms for 1k x 20).
-- `dataframe_astype` is fast in pandas (~0.68ms for 100k rows). `series_fillna` is similarly fast (~0.17ms). These are cheap scalar ops vectorized over arrays.
+- `dataframe_apply` with row-wise lambda is slow in pandas (~49ms for 10k rows). `merge` (inner join on non-unique key) is slow (~113ms for 50k rows). `read_csv` takes ~49ms for 100k rows.
+- `series_map` with 100k-element lookup dict is slow (~47ms). `dataframe_creation` with string column is slow (~70ms for 100k rows).
+- `corr` (~0.58ms for 10k rows), `cov` (~0.20ms) are fast. `stack` is very fast (~0.61ms for 1k x 20 cols).
+- New fast ops in iter 11: `between`=0.19ms, `diff`=0.30ms, `pct_change`=0.26ms, `nlargest`=0.81ms, `series_nunique`=0.86ms, `dataframe_head_tail`=0.07ms. These are all cheap vectorized operations.
+- `crosstab`=17.84ms and `pivot_table`=20ms are expensive — cross-tabulation involves groupby + counting + reshaping.
+- `qcut`=2.70ms, `cut`=2.52ms — quantile/bin ops are similar speed (~2.5ms for 100k elements into 10 bins).
 
 ---
 
@@ -69,19 +68,28 @@
 ## 🔭 Future Directions
 
 Good next functions to benchmark (roughly in priority order):
-1. `qcut` — quantile-based binning on Series
-2. `resample` — time-series resampling (requires DatetimeIndex)
-3. `crosstab` — cross-tabulation of two factors
-4. `diff` — element-wise difference (Series.diff)
-5. `pct_change` — percent change (Series.pct_change)
-6. `nlargest` / `nsmallest` — top-N elements
-7. `between` — boolean mask for range filter on Series
-8. `series_nunique` — count unique values
-9. `dataframe_head_tail` — df.head() / df.tail()
+1. `resample` — time-series resampling (requires DatetimeIndex)
+2. `rolling_std` / `rolling_var` — window std/variance on Series
+3. `rank` — Series.rank() with different tie-breaking methods
+4. `clip` — Series.clip(lower, upper) on 100k-element Series
+5. `abs` — element-wise absolute value on Series
+6. `where` — conditional replacement (Series.where)
+7. `isin` — membership test on Series
+8. `duplicated` — detect duplicate rows in DataFrame
+9. `drop_duplicates` — remove duplicate rows from DataFrame
+10. `interpolate` — linear interpolation on Series with NaN
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 11 — 2026-04-12 17:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24311492404)
+
+- **Status**: ✅ Accepted
+- **Change**: Add 37 new benchmark pairs: re-add all 29 from iter 10 + 8 new ones (`between`, `crosstab`, `diff`, `pct_change`, `nlargest`, `qcut`, `series_nunique`, `dataframe_head_tail`). Update `results.json` with Python timings.
+- **Metric**: 38 (previous best: 30, delta: +8)
+- **Commit**: c12f908
+- **Notes**: Started from main (1 pair). New Python timings: between=0.19ms, crosstab=17.84ms, diff=0.30ms, pct_change=0.26ms, nlargest=0.81ms, qcut=2.70ms, series_nunique=0.86ms, dataframe_head_tail=0.07ms. merge=113ms (50k row non-unique join). All 38 Python benchmarks ran successfully.
 
 ### Iteration 10 — 2026-04-12 16:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24310841712)
 
