@@ -4,8 +4,8 @@
  */
 import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
-import { DataFrame, Index, RangeIndex, Series } from "../../src/index.ts";
-import type { Label, Scalar } from "../../src/index.ts";
+import { DataFrame, RangeIndex, Series } from "../../src/index.ts";
+import type { Scalar } from "../../src/index.ts";
 import {
   countValid,
   countna,
@@ -31,7 +31,7 @@ function sv(series: Series<Scalar>): readonly Scalar[] {
 function mkdf(cols: ReadonlyMap<string, Series<Scalar>>): DataFrame {
   const first = cols.values().next().value;
   const n = first !== undefined ? first.values.length : 0;
-  return new DataFrame(cols, new RangeIndex(n) as Index<Label>);
+  return new DataFrame(cols, new RangeIndex(n));
 }
 
 // ─── isna — scalar ────────────────────────────────────────────────────────────
