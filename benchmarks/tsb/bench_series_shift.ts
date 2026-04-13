@@ -15,10 +15,11 @@ const s = new Series({ data });
 
 /** Shift a numeric Series by 1 position, filling with null. */
 function shiftSeries(series: Series<number>): Series<number | null> {
-  const vals = series.values as readonly number[];
+  const vals = series.toArray();
   const shifted: (number | null)[] = [null];
   for (let i = 0; i < vals.length - 1; i++) {
-    shifted.push(vals[i] as number);
+    const v = vals[i];
+    if (v !== undefined) shifted.push(v);
   }
   return new Series({ data: shifted });
 }
