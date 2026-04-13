@@ -68,6 +68,15 @@ function isDefaultRange(labels: readonly Label[]): boolean {
   return true;
 }
 
+/** Return type union for all {@link toDictOriented} orient values. */
+type ToDictResult =
+  | Record<string, Record<string, Scalar>>
+  | Record<string, Scalar[]>
+  | Record<string, Series<Scalar>>
+  | DictSplit
+  | DictTight
+  | Record<string, Scalar>[];
+
 // ─── toDictOriented ───────────────────────────────────────────────────────────
 
 /**
@@ -88,7 +97,7 @@ export function toDictOriented(df: DataFrame, orient: "index"): Record<string, R
 export function toDictOriented(
   df: DataFrame,
   orient: ToDictOrient = "dict",
-): Record<string, Record<string, Scalar>> | Record<string, Scalar[]> | Record<string, Series<Scalar>> | DictSplit | DictTight | Record<string, Scalar>[] {
+): ToDictResult {
   const colNames = [...df.columns.values];
   const rowLabels = [...(df.index.values as Label[])];
   const nRows = df.index.size;

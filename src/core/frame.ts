@@ -104,7 +104,7 @@ export class DataFrame {
    *                  `RangeIndex` derived from the first Series when omitted.
    */
   constructor(columns: ReadonlyMap<string, Series<Scalar>>, index?: Index<Label>) {
-    const firstSeries = [...columns.values()][0];
+    const firstSeries = columns.values().next().value as Series<Scalar> | undefined;
     const nRows = firstSeries !== undefined ? firstSeries.values.length : 0;
     this._columns = columns;
     this.index = index ?? defaultRowIndex(nRows);
