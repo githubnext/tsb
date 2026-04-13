@@ -8,12 +8,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-13T17:05:00Z |
-| Iteration Count | 39 |
-| Best Metric | 193 |
+| Last Run | 2026-04-13T17:26:00Z |
+| Iteration Count | 40 |
+| Best Metric | 207 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | — (new PR this run) |
+| PR | (new PR created this run) |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
 | Pause Reason | — |
@@ -29,7 +29,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: — (new PR pending)
+**Pull Request**: (new PR this run)
 **Steering Issue**: #131
 
 ---
@@ -70,18 +70,23 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (iter 40+):
-1. `strTranslate`, `strCharWidth`, `strByteLength` — remaining string standalone fns
-2. `RangeIndex` creation and operations
-3. `DataFrameGroupBy` apply with custom function
-4. More `ValueCounts` variants, `describe` with include/exclude options
-5. `dataFrameApplyMap` for element-wise transformations
+Next functions to benchmark (iter 41+):
+1. `describe` with include/exclude options, `quantile` multi-q
+2. More `ValueCounts` normalizations (with dropna, bins)
+3. `Series.sample()`, `DataFrame.sample()`
+4. `Series.autocorr()`, `Series.ewm().corr()`
+5. `DataFrame.melt()` with var_name/value_name options
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 39 — 2026-04-13 17:05 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24355737507)
+### Iteration 40 — 2026-04-13 17:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24357131354)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 185 new benchmark pairs from main (22-pair base) to reach 207 total. All iter-39 pairs plus new: Strings(translate/char_width/byte_length), RangeIndex(create/slice), GroupBy(apply), Series(between/diff/pct_change/map), DataFrame(diff/pct_change/replace).
+- **Metric**: 207 (previous best: 193, delta: +14) | **Commit**: 2169549
+- **Notes**: Branch created fresh from main. Python generator created all 185 new pairs in one pass. Future Directions from iter 39 addressed (strTranslate, strCharWidth, strByteLength, RangeIndex, GroupBy.apply).
 
 - **Status**: ✅ Accepted
 - **Change**: Added 171 new benchmark pairs from main (22-pair base) to reach 193 total. Series(std/var/median/quantile/corr/nunique/unique/isin/isna/notna/dropna/count/sum/mean/min/max/loc/iloc/eq/gt/lt), Series standalone(cumprod/cummax/cummin/abs/round/clip/rank/nlargest/nsmallest/where/mask/apply/transform), DataFrame(abs/round/clip/cumsum/cummax/cummin/cumprod/value_counts/where/transform/corr/cov/rank/nlargest/nsmallest/apply_map/apply_col/transform_rows), Rolling(sum/min/max/count/std/var/median/sem/skew/kurt/quantile/apply), Expanding(sum/mean/std/var/max/min/count/median), EWM(std/var), GroupBy(sum/count/std/min/max/size/first/last/transform/agg/nunique/var/median), Stats(zscore/normalize/cv/percentile_of_score/digitize/histogram/linspace/arange/series_digitize/pearson_corr/cut/qcut), Categorical(from_codes/sort_by_freq/freq_table/recode/to_ordinal/union/intersect/diff/cross_tab), Format(float/percent/scientific/thousands/currency/compact/series_to_string/df_to_string/apply_series_formatter), Strings(normalize/get_dummies/remove_prefix/remove_suffix/split_expand/partition/rpartition/multi_replace/indent/dedent/extract_all/extract_groups), Reshape(melt/stack/unstack/pivot/wide_to_long), IO(to_csv/to_json/read_json), DataFrame struct(insert_column/pop_column/reorder_columns/move_column/df_from_pairs), Dict(to_dict/from_dict), Datetime(dt_year/month/day/hour/dayofweek), Type checks(is_scalar/number/float/integer/string/missing/list_like), Attrs(get_set/update/copy/merge), Pipe/apply(pipe/df_apply_col/df_transform_rows), isna/notna standalone(isna/notna/fillna/dropna/countna), Merge(merge_left/outer), Concat(axis1), MultiIndex(create/from_tuples), GroupBy extra(agg/nunique/var/median).
