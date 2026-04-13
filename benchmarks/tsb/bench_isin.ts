@@ -11,7 +11,9 @@ const ITERATIONS = 50;
 const s = new Series({ data: Array.from({ length: SIZE }, (_, i) => i % 5000) });
 const testSet = Array.from({ length: 2500 }, (_, i) => i);
 
-for (let i = 0; i < WARMUP; i++) s.isin(testSet);
+for (let i = 0; i < WARMUP; i++) {
+  s.isin(testSet);
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

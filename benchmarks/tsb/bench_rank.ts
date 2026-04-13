@@ -10,7 +10,9 @@ const ITERATIONS = 50;
 
 const s = new Series({ data: Array.from({ length: SIZE }, (_, i) => (i % 1000) * 1.0) });
 
-for (let i = 0; i < WARMUP; i++) s.rank();
+for (let i = 0; i < WARMUP; i++) {
+  s.rank();
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

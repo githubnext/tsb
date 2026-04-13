@@ -13,7 +13,9 @@ const df = new DataFrame({
   b: Array.from({ length: SIZE }, (_, i) => i % 500),
 });
 
-for (let i = 0; i < WARMUP; i++) df.duplicated();
+for (let i = 0; i < WARMUP; i++) {
+  df.duplicated();
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

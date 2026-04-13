@@ -7,8 +7,8 @@ const ROWS = 100_000;
 const WARMUP = 5;
 const ITERATIONS = 20;
 
-const a = Float64Array.from({ length: ROWS }, (_, i) => (i % 10 === 0 ? NaN : i * 1.1));
-const b = Float64Array.from({ length: ROWS }, (_, i) => (i % 7 === 0 ? NaN : i * 2.2));
+const a = Float64Array.from({ length: ROWS }, (_, i) => (i % 10 === 0 ? Number.NaN : i * 1.1));
+const b = Float64Array.from({ length: ROWS }, (_, i) => (i % 7 === 0 ? Number.NaN : i * 2.2));
 const df = new DataFrame({ a, b });
 
 for (let i = 0; i < WARMUP; i++) {

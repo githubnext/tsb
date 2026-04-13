@@ -14,7 +14,9 @@ const df = new DataFrame({
   c: Array.from({ length: SIZE }, (_, i) => i * -0.5 + 100),
 });
 
-for (let i = 0; i < WARMUP; i++) df.cov();
+for (let i = 0; i < WARMUP; i++) {
+  df.cov();
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

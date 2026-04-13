@@ -2,7 +2,7 @@
  * Benchmark: qcut() — quantile-based binning.
  * Outputs JSON: {"function": "qcut", "mean_ms": ..., "iterations": ..., "total_ms": ...}
  */
-import { qcut, Series } from "../../src/index.ts";
+import { Series, qcut } from "../../src/index.ts";
 
 const SIZE = 100_000;
 const WARMUP = 5;
@@ -10,7 +10,9 @@ const ITERATIONS = 50;
 
 const s = new Series({ data: Array.from({ length: SIZE }, (_, i) => i * 1.0) });
 
-for (let i = 0; i < WARMUP; i++) qcut(s, { q: 10 });
+for (let i = 0; i < WARMUP; i++) {
+  qcut(s, { q: 10 });
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

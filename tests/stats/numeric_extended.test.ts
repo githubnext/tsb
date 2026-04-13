@@ -96,7 +96,7 @@ describe("histogram", () => {
   it("2-bin example", () => {
     const { counts } = histogram([1, 2, 3, 4, 5], { bins: 2 });
     expect(counts.length).toBe(2);
-    expect(counts[0]! + counts[1]!).toBe(5);
+    expect((counts[0] ?? 0) + (counts[1] ?? 0)).toBe(5);
   });
 
   it("right-most value lands in last bin", () => {
@@ -110,7 +110,7 @@ describe("histogram", () => {
     });
     expect(binEdges).toEqual([1, 3, 5]);
     expect(counts.length).toBe(2);
-    expect(counts[0]! + counts[1]!).toBe(5);
+    expect((counts[0] ?? 0) + (counts[1] ?? 0)).toBe(5);
   });
 
   it("density normalisation: integral ≈ 1", () => {
@@ -137,7 +137,7 @@ describe("histogram", () => {
   it("degenerate range (all same value): still produces bins", () => {
     const { counts, binEdges } = histogram([5, 5, 5]);
     expect(binEdges[0]).toBe(4.5);
-    expect(binEdges[binEdges.length - 1]).toBe(5.5);
+    expect(binEdges.at(-1)).toBe(5.5);
     expect(counts.reduce((a, b) => a + b, 0)).toBe(3);
   });
 
@@ -188,7 +188,7 @@ describe("linspace", () => {
 
   it("last element is exactly stop (no floating-point drift)", () => {
     const r = linspace(0, 10, 100);
-    expect(r[r.length - 1]).toBe(10);
+    expect(r.at(-1)).toBe(10);
   });
 });
 
@@ -464,7 +464,7 @@ describe("property: linspace endpoints", () => {
           const r = linspace(start, stop, num);
           expect(r.length).toBe(num);
           expect(r[0]).toBe(start);
-          expect(r[r.length - 1]).toBe(stop);
+          expect(r.at(-1)).toBe(stop);
         },
       ),
     );
@@ -498,8 +498,12 @@ describe("property: zscore mean is approximately 0", () => {
         }),
         (data) => {
           const s = new Series({ data: data as Scalar[] });
-          const z = vals(zscore(s)).filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
-          if (z.length < 2) return;
+          const z = vals(zscore(s)).filter(
+            (v): v is number => typeof v === "number" && !Number.isNaN(v),
+          );
+          if (z.length < 2) {
+            return;
+          }
           const mean = z.reduce((a, b) => a + b, 0) / z.length;
           expect(Math.abs(mean)).toBeLessThan(1e-8);
         },

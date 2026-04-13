@@ -15,7 +15,9 @@ for (let j = 1; j <= COLS; j++) {
 }
 const df = new DataFrame(cols);
 
-for (let i = 0; i < WARMUP; i++) df.stack();
+for (let i = 0; i < WARMUP; i++) {
+  df.stack();
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

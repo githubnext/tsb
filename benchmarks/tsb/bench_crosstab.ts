@@ -2,7 +2,7 @@
  * Benchmark: crosstab() — compute a cross-tabulation.
  * Outputs JSON: {"function": "crosstab", "mean_ms": ..., "iterations": ..., "total_ms": ...}
  */
-import { crosstab, Series } from "../../src/index.ts";
+import { Series, crosstab } from "../../src/index.ts";
 
 const SIZE = 50_000;
 const WARMUP = 5;
@@ -19,7 +19,9 @@ function rand(): number {
 const a = new Series({ data: Array.from({ length: SIZE }, () => choices_a[rand() % 3]) });
 const b = new Series({ data: Array.from({ length: SIZE }, () => choices_b[rand() % 4]) });
 
-for (let i = 0; i < WARMUP; i++) crosstab(a, b);
+for (let i = 0; i < WARMUP; i++) {
+  crosstab(a, b);
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

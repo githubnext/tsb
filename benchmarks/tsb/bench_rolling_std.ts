@@ -11,7 +11,9 @@ const ITERATIONS = 50;
 
 const s = new Series({ data: Array.from({ length: SIZE }, (_, i) => i * 1.1 + 0.5) });
 
-for (let i = 0; i < WARMUP; i++) s.rolling(WINDOW).std();
+for (let i = 0; i < WARMUP; i++) {
+  s.rolling(WINDOW).std();
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

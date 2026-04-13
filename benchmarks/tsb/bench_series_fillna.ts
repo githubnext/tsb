@@ -8,7 +8,7 @@ const WARMUP = 5;
 const ITERATIONS = 20;
 
 // Create series with every 5th value as NaN
-const data = Float64Array.from({ length: ROWS }, (_, i) => (i % 5 === 0 ? NaN : i * 1.1));
+const data = Float64Array.from({ length: ROWS }, (_, i) => (i % 5 === 0 ? Number.NaN : i * 1.1));
 const s = new Series(data);
 
 for (let i = 0; i < WARMUP; i++) {

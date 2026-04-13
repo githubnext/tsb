@@ -418,7 +418,9 @@ describe("catFromCodes — property tests", () => {
           const rebuilt = catFromCodes(codes, cats);
           const orig = s.toArray();
           const back = rebuilt.toArray();
-          if (orig.length !== back.length) return false;
+          if (orig.length !== back.length) {
+            return false;
+          }
           return orig.every((v, i) => v === back[i]);
         },
       ),
@@ -449,10 +451,7 @@ describe("catFromCodes — property tests", () => {
           const a = makeCat(va, [...new Set(va)]);
           const b = makeCat(vb, [...new Set(vb)]);
           const r = catUnionCategories(a, b);
-          return (
-            r.cat.nCategories >= a.cat.nCategories &&
-            r.cat.nCategories >= b.cat.nCategories
-          );
+          return r.cat.nCategories >= a.cat.nCategories && r.cat.nCategories >= b.cat.nCategories;
         },
       ),
     );

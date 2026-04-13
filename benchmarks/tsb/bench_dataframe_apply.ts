@@ -13,12 +13,12 @@ const b = Float64Array.from({ length: ROWS }, (_, i) => i * 2.0);
 const df = new DataFrame({ a, b });
 
 for (let i = 0; i < WARMUP; i++) {
-  df.apply((row) => (row["a"] as number) + (row["b"] as number), { axis: 1 });
+  df.apply((row) => (row.a as number) + (row.b as number), { axis: 1 });
 }
 
 const start = performance.now();
 for (let i = 0; i < ITERATIONS; i++) {
-  df.apply((row) => (row["a"] as number) + (row["b"] as number), { axis: 1 });
+  df.apply((row) => (row.a as number) + (row.b as number), { axis: 1 });
 }
 const total = performance.now() - start;
 

@@ -11,7 +11,9 @@ const ITERATIONS = 50;
 const s = new Series({ data: Array.from({ length: SIZE }, (_, i) => i % 1000) });
 const lookup = new Map<number, number>(Array.from({ length: 1000 }, (_, i) => [i, i * 2.5]));
 
-for (let i = 0; i < WARMUP; i++) s.map(lookup);
+for (let i = 0; i < WARMUP; i++) {
+  s.map(lookup);
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

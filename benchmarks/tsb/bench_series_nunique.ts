@@ -10,7 +10,9 @@ const ITERATIONS = 50;
 
 const s = new Series({ data: Array.from({ length: SIZE }, (_, i) => i % 1000) });
 
-for (let i = 0; i < WARMUP; i++) s.nunique();
+for (let i = 0; i < WARMUP; i++) {
+  s.nunique();
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

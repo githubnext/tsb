@@ -16,7 +16,9 @@ const index = Array.from(
 );
 const s = new Series({ data, index });
 
-for (let i = 0; i < WARMUP; i++) s.unstack();
+for (let i = 0; i < WARMUP; i++) {
+  s.unstack();
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {

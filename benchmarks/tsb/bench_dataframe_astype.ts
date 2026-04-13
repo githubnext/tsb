@@ -13,7 +13,9 @@ const df = new DataFrame({
   b: Array.from({ length: SIZE }, (_, i) => i),
 });
 
-for (let i = 0; i < WARMUP; i++) df.astype({ a: "float32", b: "int32" });
+for (let i = 0; i < WARMUP; i++) {
+  df.astype({ a: "float32", b: "int32" });
+}
 
 const times: number[] = [];
 for (let i = 0; i < ITERATIONS; i++) {
