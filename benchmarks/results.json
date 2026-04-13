@@ -23,6 +23,12 @@
       "ratio": null
     },
     {
+      "function": "dataframe_corr",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
+    },
+    {
       "function": "dataframe_creation",
       "tsb": null,
       "pandas": {
@@ -100,6 +106,12 @@
       "ratio": null
     },
     {
+      "function": "expanding_mean",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
+    },
+    {
       "function": "groupby_mean",
       "tsb": null,
       "pandas": {
@@ -111,6 +123,12 @@
       "ratio": null
     },
     {
+      "function": "melt",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
+    },
+    {
       "function": "merge",
       "tsb": null,
       "pandas": {
@@ -119,6 +137,18 @@
         "iterations": 10,
         "total_ms": 604.2320619999941
       },
+      "ratio": null
+    },
+    {
+      "function": "min_max_normalize",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
+    },
+    {
+      "function": "pearson_corr",
+      "tsb": null,
+      "pandas": null,
       "ratio": null
     },
     {
@@ -152,6 +182,18 @@
         "iterations": 10,
         "total_ms": 17.1982609999759
       },
+      "ratio": null
+    },
+    {
+      "function": "rolling_std",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
+    },
+    {
+      "function": "rolling_sum",
+      "tsb": null,
+      "pandas": null,
       "ratio": null
     },
     {
@@ -199,6 +241,18 @@
       "ratio": null
     },
     {
+      "function": "series_nlargest",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
+    },
+    {
+      "function": "series_rank",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
+    },
+    {
       "function": "series_shift",
       "tsb": null,
       "pandas": {
@@ -241,7 +295,19 @@
         "total_ms": 92.12644899997713
       },
       "ratio": null
+    },
+    {
+      "function": "to_json",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
+    },
+    {
+      "function": "zscore",
+      "tsb": null,
+      "pandas": null,
+      "ratio": null
     }
   ],
-  "timestamp": "2026-04-12T15:46:00Z"
+  "timestamp": "2026-04-13T20:33:20Z"
 }
