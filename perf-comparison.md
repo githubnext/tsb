@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-13T20:41:00Z |
-| Iteration Count | 45 |
-| Best Metric | 33 |
+| Last Run | 2026-04-13T20:53:07Z |
+| Iteration Count | 46 |
+| Best Metric | 34 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | (created this run) |
@@ -64,6 +64,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 46 — 2026-04-13 20:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24366249761)
+- **Status**: ✅ Accepted
+- **Change**: Added 12 benchmark pairs: zscore, min_max_normalize, melt, pearson_corr, dataframe_corr, rolling_std, rolling_sum, expanding_mean, to_csv, to_json, series_rank, series_nlargest
+- **Metric**: 34 (previous best: 33, delta: +1)
+- **Commit**: 4045075
+- **Notes**: Created fresh branch from main (baseline 22), added 12 new pairs to reach 34.
 
 ### Iteration 45 — 2026-04-13 20:41 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24365226689)
 - **Status**: ✅ Accepted
