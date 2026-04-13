@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T23:12:43Z |
-| Iteration Count | 22 |
-| Best Metric | 112 |
+| Last Run | 2026-04-12T23:46:45Z |
+| Iteration Count | 23 |
+| Best Metric | 127 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -58,16 +58,22 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (for iter 23+):
-1. `read_json`, `series_rename`, `dataframe_sort_index`, `series_idxmax`, `series_idxmin`
-2. `dataframe_select_dtypes`, `wide_to_long`, `dataframe_info`
-3. `series_le`, `series_ge`, `series_ne`, `series_var`
-4. `ewm_var`, `rolling_apply`, `expanding_apply`
-5. `dataframe_cumsum`, `dataframe_abs`, `dataframe_round`
+Next functions to benchmark (for iter 24+):
+1. `dataframe_select_dtypes`, `dataframe_info`, `dataframe_transpose`
+2. `ewm_var`, `rolling_apply`, `expanding_apply`, `expanding_median`
+3. `series_idxmax`, `series_idxmin` (check if they exist in tsb)
+4. `series_between`, `series_clip`, `series_pct_change`, `series_diff`, `series_rank`
+5. `concat_series`, `merge_outer`, `merge_left`, `dataframe_cov`
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 23 — 2026-04-12 23:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24319283909)
+- **Status**: ✅ Accepted
+- **Change**: Created canonical autoloop/perf-comparison from main (22 pairs), copied 40 from d8a2a branch, added 65 new: 19 str/, 16 series, 7 groupby, 5 rolling, 5 expanding, 1 ewm_std, 8 dataframe, 2 cumops, 2 misc
+- **Metric**: 127 (previous best: 112, delta: +15) | **Commit**: 9849fcc
+- **Notes**: First iteration with the canonical branch actually pushed. PR created this run.
 
 ### Iteration 22 — 2026-04-12 23:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24318679108)
 - **Status**: ✅ Accepted
@@ -75,43 +81,6 @@ Next functions to benchmark (for iter 23+):
 - **Metric**: 112 (previous best: 104, delta: +8) | **Commit**: af9ed55
 - **Notes**: Canonical branch created fresh; safe-output MCP tools unavailable so PR push pending next run.
 
-### Iteration 20 — 2026-04-12 22:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24317571938)
-- **Status**: ✅ Accepted
-- **Change**: Add 75 new benchmark pairs (97 total) starting from main (22 pairs): str_upper/lower/len/strip/lstrip/rstrip/capitalize/title/swapcase/contains/startswith/endswith/replace/split/count, series_abs/round/diff/pct_change/clip/rank/unique/copy/rename/quantile/cummax/cummin/eq/ne/lt/gt/between/nlargest/nsmallest/map/replace_val/sort_index, dataframe_assign/drop/select/set_index/corr/apply_col/sort_index/apply_row, groupby_sum/max/min/std/count/size/agg/transform, rolling_sum/std/var/min/max/count/median/apply, expanding_mean/sum/std/min/max/count, corr/cov/rank, melt/pivot/concat_series/dataframe_stack/series_explode
-- **Metric**: 97 (previous best: 89, delta: +8) | **Commit**: a96bc7c
-- **Notes**: Created canonical `autoloop/perf-comparison` branch fresh from main (had only 22 pairs after prior branches had incorrect names). Added 75 new pairs in a single iter.
-
-### Iteration 19 — 2026-04-12 21:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24317121738)
-- **Status**: ✅ Accepted
-- **Change**: Add 27 new benchmark pairs (89 total): str_upper, str_lower, str_len, str_strip, str_lstrip, str_rstrip, str_capitalize, str_swapcase, str_center, str_find, str_rfind, str_startswith, str_endswith, str_replace, str_split, str_count, str_pad, str_zfill, str_title, series_quantile, dataframe_assign, dataframe_select, groupby_transform, groupby_size, rolling_sum, expanding_sum, expanding_std
-- **Metric**: 89 (previous best: 83, delta: +6) | **Commit**: b6b8ee0
-- **Notes**: Created canonical branch from iter-14 (62 pairs); previous iters 15-18 had wrong branch names. Added 27 new pairs covering all str accessor ops and several non-str ops.
-
-### Iteration 18 — 2026-04-12 21:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24316499673)
-- **Status**: ✅ Accepted
-- **Change**: Add 21 new benchmark pairs (83 total): str_upper, str_lower, str_len, str_strip, str_split, str_count, str_pad, str_zfill, str_title, str_startswith, str_endswith, str_find, str_replace, str_swapcase, series_quantile, dataframe_assign, dataframe_select, groupby_transform, groupby_size, rolling_sum, rolling_apply
-- **Metric**: 83 (previous best: 74, delta: +9) | **Commit**: 3256538
-- **Notes**: Created canonical branch from iter-14 (62 pairs), added 21 new pairs. Branch state from iters 15-17 lost (not pushed); re-added most from those iters here.
-
-### Iteration 17 — 2026-04-12 20:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24316014460)
-- **Status**: ✅ Accepted
-- **Change**: Add 12 new benchmark pairs (74 total): series_str_upper, series_str_lower, series_str_len, series_str_strip, series_str_split, series_quantile, groupby_transform, groupby_size, dataframe_assign, dataframe_set_index, rolling_sum, rolling_apply
-- **Metric**: 74 (previous best: 73, delta: +1) | **Commit**: 1b79fc8
-- **Notes**: Created canonical `autoloop/perf-comparison` branch from iter-14 branch (62 pairs); iter 16 branch state lost. Added 12 new pairs.
-
-### Iteration 16 — 2026-04-12 20:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24315354129)
-- **Status**: ✅ Accepted
-- **Change**: Add 11 new benchmark pairs (73 total): series_quantile, groupby_transform, groupby_size, dataframe_assign, rolling_sum, rolling_apply, series_str_len, series_str_lower, series_str_strip, series_str_replace, series_str_split
-- **Metric**: 73 (previous best: 72, delta: +1) | **Commit**: f71ba91
-- **Notes**: Created canonical `autoloop/perf-comparison` branch from iter-14 branch (62 pairs). Previous iter 15 state was incorrectly recorded; actual branch had 62 pairs.
-
-### Iteration 15 — 2026-04-12 19:31 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24314349429)
-- **Status**: ✅ Accepted
-- **Change**: Add 50 new benchmark pairs (72 total): 40 recreated + 10 new (dataframe_info=2.9ms, shift_fill=1.1ms, series_quantile=2.4ms, dataframe_select_dtypes=0.07ms, series_str_upper=14.3ms, dataframe_set_index=0.22ms, series_to_frame=0.051ms, dataframe_transpose=0.07ms, series_idxmax=0.05ms, rolling_sum=1.7ms)
-- **Metric**: 72 (delta: +10) | **Commit**: afb8943
-
-### Iteration 14 — 2026-04-12 18:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24313773954)
-- **Status**: ✅ Accepted — Add 40 pairs (62 total): +resample=1.4ms, explode=1ms, pivot=0.9ms, combine_first=0.4ms, groupby_agg=11ms, apply_col=0.3ms, series_replace=2.8ms, string_contains=11.7ms
-- **Metric**: 62 (delta: +8) | **Commit**: 2460d7e
+### Iters 14–22 — 2026-04-12 18:48–23:12 UTC — ✅ (metrics 62→112): Built up from 22 base pairs. Iter 14: 62 pairs (resample, explode, pivot, groupby_agg, string_contains). Iters 15-21: various branches with wrong names; canonical branch never pushed (branches all had hash suffixes). Iter 22: 112 pairs on incorrectly-named branch that was never pushed to canonical name. Key functions added: str_upper/lower/len/strip/lstrip/rstrip/capitalize/title/swapcase/contains/startswith/endswith/replace/split/count/pad/zfill/find/rfind/center, series_quantile/cummax/cummin/abs/map, groupby_agg/transform/size, rolling_sum/std/var, expanding_mean/sum/std.
 
 ### Iters 1–13 — 2026-04-12 11:44–18:15 UTC — ✅ (metrics 2→54): Built benchmark suite. Iter 9: 22 pairs on main. Iters 10-13 added melt, corr, cov, expanding_mean, series_map, cut, stack, between, diff, pct_change, rank, clip, unstack, cummax, cummin, sample, mask, rolling_var, rolling_std, nsmallest, etc. Final: 54 pairs.
