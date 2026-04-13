@@ -209,8 +209,8 @@ export function strExtractGroups(
 /** Parse named capture group names from a regex source string. */
 function extractGroupNames(re: RegExp): string[] {
   // Match named capture groups: (?<name>...)
-  // Use matchAll for safety — it creates a fresh iterator with its own state.
-  const matches = re.source.matchAll(/\(\?<([^>]+)>/g);
+  // Limit group name length to 64 chars to avoid polynomial ReDoS.
+  const matches = re.source.matchAll(/\(\?<([^>]{1,64})>/g);
   const names: string[] = [];
   for (const m of matches) {
     const name = m[1];
