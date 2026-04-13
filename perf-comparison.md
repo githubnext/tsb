@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-13T09:11:57Z |
-| Iteration Count | 32 |
-| Best Metric | 126 |
+| Last Run | 2026-04-13T10:09:06Z |
+| Iteration Count | 33 |
+| Best Metric | 149 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | (pending creation) |
@@ -84,6 +84,12 @@ Next functions to benchmark (for iter 33+):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 33 — 2026-04-13 10:09 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24337710882)
+- **Status**: ✅ Accepted
+- **Change**: Recreated canonical branch from d8a2a7627f8ec4eb (62-pair base). Added 87 new pairs covering: series_where, insert_column, reorder_columns, to_dict, from_dict, wide_to_long, rolling_sem/skew/kurt/quantile/min/max/count/sum, expanding_sum/std/max/min/count/var, series_cumprod, dataframe_cumsum/cummax/cummin, value_counts, dataframe_value_counts, series_apply/transform, groupby_transform/sum/count/std/min/max/size, ewm_std/var, str_normalize/get_dummies/remove_prefix/remove_suffix/partition/rpartition/split_expand/indent/translate/multi_replace/dedent/extract_groups, digitize, histogram, linspace, arange, percentile_of_score, zscore, min_max_normalize, coefficient_of_variation, cat_from_codes/sort_by_freq/recode/freq_table/to_ordinal/union/intersect/diff, format_float/percent/scientific/thousands/engineering/currency/compact, series_to_string, dataframe_to_string, series_quantile, dataframe_corr/cov, dataframe_apply_map, to_csv, to_json, read_json, concat_axis1, merge_outer/left, isna_fillna, apply_series_formatter, apply_dataframe_formatter.
+- **Metric**: 149 (previous best: 126, delta: +23) | **Commit**: 353233e
+- **Notes**: Canonical branch again recreated from d8a2a7 (62 base) since no canonical `autoloop/perf-comparison` persisted on remote. Added 87 new pairs to reach 149. PR creation via create_pull_request safe-output tool.
 
 ### Iteration 32 — 2026-04-13 09:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24335269033)
 - **Status**: ✅ Accepted
