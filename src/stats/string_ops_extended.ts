@@ -19,7 +19,6 @@
 
 import { DataFrame, Index, RangeIndex, Series } from "../core/index.ts";
 import type { Label, Scalar } from "../types.ts";
-import type { StrInput } from "./string_ops.ts";
 
 // ─── internal helpers ─────────────────────────────────────────────────────────
 
@@ -67,7 +66,7 @@ export function strSplitExpand(
 ): DataFrame;
 /** @internal */
 export function strSplitExpand(
-  input: StrInput,
+  input: string | readonly Scalar[] | Series<Scalar>,
   sep: string | RegExp = " ",
   options: SplitExpandOptions = {},
 ): string[] | DataFrame {
@@ -225,7 +224,7 @@ export function strPartition(
 ): DataFrame;
 /** @internal */
 export function strPartition(
-  input: StrInput,
+  input: string | readonly Scalar[] | Series<Scalar>,
   sep: string,
 ): PartitionResult | DataFrame {
   function partitionOne(s: string | null): [string | null, string | null, string | null] {
@@ -263,7 +262,7 @@ export function strRPartition(
 ): DataFrame;
 /** @internal */
 export function strRPartition(
-  input: StrInput,
+  input: string | readonly Scalar[] | Series<Scalar>,
   sep: string,
 ): PartitionResult | DataFrame {
   function rpartitionOne(s: string | null): [string | null, string | null, string | null] {
@@ -309,7 +308,7 @@ export function strMultiReplace(
 ): Series<Scalar>;
 /** @internal */
 export function strMultiReplace(
-  input: StrInput,
+  input: string | readonly Scalar[] | Series<Scalar>,
   replacements: readonly ReplacePair[],
 ): string | Series<Scalar> {
   function applyAll(s: string | null): string | null {
@@ -354,7 +353,7 @@ export function strIndent(
 ): Series<Scalar>;
 /** @internal */
 export function strIndent(
-  input: StrInput,
+  input: string | readonly Scalar[] | Series<Scalar>,
   prefix: string,
   options: IndentOptions = {},
 ): string | Series<Scalar> {
@@ -399,7 +398,7 @@ export function strDedent(input: string): string;
 /** Remove common leading whitespace from each element of a Series or array. */
 export function strDedent(input: readonly Scalar[] | Series<Scalar>): Series<Scalar>;
 /** @internal */
-export function strDedent(input: StrInput): string | Series<Scalar> {
+export function strDedent(input: string | readonly Scalar[] | Series<Scalar>): string | Series<Scalar> {
   function dedentOne(s: string | null): string | null {
     if (s === null) return null;
     const lines = s.split("\n");
