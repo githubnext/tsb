@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-13T05:06:32Z |
-| Iteration Count | 28 |
-| Best Metric | 82 |
+| Last Run | 2026-04-13T06:17:40Z |
+| Iteration Count | 29 |
+| Best Metric | 95 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | (pending creation) |
@@ -55,6 +55,8 @@
 - `percentileOfScore` in tsb takes (arr, score) without scipy — pure JS implementation.
 - `s.dt.year()`, `s.dt.month()` are methods (not properties) in tsb DatetimeAccessor.
 - `coefficientOfVariation(s)` and `zscore(s)` are standalone functions exported from tsb.
+- `formatScientific(v, precision)` and `formatThousands(v, precision)` take (value, precision) args, not options objects.
+- Safe-output tools (create_pull_request, add_comment, etc.) are not available as function calls in this environment; must use noop to signal completion.
 
 ---
 
@@ -66,26 +68,31 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (for iter 29+):
-1. `rolling_corr`, `rolling_cov` — rolling correlation/covariance (if API exists — not found in rolling.ts yet)
+Next functions to benchmark (for iter 30+):
+1. `rolling_corr`, `rolling_cov` — rolling correlation/covariance (if API exists)
 2. `dataframe_apply_map` — element-wise apply on DataFrame
-3. `cat_to_ordinal` — catToOrdinal function
-4. `str_dedent` — strDedent function
-5. `str_remove_suffix` — strRemoveSuffix function
-6. `str_get_dummies` — strGetDummies function
-7. `str_extract_all` — strExtractAll function
-8. `reorder_columns`, `insert_column` — DataFrame column ops
-9. `to_dict`, `from_dict` — toDictOriented/fromDictOriented
-10. `series_transform` — Series.transform() if available
-11. `format_scientific` — formatScientific
-12. `format_thousands` — formatThousands
-13. `rolling_count` — Rolling.count()
-14. `rolling_min`, `rolling_max` — already in rolling.ts
-15. `expanding_count` — Expanding.count()
+3. `str_extract_all` — strExtractAll function
+4. `from_dict` — fromDictOriented
+5. `series_transform` — Series.transform() if available
+6. `str_indent` — strIndent function
+7. `str_translate` — strTranslate function
+8. `format_compact` — formatCompact function
+9. `format_engineering` — formatEngineering function
+10. `format_currency` — formatCurrency function
+11. `cat_union_categories` — catUnionCategories
+12. `cat_intersect_categories` — catIntersectCategories
+13. `cat_diff_categories` — catDiffCategories
+14. `series_to_string` — seriesToString, dataFrameToString
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 29 — 2026-04-13 06:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24328635038)
+- **Status**: ✅ Accepted
+- **Change**: Recreated canonical branch from d8a2a7 (62 base). Re-added 20 iter-28 pairs + 13 new: cat_to_ordinal, str_remove_suffix, str_get_dummies, str_dedent, reorder_columns, insert_column, to_dict, format_scientific, format_thousands, rolling_min, rolling_max, rolling_count, expanding_count.
+- **Metric**: 95 (previous best: 82, delta: +13) | **Commit**: d8b9ce8
+- **Notes**: Safe-output tools unavailable as function calls; PR creation done via safe-output JSON. 13 new functions added beyond iter-28 restoration.
 
 ### Iteration 28 — 2026-04-13 05:06 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24326604994)
 - **Status**: ✅ Accepted
