@@ -23,8 +23,8 @@
  * @module
  */
 
-import { Dtype } from "./dtype.ts";
 import type { DtypeName } from "../types.ts";
+import { Dtype } from "./dtype.ts";
 
 // ─── internal helper ──────────────────────────────────────────────────────────
 
@@ -95,13 +95,19 @@ export function isListLike(val: unknown): boolean {
     return false;
   }
   // Has Symbol.iterator and is not a plain number/boolean/bigint/symbol
-  if (typeof val === "number" || typeof val === "boolean" || typeof val === "bigint" || typeof val === "symbol") {
+  if (
+    typeof val === "number" ||
+    typeof val === "boolean" ||
+    typeof val === "bigint" ||
+    typeof val === "symbol"
+  ) {
     return false;
   }
   if (typeof val === "object" || typeof val === "function") {
     if (Symbol.iterator in (val as object)) {
       return true;
     }
+    // biome-ignore lint/complexity/useLiteralKeys: TS4111 index signature requires bracket access
     const len = (val as Record<string, unknown>)["length"];
     if (typeof len === "number" && len >= 0 && Number.isInteger(len)) {
       return true;
@@ -134,6 +140,7 @@ export function isArrayLike(val: unknown): boolean {
   if (typeof val !== "object" && typeof val !== "function") {
     return false;
   }
+  // biome-ignore lint/complexity/useLiteralKeys: TS4111 index signature requires bracket access
   const len = (val as Record<string, unknown>)["length"];
   return typeof len === "number" && len >= 0 && Number.isInteger(len);
 }
@@ -192,6 +199,7 @@ export function isIterator(val: unknown): boolean {
   if (typeof val !== "object" && typeof val !== "function") {
     return false;
   }
+  // biome-ignore lint/complexity/useLiteralKeys: TS4111 index signature requires bracket access
   return typeof (val as Record<string, unknown>)["next"] === "function";
 }
 

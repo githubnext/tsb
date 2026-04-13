@@ -7,7 +7,14 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["dist/**", "node_modules/**", "*.d.ts", "playground/**/*.js", "playground/serve.ts"]
+    "ignore": [
+      "dist/**",
+      "node_modules/**",
+      "*.d.ts",
+      "playground/**/*.js",
+      "playground/serve.ts",
+      "benchmarks/**"
+    ]
   },
   "formatter": {
     "enabled": true,

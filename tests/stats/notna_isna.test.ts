@@ -46,7 +46,7 @@ describe("isna — scalar", () => {
   });
 
   it("returns true for NaN", () => {
-    expect(isna(NaN)).toBe(true);
+    expect(isna(Number.NaN)).toBe(true);
   });
 
   it("returns false for 0", () => {
@@ -82,7 +82,7 @@ describe("isna — scalar", () => {
 
 describe("isna — array", () => {
   it("maps correctly over mixed array", () => {
-    expect(isna([1, null, NaN, "x", undefined])).toEqual([false, true, true, false, true]);
+    expect(isna([1, null, Number.NaN, "x", undefined])).toEqual([false, true, true, false, true]);
   });
 
   it("returns all-false for array with no missing values", () => {
@@ -102,7 +102,7 @@ describe("isna — array", () => {
 
 describe("isna — Series", () => {
   it("returns boolean Series with true at missing positions", () => {
-    const result = isna(s([1, null, NaN, 4]));
+    const result = isna(s([1, null, Number.NaN, 4]));
     expect(sv(result)).toEqual([false, true, true, false]);
   });
 
@@ -117,7 +117,7 @@ describe("isna — Series", () => {
   });
 
   it("handles all-missing series", () => {
-    const result = isna(s([null, undefined, NaN]));
+    const result = isna(s([null, undefined, Number.NaN]));
     expect(sv(result)).toEqual([true, true, true]);
   });
 });
@@ -129,7 +129,7 @@ describe("isna — DataFrame", () => {
     const df = mkdf(
       new Map([
         ["a", s([1, null, 3]) as Series<Scalar>],
-        ["b", s([NaN, 5, null]) as Series<Scalar>],
+        ["b", s([Number.NaN, 5, null]) as Series<Scalar>],
       ]),
     );
     const result = isna(df);
@@ -162,7 +162,7 @@ describe("notna — scalar", () => {
   });
 
   it("returns false for NaN", () => {
-    expect(notna(NaN)).toBe(false);
+    expect(notna(Number.NaN)).toBe(false);
   });
 
   it("returns true for 0", () => {
@@ -186,7 +186,7 @@ describe("notna — scalar", () => {
 
 describe("notna — array", () => {
   it("is the inverse of isna for arrays", () => {
-    const arr: Scalar[] = [1, null, NaN, "x", undefined];
+    const arr: Scalar[] = [1, null, Number.NaN, "x", undefined];
     const naFlags = isna(arr);
     const notnaFlags = notna(arr);
     for (let i = 0; i < arr.length; i++) {
@@ -199,7 +199,7 @@ describe("notna — array", () => {
 
 describe("notna — Series", () => {
   it("is the inverse of isna for Series", () => {
-    const series = s([1, null, NaN, 4]);
+    const series = s([1, null, Number.NaN, 4]);
     const naResult = isna(series);
     const notnaResult = notna(series);
     for (let i = 0; i < series.values.length; i++) {
@@ -214,7 +214,7 @@ describe("isnull / notnull — aliases", () => {
   it("isnull(scalar) matches isna(scalar)", () => {
     expect(isnull(null)).toBe(isna(null));
     expect(isnull(1)).toBe(isna(1));
-    expect(isnull(NaN)).toBe(isna(NaN));
+    expect(isnull(Number.NaN)).toBe(isna(Number.NaN));
   });
 
   it("notnull(scalar) matches notna(scalar)", () => {
@@ -223,7 +223,7 @@ describe("isnull / notnull — aliases", () => {
   });
 
   it("isnull(array) matches isna(array)", () => {
-    const arr: Scalar[] = [1, null, NaN];
+    const arr: Scalar[] = [1, null, Number.NaN];
     expect(isnull(arr)).toEqual(isna(arr));
   });
 
@@ -233,9 +233,7 @@ describe("isnull / notnull — aliases", () => {
   });
 
   it("isnull(DataFrame) matches isna(DataFrame) column values", () => {
-    const df = mkdf(
-      new Map([["a", s([null, 1, NaN]) as Series<Scalar>]]),
-    );
+    const df = mkdf(new Map([["a", s([null, 1, Number.NaN]) as Series<Scalar>]]));
     const r1 = isnull(df);
     const r2 = isna(df);
     expect(sv(r1.col("a"))).toEqual(sv(r2.col("a")));
@@ -254,7 +252,7 @@ describe("fillna — scalar", () => {
   });
 
   it("fills NaN with value", () => {
-    expect(fillna(NaN, { value: 99 })).toBe(99);
+    expect(fillna(Number.NaN, { value: 99 })).toBe(99);
   });
 
   it("leaves non-missing scalar unchanged", () => {
@@ -270,7 +268,7 @@ describe("fillna — scalar", () => {
 
 describe("fillna — array", () => {
   it("replaces null and NaN with value, keeps rest", () => {
-    expect(fillna([1, null, NaN, 3], { value: 0 })).toEqual([1, 0, 0, 3]);
+    expect(fillna([1, null, Number.NaN, 3], { value: 0 })).toEqual([1, 0, 0, 3]);
   });
 
   it("replaces undefined", () => {
@@ -290,7 +288,7 @@ describe("fillna — array", () => {
 
 describe("fillna — Series", () => {
   it("replaces missing values in a Series", () => {
-    const result = fillna(s([1, null, NaN, 4]), { value: 0 });
+    const result = fillna(s([1, null, Number.NaN, 4]), { value: 0 });
     expect(sv(result as Series<Scalar>)).toEqual([1, 0, 0, 4]);
   });
 
@@ -307,7 +305,7 @@ describe("fillna — DataFrame", () => {
     const df = mkdf(
       new Map([
         ["a", s([1, null]) as Series<Scalar>],
-        ["b", s([NaN, 5]) as Series<Scalar>],
+        ["b", s([Number.NaN, 5]) as Series<Scalar>],
       ]),
     );
     const result = fillna(df, { value: 0 }) as DataFrame;
@@ -320,11 +318,11 @@ describe("fillna — DataFrame", () => {
 
 describe("dropna — array", () => {
   it("removes null, undefined, and NaN", () => {
-    expect(dropna([1, null, NaN, 3, undefined, 5])).toEqual([1, 3, 5]);
+    expect(dropna([1, null, Number.NaN, 3, undefined, 5])).toEqual([1, 3, 5]);
   });
 
   it("returns empty array when all missing", () => {
-    expect(dropna([null, NaN, undefined])).toEqual([]);
+    expect(dropna([null, Number.NaN, undefined])).toEqual([]);
   });
 
   it("returns unchanged array when none missing", () => {
@@ -340,7 +338,7 @@ describe("dropna — array", () => {
 
 describe("dropna — Series", () => {
   it("drops missing values from a Series", () => {
-    const result = dropna(s([1, null, NaN, 4])) as Series<Scalar>;
+    const result = dropna(s([1, null, Number.NaN, 4])) as Series<Scalar>;
     expect(sv(result)).toEqual([1, 4]);
   });
 
@@ -350,7 +348,7 @@ describe("dropna — Series", () => {
   });
 
   it("returns empty Series when all missing", () => {
-    const result = dropna(s([null, NaN])) as Series<Scalar>;
+    const result = dropna(s([null, Number.NaN])) as Series<Scalar>;
     expect(sv(result)).toEqual([]);
   });
 });
@@ -465,7 +463,7 @@ describe("dropna — DataFrame axis=1", () => {
 
 describe("countna", () => {
   it("counts nulls, undefineds, NaNs in array", () => {
-    expect(countna([1, null, NaN, 3, undefined])).toBe(3);
+    expect(countna([1, null, Number.NaN, 3, undefined])).toBe(3);
   });
 
   it("returns 0 for complete array", () => {
@@ -473,7 +471,7 @@ describe("countna", () => {
   });
 
   it("counts missing values in Series", () => {
-    expect(countna(s([null, 1, NaN]))).toBe(2);
+    expect(countna(s([null, 1, Number.NaN]))).toBe(2);
   });
 
   it("returns 0 for empty array", () => {
@@ -483,7 +481,7 @@ describe("countna", () => {
 
 describe("countValid", () => {
   it("counts non-missing values in array", () => {
-    expect(countValid([1, null, NaN, 3, undefined])).toBe(2);
+    expect(countValid([1, null, Number.NaN, 3, undefined])).toBe(2);
   });
 
   it("returns full length for complete array", () => {
@@ -491,7 +489,7 @@ describe("countValid", () => {
   });
 
   it("counts valid values in Series", () => {
-    expect(countValid(s([null, 1, NaN, 4]))).toBe(2);
+    expect(countValid(s([null, 1, Number.NaN, 4]))).toBe(2);
   });
 });
 
@@ -526,7 +524,9 @@ describe("property: fillna removes all missing values (array)", () => {
     fc.assert(
       fc.property(scalarsArb, (arr) => {
         const filled = fillna(arr, { value: 0 });
-        return !filled.some((v) => v === null || v === undefined || (typeof v === "number" && Number.isNaN(v)));
+        return !filled.some(
+          (v) => v === null || v === undefined || (typeof v === "number" && Number.isNaN(v)),
+        );
       }),
     );
   });
