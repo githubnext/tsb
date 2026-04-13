@@ -302,7 +302,14 @@ export function linspace(start: number, stop: number, num = 50): number[] {
   const step = (stop - start) / (num - 1);
   const result: number[] = [];
   for (let i = 0; i < num; i++) {
-    result.push(i === num - 1 ? stop : start + i * step);
+    // Use exact values for first and last elements to avoid floating-point drift
+    if (i === 0) {
+      result.push(start);
+    } else if (i === num - 1) {
+      result.push(stop);
+    } else {
+      result.push(start + i * step);
+    }
   }
   return result;
 }

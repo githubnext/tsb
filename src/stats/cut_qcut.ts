@@ -240,6 +240,11 @@ export function cut(
     edges = Array.from({ length: bins + 1 }, (_, i) => mn + i * step);
     // Slightly extend the lower edge so the minimum value is included
     edges[0] = mn - step * 0.001;
+    // Guard against floating-point drift: ensure the last edge covers the max
+    const lastIdx = edges.length - 1;
+    if ((edges[lastIdx] as number) < mx) {
+      edges[lastIdx] = mx;
+    }
     edges = deduplicateEdges(edges, duplicates);
   } else {
     if (bins.length < 2) {
