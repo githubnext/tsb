@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-13T22:30:00Z |
-| Iteration Count | 49 |
-| Best Metric | 75 |
+| Last Run | 2026-04-13T22:47:41Z |
+| Iteration Count | 50 |
+| Best Metric | 90 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | (created this run) |
@@ -62,42 +62,34 @@
 
 ## 🔭 Future Directions
 
-- catFreqTable, formatFloat, formatPercent.
-- dataFrameFromPairs, seriesApply, pipe.
-- groupby agg variants (groupby_sum, groupby_count, etc.).
+- catCrossTab, catToOrdinal, catRecode benchmarks.
+- strGetDummies, strExtractAll, strNormalize string benchmarks.
+- dataFrameFromPairs, pipe function benchmarks.
+- groupby_std, groupby agg with custom functions.
+- formatScientific, formatEngineering, applySeriesFormatter benchmarks.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 49 — 2026-04-13 22:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24369734912)
+### Iteration 50 — 2026-04-13 22:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24370788523)
 
 - **Status**: ✅ Accepted
-- **Change**: Added 53 benchmark pairs (all 41 from iters 46–48 + 14 new): unstack, series_abs, dataframe_abs, pop_column, from_dict_oriented, reorder_columns, value_counts, dataframe_value_counts, rank_dataframe, cat_sort_by_freq, move_column, plus re-added all iter46 pairs (zscore, min_max_normalize, melt, pearson_corr, etc.) that were missing from iter48
-- **Metric**: 75 (previous best: 51, delta: +24)
-- **Commit**: d7fdb93
-- **Notes**: Included all iter46 pairs that were previously lost (12 pairs) plus all iter47-48 pairs (29) plus 14 new ones. Strategy: always include ALL known pairs when starting fresh from baseline 22.
+- **Change**: Added 68 benchmark pairs (all 53 from iters 46–49 + 15 new: cat_freq_table, format_float, format_percent, series_apply, series_transform, digitize, percentile_of_score, groupby_sum/count/min/max, isna_check, countna, nsmallest, linspace)
+- **Metric**: 90 (previous best: 75, delta: +15)
+- **Commit**: 07a1436
+- **Notes**: Baseline resets to 22 after each merge; recreated all 53 known pairs plus added 15 new groupby and utility function benchmarks.
+
+### Iteration 49 — 2026-04-13 22:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24369734912)
+- ✅ Accepted metric=75 | Added 53 pairs (all 41 from iters 46–48 + 12 new): unstack, series_abs, dataframe_abs, pop_column, from_dict_oriented, reorder_columns, value_counts, dataframe_value_counts, rank_dataframe, cat_sort_by_freq, move_column, dataframe_where
 
 ### Iteration 48 — 2026-04-13 21:56 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24368561859)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 29 benchmark pairs (15 from iter47 + 14 new): rolling_sem/skew/kurt/quantile, expanding_std/var/sum, ewm_var, series_where/mask, cat_from_codes, insert_column, to_dict_oriented, stack, dataframe_where, rolling_min/max/median/count/var, ewm_std, series_clip/cummax/cummin/cumprod/round, dataframe_cov, wide_to_long, cut, qcut
-- **Metric**: 51 (previous best: 37, delta: +14)
-- **Commit**: b21a0f1
-- **Notes**: Fresh branch from main (baseline 22), added all previously known pairs plus new ones from Future Directions. Comprehensive coverage of rolling ext, expanding, ewm, series ops, categorical, and DataFrame ops.
+- ✅ Accepted metric=51 | Added 29 pairs (15 from iter47 + 14 new): rolling_sem/skew/kurt/quantile, expanding_std/var/sum, ewm_var, series_where/mask, cat_from_codes, insert_column, to_dict_oriented, stack
 
 ### Iteration 47 — 2026-04-13 21:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24367359778)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 15 benchmark pairs: rolling_min, rolling_max, rolling_median, rolling_count, rolling_var, ewm_std, series_clip, series_cummax, series_cummin, series_cumprod, dataframe_cov, wide_to_long, cut, qcut, series_round
-- **Metric**: 37 (previous best: 34, delta: +3)
-- **Commit**: 5af6856
-- **Notes**: Created fresh branch from main (baseline 22), added 15 new pairs to reach 37. Confirmed seriesRound vs round naming.
+- ✅ Accepted metric=37 | Added 15 pairs: rolling_min/max/median/count/var, ewm_std, series_clip/cummax/cummin/cumprod, dataframe_cov, wide_to_long, cut, qcut, series_round
 
 ### Iteration 46 — 2026-04-13 20:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24366249761)
 - ✅ Accepted metric=34 | Added 12 pairs: zscore, min_max_normalize, melt, pearson_corr, dataframe_corr, rolling_std/sum, expanding_mean, to_csv, to_json, series_rank, series_nlargest
 
-### Iteration 45 — 2026-04-13 20:41 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24365226689)
-- ✅ Accepted metric=33 | Added 11 pairs; baseline reset to 22 after merge
-
-### Iters 25–44 — 2026-04-13 (all ✅ accepted, metrics 77→30): Progressively added rolling/ewm/groupby/stats/IO/reshape pairs; baseline resets to 22 after each merge; best-ever was 239 before reset
+### Iters 25–45 — 2026-04-13 (all ✅ accepted, metrics progressively increasing to 33): Baseline resets to 22 after each merge; best-ever was 239 before resets
