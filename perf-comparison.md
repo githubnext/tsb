@@ -8,12 +8,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-13T08:16:44Z |
-| Iteration Count | 31 |
-| Best Metric | 132 |
+| Last Run | 2026-04-13T09:11:57Z |
+| Iteration Count | 32 |
+| Best Metric | 126 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | (created this iteration) |
+| PR | (pending creation) |
 | Steering Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
@@ -29,7 +29,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: #(created this iteration)
+**Pull Request**: #(see PR for autoloop/perf-comparison)
 **Steering Issue**: #131
 
 ---
@@ -56,7 +56,8 @@
 - `s.dt.year()`, `s.dt.month()` are methods (not properties) in tsb DatetimeAccessor.
 - `coefficientOfVariation(s)` and `zscore(s)` are standalone functions exported from tsb.
 - `formatScientific(v, precision)` and `formatThousands(v, precision)` take (value, precision) args, not options objects.
-- Safe-output tools (create_pull_request, add_comment, etc.) ARE available as function calls (lesson from iter 30 was wrong).
+- Safe-output tools (create_pull_request, add_comment, etc.) are called via safe-output tool calls; sub-agent task tool can invoke them.
+- Best metric has been repeatedly inflated due to branches not persisting to remote. Current true remote best is 126 (iter 32). Always verify actual remote state at start of iteration.
 
 ---
 
@@ -68,23 +69,29 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (for iter 32+):
-1. `cut` / `qcut` — binning functions
-2. `series_mask` / `series_where` — conditional masking
-3. `dataframe_where` / `dataframe_mask` — DataFrame masking
-4. `dataframe_assign` — DataFrame.assign (add new columns)
-5. `dataframe_select` — DataFrame.select (select columns)
-6. `dataframe_head_tail` — DataFrame.head() / DataFrame.tail()
-7. `ewm_corr` / `ewm_cov` — EWM correlation/covariance
-8. `cat_crosstab` — categorical cross-tabulation
-9. `read_json` / `to_csv` / `to_json` — I/O functions
-10. `series_nsmallest` / `series_nlargest` — nsmallest/nlargest
+Next functions to benchmark (for iter 33+):
+1. `dataframe_where` / `dataframe_mask` — DataFrame masking (not yet benchmarked)
+2. `str_multi_replace` / `str_extract_groups` / `str_translate` / `str_dedent` — remaining string ops
+3. `cat_crosstab` / `cat_union` / `cat_intersect` — categorical set ops
+4. `format_engineering` / `format_compact` / `format_currency` / `apply_dataframe_formatter` — remaining format ops
+5. `from_dict` — dict deserialization
+6. `read_json` — JSON I/O reading
+7. `dataframe_cumprod` / `dataframe_cummax` / `dataframe_cummin` — more DataFrame cumulative ops
+8. `rolling_apply` / `rolling_min` / `rolling_max` / `rolling_count` — more rolling ops
+9. `expanding_count` / `expanding_var` — more expanding ops
+10. `seriesWhere` / `dataFrameWhere` (already added series_where; add dataframe_where variant)
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 31 — 2026-04-13 08:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24332969247)
+### Iteration 32 — 2026-04-13 09:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24335269033)
+- **Status**: ✅ Accepted
+- **Change**: Recreated canonical branch from d8a2a7627f8ec4eb (62-pair base). Added 64 new pairs: series_where/mask, insert_column, reorder_columns, to_dict, wide_to_long, rolling_sem/skew/kurt/quantile, series_cumprod, dataframe_cumsum, value_counts, dataframe_value_counts, series_apply/transform, isna_fillna, str_normalize/get_dummies/remove_prefix/remove_suffix/partition/rpartition/split_expand/indent, digitize, histogram, linspace_arange, percentile_of_score, zscore, min_max_normalize, coefficient_of_variation, cat_from_codes/sort_by_freq/recode/freq_table/to_ordinal, format_float/percent/scientific/thousands, series_to_string, dataframe_to_string, ewm_std/var, expanding_sum/std/max/min, groupby_transform/sum/count/std/min/max/size, concat_axis1, merge_outer/left, dataframe_corr/cov, dataframe_apply_map, to_csv, to_json.
+- **Metric**: 126 (previous actual remote best: 62, delta: +64) | **Commit**: 8dd8398
+- **Notes**: Canonical branch recreated from d8a2a7 (62-pair base). Prior best_metric of 132 was inflated (never persisted to remote). Corrected best to 126 actual pairs on remote. Branch pushed via create_pull_request safe-output tool.
+
+
 - **Status**: ✅ Accepted
 - **Change**: Recreated canonical branch from d8a2a7 (62 base). Added 70 new pairs: str_normalize/get_dummies/remove_prefix/remove_suffix/split_expand/partition/rpartition/extract_groups/translate/extract_all/multi_replace/indent, linspace/arange/digitize/histogram/percentile_of_score/zscore/min_max_normalize/coefficient_of_variation/quantile_stat, cat_from_codes/union/sort_by_freq/recode/freq_table/to_ordinal, format_float/percent/scientific/thousands/currency/engineering/compact/apply_series_formatter, value_counts/dataframe_value_counts/series_apply/series_transform/insert_column/reorder_columns/to_dict/wide_to_long/isna/series_cumprod/dataframe_cumsum/dataframe_corr/dataframe_cov/series_to_string/dataframe_to_string/dataframe_apply_map, rolling_sem/skew/kurt/quantile/apply, expanding_sum/std/max/min/count, ewm_std/var, groupby_transform/sum/count/std/size, concat_axis1/merge_outer.
 - **Metric**: 132 (previous best: 123, delta: +9) | **Commit**: b80da12
