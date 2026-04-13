@@ -8,12 +8,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-13T10:09:06Z |
-| Iteration Count | 33 |
+| Last Run | 2026-04-13T11:03:25Z |
+| Iteration Count | 34 |
 | Best Metric | 149 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | (pending creation) |
+| PR | #135 |
 | Steering Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
@@ -29,7 +29,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: #(see PR for autoloop/perf-comparison)
+**Pull Request**: #135
 **Steering Issue**: #131
 
 ---
@@ -69,21 +69,27 @@
 
 ## 🔭 Future Directions
 
-Next functions to benchmark (for iter 33+):
-1. `dataframe_where` / `dataframe_mask` — DataFrame masking (not yet benchmarked)
-2. `str_multi_replace` / `str_extract_groups` / `str_translate` / `str_dedent` — remaining string ops
-3. `cat_crosstab` / `cat_union` / `cat_intersect` — categorical set ops
-4. `format_engineering` / `format_compact` / `format_currency` / `apply_dataframe_formatter` — remaining format ops
-5. `from_dict` — dict deserialization
-6. `read_json` — JSON I/O reading
-7. `dataframe_cumprod` / `dataframe_cummax` / `dataframe_cummin` — more DataFrame cumulative ops
-8. `rolling_apply` / `rolling_min` / `rolling_max` / `rolling_count` — more rolling ops
-9. `expanding_count` / `expanding_var` — more expanding ops
-10. `seriesWhere` / `dataFrameWhere` (already added series_where; add dataframe_where variant)
+Next functions to benchmark (iter 35+):
+1. `dataframe_abs` / `dataframe_round` — `dataFrameAbs`, `dataFrameRound` (stats)
+2. `series_round` — `seriesRound` (stats)
+3. `pipe` — pipe operator benchmark
+4. `dataframe_transform` / `dataframe_transform_rows` — `dataFrameTransform`, `dataFrameTransformRows`
+5. `cat_diff` — `catDiffCategories`
+6. `cumsum`/`cummax`/`cummin` (standalone series functions) — already have `series_cumsum` but standalone `cumsum` etc.
+7. `nlargestDataFrame` / `nsmallestDataFrame` — larger df variants
+8. `rankDataFrame` — DataFrame ranking
+9. `dataFrameRolling` / `DataFrameExpanding` — DataFrame-level rolling/expanding ops
+10. `str_extract_all` / `str_partition` / `str_rpartition` / `str_dedent` / `str_indent` — remaining string standalone fns
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 34 — 2026-04-13 11:03 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24339884132)
+- **Status**: ✅ Accepted
+- **Change**: Recreated canonical branch from d8a2a7627f8ec4eb (62-pair base). Added 87 new pairs: series_where, dataframe_where/mask, insert_column, reorder_columns, to_dict, from_dict, wide_to_long, rolling_min/max/count/sum/sem/skew/kurt/quantile/apply, expanding_sum/std/max/min/count/var, series_cumprod, dataframe_cumsum/cummax/cummin/cumprod, value_counts, dataframe_value_counts, series_apply/transform, groupby_transform/sum/count/std/min/max/size, ewm_std/var, str_normalize/get_dummies/remove_prefix/remove_suffix/split_expand/translate/extract_groups, digitize, histogram, linspace, arange, percentile_of_score, zscore, min_max_normalize, coefficient_of_variation, cat_from_codes/sort_by_freq/recode/freq_table/to_ordinal/union/intersect/crosstab, format_float/percent/scientific/thousands/engineering/currency/compact, series_to_string, dataframe_to_string, series_quantile, dataframe_corr/cov, dataframe_apply_map, to_csv, to_json, read_json, concat_axis1, merge_outer/left, isna_fillna, apply_series_formatter, apply_dataframe_formatter, series_abs_stat.
+- **Metric**: 149 (previous remote best: 62, delta: +87) | **Commit**: 891b3a5
+- **Notes**: Branch built from d8a2a7 (62-pair base) + 87 new pairs via Python generator. PR #135 created via safe-output tool. Steering #131 and experiment log #130 updated.
 
 ### Iteration 33 — 2026-04-13 10:09 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24337710882)
 - **Status**: ✅ Accepted
