@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-13T20:53:07Z |
-| Iteration Count | 46 |
-| Best Metric | 34 |
+| Last Run | 2026-04-13T21:19:01Z |
+| Iteration Count | 47 |
+| Best Metric | 37 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | (created this run) |
@@ -52,18 +52,30 @@
 - MCP session must be initialized before calling tools; use session header for subsequent calls.
 - After merges reset the baseline to 22, each run creates autoloop/perf-comparison fresh from main.
 - Rolling variants (std, sum), expanding_mean, zscore, to_json, dataframe_corr, min_max_normalize, series_rank, series_nlargest, pearson_corr all available and benchmarkable.
+- round is exported as seriesRound (not round); clip exported as clip; cummax/cummin/cumprod all exported by name.
+- dataFrameCov, wideToLong, cut, qcut all confirmed exported; rolling has min/max/median/count/var methods.
 
 ---
 
 ## 🔭 Future Directions
 
-- More rolling variants (min, max, median, count), ewm (std, var), histogram, digitize, percentileOfScore.
-- coefficientOfVariation, catFromCodes, catSortByFreq, catFreqTable, formatFloat, seriesToString.
-- dataFrameCov, toJson (alternate orient), wide_to_long, stack/unstack operations.
+- ewm var, expanding std/var/sum, rolling sem/skew/kurt/quantile.
+- stack/unstack (small DataFrame), series abs, dataframe abs.
+- series where/mask, dataframe filter by column condition.
+- catFromCodes, catSortByFreq, catFreqTable, formatFloat.
+- insertColumn/popColumn, toDictOriented/fromDictOriented.
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 47 — 2026-04-13 21:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24367359778)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 15 benchmark pairs: rolling_min, rolling_max, rolling_median, rolling_count, rolling_var, ewm_std, series_clip, series_cummax, series_cummin, series_cumprod, dataframe_cov, wide_to_long, cut, qcut, series_round
+- **Metric**: 37 (previous best: 34, delta: +3)
+- **Commit**: 5af6856
+- **Notes**: Created fresh branch from main (baseline 22), added 15 new pairs to reach 37. Confirmed seriesRound vs round naming.
 
 ### Iteration 46 — 2026-04-13 20:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24366249761)
 - **Status**: ✅ Accepted
