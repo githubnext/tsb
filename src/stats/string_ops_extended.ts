@@ -17,7 +17,7 @@
  * @module
  */
 
-import { DataFrame, Index, RangeIndex, Series } from "../core/index.ts";
+import { DataFrame, type Index, RangeIndex, Series } from "../core/index.ts";
 import type { Label, Scalar } from "../types.ts";
 import type { StrInput } from "./string_ops.ts";
 
@@ -74,7 +74,9 @@ export function strSplitExpand(
   const maxSplits = options.n ?? -1;
 
   function splitOne(s: string | null): (string | null)[] {
-    if (s === null) return [null];
+    if (s === null) {
+      return [null];
+    }
     if (maxSplits < 0) {
       // unlimited splits
       const pat = sep instanceof RegExp ? sep : new RegExp(escapeRegex(sep));
@@ -91,11 +93,15 @@ export function strSplitExpand(
         sepLen = sep.length;
       } else {
         const m = rest.match(sep);
-        if (m === null || m.index === undefined) break;
+        if (m === null || m.index === undefined) {
+          break;
+        }
         idx = m.index;
         sepLen = m[0]?.length ?? 0;
       }
-      if (idx === -1) break;
+      if (idx === -1) {
+        break;
+      }
       parts.push(rest.slice(0, idx));
       rest = rest.slice(idx + sepLen);
     }
@@ -166,9 +172,13 @@ export function strExtractGroups(
 
   const rows: (string | null)[][] = vals.map((v) => {
     const s = toStrOrNull(v);
-    if (s === null) return [];
+    if (s === null) {
+      return [];
+    }
     const m = re.exec(s);
-    if (m === null) return [];
+    if (m === null) {
+      return [];
+    }
     return Array.from({ length: m.length - 1 }, (_, i) => {
       const captured = m[i + 1];
       return captured !== undefined ? captured : null;
@@ -200,10 +210,15 @@ export function strExtractGroups(
 function extractGroupNames(re: RegExp): string[] {
   const namedGroupPattern = /\(\?<([^>]+)>/g;
   const names: string[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = namedGroupPattern.exec(re.source)) !== null) {
+  for (;;) {
+    const m = namedGroupPattern.exec(re.source);
+    if (m === null) {
+      break;
+    }
     const name = m[1];
-    if (name !== undefined) names.push(name);
+    if (name !== undefined) {
+      names.push(name);
+    }
   }
   return names;
 }
@@ -219,19 +234,17 @@ export type PartitionResult = [string, string, string];
 /** Partition a scalar string at the first occurrence of `sep`. */
 export function strPartition(input: string, sep: string): PartitionResult;
 /** Partition each element and expand to a DataFrame with columns `"0"`, `"1"`, `"2"`. */
-export function strPartition(
-  input: readonly Scalar[] | Series<Scalar>,
-  sep: string,
-): DataFrame;
+export function strPartition(input: readonly Scalar[] | Series<Scalar>, sep: string): DataFrame;
 /** @internal */
-export function strPartition(
-  input: StrInput,
-  sep: string,
-): PartitionResult | DataFrame {
+export function strPartition(input: StrInput, sep: string): PartitionResult | DataFrame {
   function partitionOne(s: string | null): [string | null, string | null, string | null] {
-    if (s === null) return [null, null, null];
+    if (s === null) {
+      return [null, null, null];
+    }
     const idx = s.indexOf(sep);
-    if (idx === -1) return [s, "", ""];
+    if (idx === -1) {
+      return [s, "", ""];
+    }
     return [s.slice(0, idx), sep, s.slice(idx + sep.length)];
   }
 
@@ -257,19 +270,17 @@ export function strPartition(
 /** Partition a scalar string at the LAST occurrence of `sep`. */
 export function strRPartition(input: string, sep: string): PartitionResult;
 /** Partition each element at the last occurrence and expand to a DataFrame. */
-export function strRPartition(
-  input: readonly Scalar[] | Series<Scalar>,
-  sep: string,
-): DataFrame;
+export function strRPartition(input: readonly Scalar[] | Series<Scalar>, sep: string): DataFrame;
 /** @internal */
-export function strRPartition(
-  input: StrInput,
-  sep: string,
-): PartitionResult | DataFrame {
+export function strRPartition(input: StrInput, sep: string): PartitionResult | DataFrame {
   function rpartitionOne(s: string | null): [string | null, string | null, string | null] {
-    if (s === null) return [null, null, null];
+    if (s === null) {
+      return [null, null, null];
+    }
     const idx = s.lastIndexOf(sep);
-    if (idx === -1) return ["", "", s];
+    if (idx === -1) {
+      return ["", "", s];
+    }
     return [s.slice(0, idx), sep, s.slice(idx + sep.length)];
   }
 
@@ -313,10 +324,15 @@ export function strMultiReplace(
   replacements: readonly ReplacePair[],
 ): string | Series<Scalar> {
   function applyAll(s: string | null): string | null {
-    if (s === null) return null;
+    if (s === null) {
+      return null;
+    }
     let result = s;
     for (const { pat, repl } of replacements) {
-      result = result.replace(pat instanceof RegExp ? pat : new RegExp(escapeRegex(pat), "g"), repl);
+      result = result.replace(
+        pat instanceof RegExp ? pat : new RegExp(escapeRegex(pat), "g"),
+        repl,
+      );
     }
     return result;
   }
@@ -361,7 +377,9 @@ export function strIndent(
   const predicate = options.predicate ?? ((line: string) => line.trim().length > 0);
 
   function indentOne(s: string | null): string | null {
-    if (s === null) return null;
+    if (s === null) {
+      return null;
+    }
     return s
       .split("\n")
       .map((line) => (predicate(line) ? prefix + line : line))
@@ -401,19 +419,25 @@ export function strDedent(input: readonly Scalar[] | Series<Scalar>): Series<Sca
 /** @internal */
 export function strDedent(input: StrInput): string | Series<Scalar> {
   function dedentOne(s: string | null): string | null {
-    if (s === null) return null;
+    if (s === null) {
+      return null;
+    }
     const lines = s.split("\n");
     // find the minimum leading-whitespace length among non-whitespace-only lines
-    let minIndent = Infinity;
+    let minIndent = Number.POSITIVE_INFINITY;
     for (const line of lines) {
-      if (line.trim().length === 0) continue;
+      if (line.trim().length === 0) {
+        continue;
+      }
       const leading = line.length - line.trimStart().length;
-      if (leading < minIndent) minIndent = leading;
+      if (leading < minIndent) {
+        minIndent = leading;
+      }
     }
-    if (minIndent === Infinity || minIndent === 0) return s;
-    return lines
-      .map((line) => (line.trim().length === 0 ? "" : line.slice(minIndent)))
-      .join("\n");
+    if (minIndent === Number.POSITIVE_INFINITY || minIndent === 0) {
+      return s;
+    }
+    return lines.map((line) => (line.trim().length === 0 ? "" : line.slice(minIndent))).join("\n");
   }
 
   if (typeof input === "string") {

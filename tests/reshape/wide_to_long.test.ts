@@ -201,9 +201,7 @@ describe("property-based", () => {
           const long = wideToLong(df, "v", "id", "n");
           const outId = long.col("id").values;
           // Each original id value should appear nSuffix times
-          return idVals.every(
-            (v) => outId.filter((x) => x === v).length === nSuffix,
-          );
+          return idVals.every((v) => outId.filter((x) => x === v).length === nSuffix);
         },
       ),
     );

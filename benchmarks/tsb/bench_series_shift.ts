@@ -19,7 +19,9 @@ function shiftSeries(series: Series<number>): Series<number | null> {
   const shifted: (number | null)[] = [null];
   for (let i = 0; i < vals.length - 1; i++) {
     const v = vals[i];
-    if (v !== undefined) shifted.push(v);
+    if (v !== undefined) {
+      shifted.push(v);
+    }
   }
   return new Series({ data: shifted });
 }

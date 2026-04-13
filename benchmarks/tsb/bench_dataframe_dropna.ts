@@ -7,7 +7,9 @@ const ROWS = 100_000;
 const WARMUP = 5;
 const ITERATIONS = 20;
 
-const a: (number | null)[] = Array.from({ length: ROWS }, (_, i) => (i % 10 === 0 ? null : i * 1.1));
+const a: (number | null)[] = Array.from({ length: ROWS }, (_, i) =>
+  i % 10 === 0 ? null : i * 1.1,
+);
 const b: (number | null)[] = Array.from({ length: ROWS }, (_, i) => (i % 7 === 0 ? null : i * 2.2));
 const df = DataFrame.fromColumns({ a, b });
 

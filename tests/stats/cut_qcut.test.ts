@@ -208,12 +208,12 @@ describe("cut — property tests", () => {
           for (let i = 0; i < xs.length; i++) {
             const v = xs[i] as number;
             const c = codes[i];
-            if (!Number.isFinite(v)) {
-              expect(c).toBeNull();
-            } else {
+            if (Number.isFinite(v)) {
               expect(c).not.toBeNull();
               expect(c).toBeGreaterThanOrEqual(0);
               expect(c).toBeLessThan(labels.length);
+            } else {
+              expect(c).toBeNull();
             }
           }
         },
@@ -258,13 +258,13 @@ describe("qcut — property tests", () => {
             for (let i = 0; i < xs.length; i++) {
               const v = xs[i] as number;
               const c = codes[i];
-              if (!Number.isFinite(v)) {
-                expect(c).toBeNull();
-              } else {
+              if (Number.isFinite(v)) {
                 if (c !== null) {
                   expect(c).toBeGreaterThanOrEqual(0);
                   expect(c).toBeLessThan(labels.length);
                 }
+              } else {
+                expect(c).toBeNull();
               }
             }
           } catch {
