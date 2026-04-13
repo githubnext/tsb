@@ -8,12 +8,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-12T23:46:45Z |
-| Iteration Count | 23 |
-| Best Metric | 127 |
+| Last Run | 2026-04-13T00:31:00Z |
+| Iteration Count | 24 |
+| Best Metric | 130 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | — |
+| PR | (pending creation) |
 | Steering Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
@@ -47,6 +47,7 @@
 - Slow ops (100k rows): string_contains=11.7ms, series_str_upper=14.3ms, groupby_agg=11ms, dataframe_apply_row=47ms. Fast: series_abs=0.04ms, series_to_frame=0.051ms, series_idxmax=0.05ms.
 - Column-wise apply (0.32ms) is ~140x faster than row-wise (47ms). String ops all 11-16ms range.
 - push_repo_memory total file size limit ~12KB; keep state files compact.
+- `wideToLong` signature: `wideToLong(df, stubnames, i_cols, j_colname, options)` — id columns are 3rd param, new variable column name is 4th param.
 
 ---
 
@@ -68,6 +69,11 @@ Next functions to benchmark (for iter 24+):
 ---
 
 ## 📊 Iteration History
+
+### Iteration 24 — 2026-04-13 00:31 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24320197177)
+- **Status**: ✅ Accepted
+- **Change**: Created canonical `autoloop/perf-comparison` from main (62 base pairs from d8a2a branch), added 68 new pairs: 20 str.*, 10 series ops, 6 groupby, 5 rolling, 7 expanding, 2 ewm, 9 dataframe, 9 stats functions
+- **Metric**: 130 (previous best: 127, delta: +3) | **Commit**: 5fee980
 
 ### Iteration 23 — 2026-04-12 23:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24319283909)
 - **Status**: ✅ Accepted
