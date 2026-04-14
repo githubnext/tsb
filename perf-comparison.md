@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T11:55:00Z |
-| Iteration Count | 64 |
-| Best Metric | 209 |
+| Last Run | 2026-04-14T12:24:14Z |
+| Iteration Count | 65 |
+| Best Metric | 223 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -64,6 +64,9 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 65 — 2026-04-14 12:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24398649588)
+- ✅ Accepted metric=223 (+14 vs prev best 209) | Started from 3c596789 branch (172 pairs) + merge main (186) + 37 new: series_median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile, dataframe_set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var, concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median | Commit: 8d94ea3
 
 ### Iteration 64 — 2026-04-14 11:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24397234972)
 - ✅ Accepted metric=209 (+2 vs prev best 207) | Started from 3c596789 branch (172 pairs) + 37 new: series_median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile, dataframe_set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var, concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median | Commit: 61a8d80
