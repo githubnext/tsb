@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T18:27:40Z |
-| Iteration Count | 74 |
-| Best Metric | 259 |
+| Last Run | 2026-04-14T18:53:38Z |
+| Iteration Count | 75 |
+| Best Metric | 265 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -76,11 +76,15 @@
 - series_groupby_transform, index_contains, dataframe_apply_axis1, index_sort, dataframe_rolling_apply — ✅ Done (iter 72)
 - index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group — ✅ Done (iter 73/74)
 - str_strip, str_pad, dt_floor_ceil — ✅ Done (iter 74)
-- Remaining: Index.delete/drop/equals/identical/argmin/argmax/argsort/isna/dropna, str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_is_month_start/end, dt_quarter
+- str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month — ✅ Done (iter 75)
+- Remaining: Index.delete/drop/equals/identical/argmin/argmax/argsort/isna/dropna, str_fullmatch, dt_is_year_start/end, dt_is_leap_year, dt_days_in_month
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 75 — 2026-04-14 18:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24417123491)
+- ✅ Accepted metric=265 (+6 vs prev best 259) | Branched from 3c596789 (259 after merge main) + 6 new: str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month | Commit: d95af07
 
 ### Iteration 74 — 2026-04-14 18:27 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24415974514)
 - ✅ Accepted metric=259 (+3 vs prev best 256) | Branched from 3c596789 (251 after merge main) + 8 new: countna, series_str_replace, index_slice_take, index_drop_duplicates, groupby_get_group, str_strip, str_pad, dt_floor_ceil | Commit: 18927bf
