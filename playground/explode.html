@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — explode</title>
+  <script src="playground-runtime.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1   { font-size: 2rem; margin-bottom: .25rem; }
+    .subtitle { color: #555; margin-bottom: 2rem; }
+    section  { margin-bottom: 2.5rem; }
+    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
+    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
+    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
+    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
+    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
+    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
+    nav a { color: #0366d6; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<nav><a href="index.html">← tsb playground</a></nav>
+<h1>explode</h1>
+<p class="subtitle">Transform list-like elements into individual rows — mirrors <code>pandas.Series.explode()</code> and <code>pandas.DataFrame.explode()</code>.</p>
+
+<section>
+  <h2>1 — Series.explode: lists to rows</h2>
+  <p><code>explodeSeries(s)</code> expands each array element into its own row. The original index label is repeated for each item. Null / empty arrays each produce a single <code>null</code> row.</p>
+  <pre><code id="ex1-code">import { Series, explodeSeries } from "tsb";
+
+const s = new Series({
+  data: [[1, 2, 3], "foo", [], [3, 4]],
+  name: "x",
+});
+
+const out = explodeSeries(s);
+console.log([...out.values]);  // [1, 2, 3, "foo", null, 3, 4]
+console.log([...out.index.values]); // [0, 0, 0, 1, 2, 3, 3]
+</code></pre>
+  <div class="output" id="ex1-output">Loading…</div>
+</section>
+
+<section>
+  <h2>2 — Series.explode with ignoreIndex</h2>
+  <p>Pass <code>ignoreIndex: true</code> to replace the resulting index with a fresh <code>RangeIndex</code> instead of repeating original labels.</p>
+  <pre><code id="ex2-code">import { Series, explodeSeries } from "tsb";
+
+const s = new Series({
+  data: [[10, 20], [30]],
+  index: ["row-A", "row-B"],
+});
+
+// Default: repeats original labels
+const repeated = explodeSeries(s);
+console.log([...repeated.index.values]); // ["row-A", "row-A", "row-B"]
+
+// With ignoreIndex: fresh RangeIndex
+const fresh = explodeSeries(s, { ignoreIndex: true });
+console.log([...fresh.index.values]); // [0, 1, 2]
+</code></pre>
+  <div class="output" id="ex2-output">Loading…</div>
+</section>
+
+<section>
+  <h2>3 — DataFrame.explode: expand a list column</h2>
+  <p><code>explodeDataFrame(df, "col")</code> explodes a single column; all other columns repeat their value for every generated row.</p>
+  <pre><code id="ex3-code">import { DataFrame, explodeDataFrame } from "tsb";
+
+const df = DataFrame.fromColumns({
+  name:   ["Alice",   "Bob"  ],
+  scores: [[95, 87],  [72, 65, 88]],
+});
+
+const out = explodeDataFrame(df, "scores");
+console.log([...out.col("name").values]);   // ["Alice","Alice","Bob","Bob","Bob"]
+console.log([...out.col("scores").values]); // [95, 87, 72, 65, 88]
+console.log([...out.index.values]);         // [0, 0, 1, 1, 1]
+</code></pre>
+  <div class="output" id="ex3-output">Loading…</div>
+</section>
+
+<section>
+  <h2>4 — Handling null and empty lists</h2>
+  <p>Null values remain as a single <code>null</code> row. An empty array also becomes a single <code>null</code> row (matching pandas' NaN behaviour).</p>
+  <pre><code id="ex4-code">import { DataFrame, explodeDataFrame } from "tsb";
+
+const df = DataFrame.fromColumns({
+  id:   [1,      2,   3       ],
+  tags: [["a", "b"], null, []],
+});
+
+const out = explodeDataFrame(df, "tags");
+console.log([...out.col("id").values]);   // [1, 1, 2, 3]
+console.log([...out.col("tags").values]); // ["a", "b", null, null]
+</code></pre>
+  <div class="output" id="ex4-output">Loading…</div>
+</section>
+
+<section>
+  <h2>5 — Multi-column simultaneous explode</h2>
+  <p>Pass an array of column names to explode multiple columns at the same time. Each row's lists must have the same length across the exploded columns.</p>
+  <pre><code id="ex5-code">import { DataFrame, explodeDataFrame } from "tsb";
+
+const df = DataFrame.fromColumns({
+  key:    ["x",         "y"        ],
+  left:   [[1, 2],      [3, 4]     ],
+  right:  [["a", "b"],  ["c", "d"] ],
+});
+
+const out = explodeDataFrame(df, ["left", "right"]);
+console.log([...out.col("key").values]);   // ["x","x","y","y"]
+console.log([...out.col("left").values]);  // [1, 2, 3, 4]
+console.log([...out.col("right").values]); // ["a","b","c","d"]
+</code></pre>
+  <div class="output" id="ex5-output">Loading…</div>
+</section>
+
+<section>
+  <h2>6 — ignoreIndex on DataFrame.explode</h2>
+  <pre><code id="ex6-code">import { DataFrame, explodeDataFrame } from "tsb";
+
+const df = DataFrame.fromColumns({
+  v: [[10, 20], [30, 40]],
+});
+
+const out = explodeDataFrame(df, "v", { ignoreIndex: true });
+console.log([...out.index.values]); // [0, 1, 2, 3]
+</code></pre>
+  <div class="output" id="ex6-output">Loading…</div>
+</section>
+
+<div class="note">
+  <strong>Pandas parity:</strong> <code>explodeSeries</code> mirrors <code>pandas.Series.explode()</code>; <code>explodeDataFrame</code> mirrors <code>pandas.DataFrame.explode()</code>. Scalar values are passed through unchanged; empty arrays produce a single <code>null</code> (NaN in pandas). The <code>ignoreIndex</code> option corresponds to pandas' <code>ignore_index</code> parameter.
+</div>
+
+</body>
+</html>

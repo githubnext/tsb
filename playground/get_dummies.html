@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb — get_dummies: one-hot encoding</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; padding: 2rem; }
+      h1 { color: #58a6ff; font-size: 1.8rem; margin-bottom: .5rem; }
+      h2 { color: #79c0ff; font-size: 1.2rem; margin: 2rem 0 .75rem; }
+      p  { color: #8b949e; margin-bottom: 1rem; max-width: 800px; }
+      code { background: #161b22; padding: .1rem .4rem; border-radius: 4px; font-family: monospace; font-size: .9em; color: #a5d6ff; }
+      .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 900px; }
+      textarea { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-family: monospace; font-size: .85rem; padding: .75rem; resize: vertical; min-height: 160px; }
+      button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: .5rem 1.25rem; cursor: pointer; font-size: .9rem; margin-top: .75rem; }
+      button:hover { background: #2ea043; }
+      pre { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .82rem; margin-top: .75rem; white-space: pre-wrap; word-break: break-all; min-height: 60px; }
+      .tag { display: inline-block; background: #388bfd26; color: #58a6ff; border: 1px solid #388bfd; border-radius: 12px; padding: .1rem .6rem; font-size: .75rem; margin-left: .5rem; vertical-align: middle; }
+    </style>
+  </head>
+  <body>
+    <h1>get_dummies <span class="tag">tsb</span></h1>
+    <p>
+      One-hot / dummy encoding — the TypeScript port of
+      <code>pandas.get_dummies()</code>.
+      Convert categorical variables into binary indicator columns,
+      one column per unique value.
+    </p>
+    <p>
+      Common in machine learning pipelines before fitting linear models.
+      Supports <code>prefix</code>, <code>prefixSep</code>,
+      <code>dummyNa</code>, and <code>dropFirst</code> options.
+    </p>
+
+    <h2>1. Series → indicator DataFrame</h2>
+    <div class="card">
+      <p>Each unique value becomes a binary column (1 = present, 0 = absent).</p>
+      <textarea id="series-code">
+const s = new tsb.Series({ data: ["cat", "dog", "cat", "bird", "dog"] });
+const df = tsb.getDummies(s);
+
+console.log("Columns:", df.columns.values);
+// ["cat", "dog", "bird"]
+
+for (const c of df.columns.values) {
+  console.log(c + ":", df.col(c).values);
+}
+      </textarea>
+      <button onclick="run('series')">▶ Run</button>
+      <pre id="series-out">Click ▶ Run to execute</pre>
+    </div>
+
+    <h2>2. DataFrame — encode categorical columns</h2>
+    <div class="card">
+      <p>
+        <code>dataFrameGetDummies</code> auto-detects string columns and
+        replaces them with indicator columns. Numeric columns are kept as-is.
+      </p>
+      <textarea id="df-code">
+const df = tsb.DataFrame.fromColumns({
+  color:  ["red", "blue", "red", "green"],
+  size:   ["S", "M", "L", "M"],
+  weight: [1.2, 0.8, 1.5, 0.9],
+});
+
+const encoded = tsb.dataFrameGetDummies(df);
+console.log("Columns:", encoded.columns.values);
+console.log("weight (unchanged):", encoded.col("weight").values);
+console.log("color_red:", encoded.col("color_red").values);
+console.log("size_M:", encoded.col("size_M").values);
+      </textarea>
+      <button onclick="run('df')">▶ Run</button>
+      <pre id="df-out">Click ▶ Run to execute</pre>
+    </div>
+
+    <h2>3. Options: prefix, dummyNa, dropFirst</h2>
+    <div class="card">
+      <p>Fine-tune the encoding with optional parameters.</p>
+      <textarea id="opts-code">
+const s = new tsb.Series({ data: ["a", "b", null, "a"] });
+
+// Custom prefix
+const prefixed = tsb.getDummies(s, { prefix: "col" });
+console.log("Prefixed columns:", prefixed.columns.values);
+// ["col_a", "col_b"]
+
+// Include NaN indicator column
+const withNa = tsb.getDummies(s, { dummyNa: true });
+console.log("With NaN columns:", withNa.columns.values);
+console.log("NaN column:", withNa.col("NaN").values);
+// [0, 0, 1, 0]
+
+// Drop first category (avoid dummy variable trap)
+const dropped = tsb.getDummies(new tsb.Series({ data: ["x", "y", "z", "x"] }), { dropFirst: true });
+console.log("After dropFirst:", dropped.columns.values);
+// ["y", "z"]  — "x" was first, dropped
+      </textarea>
+      <button onclick="run('opts')">▶ Run</button>
+      <pre id="opts-out">Click ▶ Run to execute</pre>
+    </div>
+
+    <h2>4. Encode specific columns only</h2>
+    <div class="card">
+      <p>Pass <code>columns</code> to control which DataFrame columns are encoded.</p>
+      <textarea id="select-code">
+const df = tsb.DataFrame.fromColumns({
+  country: ["US", "UK", "US", "DE"],
+  city:    ["NY", "LDN", "LA", "BER"],
+  pop:     [8, 9, 4, 4],   // millions
+});
+
+// Only encode 'country'; keep 'city' and 'pop' as-is
+const encoded = tsb.dataFrameGetDummies(df, { columns: ["country"] });
+console.log("All columns:", encoded.columns.values);
+console.log("city kept:", encoded.col("city").values);
+console.log("country_US:", encoded.col("country_US").values);
+      </textarea>
+      <button onclick="run('select')">▶ Run</button>
+      <pre id="select-out">Click ▶ Run to execute</pre>
+    </div>
+
+    <script type="module">
+      // Load tsb from the built bundle (served by Pages or local dev server)
+      let tsb;
+      try {
+        tsb = await import("../dist/index.js");
+      } catch {
+        document.querySelectorAll("pre").forEach(el => {
+          el.textContent = "⚠️  Bundle not found. Run: bun build ./src/index.ts --outdir ./dist --target browser";
+        });
+      }
+      window.tsb = tsb;
+
+      window.run = function (id) {
+        const code = document.getElementById(id + "-code").value;
+        const out = document.getElementById(id + "-out");
+        const lines = [];
+        const origLog = console.log;
+        console.log = (...args) => lines.push(args.map(String).join(" "));
+        try {
+          // eslint-disable-next-line no-new-func
+          new Function("tsb", code)(tsb);
+          out.textContent = lines.join("\n") || "(no output)";
+        } catch (e) {
+          out.textContent = "Error: " + e.message;
+        } finally {
+          console.log = origLog;
+        }
+      };
+    </script>
+  </body>
+</html>

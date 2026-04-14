@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — sample</title>
+  <script src="playground-runtime.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1   { font-size: 2rem; margin-bottom: .25rem; }
+    .subtitle { color: #555; margin-bottom: 2rem; }
+    section  { margin-bottom: 2.5rem; }
+    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
+    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
+    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
+    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
+    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
+    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
+    nav a { color: #0366d6; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<nav><a href="index.html">← tsb playground</a></nav>
+<h1>sample</h1>
+<p class="subtitle">Random sampling from Series and DataFrame — mirrors <code>pandas.Series.sample()</code> and <code>pandas.DataFrame.sample()</code>.</p>
+
+<section>
+  <h2>1 — Basic Series sampling</h2>
+  <p><code>sampleSeries(s, { n })</code> returns a new Series with <em>n</em> randomly chosen elements. Pass <code>randomState</code> for reproducible results.</p>
+  <pre><code id="ex1-code">import { Series, sampleSeries } from "tsb";
+
+const s = new Series({
+  data: [10, 20, 30, 40, 50],
+  index: ["a", "b", "c", "d", "e"],
+});
+
+// Sample 3 elements — same result every time with randomState
+const r = sampleSeries(s, { n: 3, randomState: 42 });
+console.log([...r.values]);         // 3 values from [10,20,30,40,50]
+console.log([...r.index.values]);   // corresponding labels
+</code></pre>
+  <div class="output" id="ex1-output">Loading…</div>
+</section>
+
+<section>
+  <h2>2 — Sampling a fraction</h2>
+  <p>Instead of a fixed count, use <code>frac</code> to specify a proportion of the data (0–1).</p>
+  <pre><code id="ex2-code">import { Series, sampleSeries } from "tsb";
+
+const s = new Series({ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
+
+// Sample 40% of the data
+const r = sampleSeries(s, { frac: 0.4, randomState: 0 });
+console.log(r.size);        // 4  (= round(0.4 × 10))
+console.log([...r.values]); // 4 random values
+</code></pre>
+  <div class="output" id="ex2-output">Loading…</div>
+</section>
+
+<section>
+  <h2>3 — Sampling with replacement</h2>
+  <p>Set <code>replace: true</code> to allow the same element to be selected more than once. This also lets you request more items than the Series contains.</p>
+  <pre><code id="ex3-code">import { Series, sampleSeries } from "tsb";
+
+const s = new Series({ data: [1, 2, 3] });
+
+// 6 samples from a 3-element Series — duplicates allowed
+const r = sampleSeries(s, { n: 6, replace: true, randomState: 7 });
+console.log(r.size);        // 6
+console.log([...r.values]); // may contain repeated values, e.g. [3, 1, 3, 2, 1, 1]
+</code></pre>
+  <div class="output" id="ex3-output">Loading…</div>
+</section>
+
+<section>
+  <h2>4 — Weighted sampling</h2>
+  <p>Provide a <code>weights</code> array to bias the random draw. Higher weight → higher probability of selection. Weights are normalised automatically.</p>
+  <pre><code id="ex4-code">import { Series, sampleSeries } from "tsb";
+
+const s = new Series({ data: ["apple", "banana", "cherry"] });
+// cherry has 8× the weight of apple and 4× the weight of banana
+const weights = [1, 2, 8];
+
+const counts = { apple: 0, banana: 0, cherry: 0 };
+for (let seed = 0; seed < 200; seed++) {
+  const v = sampleSeries(s, { n: 1, weights, randomState: seed }).values[0];
+  counts[v]++;
+}
+console.log(counts); // cherry ~145/200, banana ~36/200, apple ~18/200
+</code></pre>
+  <div class="output" id="ex4-output">Loading…</div>
+</section>
+
+<section>
+  <h2>5 — ignoreIndex</h2>
+  <p>Set <code>ignoreIndex: true</code> to reset the result index to 0, 1, 2, … instead of preserving the original labels.</p>
+  <pre><code id="ex5-code">import { Series, sampleSeries } from "tsb";
+
+const s = new Series({
+  data: [100, 200, 300],
+  index: ["x", "y", "z"],
+});
+
+const r = sampleSeries(s, { n: 2, randomState: 1 });
+console.log([...r.index.values]);   // e.g. ["z", "x"] — original labels
+
+const r2 = sampleSeries(s, { n: 2, randomState: 1, ignoreIndex: true });
+console.log([...r2.index.values]);  // [0, 1] — reset
+</code></pre>
+  <div class="output" id="ex5-output">Loading…</div>
+</section>
+
+<section>
+  <h2>6 — DataFrame row sampling</h2>
+  <p><code>sampleDataFrame(df, { n })</code> returns a DataFrame with <em>n</em> randomly selected rows. Row integrity is preserved — all columns stay aligned.</p>
+  <pre><code id="ex6-code">import { DataFrame, sampleDataFrame } from "tsb";
+
+const df = DataFrame.fromColumns({
+  name:  ["Alice", "Bob", "Carol", "Dave", "Eve"],
+  score: [88, 72, 95, 61, 84],
+  grade: ["B", "C", "A", "D", "B"],
+});
+
+const sample = sampleDataFrame(df, { n: 3, randomState: 5 });
+console.log([...sample.col("name").values]);   // 3 names
+console.log([...sample.col("score").values]);  // corresponding scores
+</code></pre>
+  <div class="output" id="ex6-output">Loading…</div>
+</section>
+
+<section>
+  <h2>7 — DataFrame column sampling (axis=1)</h2>
+  <p>Set <code>axis: 1</code> to sample columns instead of rows. Useful for random feature selection.</p>
+  <pre><code id="ex7-code">import { DataFrame, sampleDataFrame } from "tsb";
+
+const df = DataFrame.fromColumns({
+  a: [1, 2, 3],
+  b: [4, 5, 6],
+  c: [7, 8, 9],
+  d: [10, 11, 12],
+});
+
+// Pick 2 random columns
+const r = sampleDataFrame(df, { n: 2, axis: 1, randomState: 3 });
+console.log([...r.columns.values]);  // e.g. ["b", "d"]
+</code></pre>
+  <div class="output" id="ex7-output">Loading…</div>
+</section>
+
+<section>
+  <h2>8 — Bootstrapping example</h2>
+  <p>Sampling with replacement is the foundation of <em>bootstrapping</em> — re-sampling your data to estimate statistics.</p>
+  <pre><code id="ex8-code">import { Series, sampleSeries } from "tsb";
+
+const data = new Series({ data: [2.1, 3.4, 5.5, 2.9, 4.2, 3.8, 5.1, 4.6, 3.3, 2.7] });
+const n = data.size;
+
+// 50 bootstrap means
+const means = [];
+for (let seed = 0; seed < 50; seed++) {
+  const boot = sampleSeries(data, { n, replace: true, randomState: seed });
+  const sum = (boot.values as number[]).reduce((a, b) => a + b, 0);
+  means.push(sum / n);
+}
+means.sort((a, b) => a - b);
+const lo = means[Math.floor(means.length * 0.025)].toFixed(2);
+const hi = means[Math.floor(means.length * 0.975)].toFixed(2);
+console.log(`Bootstrap 95% CI for mean: [${lo}, ${hi}]`);
+</code></pre>
+  <div class="output" id="ex8-output">Loading…</div>
+</section>
+
+<script>
+window.__tsb_examples = [
+  { id: "ex1", requires: ["sampleSeries", "Series"] },
+  { id: "ex2", requires: ["sampleSeries", "Series"] },
+  { id: "ex3", requires: ["sampleSeries", "Series"] },
+  { id: "ex4", requires: ["sampleSeries", "Series"] },
+  { id: "ex5", requires: ["sampleSeries", "Series"] },
+  { id: "ex6", requires: ["sampleDataFrame", "DataFrame"] },
+  { id: "ex7", requires: ["sampleDataFrame", "DataFrame"] },
+  { id: "ex8", requires: ["sampleSeries", "Series"] },
+];
+</script>
+</body>
+</html>
