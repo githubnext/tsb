@@ -310,19 +310,19 @@ export class DataFrame {
       >
     >,
   ): DataFrame {
-    let working: DataFrame = this;
+    let currentFrame: DataFrame = this;
     for (const [name, spec] of Object.entries(newCols)) {
       const resolved: readonly Scalar[] | Series<Scalar> =
-        typeof spec === "function" ? spec(working) : spec;
+        typeof spec === "function" ? spec(currentFrame) : spec;
       const series: Series<Scalar> =
         resolved instanceof Series
           ? resolved
-          : new Series({ data: resolved, index: working.index });
-      const colMap = new Map<string, Series<Scalar>>(working._columns);
+          : new Series({ data: resolved, index: currentFrame.index });
+      const colMap = new Map<string, Series<Scalar>>(currentFrame._columns);
       colMap.set(name, series);
-      working = new DataFrame(colMap, working.index);
+      currentFrame = new DataFrame(colMap, currentFrame.index);
     }
-    return working;
+    return currentFrame;
   }
 
   /** Drop one or more columns by name.  Returns a new DataFrame. */

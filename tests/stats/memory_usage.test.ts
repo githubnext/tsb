@@ -19,6 +19,7 @@ function dfFromSeries(columns: Record<string, Series<Scalar>>): DataFrame {
   for (const [name, series] of Object.entries(columns)) {
     colMap.set(name, series);
   }
+  // Build through the low-level constructor to preserve explicit Series dtypes in tests.
   const firstCol = Object.values(columns)[0];
   const index = new RangeIndex(firstCol?.size ?? 0);
   return new DataFrame(colMap, index);
