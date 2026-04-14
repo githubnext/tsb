@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T13:36:08Z |
-| Iteration Count | 67 |
-| Best Metric | 230 |
+| Last Run | 2026-04-14T14:37:41Z |
+| Iteration Count | 68 |
+| Best Metric | 234 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -49,7 +49,7 @@
 - API notes: seriesRound, s.dt.year() is method; groupby AggName: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only; rollingApply(s, window, fn); Series({data,name,index}); df.assign({c: series}) direct.
 - All iter 46–67 pairs accepted (except 66 error); 3c596789 has 172 pairs, main has 51. Pipeline: branch from 3c596789 → merge main (186) → add new pairs → commit.
 - groupby.first()/last() on both GroupBy types; dataFrameCummin/Cumprod exported; EWM.corr takes EwmSeriesLike.
-- Iter 67: 230 pairs achieved. Key new pairs: series_copy/rename/nunique/sort_index/loc/iloc/describe, dataframe_describe, series_corr (uses s.corr(other)), describe(s) imported from "../../src/index.js".
+- Iter 68: 234 pairs achieved (+4 vs iter 67). Branched from 3c596789 (172) + merge main (186) + 48 new: series_median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile/sort_index/loc/iloc/describe/copy/rename/dropna/isna_notna/groupby, dataframe_set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/describe, concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median, groupby_std_df. Commit: b728240
 
 ---
 
@@ -65,6 +65,9 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 68 — 2026-04-14 14:37 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24405116522)
+- ✅ Accepted metric=234 (+4 vs prev best 230) | Branched from 3c596789 (172 pairs) + merge main (186) + 48 new pairs across Series (median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile/sort_index/loc/iloc/describe/copy/rename/dropna/isna_notna/groupby), DataFrame (set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/describe), concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median, groupby_std_df | Commit: b728240
 
 ### Iteration 67 — 2026-04-14 13:36 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24401981816)
 - ✅ Accepted metric=230 (+7 vs prev best 223) | Started from 3c596789 (172 pairs) + merge main (186) + 44 new: series_median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile/sort_index/loc/iloc/describe/copy/rename/nunique, dataframe_set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/describe, concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median | Commit: 375011a
