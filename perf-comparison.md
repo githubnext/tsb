@@ -8,19 +8,20 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T20:22:50Z |
-| Iteration Count | 77 |
+| Last Run | 2026-04-14T20:48:52Z |
+| Iteration Count | 78 |
 | Best Metric | 251 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
-| Pause Reason | — |
+| Pause Reason | safeoutputs MCP server unavailable for 3 consecutive iterations (76, 77, 78); push_to_pull_request_branch and git push both blocked |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 2 |
+| Consecutive Errors | 3 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, error, error |
+| Paused | true |
 
 ---
 
@@ -77,12 +78,20 @@
 - index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group — ✅ Done (iter 73/74)
 - str_strip, str_pad, dt_floor_ceil — ✅ Done (iter 74)
 - str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month — ✅ Done (iter 75)
-- index_delete_drop, index_equals_identical, index_arg_sort, index_isna_dropna, str_fullmatch, dt_is_year_start_end, dt_is_leap_year, dt_days_in_month — Ready to add (iter 76 and 77 push failed). Recreate from 3c596789 branch (251) + these 8 = 259.
+- index_delete_drop, index_equals_identical, index_arg_sort, index_isna_dropna, str_fullmatch, dt_is_year_start_end, dt_is_leap_year, dt_days_in_month — Created locally (commit 0e6a6aa, iter 78), push blocked again. On next run (if safeoutputs fixed): checkout 3c596789 branch, recreate these 8 pairs, push via push_to_pull_request_branch to PR #141.
 - Remaining: IO benchmarks (read_parquet, to_parquet), more str/dt variants, GroupBy nunique (no API), DataFrame str accessor on columns
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 78 — 2026-04-14 20:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24422133244)
+
+- **Status**: ⚠️ Error
+- **Change**: Attempted to add 8 new benchmark pairs: index_delete_drop, index_equals_identical, index_arg_sort, index_isna_dropna, str_fullmatch, dt_is_year_start_end, dt_is_leap_year, dt_days_in_month. Metric would be 259 (+8 vs 251).
+- **Metric**: N/A (push blocked — same infra issue as iters 76 and 77)
+- **Commit**: 0e6a6aa (local only, not pushed)
+- **Notes**: 3rd consecutive error from safeoutputs MCP unavailability. push_to_pull_request_branch not registered; git push blocked (no auth). Program auto-paused. Commit exists locally at 0e6a6aa on branch autoloop/perf-comparison. Next iteration should push this commit via cherry-pick from fresh checkout of 3c596789 branch.
 
 ### Iteration 77 — 2026-04-14 20:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24421006159)
 - ⚠️ Error: safeoutputs MCP tools unavailable (same as iter 76). Created 8 benchmark pairs: index_delete_drop, index_equals_identical, index_arg_sort, index_isna_dropna, str_fullmatch, dt_is_year_start_end, dt_is_leap_year, dt_days_in_month. Committed locally as d9cb4dd on autoloop/perf-comparison but push failed. Metric would be 259 (+8 vs 251). Next iteration: recreate same 8 pairs from 3c596789 branch (251) + these 8 = 259.
