@@ -8,19 +8,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T23:19:03Z |
-| Iteration Count | 82 |
+| Last Run | 2026-04-14T23:47:02Z |
+| Iteration Count | 83 |
 | Best Metric | 269 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
-| Pause Reason | safeoutputs MCP unavailable again (iter 82). Local commit 1ab4b0c (+8 pairs, 277 total). Actual pushed metric remains 269 from origin branch. |
+| Pause Reason | safeoutputs MCP unavailable (iter 83, 8th consecutive). Local commit d120f51 (+8 pairs, 277 total). Remote metric remains 269. |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 7 |
-| Recent Statuses | accepted, accepted, error, error, error, error, error, error, error |
+| Consecutive Errors | 8 |
+| Recent Statuses | error, error, error, error, error, error, error, error, error |
 | Paused | true |
 
 ---
@@ -79,19 +79,20 @@
 - str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month — ✅ Done (iter 75)
 - Remaining after iter 80: str_case (title/capitalize/swapcase), str_zfill/center/ljust/rjust, str_count (str.count), str_slice/get, str_isalnum/isnumeric/islower/isupper/istitle/isspace, index_fillna, index_append, index_rename, IO benchmarks (read_parquet, to_parquet) — ✅ All string/index ops Done (iter 82)
 - IO benchmarks (read_parquet, to_parquet) still pending if API exists.
-- **Notes**: safeoutputs MCP restored in iter 82; successfully pushed commit 1ab4b0c (+8 pairs, 277 total).
+- str_case, str_zfill_center_ljust_rjust, str_count, str_slice_get, str_isalnum_isnumeric, index_fillna, index_append, index_rename — committed as d120f51 (local) but never pushed due to safeoutputs MCP unavailability.
+- Next: On run when safeoutputs is available, re-create these 8 pairs or push d120f51. Pairs: str_case, str_zfill_center_ljust_rjust, str_count, str_slice_get, str_isalnum_isnumeric, index_fillna, index_append, index_rename.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 82 — 2026-04-14 23:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24427732076)
+### Iteration 83 — 2026-04-14 23:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24428630710)
 
 - **Status**: ⚠️ Error
-- **Change**: Added 8 pairs: str_case (title/capitalize/swapcase), str_zfill_center_ljust_rjust, str_slice_get, str_count, str_isalnum_isnumeric (all 6 methods), index_fillna, index_append, index_rename. Local commit 1ab4b0c. Metric would be 277.
-- **Metric**: N/A (push blocked — safeoutputs MCP unavailable, 7th consecutive failure)
-- **Commit**: 1ab4b0c (local only)
-- **Notes**: All benchmark files created correctly, commit ready. safeoutputs tools consistently unavailable in this env. Actual remote best is 269.
+- **Change**: Added 8 pairs: str_case, str_zfill_center_ljust_rjust, str_count, str_slice_get, str_isalnum_isnumeric, index_fillna, index_append, index_rename. Local commit d120f51. Metric would be 277.
+- **Metric**: N/A (push blocked — safeoutputs MCP unavailable, 8th consecutive failure)
+- **Commit**: d120f51 (local only)
+- **Notes**: All 16 benchmark files (8 TS + 8 PY) created and committed. safeoutputs tools not in available tool list.
 
 ### Iteration 81 — 2026-04-14 22:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24426723308)
 
