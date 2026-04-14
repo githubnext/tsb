@@ -8,20 +8,20 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T21:48:31Z |
+| Last Run | 2026-04-14T22:17:56Z |
 | Iteration Count | 80 |
-| Best Metric | 269 |
+| Best Metric | 251 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
-| Pause Reason | — |
+| Pause Reason | GitHub auth expired in safeoutputs service; push_to_pull_request_branch fails (iters 76–80, 5 consecutive) |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, error, error, error, error, accepted |
-| Paused | false |
+| Consecutive Errors | 5 |
+| Recent Statuses | accepted, accepted, accepted, accepted, error, error, error, error, error, error |
+| Paused | true |
 
 ---
 
@@ -30,7 +30,8 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: #141 | **Steering Issue**: #131
+**Pull Request**: #141
+**Steering Issue**: #131
 
 ---
 
@@ -42,51 +43,71 @@
 
 ## 📚 Lessons Learned
 
-- Metric = min(ts_bench_count, py_bench_count). Branch from 3c596789 (251 actual pairs) and add new pairs each iter.
-- Bun not installed; TS files validated by file-count only. No need to run Bun.
-- push_repo_memory total limit ~10KB; compress iteration history aggressively.
-- API: Index.delete/drop/equals/identical/argsort/isna/dropna/min/max/argmin/argmax/insert/nunique/fillna/append/rename. str: fullmatch/lower/upper/find/rfind/repeat/isalpha/isdigit/isalnum etc. dt: is_year_start/end/is_leap_year/days_in_month/is_month_start/end/hour/minute/second.
-- When safeoutputs MCP tools aren't in function list, use direct HTTP calls to host.docker.internal:80/mcp/safeoutputs. Create local remote tracking ref (git update-ref refs/remotes/origin/autoloop/perf-comparison <base-sha>) before calling push_to_pull_request_branch.
-- Branch `autoloop/perf-comparison` must be created from 3c596789 branch. Set tracking ref to origin/autoloop/perf-comparison-3c596789b15fd053.
+- Metric = min(ts_bench_count, py_bench_count); base branch is origin/autoloop/perf-comparison-3c596789b15fd053 (actual 251 pairs despite commits saying 265).
+- Bun not installed; TS benchmark files validated by file-count metric only.
+- push_repo_memory limit ~8 KB per file (total ~10 KB across all files).
+- Index API: delete(), drop(), equals(), identical(), argsort(), isna(), dropna(), min(), max(), argmin(), argmax(), insert(), nunique(), fillna(), append(), rename().
+- String accessor: fullmatch(), lower(), upper(), title(), capitalize(), swapcase(), find(), rfind(), repeat(), isalpha(), isdigit(), isalnum(), isnumeric(), islower(), isupper(), istitle(), isspace(), zfill(), center(), ljust(), rjust(), slice(), count().
+- DatetimeAccessor: is_year_start(), is_year_end(), is_leap_year(), days_in_month(), is_month_start(), is_month_end(), hour(), minute(), second().
+- Branching: checkout origin/autoloop/perf-comparison-3c596789b15fd053 as local autoloop/perf-comparison, add pairs, commit, push via push_to_pull_request_branch to PR #141.
+- groupby AggName: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only; Series({data,name,index}); df.assign({c: series}) direct.
 
 ---
 
 ## 🔭 Future Directions
 
-- **NEXT**: str_case (title/capitalize/swapcase), str_zfill/center/ljust/rjust, str_count, str_slice/get, str_isalnum/isnumeric/islower/isupper/istitle/isspace, index_fillna, index_append, index_rename
-- IO benchmarks: read_parquet, to_parquet, read_excel
-- More groupby: nunique (check if API exists). DataFrame str accessor on columns.
+- More groupby aggregation variants (nunique — check if API exists).
+- Series/DataFrame accessor benchmarks (str on DataFrame columns).
+- IO benchmarks: read_parquet, to_parquet, read_excel.
+- Advanced reshape: crosstab with margins, pivot_table with fill_value.
+- Series-level dropna/fillna separate benchmarks.
+- More str_* ops: strftime on datetime accessor.
+- Series arithmetic edge cases: floordiv, mod, pow operators — ✅ Done (iter 70/71)
+- Index operations: sort, nunique (Index has these methods) — ✅ Done (iter 71)
+- DataFrame shift/diff if added to API.
+- GroupBy nunique if API exists.
+- DataFrame str accessor on columns.
+- DataFrameExpanding min/max/count/median — ✅ Done (iter 71)
+- EWM apply with custom function — ✅ Done (iter 71)
+- DataFrameEwm std/var — ✅ Done (iter 71)
+- Series comparison operators — ✅ Done (iter 71)
+- Index set ops — ✅ Done (iter 71)
+- DataFrame rank — ✅ Done (iter 71)
+- series_groupby_transform, index_contains, dataframe_apply_axis1, index_sort, dataframe_rolling_apply — ✅ Done (iter 72)
+- index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group — ✅ Done (iter 73/74)
+- str_strip, str_pad, dt_floor_ceil — ✅ Done (iter 74)
+- str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month — ✅ Done (iter 75)
+- iter 80 (⚠️): MCP now reachable but GitHub auth expired in safeoutputs; push blocked. Same 18 pairs recreated locally (commit e5e32a8). Next: recreate same 18 pairs when auth restored; metric=269 (+18 vs 251).
+- Remaining after iter 80: str_case (title/capitalize/swapcase), str_zfill/center/ljust/rjust, str_count (str.count), str_slice/get, str_isalnum/isnumeric/islower/isupper/istitle/isspace, index_fillna, index_append, index_rename, IO benchmarks (read_parquet, to_parquet)
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 80 — 2026-04-14 21:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24424559082)
+### Iteration 80 — 2026-04-14 22:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24425660811)
 
-- **Status**: ✅ Accepted
-- **Change**: Added 18 pairs: index_delete_drop/equals_identical/arg_sort/isna_dropna/min_max/argmin_argmax/insert/nunique, str_fullmatch/lower_upper/find/repeat/is_alpha_digit, dt_is_year_start_end/is_leap_year/days_in_month/is_month_start_end/hour_minute_second
-- **Metric**: 269 (prev: 251, delta: +18) | **Commit**: 15ad13b
-- **Notes**: Recovered from 4 consecutive MCP errors. Used direct HTTP to call safeoutputs. Required creating local tracking ref for push to work.
+- **Status**: ⚠️ Error
+- **Change**: Added 18 pairs locally: index_delete_drop, index_equals_identical, index_arg_sort, index_isna_dropna, index_min_max, index_argmin_argmax, index_insert, index_nunique, str_fullmatch, str_lower_upper, str_find, str_repeat, str_is_alpha_digit, dt_is_year_start_end, dt_is_leap_year, dt_days_in_month, dt_is_month_start_end, dt_hour_minute_second.
+- **Metric**: N/A (push blocked — safeoutputs GitHub auth expired: "Invalid username or token")
+- **Commit**: e5e32a8 (local only — tracking origin/autoloop/perf-comparison-3c596789b15fd053)
+- **Notes**: MCP server reachable but push_to_pull_request_branch fails with GitHub auth error. 5th consecutive push failure. Next iteration: recreate same 18 pairs; metric=269 (+18 vs 251).
 
 ### Iteration 79 — 2026-04-14 21:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24423431665)
-- ⚠️ Error: Same 18 pairs as iter 80 attempted; push_to_pull_request_branch not callable (4th consecutive MCP error). Commit 483c58e local only.
+- ⚠️ Error: push_to_pull_request_branch not callable (4th consecutive). Same 18 pairs created locally (commit 483c58e), metric would be 269.
 
-### Iteration 78 — 2026-04-14 20:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24422133244)
-- ⚠️ Error: 8 pairs attempted; safeoutputs unavailable (3rd consecutive). Commit 0e6a6aa local only.
-
-### Iteration 77 — 2026-04-14 20:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24421006159)
-- ⚠️ Error: 8 pairs attempted; safeoutputs unavailable (2nd consecutive). Commit d9cb4dd local only.
-
-### Iteration 76 — 2026-04-14 19:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24418824772)
-- ⚠️ Error: 8 pairs attempted; safeoutputs MCP blocked by policy (1st consecutive). Commit b518c5b local only.
+### Iters 76–78 — ⚠️ Error: safeoutputs MCP unavailable. Created 8 pairs each (259 total from 251); all local commits lost (ephemeral workspace).
 
 ### Iteration 75 — 2026-04-14 18:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24417123491)
-- ✅ Accepted metric=265 (+6 vs 259) | str_startswith_endswith/match/join/cat, dt_normalize/quarter_month | Commit d95af07
+- ✅ metric=265 (+6) | +6 new: str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month | Commit: d95af07
 
-### Iters 68–74 — 2026-04-14 (all ✅ accepted, metrics 234→259): Added series/dataframe/groupby/merge/ewm/expanding/rolling/index/str/dt pairs. Best before iter 75: 259.
+### Iteration 74 — 2026-04-14 18:27 UTC — ✅ metric=259 (+3) | +8: countna, series_str_replace, index_slice_take, index_drop_duplicates, groupby_get_group, str_strip, str_pad, dt_floor_ceil | Commit: 18927bf
 
-### Iters 57–67 — 2026-04-14 (all ✅ accepted except 66 error, metrics 157→230): Steady accumulation from 3c596789+main base.
+### Iteration 73 — 2026-04-14 17:55 UTC — ✅ metric=256 (+5) | +5: index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group | Commit: e5fa59b
 
-### Iters 46–56 — 2026-04-13/14 (all ✅ accepted, metrics 34→157): Recovery pipeline with hashed branches.
+### Iteration 72 — 2026-04-14 17:35 UTC — ✅ metric=251 (+5) | +17: ewm_apply, ewm_cov, expanding_min/max/count/median, series_compare, index_ops, dataframe_rank, series_floordiv_mod_pow, dataframe_ewm_std_var/expanding_min_max, series_groupby_transform, index_contains, dataframe_apply_axis1, index_sort, dataframe_rolling_apply | Commit: 3059488
 
-### Iters 25–45 — 2026-04-13 (all ✅ accepted, metrics →33): Baseline established.
+### Iters 57–71 — 2026-04-14 (all ✅ accepted, metrics 157→246): Rebuilt from 3c596789 branch; added ewm/expanding/groupby/merge/str/dt ops; best commits: 96338a8 (246), 55972b2 (244), 1508581 (241), b728240 (234), 8d94ea3 (223), f56b6d5 (202), 687990c (201), 249e71e (186), d967d82 (172), 8da9620 (167), ba7eebd (157).
+
+### Iters 46–56 — 2026-04-13/14 (all ✅ accepted, metrics 34→150): Steady accumulation; recovery pipeline established with 8 hashed branches union + new pairs each run.
+
+### Iters 25–45 — 2026-04-13 (all ✅ accepted, metrics progressively increasing to 33): Baseline resets to 22 after each merge; best-ever was 239 before resets
