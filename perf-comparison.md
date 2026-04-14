@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T06:10:00Z |
-| Iteration Count | 58 |
-| Best Metric | 167 |
+| Last Run | 2026-04-14T07:05:00Z |
+| Iteration Count | 59 |
+| Best Metric | 172 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -56,20 +56,27 @@
 - Iter-56: Pipeline stable: checkout main → union 8 hashed branches (97 pairs) → reconstruct 48 from iters 52-55 → add new. Total 150 after iter-56. New: series_to_string, dataframe_to_string, notna_isna, move_column, series_digitize, cat_set_ops. Branch resets to 22 on every merge; all work rebuilt each run.
 - Iter-57: Same pipeline, but 60 new files created (all iter52-56 recovery + new: dataframe_transform, dataframe_apply_map, count_valid, dataframe_transform_rows, cat_equal_categories, groupby_apply). Total 157 pairs.
 - Iter-58: After PR #142 merge, main had 51 pairs. Unified from 143-branch (3c596789) + 10 new: dataframe_abs, dataframe_round, dataframe_clip, dataframe_cumsum, dataframe_cummax, percentile_of_score, quantile, str_byte_length, dataframe_value_counts, attrs_ops. Total 167.
-- Functions not yet benchmarked: dataFrameCummin/Cumprod, dataFrameMask/Where (as DF-level), groupby_nunique/first/last, dt accessor ops.
+- Iter-59: 3c596789 branch actually had 157 pairs (not 143). Union yielded 157; added 15 new: dataframe_abs, dataframe_round, dataframe_clip, dataframe_cumsum, dataframe_cummax, dataframe_cummin, dataframe_cumprod, groupby_first, groupby_last, datetime_accessor, percentile_of_score, quantile, str_byte_length, dataframe_value_counts, attrs_ops. Total 172.
+- groupby.first()/last() available on both DataFrameGroupBy and SeriesGroupBy.
+- Series.dt.year()/month()/day() are methods (not properties) in tsb.
+- dataFrameCummin/Cumprod both exported from src/index.ts.
+- Future: groupby_nunique not yet in groupby API; skip.
 
 ---
 
 ## 🔭 Future Directions
 
-- More groupby aggregation variants (nunique, first, last).
-- Series/DataFrame accessor benchmarks (dt, str on DataFrame).
+- More groupby aggregation variants (nunique — check if API exists).
+- Series/DataFrame accessor benchmarks (str on DataFrame columns).
 - IO benchmarks: read_parquet, to_parquet, read_excel.
 - Advanced reshape: crosstab with margins, pivot_table with fill_value.
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 59 — 2026-04-14 07:05 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24385692074)
+- ✅ Accepted metric=172 (+5 vs prev best 167) | Union 3c596789 branch (157 pairs) + 15 new: dataframe_abs, dataframe_round, dataframe_clip, dataframe_cumsum, dataframe_cummax, dataframe_cummin, dataframe_cumprod, groupby_first, groupby_last, datetime_accessor, percentile_of_score, quantile, str_byte_length, dataframe_value_counts, attrs_ops | Commit: d967d82
 
 ### Iteration 58 — 2026-04-14 06:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24383841023)
 - ✅ Accepted metric=167 (+10 vs prev best 157) | Union 143-branch (106 new pairs) + 10 brand-new: dataframe_abs, dataframe_round, dataframe_clip, dataframe_cumsum, dataframe_cummax, percentile_of_score, quantile, str_byte_length, dataframe_value_counts, attrs_ops | Commit: 8da9620
