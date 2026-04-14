@@ -302,16 +302,27 @@ export class DataFrame {
    * const df2 = df.assign({ c: [7, 8, 9] });
    * ```
    */
-  assign(newCols: Readonly<Record<string, readonly Scalar[] | Series<Scalar>>>): DataFrame {
-    const colMap = new Map<string, Series<Scalar>>(this._columns);
-    for (const [name, val] of Object.entries(newCols)) {
-      if (val instanceof Series) {
-        colMap.set(name, val);
-      } else {
-        colMap.set(name, new Series({ data: val, index: this.index }));
-      }
+  assign(
+    newCols: Readonly<
+      Record<
+        string,
+        readonly Scalar[] | Series<Scalar> | ((df: DataFrame) => readonly Scalar[] | Series<Scalar>)
+      >
+    >,
+  ): DataFrame {
+    let working: DataFrame = this;
+    for (const [name, spec] of Object.entries(newCols)) {
+      const resolved: readonly Scalar[] | Series<Scalar> =
+        typeof spec === "function" ? spec(working) : spec;
+      const series: Series<Scalar> =
+        resolved instanceof Series
+          ? resolved
+          : new Series({ data: resolved, index: working.index });
+      const colMap = new Map<string, Series<Scalar>>(working._columns);
+      colMap.set(name, series);
+      working = new DataFrame(colMap, working.index);
     }
-    return new DataFrame(colMap, this.index);
+    return working;
   }
 
   /** Drop one or more columns by name.  Returns a new DataFrame. */

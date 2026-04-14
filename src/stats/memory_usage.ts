@@ -176,7 +176,7 @@ export function dataFrameMemoryUsage(
     values.push(indexMemoryBytes(df.index, deep));
   }
 
-  for (const [colName, col] of df) {
+  for (const [colName, col] of df.items()) {
     names.push(colName);
     let mem: number;
     if (deep) {
