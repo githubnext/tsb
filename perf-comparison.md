@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T17:35:00Z |
-| Iteration Count | 72 |
-| Best Metric | 251 |
+| Last Run | 2026-04-14T17:55:00Z |
+| Iteration Count | 73 |
+| Best Metric | 256 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -74,10 +74,14 @@
 - Index set ops — ✅ Done (iter 71)
 - DataFrame rank — ✅ Done (iter 71)
 - series_groupby_transform, index_contains, dataframe_apply_axis1, index_sort, dataframe_rolling_apply — ✅ Done (iter 72)
+- index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group — ✅ Done (iter 73)
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 73 — 2026-04-14 17:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24414551013)
+- ✅ Accepted metric=256 (+5 vs prev best 251) | Branched from 3c596789 (251 after merge main) + 5 new: index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group | Commit: e5fa59b
 
 ### Iteration 72 — 2026-04-14 17:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24413338114)
 - ✅ Accepted metric=251 (+5 vs prev best 246) | Branched from 3c596789 (220 pairs) + merge main (234 after conflict resolution) + 17 new: ewm_apply, ewm_cov, expanding_min/max/count/median, series_compare, index_ops, dataframe_rank, series_floordiv_mod_pow, dataframe_ewm_std_var, dataframe_expanding_min_max, series_groupby_transform, index_contains, dataframe_apply_axis1, index_sort, dataframe_rolling_apply | Commit: 3059488
