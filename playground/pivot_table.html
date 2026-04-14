@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — pivotTableFull</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html">← tsb playground</a>
+    <h1>pivotTableFull</h1>
+    <p>Full pivot table with grand-total margins — mirrors <code>pandas.pivot_table</code>.</p>
+  </header>
+
+  <main>
+    <section class="intro">
+      <p>
+        <code>pivotTableFull(df, options)</code> reshapes a DataFrame by aggregating values
+        across row and column groups, and optionally appends a grand-total "All" row and column.
+      </p>
+      <ul>
+        <li><strong>index</strong> — column(s) to use as row groups</li>
+        <li><strong>columns</strong> — column(s) to use as column groups</li>
+        <li><strong>values</strong> — column(s) to aggregate</li>
+        <li><strong>aggfunc</strong> — aggregation: <code>mean</code> | <code>sum</code> | <code>min</code> | <code>max</code> | <code>count</code> | <code>first</code> | <code>last</code></li>
+        <li><strong>margins</strong> — add grand-total row &amp; column (default <code>false</code>)</li>
+        <li><strong>margins_name</strong> — label for totals (default <code>"All"</code>)</li>
+        <li><strong>sort</strong> — sort row/column labels (default <code>true</code>)</li>
+      </ul>
+    </section>
+
+    <section class="example">
+      <h2>Example 1 — sales by region and product (sum + margins)</h2>
+      <pre><code>import { DataFrame, pivotTableFull } from "tsb";
+
+const df = DataFrame.fromColumns({
+  region:  ["North","North","South","South","North","South"],
+  product: ["A",    "B",    "A",    "B",    "A",    "B"   ],
+  sales:   [100,    200,    150,    250,    120,    180   ],
+});
+
+const result = pivotTableFull(df, {
+  index:   "region",
+  columns: "product",
+  values:  "sales",
+  aggfunc: "sum",
+  margins: true,
+});
+
+// Output:
+//          A    B    All
+// North   220  200  420
+// South   150  430  580
+// All     370  630 1000</code></pre>
+    </section>
+
+    <section class="example">
+      <h2>Example 2 — mean aggregation with custom margins_name</h2>
+      <pre><code>const df = DataFrame.fromColumns({
+  team:  ["Eng","Eng","Mkt","Mkt"],
+  level: ["Sr","Jr","Sr","Jr"],
+  score: [90,  70,  80, 60],
+});
+
+const result = pivotTableFull(df, {
+  index:        "team",
+  columns:      "level",
+  values:       "score",
+  aggfunc:      "mean",
+  margins:      true,
+  margins_name: "Total",
+});
+
+// Output:
+//       Jr   Sr   Total
+// Eng   70   90   80
+// Mkt   60   80   70
+// Total 65   85   75</code></pre>
+    </section>
+
+    <section class="example">
+      <h2>Example 3 — sort=false preserves insertion order</h2>
+      <pre><code>const df = DataFrame.fromColumns({
+  r: ["Z", "A", "M", "Z"],
+  c: ["b", "a", "c", "a"],
+  v: [1,   2,   3,   4  ],
+});
+
+pivotTableFull(df, {
+  index:   "r",
+  columns: "c",
+  values:  "v",
+  aggfunc: "sum",
+  sort:    false,
+});
+
+// Rows in order: Z, A, M  (insertion order)
+// Cols in order: b, a, c  (insertion order)</code></pre>
+    </section>
+
+    <section class="example">
+      <h2>Example 4 — count with margins</h2>
+      <pre><code>const df = DataFrame.fromColumns({
+  dept:   ["Eng","Eng","Mkt","Mkt","Eng"],
+  level:  ["Sr","Jr","Sr","Jr","Sr"],
+  salary: [120, 80, 110, 75, 130],
+});
+
+pivotTableFull(df, {
+  index:   "dept",
+  columns: "level",
+  values:  "salary",
+  aggfunc: "count",
+  margins: true,
+});
+
+//       Jr   Sr   All
+// Eng    1    2    3
+// Mkt    1    1    2
+// All    2    3    5</code></pre>
+    </section>
+
+    <section class="example">
+      <h2>Key differences from pivotTable</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th><code>pivotTable</code></th>
+            <th><code>pivotTableFull</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Grand-total margins</td>
+            <td>❌</td>
+            <td>✅ <code>margins</code></td>
+          </tr>
+          <tr>
+            <td>Custom margin label</td>
+            <td>❌</td>
+            <td>✅ <code>margins_name</code></td>
+          </tr>
+          <tr>
+            <td>Sort labels</td>
+            <td>insertion order</td>
+            <td>✅ <code>sort</code> (default <code>true</code>)</td>
+          </tr>
+          <tr>
+            <td>All aggfuncs</td>
+            <td>✅</td>
+            <td>✅</td>
+          </tr>
+          <tr>
+            <td>fill_value, dropna</td>
+            <td>✅</td>
+            <td>✅</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>tsb — a TypeScript port of pandas · <a href="index.html">playground index</a></p>
+  </footer>
+</body>
+</html>

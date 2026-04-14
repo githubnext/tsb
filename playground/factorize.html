@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb — factorize: integer encoding</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; padding: 2rem; }
+      h1 { color: #58a6ff; font-size: 1.8rem; margin-bottom: .5rem; }
+      h2 { color: #79c0ff; font-size: 1.2rem; margin: 2rem 0 .75rem; }
+      p  { color: #8b949e; margin-bottom: 1rem; max-width: 800px; }
+      code { background: #161b22; padding: .1rem .4rem; border-radius: 4px; font-family: monospace; font-size: .9em; color: #a5d6ff; }
+      .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 900px; }
+      textarea { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-family: monospace; font-size: .85rem; padding: .75rem; resize: vertical; min-height: 160px; }
+      button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: .5rem 1.25rem; cursor: pointer; font-size: .9rem; margin-top: .75rem; }
+      button:hover { background: #2ea043; }
+      pre { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .82rem; margin-top: .75rem; white-space: pre-wrap; word-break: break-all; min-height: 60px; }
+      .tag { display: inline-block; background: #388bfd26; color: #58a6ff; border: 1px solid #388bfd; border-radius: 12px; padding: .1rem .6rem; font-size: .75rem; margin-left: .5rem; vertical-align: middle; }
+    </style>
+  </head>
+  <body>
+    <h1>factorize <span class="tag">tsb</span></h1>
+    <p>
+      Integer encoding of categorical values — the TypeScript port of
+      <code>pandas.factorize()</code> and <code>Series.factorize()</code>.
+      Maps each unique value to a monotonically increasing integer code,
+      returning both the <strong>codes</strong> array and the
+      <strong>uniques</strong> array.
+    </p>
+    <p>
+      Missing values (null / undefined / NaN) receive code <code>-1</code>
+      by default.  Useful as a lightweight alternative to full dummy encoding
+      when you need ordinal indices for categorical data.
+    </p>
+
+    <h2>1. Basic factorize — first-seen order</h2>
+    <div class="card">
+      <p>
+        By default, unique values appear in <strong>first-seen order</strong>,
+        matching pandas' behaviour for object arrays.
+      </p>
+      <textarea id="basic-code">
+const values = ["banana", "apple", "banana", "cherry", "apple"];
+const { codes, uniques } = tsb.factorize(values);
+
+console.log("codes  :", codes);
+// [0, 1, 0, 2, 1]
+
+console.log("uniques:", uniques);
+// ["banana", "apple", "cherry"]
+
+// Reconstruct originals from codes + uniques
+const reconstructed = codes.map(c => uniques[c]);
+console.log("round-trip:", reconstructed);
+      </textarea>
+      <button onclick="run('basic')">▶ Run</button>
+      <pre id="basic-out">Click ▶ Run to execute</pre>
+    </div>
+
+    <h2>2. Sorted uniques</h2>
+    <div class="card">
+      <p>
+        Pass <code>sort: true</code> to sort unique values before assigning
+        codes.  Numbers are sorted numerically; strings lexicographically.
+      </p>
+      <textarea id="sort-code">
+const nums = [30, 10, 20, 10, 30];
+const { codes, uniques } = tsb.factorize(nums, { sort: true });
+
+console.log("sorted uniques:", uniques);
+// [10, 20, 30]
+
+console.log("codes         :", codes);
+// [2, 0, 1, 0, 2]
+      </textarea>
+      <button onclick="run('sort')">▶ Run</button>
+      <pre id="sort-out">Click ▶ Run to execute</pre>
+    </div>
+
+    <h2>3. Missing values → sentinel code -1</h2>
+    <div class="card">
+      <p>
+        Null, undefined, and NaN receive code <code>-1</code> by default and
+        are not included in <code>uniques</code>.  Set
+        <code>useNaSentinel: false</code> to treat them as regular values.
+      </p>
+      <textarea id="na-code">
+const mixed = ["a", null, "b", null, "a"];
+const { codes: withSentinel, uniques: u1 } = tsb.factorize(mixed);
+console.log("with sentinel — codes  :", withSentinel);
+// [0, -1, 1, -1, 0]
+console.log("with sentinel — uniques:", u1);
+// ["a", "b"]
+
+const { codes: noSentinel, uniques: u2 } = tsb.factorize(mixed, { useNaSentinel: false });
+console.log("no sentinel   — codes  :", noSentinel);
+// [0, 1, 2, 1, 0]  (null gets its own code)
+console.log("no sentinel   — uniques:", u2);
+// ["a", null, "b"]
+      </textarea>
+      <button onclick="run('na')">▶ Run</button>
+      <pre id="na-out">Click ▶ Run to execute</pre>
+    </div>
+
+    <h2>4. seriesFactorize — works on a Series</h2>
+    <div class="card">
+      <p>
+        <code>seriesFactorize</code> accepts a <code>Series</code> and returns
+        <code>{ codes: Series&lt;number&gt;, uniques: Series&lt;T&gt; }</code>.
+      </p>
+      <textarea id="series-code">
+const s = new tsb.Series({ data: ["red", "blue", "red", "green", "blue"], name: "color" });
+const { codes, uniques } = tsb.seriesFactorize(s);
+
+console.log("codes  :", codes.values);
+// [0, 1, 0, 2, 1]
+
+console.log("uniques:", uniques.values);
+// ["red", "blue", "green"]
+
+// The codes Series inherits the name
+console.log("codes.name:", codes.name);
+// "color"
+      </textarea>
+      <button onclick="run('series')">▶ Run</button>
+      <pre id="series-out">Click ▶ Run to execute</pre>
+    </div>
+
+    <script type="module">
+      import * as tsb from "../src/index.ts";
+      window.tsb = tsb;
+
+      window.run = function run(id) {
+        const code = document.getElementById(id + "-code").value;
+        const out   = document.getElementById(id + "-out");
+        const logs  = [];
+        const orig  = console.log;
+        console.log = (...args) => {
+          logs.push(args.map(a => typeof a === "string" ? a : JSON.stringify(a, null, 2)).join(" "));
+        };
+        try {
+          // eslint-disable-next-line no-new-func
+          new Function("tsb", code)(tsb);
+          out.textContent = logs.join("\n") || "(no output)";
+        } catch (e) {
+          out.textContent = "Error: " + String(e);
+        } finally {
+          console.log = orig;
+        }
+      };
+    </script>
+  </body>
+</html>
