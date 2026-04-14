@@ -108,7 +108,9 @@ export function catFromCodes(
   const { ordered = false, name = null } = opts;
   const cats = uniqueKeys(categories);
   const values: Scalar[] = codes.map((code) => {
-    if (code === -1) return null;
+    if (code === -1) {
+      return null;
+    }
     if (code < -1 || code >= cats.length) {
       throw new RangeError(`catFromCodes: code ${code} is out of range [0, ${cats.length - 1}]`);
     }
@@ -210,9 +212,13 @@ export function catDiffCategories(a: CatSeriesLike, b: CatSeriesLike): CatSeries
 export function catEqualCategories(a: CatSeriesLike, b: CatSeriesLike): boolean {
   const aSet = new Set((a.cat.categories.values as Scalar[]).map(String));
   const bSet = new Set((b.cat.categories.values as Scalar[]).map(String));
-  if (aSet.size !== bSet.size) return false;
+  if (aSet.size !== bSet.size) {
+    return false;
+  }
   for (const c of aSet) {
-    if (!bSet.has(c)) return false;
+    if (!bSet.has(c)) {
+      return false;
+    }
   }
   return true;
 }
@@ -243,12 +249,16 @@ export function catSortByFreq(
   const { ascending = false } = opts;
   const cats = series.cat.categories.values as Scalar[];
   const freq = new Map<string, number>();
-  for (const c of cats) freq.set(String(c), 0);
+  for (const c of cats) {
+    freq.set(String(c), 0);
+  }
   for (const v of series.values) {
     if (!isMissing(v)) {
       const k = String(v);
       const prev = freq.get(k);
-      if (prev !== undefined) freq.set(k, prev + 1);
+      if (prev !== undefined) {
+        freq.set(k, prev + 1);
+      }
     }
   }
   const sorted = [...cats].sort((a, b) => {
@@ -306,7 +316,9 @@ export function catToOrdinal(series: CatSeriesLike, order: readonly Scalar[]): C
 export function catFreqTable(series: CatSeriesLike): Record<string, number> {
   const cats = series.cat.categories.values as Scalar[];
   const freq: Record<string, number> = {};
-  for (const c of cats) freq[String(c)] = 0;
+  for (const c of cats) {
+    freq[String(c)] = 0;
+  }
   for (const v of series.values) {
     if (!isMissing(v)) {
       const k = String(v);
@@ -358,7 +370,9 @@ export function catCrossTab(
   const counts = new Map<string, Map<string, number>>();
   for (const r of rowCats) {
     const row = new Map<string, number>();
-    for (const c of colCats) row.set(String(c), 0);
+    for (const c of colCats) {
+      row.set(String(c), 0);
+    }
     counts.set(String(r), row);
   }
 
@@ -368,18 +382,26 @@ export function catCrossTab(
   for (let i = 0; i < n; i++) {
     const av = aVals[i];
     const bv = bVals[i];
-    if (isMissing(av) || isMissing(bv)) continue;
+    if (isMissing(av) || isMissing(bv)) {
+      continue;
+    }
     const row = counts.get(String(av));
-    if (row === undefined) continue;
+    if (row === undefined) {
+      continue;
+    }
     const prev = row.get(String(bv));
-    if (prev !== undefined) row.set(String(bv), prev + 1);
+    if (prev !== undefined) {
+      row.set(String(bv), prev + 1);
+    }
   }
 
   // Compute total for normalization
   let total = 0;
   if (normalize) {
     for (const row of counts.values()) {
-      for (const v of row.values()) total += v;
+      for (const v of row.values()) {
+        total += v;
+      }
     }
   }
 
@@ -399,7 +421,11 @@ export function catCrossTab(
     const rowTotals: Scalar[] = rowCats.map((r) => {
       let sum = 0;
       const row = counts.get(String(r));
-      if (row) for (const v of row.values()) sum += v;
+      if (row) {
+        for (const v of row.values()) {
+          sum += v;
+        }
+      }
       return normalize && total > 0 ? sum / total : sum;
     });
     data[marginsName] = rowTotals;
@@ -430,7 +456,9 @@ export function catCrossTab(
     // Ensure all column arrays have the same length
     for (const col of allCols) {
       const arr = data[col];
-      if (arr === undefined) data[col] = rowLabels.map(() => 0);
+      if (arr === undefined) {
+        data[col] = rowLabels.map(() => 0);
+      }
     }
   }
 

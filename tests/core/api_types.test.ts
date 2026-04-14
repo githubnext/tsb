@@ -343,7 +343,9 @@ describe("isMissing", () => {
   it("property: no finite number is missing", () => {
     fc.assert(
       fc.property(fc.float({ noNaN: true }), (n) => {
-        if (!Number.isFinite(n)) return true;
+        if (!Number.isFinite(n)) {
+          return true;
+        }
         return !isMissing(n);
       }),
     );

@@ -82,8 +82,12 @@ function validNums(slice: readonly Scalar[]): number[] {
 /** Convert a raw window slice to `null`-substituted numeric array. */
 function rawWindow(slice: readonly Scalar[]): (number | null)[] {
   return slice.map((v): number | null => {
-    if (isMissing(v)) return null;
-    if (typeof v === "number") return v;
+    if (isMissing(v)) {
+      return null;
+    }
+    if (typeof v === "number") {
+      return v;
+    }
     return null;
   });
 }
