@@ -3,197 +3,218 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — where / mask</title>
+    <title>tsb — where / mask: Conditional Selection</title>
     <style>
-      body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; background: #fafafa; color: #1a1a1a; }
-      h1 { font-size: 1.6rem; }
-      h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; }
-      pre { background: #f0f0f0; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.85rem; }
-      .demo { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0; }
-      button { margin-top: 0.5rem; padding: 0.4rem 1rem; cursor: pointer; border-radius: 4px; border: 1px solid #aaa; background: #f5f5f5; }
-      button:hover { background: #e8e8e8; }
-      output { display: block; margin-top: 0.5rem; white-space: pre; font-family: monospace; font-size: 0.85rem; color: #333; }
-      .label { font-weight: 600; font-size: 0.85rem; color: #555; margin-top: 0.8rem; }
-      textarea { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 4px; padding: 0.5rem; }
-      .pandas-equiv { background: #fff8e1; border-left: 3px solid #f9a825; padding: 0.4rem 0.8rem; margin-top: 0.5rem; font-size: 0.8rem; border-radius: 0 4px 4px 0; }
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 860px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.6;
+        color: #1a1a1a;
+      }
+      h1 { color: #0d47a1; }
+      h2 { color: #1565c0; border-bottom: 2px solid #e3f2fd; padding-bottom: 0.25rem; }
+      pre {
+        background: #f5f5f5;
+        border-left: 4px solid #0d47a1;
+        padding: 1rem;
+        overflow-x: auto;
+        border-radius: 4px;
+      }
+      code { font-family: "Fira Code", "Cascadia Code", monospace; font-size: 0.9em; }
+      .demo {
+        background: #e8f5e9;
+        border: 1px solid #a5d6a7;
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        margin: 1rem 0;
+      }
+      .demo h3 { margin-top: 0; color: #2e7d32; }
+      table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+      th, td { border: 1px solid #ccc; padding: 0.4rem 0.75rem; text-align: left; }
+      th { background: #e3f2fd; }
+      .note { background: #fff9c4; border: 1px solid #f9a825; border-radius: 4px; padding: 0.75rem 1rem; }
+      a { color: #0d47a1; }
     </style>
   </head>
   <body>
-    <h1>tsb — <code>where</code> / <code>mask</code></h1>
+    <h1>tsb — <code>where</code> / <code>mask</code>: Conditional Selection</h1>
     <p>
-      Conditional value selection: keep or replace elements based on a boolean
-      condition.  These are the TypeScript equivalents of
-      <code>pandas.Series.where</code> / <code>pandas.DataFrame.where</code> and
-      <code>pandas.Series.mask</code> / <code>pandas.DataFrame.mask</code>.
+      <code>seriesWhere</code> / <code>seriesMask</code> and their DataFrame equivalents
+      allow element-wise conditional replacement — the TypeScript equivalents of
+      <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.where.html"><code>pandas.Series.where</code></a>
+      and
+      <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.mask.html"><code>pandas.Series.mask</code></a>.
     </p>
 
-    <h2>Core concept</h2>
-    <pre>// where: keep where cond=true, replace with `other` where cond=false
-whereSeries(s, cond, { other: null })
-
-// mask: replace where cond=true with `other`, keep where cond=false
-maskSeries(s, cond, { other: null })</pre>
-
-    <div class="pandas-equiv">
-      <strong>pandas equivalent:</strong><br />
-      <code>s.where(cond, other=np.nan)</code><br />
-      <code>s.mask(cond, other=np.nan)</code>
+    <div class="note">
+      <strong>Quick rule:</strong><br />
+      <code>where(cond)</code> — <em>keep</em> where <code>cond</code> is <strong>true</strong>, replace elsewhere.<br />
+      <code>mask(cond)</code> — <em>keep</em> where <code>cond</code> is <strong>false</strong>, replace elsewhere.<br />
+      They are exact inverses of each other.
     </div>
 
-    <!-- Demo 1: whereSeries with boolean array -->
-    <h2>Demo 1 — whereSeries with boolean array</h2>
-    <div class="demo">
-      <div class="label">Code</div>
-      <pre>const s = new Series({ data: [10, 20, 30, 40, 50], name: "prices" });
-whereSeries(s, [true, false, true, false, true]);
-// → [10, null, 30, null, 50]</pre>
-      <button onclick="demo1()">Run</button>
-      <output id="out1"></output>
-    </div>
+    <h2>1. <code>seriesWhere</code> — Boolean Array Condition</h2>
+    <p>
+      Pass a <code>boolean[]</code> to keep values at <code>true</code> positions, replace
+      the rest with <code>null</code> (or a custom <code>other</code> value).
+    </p>
+    <pre><code>import { Series, seriesWhere } from "tsb";
 
-    <!-- Demo 2: maskSeries with callable -->
-    <h2>Demo 2 — maskSeries with callable condition</h2>
-    <div class="demo">
-      <div class="label">Code</div>
-      <pre>const s = new Series({ data: [1, 2, 3, 4, 5] });
-// Replace values > 3 with -1
-maskSeries(s, (v) => v > 3, { other: -1 });
-// → [1, 2, 3, -1, -1]</pre>
-      <button onclick="demo2()">Run</button>
-      <output id="out2"></output>
-    </div>
+const scores = new Series({ data: [42, 91, 67, 55, 88] });
+const highScores = seriesWhere(scores, [false, true, false, false, true]);
+// Series [null, 91, null, null, 88]
 
-    <!-- Demo 3: whereDataFrame with 2-D boolean array -->
-    <h2>Demo 3 — whereDataFrame with 2-D condition</h2>
-    <div class="demo">
-      <div class="label">Code</div>
-      <pre>const df = DataFrame.fromColumns({
-  a: [1, 2, 3],
-  b: [4, 5, 6],
+// Custom replacement value
+const clamped = seriesWhere(scores, [false, true, false, false, true], { other: 0 });
+// Series [0, 91, 0, 0, 88]</code></pre>
+
+    <h2>2. <code>seriesWhere</code> — Callable Condition</h2>
+    <p>
+      Pass a function that receives the Series and returns a <code>boolean[]</code> or
+      <code>Series&lt;boolean&gt;</code>. This avoids computing the condition array manually.
+    </p>
+    <pre><code>import { Series, seriesWhere } from "tsb";
+
+const temps = new Series({ data: [-5, 12, 23, -3, 8] });
+
+// Keep only values above freezing
+const aboveFreezing = seriesWhere(
+  temps,
+  (s) =&gt; s.values.map((v) =&gt; (v as number) &gt; 0),
+);
+// Series [null, 12, 23, null, 8]
+
+// Replace with 0 instead of null
+const noFreeze = seriesWhere(
+  temps,
+  (s) =&gt; s.values.map((v) =&gt; (v as number) &gt; 0),
+  { other: 0 },
+);
+// Series [0, 12, 23, 0, 8]</code></pre>
+
+    <h2>3. <code>seriesMask</code> — The Inverse</h2>
+    <p>
+      <code>mask</code> replaces positions where the condition is <strong>true</strong>
+      (the opposite of <code>where</code>). Use it to "blank out" outliers or invalid values.
+    </p>
+    <pre><code>import { Series, seriesMask } from "tsb";
+
+const data = new Series({ data: [1, 2, 3, 4, 5] });
+
+// Mask out values greater than 3
+const masked = seriesMask(
+  data,
+  (s) =&gt; s.values.map((v) =&gt; (v as number) &gt; 3),
+  { other: null },
+);
+// Series [1, 2, 3, null, null]</code></pre>
+
+    <h2>4. <code>dataFrameWhere</code> — Element-Wise on DataFrames</h2>
+    <p>
+      Pass a boolean <code>DataFrame</code> or a callable that returns one.
+      Columns and row labels are aligned by name.
+    </p>
+    <pre><code>import { DataFrame, dataFrameWhere } from "tsb";
+
+const df = DataFrame.fromColumns({
+  temp_c:   [22, -3, 18, -7, 30],
+  humidity: [55, 80, 62, 75, 45],
 });
-const cond = [[true, false], [false, true], [true, true]];
-whereDataFrame(df, cond);
-// a: [1, null, 3]
-// b: [null, 5, 6]</pre>
-      <button onclick="demo3()">Run</button>
-      <output id="out3"></output>
-    </div>
 
-    <!-- Demo 4: whereDataFrame with Series condition (row broadcast) -->
-    <h2>Demo 4 — whereDataFrame with Series condition (axis=0)</h2>
-    <div class="demo">
-      <div class="label">Code</div>
-      <pre>const df = DataFrame.fromColumns({
-  a: [1, 2, 3],
-  b: [10, 20, 30],
-});
-// Keep rows 0 and 2 only, replace row 1 across all columns
-const rowCond = new Series({ data: [true, false, true], index: [0, 1, 2] });
-whereDataFrame(df, rowCond, { axis: 0, other: 0 });
-// a: [1, 0, 3]
-// b: [10, 0, 30]</pre>
-      <button onclick="demo4()">Run</button>
-      <output id="out4"></output>
-    </div>
-
-    <!-- Demo 5: maskDataFrame with DataFrame condition -->
-    <h2>Demo 5 — maskDataFrame with DataFrame condition</h2>
-    <div class="demo">
-      <div class="label">Code</div>
-      <pre>const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [4, 5, 6] });
+// Keep only valid summer readings (temp &gt; 0)
 const condDf = DataFrame.fromColumns({
-  a: [false, true, false],
-  b: [true, false, true],
+  temp_c:   [true, false, true, false, true],
+  humidity: [true, false, true, false, true],
 });
-maskDataFrame(df, condDf, { other: 99 });
-// a: [1, 99, 3]
-// b: [99, 5, 99]</pre>
-      <button onclick="demo5()">Run</button>
-      <output id="out5"></output>
-    </div>
 
-    <!-- Demo 6: interactive editor -->
-    <h2>Demo 6 — Interactive editor</h2>
-    <div class="demo">
-      <div class="label">Edit and run</div>
-      <textarea id="editor" rows="12">const s = new Series({ data: [5, 10, 15, 20, 25], name: "vals" });
+const summer = dataFrameWhere(df, condDf);
+// DataFrame:
+//   temp_c   [22,   null, 18,   null, 30  ]
+//   humidity [55,   null, 62,   null, 45  ]</code></pre>
 
-// Keep only values in [10, 20]
-const result = whereSeries(s, (v) => v >= 10 && v <= 20, { other: null });
-return result.values;</textarea>
-      <button onclick="runEditor()">Run</button>
-      <output id="out6"></output>
-    </div>
+    <h2>5. <code>dataFrameWhere</code> — Callable Condition</h2>
+    <pre><code>import { DataFrame, dataFrameWhere } from "tsb";
 
-    <script type="module">
-      import {
-        Series,
-        DataFrame,
-        whereSeries,
-        maskSeries,
-        whereDataFrame,
-        maskDataFrame,
-      } from "https://esm.sh/tsb@0.0.1" // swap for local bundle in dev
+const df = DataFrame.fromColumns({
+  a: [1, 2, 3, 4, 5],
+  b: [10, 20, 30, 40, 50],
+});
 
-      // Expose to global for onclick handlers
-      Object.assign(window, {
-        Series, DataFrame, whereSeries, maskSeries, whereDataFrame, maskDataFrame,
-      });
+// Keep only values &gt; 2 (column-wise threshold)
+const result = dataFrameWhere(df, (d) =&gt; {
+  const condCols: Record&lt;string, boolean[]&gt; = {};
+  for (const col of d.columns) {
+    condCols[col as string] = d.col(col as string).values.map(
+      (v) =&gt; (v as number) &gt; 2
+    );
+  }
+  return DataFrame.fromColumns(condCols);
+});
+// DataFrame:
+//   a: [null, null, 3, 4, 5]
+//   b: [10,   20,   30, 40, 50]</code></pre>
 
-      window.demo1 = () => {
-        const s = new Series({ data: [10, 20, 30, 40, 50], name: "prices" });
-        const r = whereSeries(s, [true, false, true, false, true]);
-        document.getElementById("out1").textContent = JSON.stringify(r.values);
-      };
+    <h2>6. <code>dataFrameMask</code> — DataFrame Mask</h2>
+    <pre><code>import { DataFrame, dataFrameMask } from "tsb";
 
-      window.demo2 = () => {
-        const s = new Series({ data: [1, 2, 3, 4, 5] });
-        const r = maskSeries(s, (v) => v > 3, { other: -1 });
-        document.getElementById("out2").textContent = JSON.stringify(r.values);
-      };
+const df = DataFrame.fromColumns({
+  sales:  [100, 200, 50,  300, 80],
+  profit: [10,  40,  -5,  60,  -2],
+});
 
-      window.demo3 = () => {
-        const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [4, 5, 6] });
-        const cond = [[true, false], [false, true], [true, true]];
-        const r = whereDataFrame(df, cond);
-        document.getElementById("out3").textContent =
-          `a: ${JSON.stringify(r.col("a").values)}\nb: ${JSON.stringify(r.col("b").values)}`;
-      };
+// Mask out (replace) rows with negative profit
+const cleaned = dataFrameMask(
+  df,
+  (d) =&gt; {
+    const condCols: Record&lt;string, boolean[]&gt; = {};
+    for (const col of d.columns) {
+      condCols[col as string] = d.col(col as string).values.map(
+        (v) =&gt; (v as number) &lt; 0
+      );
+    }
+    return DataFrame.fromColumns(condCols);
+  },
+  { other: 0 },
+);
+// DataFrame:
+//   sales:  [100, 200, 50,  300, 80]
+//   profit: [10,  40,  0,   60,  0 ]</code></pre>
 
-      window.demo4 = () => {
-        const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [10, 20, 30] });
-        const rowCond = new Series({ data: [true, false, true], index: [0, 1, 2] });
-        const r = whereDataFrame(df, rowCond, { axis: 0, other: 0 });
-        document.getElementById("out4").textContent =
-          `a: ${JSON.stringify(r.col("a").values)}\nb: ${JSON.stringify(r.col("b").values)}`;
-      };
+    <h2>Label-Aligned Series Condition</h2>
+    <p>
+      When you pass a <code>Series&lt;boolean&gt;</code> as the condition, values are aligned
+      by <strong>label</strong>, not position. Labels absent from the condition series are treated
+      as <code>false</code>.
+    </p>
+    <pre><code>import { Series, seriesWhere } from "tsb";
 
-      window.demo5 = () => {
-        const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [4, 5, 6] });
-        const condDf = DataFrame.fromColumns({
-          a: [false, true, false],
-          b: [true, false, true],
-        });
-        const r = maskDataFrame(df, condDf, { other: 99 });
-        document.getElementById("out5").textContent =
-          `a: ${JSON.stringify(r.col("a").values)}\nb: ${JSON.stringify(r.col("b").values)}`;
-      };
+const prices = new Series({ data: [10, 20, 30], index: ["a", "b", "c"] });
+const valid  = new Series&lt;boolean&gt;({ data: [false, true], index: ["a", "b"] });
 
-      window.runEditor = () => {
-        const code = document.getElementById("editor").value;
-        try {
-          // eslint-disable-next-line no-new-func
-          const fn = new Function(
-            "Series", "DataFrame", "whereSeries", "maskSeries",
-            "whereDataFrame", "maskDataFrame",
-            `"use strict";\n${code}`,
-          );
-          const result = fn(Series, DataFrame, whereSeries, maskSeries, whereDataFrame, maskDataFrame);
-          document.getElementById("out6").textContent = JSON.stringify(result, null, 2);
-        } catch (e) {
-          document.getElementById("out6").textContent = `Error: ${e.message}`;
-        }
-      };
-    </script>
+// Only "b" is in the condition with value=true; "a"=false, "c" missing→false
+const result = seriesWhere(prices, valid, { other: -1 });
+// Series { a: -1, b: 20, c: -1 }</code></pre>
+
+    <h2>API Reference</h2>
+    <table>
+      <tr><th>Function</th><th>Keeps when cond is…</th><th>Replaces with</th></tr>
+      <tr><td><code>seriesWhere(s, cond, {other})</code></td><td><code>true</code></td><td><code>other</code> (default <code>null</code>)</td></tr>
+      <tr><td><code>seriesMask(s, cond, {other})</code></td><td><code>false</code></td><td><code>other</code> (default <code>null</code>)</td></tr>
+      <tr><td><code>dataFrameWhere(df, cond, {other})</code></td><td><code>true</code></td><td><code>other</code> (default <code>null</code>)</td></tr>
+      <tr><td><code>dataFrameMask(df, cond, {other})</code></td><td><code>false</code></td><td><code>other</code> (default <code>null</code>)</td></tr>
+    </table>
+
+    <h3>Condition types</h3>
+    <table>
+      <tr><th>Type</th><th>Series ops</th><th>DataFrame ops</th></tr>
+      <tr><td>Boolean array</td><td>✅ positional</td><td>—</td></tr>
+      <tr><td><code>Series&lt;boolean&gt;</code></td><td>✅ label-aligned</td><td>—</td></tr>
+      <tr><td><code>DataFrame</code> (boolean)</td><td>—</td><td>✅ label-aligned</td></tr>
+      <tr><td>Callable</td><td>✅ receives Series</td><td>✅ receives DataFrame</td></tr>
+    </table>
+
+    <p><a href="index.html">← Back to tsb playground index</a></p>
   </body>
 </html>
