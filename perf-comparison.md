@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T11:26:24Z |
+| Last Run | 2026-04-14T11:55:00Z |
 | Iteration Count | 64 |
-| Best Metric | 225 |
+| Best Metric | 209 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -54,20 +54,19 @@
 
 ## 🔭 Future Directions
 
-- More groupby aggregation variants (nunique — ✅ added this iter).
+- More groupby aggregation variants (nunique — check if API exists).
 - Series/DataFrame accessor benchmarks (str on DataFrame columns).
 - IO benchmarks: read_parquet, to_parquet, read_excel.
 - Advanced reshape: crosstab with margins, pivot_table with fill_value.
 - Series-level dropna/fillna separate benchmarks.
 - More str_* ops: strftime on datetime accessor.
-- rollingSem, rollingSkew, rollingKurt, rollingQuantile (not yet benchmarked).
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 64 — 2026-04-14 11:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24396281065)
-- ✅ Accepted metric=225 (+18 vs prev best 207) | Rebuilt from main(186 via 3c596789 union) + re-added 35 from iter63 (concat_axis1, dataframe_set/sort_index, iloc/loc/drop/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/count/sum_mean/reset_index, series_median/min_max/sum_mean/unique/corr/filter/count/std_var/toobject/reset_index, merge_left/right/inner/outer, ewm_corr, groupby_median) + 4 new: expanding_median, expanding_count, series_quantile, groupby_nunique | Commit: 6f11229
+### Iteration 64 — 2026-04-14 11:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24397234972)
+- ✅ Accepted metric=209 (+2 vs prev best 207) | Started from 3c596789 branch (172 pairs) + 37 new: series_median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile, dataframe_set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var, concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median | Commit: 61a8d80
 
 ### Iteration 63 — 2026-04-14 10:39 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24394419832)
 - ✅ Accepted metric=207 (+5 vs prev best 202) | Based on 3c596789 branch (172 pairs) + 35 new: concat_axis1, dataframe_set/sort_index, dataframe_iloc/loc/drop/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/count/sum_mean/resetindex, series_median/min_max/sum_mean/unique/corr/filter/count/std_var/toobject/resetindex, merge_left/right/inner/outer, ewm_corr, groupby_median | Commit: b81351e
