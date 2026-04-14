@@ -8,12 +8,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T04:31:00Z |
-| Iteration Count | 56 |
-| Best Metric | 150 |
+| Last Run | 2026-04-14T05:25:00Z |
+| Iteration Count | 57 |
+| Best Metric | 157 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | (created iter-56) |
+| PR | #141 |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
 | Pause Reason | — |
@@ -29,7 +29,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: (created this run)
+**Pull Request**: #141
 **Steering Issue**: #131
 
 ---
@@ -54,24 +54,23 @@
 - Iter-54: New branch `autoloop/perf-comparison` (no hash suffix) created; recovered all 97 pairs from 7 hashed branches + 43 new (total 140). Pipeline: branch from main → union from all hashed branches → add new pairs each run. Lessons on new benchmarks: groupby.transform() takes `(vals, col)` fn for DataFrame, `(vals)` fn for Series; rollingApply takes `(s, window, fn)` not `(s, fn, window)`.
 - fromDictOriented accepts `{orient: "records", data: [...]}` or `{columns: [...], data: [...]}`.
 - Iter-56: Pipeline stable: checkout main → union 8 hashed branches (97 pairs) → reconstruct 48 from iters 52-55 → add new. Total 150 after iter-56. New: series_to_string, dataframe_to_string, notna_isna, move_column, series_digitize, cat_set_ops. Branch resets to 22 on every merge; all work rebuilt each run.
+- Iter-57: Same pipeline, but 60 new files created (all iter52-56 recovery + new: dataframe_transform, dataframe_apply_map, count_valid, dataframe_transform_rows, cat_equal_categories, groupby_apply). Total 157 pairs.
 
 ---
 
 ## 🔭 Future Directions
 
-- groupby apply benchmark (DataFrame.groupby().apply(fn)).
-- rankedDataFrame benchmark.
-- digitize/percentileOfScore benchmark.
-- dataFrameTransform/dataFrameTransformRows benchmark.
-- dataFrameApply/dataFrameApplyMap benchmark.
-- catEqualCategories benchmark.
+- More groupby aggregation variants (nunique, first, last).
+- Series/DataFrame accessor benchmarks (dt, str on DataFrame).
+- IO benchmarks: read_parquet, to_parquet, read_excel.
+- Advanced reshape: crosstab with margins, pivot_table with fill_value.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 56 — 2026-04-14 04:31 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24380995066)
-- ✅ Accepted metric=150 (+5 vs prev best 145) | Union 8 hashed branches (97 pairs) + reconstruct 48 from iters 52-55 + 6 new (series_to_string, dataframe_to_string, notna_isna, move_column, series_digitize, cat_set_ops) | Commit: 4ab8db7
+### Iteration 57 — 2026-04-14 05:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24382472700)
+- ✅ Accepted metric=157 (+7 vs prev best 150) | Union 8 hashed branches (97 pairs) + 60 new: all iter52-56 pairs recovered + new (dataframe_transform, dataframe_apply_map, count_valid, dataframe_transform_rows, cat_equal_categories, groupby_apply) | Commit: ba7eebd
 
 ### Iteration 55 — 2026-04-14 03:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24378771407)
 - ✅ Accepted metric=145 (+5 vs prev best 140) | Union 8 hashed branches + recovered iters 52-54 + 5 new (apply_dataframe_formatter, format_float, format_percent, pop_column, reorder_columns) | Commit: 9c6911c
