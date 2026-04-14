@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T17:55:00Z |
-| Iteration Count | 73 |
-| Best Metric | 256 |
+| Last Run | 2026-04-14T18:27:40Z |
+| Iteration Count | 74 |
+| Best Metric | 259 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -74,11 +74,16 @@
 - Index set ops — ✅ Done (iter 71)
 - DataFrame rank — ✅ Done (iter 71)
 - series_groupby_transform, index_contains, dataframe_apply_axis1, index_sort, dataframe_rolling_apply — ✅ Done (iter 72)
-- index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group — ✅ Done (iter 73)
+- index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group — ✅ Done (iter 73/74)
+- str_strip, str_pad, dt_floor_ceil — ✅ Done (iter 74)
+- Remaining: Index.delete/drop/equals/identical/argmin/argmax/argsort/isna/dropna, str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_is_month_start/end, dt_quarter
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 74 — 2026-04-14 18:27 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24415974514)
+- ✅ Accepted metric=259 (+3 vs prev best 256) | Branched from 3c596789 (251 after merge main) + 8 new: countna, series_str_replace, index_slice_take, index_drop_duplicates, groupby_get_group, str_strip, str_pad, dt_floor_ceil | Commit: 18927bf
 
 ### Iteration 73 — 2026-04-14 17:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24414551013)
 - ✅ Accepted metric=256 (+5 vs prev best 251) | Branched from 3c596789 (251 after merge main) + 5 new: index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group | Commit: e5fa59b
