@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T12:52:27Z |
-| Iteration Count | 66 |
-| Best Metric | 223 |
+| Last Run | 2026-04-14T13:36:08Z |
+| Iteration Count | 67 |
+| Best Metric | 230 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 1 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, error |
+| Consecutive Errors | 0 |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -44,12 +44,12 @@
 
 - Metric = min(ts_bench_count, py_bench_count); start from main, union 3c596789 branch (172 pairs) + all other hashed branches, add new pairs.
 - Bun not installed; TS benchmark files validated by file-count metric only.
-- MCP: push_to_pull_request_branch needs remote tracking ref; create via `git update-ref refs/remotes/origin/autoloop/perf-comparison $(git rev-parse origin/main)`.
+- MCP: push_to_pull_request_branch needs remote tracking ref; create via `git update-ref refs/remotes/origin/autoloop/perf-comparison $(git rev-parse HEAD~1)`.
 - push_repo_memory limit ~10KB total; compress iteration history when needed.
 - API notes: seriesRound, s.dt.year() is method; groupby AggName: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only; rollingApply(s, window, fn); Series({data,name,index}); df.assign({c: series}) direct.
-- All iter 46–62 pairs accepted; 3c596789 has 172 pairs, main has 51. Pipeline: branch from main → checkout 3c596789 → add new pairs → commit.
+- All iter 46–67 pairs accepted (except 66 error); 3c596789 has 172 pairs, main has 51. Pipeline: branch from 3c596789 → merge main (186) → add new pairs → commit.
 - groupby.first()/last() on both GroupBy types; dataFrameCummin/Cumprod exported; EWM.corr takes EwmSeriesLike.
-- Iter 66: safeoutputs MCP filtered due to 401 MCP registry check (AWF auth issue). 42 new pairs identified: series_median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile/sort_index/loc/iloc/describe, dataframe_set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/describe, concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median. Next iter: recreate these + more from 3c596789+main (186) to exceed 223.
+- Iter 67: 230 pairs achieved. Key new pairs: series_copy/rename/nunique/sort_index/loc/iloc/describe, dataframe_describe, series_corr (uses s.corr(other)), describe(s) imported from "../../src/index.js".
 
 ---
 
@@ -65,6 +65,9 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 67 — 2026-04-14 13:36 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24401981816)
+- ✅ Accepted metric=230 (+7 vs prev best 223) | Started from 3c596789 (172 pairs) + merge main (186) + 44 new: series_median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile/sort_index/loc/iloc/describe/copy/rename/nunique, dataframe_set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/describe, concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median | Commit: 375011a
 
 ### Iteration 66 — 2026-04-14 12:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24399899563)
 - ⚠️ Error: Push failed. Created 42 new benchmark pairs (186→228 total, metric would have been 228). Committed locally to autoloop/perf-comparison (81bf680) but push failed: safeoutputs MCP server was filtered due to 401 MCP registry policy check failure. Next iteration can recreate same 42 pairs from 3c596789 branch (186 after merge main) + series_median/min_max/sum_mean/unique/corr/std_var/filter/count/toobject/resetindex/isin/quantile/sort_index/loc/iloc/describe, dataframe_set_index/sort_index/iloc/loc/drop/resetindex/count/sum_mean/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/describe, concat_axis1, merge_left/right/outer/inner, ewm_corr, groupby_median
