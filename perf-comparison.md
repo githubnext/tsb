@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T10:39:13Z |
-| Iteration Count | 63 |
-| Best Metric | 207 |
+| Last Run | 2026-04-14T11:26:24Z |
+| Iteration Count | 64 |
+| Best Metric | 225 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -54,16 +54,20 @@
 
 ## 🔭 Future Directions
 
-- More groupby aggregation variants (nunique — check if API exists).
+- More groupby aggregation variants (nunique — ✅ added this iter).
 - Series/DataFrame accessor benchmarks (str on DataFrame columns).
 - IO benchmarks: read_parquet, to_parquet, read_excel.
 - Advanced reshape: crosstab with margins, pivot_table with fill_value.
 - Series-level dropna/fillna separate benchmarks.
 - More str_* ops: strftime on datetime accessor.
+- rollingSem, rollingSkew, rollingKurt, rollingQuantile (not yet benchmarked).
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 64 — 2026-04-14 11:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24396281065)
+- ✅ Accepted metric=225 (+18 vs prev best 207) | Rebuilt from main(186 via 3c596789 union) + re-added 35 from iter63 (concat_axis1, dataframe_set/sort_index, iloc/loc/drop/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/count/sum_mean/reset_index, series_median/min_max/sum_mean/unique/corr/filter/count/std_var/toobject/reset_index, merge_left/right/inner/outer, ewm_corr, groupby_median) + 4 new: expanding_median, expanding_count, series_quantile, groupby_nunique | Commit: 6f11229
 
 ### Iteration 63 — 2026-04-14 10:39 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24394419832)
 - ✅ Accepted metric=207 (+5 vs prev best 202) | Based on 3c596789 branch (172 pairs) + 35 new: concat_axis1, dataframe_set/sort_index, dataframe_iloc/loc/drop/assign/select/to_array/to_records/to_dict/fillna/isna/notna/min_max/std_var/count/sum_mean/resetindex, series_median/min_max/sum_mean/unique/corr/filter/count/std_var/toobject/resetindex, merge_left/right/inner/outer, ewm_corr, groupby_median | Commit: b81351e
