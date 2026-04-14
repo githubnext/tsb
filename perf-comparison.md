@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-14T18:53:38Z |
-| Iteration Count | 75 |
-| Best Metric | 265 |
+| Last Run | 2026-04-14T19:32:35Z |
+| Iteration Count | 76 |
+| Best Metric | 251 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Consecutive Errors | 1 |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, error |
 
 ---
 
@@ -77,11 +77,15 @@
 - index_slice_take, index_drop_duplicates, countna, series_str_replace, groupby_get_group — ✅ Done (iter 73/74)
 - str_strip, str_pad, dt_floor_ceil — ✅ Done (iter 74)
 - str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month — ✅ Done (iter 75)
-- Remaining: Index.delete/drop/equals/identical/argmin/argmax/argsort/isna/dropna, str_fullmatch, dt_is_year_start/end, dt_is_leap_year, dt_days_in_month
+- Index.delete/drop/equals/identical/argmin/argmax/argsort/isna/dropna, str_fullmatch, dt_is_year_start/end, dt_is_leap_year, dt_days_in_month — Ready to add (iter 76 error — push failed). Add from 3c596789 (251) + these 8 = 259.
+- Remaining to explore after iter 76: Series/DataFrame shift/diff if added to API, GroupBy nunique, DataFrame str accessor on columns, more IO benchmarks
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 76 — 2026-04-14 19:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24418824772)
+- ⚠️ Error: safeoutputs MCP server blocked by policy. Created 8 new benchmark pairs (259 total from 251): index_delete_drop, index_equals_identical, index_arg_sort, index_isna_dropna, str_fullmatch, dt_is_year_start_end, dt_is_leap_year, dt_days_in_month. Committed locally to autoloop/perf-comparison (b518c5b) but push failed. Next iteration can recreate same 8 pairs from 3c596789 branch (251 pairs) + these 8 new = 259.
 
 ### Iteration 75 — 2026-04-14 18:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24417123491)
 - ✅ Accepted metric=265 (+6 vs prev best 259) | Branched from 3c596789 (259 after merge main) + 6 new: str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month | Commit: d95af07
