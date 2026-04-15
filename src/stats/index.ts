@@ -307,3 +307,63 @@ export type {
   DateRangeOptions,
   ParsedFreq,
 } from "./date_range.ts";
+export { clipAdvancedSeries, clipAdvancedDataFrame } from "./clip_advanced.ts";
+export type {
+  SeriesBound,
+  DataFrameBound,
+  ClipAdvancedSeriesOptions,
+  ClipAdvancedDataFrameOptions,
+} from "./clip_advanced.ts";
+export { diffDataFrame, shiftDataFrame } from "./diff_shift.ts";
+export type {
+  DiffOptions,
+  DataFrameDiffOptions,
+  ShiftOptions,
+  DataFrameShiftOptions,
+} from "./diff_shift.ts";
+export { modeSeries, modeDataFrame } from "./mode.ts";
+export type { ModeSeriesOptions, ModeDataFrameOptions } from "./mode.ts";
+export { ffillSeries, bfillSeries, dataFrameFfill, dataFrameBfill } from "./na_ops.ts";
+export type { FillDirectionOptions, DataFrameFillOptions } from "./na_ops.ts";
+export { pctChangeSeries, pctChangeDataFrame } from "./pct_change.ts";
+export type {
+  PctChangeFillMethod,
+  PctChangeOptions,
+  DataFramePctChangeOptions,
+} from "./pct_change.ts";
+export { replaceSeries, replaceDataFrame } from "./replace.ts";
+export type {
+  ReplaceMapping,
+  ReplaceSpec,
+  ReplaceOptions,
+  DataFrameReplaceOptions,
+} from "./replace.ts";
+export { skewSeries, kurtSeries, skewDataFrame, kurtDataFrame } from "./skew_kurt.ts";
+export type { SkewKurtSeriesOptions, SkewKurtDataFrameOptions } from "./skew_kurt.ts";
+export { varSeries, semSeries, varDataFrame, semDataFrame } from "./sem_var.ts";
+export type { VarSemSeriesOptions, VarSemDataFrameOptions } from "./sem_var.ts";
+export { idxminSeries, idxmaxSeries, idxminDataFrame, idxmaxDataFrame } from "./idxmin_idxmax.ts";
+export type { IdxOptions, IdxDataFrameOptions } from "./idxmin_idxmax.ts";
+export {
+  nuniqueSeries,
+  nuniqueDataFrame,
+  anySeries,
+  allSeries,
+  anyDataFrame,
+  allDataFrame,
+} from "./nunique.ts";
+export type {
+  NuniqueSeriesOptions,
+  NuniqueDataFrameOptions,
+  AnyAllSeriesOptions,
+  AnyAllDataFrameOptions,
+} from "./nunique.ts";
+export { nunique } from "./reduce_ops.ts";
+export { quantileSeries, quantileDataFrame } from "./quantile.ts";
+export type {
+  QuantileInterpolation,
+  QuantileSeriesOptions,
+  QuantileDataFrameOptions,
+} from "./quantile.ts";
+export { intervalRange } from "./interval.ts";
+export type { ClosedType } from "./interval.ts";
