@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-15T15:30:07Z |
-| Iteration Count | 100 |
+| Last Run | 2026-04-15T15:56:34Z |
+| Iteration Count | 101 |
 | Best Metric | 317 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 2 |
-| Recent Statuses | error, error, accepted, error, accepted, error, error, accepted, error, error |
+| Consecutive Errors | 3 |
+| Recent Statuses | error, error, error, accepted, error, accepted, error, error, accepted, error |
 | Paused | false |
 
 ---
@@ -52,11 +52,15 @@
 - Branching: checkout origin/autoloop/perf-comparison-3c596789b15fd053 as local autoloop/perf-comparison, add pairs, commit, push via push_to_pull_request_branch to PR #141.
 - groupby AggName: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only; Series({data,name,index}); df.assign({c: series}) direct.
 - CategoricalAccessor instance methods (addCategories, removeCategories, renameCategories, setCategories, reorderCategories, asOrdered, asUnordered) are accessed via s.cat.<method>(). Python equivalent uses pd.Categorical directly.
-- MultiIndex.swaplevel() and Series.fromObject()/withValues() benchmarked in iter 100.
+- MultiIndex.swaplevel() and Series.fromObject()/withValues() benchmarked in iter 101.
 - DataFrame.col(), .has(), .get() are distinct methods for column access (col throws if missing, get returns undefined).
-- RangeIndex construction + toArray() + slice() + contains() all benchmarked in iter 100.
+- RangeIndex construction + toArray() + slice() + contains() all benchmarked in iter 101.
 - toDictOriented supports "split", "tight", "records", "index", "dict", "columns", "list", "series" orientations.
 - isScalar/isListLike/isArrayLike/isDictLike/isIterator are all exported utility functions from api_types.ts.
+- MultiIndex constructor is private; use MultiIndex.fromTuples() or MultiIndex.fromArrays() static factories.
+- Index.isUnique/hasDuplicates/isMonotonicIncreasing/isMonotonicDecreasing are computed properties (benchmarked iter 101).
+- Index.getLoc(key) returns position (number or array of numbers) for a label (benchmarked iter 101).
+- str.len() measures string length of each element (benchmarked iter 101).
 
 ---
 
@@ -94,7 +98,7 @@
 - MultiIndex setops (union/intersection/difference) — ✅ Done (iter 99).
 - MultiIndex reorderLevels, setNames — ✅ Done (iter 99 via bench_multi_index_droplevel).
 - groupby nunique — not in API; skip.
-- MultiIndex.swaplevel(), Series.fromObject(), Series.withValues(), DataFrame.col()/has()/get(), type checks (isScalar etc.), toDictOriented multi-orient, RangeIndex — ✅ Done (iter 100).
+- MultiIndex.swaplevel(), Series.fromObject(), Series.withValues(), DataFrame.col()/has()/get(), type checks (isScalar etc.), toDictOriented multi-orient, RangeIndex, index_monotonic, index_getloc, str_len — ✅ Done (iter 101).
 - Advanced reshape: crosstab with margins, pivot_table with fill_value.
 - Series.nbits/itemsize-style benchmarks if API exists.
 - DataFrame.memory_usage benchmark if API exists.
@@ -104,6 +108,14 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 101 — 2026-04-15 15:56 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24464467430)
+
+- **Status**: ⚠️ Error
+- **Change**: Added 10 pairs: multi_index_swaplevel, series_from_object, series_with_values, dataframe_col_has, type_checks, to_dict_oriented_all, range_index, index_monotonic, index_getloc, str_len. Local commit 1795d4f. Metric would be 327.
+- **Metric**: N/A (push blocked — safeoutputs MCP tools unavailable; same as iters 83-100 except 86, 94, 97)
+- **Commit**: 1795d4f (local only)
+- **Notes**: MultiIndex.fromTuples() confirmed as correct API (private constructor). Index.getLoc()/isUnique/isMonotonicIncreasing all benchmarked. str.len() accessor benchmarked.
 
 ### Iteration 100 — 2026-04-15 15:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24463206508)
 
