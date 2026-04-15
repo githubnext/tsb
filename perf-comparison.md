@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-15T23:18:29Z |
-| Iteration Count | 115 |
-| Best Metric | 340 |
+| Last Run | 2026-04-15T23:47:01Z |
+| Iteration Count | 116 |
+| Best Metric | 345 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, error, error, error, error, error, error, accepted, error, accepted |
+| Recent Statuses | error, error, error, error, error, accepted, error, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -68,8 +68,7 @@
 
 ## 🔭 Future Directions
 
-- catFromCodes() benchmark still needed (cat_from_codes pair missing from branch).
-- MultiIndex isin, toArray, reorderLevels, setNames still not benchmarked.
+- MultiIndex: getLoc with slice, get_locs, get_indexer for multi-label lookup.
 - More groupby: nunique (check if API exists).
 - Advanced reshape: crosstab with margins, pivot_table with fill_value.
 - DataFrame shift/diff, series_pipe, DataFrame.copy(), Series.combine() if APIs exist.
@@ -78,6 +77,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 116 — 2026-04-15 23:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24484182038)
+- **Status**: ✅ Accepted
+- **Change**: Added 5 benchmark pairs: cat_from_codes (catFromCodes/pd.Categorical.from_codes), multi_index_isin (MultiIndex.isin()), multi_index_reorder_levels (MultiIndex.reorderLevels()), multi_index_set_names (MultiIndex.setNames()), multi_index_to_array (MultiIndex.toArray())
+- **Metric**: 345 (previous: 340, +5) | **Commit**: 3203925
+- **Notes**: Covered remaining catFromCodes gap and 4 missing MultiIndex utility methods.
 
 ### Iteration 115 — 2026-04-15 23:18 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24483302039)
 - **Status**: ✅ Accepted
