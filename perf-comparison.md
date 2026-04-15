@@ -8,19 +8,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-15T20:48:00Z |
-| Iteration Count | 110 |
+| Last Run | 2026-04-15T21:20:00Z |
+| Iteration Count | 111 |
 | Best Metric | 332 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
-| Pause Reason | safeoutputs MCP tools unavailable; push blocked 4 consecutive runs |
+| Pause Reason | safeoutputs MCP tools unavailable; push blocked 5 consecutive runs |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 4 |
-| Recent Statuses | error, error, error, error, accepted, error, accepted, error, error, accepted |
+| Consecutive Errors | 5 |
+| Recent Statuses | error, error, error, error, error, accepted, error, accepted, error, accepted |
 | Paused | true |
 
 ---
@@ -43,7 +43,7 @@
 
 ## 📚 Lessons Learned
 
-- Metric = min(ts_bench_count, py_bench_count); local branch autoloop/perf-comparison tracks origin/autoloop/perf-comparison-3c596789b15fd053 (best metric 332 after iter 106, commit 62b943a). Local commit 054f3a1 has 6 more pairs ready to push when MCP tools available.
+- Metric = min(ts_bench_count, py_bench_count); branch autoloop/perf-comparison tracks origin/autoloop/perf-comparison-3c596789b15fd053. Best metric 332 after iter 106, commit 62b943a. Local commit 115bf22 has 6 more pairs ready to push when MCP tools available.
 - Bun not installed; TS benchmark files validated by file-count metric only.
 - push_repo_memory limit ~8 KB per file (total ~10 KB across all files).
 - Index API: delete(), drop(), equals(), identical(), argsort(), isna(), dropna(), min(), max(), argmin(), argmax(), insert(), nunique(), fillna(), append(), rename(), symmetricDifference() — all benchmarked.
@@ -117,16 +117,24 @@
 - reindexSeries/reindexDataFrame, alignSeries, Timestamp, Timedelta, Period/PeriodIndex, IntervalIndex, CategoricalIndex — ✅ Done (iter 108).
 - DataFrame.filter() if it exists.
 - More IO: to_parquet/read_parquet if added to src/io.
-- catFromCodes() — planned for next push (local commit 054f3a1).
-- Extended value type checks (isNumber/isBool/isStringValue/isFloat/isInteger/isBigInt/isRegExp/isMissing/isHashable/isDate) — planned for next push (local commit 054f3a1).
-- Dtype predicates (isNumericDtype/isIntegerDtype/isFloatDtype/isBoolDtype/isStringDtype/isDatetimeDtype/isCategoricalDtype) — planned for next push (local commit 054f3a1).
-- MultiIndex sortValues/equals/duplicated/dropDuplicates/isin/isna/notna/dropna/toArray — planned for next push (local commit 054f3a1).
+- catFromCodes() — planned for next push (local commit 115bf22).
+- Extended value type checks (isNumber/isBool/isStringValue/isFloat/isInteger/isBigInt/isRegExp/isMissing/isHashable/isDate) — planned for next push (local commit 115bf22).
+- Dtype predicates (isNumericDtype/isIntegerDtype/isFloatDtype/isBoolDtype/isStringDtype/isDatetimeDtype/isCategoricalDtype) — planned for next push (local commit 115bf22).
+- MultiIndex sortValues/equals/duplicated/dropDuplicates/isin/isna/notna/dropna/toArray — planned for next push (local commit 115bf22).
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 111 — 2026-04-15 21:20 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24478931080)
+
+- **Status**: ⚠️ Error
+- **Change**: Added 6 pairs: cat_from_codes, value_type_checks2, dtype_predicates, multi_index_sort_equals, multi_index_duplicated_isin, multi_index_isna_toarray. Local commit 115bf22. Metric would be 338 (+6 vs best 332).
+- **Metric**: N/A (push blocked — safeoutputs MCP tools unavailable; consecutive_errors now 5, program remains paused)
+- **Commit**: 115bf22 (local only)
+- **Notes**: All 12 benchmark files created and committed. Same recurring push blocker (iters 107-111). catFromCodes, value/dtype predicates, MultiIndex sort/equals/duplicated/isin/isna/dropna/toArray all covered. Next run should push when MCP tools available.
 
 ### Iteration 110 — 2026-04-15 20:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24477539530)
 
