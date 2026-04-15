@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-15T17:26:49Z |
-| Iteration Count | 104 |
+| Last Run | 2026-04-15T17:53:29Z |
+| Iteration Count | 105 |
 | Best Metric | 326 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 2 |
-| Recent Statuses | error, error, accepted, error, accepted, error, error, accepted, error, error |
+| Consecutive Errors | 3 |
+| Recent Statuses | error, error, error, accepted, error, accepted, error, error, accepted, error |
 | Paused | false |
 
 ---
@@ -101,12 +101,12 @@
 - Advanced reshape: crosstab with margins, pivot_table with fill_value.
 - Series.nbits/itemsize-style benchmarks if API exists.
 - DataFrame.memory_usage benchmark if API exists.
-- Dtype class (from, inferFrom, commonType, property access) — ✅ Done (iter 104, pending push).
-- Index.symmetricDifference — ✅ Done (iter 104, pending push).
-- attrs: getAttr/setAttr/clearAttrs/copyAttrs/deleteAttr/mergeAttrs/hasAttrs — ✅ Done (iter 104, pending push).
-- describe() with custom percentiles and include options — ✅ Done (iter 104, pending push).
-- Series property access (shape/ndim/size/empty/values) — ✅ Done (iter 104, pending push).
-- insertColumn for DataFrame — ✅ Done (iter 104, pending push).
+- Dtype class (from, inferFrom, commonType, property access) — ✅ Done (iter 105).
+- Index.symmetricDifference — ✅ Done (iter 105).
+- attrs: getAttr/setAttr/clearAttrs/copyAttrs/deleteAttr/mergeAttrs/hasAttrs — ✅ Done (iter 105).
+- describe() with custom percentiles and include options — ✅ Done (iter 105).
+- Series property access (shape/ndim/size/empty/values) — ✅ Done (iter 105).
+- insertColumn for DataFrame — ✅ Done (iter 105).
 - DataFrame.copy() if it exists in API.
 - Series.combine() if it exists in API.
 - Advanced MultiIndex operations not yet covered.
@@ -119,6 +119,13 @@
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 105 — 2026-04-15 17:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24469672759)
+
+- **Status**: ⚠️ Error
+- **Change**: Added 6 pairs: dtype, attrs_advanced, index_symmetric_diff, describe_options, series_properties, insert_column. Local commit c02124e. Metric would be 332 (+6 vs best 326).
+- **Metric**: N/A (push blocked — safeoutputs MCP tools unavailable; same recurring issue as iters 83-104 except 86, 94, 97, 102)
+- **Notes**: All 12 benchmark files (6 TS + 6 PY) created and committed to local branch autoloop/perf-comparison (from origin/autoloop/perf-comparison-3c596789b15fd053). Next run should find commit c02124e and push when MCP tools are available.
 
 ### Iteration 104 — 2026-04-15 17:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24468471179)
 
