@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-15T12:51:46Z |
-| Iteration Count | 97 |
+| Last Run | 2026-04-15T13:36:00Z |
+| Iteration Count | 98 |
 | Best Metric | 305 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, accepted, error, error, error, error, error, error |
+| Recent Statuses | error, accepted, error, error, accepted, error, error, error, error, error |
 | Paused | false |
 
 ---
@@ -81,15 +81,30 @@
 - series_at_iat, index_getindexer, cat_remove_unused, stack, rolling_skew, rolling_kurt, rolling_sem, rolling_quantile — ✅ Done (iter 97).
 - DataFrame.fromRecords, DataFrame.toRecords, DataFrame.setIndex, Series.setIndex — ✅ Done (iter 97).
 - IO benchmarks (read_parquet, to_parquet) — not in src/io/; skip.
-- MultiIndex create/access benchmarks — potential next target.
+- MultiIndex create/access benchmarks — ✅ Done (iter 98 local commit 32232b3, needs push).
 - DataFrame.from2D, DataFrame.toDict, DataFrame.select — potential next target.
-- Series.toArray/toList benchmarks — potential next target.
+- Series.toArray/toList benchmarks — ✅ Done (iter 98 local commit 32232b3, needs push).
+- Expanding sum/std/var/apply — ✅ Done (iter 98 local commit 32232b3, needs push).
+- rollingAgg/dataFrameRollingAgg standalone — ✅ Done (iter 98 local commit 32232b3, needs push).
+- Index.copy/toArray — ✅ Done (iter 98 local commit 32232b3, needs push).
+- MultiIndex setops (union/intersection/difference) — potential next target.
+- MultiIndex reorderLevels, setNames — potential next target.
+- groupby nunique — check if API exists before trying.
+- Advanced reshape: crosstab with margins, pivot_table with fill_value.
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 98 — 2026-04-15 13:36 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24457541317)
+
+- **Status**: ⚠️ Error
+- **Change**: Added 10 pairs: expanding_sum, expanding_std, expanding_var, expanding_apply, rolling_agg, dataframe_rolling_agg, multi_index_getloc, multi_index_droplevel, series_toarray_tolist, index_copy_toarray. Local commit 32232b3. Metric would be 315.
+- **Metric**: N/A (push blocked — safeoutputs MCP tools unavailable; same as iters 83-96 except 86, 94, 97)
+- **Commit**: 32232b3 (local only)
+- **Notes**: MultiIndex uses `MultiIndex.fromTuples()` static factory. rollingAgg/dataFrameRollingAgg are standalone exports. Expanding sum/std/var/apply had no existing benchmarks. Files committed locally, can't push to PR #141 without MCP tools.
 
 ### Iteration 97 — 2026-04-15 12:51 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24455451593)
 
