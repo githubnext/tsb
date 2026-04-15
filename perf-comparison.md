@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-15T16:26:59Z |
-| Iteration Count | 102 |
+| Last Run | 2026-04-15T16:50:45Z |
+| Iteration Count | 103 |
 | Best Metric | 326 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, error, accepted, error, accepted, error, error, accepted |
+| Consecutive Errors | 1 |
+| Recent Statuses | error, error, error, accepted, error, accepted, error, error, accepted, error |
 | Paused | false |
 
 ---
@@ -43,24 +43,23 @@
 
 ## 📚 Lessons Learned
 
-- Metric = min(ts_bench_count, py_bench_count); base branch is origin/autoloop/perf-comparison-3c596789b15fd053 (actual 251 pairs despite commits saying 265).
+- Metric = min(ts_bench_count, py_bench_count); working branch is origin/autoloop/perf-comparison-3c596789b15fd053 (actual metric 337 after iter 103).
 - Bun not installed; TS benchmark files validated by file-count metric only.
 - push_repo_memory limit ~8 KB per file (total ~10 KB across all files).
-- Index API: delete(), drop(), equals(), identical(), argsort(), isna(), dropna(), min(), max(), argmin(), argmax(), insert(), nunique(), fillna(), append(), rename().
+- Index API: delete(), drop(), equals(), identical(), argsort(), isna(), dropna(), min(), max(), argmin(), argmax(), insert(), nunique(), fillna(), append(), rename(), symmetricDifference().
 - String accessor: fullmatch(), lower(), upper(), title(), capitalize(), swapcase(), find(), rfind(), repeat(), isalpha(), isdigit(), isalnum(), isnumeric(), islower(), isupper(), istitle(), isspace(), zfill(), center(), ljust(), rjust(), slice(), count().
 - DatetimeAccessor: is_year_start(), is_year_end(), is_leap_year(), days_in_month(), is_month_start(), is_month_end(), hour(), minute(), second().
 - Branching: checkout origin/autoloop/perf-comparison-3c596789b15fd053 as local autoloop/perf-comparison, add pairs, commit, push via push_to_pull_request_branch to PR #141.
 - groupby AggName: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only; Series({data,name,index}); df.assign({c: series}) direct.
 - CategoricalAccessor instance methods (addCategories, removeCategories, renameCategories, setCategories, reorderCategories, asOrdered, asUnordered) are accessed via s.cat.<method>(). Python equivalent uses pd.Categorical directly.
-- MultiIndex.swaplevel() and Series.fromObject()/withValues() benchmarked in iter 101.
 - DataFrame.col(), .has(), .get() are distinct methods for column access (col throws if missing, get returns undefined).
-- RangeIndex construction + toArray() + slice() + contains() all benchmarked in iter 101.
 - toDictOriented supports "split", "tight", "records", "index", "dict", "columns", "list", "series" orientations.
 - isScalar/isListLike/isArrayLike/isDictLike/isIterator are all exported utility functions from api_types.ts.
 - MultiIndex constructor is private; use MultiIndex.fromTuples() or MultiIndex.fromArrays() static factories.
-- Index.isUnique/hasDuplicates/isMonotonicIncreasing/isMonotonicDecreasing are computed properties (benchmarked iter 101).
-- Index.getLoc(key) returns position (number or array of numbers) for a label (benchmarked iter 101).
-- str.len() measures string length of each element (benchmarked iter 101).
+- Index.isUnique/hasDuplicates/isMonotonicIncreasing/isMonotonicDecreasing are computed properties.
+- str.len() measures string length of each element.
+- Dtype.from() returns singletons; use Dtype.inferFrom(values) for inference, Dtype.commonType(a,b) for type promotion.
+- attrs functions: getAttrs/setAttrs/updateAttrs/withAttrs (in attrs_ops), attrsCount/attrsKeys (in attrs_count_keys), getAttr/setAttr/clearAttrs/copyAttrs/deleteAttr/mergeAttrs/hasAttrs (in attrs_advanced) — all covered.
 
 ---
 
@@ -102,12 +101,24 @@
 - Advanced reshape: crosstab with margins, pivot_table with fill_value.
 - Series.nbits/itemsize-style benchmarks if API exists.
 - DataFrame.memory_usage benchmark if API exists.
+- Dtype class (from, inferFrom, commonType, property access) — ✅ Done (iter 103, pending push).
+- Index.symmetricDifference — ✅ Done (iter 103, pending push).
+- attrs: getAttr/setAttr/clearAttrs/copyAttrs/deleteAttr/mergeAttrs/hasAttrs — ✅ Done (iter 103, pending push).
+- describe() with custom percentiles and include options — ✅ Done (iter 103, pending push).
+- Series property access (shape/ndim/size/empty/values) — ✅ Done (iter 103, pending push).
 
 ---
 
 ## 📊 Iteration History
 
 All iterations in reverse chronological order (newest first).
+
+### Iteration 103 — 2026-04-15 16:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24466900367)
+
+- **Status**: ⚠️ Error
+- **Change**: Added 5 pairs: dtype, attrs_advanced, index_symmetric_diff, describe_options, series_properties. Merged origin/main (+6 pairs). Total metric would be 337 (+11 vs best 326). Local commit 54d99e1 on branch autoloop/perf-comparison.
+- **Metric**: N/A (push blocked — safeoutputs MCP tools unavailable; same recurring issue as iters 83-101 except 94, 97, 102)
+- **Notes**: Benchmarks created for Dtype class operations, Index.symmetricDifference, advanced attrs functions, describe() with options, Series property access. Branch checkout: origin/autoloop/perf-comparison-3c596789b15fd053. Next run should push these. Functions to add: more DataFrame properties, Series.combine(), advanced MultiIndex ops.
 
 ### Iteration 102 — 2026-04-15 16:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24465820163)
 
