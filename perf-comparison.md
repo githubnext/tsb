@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-15T10:55:36Z |
+| Last Run | 2026-04-15T11:24:30Z |
 | Iteration Count | 94 |
-| Best Metric | 281 |
+| Best Metric | 269 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, error, error, error, error, error, error, error |
+| Consecutive Errors | 8 |
+| Recent Statuses | error, error, error, error, error, error, error, error, error, error |
 | Paused | false |
 
 ---
@@ -79,8 +79,8 @@
 - str_startswith_endswith, str_match, str_join, str_cat, dt_normalize, dt_quarter_month — ✅ Done (iter 75)
 - Remaining after iter 80: str_case (title/capitalize/swapcase), str_zfill/center/ljust/rjust, str_count (str.count), str_slice/get, str_isalnum/isnumeric/islower/isupper/istitle/isspace, index_fillna, index_append, index_rename, IO benchmarks (read_parquet, to_parquet) — ✅ All string/index ops Done (iter 82)
 - IO benchmarks (read_parquet, to_parquet) still pending if API exists.
-- str_case, str_zfill_center_ljust_rjust, str_count, str_slice_get, str_isalnum_isnumeric, str_islower_isupper, str_wrap, str_encode, str_istitle_isspace, index_fillna, index_append, index_rename — ✅ Done (iter 94, commit 82afaa6).
-- Next: groupby_nunique (API does NOT exist — skip), IO benchmarks (read_parquet, to_parquet if API exists), DataFrame str accessor on columns (check frame API), strftime on datetime accessor (series_dt_strftime already done), other unexplored APIs.
+- str_case, str_zfill_center_ljust_rjust, str_count, str_slice_get, str_isalnum_isnumeric, str_islower_isupper, str_wrap, str_encode, str_istitle_isspace, index_fillna, index_append, index_rename — ✅ Done (iter 94, commit 49a9bb9).
+- Next: groupby_nunique (if API exists), IO benchmarks (read_parquet, to_parquet if API exists), DataFrame str accessor on columns, strftime on datetime accessor, series_groupby_std, dataframe_corr, series_cov, series_autocorr.
 - Base branch now at 281 pairs (iter 94).
 
 ---
@@ -89,13 +89,13 @@
 
 All iterations in reverse chronological order (newest first).
 
-### Iteration 94 — 2026-04-15 10:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24450563155)
+### Iteration 94 — 2026-04-15 11:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24451751712)
 
-- **Status**: ✅ Accepted
-- **Change**: Added 12 pairs: str_case, str_zfill_center_ljust_rjust, str_count, str_slice_get, str_isalnum_isnumeric, str_islower_isupper, str_istitle_isspace, str_wrap, str_encode, index_fillna, index_append, index_rename.
-- **Metric**: 281 (previous best: 269, delta: +12)
-- **Commit**: 82afaa6
-- **Notes**: safeoutputs MCP tools available this run. Successfully pushed 24 benchmark files (12 TS + 12 PY) covering remaining string accessor and Index methods.
+- **Status**: ⚠️ Error
+- **Change**: Added 12 pairs: str_case, str_zfill_center_ljust_rjust, str_count, str_slice_get, str_isalnum_isnumeric, str_islower_isupper, str_istitle_isspace, str_wrap, str_encode, index_fillna, index_append, index_rename. Local commit 49a9bb9. Metric = 281.
+- **Metric**: N/A (push blocked — safeoutputs MCP tools unavailable; push_to_pull_request_branch and all safe-output tools return "Tool does not exist")
+- **Commit**: 49a9bb9 (local only)
+- **Notes**: 24 files created and committed. Same blocker as iters 83-93 (except 86). safeoutputs MCP server not connected this run.
 
 ### Iteration 93 — 2026-04-15 10:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24449548477)
 
