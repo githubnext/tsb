@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T20:18:10Z |
-| Iteration Count | 132 |
-| Best Metric | 380 |
+| Last Run | 2026-04-16T20:48:10Z |
+| Iteration Count | 133 |
+| Best Metric | 388 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, error, error, error, error, accepted, accepted, error |
+| Recent Statuses | accepted, accepted, error, error, error, error, accepted, accepted, error, accepted |
 | Paused | false |
 
 ---
@@ -65,18 +65,26 @@
 
 ## 🔭 Future Directions
 
-- dataframe_mode — modeDataFrame benchmark.
-- quantileDataFrame — DataFrame-level quantile.
+- dataframe_mode — modeDataFrame benchmark. ✅ Done (iter 133)
+- quantileDataFrame — DataFrame-level quantile. ✅ Done (iter 133)
 - MultiIndex getLoc with slice / get_locs / get_indexer.
 - groupby: nunique, transform-apply.
-- DatetimeIndex: tz_localize, tz_convert.
+- DatetimeIndex: tz_localize, tz_convert. ✅ Done (iter 133)
 - Series.autocorr(lag).
-- valueCountsBinned — binned value counts.
+- valueCountsBinned — binned value counts. ✅ Done (iter 133)
 - read_excel — Excel I/O benchmark.
+- namedAgg — named aggregation groupby. ✅ Done (iter 133)
+- numeric_ops (floor/ceil/trunc/sqrt). ✅ Done (iter 133)
+- memory_usage (series/dataframe). ✅ Done (iter 133)
+- series_arith_fns (seriesAdd/Sub/Mul/Div standalone). ✅ Done (iter 133)
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 133 — 2026-04-16 20:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24533159999)
+- **Status**: ✅ Accepted | **Metric**: 388 (+8 from 380) | **Commit**: 0232f33
+- Added 8 pairs: mode_dataframe, quantile_dataframe, value_counts_binned, memory_usage, named_agg, tz_localize_convert, numeric_ops, series_arith_fns.
 
 ### Iteration 132 — 2026-04-16 20:18 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24531850677)
 - **Status**: ✅ Accepted | **Metric**: 380 (+8 from 372) | **Commit**: 5c60e02
