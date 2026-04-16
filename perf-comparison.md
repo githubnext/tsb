@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T00:34:10Z |
-| Iteration Count | 117 |
-| Best Metric | 354 |
+| Last Run | 2026-04-16T01:36:46Z |
+| Iteration Count | 118 |
+| Best Metric | 57 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, error, error, accepted, error, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | error, error, accepted, error, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -43,6 +43,7 @@
 
 ## 📚 Lessons Learned
 
+- **IMPORTANT**: Iter 118 reset best_metric to 57 (was 354). The old metric was inflated — previous iters tracked many functions but branches that were later merged/deleted caused the file count in main to drop back to 51. The canonical branch `autoloop/perf-comparison` never existed before iter 118; was re-created from main. Each iter should add benchmark pairs and compare to actual file counts.
 - Metric = min(ts_bench_count, py_bench_count); branch autoloop/perf-comparison. Best metric 334 after iter 114, commit 685193d. Iters 107-113 were push-blocked (safeoutputs MCP blocked by policy). Iter 114 succeeded when policy was restored.
 - Bun not installed; TS benchmark files validated by file-count metric only.
 - push_repo_memory limit ~8 KB per file (total ~10 KB across all files).
@@ -78,6 +79,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 118 — 2026-04-16 01:36 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24487281656)
+- **Status**: ✅ Accepted
+- **Change**: Added 6 benchmark pairs: rank (rankSeries/rankDataFrame), nlargest_nsmallest (nlargestSeries/nsmallestSeries), sample (sampleSeries/sampleDataFrame), get_dummies (getDummies/dataFrameGetDummies), duplicated (duplicatedSeries/dropDuplicatesSeries/dropDuplicatesDataFrame), interpolate (interpolateSeries/dataFrameInterpolate)
+- **Metric**: 57 (reset from stale 354; real baseline was 51, +6) | **Commit**: e0c0aa0
+- **Notes**: Best metric reset from 354 to 57 because canonical branch autoloop/perf-comparison didn't exist and main only had 51 benchmark pairs. Created branch from main and added 6 new pairs covering previously uncovered stats functions.
 
 ### Iteration 117 — 2026-04-16 00:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24485542882)
 - **Status**: ✅ Accepted
