@@ -1,0 +1,33 @@
+/**
+ * Benchmark: MultiIndex.getLoc key lookup
+ */
+import { MultiIndex } from "../../src/index.js";
+
+const ROWS = 100_000;
+const WARMUP = 3;
+const ITERATIONS = 10;
+
+const a = Array.from({ length: ROWS }, (_, i) => `a${i % 100}`);
+const b = Array.from({ length: ROWS }, (_, i) => i % 1000);
+const tuples: [string, number][] = a.map((v, i) => [v, b[i]]);
+const mi = new MultiIndex({ tuples });
+const key: [string, number] = ["a50", 500];
+
+for (let i = 0; i < WARMUP; i++) {
+  mi.getLoc(key);
+}
+
+const start = performance.now();
+for (let i = 0; i < ITERATIONS; i++) {
+  mi.getLoc(key);
+}
+const total = performance.now() - start;
+
+console.log(
+  JSON.stringify({
+    function: "multi_index_getloc",
+    mean_ms: total / ITERATIONS,
+    iterations: ITERATIONS,
+    total_ms: total,
+  }),
+);

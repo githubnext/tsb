@@ -1,4 +1,4 @@
-"""Benchmark: DataFrame.corr — pairwise Pearson correlation on a 10k-row DataFrame"""
+"""Benchmark: DataFrame correlation matrix on 10k-row x 5-column DataFrame"""
 import json, time
 import numpy as np
 import pandas as pd
@@ -8,9 +8,11 @@ WARMUP = 3
 ITERATIONS = 10
 
 df = pd.DataFrame({
-    "a": np.sin(np.arange(ROWS) * 0.01),
-    "b": np.cos(np.arange(ROWS) * 0.01),
-    "c": np.arange(ROWS, dtype=np.float64) * 0.001,
+    "A": np.sin(np.arange(ROWS) * 0.01),
+    "B": np.cos(np.arange(ROWS) * 0.01),
+    "C": np.sin(np.arange(ROWS) * 0.02),
+    "D": np.cos(np.arange(ROWS) * 0.02),
+    "E": np.sin(np.arange(ROWS) * 0.03),
 })
 
 for _ in range(WARMUP):

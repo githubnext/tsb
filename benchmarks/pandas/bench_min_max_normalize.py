@@ -1,4 +1,4 @@
-"""Benchmark: min-max normalization — scale a 100k-element Series to [0, 1]"""
+"""Benchmark: min-max normalization on 100k-element Series"""
 import json, time
 import numpy as np
 import pandas as pd
@@ -7,18 +7,15 @@ ROWS = 100_000
 WARMUP = 3
 ITERATIONS = 10
 
-data = np.arange(ROWS, dtype=np.float64) * 3.7 - 50_000
+data = np.sin(np.arange(ROWS) * 0.01) * 100 + 50
 s = pd.Series(data)
 
-def min_max_normalize(s):
-    return (s - s.min()) / (s.max() - s.min())
-
 for _ in range(WARMUP):
-    min_max_normalize(s)
+    (s - s.min()) / (s.max() - s.min())
 
 start = time.perf_counter()
 for _ in range(ITERATIONS):
-    min_max_normalize(s)
+    (s - s.min()) / (s.max() - s.min())
 total = (time.perf_counter() - start) * 1000
 
 print(json.dumps({

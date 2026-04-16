@@ -1,4 +1,4 @@
-"""Benchmark: pearsonCorr — Pearson correlation between two 100k-element Series"""
+"""Benchmark: Pearson correlation between two 100k-element Series"""
 import json, time
 import numpy as np
 import pandas as pd
@@ -7,15 +7,17 @@ ROWS = 100_000
 WARMUP = 3
 ITERATIONS = 10
 
-x = pd.Series(np.sin(np.arange(ROWS) * 0.01))
-y = pd.Series(np.sin(np.arange(ROWS) * 0.01 + 0.5))
+a = np.sin(np.arange(ROWS) * 0.01)
+b = np.cos(np.arange(ROWS) * 0.01)
+sa = pd.Series(a)
+sb = pd.Series(b)
 
 for _ in range(WARMUP):
-    x.corr(y)
+    sa.corr(sb)
 
 start = time.perf_counter()
 for _ in range(ITERATIONS):
-    x.corr(y)
+    sa.corr(sb)
 total = (time.perf_counter() - start) * 1000
 
 print(json.dumps({

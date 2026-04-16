@@ -1,113 +1,263 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tsb — wideToLong</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #1a1a1a; }
-    h1 { color: #0066cc; }
-    h2 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
-    pre { background: #f6f8fa; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.9em; }
-    code { font-family: 'Fira Code', 'Cascadia Code', monospace; }
-    .note { background: #fffbea; border-left: 4px solid #f5a623; padding: 0.7rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
-    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-    th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
-    th { background: #f0f4f8; }
-    a { color: #0066cc; }
-  </style>
-</head>
-<body>
-  <p><a href="index.html">← tsb playground</a></p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb · wide_to_long</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --surface: #161b22;
+        --border: #30363d;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --accent: #58a6ff;
+        --green: #3fb950;
+        --yellow: #d29922;
+        --red: #f85149;
+        --code-bg: #1f2937;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; }
+      header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+      header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+      header h1 { font-size: 1.4rem; font-weight: 600; }
+      main { max-width: 900px; margin: 0 auto; padding: 2rem; }
+      section { margin-bottom: 2.5rem; }
+      h2 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+      p { margin-bottom: 0.75rem; color: var(--muted); font-size: 0.95rem; }
+      code { background: var(--code-bg); padding: 0.1em 0.4em; border-radius: 4px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.88em; }
+      pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.85rem; font-family: "SFMono-Regular", Consolas, monospace; line-height: 1.5; }
+      .editor { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      textarea { width: 100%; background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.82rem; resize: vertical; line-height: 1.5; outline: none; }
+      textarea:focus { border-color: var(--accent); }
+      button { background: var(--accent); color: #0d1117; border: none; border-radius: 6px; padding: 0.5rem 1.25rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+      button:hover { opacity: 0.85; }
+      .output { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.82rem; white-space: pre; min-height: 120px; color: var(--green); overflow-x: auto; }
+      .output.error { color: var(--red); }
+      label { font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 0.3rem; }
+      .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+      input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.85rem; width: 100%; outline: none; }
+      input[type="text"]:focus { border-color: var(--accent); }
+      table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+      th { background: var(--surface); border: 1px solid var(--border); padding: 0.4rem 0.75rem; text-align: left; color: var(--accent); }
+      td { border: 1px solid var(--border); padding: 0.35rem 0.75rem; color: var(--text); font-family: "SFMono-Regular", Consolas, monospace; }
+      tr:nth-child(even) td { background: #1a1f27; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="index.html">← tsb</a>
+      <h1>🔀 wide_to_long</h1>
+    </header>
+    <main>
 
-  <h1><code>wideToLong</code></h1>
-  <p>
-    Reshape a wide-format DataFrame to long format by collapsing stub-prefixed column
-    groups into rows — mirrors
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.wide_to_long.html" target="_blank">
-    <code>pandas.wide_to_long()</code></a>.
-  </p>
+      <section>
+        <h2>Overview</h2>
+        <p>
+          <code>wideToLong(df, stubnames, i, j, options?)</code> mirrors
+          <code>pandas.wide_to_long()</code>. It reshapes a <strong>wide</strong>
+          DataFrame — where multiple columns share a common prefix (stub) and a
+          varying suffix — into a <strong>long</strong> DataFrame with one row per
+          (original row, suffix) pair.
+        </p>
+        <p>
+          Unlike the simpler <code>melt</code> (which treats every column value
+          independently), <code>wideToLong</code> keeps related stub columns
+          <em>side by side</em> and extracts the suffix as a new identifier column.
+        </p>
+        <pre>wideToLong(df, stubnames, i, j, { sep?, suffix? })</pre>
+        <p>
+          <code>stubnames</code> — prefix(es) of the grouped columns (e.g.
+          <code>["A","B"]</code>).<br />
+          <code>i</code> — identifier column(s) that are carried along
+          unchanged.<br />
+          <code>j</code> — name for the new column that holds the extracted
+          suffixes.<br />
+          <code>sep</code> — separator between stub and suffix
+          (<code>""</code> by default).<br />
+          <code>suffix</code> — RegExp or string pattern that matches the suffix
+          (<code>/\d+/</code> by default).
+        </p>
+      </section>
 
-  <h2>Concept</h2>
-  <p>
-    Given a wide DataFrame where repeated measurements are spread across columns with a
-    common stub prefix and a numeric (or other) suffix — e.g. <code>score_2021</code>,
-    <code>score_2022</code> — <code>wideToLong</code> pivots those column groups into rows.
-    One row per original row per unique suffix is produced.
-  </p>
+      <section>
+        <h2>Interactive playground</h2>
+        <p>Edit the CSV data, stubs, and options then click <strong>Run</strong>.</p>
 
-  <h2>Example — numeric suffixes</h2>
-  <pre><code>import { DataFrame } from "tsb";
-import { wideToLong } from "tsb";
+        <div class="controls">
+          <div>
+            <label>stubnames (comma-separated)</label>
+            <input type="text" id="stubs" value="A,B" />
+          </div>
+          <div>
+            <label>i (id column(s), comma-separated)</label>
+            <input type="text" id="icols" value="id" />
+          </div>
+          <div>
+            <label>j (new suffix column name)</label>
+            <input type="text" id="jcol" value="year" />
+          </div>
+          <div>
+            <label>sep (separator, blank = none)</label>
+            <input type="text" id="sep" value="" />
+          </div>
+          <div>
+            <label>suffix (regex, blank = \d+)</label>
+            <input type="text" id="suffix" value="" />
+          </div>
+        </div>
 
-const df = DataFrame.fromColumns({
-  id:  ["x", "y"],
-  A1:  [1, 2],
-  A2:  [3, 4],
-  B1:  [5, 6],
-  B2:  [7, 8],
+        <div class="editor">
+          <div>
+            <label>Wide CSV data</label>
+            <textarea id="csv-input" rows="8">id,A1,A2,B1,B2
+x,1,3,5,7
+y,2,4,6,8</textarea>
+          </div>
+          <div>
+            <label>Long output</label>
+            <div class="output" id="output">Click Run…</div>
+          </div>
+        </div>
+        <br />
+        <button onclick="runExample()">Run</button>
+      </section>
+
+      <section>
+        <h2>Examples</h2>
+
+        <h2 style="color:var(--text);font-size:0.95rem;border:none;padding:0;margin-bottom:0.5rem;">1 · Numeric suffix (default)</h2>
+        <p>Column names like <code>A1</code>, <code>A2</code> share stub <code>A</code>; the suffix <code>1</code>/<code>2</code> becomes the <code>year</code> column.</p>
+        <pre>const df = DataFrame.fromColumns({
+  id: ["x", "y"],
+  A1: [1, 2],  A2: [3, 4],
+  B1: [5, 6],  B2: [7, 8],
 });
+wideToLong(df, ["A", "B"], "id", "year");
+// id  year  A  B
+// x   1     1  5
+// y   1     2  6
+// x   2     3  7
+// y   2     4  8</pre>
 
-const long = wideToLong(df, ["A", "B"], "id", "num");
-
-// long.columns.values → ["id", "num", "A", "B"]
-// long.shape          → [4, 4]
-//
-// id  num   A   B
-//  x    1   1   5
-//  y    1   2   6
-//  x    2   3   7
-//  y    2   4   8
-</code></pre>
-
-  <h2>Example — separator and custom suffix</h2>
-  <pre><code>const df = DataFrame.fromColumns({
-  country: ["US", "UK"],
-  gdp_2020: [21e12, 2.7e12],
-  gdp_2021: [23e12, 3.1e12],
-  pop_2020: [331e6, 67e6],
-  pop_2021: [332e6, 68e6],
+        <br />
+        <h2 style="color:var(--text);font-size:0.95rem;border:none;padding:0;margin-bottom:0.5rem;">2 · Underscore separator</h2>
+        <p>Use <code>sep: "_"</code> for column names like <code>score_pre</code> / <code>score_post</code>.</p>
+        <pre>const df = DataFrame.fromColumns({
+  subject: [1, 2],
+  score_pre:  [80, 90],
+  score_post: [85, 95],
 });
+wideToLong(df, "score", "subject", "phase", {
+  sep: "_",
+  suffix: /[a-z]+/,
+});
+// subject  phase  score
+// 1        pre    80
+// 2        pre    90
+// 1        post   85
+// 2        post   95</pre>
 
-const long = wideToLong(df, ["gdp", "pop"], "country", "year", { sep: "_" });
-// long.shape → [4, 4]  — 2 countries × 2 years
-// Columns: ["country", "year", "gdp", "pop"]
-</code></pre>
+        <br />
+        <h2 style="color:var(--text);font-size:0.95rem;border:none;padding:0;margin-bottom:0.5rem;">3 · Multiple id columns</h2>
+        <p>Pass an array to <code>i</code> to preserve several identifier columns.</p>
+        <pre>const df = DataFrame.fromColumns({
+  country: ["US","UK","DE"],
+  region:  ["East","South","West"],
+  gdp2020: [21, 2.7, 3.8],
+  gdp2021: [23, 3.1, 4.2],
+});
+wideToLong(df, "gdp", ["country","region"], "year", { sep: "" });
+// country  region  year  gdp
+// US       East    2020  21
+// UK       South   2020  2.7
+// DE       West    2020  3.8
+// US       East    2021  23
+// UK       South   2021  3.1
+// DE       West    2021  4.2</pre>
+      </section>
 
-  <h2>API reference</h2>
-  <pre><code>function wideToLong(
-  df: DataFrame,
-  stubnames: string | string[],
-  i: string | string[],
-  j: string,
-  options?: WideToLongOptions,
-): DataFrame;
+      <section>
+        <h2>vs melt</h2>
+        <p>
+          Both <code>melt</code> and <code>wideToLong</code> convert wide data to
+          long. The key difference:
+        </p>
+        <table>
+          <tr><th></th><th>melt</th><th>wideToLong</th></tr>
+          <tr><td>Column grouping</td><td>None — each column → one variable/value row</td><td>Groups by stub; related columns land in the <em>same</em> output row</td></tr>
+          <tr><td>New columns</td><td><code>variable</code> + <code>value</code></td><td>One column per stub + <code>j</code></td></tr>
+          <tr><td>Suffix extraction</td><td>No</td><td>Yes — suffix becomes <code>j</code> value</td></tr>
+          <tr><td>Use when…</td><td>Each wide column is independent</td><td>Columns share a common prefix and varying suffix</td></tr>
+        </table>
+      </section>
 
-interface WideToLongOptions {
-  sep?: string;      // separator between stub and suffix, default ""
-  suffix?: string;   // regex string matching suffix, default "\\d+"
-}
-</code></pre>
+    </main>
 
-  <h2>Parameters</h2>
-  <table>
-    <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
-    <tbody>
-      <tr><td><code>df</code></td><td><code>DataFrame</code></td><td>Source DataFrame (not mutated)</td></tr>
-      <tr><td><code>stubnames</code></td><td><code>string | string[]</code></td><td>Prefix(es) shared by the wide column groups</td></tr>
-      <tr><td><code>i</code></td><td><code>string | string[]</code></td><td>Column(s) to keep as id variables (repeated per suffix)</td></tr>
-      <tr><td><code>j</code></td><td><code>string</code></td><td>Name of the new column holding the suffix values</td></tr>
-      <tr><td><code>options.sep</code></td><td><code>string</code></td><td>Separator between stub and suffix (default: <code>""</code>)</td></tr>
-      <tr><td><code>options.suffix</code></td><td><code>string</code></td><td>Regex string matching the suffix (default: <code>"\\d+"</code>)</td></tr>
-    </tbody>
-  </table>
+    <script type="module">
+      import { DataFrame, wideToLong } from "./tsb.js";
 
-  <h2>Output layout</h2>
-  <div class="note">
-    Output columns are always ordered: <strong>id cols</strong>, <strong>j</strong>, <strong>stub cols</strong>
-    (in the same order the stubs were passed).  Suffixes are sorted numerically when they are all
-    integers, otherwise lexicographically.  Wide columns that are absent from the DataFrame are
-    filled with <code>null</code>.
-  </div>
-</body>
+      function parseCSV(text) {
+        const lines = text.trim().split("\n").filter(Boolean);
+        const headers = lines[0].split(",").map(s => s.trim());
+        const rows = lines.slice(1).map(l =>
+          l.split(",").map(s => {
+            const v = s.trim();
+            const n = Number(v);
+            return isNaN(n) || v === "" ? v : n;
+          })
+        );
+        const data = {};
+        for (let c = 0; c < headers.length; c++) {
+          data[headers[c]] = rows.map(r => r[c] ?? null);
+        }
+        return data;
+      }
+
+      function dfToTable(df) {
+        const cols = [...df.columns.values];
+        let html = "<table><tr>";
+        for (const c of cols) html += `<th>${c}</th>`;
+        html += "</tr>";
+        const nRows = df.shape[0];
+        for (let r = 0; r < nRows; r++) {
+          html += "<tr>";
+          for (const c of cols) {
+            const v = df.col(c).values[r];
+            html += `<td>${v === null || v === undefined ? "<em style='color:var(--muted)'>null</em>" : v}</td>`;
+          }
+          html += "</tr>";
+        }
+        html += "</table>";
+        return html;
+      }
+
+      window.runExample = function() {
+        const out = document.getElementById("output");
+        try {
+          const csv = document.getElementById("csv-input").value;
+          const stubs = document.getElementById("stubs").value.split(",").map(s => s.trim()).filter(Boolean);
+          const icols = document.getElementById("icols").value.split(",").map(s => s.trim()).filter(Boolean);
+          const jcol = document.getElementById("jcol").value.trim();
+          const sep = document.getElementById("sep").value;
+          const suffixRaw = document.getElementById("suffix").value.trim();
+
+          const data = parseCSV(csv);
+          const df = DataFrame.fromColumns(data);
+
+          const opts = {};
+          if (sep) opts.sep = sep;
+          if (suffixRaw) opts.suffix = new RegExp(suffixRaw);
+
+          const result = wideToLong(df, stubs, icols.length === 1 ? icols[0] : icols, jcol, opts);
+          out.className = "output";
+          out.innerHTML = dfToTable(result);
+        } catch(e) {
+          out.className = "output error";
+          out.textContent = String(e);
+        }
+      };
+    </script>
+  </body>
 </html>

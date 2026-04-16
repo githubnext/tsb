@@ -7,7 +7,7 @@ ROWS = 100_000
 WARMUP = 3
 ITERATIONS = 10
 
-data = np.arange(ROWS, dtype=np.float64) * 0.1
+data = np.sin(np.arange(ROWS) * 0.01)
 s = pd.Series(data)
 
 for _ in range(WARMUP):

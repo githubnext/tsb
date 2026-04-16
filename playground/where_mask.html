@@ -1,220 +1,194 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — where / mask: Conditional Selection</title>
-    <style>
-      body {
-        font-family: system-ui, sans-serif;
-        max-width: 860px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-        line-height: 1.6;
-        color: #1a1a1a;
-      }
-      h1 { color: #0d47a1; }
-      h2 { color: #1565c0; border-bottom: 2px solid #e3f2fd; padding-bottom: 0.25rem; }
-      pre {
-        background: #f5f5f5;
-        border-left: 4px solid #0d47a1;
-        padding: 1rem;
-        overflow-x: auto;
-        border-radius: 4px;
-      }
-      code { font-family: "Fira Code", "Cascadia Code", monospace; font-size: 0.9em; }
-      .demo {
-        background: #e8f5e9;
-        border: 1px solid #a5d6a7;
-        border-radius: 6px;
-        padding: 1rem 1.25rem;
-        margin: 1rem 0;
-      }
-      .demo h3 { margin-top: 0; color: #2e7d32; }
-      table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
-      th, td { border: 1px solid #ccc; padding: 0.4rem 0.75rem; text-align: left; }
-      th { background: #e3f2fd; }
-      .note { background: #fff9c4; border: 1px solid #f9a825; border-radius: 4px; padding: 0.75rem 1rem; }
-      a { color: #0d47a1; }
-    </style>
-  </head>
-  <body>
-    <h1>tsb — <code>where</code> / <code>mask</code>: Conditional Selection</h1>
-    <p>
-      <code>seriesWhere</code> / <code>seriesMask</code> and their DataFrame equivalents
-      allow element-wise conditional replacement — the TypeScript equivalents of
-      <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.where.html"><code>pandas.Series.where</code></a>
-      and
-      <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.mask.html"><code>pandas.Series.mask</code></a>.
-    </p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — where / mask</title>
+  <script src="playground-runtime.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1   { font-size: 2rem; margin-bottom: .25rem; }
+    .subtitle { color: #555; margin-bottom: 2rem; }
+    section  { margin-bottom: 2.5rem; }
+    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
+    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
+    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
+    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
+    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
+    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
+    nav a { color: #0366d6; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<nav><a href="index.html">← tsb playground</a></nav>
+<h1>where / mask</h1>
+<p class="subtitle">Conditional value selection and replacement — mirrors <code>pandas.Series.where</code> and <code>pandas.DataFrame.mask</code>.</p>
 
-    <div class="note">
-      <strong>Quick rule:</strong><br />
-      <code>where(cond)</code> — <em>keep</em> where <code>cond</code> is <strong>true</strong>, replace elsewhere.<br />
-      <code>mask(cond)</code> — <em>keep</em> where <code>cond</code> is <strong>false</strong>, replace elsewhere.<br />
-      They are exact inverses of each other.
-    </div>
+<section>
+  <h2>1 — whereSeries: keep values where condition is true</h2>
+  <p><code>whereSeries(series, cond)</code> keeps each element where <code>cond</code> is <code>true</code> and replaces it with <code>null</code> (or a custom <code>other</code>) where <code>cond</code> is <code>false</code>.</p>
+  <pre><code id="ex1-code">import { Series, whereSeries } from "tsb";
 
-    <h2>1. <code>seriesWhere</code> — Boolean Array Condition</h2>
-    <p>
-      Pass a <code>boolean[]</code> to keep values at <code>true</code> positions, replace
-      the rest with <code>null</code> (or a custom <code>other</code> value).
-    </p>
-    <pre><code>import { Series, seriesWhere } from "tsb";
+const scores = new Series({ data: [45, 72, 58, 88, 91, 30], name: "score" });
 
-const scores = new Series({ data: [42, 91, 67, 55, 88] });
-const highScores = seriesWhere(scores, [false, true, false, false, true]);
-// Series [null, 91, null, null, 88]
+// Keep only passing scores (>= 60); replace failing scores with null
+const passing = whereSeries(scores, (v) => v >= 60);
+console.log("passing:", [...passing.values]);
+// → [null, 72, null, 88, 91, null]
 
-// Custom replacement value
-const clamped = seriesWhere(scores, [false, true, false, false, true], { other: 0 });
-// Series [0, 91, 0, 0, 88]</code></pre>
+// Replace failing scores with 0 instead of null
+const zeroFail = whereSeries(scores, (v) => v >= 60, { other: 0 });
+console.log("zero-fail:", [...zeroFail.values]);
+// → [0, 72, 0, 88, 91, 0]
+</code></pre>
+  <div class="output" id="ex1-out">▶ run</div>
+</section>
 
-    <h2>2. <code>seriesWhere</code> — Callable Condition</h2>
-    <p>
-      Pass a function that receives the Series and returns a <code>boolean[]</code> or
-      <code>Series&lt;boolean&gt;</code>. This avoids computing the condition array manually.
-    </p>
-    <pre><code>import { Series, seriesWhere } from "tsb";
+<section>
+  <h2>2 — maskSeries: replace values where condition is true</h2>
+  <p><code>maskSeries</code> is the inverse of <code>whereSeries</code>: it replaces where <code>cond</code> is <code>true</code> and keeps where <code>cond</code> is <code>false</code>.</p>
+  <pre><code id="ex2-code">import { Series, maskSeries } from "tsb";
 
-const temps = new Series({ data: [-5, 12, 23, -3, 8] });
+const temps = new Series({ data: [-5, 12, -3, 20, 7], name: "temp_C" });
 
-// Keep only values above freezing
-const aboveFreezing = seriesWhere(
-  temps,
-  (s) =&gt; s.values.map((v) =&gt; (v as number) &gt; 0),
-);
-// Series [null, 12, 23, null, 8]
+// Mask (hide) sub-zero temperatures
+const noFrost = maskSeries(temps, (v) => v < 0);
+console.log("no frost:", [...noFrost.values]);
+// → [null, 12, null, 20, 7]
 
-// Replace with 0 instead of null
-const noFreeze = seriesWhere(
-  temps,
-  (s) =&gt; s.values.map((v) =&gt; (v as number) &gt; 0),
-  { other: 0 },
-);
-// Series [0, 12, 23, 0, 8]</code></pre>
+// Replace sub-zero with a sentinel value
+const clamped = maskSeries(temps, (v) => v < 0, { other: 0 });
+console.log("clamped: ", [...clamped.values]);
+// → [0, 12, 0, 20, 7]
+</code></pre>
+  <div class="output" id="ex2-out">▶ run</div>
+</section>
 
-    <h2>3. <code>seriesMask</code> — The Inverse</h2>
-    <p>
-      <code>mask</code> replaces positions where the condition is <strong>true</strong>
-      (the opposite of <code>where</code>). Use it to "blank out" outliers or invalid values.
-    </p>
-    <pre><code>import { Series, seriesMask } from "tsb";
+<section>
+  <h2>3 — Boolean Series as condition</h2>
+  <p>Pass a <code>Series&lt;boolean&gt;</code> (or a plain boolean array) as the condition for position-aligned filtering.</p>
+  <pre><code id="ex3-code">import { Series, whereSeries, maskSeries } from "tsb";
 
-const data = new Series({ data: [1, 2, 3, 4, 5] });
+const prices = new Series({ data: [100, 200, 150, 80, 300], name: "price" });
+const inStock = new Series({ data: [true, false, true, false, true] });
 
-// Mask out values greater than 3
-const masked = seriesMask(
-  data,
-  (s) =&gt; s.values.map((v) =&gt; (v as number) &gt; 3),
-  { other: null },
-);
-// Series [1, 2, 3, null, null]</code></pre>
+// Keep prices only for in-stock items
+const available = whereSeries(prices, inStock);
+console.log("in-stock prices:", [...available.values]);
+// → [100, null, 150, null, 300]
 
-    <h2>4. <code>dataFrameWhere</code> — Element-Wise on DataFrames</h2>
-    <p>
-      Pass a boolean <code>DataFrame</code> or a callable that returns one.
-      Columns and row labels are aligned by name.
-    </p>
-    <pre><code>import { DataFrame, dataFrameWhere } from "tsb";
+// Mask out-of-stock prices (same result — cond is inverted)
+const masked = maskSeries(prices, inStock.values.map((v) => !v));
+console.log("masked:         ", [...masked.values]);
+// → [100, null, 150, null, 300]
+</code></pre>
+  <div class="output" id="ex3-out">▶ run</div>
+</section>
+
+<section>
+  <h2>4 — whereDataFrame: cell-wise filtering on a DataFrame</h2>
+  <p><code>whereDataFrame(df, cond)</code> applies the condition independently to each cell across all columns.</p>
+  <pre><code id="ex4-code">import { DataFrame, whereDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
-  temp_c:   [22, -3, 18, -7, 30],
-  humidity: [55, 80, 62, 75, 45],
+  a: [1, -2,  3],
+  b: [-4,  5, -6],
+  c: [ 7,  8,  9],
 });
 
-// Keep only valid summer readings (temp &gt; 0)
-const condDf = DataFrame.fromColumns({
-  temp_c:   [true, false, true, false, true],
-  humidity: [true, false, true, false, true],
-});
+// Keep non-negative values; replace negatives with null
+const positive = whereDataFrame(df, (v) => v >= 0);
+console.log("a:", [...positive.col("a").values]); // [1,  null, 3]
+console.log("b:", [...positive.col("b").values]); // [null, 5, null]
+console.log("c:", [...positive.col("c").values]); // [7,  8,  9]
+</code></pre>
+  <div class="output" id="ex4-out">▶ run</div>
+</section>
 
-const summer = dataFrameWhere(df, condDf);
-// DataFrame:
-//   temp_c   [22,   null, 18,   null, 30  ]
-//   humidity [55,   null, 62,   null, 45  ]</code></pre>
-
-    <h2>5. <code>dataFrameWhere</code> — Callable Condition</h2>
-    <pre><code>import { DataFrame, dataFrameWhere } from "tsb";
+<section>
+  <h2>5 — maskDataFrame: replace cells matching condition</h2>
+  <pre><code id="ex5-code">import { DataFrame, maskDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
-  a: [1, 2, 3, 4, 5],
-  b: [10, 20, 30, 40, 50],
+  revenue: [100, 0, 250, -50, 0],
+  cost:    [ 80, 0, 200,  30, 0],
 });
 
-// Keep only values &gt; 2 (column-wise threshold)
-const result = dataFrameWhere(df, (d) =&gt; {
-  const condCols: Record&lt;string, boolean[]&gt; = {};
-  for (const col of d.columns) {
-    condCols[col as string] = d.col(col as string).values.map(
-      (v) =&gt; (v as number) &gt; 2
-    );
-  }
-  return DataFrame.fromColumns(condCols);
-});
-// DataFrame:
-//   a: [null, null, 3, 4, 5]
-//   b: [10,   20,   30, 40, 50]</code></pre>
+// Mask zeros (replace with null to mark as missing)
+const noZeros = maskDataFrame(df, (v) => v === 0);
+console.log("revenue:", [...noZeros.col("revenue").values]);
+// → [100, null, 250, -50, null]
+console.log("cost:   ", [...noZeros.col("cost").values]);
+// → [80, null, 200, 30, null]
+</code></pre>
+  <div class="output" id="ex5-out">▶ run</div>
+</section>
 
-    <h2>6. <code>dataFrameMask</code> — DataFrame Mask</h2>
-    <pre><code>import { DataFrame, dataFrameMask } from "tsb";
+<section>
+  <h2>6 — DataFrame condition (boolean DataFrame)</h2>
+  <p>Pass a boolean <code>DataFrame</code> as the condition for per-cell control.</p>
+  <pre><code id="ex6-code">import { DataFrame, whereDataFrame } from "tsb";
 
-const df = DataFrame.fromColumns({
-  sales:  [100, 200, 50,  300, 80],
-  profit: [10,  40,  -5,  60,  -2],
+const data = DataFrame.fromColumns({
+  x: [10, 20, 30],
+  y: [40, 50, 60],
 });
 
-// Mask out (replace) rows with negative profit
-const cleaned = dataFrameMask(
-  df,
-  (d) =&gt; {
-    const condCols: Record&lt;string, boolean[]&gt; = {};
-    for (const col of d.columns) {
-      condCols[col as string] = d.col(col as string).values.map(
-        (v) =&gt; (v as number) &lt; 0
-      );
-    }
-    return DataFrame.fromColumns(condCols);
-  },
-  { other: 0 },
-);
-// DataFrame:
-//   sales:  [100, 200, 50,  300, 80]
-//   profit: [10,  40,  0,   60,  0 ]</code></pre>
+// Custom boolean mask per cell
+const cond = DataFrame.fromColumns({
+  x: [true,  false, true],
+  y: [false,  true, true],
+});
 
-    <h2>Label-Aligned Series Condition</h2>
-    <p>
-      When you pass a <code>Series&lt;boolean&gt;</code> as the condition, values are aligned
-      by <strong>label</strong>, not position. Labels absent from the condition series are treated
-      as <code>false</code>.
-    </p>
-    <pre><code>import { Series, seriesWhere } from "tsb";
+const result = whereDataFrame(data, cond);
+console.log("x:", [...result.col("x").values]); // [10, null, 30]
+console.log("y:", [...result.col("y").values]); // [null, 50, 60]
+</code></pre>
+  <div class="output" id="ex6-out">▶ run</div>
+</section>
 
-const prices = new Series({ data: [10, 20, 30], index: ["a", "b", "c"] });
-const valid  = new Series&lt;boolean&gt;({ data: [false, true], index: ["a", "b"] });
+<section>
+  <h2>7 — Combining where and mask for range clamping</h2>
+  <p>Chaining <code>whereSeries</code> and <code>maskSeries</code> is a clean way to apply lower and upper bounds.</p>
+  <pre><code id="ex7-code">import { Series, whereSeries, maskSeries } from "tsb";
 
-// Only "b" is in the condition with value=true; "a"=false, "c" missing→false
-const result = seriesWhere(prices, valid, { other: -1 });
-// Series { a: -1, b: 20, c: -1 }</code></pre>
+const raw = new Series({ data: [-10, 0, 5, 15, 100, 3], name: "value" });
+const LO = 0, HI = 10;
 
-    <h2>API Reference</h2>
-    <table>
-      <tr><th>Function</th><th>Keeps when cond is…</th><th>Replaces with</th></tr>
-      <tr><td><code>seriesWhere(s, cond, {other})</code></td><td><code>true</code></td><td><code>other</code> (default <code>null</code>)</td></tr>
-      <tr><td><code>seriesMask(s, cond, {other})</code></td><td><code>false</code></td><td><code>other</code> (default <code>null</code>)</td></tr>
-      <tr><td><code>dataFrameWhere(df, cond, {other})</code></td><td><code>true</code></td><td><code>other</code> (default <code>null</code>)</td></tr>
-      <tr><td><code>dataFrameMask(df, cond, {other})</code></td><td><code>false</code></td><td><code>other</code> (default <code>null</code>)</td></tr>
-    </table>
+// 1) Replace values below lower bound with LO
+const step1 = whereSeries(raw, (v) => (v as number) >= LO, { other: LO });
+// 2) Replace values above upper bound with HI
+const clamped = whereSeries(step1, (v) => (v as number) <= HI, { other: HI });
 
-    <h3>Condition types</h3>
-    <table>
-      <tr><th>Type</th><th>Series ops</th><th>DataFrame ops</th></tr>
-      <tr><td>Boolean array</td><td>✅ positional</td><td>—</td></tr>
-      <tr><td><code>Series&lt;boolean&gt;</code></td><td>✅ label-aligned</td><td>—</td></tr>
-      <tr><td><code>DataFrame</code> (boolean)</td><td>—</td><td>✅ label-aligned</td></tr>
-      <tr><td>Callable</td><td>✅ receives Series</td><td>✅ receives DataFrame</td></tr>
-    </table>
+console.log("clamped:", [...clamped.values]);
+// → [0, 0, 5, 10, 10, 3]
+</code></pre>
+  <div class="output" id="ex7-out">▶ run</div>
+</section>
 
-    <p><a href="index.html">← Back to tsb playground index</a></p>
-  </body>
+<section>
+  <h2>8 — where / mask vs. clip</h2>
+  <div class="note">
+    <strong>When to use which?</strong><br>
+    Use <code>clip()</code> for simple numeric lower/upper bounds.<br>
+    Use <code>where()</code> / <code>mask()</code> for arbitrary conditions — including non-numeric types,
+    string patterns, or per-cell boolean DataFrames.
+  </div>
+  <pre><code id="ex8-code">import { Series, whereSeries, clip } from "tsb";
+
+const s = new Series({ data: [-3, 1, 5, 10], name: "val" });
+
+// clip is concise for numeric bounds
+const clipped  = clip(s, { lower: 0, upper: 6 });
+console.log("clipped: ", [...clipped.values]);  // [0, 1, 5, 6]
+
+// where gives full control — replace out-of-range with null instead of clamping
+const filtered = whereSeries(s, (v) => (v as number) >= 0 && (v as number) <= 6);
+console.log("filtered:", [...filtered.values]); // [null, 1, 5, null]
+</code></pre>
+  <div class="output" id="ex8-out">▶ run</div>
+</section>
+
+</body>
 </html>

@@ -1,5 +1,5 @@
 /**
- * Benchmark: pearsonCorr — Pearson correlation between two 100k-element Series
+ * Benchmark: Pearson correlation between two 100k-element Series
  */
 import { Series, pearsonCorr } from "../../src/index.js";
 
@@ -7,18 +7,18 @@ const ROWS = 100_000;
 const WARMUP = 3;
 const ITERATIONS = 10;
 
-const x = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01));
-const y = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01 + 0.5));
-const sx = new Series(x);
-const sy = new Series(y);
+const a = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01));
+const b = Float64Array.from({ length: ROWS }, (_, i) => Math.cos(i * 0.01));
+const sa = new Series(a);
+const sb = new Series(b);
 
 for (let i = 0; i < WARMUP; i++) {
-  pearsonCorr(sx, sy);
+  pearsonCorr(sa, sb);
 }
 
 const start = performance.now();
 for (let i = 0; i < ITERATIONS; i++) {
-  pearsonCorr(sx, sy);
+  pearsonCorr(sa, sb);
 }
 const total = performance.now() - start;
 

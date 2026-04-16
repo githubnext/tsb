@@ -1,5 +1,5 @@
 /**
- * Benchmark: minMaxNormalize — scale a 100k-element Series to [0, 1]
+ * Benchmark: min-max normalization on 100k-element Series
  */
 import { Series, minMaxNormalize } from "../../src/index.js";
 
@@ -7,7 +7,7 @@ const ROWS = 100_000;
 const WARMUP = 3;
 const ITERATIONS = 10;
 
-const data = Float64Array.from({ length: ROWS }, (_, i) => i * 3.7 - 50_000);
+const data = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01) * 100 + 50);
 const s = new Series(data);
 
 for (let i = 0; i < WARMUP; i++) {

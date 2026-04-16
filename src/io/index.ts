@@ -8,3 +8,8 @@ export { readCsv, toCsv } from "./csv.ts";
 export type { ReadCsvOptions, ToCsvOptions } from "./csv.ts";
 export { readJson, toJson } from "./json.ts";
 export type { ReadJsonOptions, ToJsonOptions, JsonOrient } from "./json.ts";
+export { jsonNormalize } from "./json_normalize.ts";
+export type { JsonPath, JsonNormalizeOptions } from "./json_normalize.ts";
+// readExcel / xlsxSheetNames use node:zlib and cannot be bundled for the
+// browser.  Import them directly from "tsb/io/read_excel" when running in
+// Node / Bun.

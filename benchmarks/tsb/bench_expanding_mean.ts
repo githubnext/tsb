@@ -7,16 +7,16 @@ const ROWS = 100_000;
 const WARMUP = 3;
 const ITERATIONS = 10;
 
-const data = Float64Array.from({ length: ROWS }, (_, i) => Math.cos(i * 0.01));
+const data = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01));
 const s = new Series(data);
 
 for (let i = 0; i < WARMUP; i++) {
-  s.expanding(1).mean();
+  s.expanding().mean();
 }
 
 const start = performance.now();
 for (let i = 0; i < ITERATIONS; i++) {
-  s.expanding(1).mean();
+  s.expanding().mean();
 }
 const total = performance.now() - start;
 

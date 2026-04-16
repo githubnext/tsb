@@ -1,22 +1,22 @@
 /**
- * Benchmark: Series.rank — rank 100k elements
+ * Benchmark: Series rank on 100k-element Series
  */
-import { Series } from "../../src/index.js";
+import { Series, rankSeries } from "../../src/index.js";
 
 const ROWS = 100_000;
 const WARMUP = 3;
 const ITERATIONS = 10;
 
-const data = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.03) * 1000);
+const data = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01) * 1000);
 const s = new Series(data);
 
 for (let i = 0; i < WARMUP; i++) {
-  s.rank();
+  rankSeries(s);
 }
 
 const start = performance.now();
 for (let i = 0; i < ITERATIONS; i++) {
-  s.rank();
+  rankSeries(s);
 }
 const total = performance.now() - start;
 

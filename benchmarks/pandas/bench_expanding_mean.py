@@ -7,15 +7,15 @@ ROWS = 100_000
 WARMUP = 3
 ITERATIONS = 10
 
-data = np.cos(np.arange(ROWS) * 0.01)
+data = np.sin(np.arange(ROWS) * 0.01)
 s = pd.Series(data)
 
 for _ in range(WARMUP):
-    s.expanding(1).mean()
+    s.expanding().mean()
 
 start = time.perf_counter()
 for _ in range(ITERATIONS):
-    s.expanding(1).mean()
+    s.expanding().mean()
 total = (time.perf_counter() - start) * 1000
 
 print(json.dumps({

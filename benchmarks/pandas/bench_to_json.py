@@ -1,4 +1,4 @@
-"""Benchmark: to_json — serialize a 10k-row DataFrame to JSON"""
+"""Benchmark: to_json — serialize a 10k-row DataFrame to JSON string"""
 import json, time
 import numpy as np
 import pandas as pd
@@ -8,8 +8,9 @@ WARMUP = 3
 ITERATIONS = 10
 
 df = pd.DataFrame({
-    "a": np.arange(ROWS, dtype=np.float64) * 1.5,
-    "b": np.arange(ROWS, dtype=np.float64) * 2.5,
+    "id": np.arange(ROWS, dtype=float),
+    "value": np.arange(ROWS) * 1.1,
+    "score": np.sin(np.arange(ROWS) * 0.01),
 })
 
 for _ in range(WARMUP):

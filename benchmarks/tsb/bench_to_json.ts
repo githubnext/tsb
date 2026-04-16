@@ -1,5 +1,5 @@
 /**
- * Benchmark: toJson — serialize a 10k-row DataFrame to JSON
+ * Benchmark: toJson — serialize a 10k-row DataFrame to JSON string
  */
 import { DataFrame, toJson } from "../../src/index.js";
 
@@ -7,9 +7,11 @@ const ROWS = 10_000;
 const WARMUP = 3;
 const ITERATIONS = 10;
 
-const a = Float64Array.from({ length: ROWS }, (_, i) => i * 1.5);
-const b = Float64Array.from({ length: ROWS }, (_, i) => i * 2.5);
-const df = new DataFrame({ a, b });
+const df = new DataFrame({
+  id: Float64Array.from({ length: ROWS }, (_, i) => i),
+  value: Float64Array.from({ length: ROWS }, (_, i) => i * 1.1),
+  score: Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01)),
+});
 
 for (let i = 0; i < WARMUP; i++) {
   toJson(df);

@@ -1,5 +1,5 @@
 /**
- * Benchmark: rolling std with window=100 on 100k-element Series
+ * Benchmark: rolling standard deviation with window=100 on 100k-element Series
  */
 import { Series } from "../../src/index.js";
 
