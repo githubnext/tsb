@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T05:46:32Z |
-| Iteration Count | 121 |
-| Best Metric | 63 |
+| Last Run | 2026-04-16T07:35:55Z |
+| Iteration Count | 122 |
+| Best Metric | 71 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -42,6 +42,12 @@
 ---
 
 ## 📚 Lessons Learned
+
+- IO benchmarks (toCsv/toJson) work well with 10k rows for reasonable timing; 100k rows makes serialization too slow per iteration.
+- alignSeries requires partial index overlap — using idx1=evens, idx2=multiples-of-3 gives a good overlap for benchmarking outer join.
+- date_range with 10k periods and "D" freq is fast enough for 20 iterations.
+- melt with 10 value columns and 10k rows gives measurable timing.
+- groupby.std() on DataFrame works via df.groupBy("key").std() — returns aggregated DataFrame.
 
 - **IMPORTANT**: Iter 118 reset best_metric to 57 (was 354). The old metric was inflated — previous iters tracked many functions but branches that were later merged/deleted caused the file count in main to drop back to 51. The canonical branch `autoloop/perf-comparison` never existed before iter 118; was re-created from main. Each iter should add benchmark pairs and compare to actual file counts.
 - Metric = min(ts_bench_count, py_bench_count); branch autoloop/perf-comparison. Best metric 334 after iter 114, commit 685193d. Iters 107-113 were push-blocked (safeoutputs MCP blocked by policy). Iter 114 succeeded when policy was restored.
@@ -70,15 +76,28 @@
 ## 🔭 Future Directions
 
 - MultiIndex: getLoc with slice, get_locs, get_indexer for multi-label lookup.
-- More groupby: nunique (check if API exists).
-- Advanced reshape: pivot_table with fill_value, melt, unstack.
-- reindex, align, date_range, DatetimeIndex, bdate_range — check if benchmarkable.
-- IO: read_parquet/to_parquet if added to src/io; toJson, toCsv.
+- More groupby: nunique, transform, apply.
+- Advanced reshape: unstack, pivot with aggfunc.
+- DatetimeIndex operations: tz_localize, tz_convert.
+- Period/PeriodIndex: creation and frequency operations.
+- Timedelta/TimedeltaIndex: arithmetic operations.
+- natSorted/natCompare — natural sort benchmark.
+- pearsonCorr/dataFrameCorr — correlation benchmarks.
+- inferDtype — dtype inference benchmark.
+- groupby transform, groupby apply.
+- DataFrame.pipe — pipe operations.
 - src/core: period, timedelta, timestamp, interval, datetime_tz, categorical_index — check if exported.
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 122 — 2026-04-16 07:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24498008954)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 20 benchmark pairs: re-added 12 from iter121 (rank, nlargest_nsmallest, sample, get_dummies, duplicated, interpolate, diff, explode, isin, combine_first, select_dtypes, crosstab) + 8 new (reindex, align, date_range, melt, to_csv, to_json, value_counts_binned, groupby_std)
+- **Metric**: 71 (previous best: 63, delta: +8) | **Commit**: d58440f
+- **Notes**: Branch created fresh from main (51 pairs) + 20 new pairs = 71. New pairs cover IO serialization (to_csv, to_json), datetime (date_range), reshape (melt), index alignment (reindex, align), statistical (value_counts_binned), and groupby aggregation (groupby_std).
 
 ### Iteration 121 — 2026-04-16 05:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24494296445)
 - **Status**: ✅ Accepted
