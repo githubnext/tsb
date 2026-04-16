@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T03:07:33Z |
-| Iteration Count | 119 |
+| Last Run | 2026-04-16T04:33:11Z |
+| Iteration Count | 120 |
 | Best Metric | 62 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 1 |
-| Recent Statuses | accepted, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Consecutive Errors | 2 |
+| Recent Statuses | error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -79,6 +79,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 120 — 2026-04-16 04:33 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24492186697)
+- **Status**: ⚠️ Error (safeoutputs MCP unavailable — commit created but not pushed)
+- **Change**: Added 13 benchmark pairs: rank, nlargest/nsmallest, sample, get_dummies, duplicated, interpolate, diff, explode, isin, combine_first, melt, pivot, unstack (commit a4bc9eb on local branch autoloop/perf-comparison)
+- **Metric**: 64 (would be +2 from 62) — NOT pushed
+- **Notes**: safeoutputs MCP tools not available this run. Commit a4bc9eb exists locally but could not be pushed. Next iteration should add new pairs on top (baseline on main still 51).
 
 ### Iteration 119 — 2026-04-16 03:07 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24489800049)
 - **Status**: ⚠️ Error (safeoutputs MCP unavailable — commit created but not pushed)
