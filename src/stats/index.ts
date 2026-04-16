@@ -284,6 +284,76 @@ export type {
   SeriesToStringOptions,
   DataFrameToStringOptions,
 } from "./format_ops.ts";
+
+export { quantileSeries, quantileDataFrame } from "./quantile.ts";
+export type {
+  QuantileInterpolation,
+  QuantileSeriesOptions,
+  QuantileDataFrameOptions,
+} from "./quantile.ts";
+
+export { replaceSeries, replaceDataFrame } from "./replace.ts";
+export type {
+  ReplaceMapping,
+  ReplaceSpec,
+  ReplaceOptions,
+  DataFrameReplaceOptions,
+} from "./replace.ts";
+
+export { varSeries, semSeries, varDataFrame, semDataFrame } from "./sem_var.ts";
+export type { VarSemSeriesOptions, VarSemDataFrameOptions } from "./sem_var.ts";
+
+export { skewSeries, kurtSeries, skewDataFrame, kurtDataFrame } from "./skew_kurt.ts";
+export type {
+  SkewKurtSeriesOptions,
+  SkewKurtDataFrameOptions,
+} from "./skew_kurt.ts";
+
+export { toDatetime } from "./to_datetime.ts";
+export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./to_datetime.ts";
+
+export { clipAdvancedSeries, clipAdvancedDataFrame } from "./clip_advanced.ts";
+export type {
+  SeriesBound,
+  DataFrameBound,
+  ClipAdvancedSeriesOptions,
+  ClipAdvancedDataFrameOptions,
+} from "./clip_advanced.ts";
+
+export { idxminSeries, idxmaxSeries, idxminDataFrame, idxmaxDataFrame } from "./idxmin_idxmax.ts";
+export type { IdxOptions, IdxDataFrameOptions } from "./idxmin_idxmax.ts";
+
+export { modeSeries, modeDataFrame } from "./mode.ts";
+export type { ModeSeriesOptions, ModeDataFrameOptions } from "./mode.ts";
+
+export {
+  nancount,
+  nansum,
+  nanmean,
+  nanmedian,
+  nanvar,
+  nanstd,
+  nanmin,
+  nanmax,
+  nanprod,
+} from "./nancumops.ts";
+export type { NanInput, NanAggOptions } from "./nancumops.ts";
+
+export {
+  nuniqueSeries,
+  nuniqueDataFrame,
+  anySeries,
+  allSeries,
+  anyDataFrame,
+  allDataFrame,
+} from "./nunique.ts";
+export type {
+  NuniqueSeriesOptions,
+  NuniqueDataFrameOptions,
+  AnyAllSeriesOptions,
+  AnyAllDataFrameOptions,
+} from "./nunique.ts";
+
 export { pctChangeSeries, pctChangeDataFrame } from "./pct_change.ts";
 export type {
   PctChangeFillMethod,
