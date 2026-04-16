@@ -126,3 +126,5 @@ export {
   isPeriodDtype,
   isIntervalDtype,
 } from "./api_types.ts";
+export { astypeSeries, astype, castScalar } from "./astype.ts";
+export type { AstypeOptions, DataFrameAstypeOptions } from "./astype.ts";

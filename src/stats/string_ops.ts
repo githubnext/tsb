@@ -33,7 +33,7 @@ export type NormalizeForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 export type StrInput = Series<Scalar> | readonly Scalar[] | readonly string[] | string;
 
 /** Options for {@link strGetDummies}. */
-export interface GetDummiesOptions {
+export interface StrGetDummiesOptions {
   /**
    * The delimiter used to split each element into tokens.
    * @default "|"
@@ -163,7 +163,7 @@ export function strNormalize(
  */
 export function strGetDummies(
   input: readonly string[] | Series<Scalar>,
-  options: GetDummiesOptions = {},
+  options: StrGetDummiesOptions = {},
 ): DataFrame {
   const sep = options.sep ?? "|";
   const prefix = options.prefix ?? "";
