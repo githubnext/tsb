@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T19:31:48Z |
-| Iteration Count | 131 |
-| Best Metric | 372 |
+| Last Run | 2026-04-16T20:18:10Z |
+| Iteration Count | 132 |
+| Best Metric | 380 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, error, error, error, accepted, accepted, error, error |
+| Recent Statuses | accepted, accepted, accepted, error, error, error, error, accepted, accepted, error |
 | Paused | false |
 
 ---
@@ -65,20 +65,22 @@
 
 ## 🔭 Future Directions
 
-- astypeSeries — series type conversion benchmarks.
 - dataframe_mode — modeDataFrame benchmark.
 - quantileDataFrame — DataFrame-level quantile.
 - MultiIndex getLoc with slice / get_locs / get_indexer.
 - groupby: nunique, transform-apply.
 - DatetimeIndex: tz_localize, tz_convert.
-- Timestamp class, DateOffset — custom offsets.
 - Series.autocorr(lag).
 - valueCountsBinned — binned value counts.
-- searchsorted / searchsortedMany — binary search.
+- read_excel — Excel I/O benchmark.
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 132 — 2026-04-16 20:18 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24531850677)
+- **Status**: ✅ Accepted | **Metric**: 380 (+8 from 372) | **Commit**: 5c60e02
+- Added 8 pairs: searchsorted, astype_series, timestamp, date_offset, timedelta, json_normalize, period, interval.
 
 ### Iteration 131 — 2026-04-16 19:31 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24529808007)
 - **Status**: ✅ Accepted | **Metric**: 372 (+8 from 364) | **Commit**: 7b67fa5
