@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T09:34:48Z |
-| Iteration Count | 124 |
-| Best Metric | 345 |
+| Last Run | 2026-04-16T10:32:12Z |
+| Iteration Count | 125 |
+| Best Metric | 352 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, accepted, accepted, accepted, error, error, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -97,6 +97,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 125 — 2026-04-16 10:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24505389421)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 7 benchmark pairs: index_union, index_intersection, index_difference, index_getloc, index_at_tolist, series_groupby_apply, series_groupby_filter
+- **Metric**: 352 (previous best: 345, delta: +7) | **Commit**: 89e8b20
+- **Notes**: Branched from 3c596789 (345 pairs), added 7 new Index set-op and SeriesGroupBy pairs. Index.union/intersection/difference are now benchmarked alongside pd.Index equivalents.
 
 ### Iteration 124 — 2026-04-16 09:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24502952980)
 
