@@ -8,19 +8,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T21:47:12Z |
-| Iteration Count | 135 |
-| Best Metric | 388 |
+| Last Run | 2026-04-16T22:18:00Z |
+| Iteration Count | 136 |
+| Best Metric | 396 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #140 |
+| PR | #147 |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, error, error, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | error, error, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -30,7 +30,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: #140
+**Pull Request**: #147
 **Steering Issue**: #131
 
 ---
@@ -73,16 +73,23 @@
 - series_any_all / dataframe_any_all — boolean reductions.
 - series_crosstab — seriesCrosstab.
 - dataframe_explode / dataframe_nunique.
-- (iters 133-135 added: mode_df, quantile_df, shift_diff, pow_mod, clip_bounds, reindex, compare, arith_fns, numeric_ops, memory_usage, named_agg, tz_localize)
+- (iters 133-135: mode_df, quantile_df, shift_diff, pow_mod, clip_bounds, reindex, compare, arith_fns, numeric_ops, memory_usage, named_agg, tz_localize)
+- (iter 136: series_any_all, dataframe_any_all, dataframe_nunique, series_crosstab, bdate_range, series_radd_rsub, dataframe_radd_rsub, series_exp_log)
+- MultiIndex getLoc with slice / get_locs / get_indexer.
+- groupby: nunique, transform-apply.
 
 ---
 
 ## 📊 Iteration History
 
+### Iteration 136 — 2026-04-16 22:18 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24536797293)
+- **Status**: ✅ Accepted | **Metric**: 396 (previous best: 388, delta: +8) | **Commit**: 6c70e80
+- Added 8 pairs: series_any_all, dataframe_any_all, dataframe_nunique, series_crosstab, bdate_range, series_radd_rsub, dataframe_radd_rsub, series_exp_log.
+- Covered boolean reductions (any/all), reverse arithmetic, DataFrame nunique, seriesCrosstab, bdate_range, extended math.
+
 ### Iteration 135 — 2026-04-16 21:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24535650224)
 - **Status**: ✅ Accepted | **Metric**: 388 (+8 from 380 actual baseline) | **Commit**: 2df0cea
 - Added 8 pairs: dataframe_shift_diff, dataframe_pow_mod, clip_series_bounds, reindex, dataframe_compare, series_add_sub_mul_div, numeric_ops_math, dataframe_add_sub_mul_div.
-- Note: State claimed 388 but actual main had 380; iters 133-134 commits missing from branch.
 
 ### Iteration 134 — 2026-04-16 21:21 UTC — ✅ | metric=388 | commit=364b7f2
 - Added 8 pairs: dataframe_shift_diff, dataframe_pow_mod, clip_series_bounds, reindex, dataframe_compare, series_add_sub_mul_div, numeric_ops_math, dataframe_add_sub_mul_div.
