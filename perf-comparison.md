@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T17:32:21Z |
-| Iteration Count | 128 |
+| Last Run | 2026-04-16T18:27:43Z |
+| Iteration Count | 129 |
 | Best Metric | 352 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 3 |
-| Recent Statuses | error, error, error, accepted, accepted, error, error, accepted, accepted, accepted |
+| Consecutive Errors | 4 |
+| Recent Statuses | error, error, error, error, accepted, accepted, error, error, accepted, accepted |
 | Paused | false |
 
 ---
@@ -79,7 +79,7 @@
 
 ## 🔭 Future Directions
 
-- **PRIORITY (iter 128)**: 8 benchmark pairs ready in commit 2eaf896 (NOT pushed): skew_kurt, sem_var, mode, nunique_any_all, compare_ops, pow_mod_floordiv, nancumops, minmax_normalize_digitize. Next iter: branch from 3c596789, re-add these 8 + new ones.
+- **PRIORITY (iter 130)**: 8 benchmark pairs ready in commit 2a31dc6 (NOT pushed): skew_kurt, sem_var, mode_series, nunique_any_all, compare_ops, nancumops, dataframe_skew_kurt, dataframe_sem_var. Also: SeriesGroupBy pairs (min_max, first_last, count_size, mean_std, sum, agg_named, get_group) were in iter 127 note as NOT pushed, but 3c596789 branch has 356 pairs so some pushed. Check before re-adding. Next iter: branch from 3c596789, verify current count, add all unpushed pairs + new ones.
 - MultiIndex: getLoc with slice, get_locs, get_indexer for multi-label lookup.
 - More groupby: nunique, transform apply with aggregation.
 - Advanced reshape: unstack, pivot with aggfunc.
@@ -93,6 +93,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 129 — 2026-04-16 18:27 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24526990674)
+
+- **Status**: ⚠️ Error (safeoutputs MCP blocked by policy — commit created but not pushed)
+- **Change**: Added 8 benchmark pairs: skew_kurt, sem_var, mode_series, nunique_any_all, compare_ops, nancumops, dataframe_skew_kurt, dataframe_sem_var (commit 2a31dc6 on local branch autoloop/perf-comparison)
+- **Metric**: 364 (would be +12 from 352) — NOT pushed
+- **Notes**: Branched from 3c596789 (356 pairs). Evaluation metric=364, safeoutputs MCP blocked by policy (consecutive run 4). Next iteration: branch from 3c596789, re-add these 8 pairs PLUS new ones.
 
 ### Iteration 128 — 2026-04-16 17:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24524542936)
 
