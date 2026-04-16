@@ -133,12 +133,27 @@ describe("wideToLong — multiple id columns", () => {
 // ─── missing stub column → null ───────────────────────────────────────────────
 
 describe("wideToLong — missing stub columns", () => {
-  test("missing wide column fills with null", () => {
-    // A1 exists but A2 does not — A2 values should be null
-    const df = DataFrame.fromColumns({ id: [1], A1: [10] });
-    const long = wideToLong(df, "A", "id", "n", { suffix: "[12]" });
-    // suffix 1 → A1=10, suffix 2 → A2=null
-    expect(long.col("A").values).toEqual([10, null]);
+  test("missing wide column fills with null when other stubs cover that suffix", () => {
+    // Only A1 and B2 exist — mixed stubs
+    const df = DataFrame.fromColumns({
+      id: ["x", "y"],
+      A1: [1, 2],
+      B2: [7, 8],
+    });
+    const long = wideToLong(df, ["A", "B"], "id", "t");
+    // suffix 1: A1=[1,2], B1=missing=null
+    // suffix 2: A2=missing=null, B2=[7,8]
+    expect(long.shape[0]).toBe(4); // 2 rows × 2 suffixes
+    const aVals = long.col("A").values;
+    const bVals = long.col("B").values;
+    expect(aVals[0]).toBe(1);
+    expect(aVals[1]).toBe(2);
+    expect(bVals[0]).toBeNull();
+    expect(bVals[1]).toBeNull();
+    expect(aVals[2]).toBeNull();
+    expect(aVals[3]).toBeNull();
+    expect(bVals[2]).toBe(7);
+    expect(bVals[3]).toBe(8);
   });
 });
 
@@ -200,8 +215,18 @@ describe("property-based", () => {
           const df = DataFrame.fromColumns(colData);
           const long = wideToLong(df, "v", "id", "n");
           const outId = long.col("id").values;
-          // Each original id value should appear nSuffix times
-          return idVals.every((v) => outId.filter((x) => x === v).length === nSuffix);
+          // Each original id value occurrence should appear nSuffix times total
+          const counts = new Map<number, number>();
+          for (const id of idVals) {
+            counts.set(id, (counts.get(id) ?? 0) + 1);
+          }
+          for (const [id, originalCount] of counts) {
+            const count = outId.filter((x) => x === id).length;
+            if (count !== originalCount * nSuffix) {
+              return false;
+            }
+          }
+          return true;
         },
       ),
     );
