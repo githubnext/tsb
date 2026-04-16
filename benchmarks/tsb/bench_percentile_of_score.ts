@@ -1,0 +1,10 @@
+import { percentileOfScore } from "tsb";
+const N = 100_000;
+const data = Array.from({ length: N }, (_, i) => (i % 1000) * 0.1);
+const WARMUP = 3;
+const ITERS = 20;
+for (let i = 0; i < WARMUP; i++) percentileOfScore(data, 50.0);
+const t0 = performance.now();
+for (let i = 0; i < ITERS; i++) percentileOfScore(data, 50.0);
+const total = performance.now() - t0;
+console.log(JSON.stringify({ function: "percentile_of_score", mean_ms: total / ITERS, iterations: ITERS, total_ms: total }));

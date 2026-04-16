@@ -1,0 +1,13 @@
+import { strCharWidth } from "tsb";
+import { Series } from "tsb";
+const N = 100_000;
+const words = ["hello", "world", "café", "résumé", "naïve"];
+const data = Array.from({ length: N }, (_, i) => words[i % words.length]);
+const s = new Series(data);
+const WARMUP = 3;
+const ITERS = 20;
+for (let i = 0; i < WARMUP; i++) strCharWidth(s);
+const t0 = performance.now();
+for (let i = 0; i < ITERS; i++) strCharWidth(s);
+const total = performance.now() - t0;
+console.log(JSON.stringify({ function: "str_char_width", mean_ms: total / ITERS, iterations: ITERS, total_ms: total }));
