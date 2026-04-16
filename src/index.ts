@@ -123,12 +123,12 @@ export {
 export type { ClipOptions, RoundOptions, DataFrameElemOptions } from "./stats/index.ts";
 export { valueCounts, dataFrameValueCounts } from "./stats/index.ts";
 export type { ValueCountsOptions, DataFrameValueCountsOptions } from "./stats/index.ts";
-export { seriesWhere, seriesMask, dataFrameWhere, dataFrameMask } from "./stats/index.ts";
+export { whereSeries, maskSeries, whereDataFrame, maskDataFrame } from "./stats/index.ts";
 export type {
+  WherePredicate,
   SeriesCond,
   DataFrameCond,
-  SeriesWhereOptions,
-  DataFrameWhereOptions,
+  WhereMaskOptions,
 } from "./stats/index.ts";
 export {
   seriesEq,
@@ -305,11 +305,172 @@ export type { ExplodeOptions, ExplodeDataFrameOptions } from "./stats/index.ts";
 export { isin, dataFrameIsin } from "./stats/index.ts";
 export type { IsinValues, IsinDict, DataFrameIsinValues } from "./stats/index.ts";
 
-export { readExcel, xlsxSheetNames } from "./io/index.ts";
-export type { ReadExcelOptions } from "./io/index.ts";
+export {
+  insertColumn,
+  popColumn,
+  reorderColumns,
+  moveColumn,
+  dataFrameFromPairs,
+} from "./core/index.ts";
+export type { PopResult } from "./core/index.ts";
+export { toDictOriented, fromDictOriented } from "./core/index.ts";
+export type {
+  ToDictOrient,
+  FromDictOrient,
+  DictSplit,
+  DictTight,
+  SplitInput,
+} from "./core/index.ts";
+export { rollingSem, rollingSkew, rollingKurt, rollingQuantile } from "./stats/index.ts";
+export type { WindowExtOptions, RollingQuantileOptions } from "./stats/index.ts";
+export { fillna, countna, countValid } from "./stats/index.ts";
+export type { IsnaInput, FillnaOptions, DropnaOptions } from "./stats/index.ts";
+export {
+  getAttrs,
+  setAttrs,
+  updateAttrs,
+  copyAttrs,
+  withAttrs,
+  clearAttrs,
+  hasAttrs,
+  getAttr,
+  setAttr,
+  deleteAttr,
+  attrsCount,
+  attrsKeys,
+  mergeAttrs,
+} from "./core/index.ts";
+export type { Attrs } from "./core/index.ts";
+export {
+  pipe,
+  seriesApply,
+  seriesTransform,
+  dataFrameApplyMap,
+  dataFrameTransform,
+  dataFrameTransformRows,
+} from "./core/index.ts";
+export {
+  isScalar,
+  isListLike,
+  isArrayLike,
+  isDictLike,
+  isIterator,
+  isNumber,
+  isBool,
+  isStringValue,
+  isFloat,
+  isInteger,
+  isBigInt,
+  isRegExp,
+  isReCompilable,
+  isMissing,
+  isHashable,
+  isDate,
+  isNumericDtype,
+  isIntegerDtype,
+  isSignedIntegerDtype,
+  isUnsignedIntegerDtype,
+  isFloatDtype,
+  isBoolDtype,
+  isStringDtype,
+  isDatetimeDtype,
+  isTimedeltaDtype,
+  isCategoricalDtype,
+  isObjectDtype,
+  isComplexDtype,
+  isExtensionArrayDtype,
+  isPeriodDtype,
+  isIntervalDtype,
+} from "./core/index.ts";
+export {
+  strNormalize,
+  strGetDummies,
+  strExtractAll,
+  strRemovePrefix,
+  strRemoveSuffix,
+  strTranslate,
+  strCharWidth,
+  strByteLength,
+  strSplitExpand,
+  strExtractGroups,
+  strPartition,
+  strRPartition,
+  strMultiReplace,
+  strIndent,
+  strDedent,
+} from "./stats/index.ts";
+export type {
+  NormalizeForm,
+  StrInput,
+  ExtractAllOptions,
+  SplitExpandOptions,
+  ExtractGroupsOptions,
+  PartitionResult,
+  ReplacePair,
+  IndentOptions,
+} from "./stats/index.ts";
+export {
+  digitize,
+  histogram,
+  linspace,
+  arange,
+  percentileOfScore,
+  zscore,
+  minMaxNormalize,
+  coefficientOfVariation,
+  seriesDigitize,
+} from "./stats/index.ts";
+export type {
+  HistogramOptions,
+  HistogramResult,
+  ZscoreOptions,
+  MinMaxOptions,
+  CvOptions,
+} from "./stats/index.ts";
+export {
+  catFromCodes,
+  catUnionCategories,
+  catIntersectCategories,
+  catDiffCategories,
+  catEqualCategories,
+  catSortByFreq,
+  catToOrdinal,
+  catFreqTable,
+  catCrossTab,
+  catRecode,
+} from "./stats/index.ts";
+export type {
+  CatFromCodesOptions,
+  CatSortByFreqOptions,
+  CatCrossTabOptions,
+} from "./stats/index.ts";
+export {
+  formatFloat,
+  formatPercent,
+  formatScientific,
+  formatEngineering,
+  formatThousands,
+  formatCurrency,
+  formatCompact,
+  makeFloatFormatter,
+  makePercentFormatter,
+  makeCurrencyFormatter,
+  applySeriesFormatter,
+  applyDataFrameFormatter,
+  seriesToString,
+  dataFrameToString,
+} from "./stats/index.ts";
+export type {
+  Formatter,
+  SeriesToStringOptions,
+  DataFrameToStringOptions,
+} from "./stats/index.ts";
+
+// PR #120 unique modules — re-exported from sub-barrels
 export { astypeSeries, astype, castScalar } from "./core/index.ts";
 export type { AstypeOptions, DataFrameAstypeOptions } from "./core/index.ts";
-
+export { readExcel, xlsxSheetNames } from "./io/index.ts";
+export type { ReadExcelOptions } from "./io/index.ts";
 export { clipAdvancedSeries, clipAdvancedDataFrame } from "./stats/index.ts";
 export type {
   SeriesBound,
@@ -375,118 +536,3 @@ export type {
 } from "./stats/index.ts";
 export { toDatetime } from "./stats/index.ts";
 export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./stats/index.ts";
-
-// iter136 features — core
-export { isScalar, isListLike, isArrayLike, isDictLike, isIterator } from "./core/index.ts";
-export { getAttrs, setAttrs, updateAttrs, copyAttrs } from "./core/index.ts";
-export type { Attrs } from "./core/index.ts";
-export {
-  insertColumn,
-  popColumn,
-  reorderColumns,
-  moveColumn,
-  dataFrameFromPairs,
-} from "./core/index.ts";
-export type { PopResult } from "./core/index.ts";
-export { toDictOriented, fromDictOriented } from "./core/index.ts";
-export type { ToDictOrient, FromDictOrient, DictSplit, DictTight } from "./core/index.ts";
-
-// iter136 features — stats
-export {
-  catFromCodes,
-  catUnionCategories,
-  catIntersectCategories,
-  catDiffCategories,
-  catEqualCategories,
-  catSortByFreq,
-  catToOrdinal,
-  catFreqTable,
-  catCrossTab,
-  catRecode,
-} from "./stats/index.ts";
-export type {
-  CatFromCodesOptions,
-  CatSortByFreqOptions,
-  CatCrossTabOptions,
-} from "./stats/index.ts";
-export {
-  formatFloat,
-  formatPercent,
-  formatScientific,
-  formatEngineering,
-  formatThousands,
-  formatCurrency,
-  formatCompact,
-  makeFloatFormatter,
-  makePercentFormatter,
-  makeCurrencyFormatter,
-  applySeriesFormatter,
-  applyDataFrameFormatter,
-  seriesToString,
-  dataFrameToString,
-} from "./stats/index.ts";
-export type {
-  Formatter,
-  SeriesToStringOptions,
-  DataFrameToStringOptions,
-} from "./stats/index.ts";
-export {
-  histogram,
-  zscore,
-  minMaxNormalize,
-  coefficientOfVariation,
-  digitize,
-  linspace,
-  arange,
-  percentileOfScore,
-  seriesDigitize,
-} from "./stats/index.ts";
-export type {
-  HistogramOptions,
-  HistogramResult,
-  ZscoreOptions,
-  MinMaxOptions,
-  CvOptions,
-} from "./stats/index.ts";
-export {
-  strNormalize,
-  strGetDummies,
-  strExtractAll,
-  strRemovePrefix,
-  strRemoveSuffix,
-  strTranslate,
-  strCharWidth,
-  strByteLength,
-} from "./stats/index.ts";
-export type {
-  NormalizeForm,
-  StrInput,
-  StrGetDummiesOptions,
-  ExtractAllOptions,
-} from "./stats/index.ts";
-export {
-  strSplitExpand,
-  strExtractGroups,
-  strPartition,
-  strRPartition,
-  strMultiReplace,
-  strIndent,
-  strDedent,
-} from "./stats/index.ts";
-export type {
-  SplitExpandOptions,
-  ExtractGroupsOptions,
-  PartitionResult,
-  ReplacePair,
-  IndentOptions,
-} from "./stats/index.ts";
-export {
-  rollingSem,
-  rollingSkew,
-  rollingKurt,
-  rollingQuantile,
-} from "./stats/index.ts";
-export type {
-  WindowExtOptions,
-  RollingQuantileOptions,
-} from "./stats/index.ts";

@@ -2,6 +2,14 @@ import { describe, expect, it } from "bun:test";
 import * as fc from "fast-check";
 import { natArgSort, natCompare, natSortKey, natSorted } from "../../src/core/natsort.ts";
 
+function mustAt<T>(values: readonly T[], index: number): T {
+  const value = values[index];
+  if (value === undefined) {
+    throw new Error("expected value at index");
+  }
+  return value;
+}
+
 // ─── natCompare ───────────────────────────────────────────────────────────────
 
 describe("natCompare", () => {
@@ -203,7 +211,7 @@ describe("natArgSort", () => {
     const arr = ["file10", "file2", "file1"];
     const idx = natArgSort(arr);
     expect(idx).toEqual([2, 1, 0]); // file1, file2, file10
-    expect(idx.map((i) => arr[i]!)).toEqual(["file1", "file2", "file10"]);
+    expect(idx.map((i) => mustAt(arr, i))).toEqual(["file1", "file2", "file10"]);
   });
 
   it("empty array", () => {
@@ -217,13 +225,13 @@ describe("natArgSort", () => {
   it("reverse option", () => {
     const arr = ["file1", "file2", "file10"];
     const idx = natArgSort(arr, { reverse: true });
-    expect(idx.map((i) => arr[i]!)).toEqual(["file10", "file2", "file1"]);
+    expect(idx.map((i) => mustAt(arr, i))).toEqual(["file10", "file2", "file1"]);
   });
 
   it("ignoreCase option", () => {
     const arr = ["Banana", "apple", "Cherry"];
     const idx = natArgSort(arr, { ignoreCase: true });
-    expect(idx.map((i) => arr[i]!)).toEqual(["apple", "Banana", "Cherry"]);
+    expect(idx.map((i) => mustAt(arr, i))).toEqual(["apple", "Banana", "Cherry"]);
   });
 
   it("all identical strings", () => {
@@ -254,7 +262,7 @@ describe("natSorted property tests", () => {
       fc.property(fc.array(fc.string({ minLength: 0, maxLength: 20 })), (arr) => {
         const sorted = natSorted(arr);
         for (let i = 0; i + 1 < sorted.length; i++) {
-          expect(natCompare(sorted[i]!, sorted[i + 1]!)).toBeLessThanOrEqual(0);
+          expect(natCompare(mustAt(sorted, i), mustAt(sorted, i + 1))).toBeLessThanOrEqual(0);
         }
       }),
       { numRuns: 200 },
@@ -265,7 +273,7 @@ describe("natSorted property tests", () => {
     fc.assert(
       fc.property(fc.array(fc.string({ minLength: 0, maxLength: 20 })), (arr) => {
         const sorted = natSorted(arr);
-        const fromArgSort = natArgSort(arr).map((i) => arr[i]!);
+        const fromArgSort = natArgSort(arr).map((i) => mustAt(arr, i));
         expect(fromArgSort).toEqual(sorted);
       }),
       { numRuns: 200 },

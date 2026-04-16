@@ -21,7 +21,13 @@ import type { Label, Scalar } from "../types.ts";
 // ─── public types ─────────────────────────────────────────────────────────────
 
 /** A scalar numeric bound, a positional array, or a Series aligned by label. */
-export type BoundArg = number | null | undefined | readonly (number | null)[] | Series<Scalar>;
+export type BoundArg =
+  | number
+  | null
+  | undefined
+  | readonly (number | null)[]
+  | Series<Scalar>
+  | DataFrame;
 
 /** Options for {@link clipSeriesWithBounds}. */
 export interface SeriesClipBoundsOptions {
@@ -227,8 +233,15 @@ export function clipDataFrameWithBounds(
 
   if (axisIsColumns) {
     // axis=1: each column gets its own scalar bound resolved from the Series/array
-    const loBounds = resolveBound(lower, nCols, df.columns);
-    const hiBounds = resolveBound(upper, nCols, df.columns);
+    const resolveColumnBounds = (bound: BoundArg | undefined): (number | null)[] => {
+      const aligned = resolveBound(bound, nCols, df.columns);
+      if (bound instanceof Series && aligned.every((v) => v === null) && bound.size === nCols) {
+        return bound.values.map((v) => (isFiniteNum(v) ? v : null));
+      }
+      return aligned;
+    };
+    const loBounds = resolveColumnBounds(lower);
+    const hiBounds = resolveColumnBounds(upper);
 
     const colMap = new Map<string, Series<Scalar>>();
     for (let ci = 0; ci < nCols; ci++) {

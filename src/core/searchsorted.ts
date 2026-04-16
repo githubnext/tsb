@@ -156,6 +156,26 @@ function bisect(
   return lo;
 }
 
+function valueAt(values: readonly Scalar[], index: number): Scalar {
+  const value = values[index];
+  if (value === undefined) {
+    throw new RangeError("searchsorted: index out of bounds");
+  }
+  return value;
+}
+
+function valueAtSorted(
+  values: readonly Scalar[],
+  sorter: readonly number[],
+  index: number,
+): Scalar {
+  const sortedIndex = sorter[index];
+  if (sortedIndex === undefined) {
+    throw new RangeError("searchsorted: sorter index out of bounds");
+  }
+  return valueAt(values, sortedIndex);
+}
+
 // ─── public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -184,9 +204,9 @@ export function searchsorted(
   const { side = "left", sorter, compareFn = defaultCompare } = options;
   const n = a.length;
   if (sorter !== undefined) {
-    return bisect(n, (i) => a[sorter[i]!]!, v, side, compareFn);
+    return bisect(n, (i) => valueAtSorted(a, sorter, i), v, side, compareFn);
   }
-  return bisect(n, (i) => a[i]!, v, side, compareFn);
+  return bisect(n, (i) => valueAt(a, i), v, side, compareFn);
 }
 
 /**
@@ -214,7 +234,8 @@ export function searchsortedMany(
 ): number[] {
   const { side = "left", sorter, compareFn = defaultCompare } = options;
   const n = a.length;
-  const get: (i: number) => Scalar = sorter !== undefined ? (i) => a[sorter[i]!]! : (i) => a[i]!;
+  const get: (i: number) => Scalar =
+    sorter !== undefined ? (i) => valueAtSorted(a, sorter, i) : (i) => valueAt(a, i);
   return vs.map((v) => bisect(n, get, v, side, compareFn));
 }
 
@@ -241,6 +262,6 @@ export function argsortScalars(
   compareFn: (x: Scalar, y: Scalar) => number = defaultCompare,
 ): number[] {
   const indices = a.map((_, i) => i);
-  indices.sort((i, j) => compareFn(a[i]!, a[j]!));
+  indices.sort((i, j) => compareFn(valueAt(a, i), valueAt(a, j)));
   return indices;
 }

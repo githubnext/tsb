@@ -306,18 +306,10 @@ export class DataFrameGroupBy {
   }
 
   /**
-   * Aggregate with named output columns via `NamedAgg` specs.
+   * Aggregate each group using named aggregation specs.
    *
-   * Each key in `spec` becomes an output column name.  The corresponding
-   * `NamedAgg` tells which source column to read and which aggregation to apply.
-   *
-   * @example
-   * ```ts
-   * df.groupby("dept").aggNamed({
-   *   total: namedAgg("salary", "sum"),
-   *   avg:   namedAgg("salary", "mean"),
-   * });
-   * ```
+   * Each key in `spec` becomes the output column name; the `NamedAgg` value
+   * specifies which source column to aggregate and how.
    */
   aggNamed(spec: NamedAggSpec, asIndex = true): DataFrame {
     const groupKeys = this._groups.map((g) => g.key);
@@ -343,10 +335,10 @@ export class DataFrameGroupBy {
       }
     }
 
-    for (const [outputCol, namedSpec] of Object.entries(spec)) {
-      const srcVals = this._df.col(namedSpec.column).values as readonly Scalar[];
+    for (const [outCol, namedSpec] of Object.entries(spec)) {
       const fn = resolveAgg(namedSpec.aggfunc);
-      resultCols[outputCol] = this._groups.map((g) =>
+      const srcVals = this._df.col(namedSpec.column).values as readonly Scalar[];
+      resultCols[outCol] = this._groups.map((g) =>
         fn(g.positions.map((p) => srcVals[p] as Scalar)),
       );
     }

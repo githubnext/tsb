@@ -16,16 +16,16 @@ import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
 import { DataFrame } from "../../src/core/frame.ts";
 import { Series } from "../../src/core/series.ts";
+import type { Label, Scalar } from "../../src/index.ts";
 import { combineFirstDataFrame, combineFirstSeries } from "../../src/stats/combine_first.ts";
-import type { Label, Scalar } from "../../src/types.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-function sv(s: Series<Scalar>, idx: Scalar[]): Scalar[] {
+function sv(s: Series<Scalar>, idx: unknown[]): unknown[] {
   return idx.map((lbl) => {
-    const pos = s.index.getLoc(lbl as Label);
+    const pos = s.index.getLoc(lbl as number | string | boolean | null);
     const p = Array.isArray(pos) ? (pos[0] ?? 0) : pos;
-    return s.values[p] as Scalar;
+    return s.values[p];
   });
 }
 

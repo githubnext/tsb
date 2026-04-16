@@ -39,12 +39,12 @@ export {
   nsmallestDataFrame,
 } from "./nlargest.ts";
 export type { NKeep, NTopOptions, NTopDataFrameOptions } from "./nlargest.ts";
-export { seriesWhere, seriesMask, dataFrameWhere, dataFrameMask } from "./where_mask.ts";
+export { whereSeries, maskSeries, whereDataFrame, maskDataFrame } from "./where_mask.ts";
 export type {
+  WherePredicate,
   SeriesCond,
   DataFrameCond,
-  SeriesWhereOptions,
-  DataFrameWhereOptions,
+  WhereMaskOptions,
 } from "./where_mask.ts";
 export {
   seriesEq,
@@ -174,13 +174,6 @@ export { isna, notna, isnull, notnull } from "./notna.ts";
 export { dropna, dropnaSeries, dropnaDataFrame } from "./dropna.ts";
 export type { DropnaHow, DropnaDataFrameOptions } from "./dropna.ts";
 
-export {
-  fillna,
-  countna,
-  countValid,
-} from "./notna_isna.ts";
-export type { IsnaInput, FillnaOptions, DropnaOptions } from "./notna_isna.ts";
-
 export { combineFirstSeries, combineFirstDataFrame } from "./combine_first.ts";
 
 export { valueCountsBinned } from "./value_counts_full.ts";
@@ -203,6 +196,94 @@ export type { ExplodeOptions, ExplodeDataFrameOptions } from "./explode.ts";
 
 export { isin, dataFrameIsin } from "./isin.ts";
 export type { IsinValues, IsinDict, DataFrameIsinValues } from "./isin.ts";
+
+export { rollingSem, rollingSkew, rollingKurt, rollingQuantile } from "./window_extended.ts";
+export type { WindowExtOptions, RollingQuantileOptions } from "./window_extended.ts";
+export { fillna, countna, countValid } from "./notna_isna.ts";
+export type { IsnaInput, FillnaOptions, DropnaOptions } from "./notna_isna.ts";
+export {
+  strNormalize,
+  strGetDummies,
+  strExtractAll,
+  strRemovePrefix,
+  strRemoveSuffix,
+  strTranslate,
+  strCharWidth,
+  strByteLength,
+} from "./string_ops.ts";
+export type { NormalizeForm, StrInput, ExtractAllOptions } from "./string_ops.ts";
+export {
+  strSplitExpand,
+  strExtractGroups,
+  strPartition,
+  strRPartition,
+  strMultiReplace,
+  strIndent,
+  strDedent,
+} from "./string_ops_extended.ts";
+export type {
+  SplitExpandOptions,
+  ExtractGroupsOptions,
+  PartitionResult,
+  ReplacePair,
+  IndentOptions,
+} from "./string_ops_extended.ts";
+export {
+  digitize,
+  histogram,
+  linspace,
+  arange,
+  percentileOfScore,
+  zscore,
+  minMaxNormalize,
+  coefficientOfVariation,
+  seriesDigitize,
+} from "./numeric_extended.ts";
+export type {
+  HistogramOptions,
+  HistogramResult,
+  ZscoreOptions,
+  MinMaxOptions,
+  CvOptions,
+} from "./numeric_extended.ts";
+export {
+  catFromCodes,
+  catUnionCategories,
+  catIntersectCategories,
+  catDiffCategories,
+  catEqualCategories,
+  catSortByFreq,
+  catToOrdinal,
+  catFreqTable,
+  catCrossTab,
+  catRecode,
+} from "./categorical_ops.ts";
+export type {
+  CatFromCodesOptions,
+  CatSortByFreqOptions,
+  CatCrossTabOptions,
+} from "./categorical_ops.ts";
+export {
+  formatFloat,
+  formatPercent,
+  formatScientific,
+  formatEngineering,
+  formatThousands,
+  formatCurrency,
+  formatCompact,
+  makeFloatFormatter,
+  makePercentFormatter,
+  makeCurrencyFormatter,
+  applySeriesFormatter,
+  applyDataFrameFormatter,
+  seriesToString,
+  dataFrameToString,
+} from "./format_ops.ts";
+export type {
+  Formatter,
+  SeriesToStringOptions,
+  DataFrameToStringOptions,
+} from "./format_ops.ts";
 
 export { clipAdvancedSeries, clipAdvancedDataFrame } from "./clip_advanced.ts";
 export type {
@@ -279,107 +360,3 @@ export type {
 
 export { toDatetime } from "./to_datetime.ts";
 export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./to_datetime.ts";
-
-export {
-  catFromCodes,
-  catUnionCategories,
-  catIntersectCategories,
-  catDiffCategories,
-  catEqualCategories,
-  catSortByFreq,
-  catToOrdinal,
-  catFreqTable,
-  catCrossTab,
-  catRecode,
-} from "./categorical_ops.ts";
-export type {
-  CatFromCodesOptions,
-  CatSortByFreqOptions,
-  CatCrossTabOptions,
-} from "./categorical_ops.ts";
-
-export {
-  formatFloat,
-  formatPercent,
-  formatScientific,
-  formatEngineering,
-  formatThousands,
-  formatCurrency,
-  formatCompact,
-  makeFloatFormatter,
-  makePercentFormatter,
-  makeCurrencyFormatter,
-  applySeriesFormatter,
-  applyDataFrameFormatter,
-  seriesToString,
-  dataFrameToString,
-} from "./format_ops.ts";
-export type {
-  Formatter,
-  SeriesToStringOptions,
-  DataFrameToStringOptions,
-} from "./format_ops.ts";
-
-export {
-  histogram,
-  zscore,
-  minMaxNormalize,
-  coefficientOfVariation,
-  digitize,
-  linspace,
-  arange,
-  percentileOfScore,
-  seriesDigitize,
-} from "./numeric_extended.ts";
-export type {
-  HistogramOptions,
-  HistogramResult,
-  ZscoreOptions,
-  MinMaxOptions,
-  CvOptions,
-} from "./numeric_extended.ts";
-
-export {
-  strNormalize,
-  strGetDummies,
-  strExtractAll,
-  strRemovePrefix,
-  strRemoveSuffix,
-  strTranslate,
-  strCharWidth,
-  strByteLength,
-} from "./string_ops.ts";
-export type {
-  NormalizeForm,
-  StrInput,
-  StrGetDummiesOptions,
-  ExtractAllOptions,
-} from "./string_ops.ts";
-
-export {
-  strSplitExpand,
-  strExtractGroups,
-  strPartition,
-  strRPartition,
-  strMultiReplace,
-  strIndent,
-  strDedent,
-} from "./string_ops_extended.ts";
-export type {
-  SplitExpandOptions,
-  ExtractGroupsOptions,
-  PartitionResult,
-  ReplacePair,
-  IndentOptions,
-} from "./string_ops_extended.ts";
-
-export {
-  rollingSem,
-  rollingSkew,
-  rollingKurt,
-  rollingQuantile,
-} from "./window_extended.ts";
-export type {
-  WindowExtOptions,
-  RollingQuantileOptions,
-} from "./window_extended.ts";

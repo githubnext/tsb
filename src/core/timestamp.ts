@@ -409,7 +409,7 @@ function freqMs(freq: string): number {
   }
   // Try "Nunit" pattern (e.g. "2H", "15T").
   const m = /^(\d+)(.+)$/.exec(freq);
-  if (m !== null && m[2] !== undefined) {
+  if (m !== null && m[1] !== undefined && m[2] !== undefined) {
     return Number(m[1]) * freqMs(m[2]);
   }
   throw new Error(`Timestamp.floor/ceil/round: unsupported frequency "${freq}"`);

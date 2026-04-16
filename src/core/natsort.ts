@@ -58,8 +58,11 @@ function tokenize(s: string): readonly Token[] {
   // Split on runs of ASCII digits
   const re = /(\d+)/g;
   let last = 0;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(s)) !== null) {
+  while (true) {
+    const m = re.exec(s);
+    if (m === null) {
+      break;
+    }
     if (m.index > last) {
       tokens.push(s.slice(last, m.index));
     }
@@ -115,7 +118,12 @@ export function natCompare(a: string, b: string, options: NatSortOptions = {}): 
   const tb = tokenize(b);
   const len = Math.min(ta.length, tb.length);
   for (let i = 0; i < len; i++) {
-    const c = cmpTokens(ta[i]!, tb[i]!, ignoreCase);
+    const taToken = ta[i];
+    const tbToken = tb[i];
+    if (taToken === undefined || tbToken === undefined) {
+      break;
+    }
+    const c = cmpTokens(taToken, tbToken, ignoreCase);
     if (c !== 0) {
       return reverse ? -c : c;
     }
@@ -216,16 +224,27 @@ export function natArgSort(arr: readonly string[], options: NatSortOptions = {})
   const { ignoreCase = false, reverse = false } = options;
   const keys = arr.map((s) => tokenize(ignoreCase ? s.toLowerCase() : s));
   indices.sort((i, j) => {
-    const ta = keys[i]!;
-    const tb = keys[j]!;
+    const ta = keys[i];
+    const tb = keys[j];
+    if (ta === undefined || tb === undefined) {
+      throw new RangeError("natArgSort: index out of bounds");
+    }
     const len = Math.min(ta.length, tb.length);
     for (let k = 0; k < len; k++) {
-      const c = cmpTokens(ta[k]!, tb[k]!, false); // already case-folded
+      const taToken = ta[k];
+      const tbToken = tb[k];
+      if (taToken === undefined || tbToken === undefined) {
+        break;
+      }
+      const c = cmpTokens(taToken, tbToken, false); // already case-folded
       if (c !== 0) {
         return reverse ? -c : c;
       }
     }
     const lc = ta.length - tb.length;
+    if (lc === 0) {
+      return 0;
+    }
     return reverse ? -lc : lc;
   });
   return indices;

@@ -270,11 +270,11 @@ export function reindexSeries<T extends Scalar>(
     const key = String(newLabels[i]);
     const positions = labelMap.get(key);
     if (positions !== undefined && positions.length > 0) {
-      const pos0 = positions[0];
-      if (pos0 !== undefined) {
-        resultValues[i] = series.values[pos0] as Scalar;
+      const pos = positions[0];
+      if (pos !== undefined) {
+        resultValues[i] = series.values[pos] ?? null;
+        present[i] = true;
       }
-      present[i] = true;
     }
   }
 

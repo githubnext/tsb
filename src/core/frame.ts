@@ -297,19 +297,9 @@ export class DataFrame {
   /**
    * Add or replace columns.  Returns a new DataFrame.
    *
-   * Accepts three kinds of column specifiers:
-   * - `readonly Scalar[]` — values aligned by position
-   * - `Series<Scalar>` — a Series aligned by position
-   * - `(df: DataFrame) => readonly Scalar[] | Series<Scalar>` — callable that receives the
-   *   in-progress DataFrame (earlier columns in this call are already visible), enabling
-   *   chained derivations that mirror the pandas behaviour.
-   *
    * @example
    * ```ts
-   * const df2 = df.assign({
-   *   c: [7, 8, 9],
-   *   d: (d) => d.col("c").add(d.col("a")), // callable — sees "c" already added
-   * });
+   * const df2 = df.assign({ c: [7, 8, 9] });
    * ```
    */
   assign(
@@ -320,19 +310,19 @@ export class DataFrame {
       >
     >,
   ): DataFrame {
-    let working: DataFrame = this;
+    let currentFrame: DataFrame = this;
     for (const [name, spec] of Object.entries(newCols)) {
       const resolved: readonly Scalar[] | Series<Scalar> =
-        typeof spec === "function" ? spec(working) : spec;
+        typeof spec === "function" ? spec(currentFrame) : spec;
       const series: Series<Scalar> =
         resolved instanceof Series
           ? resolved
-          : new Series({ data: resolved, index: working.index });
-      const colMap = new Map<string, Series<Scalar>>(working._columns);
+          : new Series({ data: resolved, index: currentFrame.index });
+      const colMap = new Map<string, Series<Scalar>>(currentFrame._columns);
       colMap.set(name, series);
-      working = new DataFrame(colMap, working.index);
+      currentFrame = new DataFrame(colMap, currentFrame.index);
     }
-    return working;
+    return currentFrame;
   }
 
   /** Drop one or more columns by name.  Returns a new DataFrame. */

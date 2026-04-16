@@ -123,14 +123,14 @@ function flattenObject(
 ): Record<string, Scalar> {
   const result: Record<string, Scalar> = {};
   for (const [k, v] of Object.entries(obj)) {
-    const fullKey = prefix === "" ? k : `${prefix}${sep}${k}`;
+    const fullKey = prefix === "" ? k : `${prefix}${depth === 0 ? "" : sep}${k}`;
     const atMax = maxLevel !== undefined && depth >= maxLevel;
     if (!atMax && typeof v === "object" && v !== null && !Array.isArray(v)) {
       const nested = flattenObject(v as JsonObject, sep, maxLevel, fullKey, depth + 1);
       for (const [nk, nv] of Object.entries(nested)) {
         result[nk] = nv;
       }
-    } else if (Array.isArray(v)) {
+    } else if (Array.isArray(v) || (typeof v === "object" && v !== null)) {
       // Arrays at this level become JSON strings
       result[fullKey] = JSON.stringify(v);
     } else {
@@ -359,7 +359,7 @@ export function jsonNormalize(
   }
 
   // Build Series columns and infer dtypes
-  const colMap = new Map<string, Series<Scalar>>();
+  const seriesMap = new Map<string, Series<Scalar>>();
   for (const [col, vals] of Object.entries(colData)) {
     let dtype: Dtype;
     if (vals.every((v) => v === null || typeof v === "number")) {
@@ -369,8 +369,8 @@ export function jsonNormalize(
     } else {
       dtype = Dtype.object;
     }
-    colMap.set(col, new Series({ data: vals, name: col, dtype }));
+    seriesMap.set(col, new Series({ data: vals, name: col, dtype }));
   }
 
-  return new DataFrame(colMap, new RangeIndex(rows.length));
+  return new DataFrame(seriesMap, new RangeIndex(rows.length));
 }

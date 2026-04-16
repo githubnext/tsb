@@ -15,7 +15,6 @@ export { CategoricalAccessor } from "./cat_accessor.ts";
 export type { CatSeriesLike } from "./cat_accessor.ts";
 export { MultiIndex } from "./multi_index.ts";
 export type { MultiIndexOptions } from "./multi_index.ts";
-
 export { Interval, IntervalIndex } from "./interval.ts";
 export type { IntervalClosed, IntervalIndexOptions } from "./interval.ts";
 export { CategoricalIndex } from "./categorical_index.ts";
@@ -41,7 +40,6 @@ export type { DateOffset, WeekOptions } from "./date_offset.ts";
 export { DatetimeIndex, date_range, bdate_range, resolveFreq } from "./date_range.ts";
 export type { DateRangeFreq, DateRangeOptions, DatetimeIndexOptions } from "./date_range.ts";
 export { TZDatetimeIndex, tz_localize, tz_convert } from "./datetime_tz.ts";
-
 export { Timestamp } from "./timestamp.ts";
 export type { TimestampOptions, TimestampComponents, TimestampUnit } from "./timestamp.ts";
 export { dataFrameAssign } from "./assign.ts";
@@ -54,8 +52,47 @@ export { reindexSeries, reindexDataFrame } from "./reindex.ts";
 export type { ReindexMethod, ReindexSeriesOptions, ReindexDataFrameOptions } from "./reindex.ts";
 export { alignSeries, alignDataFrame } from "./align.ts";
 export type { AlignSeriesOptions, AlignDataFrameOptions } from "./align.ts";
-export { astypeSeries, astype, castScalar } from "./astype.ts";
-export type { AstypeOptions, DataFrameAstypeOptions } from "./astype.ts";
+export {
+  insertColumn,
+  popColumn,
+  reorderColumns,
+  moveColumn,
+  dataFrameFromPairs,
+} from "./insert_pop.ts";
+export type { PopResult } from "./insert_pop.ts";
+export { toDictOriented, fromDictOriented } from "./to_from_dict.ts";
+export type {
+  ToDictOrient,
+  FromDictOrient,
+  DictSplit,
+  DictTight,
+  SplitInput,
+} from "./to_from_dict.ts";
+export {
+  getAttrs,
+  setAttrs,
+  updateAttrs,
+  copyAttrs,
+  withAttrs,
+  clearAttrs,
+  hasAttrs,
+  getAttr,
+  setAttr,
+  deleteAttr,
+  attrsCount,
+  attrsKeys,
+  mergeAttrs,
+} from "./attrs.ts";
+export type { Attrs } from "./attrs.ts";
+export {
+  pipe,
+  seriesApply,
+  seriesTransform,
+  dataFrameApply,
+  dataFrameApplyMap,
+  dataFrameTransform,
+  dataFrameTransformRows,
+} from "./pipe_apply.ts";
 export {
   isScalar,
   isListLike,
@@ -89,44 +126,5 @@ export {
   isPeriodDtype,
   isIntervalDtype,
 } from "./api_types.ts";
-export {
-  getAttrs,
-  setAttrs,
-  updateAttrs,
-  copyAttrs,
-  withAttrs,
-  clearAttrs,
-  hasAttrs,
-  getAttr,
-  setAttr,
-  deleteAttr,
-  attrsCount,
-  attrsKeys,
-  mergeAttrs,
-} from "./attrs.ts";
-export type { Attrs } from "./attrs.ts";
-export {
-  insertColumn,
-  popColumn,
-  reorderColumns,
-  moveColumn,
-  dataFrameFromPairs,
-} from "./insert_pop.ts";
-export type { PopResult } from "./insert_pop.ts";
-export { toDictOriented, fromDictOriented } from "./to_from_dict.ts";
-export type {
-  ToDictOrient,
-  FromDictOrient,
-  DictSplit,
-  DictTight,
-  SplitInput,
-} from "./to_from_dict.ts";
-export {
-  pipe,
-  seriesApply,
-  seriesTransform,
-  dataFrameApply as dataFrameApplyPipe,
-  dataFrameApplyMap,
-  dataFrameTransform,
-  dataFrameTransformRows,
-} from "./pipe_apply.ts";
+export { astypeSeries, astype, castScalar } from "./astype.ts";
+export type { AstypeOptions, DataFrameAstypeOptions } from "./astype.ts";

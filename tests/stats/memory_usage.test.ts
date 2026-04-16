@@ -14,12 +14,15 @@ import {
 } from "../../src/index.ts";
 import type { Scalar } from "../../src/index.ts";
 
-/** Build a DataFrame from a record of named Series. */
-function dfFromSeries(cols: Record<string, Series<Scalar>>): DataFrame {
-  const entries = Object.entries(cols);
-  const colMap = new Map<string, Series<Scalar>>(entries);
-  const nRows = entries.length > 0 ? (entries[0]?.[1]?.length ?? 0) : 0;
-  return new DataFrame(colMap, new RangeIndex(nRows));
+function dfFromSeries(columns: Record<string, Series<Scalar>>): DataFrame {
+  const colMap = new Map<string, Series<Scalar>>();
+  for (const [name, series] of Object.entries(columns)) {
+    colMap.set(name, series);
+  }
+  // Build through the low-level constructor to preserve explicit Series dtypes in tests.
+  const firstCol = Object.values(columns)[0];
+  const index = new RangeIndex(firstCol?.size ?? 0);
+  return new DataFrame(colMap, index);
 }
 
 // ─── seriesMemoryUsage ────────────────────────────────────────────────────────
@@ -250,7 +253,7 @@ describe("dataFrameMemoryUsage", () => {
   });
 
   it("empty DataFrame returns only Index row", () => {
-    const df = DataFrame.fromColumns({});
+    const df = dfFromSeries({});
     const mu = dataFrameMemoryUsage(df);
     expect(mu.index.size).toBe(1);
     expect(mu.at("Index")).toBe(24);

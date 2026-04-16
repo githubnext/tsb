@@ -205,9 +205,8 @@ export function crosstab(
   // buckets[r][c] = collected numeric values for aggregation (when values+aggfunc provided).
   const buckets: Array<Array<number[] | undefined>> | null =
     values !== undefined
-      ? Array.from(
-          { length: nRows },
-          (): Array<number[] | undefined> => new Array<number[] | undefined>(nCols).fill(undefined),
+      ? Array.from({ length: nRows }, () =>
+          Array.from<undefined, number[] | undefined>({ length: nCols }, () => undefined),
         )
       : null;
 

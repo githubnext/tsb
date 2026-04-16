@@ -76,6 +76,9 @@ describe("pipeSeries — basic usage", () => {
       received = x;
       return x;
     });
+    if (received === null) {
+      throw new Error("Expected callback to receive series");
+    }
     expect(received === s).toBe(true);
   });
 });
@@ -153,6 +156,9 @@ describe("dataFramePipe — basic usage", () => {
       received = d;
       return d;
     });
+    if (received === null) {
+      throw new Error("Expected callback to receive dataframe");
+    }
     expect(received === df).toBe(true);
   });
 

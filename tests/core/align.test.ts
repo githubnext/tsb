@@ -4,11 +4,12 @@ import { alignDataFrame, alignSeries } from "../../src/core/align.ts";
 import { Index } from "../../src/core/base-index.ts";
 import { DataFrame } from "../../src/core/frame.ts";
 import { Series } from "../../src/core/series.ts";
+import type { Scalar } from "../../src/index.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-function ns(data: number[], labels: string[], name?: string): Series<number> {
-  return new Series<number>({
+function ns(data: number[], labels: string[], name?: string): Series<Scalar> {
+  return new Series<Scalar>({
     data,
     index: new Index<string>(labels),
     name: name ?? null,
@@ -31,8 +32,8 @@ describe("alignSeries — outer (default)", () => {
     const [la, ra] = alignSeries(a, b);
     expect(la.index.toArray()).toEqual(["a", "b", "c", "d"]);
     expect(ra.index.toArray()).toEqual(["a", "b", "c", "d"]);
-    expect(la.toArray() as (number | null)[]).toEqual([1, 2, null, null]);
-    expect(ra.toArray() as (number | null)[]).toEqual([null, null, 10, 20]);
+    expect(la.toArray()).toEqual([1, 2, null, null]);
+    expect(ra.toArray()).toEqual([null, null, 10, 20]);
   });
 
   it("overlapping labels → correct values", () => {
@@ -41,7 +42,7 @@ describe("alignSeries — outer (default)", () => {
     const [la, ra] = alignSeries(a, b);
     expect(la.index.toArray()).toEqual(["a", "b", "c"]);
     expect(la.toArray()).toEqual([1, 2, 3]);
-    expect(ra.toArray() as (number | null)[]).toEqual([null, 10, 20]);
+    expect(ra.toArray()).toEqual([null, 10, 20]);
   });
 
   it("identical indices → no change", () => {
@@ -100,7 +101,7 @@ describe("alignSeries — left", () => {
     const [la, ra] = alignSeries(a, b, { join: "left" });
     expect(la.index.toArray()).toEqual(["a", "b", "c"]);
     expect(la.toArray()).toEqual([1, 2, 3]);
-    expect(ra.toArray() as (number | null)[]).toEqual([null, 10, null]);
+    expect(ra.toArray()).toEqual([null, 10, null]);
   });
 });
 
@@ -112,7 +113,7 @@ describe("alignSeries — right", () => {
     const b = ns([10, 30], ["b", "d"]);
     const [la, ra] = alignSeries(a, b, { join: "right" });
     expect(la.index.toArray()).toEqual(["b", "d"]);
-    expect(la.toArray() as (number | null)[]).toEqual([2, null]);
+    expect(la.toArray()).toEqual([2, null]);
     expect(ra.toArray()).toEqual([10, 30]);
   });
 });
