@@ -469,8 +469,7 @@ export type {
 // PR #120 unique modules — re-exported from sub-barrels
 export { astypeSeries, astype, castScalar } from "./core/index.ts";
 export type { AstypeOptions, DataFrameAstypeOptions } from "./core/index.ts";
-export { readExcel, xlsxSheetNames } from "./io/index.ts";
-export type { ReadExcelOptions } from "./io/index.ts";
+// readExcel / xlsxSheetNames use node:zlib — import from "tsb/io/read_excel" directly
 export { clipAdvancedSeries, clipAdvancedDataFrame } from "./stats/index.ts";
 export type {
   SeriesBound,

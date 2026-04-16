@@ -3,7 +3,8 @@
  */
 import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
-import { DataFrame, readExcel, xlsxSheetNames } from "../../src/index.ts";
+import { DataFrame } from "../../src/index.ts";
+import { readExcel, xlsxSheetNames } from "../../src/io/read_excel.ts";
 
 // ─── minimal XLSX fixture builder ─────────────────────────────────────────────
 
