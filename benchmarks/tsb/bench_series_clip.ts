@@ -4,8 +4,8 @@
 import { Series, clip } from "../../src/index.js";
 
 const ROWS = 100_000;
-const WARMUP = 5;
-const ITERATIONS = 20;
+const WARMUP = 3;
+const ITERATIONS = 10;
 
 const data = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01) * 2);
 const s = new Series(data);
@@ -20,11 +20,4 @@ for (let i = 0; i < ITERATIONS; i++) {
 }
 const total = performance.now() - start;
 
-console.log(
-  JSON.stringify({
-    function: "series_clip",
-    mean_ms: total / ITERATIONS,
-    iterations: ITERATIONS,
-    total_ms: total,
-  }),
-);
+console.log(JSON.stringify({ function: "series_clip", mean_ms: total / ITERATIONS, iterations: ITERATIONS, total_ms: total }));

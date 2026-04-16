@@ -1,13 +1,13 @@
-"""Benchmark: series cumprod on 100k-element Series"""
+"""Benchmark: series cumprod on 10k-element Series"""
 import json, time
 import numpy as np
 import pandas as pd
 
-ROWS = 100_000
+ROWS = 10_000
 WARMUP = 5
 ITERATIONS = 20
 
-data = 1 + np.sin(np.arange(ROWS) * 0.0001) * 0.01
+data = 1 + (np.arange(ROWS) % 1000) * 0.0001
 s = pd.Series(data)
 
 for _ in range(WARMUP):
@@ -18,9 +18,4 @@ for _ in range(ITERATIONS):
     s.cumprod()
 total = (time.perf_counter() - start) * 1000
 
-print(json.dumps({
-    "function": "series_cumprod",
-    "mean_ms": total / ITERATIONS,
-    "iterations": ITERATIONS,
-    "total_ms": total,
-}))
+print(json.dumps({ "function": "series_cumprod", "mean_ms": total / ITERATIONS, "iterations": ITERATIONS, "total_ms": total }))

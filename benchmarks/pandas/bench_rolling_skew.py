@@ -1,4 +1,4 @@
-"""Benchmark: rolling_skew — series.rolling(100).skew() on 100k-element Series"""
+"""Benchmark: rolling skew with window=100 on 100k-element Series"""
 import json, time
 import numpy as np
 import pandas as pd
@@ -18,9 +18,4 @@ for _ in range(ITERATIONS):
     s.rolling(100).skew()
 total = (time.perf_counter() - start) * 1000
 
-print(json.dumps({
-    "function": "rolling_skew",
-    "mean_ms": total / ITERATIONS,
-    "iterations": ITERATIONS,
-    "total_ms": total,
-}))
+print(json.dumps({ "function": "rolling_skew", "mean_ms": total / ITERATIONS, "iterations": ITERATIONS, "total_ms": total }))

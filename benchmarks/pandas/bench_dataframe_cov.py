@@ -1,9 +1,9 @@
-"""Benchmark: dataframe cov on a 10k-row, 10-column DataFrame"""
+"""Benchmark: DataFrame covariance matrix on 1000x10 DataFrame"""
 import json, time
 import numpy as np
 import pandas as pd
 
-ROWS = 10_000
+ROWS = 1_000
 COLS = 10
 WARMUP = 3
 ITERATIONS = 10
@@ -19,9 +19,4 @@ for _ in range(ITERATIONS):
     df.cov()
 total = (time.perf_counter() - start) * 1000
 
-print(json.dumps({
-    "function": "dataframe_cov",
-    "mean_ms": total / ITERATIONS,
-    "iterations": ITERATIONS,
-    "total_ms": total,
-}))
+print(json.dumps({ "function": "dataframe_cov", "mean_ms": total / ITERATIONS, "iterations": ITERATIONS, "total_ms": total }))

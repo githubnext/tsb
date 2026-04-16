@@ -1,7 +1,7 @@
 /**
- * Benchmark: rolling_sem — rollingSem(series, window=100) on 100k-element Series
+ * Benchmark: rolling SEM with window=100 on 100k-element Series
  */
-import { rollingSem, Series } from "../../src/index.js";
+import { Series, rollingSem } from "../../src/index.js";
 
 const ROWS = 100_000;
 const WARMUP = 3;
@@ -20,11 +20,4 @@ for (let i = 0; i < ITERATIONS; i++) {
 }
 const total = performance.now() - start;
 
-console.log(
-  JSON.stringify({
-    function: "rolling_sem",
-    mean_ms: total / ITERATIONS,
-    iterations: ITERATIONS,
-    total_ms: total,
-  }),
-);
+console.log(JSON.stringify({ function: "rolling_sem", mean_ms: total / ITERATIONS, iterations: ITERATIONS, total_ms: total }));

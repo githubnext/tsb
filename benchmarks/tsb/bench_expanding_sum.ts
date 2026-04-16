@@ -20,11 +20,4 @@ for (let i = 0; i < ITERATIONS; i++) {
 }
 const total = performance.now() - start;
 
-console.log(
-  JSON.stringify({
-    function: "expanding_sum",
-    mean_ms: total / ITERATIONS,
-    iterations: ITERATIONS,
-    total_ms: total,
-  }),
-);
+console.log(JSON.stringify({ function: "expanding_sum", mean_ms: total / ITERATIONS, iterations: ITERATIONS, total_ms: total }));

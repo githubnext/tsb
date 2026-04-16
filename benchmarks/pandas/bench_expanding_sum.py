@@ -18,9 +18,4 @@ for _ in range(ITERATIONS):
     s.expanding().sum()
 total = (time.perf_counter() - start) * 1000
 
-print(json.dumps({
-    "function": "expanding_sum",
-    "mean_ms": total / ITERATIONS,
-    "iterations": ITERATIONS,
-    "total_ms": total,
-}))
+print(json.dumps({ "function": "expanding_sum", "mean_ms": total / ITERATIONS, "iterations": ITERATIONS, "total_ms": total }))

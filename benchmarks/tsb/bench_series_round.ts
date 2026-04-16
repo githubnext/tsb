@@ -4,10 +4,10 @@
 import { Series, seriesRound } from "../../src/index.js";
 
 const ROWS = 100_000;
-const WARMUP = 5;
-const ITERATIONS = 20;
+const WARMUP = 3;
+const ITERATIONS = 10;
 
-const data = Float64Array.from({ length: ROWS }, (_, i) => Math.sin(i * 0.01) * 1000);
+const data = Float64Array.from({ length: ROWS }, (_, i) => (i % 10000) * 0.1234);
 const s = new Series(data);
 
 for (let i = 0; i < WARMUP; i++) {
@@ -20,11 +20,4 @@ for (let i = 0; i < ITERATIONS; i++) {
 }
 const total = performance.now() - start;
 
-console.log(
-  JSON.stringify({
-    function: "series_round",
-    mean_ms: total / ITERATIONS,
-    iterations: ITERATIONS,
-    total_ms: total,
-  }),
-);
+console.log(JSON.stringify({ function: "series_round", mean_ms: total / ITERATIONS, iterations: ITERATIONS, total_ms: total }));

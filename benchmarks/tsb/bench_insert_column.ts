@@ -1,31 +1,32 @@
 /**
- * Benchmark: insertColumn on a 100k-row DataFrame
+ * Benchmark: insertColumn on 10000x3 DataFrame
  */
 import { DataFrame, insertColumn } from "../../src/index.js";
 
-const ROWS = 100_000;
+const ROWS = 10_000;
 const WARMUP = 3;
-const ITERATIONS = 10;
+const ITERATIONS = 20;
 
-const a = Array.from({ length: ROWS }, (_, i) => i);
-const b = Array.from({ length: ROWS }, (_, i) => i * 2);
-const newCol = Array.from({ length: ROWS }, (_, i) => i * 3);
-const df = DataFrame.fromColumns({ a, b });
+const newCol = Float64Array.from({ length: ROWS }, (_, i) => i * 4);
 
 for (let i = 0; i < WARMUP; i++) {
-  insertColumn(df, 1, "c", newCol);
+  const df = new DataFrame({
+    a: Float64Array.from({ length: ROWS }, (_, j) => j),
+    b: Float64Array.from({ length: ROWS }, (_, j) => j * 2),
+    c: Float64Array.from({ length: ROWS }, (_, j) => j * 3),
+  });
+  insertColumn(df, 1, "new_col", newCol);
 }
 
 const start = performance.now();
 for (let i = 0; i < ITERATIONS; i++) {
-  insertColumn(df, 1, "c", newCol);
+  const df = new DataFrame({
+    a: Float64Array.from({ length: ROWS }, (_, j) => j),
+    b: Float64Array.from({ length: ROWS }, (_, j) => j * 2),
+    c: Float64Array.from({ length: ROWS }, (_, j) => j * 3),
+  });
+  insertColumn(df, 1, "new_col", newCol);
 }
 const total = performance.now() - start;
-console.log(
-  JSON.stringify({
-    function: "insert_column",
-    mean_ms: total / ITERATIONS,
-    iterations: ITERATIONS,
-    total_ms: total,
-  }),
-);
+
+console.log(JSON.stringify({ function: "insert_column", mean_ms: total / ITERATIONS, iterations: ITERATIONS, total_ms: total }));

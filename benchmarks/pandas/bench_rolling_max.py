@@ -18,9 +18,4 @@ for _ in range(ITERATIONS):
     s.rolling(100).max()
 total = (time.perf_counter() - start) * 1000
 
-print(json.dumps({
-    "function": "rolling_max",
-    "mean_ms": total / ITERATIONS,
-    "iterations": ITERATIONS,
-    "total_ms": total,
-}))
+print(json.dumps({ "function": "rolling_max", "mean_ms": total / ITERATIONS, "iterations": ITERATIONS, "total_ms": total }))
