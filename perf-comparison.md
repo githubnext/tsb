@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-15T23:47:01Z |
-| Iteration Count | 116 |
-| Best Metric | 345 |
+| Last Run | 2026-04-16T00:34:10Z |
+| Iteration Count | 117 |
+| Best Metric | 354 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #141 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, error, error, error, error, accepted, error, accepted, accepted, accepted |
+| Recent Statuses | error, error, error, accepted, error, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -73,10 +73,17 @@
 - Advanced reshape: crosstab with margins, pivot_table with fill_value.
 - DataFrame shift/diff, series_pipe, DataFrame.copy(), Series.combine() if APIs exist.
 - IO: read_parquet/to_parquet if added to src/io.
+- src/core: period, timedelta, timestamp, interval, datetime_tz, date_range, align, reindex, categorical_index — check if exported and benchmarkable.
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 117 — 2026-04-16 00:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24485542882)
+- **Status**: ✅ Accepted
+- **Change**: Added 6 benchmark pairs: searchsorted (searchsorted/searchsortedMany/argsortScalars), factorize (factorize/seriesFactorize), to_numeric (toNumericArray/toNumericSeries), json_normalize (jsonNormalize), select_dtypes (selectDtypes), memory_usage (seriesMemoryUsage/dataFrameMemoryUsage)
+- **Metric**: 354 (previous: 348 post-merge, +6) | **Commit**: 970d5bf
+- **Notes**: Filled previously uncovered utility functions from stats/ and io/. Note: baseline rose from 345→348 due to merging main which included earlier accepted benchmark commits.
 
 ### Iteration 116 — 2026-04-15 23:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24484182038)
 - **Status**: ✅ Accepted
