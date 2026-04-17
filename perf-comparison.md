@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-16T23:46:52Z |
-| Iteration Count | 139 |
-| Best Metric | 420 |
+| Last Run | 2026-04-17T00:33:00Z |
+| Iteration Count | 140 |
+| Best Metric | 428 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #147 |
@@ -77,6 +77,7 @@
 - (iter 137: infer_dtype, value_counts_binned, categorical_index, tz_localize_convert, align_series, align_dataframe, memory_usage, named_agg)
 - (iter 138: series_ceil_floor_trunc_sqrt, dataframe_ceil_floor_trunc, dataframe_exp_log, pivot_table_full, read_excel, pipe_chain_ops, nan_extended_agg, series_pipe_apply)
 - (iter 139: cut_interval_index, dataframe_sign, argsort_scalars, interval_index_ops, period_index_range, datetime_index_from, timedelta_index, resolve_freq)
+- (iter 140: mode_dataframe, combine_first_ext, dataframe_interpolate_fn, where_mask_df_fn, fillna_fn, dropna_fn, isin_fn, explode_fn)
 - MultiIndex getLoc with slice / get_locs / get_indexer.
 - groupby: nunique (if DataFrameGroupBy.nunique() added), transform-apply.
 - Series.autocorr(lag) if implemented.
@@ -86,6 +87,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 140 — 2026-04-17 00:33 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24541324267)
+- **Status**: ✅ Accepted | **Metric**: 428 (previous best: 420, delta: +8) | **Commit**: 0a2efa8
+- Added 8 pairs: mode_dataframe (modeDataFrame), combine_first_ext (combineFirstSeries+combineFirstDataFrame), dataframe_interpolate_fn (dataFrameInterpolate), where_mask_df_fn (whereDataFrame+maskDataFrame), fillna_fn (fillnaSeries+fillnaDataFrame), dropna_fn (dropnaSeries+dropnaDataFrame), isin_fn (isin+dataFrameIsin), explode_fn (explodeSeries+explodeDataFrame).
+- Covered functional-API variants of operations previously benchmarked only via method calls.
 
 ### Iteration 139 — 2026-04-16 23:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24539911725)
 - **Status**: ✅ Accepted | **Metric**: 420 (previous best: 412, delta: +8) | **Commit**: 18753f6
