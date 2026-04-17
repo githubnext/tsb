@@ -112,39 +112,39 @@ describe("toTimedelta — Timedelta passthrough", () => {
 
 describe("toTimedelta — numeric", () => {
   it("default unit ns", () => {
-    expect(toTimedelta(1_000_000).totalMs).toBe(1); // 1e6 ns = 1 ms
+    expect(toTimedelta(1_000_000)?.totalMs).toBe(1); // 1e6 ns = 1 ms
   });
 
   it("unit ms", () => {
-    expect(toTimedelta(1000, { unit: "ms" }).totalMs).toBe(1000);
+    expect(toTimedelta(1000, { unit: "ms" })?.totalMs).toBe(1000);
   });
 
   it("unit s", () => {
-    expect(toTimedelta(2, { unit: "s" }).totalMs).toBe(2000);
+    expect(toTimedelta(2, { unit: "s" })?.totalMs).toBe(2000);
   });
 
   it("unit m", () => {
-    expect(toTimedelta(1, { unit: "m" }).totalMs).toBe(60_000);
+    expect(toTimedelta(1, { unit: "m" })?.totalMs).toBe(60_000);
   });
 
   it("unit h", () => {
-    expect(toTimedelta(1, { unit: "h" }).totalMs).toBe(3_600_000);
+    expect(toTimedelta(1, { unit: "h" })?.totalMs).toBe(3_600_000);
   });
 
   it("unit D", () => {
-    expect(toTimedelta(1, { unit: "D" }).totalMs).toBe(86_400_000);
+    expect(toTimedelta(1, { unit: "D" })?.totalMs).toBe(86_400_000);
   });
 
   it("unit W", () => {
-    expect(toTimedelta(1, { unit: "W" }).totalMs).toBe(7 * 86_400_000);
+    expect(toTimedelta(1, { unit: "W" })?.totalMs).toBe(7 * 86_400_000);
   });
 
   it("unit us", () => {
-    expect(toTimedelta(1000, { unit: "us" }).totalMs).toBe(1);
+    expect(toTimedelta(1000, { unit: "us" })?.totalMs).toBe(1);
   });
 
   it("zero", () => {
-    expect(toTimedelta(0, { unit: "ms" }).totalMs).toBe(0);
+    expect(toTimedelta(0, { unit: "ms" })?.totalMs).toBe(0);
   });
 });
 
@@ -377,11 +377,14 @@ describe("toTimedelta — property tests", () => {
 
   it("array length preserved", () => {
     fc.assert(
-      fc.property(fc.array(fc.integer({ min: 0, max: 1_000_000 }), { minLength: 0, maxLength: 20 }), (arr) => {
-        const scalars = arr as unknown as Scalar[];
-        const result = toTimedelta(scalars, { unit: "ms" });
-        return result.length === arr.length;
-      }),
+      fc.property(
+        fc.array(fc.integer({ min: 0, max: 1_000_000 }), { minLength: 0, maxLength: 20 }),
+        (arr) => {
+          const scalars = arr as unknown as Scalar[];
+          const result = toTimedelta(scalars, { unit: "ms" });
+          return result.length === arr.length;
+        },
+      ),
     );
   });
 

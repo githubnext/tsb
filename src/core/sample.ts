@@ -8,10 +8,10 @@
  * @module
  */
 
-import { DataFrame } from "./frame.ts";
-import { Index } from "./base-index.ts";
-import { Series } from "./series.ts";
 import type { Label, Scalar } from "../types.ts";
+import { Index } from "./base-index.ts";
+import { DataFrame } from "./frame.ts";
+import { Series } from "./series.ts";
 
 // ─── public types ─────────────────────────────────────────────────────────────
 
@@ -139,7 +139,7 @@ function weightedSampleWithoutReplacement(
   // Use reservoir sampling with exponential keys: assign key = rand^(1/w), take top-k
   const keys: Array<[number, number]> = probs.map((p, i) => {
     const r = rng();
-    const key = p > 0 ? Math.pow(r, 1 / p) : 0;
+    const key = p > 0 ? r ** (1 / p) : 0;
     return [key, i];
   });
   keys.sort((a, b) => b[0] - a[0]);
@@ -149,11 +149,7 @@ function weightedSampleWithoutReplacement(
 /**
  * Weighted sample WITH replacement: pick `k` indices based on cumulative probabilities.
  */
-function weightedSampleWithReplacement(
-  k: number,
-  probs: number[],
-  rng: () => number,
-): number[] {
+function weightedSampleWithReplacement(k: number, probs: number[], rng: () => number): number[] {
   const cumulative: number[] = [];
   let sum = 0;
   for (const p of probs) {
@@ -256,12 +252,10 @@ export function sampleSeries(series: Series<Scalar>, options?: SampleOptions): S
   return new Series<Scalar>({
     data: newValues,
     index: new Index<Label>(newLabels),
-    name: series.name ?? undefined,
+    name: series.name ?? null,
     dtype: series.dtype,
   });
 }
-
-// ─── DataFrame sample ──────────────────────────────────────────────────────────
 
 /**
  * Return a random sample of rows (or columns) from a DataFrame.

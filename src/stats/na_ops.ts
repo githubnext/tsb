@@ -183,7 +183,7 @@ export function ffillSeries<T extends Scalar>(
     data: filled,
     index: series.index,
     dtype: series.dtype,
-    name: series.name ?? undefined,
+    name: series.name ?? null,
   });
 }
 
@@ -213,7 +213,7 @@ export function bfillSeries<T extends Scalar>(
     data: filled,
     index: series.index,
     dtype: series.dtype,
-    name: series.name ?? undefined,
+    name: series.name ?? null,
   });
 }
 

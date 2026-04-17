@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
-import { DataFrame, Series, type Scalar } from "../../src/index.ts";
+import { DataFrame, type Scalar, Series } from "../../src/index.ts";
 import { explodeDataFrame, explodeSeries } from "../../src/index.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -31,7 +31,10 @@ describe("explodeSeries", () => {
   describe("basic list expansion", () => {
     it("expands array-valued cells into individual rows", () => {
       const s = new Series<Scalar>({
-        data: [[1, 2, 3], [4, 5]] as unknown as Scalar[],
+        data: [
+          [1, 2, 3],
+          [4, 5],
+        ] as unknown as Scalar[],
         name: "x",
       });
       expect(seriesValues(explodeSeries(s))).toEqual([1, 2, 3, 4, 5]);
@@ -70,7 +73,7 @@ describe("explodeSeries", () => {
   });
 
   describe("index handling", () => {
-    it("duplicates labels by default (ignore_index=false)", () => {
+    it("duplicates labels by default (ignoreIndex=false)", () => {
       const s = new Series<Scalar>({
         data: [[1, 2], [3]] as unknown as Scalar[],
         index: ["a", "b"],
@@ -80,19 +83,22 @@ describe("explodeSeries", () => {
       expect(seriesLabels(result)).toEqual(["a", "a", "b"]);
     });
 
-    it("resets to RangeIndex when ignore_index=true", () => {
+    it("resets to RangeIndex when ignoreIndex=true", () => {
       const s = new Series<Scalar>({
         data: [[1, 2], [3]] as unknown as Scalar[],
         index: ["a", "b"],
         name: "x",
       });
-      const result = explodeSeries(s, { ignore_index: true });
+      const result = explodeSeries(s, { ignoreIndex: true });
       expect(seriesLabels(result)).toEqual([0, 1, 2]);
     });
 
     it("preserves numeric labels", () => {
       const s = new Series<Scalar>({
-        data: [[10, 20], [30, 40]] as unknown as Scalar[],
+        data: [
+          [10, 20],
+          [30, 40],
+        ] as unknown as Scalar[],
         index: [100, 200],
         name: "x",
       });
@@ -183,8 +189,14 @@ describe("explodeDataFrame", () => {
   describe("multi-column explosion", () => {
     it("explodes two columns together (same-length arrays)", () => {
       const df = DataFrame.fromColumns({
-        a: [[1, 2], [3, 4]] as unknown as Scalar[],
-        b: [["x", "y"], ["p", "q"]] as unknown as Scalar[],
+        a: [
+          [1, 2],
+          [3, 4],
+        ] as unknown as Scalar[],
+        b: [
+          ["x", "y"],
+          ["p", "q"],
+        ] as unknown as Scalar[],
         c: [10, 20] as Scalar[],
       });
       const result = explodeDataFrame(df, ["a", "b"]);
@@ -216,12 +228,12 @@ describe("explodeDataFrame", () => {
       expect(dfLabels(result)).toEqual(["r0", "r0", "r1"]);
     });
 
-    it("resets to RangeIndex when ignore_index=true", () => {
+    it("resets to RangeIndex when ignoreIndex=true", () => {
       const df = DataFrame.fromColumns(
         { a: [[1, 2], [3]] as unknown as Scalar[] },
         { index: ["r0", "r1"] },
       );
-      const result = explodeDataFrame(df, "a", { ignore_index: true });
+      const result = explodeDataFrame(df, "a", { ignoreIndex: true });
       expect(dfLabels(result)).toEqual([0, 1, 2]);
     });
   });
@@ -292,7 +304,7 @@ describe("explodeSeries — property tests", () => {
         }),
         (items) => {
           const s = new Series<Scalar>({ data: items as unknown as Scalar[], name: "t" });
-          const result = explodeSeries(s, { ignore_index: true });
+          const result = explodeSeries(s, { ignoreIndex: true });
           const labels = result.index.values as unknown[];
           return labels.every((v, i) => v === i);
         },

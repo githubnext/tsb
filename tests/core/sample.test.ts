@@ -98,14 +98,14 @@ describe("sampleSeries", () => {
   });
 
   test("preserves correct index labels", () => {
-    const s = new Series({ data: [100, 200, 300], index: { values: ["a", "b", "c"] } });
+    const s = new Series({ data: [100, 200, 300], index: ["a", "b", "c"] });
     const r = sampleSeries(s, { n: 2, randomState: 0 });
     // Index labels should match the positions sampled
     for (let i = 0; i < r.values.length; i++) {
       const v = r.values[i] as number;
       const label = r.index.at(i);
       const origPos = (v - 100) / 100; // 0, 1, or 2
-      const expectedLabel = ["a", "b", "c"][origPos];
+      const expectedLabel: string | null = ["a", "b", "c"][origPos] ?? null;
       expect(label).toBe(expectedLabel);
     }
   });

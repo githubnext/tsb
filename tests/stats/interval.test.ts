@@ -4,8 +4,8 @@
 
 import { describe, expect, test } from "bun:test";
 import fc from "fast-check";
-import { Interval, IntervalIndex, intervalRange } from "../../src/index.ts";
-import type { ClosedType } from "../../src/index.ts";
+import { Interval, IntervalIndex, intervalRange } from "../../src/stats/interval.ts";
+import type { ClosedType } from "../../src/stats/interval.ts";
 
 // ─── Interval ─────────────────────────────────────────────────────────────────
 

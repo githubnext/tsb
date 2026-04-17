@@ -182,7 +182,7 @@ export {
 
 export { Period, PeriodIndex } from "./core/index.ts";
 export type { PeriodFreq, PeriodIndexOptions } from "./core/index.ts";
-export { Timedelta, TimedeltaIndex } from "./core/index.ts";
+export { TimedeltaIndex } from "./core/index.ts";
 export type { TimedeltaComponents, TimedeltaIndexOptions } from "./core/index.ts";
 export {
   Day,
@@ -537,7 +537,7 @@ export { toDatetime } from "./stats/index.ts";
 export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./stats/index.ts";
 
 // Branch-unique exports not yet in main
-export { toTimedelta, parseFrac, formatTimedelta } from "./stats/index.ts";
+export { toTimedelta, parseFrac, formatTimedelta, Timedelta } from "./stats/index.ts";
 export type { TimedeltaUnit, TimedeltaErrors, ToTimedeltaOptions } from "./stats/index.ts";
 export { dateRange, parseFreq, advanceDate, toDateInput } from "./stats/index.ts";
 export type { DateRangeInclusive, ParsedFreq } from "./stats/index.ts";

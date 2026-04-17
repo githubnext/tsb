@@ -258,19 +258,22 @@ describe("property-based: diffSeries", () => {
 
   test("shift+diff reconstructs original for numeric arrays (first element is null)", () => {
     fc.assert(
-      fc.property(fc.array(fc.integer({ min: -1000, max: 1000 }), { minLength: 2, maxLength: 20 }), (arr) => {
-        const data = arr as Scalar[];
-        const s = makeSeries(data);
-        const shifted = shiftSeries(s, { periods: 1, fillValue: 0 });
-        const d = diffSeries(s);
-        // sum of diffs [1..n] + first value ≈ last value (numeric check)
-        // More directly: diff[i] + shifted[i] = s[i] for i >= 1
-        for (let i = 1; i < arr.length; i++) {
-          const diffVal = d.values[i] as number;
-          const shiftedVal = shifted.values[i] as number;
-          expect(diffVal + shiftedVal).toBeCloseTo(arr[i] as number, 10);
-        }
-      }),
+      fc.property(
+        fc.array(fc.integer({ min: -1000, max: 1000 }), { minLength: 2, maxLength: 20 }),
+        (arr) => {
+          const data = arr as Scalar[];
+          const s = makeSeries(data);
+          const shifted = shiftSeries(s, { periods: 1, fillValue: 0 });
+          const d = diffSeries(s);
+          // sum of diffs [1..n] + first value ≈ last value (numeric check)
+          // More directly: diff[i] + shifted[i] = s[i] for i >= 1
+          for (let i = 1; i < arr.length; i++) {
+            const diffVal = d.values[i] as number;
+            const shiftedVal = shifted.values[i] as number;
+            expect(diffVal + shiftedVal).toBeCloseTo(arr[i] as number, 10);
+          }
+        },
+      ),
     );
   });
 });

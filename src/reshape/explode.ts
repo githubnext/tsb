@@ -88,10 +88,7 @@ function expandCell(value: Scalar): Scalar[] {
  * explodeSeries(s).toArray(); // [1, 2, 3]
  * ```
  */
-export function explodeSeries(
-  series: Series<Scalar>,
-  options?: ExplodeOptions,
-): Series<Scalar> {
+export function explodeSeries(series: Series<Scalar>, options?: ExplodeOptions): Series<Scalar> {
   const ignoreIndex = options?.ignore_index ?? false;
   const outValues: Scalar[] = [];
   const outLabels: Label[] = [];
@@ -154,8 +151,7 @@ export function explodeDataFrame(
   options?: ExplodeOptions,
 ): DataFrame {
   const ignoreIndex = options?.ignore_index ?? false;
-  const explodeCols: readonly string[] =
-    typeof column === "string" ? [column] : column;
+  const explodeCols: readonly string[] = typeof column === "string" ? [column] : column;
 
   // Validate column names
   for (const col of explodeCols) {

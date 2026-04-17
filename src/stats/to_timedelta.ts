@@ -22,8 +22,7 @@ import type { Scalar } from "../types.ts";
 // ─── top-level regex constants (biome: useTopLevelRegex) ──────────────────────
 
 /** Pandas-style: "[± ][N day[s][,]] HH:MM:SS[.fraction]" */
-const RE_PANDAS =
-  /^(-)?(?:(\d+)\s+days?,?\s*)?(\d{1,2}):(\d{2}):(\d{2})(?:\.(\d+))?$/i;
+const RE_PANDAS = /^(-)?(?:(\d+)\s+days?,?\s*)?(\d{1,2}):(\d{2}):(\d{2})(?:\.(\d+))?$/i;
 
 /** ISO 8601 duration: P[nD][T[nH][nM][nS]] */
 const RE_ISO =
@@ -207,10 +206,7 @@ export function toTimedelta(
 
 // ─── series conversion ─────────────────────────────────────────────────────────
 
-function convertSeries(
-  s: Series<Scalar>,
-  options: ToTimedeltaOptions,
-): Series<Timedelta | null> {
+function convertSeries(s: Series<Scalar>, options: ToTimedeltaOptions): Series<Timedelta | null> {
   const converted = s.values.map((v) => convertOne(v, options));
   return new Series<Timedelta | null>({
     data: converted as (Timedelta | null)[],
@@ -353,12 +349,7 @@ function parsePandas(m: RegExpExecArray): Timedelta | null {
 /** Parse ISO 8601 duration: P1DT2H3M4.5S */
 function parseIso(m: RegExpExecArray): Timedelta | null {
   // Reject bare "P" with no components
-  if (
-    m[2] === undefined &&
-    m[3] === undefined &&
-    m[4] === undefined &&
-    m[5] === undefined
-  ) {
+  if (m[2] === undefined && m[3] === undefined && m[4] === undefined && m[5] === undefined) {
     return null;
   }
   const neg = m[1] === "-";
@@ -474,11 +465,7 @@ export function formatTimedelta(td: Timedelta): string {
  * - `"coerce"` → returns null
  * - `"ignore"` → returns original value unchanged
  */
-function applyErrors(
-  errors: TimedeltaErrors,
-  original: Scalar,
-  message: string,
-): Timedelta | null {
+function applyErrors(errors: TimedeltaErrors, original: Scalar, message: string): Timedelta | null {
   if (errors === "raise") {
     throw new TypeError(message);
   }

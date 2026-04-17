@@ -89,10 +89,10 @@ export interface SampleDataFrameOptions {
   readonly ignoreIndex?: boolean;
   /**
    * Axis to sample along.
-   * - `0` (default): sample rows.
-   * - `1`: sample columns.
+   * - `0` or `"index"` (default): sample rows.
+   * - `1` or `"columns"`: sample columns.
    */
-  readonly axis?: 0 | 1;
+  readonly axis?: 0 | 1 | "index" | "columns";
 }
 
 // ─── pseudo-random number generator ──────────────────────────────────────────
@@ -384,7 +384,7 @@ export function sampleSeries(
 export function sampleDataFrame(df: DataFrame, options: SampleDataFrameOptions = {}): DataFrame {
   const { n, frac, replace = false, weights, randomState, ignoreIndex = false, axis = 0 } = options;
 
-  if (axis === 1) {
+  if (axis === 1 || axis === "columns") {
     return sampleColumns(df, n, frac, replace, weights, randomState);
   }
   return sampleRows(df, n, frac, replace, weights, randomState, ignoreIndex);
