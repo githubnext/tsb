@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T23:16:10Z |
-| Iteration Count | 169 |
-| Best Metric | 549 |
+| Last Run | 2026-04-17T23:46:27Z |
+| Iteration Count | 170 |
+| Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #150 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -43,7 +43,7 @@
 
 ## 📚 Lessons Learned
 
-- **CRITICAL BRANCHING**: Use `autoloop/perf-comparison` (PR #150 active branch). PR #150 is the active PR.
+- **CRITICAL BRANCHING**: Use `autoloop/perf-comparison` (PR #150 active branch). Always merge origin/main first; state file best_metric may diverge from branch reality.
 - **MCP HTTP workaround**: Use curl to `http://host.docker.internal:80/mcp/safeoutputs` with Authorization from `~/.copilot/mcp-config.json`. Get `Mcp-Session-Id` from initialize, send `notifications/initialized`, then `tools/call`.
 - push_repo_memory limit is ~10KB file / ~12KB total. Keep history trimmed.
 - Metric = min(ts_bench_count, py_bench_count). Bun not installed; file-count only.
@@ -52,6 +52,7 @@
 - IO benchmarks: 10k rows for toCsv/toJson. date_range: 10k periods "D" freq.
 - catFromCodes(codes, categories). toDictOriented supports many orients.
 - Period.startTime gives the start Date. Timedelta.totalDays is a getter. IntervalIndex.overlaps(query) returns boolean[]. describe() accepts {percentiles, include}.
+- cumops: supports skipna=false option; dataFrameCumops supports axis=1.
 
 ---
 
@@ -66,9 +67,13 @@
 
 ## 📊 Iteration History
 
+### Iteration 170 — 2026-04-17 23:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24591536269)
+- **Status**: ✅ Accepted | **Metric**: 539 (previous best on branch: 534, delta: +5) | **Commit**: a68ec02
+- Added 5 pairs: nancumops_extra (nanmedian/nancount/nanprod), cumops_skipna (cumsum/cumprod skipna=false), dataframe_cumops_axis1 (row-wise cumops), series_cumops_nan (cumops with NaN data), cummax_cummin_str (string Series cumops).
+
 ### Iteration 169 — 2026-04-17 23:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24590758458)
 - **Status**: ✅ Accepted | **Metric**: 549 (previous best: 544, delta: +5) | **Commit**: 449a452
-- Added 10 pairs: read_json_all_orients, pivot_table_fill_value, dataframe_cov_options, dataframe_rolling_apply_fn, pct_change_fill_method, reindex_fill_methods (ffill/bfill/nearest), json_normalize_meta (recordPath+meta), interpolate_zero_nearest (zero/nearest methods), dropna_thresh_subset (thresh+subset), wide_to_long_sep_suffix.
+- Added 10 pairs (pushed to non-canonical branch, merged into main): read_json_all_orients, pivot_table_fill_value, dataframe_cov_options, dataframe_rolling_apply_fn, pct_change_fill_method, reindex_fill_methods, json_normalize_meta, interpolate_zero_nearest, dropna_thresh_subset, wide_to_long_sep_suffix.
 
 ### Iters 163–168 — ✅ | metrics 513→544. series_set_reset_index, melt_id_vars, concat_series, stack_dropna, sample_frac, nan_sum_mean_std, nan_var_min_max, sample_weights, histogram_bin_edges, pivot_table_aggfunc_variants, series_to_array, dataframe_has_get, pipe_series_df, qcut_interval_index, merge_sort, series_var/min_max/median_method, log2_log10, clip_with_bounds, pipe_to, groupby_groups_map, minmax_normalize.
 
