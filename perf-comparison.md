@@ -8,12 +8,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T17:20:00Z |
-| Iteration Count | 159 |
+| Last Run | 2026-04-17T17:48:00Z |
+| Iteration Count | 160 |
 | Best Metric | 513 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #147 |
+| PR | #148 |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
 | Pause Reason | — |
@@ -30,7 +30,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: #147
+**Pull Request**: #148
 **Steering Issue**: #131
 
 ---
@@ -43,7 +43,7 @@
 
 ## 📚 Lessons Learned
 
-- **CRITICAL BRANCHING**: Use `autoloop/perf-comparison`. PR #147 is the active PR.
+- **CRITICAL BRANCHING**: Use `autoloop/perf-comparison`. PR #148 is the active PR.
 - **MCP HTTP workaround**: Use curl to `http://host.docker.internal:80/mcp/safeoutputs` with Authorization from `~/.copilot/mcp-config.json`. Get `Mcp-Session-Id` from initialize, send `notifications/initialized`, then `tools/call`.
 - push_repo_memory limit is ~10KB file / ~12KB total. Keep history trimmed.
 - Metric = min(ts_bench_count, py_bench_count). Bun not installed; file-count only.
@@ -66,11 +66,13 @@
 
 ## 📊 Iteration History
 
-### Iteration 159 — 2026-04-17 17:20 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24577736975)
-- **Status**: ✅ Accepted | **Metric**: 513 (previous best: 508, delta: +5) | **Commit**: b67e4ad
-- Added 5 pairs: series_sign (seriesSign numpy.sign equivalent), groupby_groups_props (DataFrameGroupBy.groups/groupKeys/ngroups), merge_sort (merge with sort=true), series_groupby_groups (SeriesGroupBy.groups/groupKeys/ngroups), pipe_fn (pipe functional composition operator).
+### Iteration 160 — 2026-04-17 17:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24578878886)
+- **Status**: ✅ Accepted | **Metric**: 513 (previous best: 508, delta: +5) | **Commit**: 3116a9b
+- Added 5 pairs: series_sign (seriesSign), series_log2_log10 (seriesLog2/Log10/dataFrameLog2/Log10), merge_sort (merge with sort=true), groupby_groups_map (DataFrameGroupBy/SeriesGroupBy.groups), minmax_normalize (minMaxNormalize).
 
-### Iters 147–158 — all ✅ | metrics 462→508. timestamp_arith/str_format/round_normalize, value_counts_opts, series_sortvalues_opts, dataframe_sortvalues_mixed, series_groupby_size, series_log_natural, series_standalone_compare, dataframe_compare_lege, series_floordiv_standalone, drop_duplicates_fn, nsmallest_series_fn, duplicated_fn, dataframe_isin, series/dataframe_reset_index, series_to_object, interval_index_construction, replace_series, isnull_notnull, to_numeric_scalar, dataframe_assign_fn, df_any_all_axis1, df_nunique_axis1, cat_codes_accessor, ewm_adjust, interpolate_bfill_limit, datetime_index_ops/snap/normalize_filter_shift, index_map, multi_index_fromtuples, timedelta_advanced_ops, dataframe_rolling_var_std_sum_count/median/min_max, period_index_query, series_groupby_agg_all, date_offset_rollforward/more_types/range_options, combine_first_dataframe, series_groupby_custom_agg, dataframe_expanding_std_var/sum_count/median_apply, tz_datetime_index_extra, timedelta_index_tostrings, nan_agg_extended, rank_methods, dropna_advanced, get_dummies_opts, factorize_sort, read_csv_options, to_csv_options, dataframe_median.
+### Iters 147–159 — all ✅ | metrics 462→508. timestamp_arith/str_format/round_normalize, value_counts_opts, series_sortvalues_opts, dataframe_sortvalues_mixed, series_groupby_size, series_log_natural, series_standalone_compare, dataframe_compare_lege, series_floordiv_standalone, drop_duplicates_fn, nsmallest_series_fn, duplicated_fn, dataframe_isin, series/dataframe_reset_index, series_to_object, interval_index_construction, replace_series, isnull_notnull, to_numeric_scalar, dataframe_assign_fn, df_any_all_axis1, df_nunique_axis1, cat_codes_accessor, ewm_adjust, interpolate_bfill_limit, datetime_index_ops/snap/normalize_filter_shift, index_map, multi_index_fromtuples, timedelta_advanced_ops, dataframe_rolling_var_std_sum_count/median/min_max, period_index_query, series_groupby_agg_all, date_offset_rollforward/more_types/range_options, combine_first_dataframe, series_groupby_custom_agg, dataframe_expanding_std_var/sum_count/median_apply, tz_datetime_index_extra, timedelta_index_tostrings, nan_agg_extended, rank_methods, dropna_advanced, get_dummies_opts, factorize_sort, read_csv_options, to_csv_options, dataframe_median, series_sign, groupby_groups_props, pipe_fn (iter 159 state recorded but not pushed).
+
+### Iters 143–146 — all ✅ | metrics 462→508. timestamp_arith/str_format/round_normalize, value_counts_opts, series_sortvalues_opts, dataframe_sortvalues_mixed, series_groupby_size, series_log_natural, series_standalone_compare, dataframe_compare_lege, series_floordiv_standalone, drop_duplicates_fn, nsmallest_series_fn, duplicated_fn, dataframe_isin, series/dataframe_reset_index, series_to_object, interval_index_construction, replace_series, isnull_notnull, to_numeric_scalar, dataframe_assign_fn, df_any_all_axis1, df_nunique_axis1, cat_codes_accessor, ewm_adjust, interpolate_bfill_limit, datetime_index_ops/snap/normalize_filter_shift, index_map, multi_index_fromtuples, timedelta_advanced_ops, dataframe_rolling_var_std_sum_count/median/min_max, period_index_query, series_groupby_agg_all, date_offset_rollforward/more_types/range_options, combine_first_dataframe, series_groupby_custom_agg, dataframe_expanding_std_var/sum_count/median_apply, tz_datetime_index_extra, timedelta_index_tostrings, nan_agg_extended, rank_methods, dropna_advanced, get_dummies_opts, factorize_sort, read_csv_options, to_csv_options, dataframe_median.
 
 ### Iters 143–146 — ✅/⚠️ mix | metrics 437→462. period_arithmetic, period_index_methods, dt_total_seconds, timedelta_index_ops, interval_overlaps, describe_opts, merge_index_join, to_json_orient, mode_dataframe_fn, where_mask_fns, idxmin_max_df, diff_applymap_fn, quantile_fn, pct_change_fn, merge_suffixes, expanding_min_periods, dt_isocalendar, period_asfreq, sample_fn, nunique_fn.
 
