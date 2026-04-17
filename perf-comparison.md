@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T21:50:00Z |
+| Last Run | 2026-04-17T21:46:47Z |
 | Iteration Count | 166 |
-| Best Metric | 534 |
+| Best Metric | 513 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #148 |
@@ -66,9 +66,9 @@
 
 ## 📊 Iteration History
 
-### Iteration 166 — 2026-04-17 21:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24587057857)
-- **Status**: ✅ Accepted | **Metric**: 534 (previous best: 513, delta: +21 cherry-picked + 5 new) | **Commit**: af40532
-- Cherry-picked iters 159-165 (21 pairs) from diverged `perf-comparison-eef4c65f` branch onto canonical; added 5 new pairs: str_split_method, categorical_index_modify, applySeries_fn, dataframe_apply_stats, dataframe_from_columns. Branch now at 534 pairs.
+### Iteration 166 — 2026-04-17 21:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24588062327)
+- **Status**: ✅ Accepted | **Metric**: 513 (previous best on branch: 508, delta: +5) | **Commit**: 6ece5be
+- Added 5 pairs: series_set_reset_index (Series.setIndex/resetIndex), melt_id_vars (melt with id_vars/value_vars), concat_series (concat of multiple Series), stack_dropna (stack with dropna option), sample_frac (sampleSeries/sampleDataFrame with frac).
 
 ### Iteration 165 — 2026-04-17 20:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24585962377)
 - **Status**: ✅ Accepted | **Metric**: 513 (previous best on branch: 508, delta: +5) | **Commit**: 682db54
