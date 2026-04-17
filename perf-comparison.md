@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T03:07:00Z |
-| Iteration Count | 142 |
-| Best Metric | 429 |
+| Last Run | 2026-04-17T04:32:00Z |
+| Iteration Count | 143 |
+| Best Metric | 437 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #147 |
@@ -65,18 +65,19 @@
 
 ## 🔭 Future Directions
 
+- (iter 143: quantile_fn, pct_change_fn, merge_suffixes, expanding_min_periods, dt_isocalendar, period_asfreq, sample_fn, nunique_fn)
+- Series.autocorr(lag) if implemented.
 - MultiIndex getLoc with slice / get_locs / get_indexer.
 - groupby: nunique (if DataFrameGroupBy.nunique() added), transform-apply.
-- Series.autocorr(lag) if implemented.
-- (iter 142: groupby_multi_key, timestamp_static, tz_datetime_index_ops, rolling_center_min_periods, cast_scalar, concat_options, ewm_com_halflife, nat_sort_key, dataframe_iter)
-- Series/DataFrame remaining: DataFrame.copy(), more Timestamp method benchmarks (isoformat/strftime/floor/ceil).
-- Expanding window options (minPeriods on expanding).
-- More merge options (merge on different key types, merge suffixes).
-- IntervalIndex.from_breaks if it exists.
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 143 — 2026-04-17 04:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24547746540)
+- **Status**: ✅ Accepted | **Metric**: 437 (previous best: 429, delta: +8) | **Commit**: d968511
+- Added 8 pairs: quantile_fn (quantileSeries/quantileDataFrame), pct_change_fn (pctChangeSeries/pctChangeDataFrame), merge_suffixes (merge with custom suffixes option), expanding_min_periods (Expanding with minPeriods), dt_isocalendar (DatetimeAccessor.isocalendar_week), period_asfreq (Period.asfreq/PeriodIndex.asfreq), sample_fn (sampleSeries/sampleDataFrame), nunique_fn (nuniqueSeries/nuniqueDataFrame).
+- All are standalone functional-form benchmarks and new operation coverage for unexplored APIs.
 
 ### Iteration 142 — 2026-04-17 03:07 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24545567127)
 - **Status**: ✅ Accepted | **Metric**: 429 (previous actual best: 420, delta: +9) | **Commit**: 0f3f448
