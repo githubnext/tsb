@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T12:22:38Z |
-| Iteration Count | 153 |
-| Best Metric | 483 |
+| Last Run | 2026-04-17T12:50:15Z |
+| Iteration Count | 154 |
+| Best Metric | 488 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #147 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -65,6 +65,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 154 — 2026-04-17 12:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24565880287)
+- **Status**: ✅ Accepted | **Metric**: 488 (previous best: 483, delta: +5) | **Commit**: d17b31c
+- Added 5 pairs: datetime_index_normalize_filter_shift (DatetimeIndex.normalize/filter/shift), index_map (Index.map transform), multi_index_fromtuples (MultiIndex.fromTuples), timedelta_advanced_ops (Timedelta.parse/toISOString/divBy/negate/mul/compareTo), dataframe_rolling_var_std_sum_count (DataFrameRolling.var/std/sum/count).
 
 ### Iteration 153 — 2026-04-17 12:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24564770860)
 - **Status**: ✅ Accepted | **Metric**: 483 (previous best: 478, delta: +5) | **Commit**: 8f22edd
