@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T09:34:00Z |
-| Iteration Count | 148 |
-| Best Metric | 468 |
+| Last Run | 2026-04-17T10:28:00Z |
+| Iteration Count | 149 |
+| Best Metric | 473 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #147 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -65,6 +65,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 149 — 2026-04-17 10:28 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24560446149)
+- **Status**: ✅ Accepted | **Metric**: 473 (previous best: 468, delta: +5) | **Commit**: e83434d
+- Added 5 pairs: dataframe_isin (dataFrameIsin global+per-column), series_reset_index (Series.resetIndex), dataframe_reset_index (DataFrame.resetIndex), series_to_object (Series.toObject), interval_index_construction (IntervalIndex.fromArrays/fromIntervals/mid/filter).
 
 ### Iteration 148 — 2026-04-17 09:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24558253472)
 - **Status**: ✅ Accepted | **Metric**: 468 (previous best: 462, delta: +6) | **Commit**: b19b611
