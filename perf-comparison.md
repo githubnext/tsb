@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T21:46:47Z |
-| Iteration Count | 166 |
-| Best Metric | 513 |
+| Last Run | 2026-04-17T22:15:23Z |
+| Iteration Count | 167 |
+| Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #148 |
@@ -65,6 +65,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 167 — 2026-04-17 22:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24588989692)
+- **Status**: ✅ Accepted | **Metric**: 539 (previous best: 513, delta: +26) | **Commit**: 573e445
+- Added 5 pairs: nan_sum_mean_std (nansum/nanmean/nanstd), nan_var_min_max (nanvar/nanmin/nanmax), sample_weights (sampleSeries/sampleDataFrame with weights), histogram_bin_edges (histogram with binEdges), pivot_table_aggfunc_variants (pivotTable sum/count/min/max).
 
 ### Iteration 166 — 2026-04-17 21:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24588062327)
 - **Status**: ✅ Accepted | **Metric**: 513 (previous best on branch: 508, delta: +5) | **Commit**: 6ece5be
