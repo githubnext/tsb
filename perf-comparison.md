@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T14:53:30Z |
-| Iteration Count | 156 |
-| Best Metric | 498 |
+| Last Run | 2026-04-17T15:30:00Z |
+| Iteration Count | 157 |
+| Best Metric | 503 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #147 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -66,9 +66,13 @@
 
 ## 📊 Iteration History
 
-### Iteration 156 — 2026-04-17 14:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24571428668)
-- **Status**: ✅ Accepted | **Metric**: 498 (previous best: 493, delta: +5) | **Commit**: 706b1a2
+### Iteration 157 — 2026-04-17 15:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24572885192)
+- **Status**: ✅ Accepted | **Metric**: 503 (previous best: 498, delta: +5) | **Commit**: 436abfe
 - Added 5 pairs: nan_agg_extended (nancount/nanprod/nanmedian), rank_methods (rankSeries min/max/first/dense methods), dropna_advanced (dropnaDataFrame thresh/subset/axis=1 options), get_dummies_opts (getDummies/dataFrameGetDummies prefix/dropFirst/dummyNa), factorize_sort (factorize/seriesFactorize sort=true/useNaSentinel options).
+
+### Iteration 156 — 2026-04-17 14:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24571428668)
+- **Status**: ✅ Accepted | **Metric**: 498 (previous best: 493, delta: +5) | **Commit**: df6dab9
+- Added 5 pairs: date_offset_rollforward (DateOffset.rollforward/rollback/onOffset), date_offset_more_types (MonthBegin/YearEnd/Week/Minute/Milli), date_range_options (date_range with various freq options), combine_first_dataframe (combineFirstDataFrame standalone), series_groupby_custom_agg (SeriesGroupBy.agg with custom function).
 
 ### Iteration 155 — 2026-04-17 13:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24567781388)
 - **Status**: ✅ Accepted | **Metric**: 493 (previous best: 488, delta: +5) | **Commit**: 1267bc5
