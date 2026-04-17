@@ -8,7 +8,7 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T18:47:37Z |
+| Last Run | 2026-04-17T18:49:00Z |
 | Iteration Count | 161 |
 | Best Metric | 513 |
 | Target Metric | — |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -66,10 +66,9 @@
 
 ## 📊 Iteration History
 
-### Iteration 161 — 2026-04-17 18:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24580196718)
-- **Status**: ✅ Accepted | **Metric**: 513 (corrected baseline 508 → 513, delta: +5) | **Commit**: 6b0391c
-- Added 5 pairs: merge_sort (merge with sort=true), groupby_groups (GroupBy.groups Map), str_extract (s.str.extract single capture), clip_with_bounds (clipSeriesWithBounds/DF with Series bounds), all_any (allSeries/allDataFrame/anySeries/anyDataFrame).
-- Note: Iterations 159-160 in prior state were state-file-only; commits never pushed. Corrected baseline = 508.
+### Iteration 161 — 2026-04-17 18:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24581386899)
+- **Status**: ✅ Accepted | **Metric**: 513 (previous best: 508, delta: +5) | **Commit**: 46afa02
+- Added 5 pairs: series_log2_log10 (seriesLog2/Log10/dataFrameLog2/Log10), clip_series_with_bounds (clipSeriesWithBounds), clip_dataframe_with_bounds (clipDataFrameWithBounds), dataframe_pipe_to (dataFramePipeTo), qcut_interval_index (qcutIntervalIndex).
 
 ### Iteration 160 — 2026-04-17 17:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24578878886)
 - **Status**: ✅ Accepted | **Metric**: 513 (previous best: 508, delta: +5) | **Commit**: 3116a9b
