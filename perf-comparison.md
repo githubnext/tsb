@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T00:33:00Z |
-| Iteration Count | 140 |
+| Last Run | 2026-04-17T01:36:00Z |
+| Iteration Count | 141 |
 | Best Metric | 428 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -87,6 +87,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 141 — 2026-04-17 01:36 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24543161266)
+- **Status**: ✅ Accepted | **Metric**: 428 (previous best: 428 on branch=420, delta: +8) | **Commit**: e4ed391
+- Added 8 pairs: interpolate_fn (interpolateSeries+dataFrameInterpolate), sample_fn (sampleSeries+sampleDataFrame), fillna_fn (fillnaSeries+fillnaDataFrame), where_mask_fn (whereSeries+maskSeries+whereDataFrame+maskDataFrame), mode_dataframe (modeDataFrame), combine_first_fn (combineFirstSeries+combineFirstDataFrame), dropna_fn (dropnaSeries+dropnaDataFrame), explode_fn (explodeSeries+explodeDataFrame).
+- Covered standalone functional-API forms of operations previously only benchmarked as method calls. Branch had 420 pairs; iter 140 commit was lost — rebuilt to 428.
 
 ### Iteration 140 — 2026-04-17 00:33 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24541324267)
 - **Status**: ✅ Accepted | **Metric**: 428 (previous best: 420, delta: +8) | **Commit**: 0a2efa8
