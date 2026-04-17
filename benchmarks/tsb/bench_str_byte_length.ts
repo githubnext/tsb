@@ -1,0 +1,13 @@
+import { strByteLength } from "tsb";
+import { Series } from "tsb";
+const N = 100_000;
+const words = ["hello", "world", "typescript", "benchmark", "tsb"];
+const data = Array.from({ length: N }, (_, i) => words[i % words.length]);
+const s = new Series(data);
+const WARMUP = 3;
+const ITERS = 20;
+for (let i = 0; i < WARMUP; i++) strByteLength(s);
+const t0 = performance.now();
+for (let i = 0; i < ITERS; i++) strByteLength(s);
+const total = performance.now() - t0;
+console.log(JSON.stringify({ function: "str_byte_length", mean_ms: total / ITERS, iterations: ITERS, total_ms: total }));

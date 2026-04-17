@@ -465,8 +465,22 @@ export type {
   SeriesToStringOptions,
   DataFrameToStringOptions,
 } from "./stats/index.ts";
-export { readExcel, xlsxSheetNames } from "./io/index.ts";
-export type { ReadExcelOptions } from "./io/index.ts";
+
+// PR #120 unique modules — re-exported from sub-barrels
+export { astypeSeries, astype, castScalar } from "./core/index.ts";
+export type { AstypeOptions, DataFrameAstypeOptions } from "./core/index.ts";
+// readExcel / xlsxSheetNames use node:zlib — import from "tsb/io/read_excel" directly
+export { clipAdvancedSeries, clipAdvancedDataFrame } from "./stats/index.ts";
+export type {
+  SeriesBound,
+  DataFrameBound,
+  ClipAdvancedSeriesOptions,
+  ClipAdvancedDataFrameOptions,
+} from "./stats/index.ts";
+export { idxminSeries, idxmaxSeries, idxminDataFrame, idxmaxDataFrame } from "./stats/index.ts";
+export type { IdxOptions, IdxDataFrameOptions } from "./stats/index.ts";
+export { modeSeries, modeDataFrame } from "./stats/index.ts";
+export type { ModeSeriesOptions, ModeDataFrameOptions } from "./stats/index.ts";
 export {
   nancount,
   nansum,
@@ -479,37 +493,31 @@ export {
   nanprod,
 } from "./stats/index.ts";
 export type { NanInput, NanAggOptions } from "./stats/index.ts";
-export { toDatetime } from "./stats/index.ts";
-export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./stats/index.ts";
-export { toTimedelta, parseFrac, formatTimedelta } from "./stats/index.ts";
-export type { TimedeltaUnit, TimedeltaErrors, ToTimedeltaOptions } from "./stats/index.ts";
-export { dateRange, parseFreq, advanceDate, toDateInput } from "./stats/index.ts";
-export type { DateRangeInclusive, ParsedFreq } from "./stats/index.ts";
-export { astypeSeries, astype, castScalar } from "./core/index.ts";
-export type { AstypeOptions, DataFrameAstypeOptions } from "./core/index.ts";
-export { clipAdvancedSeries, clipAdvancedDataFrame } from "./stats/index.ts";
-export type {
-  SeriesBound,
-  DataFrameBound,
-  ClipAdvancedSeriesOptions,
-  ClipAdvancedDataFrameOptions,
+export {
+  nuniqueSeries,
+  nuniqueDataFrame,
+  anySeries,
+  allSeries,
+  anyDataFrame,
+  allDataFrame,
 } from "./stats/index.ts";
-export { diffDataFrame, shiftDataFrame } from "./stats/index.ts";
 export type {
-  DiffOptions,
-  DataFrameDiffOptions,
-  ShiftOptions,
-  DataFrameShiftOptions,
+  NuniqueSeriesOptions,
+  NuniqueDataFrameOptions,
+  AnyAllSeriesOptions,
+  AnyAllDataFrameOptions,
 } from "./stats/index.ts";
-export { modeSeries, modeDataFrame } from "./stats/index.ts";
-export type { ModeSeriesOptions, ModeDataFrameOptions } from "./stats/index.ts";
-export { ffillSeries, bfillSeries, dataFrameFfill, dataFrameBfill } from "./stats/index.ts";
-export type { FillDirectionOptions, DataFrameFillOptions } from "./stats/index.ts";
 export { pctChangeSeries, pctChangeDataFrame } from "./stats/index.ts";
 export type {
   PctChangeFillMethod,
   PctChangeOptions,
   DataFramePctChangeOptions,
+} from "./stats/index.ts";
+export { quantileSeries, quantileDataFrame } from "./stats/index.ts";
+export type {
+  QuantileInterpolation,
+  QuantileSeriesOptions,
+  QuantileDataFrameOptions,
 } from "./stats/index.ts";
 export { replaceSeries, replaceDataFrame } from "./stats/index.ts";
 export type {
@@ -518,32 +526,30 @@ export type {
   ReplaceOptions,
   DataFrameReplaceOptions,
 } from "./stats/index.ts";
-export { skewSeries, kurtSeries, skewDataFrame, kurtDataFrame } from "./stats/index.ts";
-export type { SkewKurtSeriesOptions, SkewKurtDataFrameOptions } from "./stats/index.ts";
 export { varSeries, semSeries, varDataFrame, semDataFrame } from "./stats/index.ts";
 export type { VarSemSeriesOptions, VarSemDataFrameOptions } from "./stats/index.ts";
-export { idxminSeries, idxmaxSeries, idxminDataFrame, idxmaxDataFrame } from "./stats/index.ts";
-export type { IdxOptions, IdxDataFrameOptions } from "./stats/index.ts";
-export {
-  nuniqueSeries,
-  nuniqueDataFrame,
-  anySeries,
-  allSeries,
-  anyDataFrame,
-  allDataFrame,
-  nunique,
-} from "./stats/index.ts";
+export { skewSeries, kurtSeries, skewDataFrame, kurtDataFrame } from "./stats/index.ts";
 export type {
-  NuniqueSeriesOptions,
-  NuniqueDataFrameOptions,
-  AnyAllSeriesOptions,
-  AnyAllDataFrameOptions,
+  SkewKurtSeriesOptions,
+  SkewKurtDataFrameOptions,
 } from "./stats/index.ts";
-export { quantileSeries, quantileDataFrame } from "./stats/index.ts";
+export { toDatetime } from "./stats/index.ts";
+export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./stats/index.ts";
+
+// Branch-unique exports not yet in main
+export { toTimedelta, parseFrac, formatTimedelta } from "./stats/index.ts";
+export type { TimedeltaUnit, TimedeltaErrors, ToTimedeltaOptions } from "./stats/index.ts";
+export { dateRange, parseFreq, advanceDate, toDateInput } from "./stats/index.ts";
+export type { DateRangeInclusive, ParsedFreq } from "./stats/index.ts";
+export { diffDataFrame, shiftDataFrame } from "./stats/index.ts";
 export type {
-  QuantileInterpolation,
-  QuantileSeriesOptions,
-  QuantileDataFrameOptions,
+  DiffOptions,
+  DataFrameDiffOptions,
+  ShiftOptions,
+  DataFrameShiftOptions,
 } from "./stats/index.ts";
+export { ffillSeries, bfillSeries, dataFrameFfill, dataFrameBfill } from "./stats/index.ts";
+export type { FillDirectionOptions, DataFrameFillOptions } from "./stats/index.ts";
 export { intervalRange } from "./stats/index.ts";
 export type { ClosedType } from "./stats/index.ts";
+export { nunique } from "./stats/index.ts";

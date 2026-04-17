@@ -13,7 +13,7 @@
  * @module
  */
 
-import { DataFrame, Dtype, Index, Series } from "../core/index.ts";
+import { DataFrame, type Dtype, Index, Series } from "../core/index.ts";
 import type { DtypeKind } from "../core/index.ts";
 import type { Label, Scalar } from "../types.ts";
 
@@ -181,7 +181,8 @@ function computeModes(values: readonly Scalar[], dropna: boolean): Scalar[] {
 /** Build an integer-index Series from a Scalar array, preserving the source dtype. */
 function buildModeSeries(modes: readonly Scalar[], name: Label, dtype: Dtype): Series<Scalar> {
   const idx = new Index<Label>(modes.map((_, i) => i));
-  return new Series({ data: modes.slice(), index: idx, dtype, name });
+  const seriesName = typeof name === "string" ? name : name === null ? null : String(name);
+  return new Series({ data: modes.slice(), index: idx, dtype, name: seriesName });
 }
 
 // ─── public API ───────────────────────────────────────────────────────────────

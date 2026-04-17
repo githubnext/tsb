@@ -203,6 +203,17 @@ function convertString(value: string, options: ToDatetimeOptions): Date | null {
   const errors = options.errors ?? "raise";
   const dayfirst = options.dayfirst ?? false;
 
+  // Try compact YYYYMMDD before treating as integer (both match all-digit strings)
+  if (RE_COMPACT.test(value)) {
+    const m = RE_COMPACT.exec(value);
+    if (m !== null) {
+      const result = parseCompact(m);
+      if (result !== null) {
+        return result;
+      }
+    }
+  }
+
   if (RE_INT.test(value)) {
     return convertNumber(Number(value), options);
   }

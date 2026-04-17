@@ -168,7 +168,7 @@ describe("clipAdvancedDataFrame", () => {
   });
 
   test("null values pass through unchanged", () => {
-    const df = DataFrame.fromColumns<Scalar>({ a: [null, 5], b: [3, null] });
+    const df = DataFrame.fromColumns({ a: [null, 5], b: [3, null] });
     const result = clipAdvancedDataFrame(df, { lower: 0, upper: 4 });
     expect(result.col("a").values[0]).toBeNull();
     expect(result.col("a").values[1]).toBe(4);
