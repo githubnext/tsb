@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-17T16:05:00Z |
-| Iteration Count | 158 |
-| Best Metric | 508 |
+| Last Run | 2026-04-17T17:20:00Z |
+| Iteration Count | 159 |
+| Best Metric | 513 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #147 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -66,23 +66,11 @@
 
 ## 📊 Iteration History
 
-### Iteration 158 — 2026-04-17 16:05 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24573945763)
-- **Status**: ✅ Accepted | **Metric**: 508 (previous best: 503, delta: +5) | **Commit**: 2c82582
-- Added 5 pairs: dataframe_rolling_min_max (DataFrameRolling.min/max), interval_index_construction (IntervalIndex.fromArrays/fromIntervals), read_csv_options (readCsv with sep/header/skipRows/dtype), to_csv_options (toCsv with sep/header/index options), dataframe_median (DataFrame.median column-wise).
+### Iteration 159 — 2026-04-17 17:20 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24577736975)
+- **Status**: ✅ Accepted | **Metric**: 513 (previous best: 508, delta: +5) | **Commit**: b67e4ad
+- Added 5 pairs: series_sign (seriesSign numpy.sign equivalent), groupby_groups_props (DataFrameGroupBy.groups/groupKeys/ngroups), merge_sort (merge with sort=true), series_groupby_groups (SeriesGroupBy.groups/groupKeys/ngroups), pipe_fn (pipe functional composition operator).
 
-### Iteration 157 — 2026-04-17 15:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24572885192)
-- **Status**: ✅ Accepted | **Metric**: 503 (previous best: 498, delta: +5) | **Commit**: 436abfe
-- Added 5 pairs: nan_agg_extended (nancount/nanprod/nanmedian), rank_methods (rankSeries min/max/first/dense methods), dropna_advanced (dropnaDataFrame thresh/subset/axis=1 options), get_dummies_opts (getDummies/dataFrameGetDummies prefix/dropFirst/dummyNa), factorize_sort (factorize/seriesFactorize sort=true/useNaSentinel options).
-
-### Iteration 156 — 2026-04-17 14:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24571428668)
-- **Status**: ✅ Accepted | **Metric**: 498 (previous best: 493, delta: +5) | **Commit**: df6dab9
-- Added 5 pairs: date_offset_rollforward (DateOffset.rollforward/rollback/onOffset), date_offset_more_types (MonthBegin/YearEnd/Week/Minute/Milli), date_range_options (date_range with various freq options), combine_first_dataframe (combineFirstDataFrame standalone), series_groupby_custom_agg (SeriesGroupBy.agg with custom function).
-
-### Iteration 155 — 2026-04-17 13:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24567781388)
-- **Status**: ✅ Accepted | **Metric**: 493 (previous best: 488, delta: +5) | **Commit**: 1267bc5
-- Added 5 pairs: dataframe_expanding_std_var (DataFrameExpanding.std/var), dataframe_expanding_sum_count (DataFrameExpanding.sum/count), dataframe_expanding_median_apply (DataFrameExpanding.median/apply), tz_datetime_index_extra (TZDatetimeIndex.slice/concat/at/toArray/toTimestamps/min/max/tz_convert method/tz_localize_none), timedelta_index_tostrings (TimedeltaIndex.toStrings/toArray/at/rename).
-
-### Iters 147–157 — all ✅ | metrics 462→503. timestamp_arith/str_format/round_normalize, value_counts_opts, series_sortvalues_opts, dataframe_sortvalues_mixed, series_groupby_size, series_log_natural, series_standalone_compare, dataframe_compare_lege, series_floordiv_standalone, drop_duplicates_fn, nsmallest_series_fn, duplicated_fn, dataframe_isin, series/dataframe_reset_index, series_to_object, interval_index_construction, replace_series, isnull_notnull, to_numeric_scalar, dataframe_assign_fn, df_any_all_axis1, df_nunique_axis1, cat_codes_accessor, ewm_adjust, interpolate_bfill_limit, datetime_index_ops/snap/normalize_filter_shift, index_map, multi_index_fromtuples, timedelta_advanced_ops, dataframe_rolling_var_std_sum_count/median, period_index_query, series_groupby_agg_all, date_offset_rollforward/more_types/range_options, combine_first_dataframe, series_groupby_custom_agg, dataframe_expanding_std_var/sum_count/median_apply, tz_datetime_index_extra, timedelta_index_tostrings, nan_agg_extended, rank_methods, dropna_advanced, get_dummies_opts, factorize_sort.
+### Iters 147–158 — all ✅ | metrics 462→508. timestamp_arith/str_format/round_normalize, value_counts_opts, series_sortvalues_opts, dataframe_sortvalues_mixed, series_groupby_size, series_log_natural, series_standalone_compare, dataframe_compare_lege, series_floordiv_standalone, drop_duplicates_fn, nsmallest_series_fn, duplicated_fn, dataframe_isin, series/dataframe_reset_index, series_to_object, interval_index_construction, replace_series, isnull_notnull, to_numeric_scalar, dataframe_assign_fn, df_any_all_axis1, df_nunique_axis1, cat_codes_accessor, ewm_adjust, interpolate_bfill_limit, datetime_index_ops/snap/normalize_filter_shift, index_map, multi_index_fromtuples, timedelta_advanced_ops, dataframe_rolling_var_std_sum_count/median/min_max, period_index_query, series_groupby_agg_all, date_offset_rollforward/more_types/range_options, combine_first_dataframe, series_groupby_custom_agg, dataframe_expanding_std_var/sum_count/median_apply, tz_datetime_index_extra, timedelta_index_tostrings, nan_agg_extended, rank_methods, dropna_advanced, get_dummies_opts, factorize_sort, read_csv_options, to_csv_options, dataframe_median.
 
 ### Iters 143–146 — ✅/⚠️ mix | metrics 437→462. period_arithmetic, period_index_methods, dt_total_seconds, timedelta_index_ops, interval_overlaps, describe_opts, merge_index_join, to_json_orient, mode_dataframe_fn, where_mask_fns, idxmin_max_df, diff_applymap_fn, quantile_fn, pct_change_fn, merge_suffixes, expanding_min_periods, dt_isocalendar, period_asfreq, sample_fn, nunique_fn.
 
