@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T10:46:56Z |
-| Iteration Count | 185 |
+| Last Run | 2026-04-18T11:15:25Z |
+| Iteration Count | 186 |
 | Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -59,7 +59,6 @@
 
 ## 🔭 Future Directions
 
-- **Standalone vs method**: combineFirstSeries, dataFrameAbs, dataFrameRound, dataFrameRollingApply, NamedAgg class + isNamedAggSpec now covered in iter 185.
 - Series.autocorr(lag) if implemented.
 - MultiIndex getLoc with slice / get_locs / get_indexer.
 - groupby: nunique (if DataFrameGroupBy.nunique() added), transform-apply.
@@ -70,35 +69,17 @@
 
 ## 📊 Iteration History
 
+### Iteration 186 — 2026-04-18 11:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24603452424)
+- **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: 81b2083
+- Merged origin/main into canonical branch (508→534). Added 5 standalone-fn benchmarks: combineFirstSeries, dataFrameAbs (standalone), dataFrameRound (standalone), dataFrameRollingApply (standalone), isNamedAggSpec+NamedAgg+namedAgg. These had only been added to non-canonical branches in iters 183-185; now on true canonical branch.
+
 ### Iteration 185 — 2026-04-18 10:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24602996473)
-- **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: dbb98ff
-- Merged origin/main (canonical 534). Added 5 standalone-fn benchmarks: combineFirstSeries, dataFrameAbs, dataFrameRound, dataFrameRollingApply, NamedAgg+isNamedAggSpec. Iters 183-184 added these to non-canonical branches only; this iteration re-adds them to the true canonical branch.
+- **Status**: ✅ Accepted (non-canonical) | **Metric**: 539 (non-canonical branch) | **Commit**: dbb98ff
+- Claimed canonical but commit was not on origin/autoloop/perf-comparison.
 
-### Iteration 184 — 2026-04-18 10:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24602516981)
-- **Status**: ✅ Accepted (non-canonical) | **Metric**: 540 (non-canonical branch, not pushed to canonical) | **Commit**: f5c5c77
-- Files were created but not on canonical branch autoloop/perf-comparison. Real canonical remained at 534.
+### Iters 179–184 — ✅/non-canonical | All had branching issues; metrics claimed 539 but not on canonical branch.
 
-### Iteration 183 — 2026-04-18 09:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24602049807)
-- **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: 338d756
-- Added 5 standalone-function benchmarks for previously uncovered exports: combineFirstSeries, dataFrameAbs, dataFrameRound, dataFrameRollingApply, isNamedAggSpec/NamedAgg/namedAgg.
-
-### Iteration 182 — 2026-04-18 09:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24601588226)
-- **Status**: ✅ Accepted | **Metric**: 539 (canonical branch 534→539, +5 new pairs) | **Commit**: 940de0d
-- Added 5 pairs: quantile_series_options (quantileSeries with interpolation/multi-q), quantile_dataframe (quantileDataFrame axis=0/1), dataframe_interpolate (dataFrameInterpolate linear/ffill/bfill), crosstab_normalize (crosstab normalize=all/index/columns), index_set_ops (Index.union/intersection/difference).
-
-### Iteration 181 — 2026-04-18 08:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24601083406)
-- **Status**: ✅ Accepted | **Metric**: 539 (canonical branch 534→539, +5 new pairs) | **Commit**: ffc962f
-- Added 5 pairs: dataframe_quantile (quantileDataFrame q/axis/interpolation), crosstab_normalize (normalize=all/index/columns + margins), series_rmul_rdiv (seriesRmul/seriesRdiv scalar+series), dataframe_rmul_rdiv (dataFrameRmul/dataFrameRdiv scalar+df), series_shift_diff (shiftSeries/diffSeries multi-period).
-
-### Iteration 180 — 2026-04-18 08:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24600586107)
-- **Status**: ✅ Accepted | **Metric**: 539 (baseline 534 after merging main, +5 new pairs) | **Commit**: b5c1f86
-- Merged origin/main (508→534 on canonical branch). Added 5 real pairs: crosstab_normalize (normalize all/index/columns), reindex_fill_method (ffill/bfill), quantile_multi (array quantiles), nancumops_extra (nanmedian/nancount), dataframe_interpolate (linear/ffill/bfill). Canonical branch now at 539.
-
-### Iteration 179 — 2026-04-18 07:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24600207313)
-- **Status**: ✅ Accepted | **Metric**: 539 (baseline 534 after main-merge, +5 new pairs) | **Commit**: 660b4d4
-- Merged origin/main (508→534), then added 5 new pairs: numeric_stats_ext (percentileOfScore/minMaxNormalize/coefficientOfVariation), cat_ops_from_codes (catFromCodes/catSortByFreq/catToOrdinal), cat_ops_setops (catUnion/Intersect/DiffCategories), cat_freq_crosstab (catFreqTable/catCrossTab), natsort_ops (natCompare/natSorted/natArgSort).
-
-### Iters 163–179 — ✅ | metrics 513→534 (canonical confirmed after main-merge in iter 180). Note: iters 169-179 had branching issues, claimed metrics from non-canonical branches; iter 180 established real canonical 534→539.
+### Iters 163–178 — ✅ | metrics 513→534 (canonical confirmed after main-merge in iter 186).
 
 ### Iters 126–162 — ✅/⚠️ mix | metrics 352→513. All major stats, reshape, IO, groupby, merge, concat, window (rolling/expanding/ewm), index ops, categorical, datetime/timedelta/period/interval, string ops, numeric ops, pipe/apply, format ops, infer_dtype, memory_usage, and more benchmarked.
 
