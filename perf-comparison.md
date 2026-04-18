@@ -8,7 +8,7 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T14:15:00Z |
+| Last Run | 2026-04-18T14:17:00Z |
 | Iteration Count | 191 |
 | Best Metric | 540 |
 | Target Metric | — |
@@ -63,19 +63,21 @@
 - MultiIndex getLoc with slice / get_locs / get_indexer.
 - groupby: nunique (if DataFrameGroupBy.nunique() added), transform-apply.
 - Resample operations beyond mean (sum/std/count) if more ops exposed.
+- `toNumeric` (generic dispatch fn) - benchmark vs toNumericArray/toNumericSeries.
+- `Hour`, `Second` date offset benchmarks.
 - STACK_DEFAULT_SEP constant (not really benchmarkable).
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 191 — 2026-04-18 14:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24606138334)
-- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: 288acf5
-- Merged origin/main (534 pairs). Added 6 standalone-fn benchmark pairs: shift_series_fn, combine_first_series_fn, dataframe_abs_fn, dataframe_round_fn, isin_fn, digitize. All functions exist in src/ and are exported from src/index.ts but lacked standalone-function benchmarks.
+### Iteration 191 — 2026-04-18 14:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24606535732)
+- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: 6739ed2
+- Merged origin/main (534 canonical pairs). Added 6 standalone-fn benchmark pairs: shiftSeries (library fn), combineFirstSeries (fn), dataFrameAbs+dataFrameRound (fn), digitize array fn, dataFrameRollingApply (fn), NamedAgg class+isNamedAggSpec. Prior iters 189-190 were non-canonical; this correctly commits to origin/autoloop/perf-comparison.
 
 ### Iteration 190 — 2026-04-18 13:29 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24605704960)
-- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: 40b365f
-- Merged origin/main (534 pairs). Added 6 standalone-fn benchmark pairs: shiftSeries, combineFirstSeries, dataFrameAbs (fn), dataFrameRound (fn), isin (series standalone), digitize (array standalone). These functions were previously tested only via method form or not at all.
+- **Status**: ✅ Accepted (non-canonical) | **Metric**: 540 claimed but branch was not origin/autoloop/perf-comparison
+- Iteration 190 and 189 both had wrong branch; canonical was 534 after main-merge.
 
 ### Iteration 189 — 2026-04-18 12:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24605008600)
 - **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: 607b008
