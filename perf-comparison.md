@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T07:29:00Z |
+| Last Run | 2026-04-18T07:53:18Z |
 | Iteration Count | 179 |
-| Best Metric | 542 |
+| Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #150 |
@@ -67,9 +67,9 @@
 
 ## 📊 Iteration History
 
-### Iteration 179 — 2026-04-18 07:29 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24599811979)
-- **Status**: ✅ Accepted | **Metric**: 542 (prev best: 539, delta: +3) | **Commit**: ef5ad26
-- Merged origin/main (508→534), then added 8 new pairs: crosstab_normalize, crosstab_margins, reindex_fill_method, quantile_multi, interpolate_methods, nancumops_extra, reindex_dataframe, pivot_table_aggfuncs. Canonical branch now at 542 verified.
+### Iteration 179 — 2026-04-18 07:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24600207313)
+- **Status**: ✅ Accepted | **Metric**: 539 (baseline 534 after main-merge, +5 new pairs) | **Commit**: 660b4d4
+- Merged origin/main (508→534), then added 5 new pairs: numeric_stats_ext (percentileOfScore/minMaxNormalize/coefficientOfVariation), cat_ops_from_codes (catFromCodes/catSortByFreq/catToOrdinal), cat_ops_setops (catUnion/Intersect/DiffCategories), cat_freq_crosstab (catFreqTable/catCrossTab), natsort_ops (natCompare/natSorted/natArgSort).
 
 ### Iteration 178 — 2026-04-18 06:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24599244443)
 - **Status**: ✅ Accepted | **Metric**: 539 (canonical branch confirmed: merged main 508→534, added +5 real pairs, total=539) | **Commit**: a468560
