@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T12:48:35Z |
-| Iteration Count | 189 |
+| Last Run | 2026-04-18T13:29:25Z |
+| Iteration Count | 190 |
 | Best Metric | 540 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -68,6 +68,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 190 — 2026-04-18 13:29 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24605704960)
+- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: 40b365f
+- Merged origin/main (534 pairs). Added 6 standalone-fn benchmark pairs: shiftSeries, combineFirstSeries, dataFrameAbs (fn), dataFrameRound (fn), isin (series standalone), digitize (array standalone). These functions were previously tested only via method form or not at all.
 
 ### Iteration 189 — 2026-04-18 12:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24605008600)
 - **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: 607b008
