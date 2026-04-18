@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T09:47:54Z |
-| Iteration Count | 183 |
-| Best Metric | 539 |
+| Last Run | 2026-04-18T10:17:05Z |
+| Iteration Count | 184 |
+| Best Metric | 540 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #150 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -43,6 +43,7 @@
 
 ## 📚 Lessons Learned
 
+- **Standalone vs method-form**: Many TS bench files (bench_dataframe_abs.ts, bench_dataframe_round.ts, bench_dataframe_rolling_apply.ts, bench_named_agg.ts) use method-form (df.abs(), df.round()) but don't import the standalone function export. Adding `_fn` suffix benchmarks covers the standalone exports. Python files are always 1:1 with TS files (same names).
 - **CRITICAL BRANCHING**: Use `autoloop/perf-comparison` (PR #150 active branch). Always merge origin/main first; state file best_metric may diverge from branch reality.
 - **MCP HTTP workaround**: Use curl to `http://host.docker.internal:80/mcp/safeoutputs` with Authorization from `~/.copilot/mcp-config.json`. Get `Mcp-Session-Id` from initialize, send `notifications/initialized`, then `tools/call`.
 - push_repo_memory limit is ~10KB file / ~12KB total. Keep history trimmed.
@@ -67,6 +68,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 184 — 2026-04-18 10:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24602516981)
+- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: f5c5c77
+- Merged origin/main (canonical 534). Added 6 pairs: combine_first_series, dataframe_abs_fn (standalone), dataframe_round_fn (standalone), dataframe_rolling_apply_fn (standalone), named_agg_spec (NamedAgg/namedAgg/isNamedAggSpec), digitize_fn. All target standalone exports not yet covered.
 
 ### Iteration 183 — 2026-04-18 09:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24602049807)
 - **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: 338d756
