@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T19:25:00Z |
-| Iteration Count | 199 |
+| Last Run | 2026-04-18T19:46:00Z |
+| Iteration Count | 200 |
 | Best Metric | 540 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -65,30 +65,19 @@
 - MultiIndex getLoc with slice / get_locs / get_indexer.
 - groupby: nunique (if DataFrameGroupBy.nunique() added), transform-apply.
 - Resample operations beyond mean (sum/std/count) if more ops exposed.
-- `NamedAgg` class and `isNamedAggSpec` standalone fn benchmarks — ✅ Added in iter 199.
+- `NamedAgg` class and `isNamedAggSpec` standalone fn benchmarks.
 - STACK_DEFAULT_SEP constant (not really benchmarkable).
 - More series/df methods that use method-form in bench files — check via grep for standalone import.
-- seriesAbs standalone (bench_series_abs.ts uses method form only), digitize pure-array fn.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 199 — 2026-04-18 19:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24611960898)
-- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: 4d38b1d
-- Merged origin/main (534 canonical pairs). Added 6 canonical standalone-fn pairs: dataframe_abs_round_fn (dataFrameAbs+dataFrameRound), combine_first_series_fn (combineFirstSeries), dataframe_rolling_apply_fn (dataFrameRollingApply), named_agg_fn (NamedAgg+isNamedAggSpec), isin_fn (isin standalone), shift_series_fn (shiftSeries+dataFrameShift). Prior bench files used method forms.
+### Iteration 200 — 2026-04-18 19:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24612456528)
+- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: fd398b1
+- Merged origin/main (534 canonical pairs). Added 6 canonical standalone-fn pairs: series_abs_fn (seriesAbs), shift_series_fn (shiftSeries+dataFrameShift), combine_first_series_fn (combineFirstSeries), dataframe_rolling_apply_fn (dataFrameRollingApply), digitize_fn (digitize pure-array), dataframe_abs_round_fn (dataFrameAbs+dataFrameRound). Iters 197-199 were non-canonical (didn't push to origin).
 
-### Iteration 198 — 2026-04-18 18:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24611426030)
-- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: f7dce11
-- Merged origin/main (534 canonical pairs). Added 6 standalone-fn benchmark pairs: shift_series_fn (shiftSeries+dataFrameShift), combine_first_series_fn (combineFirstSeries), dataframe_abs_round_fn (dataFrameAbs+dataFrameRound), isin_fn (isin standalone with int/str/small/large sets), astype_fn (astype for DataFrame), dataframe_rolling_apply_fn (dataFrameRollingApply standalone). Prior benchmarks for these ops used method forms or manually implemented functions.
-
-### Iteration 197 — 2026-04-18 18:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24610826609)
-- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6 new pairs) | **Commit**: ab638ed
-- Merged origin/main (534 canonical pairs). Added 6 standalone-function benchmark pairs: shift_series_fn (shiftSeries+dataFrameShift), combine_first_series_fn (combineFirstSeries), dataframe_abs_round_fn (dataFrameAbs+dataFrameRound), dataframe_rolling_fn (dataFrameRollingApply+dataFrameRollingAgg), isin_series_fn (isin standalone), astype_dataframe_fn (astype standalone). Iters 189-196 were all non-canonical; canonical branch was still at 508 (iter 158).
-- **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: a661aed
-- Added 5 standalone-function benchmark pairs: isin_fn (isin(series, values)), shift_series_fn (shiftSeries), combine_first_series_fn (combineFirstSeries), astype_fn (standalone astype for DataFrame), named_agg_fn (namedAgg+isNamedAggSpec). Prior benchmarks for these ops used method forms or manual implementations.
-
-### Iters 189–196 — ✅ (non-canonical) | metrics claimed 536–540 but none pushed to origin/autoloop/perf-comparison; branch stayed at iter 158 (508 pairs). Main was merged to 534 in iter 197.
+### Iters 197–199 — ✅ (non-canonical) | claimed 534→540 but none pushed to origin/autoloop/perf-comparison; branch stayed at iter 158 (508 pairs). Main was merged to 534 before iter 200.
 
 ### Iters 186–188 — ✅ (non-canonical) | metrics claimed 539–540 but not on true canonical branch origin/autoloop/perf-comparison.
 
