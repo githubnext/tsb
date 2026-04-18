@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T22:10:00Z |
-| Iteration Count | 205 |
+| Last Run | 2026-04-18T22:46:00Z |
+| Iteration Count | 206 |
 | Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -73,6 +73,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 206 — 2026-04-18 22:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24615590800)
+- **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 standalone fn pairs) | **Commit**: 376403d
+- Merged origin/main (534 canonical pairs). Added 5 standalone-function benchmarks for previously method-form-only exported functions: astype (DataFrame), combineFirstSeries, isNamedAggSpec, shiftSeries, isin (Series). Verified via grep that none of these 5 had existing standalone import in any benchmark.
 
 ### Iteration 205 — 2026-04-18 22:10 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24614994923)
 - **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: d426d88
