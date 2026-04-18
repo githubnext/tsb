@@ -108,10 +108,10 @@ class Rng {
     // stays small for the first few steps.
     let s = seed >>> 0 || 0xdeadbeef;
     // Wang hash to spread bits before the first step.
-    s = ((s ^ 61) ^ (s >>> 16)) >>> 0;
+    s = (s ^ 61 ^ (s >>> 16)) >>> 0;
     s = (s + (s << 3)) >>> 0;
     s = (s ^ (s >>> 4)) >>> 0;
-    s = (Math.imul(s, 0x27d4eb2d)) >>> 0;
+    s = Math.imul(s, 0x27d4eb2d) >>> 0;
     s = (s ^ (s >>> 15)) >>> 0;
     this._state = s || 0xdeadbeef;
   }
