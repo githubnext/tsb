@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T11:15:25Z |
-| Iteration Count | 186 |
+| Last Run | 2026-04-18T11:45:07Z |
+| Iteration Count | 187 |
 | Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -68,6 +68,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 187 — 2026-04-18 11:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24603938988)
+- **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: e382b5c
+- Merged origin/main (534), then added 5 benchmark pairs: Hour/Second DateOffset, digitize standalone, toNumeric generic, NamedAgg class+factory+isNamedAggSpec, combineFirstSeries standalone.
 
 ### Iteration 186 — 2026-04-18 11:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24603452424)
 - **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: 81b2083
