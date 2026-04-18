@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T09:19:15Z |
-| Iteration Count | 182 |
+| Last Run | 2026-04-18T09:47:54Z |
+| Iteration Count | 183 |
 | Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -58,6 +58,7 @@
 
 ## 🔭 Future Directions
 
+- **Standalone vs method**: Many src/index.ts exports (combineFirstSeries, dataFrameAbs, dataFrameRound, dataFrameRollingApply) were only benchmarked via their method-call equivalents. Check `grep -r "FnName" benchmarks/tsb/*.ts` to find gaps.
 - Series.autocorr(lag) if implemented.
 - MultiIndex getLoc with slice / get_locs / get_indexer.
 - groupby: nunique (if DataFrameGroupBy.nunique() added), transform-apply.
@@ -66,6 +67,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 183 — 2026-04-18 09:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24602049807)
+- **Status**: ✅ Accepted | **Metric**: 539 (canonical 534→539, +5 new pairs) | **Commit**: 338d756
+- Added 5 standalone-function benchmarks for previously uncovered exports: combineFirstSeries, dataFrameAbs, dataFrameRound, dataFrameRollingApply, isNamedAggSpec/NamedAgg/namedAgg.
 
 ### Iteration 182 — 2026-04-18 09:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24601588226)
 - **Status**: ✅ Accepted | **Metric**: 539 (canonical branch 534→539, +5 new pairs) | **Commit**: 940de0d
