@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-18T05:34:51Z |
-| Iteration Count | 176 |
+| Last Run | 2026-04-18T06:28:27Z |
+| Iteration Count | 177 |
 | Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -67,11 +67,15 @@
 
 ## 📊 Iteration History
 
-### Iteration 176 — 2026-04-18 05:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24597964189)
-- **Status**: ✅ Accepted | **Metric**: 539 (actual canonical baseline: 534 post-main-merge, delta: +5) | **Commit**: d8f55af
-- Merged origin/main into canonical branch (508→534). Added 5 real pairs: nancumops_extra (nanmedian/nanprod/nancount), cumops_skipna (cumsum/cumprod skipna=false), pivot_table_fill_value (sum/count with fill_value=0), pct_change_periods (periods=1/7 series + periods=5 df), crosstab_normalize (all/index/columns). Canonical branch now at 539 verified.
+### Iteration 177 — 2026-04-18 06:28 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24598829133)
+- **Status**: ✅ Accepted | **Metric**: 539 (baseline after main merge: 534, delta: +5) | **Commit**: 1b090e1
+- Merged origin/main (508→534). Added 5 real pairs on canonical branch: nancumops_extra (nanmedian/nanprod/nancount), dataframe_sqrt (dataFrameSqrt), pivot_table_fill_value (sum/count with fill_value=0), crosstab_normalize (all/index/columns), dataframe_interpolate (dataFrameInterpolate linear). Canonical branch now at 539 verified.
 
-### Iters 163–175 — ✅ | metrics 513→539 (canonical confirmed 539 in iter 176). Note: iters 169-175 had branching issues, claimed merges to non-canonical branches; iter 176 re-established canonical at 539.
+### Iteration 176 — 2026-04-18 05:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24597964189)
+- **Status**: ✅ Accepted | **Metric**: claimed 539 but canonical was at 534; iter 177 re-confirmed canonical at 539. | **Commit**: d8f55af
+- Iteration had non-canonical branch confusion; actual canonical confirmed 534 after merge; iter 177 added the real +5 pairs.
+
+### Iters 163–175 — ✅ | metrics 513→534 (canonical confirmed after main-merge in iter 177). Note: iters 169-176 had branching issues, claimed metrics from non-canonical branches.
 
 ### Iters 126–162 — ✅/⚠️ mix | metrics 352→513. All major stats, reshape, IO, groupby, merge, concat, window (rolling/expanding/ewm), index ops, categorical, datetime/timedelta/period/interval, string ops, numeric ops, pipe/apply, format ops, infer_dtype, memory_usage, and more benchmarked.
 
