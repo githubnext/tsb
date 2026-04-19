@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-19T18:15:09Z |
-| Iteration Count | 232 |
-| Best Metric | 540 |
+| Last Run | 2026-04-19T18:48:09Z |
+| Iteration Count | 233 |
+| Best Metric | 508 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #150 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, error, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, error, accepted, error |
 
 ---
 
@@ -43,7 +43,7 @@
 ## 📚 Lessons Learned
 
 - **Canonical baseline is 534 from PR #148**. After merging origin/main, we start at 534. Always verify after merge.
-- **Non-canonical branches have extra files**: branches like `origin/autoloop/perf-comparison-8724e9f9` have 50+ benchmark pairs not yet in main. Use `git checkout remotes/origin/... -- file` to retrieve them. NEXT ITER: use these same files (still 44 unused pairs available).
+- **Non-canonical branches have extra files**: branches like `origin/autoloop/perf-comparison-8724e9f9` have 76 benchmark pairs not yet in canonical. Use `git checkout remotes/origin/... -- file` to retrieve them. NEXT ITER: use same branch (still ~66 unused pairs available after this iter took 10).
 - **PUSH_FAILURE persists**: safeoutputs push_to_pull_request_branch not available in direct or sub-agent calls. Commits remain local. The repo-memory state is pushed by framework automatically.
 - **cumops options**: cumsum/cummax support skipna=false. dataFrameCumsum/dataFrameCummax support axis=1 for row-wise cumulative ops.
 - **Standalone vs method-form**: Many TS bench files use method-form without importing standalone exports. `_fn` suffix benchmarks cover standalone exports.
@@ -62,6 +62,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 233 — 2026-04-19 18:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24636438815)
+
+- **Status**: ⚠️ Local Only | **Metric**: 518 (canonical 508→518, +10) | **Commit**: 9332415 (local only, not pushed)
+- Checked out origin/autoloop/perf-comparison (508 canonical). Cherry-picked 10 pairs from non-canonical branch `origin/autoloop/perf-comparison-8724e9f9`: applySeries_fn, astype_df_fn, cat_freq_crosstab, cat_ops_from_codes, cat_ops_setops, categorical_index_modify, clip_dataframe_with_bounds, clip_series_with_bounds, combine_first_fn, combine_first_series. Push failed: safeoutputs tools not available. State corrected from 540→518 (state was inflated by non-canonical commits).
 
 ### Iteration 232 — 2026-04-19 18:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24635794410)
 
