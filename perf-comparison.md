@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-19T13:28:51Z |
+| Last Run | 2026-04-19T13:53:40Z |
 | Iteration Count | 225 |
-| Best Metric | 541 |
+| Best Metric | 540 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #150 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -42,8 +42,7 @@
 
 ## 📚 Lessons Learned
 
-- **Canonical branching** (iters 201–219): Always check out `origin/autoloop/perf-comparison`, merge `origin/main`. Iter 225 (a64bfa7) is confirmed canonical 541.
-- **Duplicate prevention**: Iters 219–224 all tried the same 6 files (shift_series_fn, cumops_skipna, etc.) on non-canonical branches. Iter 225 committed them canonically + added searchsorted_right as 7th pair to beat best=540.
+- **Canonical branching**: Always check out `origin/autoloop/perf-comparison`, merge `origin/main`. Iters 219-224 had non-canonical commits (not pushed to remote). Iter 225 (e380b8f) is first true canonical 540.
 - **cumops options**: cumsum/cummax support skipna=false. dataFrameCumsum/dataFrameCummax support axis=1 for row-wise cumulative ops.
 - **Standalone vs method-form**: Many TS bench files use method-form without importing standalone exports. `_fn` suffix benchmarks cover standalone exports.
 - **CRITICAL**: Use `autoloop/perf-comparison` (PR #150). Metric = min(ts_bench_count, py_bench_count). Bun not installed; file-count only.
@@ -62,10 +61,10 @@
 
 ## 📊 Iteration History
 
-### Iteration 225 — 2026-04-19 13:28 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24630206399)
+### Iteration 225 — 2026-04-19 13:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24630669433)
 
-- **Status**: ✅ Accepted | **Metric**: 541 (540→541, +1) | **Commit**: a64bfa7
-- Checked out origin/autoloop/perf-comparison (534 canonical), merged origin/main. Added 7 unique benchmark pairs: shift_series_fn, cumops_skipna, dataframe_cumops_axis1, index_set_operations, reindex_fill_method, rolling_apply_raw, searchsorted_right.
+- **Status**: ✅ Accepted | **Metric**: 540 (534→540, +6) | **Commit**: e380b8f
+- Merged origin/main (534 canonical). Added 6 new benchmark pairs: shift_series_fn, reindex_fill_method, cumops_skipna, dataframe_cumops_axis1, series_to_object, series_median_corr_quantile.
 
 ### Iteration 224 — 2026-04-19 12:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24629443936)
 
