@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-19T15:16:09Z |
-| Iteration Count | 227 |
+| Last Run | 2026-04-19T15:46:10Z |
+| Iteration Count | 228 |
 | Best Metric | 540 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -42,10 +42,10 @@
 
 ## 📚 Lessons Learned
 
-- **Canonical baseline is 534** (not 541): Iters 219–225 committed to non-canonical branches. Iter 226 (636dc14) claimed to add 540 but commit not in canonical branch. Iter 227 (e08346b) properly merged main (534) and added 6 pairs → 540.
+- **Canonical baseline is 534** (not 541): Iters 219–225 committed to non-canonical branches. Iters 226–227 also non-canonical. Iter 228 (53e3f11) properly merged main (534) and added 6 pairs → 540.
 - **Always verify file count after merge** - origin/autoloop/perf-comparison may be behind main; after merging, verify count before choosing new files.
-- **New files added in iter 227**: shift_series_fn, dataframe_round_fn, combine_first_series_fn, reindex_nearest, cumops_skipna_false, dataframe_shift_axis1.
-- **Duplicate prevention**: Iters 219–224 all tried the same 6 files (shift_series_fn, cumops_skipna, etc.) on non-canonical branches. Now added canonically in iter 226.
+- **New files added in iter 228**: shift_series_fn, dataframe_round_fn, combine_first_series_fn, reindex_nearest, cumops_skipna_false, dataframe_shift_axis1.
+- **Duplicate prevention**: Iters 219–227 all tried the same 6 files on non-canonical branches. Now added canonically in iter 228.
 - **cumops options**: cumsum/cummax support skipna=false. dataFrameCumsum/dataFrameCummax support axis=1 for row-wise cumulative ops.
 - **Standalone vs method-form**: Many TS bench files use method-form without importing standalone exports. `_fn` suffix benchmarks cover standalone exports.
 - **CRITICAL**: Use `autoloop/perf-comparison` (PR #150). Metric = min(ts_bench_count, py_bench_count). Bun not installed; file-count only.
@@ -64,10 +64,15 @@
 
 ## 📊 Iteration History
 
+### Iteration 228 — 2026-04-19 15:46 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24632889823)
+
+- **Status**: ✅ Accepted | **Metric**: 540 (534→540, +6) | **Commit**: 53e3f11
+- Merged origin/main (534 canonical), added 6 benchmark pairs: shift_series_fn (shiftSeries standalone), dataframe_round_fn (dataFrameRound standalone), combine_first_series_fn (combineFirstSeries standalone), reindex_nearest, cumops_skipna_false, dataframe_shift_axis1.
+
 ### Iteration 227 — 2026-04-19 15:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24632285280)
 
-- **Status**: ✅ Accepted | **Metric**: 540 (534→540, +6) | **Commit**: e08346b
-- Checked out origin/autoloop/perf-comparison, merged origin/main (534). Added 6 benchmark pairs: shift_series_fn, dataframe_round_fn, combine_first_series_fn, reindex_nearest, cumops_skipna_false, dataframe_shift_axis1.
+- **Status**: ⚠️ Non-canonical | **Claimed**: 540 | **Commit**: e08346b (not in canonical branch after sync)
+- Merged main (534) and added 6 pairs but commit was overwritten by main sync.
 
 ### Iteration 226 — 2026-04-19 14:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24631136508)
 
