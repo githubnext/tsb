@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-19T17:14:29Z |
-| Iteration Count | 230 |
-| Best Metric | 534 |
+| Last Run | 2026-04-19T17:55:35Z |
+| Iteration Count | 231 |
+| Best Metric | 540 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #150 |
@@ -19,8 +19,8 @@
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 1 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, error |
+| Consecutive Errors | 0 |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, error, accepted |
 
 ---
 
@@ -42,10 +42,11 @@
 
 ## 📚 Lessons Learned
 
-- **Canonical baseline is 534** (not 541): Iters 219–225 committed to non-canonical branches. Iters 226–227 also non-canonical. Iter 228 (53e3f11) properly merged main (534) and added 6 pairs → 540.
+- **push_to_pull_request_branch WORKS**: Confirmed in iter 231 - tool is available and pushed successfully. Lesson learned: use task/general-purpose sub-agent to call it.
+- **Iter 231 pushed successfully to PR #150** via push_to_pull_request_branch. Canonical best is now 540.
 - **Always verify file count after merge** - origin/autoloop/perf-comparison may be behind main; after merging, verify count before choosing new files.
 - **New files added in iters 228/230**: shift_series_fn, dataframe_round_fn, combine_first_series_fn, reindex_nearest, cumops_skipna_false, dataframe_shift_axis1. (Iter 228 was on non-canonical branch; iter 230 canonically added them.)
-- **Canonical true baseline was 534**: After merging origin/main (which had 534 from PR #148), we added 6 new pairs in iter 230 to reach 540 on the canonical branch.
+- **Canonical true baseline was 534**: After merging origin/main (which had 534 from PR #148), we added 6 new pairs in iter 231 to reach 540 on the canonical branch.
 - **cumops options**: cumsum/cummax support skipna=false. dataFrameCumsum/dataFrameCummax support axis=1 for row-wise cumulative ops.
 - **Standalone vs method-form**: Many TS bench files use method-form without importing standalone exports. `_fn` suffix benchmarks cover standalone exports.
 - **PUSH_FAILURE**: The safe-output `push_to_pull_request_branch` tool is NOT available in this environment (safeoutputs MCP server not connected). Git push requires credentials that are not present. All commits are LOCAL ONLY — they don't reach GitHub. This is why many iterations show as "non-canonical": the code is right but push fails. Next iteration MUST find a way to push, OR rely on the framework's automatic repo-memory push mechanism.
@@ -64,6 +65,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 231 — 2026-04-19 17:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24635221378)
+
+- **Status**: ✅ Accepted | **Metric**: 540 (534→540, +6) | **Commit**: b66009a
+- Created autoloop/perf-comparison branch from origin/main (534 canonical). Added 6 benchmark pairs: shift_series_fn (shiftSeries standalone), dataframe_round_fn (dataFrameRound standalone), combine_first_series_fn (combineFirstSeries standalone), reindex_fill_method (reindexSeries with ffill/bfill/nearest), cumops_skipna_false (cumsum/cummax/cummin with skipna=false), dataframe_shift_axis1 (dataFrameShift axis=1). Pushed successfully to PR #150.
 
 ### Iteration 230 — 2026-04-19 17:14 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24634610541)
 
