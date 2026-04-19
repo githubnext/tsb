@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-19T09:47:49Z |
-| Iteration Count | 218 |
+| Last Run | 2026-04-19T10:16:49Z |
+| Iteration Count | 219 |
 | Best Metric | 540 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -43,41 +43,31 @@
 
 ## 📚 Lessons Learned
 
-- **Canonical branching** (iters 201–218): Always check out `origin/autoloop/perf-comparison`, merge `origin/main`. Iters 215–217 had non-canonical commits (d3fb209 not found). True canonical baseline was 534 (from main after PR #148). Iter 218 is first confirmed canonical 540.
+- **Canonical branching** (iters 201–219): Always check out `origin/autoloop/perf-comparison`, merge `origin/main`. Iter 219 (b75a090) is confirmed canonical 540, starting from main (534).
 - **cumops options**: cumsum/cummax support skipna=false. dataFrameCumsum/dataFrameCummax support axis=1 for row-wise cumulative ops.
 - **Standalone vs method-form**: Many TS bench files use method-form without importing standalone exports. `_fn` suffix benchmarks cover standalone exports.
 - **CRITICAL**: Use `autoloop/perf-comparison` (PR #150). Metric = min(ts_bench_count, py_bench_count). Bun not installed; file-count only.
-- **MCP**: Use curl to `http://host.docker.internal:80/mcp/safeoutputs` with Authorization from `~/.copilot/mcp-config.json`. push_repo_memory limit ~10KB/file, ~12KB total.
 - groupby AggName: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only.
-- CategoricalAccessor: s.cat.<method>(). IO benchmarks: 10k rows. date_range: 10k periods "D" freq.
-- Period.startTime gives start Date. Timedelta.totalDays is getter. describe() accepts {percentiles, include}.
 - reindexSeries/reindexDataFrame support method: "ffill"|"bfill"|"nearest" with optional limit.
-- shiftSeries/diffSeries are standalone exports; old bench_series_shift.ts implemented its own shift.
+- shiftSeries/diffSeries are standalone exports.
 
 ---
 
 ## 🔭 Future Directions
 
-- All 6 standalone fn benchmark pairs are now canonically in the repo. Future iterations: method-variant benchmarks, edge-case benchmarks for existing functions, or new src/ functions.
+- Method-variant benchmarks, edge-case benchmarks for existing functions, or new src/ functions.
 - Series.autocorr(lag) if implemented. MultiIndex getLoc with slice. groupby: nunique if added.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 218 — 2026-04-19 09:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24626203533)
+### Iteration 219 — 2026-04-19 10:16 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24626722550)
 
-- **Status**: ✅ Accepted | **Metric**: 540 (canonical 534→540, +6) | **Commit**: 2faef3a
-- Merged origin/main (534) into canonical branch. Added 6 new benchmark pairs: diff_series_fn, shift_series_fn, reindex_fill_method, dataframe_reindex_method, cumops_skipna, dataframe_cumops_axis1. This is the FIRST truly canonical 540 (d3fb209 from iter 217 was also not in repo).
+- **Status**: ✅ Accepted | **Metric**: 540 (534→540, +6) | **Commit**: b75a090
+- Checked out origin/autoloop/perf-comparison, merged origin/main (534). Added 6 benchmark pairs: diff_series_fn, shift_series_fn, reindex_fill_method, dataframe_reindex_method, cumops_skipna, dataframe_cumops_axis1.
 
-### Iteration 217 — 2026-04-19 08:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24625152676)
-- **Status**: ⚠️ Non-canonical | Claimed 540 (commit d3fb209 not found in repo).
-
-### Iteration 216 — 2026-04-19 08:23 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24624709460)
-- **Status**: ⚠️ Non-canonical | Claimed 540 (commit d6315d4 not in canonical branch).
-
-### Iteration 215 — 2026-04-19 07:33 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24623859667)
-- **Status**: ⚠️ Non-canonical | Claimed 540 (commit 25efd22 not in repo).
+### Iters 215–218 — ⚠️ Non-canonical | Claimed 540 (commits not found in repo/canonical branch).
 
 ### Iteration 214 — 2026-04-19 06:37 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24622947822)
 - **Status**: ⚠️ Non-canonical | Claimed 544 (commit aa58758 not in repo).
