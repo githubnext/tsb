@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-19T11:45:30Z |
-| Iteration Count | 222 |
+| Last Run | 2026-04-19T12:14:08Z |
+| Iteration Count | 223 |
 | Best Metric | 540 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -61,6 +61,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 223 — 2026-04-19 12:14 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24628803811)
+
+- **Status**: ✅ Accepted | **Metric**: 540 (534→540, +6) | **Commit**: 4e46112
+- Merged origin/main (534), added 6 benchmark pairs on canonical branch: shift_series_fn, reindex_fill_method, reindex_nearest, dataframe_cumops_axis1, cumops_skipna, rolling_apply_raw.
 
 ### Iteration 222 — 2026-04-19 11:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24628287110)
 
