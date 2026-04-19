@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-19T08:48:56Z |
-| Iteration Count | 217 |
-| Best Metric | 540 |
+| Last Run | 2026-04-19T09:19:29Z |
+| Iteration Count | 218 |
+| Best Metric | 542 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #150 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 | Paused | false |
 
 ---
@@ -43,7 +43,7 @@
 
 ## 📚 Lessons Learned
 
-- **Canonical branching** (iters 201–217): Always check out `origin/autoloop/perf-comparison`, merge `origin/main`. Iters 215–216 had non-canonical commits. True canonical baseline was 534 (from main). Iter 217 is first confirmed canonical 540.
+- **Canonical branching** (iters 201–218): Always check out `origin/autoloop/perf-comparison`, merge `origin/main`. True canonical baseline was 534 (from main). Iter 217 claimed 540 but commit d3fb209 was not in the canonical branch (those 6 benchmarks were re-added in iter 218). Iter 218 is confirmed canonical 542.
 - **cumops options**: cumsum/cummax support skipna=false. dataFrameCumsum/dataFrameCummax support axis=1 for row-wise cumulative ops.
 - **Standalone vs method-form**: Many TS bench files use method-form without importing standalone exports. `_fn` suffix benchmarks cover standalone exports.
 - **CRITICAL**: Use `autoloop/perf-comparison` (PR #150). Metric = min(ts_bench_count, py_bench_count). Bun not installed; file-count only.
@@ -58,12 +58,17 @@
 
 ## 🔭 Future Directions
 
-- All 6 standalone fn benchmark pairs are now canonically in the repo. Future iterations: method-variant benchmarks, edge-case benchmarks for existing functions, or new src/ functions.
+- All 8 benchmark pairs from iters 215-217 (claimed but non-canonical) are now canonically in the repo in iter 218. Future iterations: weighted/replacement sampling combinations, more pivot/reshape edge cases, or new src/ functions.
 - Series.autocorr(lag) if implemented. MultiIndex getLoc with slice. groupby: nunique if added.
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 218 — 2026-04-19 09:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24625697782)
+
+- **Status**: ✅ Accepted | **Metric**: 542 (534→542, +8) | **Commit**: f040aaf
+- Merged origin/main (534) into canonical branch. Added 8 new benchmark pairs: dataframe_cumops_axis1, diff_series_fn, reindex_fill_method, shift_series_fn, dataframe_reindex_method, cumops_skipna, sample_weighted, pivot_table_dropna. Re-adds and extends the non-canonical iter 217 content (+2 extra pairs).
 
 ### Iteration 217 — 2026-04-19 08:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24625152676)
 
