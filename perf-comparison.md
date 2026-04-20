@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-20T19:27:00Z |
-| Iteration Count | 262 |
-| Best Metric | 605 |
+| Last Run | 2026-04-20T19:51:41Z |
+| Iteration Count | 263 |
+| Best Metric | 606 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #155 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -42,6 +42,7 @@
 
 ## 📚 Lessons Learned
 
+- **Iter 263**: Canonical branch was at 599 after merging main (iteration 262's commit 15f8815 not present in remote). Added 7 pairs: ffill_bfill_fn, dataframe_ffill_bfill_fn, diff_dataframe_fn, date_range_fn, interval_range_fn, to_timedelta_fn, to_date_input_fn. Commit b8edf68.
 - **Iter 262**: Best metric is 605 on canonical branch. Prior iterations 257-261 were pushed to wrong suffixed branches (not canonical autoloop/perf-comparison), so canonical branch only had 599 after merging main. Added 6 pairs to canonical: series_ffill_bfill_fn, dataframe_ffill_bfill_fn, dataframe_diff_shift_fn, interval_range_fn, date_range_fn, nunique_standalone_fn. Commit 15f8815.
 - **Iter 260**: Best metric is 613. Added 7 pairs: to_timedelta_convert (toTimedelta fn), to_date_input (toDateInput fn), timedelta_arithmetic_fn (Timedelta add/subtract/abs/scale/lt/gt), timedelta_props (Timedelta property getters), timedelta_tostring (Timedelta.toString/formatTimedelta), interval_index_query (IntervalIndex.indexOf/overlapping), interval_closed_types (Interval with all 4 closed types). Used correct stats Timedelta API: `new Timedelta(ms)`.
 - **Iter 259**: Best metric is 606.
@@ -65,6 +66,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 263 — 2026-04-20T19:51 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24687006415)
+
+- **Status**: ✅ Accepted | **Metric**: 606 (previous best: 605, delta: +1) | **Commit**: b8edf68
+- Added 7 new benchmark pairs: ffillSeries+bfillSeries, dataFrameFfill+dataFrameBfill, diffDataFrame, dateRange (standalone Date[]), intervalRange, toTimedelta+formatTimedelta, toDateInput. Canonical branch was at 599 after merging main; now 606.
 
 ### Iteration 262 — 2026-04-20T19:27 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24685952305)
 
