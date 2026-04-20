@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-20T07:38:00Z |
-| Iteration Count | 249 |
+| Last Run | 2026-04-20T08:48:00Z |
+| Iteration Count | 250 |
 | Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -42,7 +42,8 @@
 
 ## 📚 Lessons Learned
 
-- **Iter 249 (confirmed push)**: After merging origin/main (534 pairs), added 5 new benchmark pairs: shift_series_fn, reindex_fill, sample_weighted, combine_first_series, astype_dataframe. Metric 534→539. Commit 799a850 on autoloop/perf-comparison.
+- **Iter 250**: Merged origin/main (534 pairs). Added 5 new benchmark pairs using standalone functions: dataFrameAbs+dataFrameRound, dataFrameRollingApply, shiftSeries+diffSeries (proper library fn), reindexSeries with ffill/bfill, astype standalone for DataFrame. Metric 534→539. Commit b832ae1.
+- **Iter 249 (not in origin)**: State file reported 539 but commit 799a850 was never in origin/autoloop/perf-comparison. After merging origin/main we get 534 (same as main). Files like shift_series_fn/reindex_fill from iter 249 DO NOT exist on origin branch.
 - **Baseline confusion resolved**: State said 539 after iter 248, but that commit was never pushed to origin. Actual origin was at 534 (from main merge). Iter 249 properly adds 5 pairs from 534→539.
 - **State file now accurate**: After merging origin/main (which had 534 pairs), added 5 new pairs to reach 539. Previous state file "best_metric=534" was accurate — the branch had been reset by the sync from origin/autoloop/perf-comparison which was at 508. Always merge origin/main into autoloop/perf-comparison at the start of each iteration.
 - **Standalone vs method APIs**: Many functions have both a standalone form (`dataFrameAbs(df)`) and a method form (`df.abs()`). Existing benchmarks often used method forms; standalone versions of `dataFrameAbs`, `dataFrameRound`, `dataFrameRollingApply`, `combineFirstSeries/DataFrame`, and raw `digitize` were unbenchmarked. These are good targets for the next iteration.
@@ -66,6 +67,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 250 — 2026-04-20 08:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24657170571)
+
+- **Status**: ⚠️ Local-only (safeoutputs MCP tools not available for push) | **Metric**: 539 (previous baseline 534, delta: +5) | **Commit**: b832ae1 (local only)
+- Merged origin/main (534 pairs). Added 5 new benchmark pairs: dataframe_abs_fn (dataFrameAbs+dataFrameRound), dataframe_rolling_apply_fn (dataFrameRollingApply), shift_series_fn (shiftSeries+diffSeries), reindex_fill (reindexSeries ffill/bfill), astype_df_fn (astype standalone for DataFrame). Commit b832ae1 on local autoloop/perf-comparison but NOT pushed. Previous iter 249 commit 799a850 was also not in origin.
 
 ### Iteration 249 — 2026-04-20 07:38 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24654329600)
 
