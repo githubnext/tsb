@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-20T06:58:00Z |
-| Iteration Count | 248 |
+| Last Run | 2026-04-20T07:38:00Z |
+| Iteration Count | 249 |
 | Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -42,8 +42,8 @@
 
 ## 📚 Lessons Learned
 
-- **Iter 247 push failed**: commit 69c7ad0 was not found in origin/autoloop/perf-comparison. The actual pushed baseline after merging origin/main was 534 (not 539). Iter 248 re-added the same targets plus combine_first_series and astype_dataframe to reach 539 with a real push.
-- **RETRY TARGETS COMPLETED** (iter 248): 5 new benchmark pairs pushed: shift_series_fn, reindex_fill, sample_weighted, combine_first_series, astype_dataframe. Metric: 534→539.
+- **Iter 249 (confirmed push)**: After merging origin/main (534 pairs), added 5 new benchmark pairs: shift_series_fn, reindex_fill, sample_weighted, combine_first_series, astype_dataframe. Metric 534→539. Commit 799a850 on autoloop/perf-comparison.
+- **Baseline confusion resolved**: State said 539 after iter 248, but that commit was never pushed to origin. Actual origin was at 534 (from main merge). Iter 249 properly adds 5 pairs from 534→539.
 - **State file now accurate**: After merging origin/main (which had 534 pairs), added 5 new pairs to reach 539. Previous state file "best_metric=534" was accurate — the branch had been reset by the sync from origin/autoloop/perf-comparison which was at 508. Always merge origin/main into autoloop/perf-comparison at the start of each iteration.
 - **Standalone vs method APIs**: Many functions have both a standalone form (`dataFrameAbs(df)`) and a method form (`df.abs()`). Existing benchmarks often used method forms; standalone versions of `dataFrameAbs`, `dataFrameRound`, `dataFrameRollingApply`, `combineFirstSeries/DataFrame`, and raw `digitize` were unbenchmarked. These are good targets for the next iteration.
 - **New canonical baseline is 539** (iter 244). Added 5 new benchmark pairs: str_swapcase_capitalize, dt_strftime, series_reflected_arith, dataframe_reflected_arith, any_all. Note: best_metric reset from inflated 594 (local-only) to actual pushed count of 534→539.
@@ -66,6 +66,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 249 — 2026-04-20 07:38 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24654329600)
+
+- **Status**: ✅ Accepted | **Metric**: 539 (previous baseline 534, delta: +5) | **Commit**: 799a850
+- Added 5 benchmark pairs: shift_series_fn (standalone shiftSeries/diffSeries), reindex_fill (reindexSeries with ffill/bfill), sample_weighted (sampleSeries with weights), combine_first_series (combineFirstSeries standalone), astype_dataframe (astype standalone on DataFrame). Previous iter 248 commit was not actually pushed to origin so actual baseline was 534.
 
 ### Iteration 248 — 2026-04-20 06:58 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24652467203)
 
