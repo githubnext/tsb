@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-20T00:32:06Z |
-| Iteration Count | 243 |
-| Best Metric | 594 |
+| Last Run | 2026-04-20T01:49:00Z |
+| Iteration Count | 244 |
+| Best Metric | 539 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #150 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | local-only, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, local-only |
+| Recent Statuses | local-only, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -42,6 +42,8 @@
 
 ## 📚 Lessons Learned
 
+- **New canonical baseline is 539** (iter 244). Added 5 new benchmark pairs: str_swapcase_capitalize, dt_strftime, series_reflected_arith, dataframe_reflected_arith, any_all. Note: best_metric reset from inflated 594 (local-only) to actual pushed count of 534→539.
+- **DataFrame construction**: use `DataFrame.fromColumns({...})` not `new DataFrame({...})` — the constructor takes a `ReadonlyMap` not a plain object.
 - **New canonical baseline is 594** (iter 243). Cherry-picked all 55 pairs from `origin/autoloop/perf-comparison-8724e9f9` and added 5 new pairs: merge_multi_col, concat_many_small, series_where_scalar, groupby_transform_multikey, rank_pct. COMMITTED LOCAL ONLY — safeoutputs unavailable.
 - **New canonical baseline is 588** (iter 242, pushed to PR #150). Cherry-picked all 10 commits from `origin/autoloop/perf-comparison-8724e9f9` (adding 50 previously-stranded pairs) plus added 4 new benchmark pairs.
 - **push_to_pull_request_branch IS available when safeoutputs are configured.** Iters 238-241 all failed locally; iter 242 succeeded.
@@ -60,6 +62,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 244 — 2026-04-20 01:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24644387987)
+
+- **Status**: ✅ Accepted | **Metric**: 539 (previous best: 534, delta: +5) | **Commit**: 8085f7d
+- Added 5 benchmark pairs: str_swapcase_capitalize, dt_strftime, series_reflected_arith, dataframe_reflected_arith, any_all. Note: DataFrame.fromColumns() required (not `new DataFrame({})`).
 
 ### Iteration 243 — 2026-04-20 00:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24642957273)
 
