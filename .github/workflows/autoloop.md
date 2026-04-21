@@ -434,12 +434,21 @@ Each run executes **one iteration for the single selected program**:
    PR=${EXISTING_PR:-$(gh pr list --head autoloop/{program-name} --json number -q '.[0].number')}
    # Watch the checks (exits non-zero if any fail — we tolerate that below).
    gh pr checks "$PR" --watch --interval 30 || true
-   status=$(gh pr checks "$PR" --json conclusion -q '.[].conclusion' \
-     | awk 'BEGIN{r="success"} /FAILURE|CANCELLED|TIMED_OUT|ACTION_REQUIRED/{r="failure"} END{print r}')
+   # Determine status. Treat any pending/queued/in_progress as failure-to-conclude
+   # (should not happen after --watch returns, but we guard anyway). Neutral and
+   # skipped count as success.
+   status=$(gh pr checks "$PR" --json conclusion,state -q '.[] | (.conclusion // .state // "")' \
+     | awk '
+         BEGIN { r = "success" }
+         /^(FAILURE|CANCELLED|TIMED_OUT|ACTION_REQUIRED|STARTUP_FAILURE|STALE)$/ { r = "failure" }
+         /^(PENDING|QUEUED|IN_PROGRESS|WAITING|REQUESTED)$/ { if (r == "success") r = "pending" }
+         END { print r }')
    echo "CI status: $status"
+   # If status == "pending" after --watch, treat as failure for safety and re-poll
+   # once more; otherwise proceed with success/failure.
    ```
 
-   Equivalent REST-API fallback: `GET /repos/{owner}/{repo}/commits/{sha}/check-runs` and `GET /repos/.../commits/{sha}/check-suites`, treating any `conclusion` in {`failure`, `timed_out`, `cancelled`, `action_required`} as failure.
+   Equivalent REST-API fallback: `GET /repos/{owner}/{repo}/commits/{sha}/check-runs` and `GET /repos/.../commits/{sha}/check-suites`, treating any `conclusion` in {`failure`, `timed_out`, `cancelled`, `action_required`} as failure and any check still in `status` ∈ {`queued`, `in_progress`, `waiting`} as not-yet-concluded (keep polling).
 
 4. Respect the **per-iteration wall clock**: 60 minutes total (including all CI waits and fix attempts). If the cap is hit while waiting or fixing, **stop** — do **not** silently abandon. Go to the **budget-exhausted** handler in Step 5b below: set `paused: true` with `pause_reason: "ci-timeout: wall-clock cap reached"`, comment on the program issue, and end the iteration. Do **not** revert — leave the broken commit in place for a human or Evergreen to pick up.
 
@@ -768,7 +777,7 @@ All iterations in reverse chronological order (newest first).
 | PR | `#number` or `—` | Draft PR number for this program |
 | Issue | `#number` or `—` | Program issue number (single source of truth for status, iteration log, and human steering) |
 | Paused | `true` or `false` | Whether the program is paused |
-| Pause Reason | text or `—` | Why it is paused (if applicable) |
+| Pause Reason | text or `—` | Why it is paused. Recognized values set by the CI-gated acceptance flow: `ci-fix-exhausted: <signature>` (5 fix attempts exhausted), `stuck in CI fix loop: <signature>` (no-progress guard triggered), `ci-timeout: wall-clock cap reached` (60-min per-iteration cap hit). Other free-form text may be set for errors. |
 | Completed | `true` or `false` | Whether the program has reached its target metric |
 | Completed Reason | text or `—` | Why it completed (e.g., `target metric 0.95 reached with value 0.97`) |
 | Consecutive Errors | integer | Count of consecutive evaluation failures |
