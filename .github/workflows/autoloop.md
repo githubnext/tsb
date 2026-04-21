@@ -84,6 +84,33 @@ imports:
   - shared/reporting.md
 
 steps:
+  - name: Clone repo-memory for scheduler
+    # The "Check which programs are due" step below reads program state from
+    # /tmp/gh-aw/repo-memory/autoloop/, but gh-aw's built-in repo-memory clone
+    # runs *after* this pre-step (and clones to a different directory). Without
+    # this step, every program looks like a "first run" and the tiebreaker
+    # starves programs that lose the original-insertion-order tiebreak.
+    # See issue: "Autoloop pre-step can't read state files".
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+    run: |
+      mkdir -p /tmp/gh-aw/repo-memory
+      if [ -d /tmp/gh-aw/repo-memory/autoloop/.git ]; then
+        echo "repo-memory/autoloop already cloned; skipping"
+      else
+        # Pass the token via an http.extraHeader rather than embedding it in the
+        # URL — keeps it out of process listings and any logged remote URLs.
+        AUTH_HEADER="Authorization: Basic $(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 -w0)"
+        git -c "http.extraHeader=${AUTH_HEADER}" clone --depth=1 --branch memory/autoloop \
+          "https://github.com/${GITHUB_REPOSITORY}.git" \
+          /tmp/gh-aw/repo-memory/autoloop \
+          || {
+            echo "memory/autoloop branch not found (first run); creating empty dir"
+            mkdir -p /tmp/gh-aw/repo-memory/autoloop
+          }
+      fi
+
   - name: Check which programs are due
     env:
       GITHUB_TOKEN: ${{ github.token }}
@@ -409,7 +436,8 @@ steps:
                                   "next_due": (last_run + schedule_delta).isoformat()})
                   continue
 
-          due.append({"name": name, "last_run": lr, "file": pf, "target_metric": target_metric})
+          due.append({"name": name, "last_run": lr, "file": pf, "target_metric": target_metric,
+                      "schedule_seconds": schedule_delta.total_seconds() if schedule_delta else None})
 
       # Pick the program to run
       selected = None
@@ -457,8 +485,19 @@ steps:
                   pass
           print(f"FORCED: running program '{forced_program}' (manual dispatch)")
       elif due:
-          # Normal scheduling: pick the single most-overdue program
-          due.sort(key=lambda p: p["last_run"] or "")  # None/empty sorts first (never run)
+          # Normal scheduling: pick the single most-overdue program.
+          # Tiebreaker rationale: programs that have never run (no last_run) take
+          # priority over ever-run programs; among never-run programs, prefer the
+          # shortest schedule (so "every 30m" beats "every 6h"), then alphabetical
+          # by name. Programs with no parseable schedule sort last among never-run
+          # programs (float('inf')). This avoids permanent starvation when state
+          # is missing — see issue: "Autoloop pre-step can't read state files".
+          def _due_sort_key(p):
+              if p["last_run"]:
+                  return (1, p["last_run"], p["name"])
+              sched = p.get("schedule_seconds")
+              return (0, sched if sched is not None else float("inf"), p["name"])
+          due.sort(key=_due_sort_key)
           selected = due[0]["name"]
           selected_file = due[0]["file"]
           selected_target_metric = due[0].get("target_metric")
