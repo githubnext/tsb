@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-21T21:06:32Z |
-| Iteration Count | 232 |
+| Last Run | 2026-04-21T21:47:28Z |
+| Iteration Count | 234 |
 | Best Metric | 110 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, accepted, error, error, error, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, accepted, error, error, error, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -35,8 +35,7 @@
 
 ## 🎯 Current Priorities
 
-- `stats/timedelta_range.ts` — ✅ done (iter 231)
-- `core/str_accessor` improvements (findall, extractall)
+- `core/str_accessor` improvements (findall ✅ iter 234, extractall)
 - `io/to_json_normalize.ts` — inverse of jsonNormalize
 
 ---
@@ -48,6 +47,7 @@
 - **Tests**: Import from `../../src/index.ts`. `Series<Scalar>` type. `Series({dtype: Dtype, name: null|string})`.
 - **MCP safeoutputs**: session flow: init → notifications/initialized → tools/call with Mcp-Session-Id. Accept: application/json, text/event-stream. `push_to_pull_request_branch` (not create) when PR exists.
 - **Regex**: Global regex requires `lastIndex=0` reset before reuse in loops.
+- **Iter 234**: `DataFrame.fromArrays()` needed as alias for `fromColumns` (used by generated tests). `fc.float({ noNaN: true })` includes Infinity - use `noDefaultInfinity: true` for multiply-by-zero property tests. `norm0(-0) = 0` for pandas semantics. New file `str_findall.ts` adds `strFindall/strFindallCount/strFindFirst`.
 - **Iter 232**: Two-Timedelta problem — stats Timedelta (exported) and core Timedelta (used by timedelta_range) are distinct classes. Must add missing structural members to stats Timedelta so tests pass typecheck. `withValues()` preserves index — use `new Series({ data: vals })` for resized results.
 - **Iter 230**: date_range: D/B/h/min/s/ms/W/W-DOW/MS/ME/QS/QE/YS/YE, inclusive, normalize, UNIT_NORM table. Complexity ≤15 via helpers. Metric: 61.
 - **Iter 229**: to_timedelta: RE_PANDAS/RE_ISO/RE_HUMAN_UNIT, Timedelta class, applyErrors(), parseFrac(), formatTimedelta(). 5 prior push failures fixed by using push_to_pull_request_branch targeting PR #120.
@@ -71,6 +71,8 @@
 
 ## 📊 Iteration History
 
+### Iter 234 — 2026-04-21 21:47 UTC — ✅ Fix eval_query tests + add strFindall/strFindallCount/strFindFirst. Metric: 110. Commit: 72160d1. [Run](https://github.com/githubnext/tsessebe/actions/runs/24748075361)
+### Iter 233 — 2026-04-21 ~21:20 UTC — ✅ +queryDataFrame/evalDataFrame. Metric: 110. Commit: ae530a9.
 ### Iter 232 — 2026-04-21 21:06 UTC — ✅ Fix timedelta_range tests + add unique/between. Metric: 110. Commit: ce2b102. [Run](https://github.com/githubnext/tsessebe/actions/runs/24739263127)
 ### Iter 231 — 2026-04-21 ~09:00 UTC — ✅ +timedelta_range. Metric: 108. PR #174.
 ### Iter 230 — 2026-04-12 11:15 UTC — ✅ +date_range. Metric: 61. Commit: 996705d. [Run](https://github.com/githubnext/tsessebe/actions/runs/24305375139)
