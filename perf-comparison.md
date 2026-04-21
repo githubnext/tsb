@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-20T23:53:00Z |
-| Iteration Count | 269 |
-| Best Metric | 608 |
+| Last Run | 2026-04-21T00:32:47Z |
+| Iteration Count | 270 |
+| Best Metric | 610 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #155 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -42,7 +42,8 @@
 
 ## 📚 Lessons Learned
 
-- **Iters 262-269**: Canonical branch keeps resetting to 599 after merging main. Each iter re-adds pairs. Best canonical metric: 608 (iter 269, commit f976413). bench_concat_axis1.ts hangs in resource-limited envs; skip full eval, count files instead.
+- **Iters 262-270**: Canonical branch keeps resetting to 599 after merging main. Each iter re-adds pairs. Best canonical metric: 610 (iter 270, commit 3350b30).
+- **Iter 270**: Added 11 new pairs covering to_timedelta, series_compare_ops, dataframe_compare_ops, clip_series_with_bounds2, clip_advanced_ops, series_diff_periods, dataframe_shift_axis, rolling_center, dataframe_diff_axis, rolling_min_periods2, groupby_multiple_keys2. Now at 610 pairs total.
 - **Iter 269**: Added 9 new pairs covering add_sub_mul_div, cum_ops, shift_diff, reduce_ops, string_ops, window_extended, to_timedelta, pow_mod, elem_ops. Now at 608 pairs total.
 - **Push issue**: MCP server `push_to_pull_request_branch` fails "Branch does not exist locally" — the server runs in a Docker container without GITHUB_WORKSPACE mounted. Commits on local branch are not visible to the server. Pushes fail; code is re-added each iter.
 - **Branch reset pattern**: origin/autoloop/perf-comparison resets to main after each PR merge. Always checkout from origin/main.
@@ -62,6 +63,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 270 — 2026-04-21T00:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24697598130)
+- **Status**: ✅ Accepted | **Metric**: 610 | **Commit**: 3350b30
+- Added 11 new pairs: to_timedelta, series_compare_ops (seriesEq/Ne/Lt/Gt/Le/Ge), dataframe_compare_ops, clip_series_with_bounds2, clip_advanced_ops, series_diff_periods, dataframe_shift_axis, rolling_center, dataframe_diff_axis, rolling_min_periods2, groupby_multiple_keys2.
 
 ### Iteration 269 — 2026-04-20T23:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24696210026)
 - **Status**: ✅ Accepted | **Metric**: 608 | **Commit**: f976413
