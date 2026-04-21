@@ -184,6 +184,8 @@ export { Period, PeriodIndex } from "./core/index.ts";
 export type { PeriodFreq, PeriodIndexOptions } from "./core/index.ts";
 export { TimedeltaIndex } from "./core/index.ts";
 export type { TimedeltaComponents, TimedeltaIndexOptions } from "./core/index.ts";
+export { timedelta_range } from "./core/index.ts";
+export type { TimedeltaFreq, TimedeltaRangeClosed, TimedeltaRangeOptions } from "./core/index.ts";
 export {
   Day,
   Hour,
