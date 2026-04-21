@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-21T17:30:00Z |
-| Iteration Count | 277 |
-| Best Metric | 631 |
+| Last Run | 2026-04-21T19:30:00Z |
+| Iteration Count | 278 |
+| Best Metric | 532 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #166 |
@@ -23,7 +23,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, error, error, accepted, accepted, error, error, accepted |
+| Recent Statuses | accepted, error, error, error, accepted, accepted, error, error, accepted, accepted, accepted |
 
 ---
 
@@ -45,46 +45,63 @@
 
 ## 📚 Lessons Learned
 
-- **Iter 277 (MASSIVE FIX — 631/631)**: Fixed 262 files (200+ TS + 30+ Python). Key patterns: import paths, Series/DataFrame/MultiIndex constructors, method→standalone fns, freq case (h→H), timedelta API, catUnionCategories takes Series not accessor, strMultiReplace needs {pat,repl} objects, reduce sizes for slow benchmarks. All 631 pairs now pass.
+- **Iter 278 (canonical 532)**: Fixed 300+ benchmark API bugs: wrong export names (dataFrameWhere→whereDataFrame etc.), method-not-found (diff/explode/pct_change/abs/where/mask/sample/replace/astype/pivot/groupby.var), fromColumns(Map) with empty index, rollingQuantile arg order, fromDictOriented API. Added proper pgid-based timeout kill for parallel runner. Result: 532/631 pairs.
+- **subprocess.run timeout doesn't kill child processes**: Must use `Popen` + capture pgid BEFORE `communicate()`, then `os.killpg(pgid, SIGKILL)` in the except. subprocess.run with timeout kills only the direct child; `start_new_session=True` grandchildren survive.
+- **Iter 277 (canonical 382)**: Fixed Series constructor (142 files), import paths, cummax/cummin standalone, DataFrame.fromColumns, plus installed pandas + added Python-based parallel runner with process-group kill. Result: 382/508 pairs. Commit b95658d pushed to PR #166.
+- **Pandas must be installed**: Previous runs got 2-11/508 because pandas wasn't installed. Always install pandas before running benchmarks.
 - **Import paths**: Use `../../src/index.ts` not `"tsb"` — the tsb package may not be installed in runner environments.
-- **Series constructor**: Use `new Series({ data: [...] })` — passing an array directly fails with node/tsx.
-- **Standalone functions vs methods**: cummax/cummin/cumprod/cumsum, var, median, round, abs, pivot, duplicated, drop_duplicates are ALL standalone only.
-- **Parallel tsx**: Install tsx in `/tmp/gh-aw/agent/node_modules/` via npm, then use 6 workers + 90s timeout per benchmark. All 631 pairs succeed.
-- **DataFrame construction**: use `DataFrame.fromColumns({col: arr})` — no wrapper object, no Map.
-- **MultiIndex**: private constructor; use `MultiIndex.fromTuples(tuples, opts?)` factory.
-- **DateRangeFreq**: uppercase `"H"` and `"S"` required (not `"h"` or `"s"`).
-- **Timedelta**: import from `../../src/core/timedelta.ts`. Methods: sub/mul/abs/negate.
-- **Python pandas 2.x**: fillna(method=) removed, stack(dropna=) removed, factorize use_na_sentinel removed, ewm().apply() removed, read_json needs StringIO, mi.isna() raises error, Period freq ME→M.
-- **groupby AggName**: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only.
+- **Series constructor**: Use `new Series({ data: [...] })` — passing an array directly fails with tsx/node.
+- **Balanced-paren fix needed**: The Series constructor fix requires balanced-paren parsing (not regex) — `Array.from({ length: N }, (_, i) => i)` has nested parens.
+- **Standalone functions vs methods**: cummax/cummin/cumprod/cumsum/diff/explode/pct_change/seriesAbs/where/mask/sample/replace/astype/pivot are standalone. NOT methods on Series/DataFrame.
+- **DataFrame construction**: use `DataFrame.fromColumns({...})` not `new DataFrame({...})`.
+- **groupby AggName**: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only — no "var".
+- **whereDataFrame/maskDataFrame cond**: Must be function or boolean DataFrame, NOT a plain boolean array.
+- **fromDictOriented orient**: Only "columns"|"index"|"split"|"tight" — NOT "records".
+- **rollingQuantile arg order**: `rollingQuantile(series, q, window)` — q first, window second.
+- **fromColumns Map pattern**: `DataFrame.fromColumns(new Map([...]), { index: })` = broken. Use `DataFrame.fromColumns({ col: array })` directly.
 
 ---
 
 ## 🚧 Foreclosed Avenues
 
 - **Suffixed branches**: Never commit to `autoloop/perf-comparison-{suffix}` branches. Only `autoloop/perf-comparison` counts.
-- **Sequential run_benchmarks.sh**: Old sequential approach is too slow for 631 pairs. Must use parallel workers.
+- **Sequential run_benchmarks.sh**: Old sequential approach is too slow for 508 pairs. Use parallel Python runner.
 - **SSH push**: SSH to github.com is blocked in this runner environment.
-- **HTTPS push without credentials**: git credential helper not configured; git push hangs waiting for input.
+- **HTTPS push without credentials**: git credential helper not configured; git push hangs waiting for input. Use safeoutputs push_to_pull_request_branch.
 
 ---
 
 ## 🔭 Future Directions
 
-- **All 631 pairs now pass** — metric is at maximum possible value (631). Next iterations may focus on accuracy/correctness improvements or new benchmarks if more are added.
-- If new benchmark pairs are added to the repo, apply the same fix patterns from Lessons Learned above.
+- **Fix remaining 99 failing pairs** (532/631 passing):
+  1. Timeouts: concat_axis1, dataframe_expanding*, dataframe_rolling*, expanding_* — reduce sizes or skip
+  2. DataFrame.median() not a method — needs standalone medianDataFrame function
+  3. df.round(2) not a method — needs roundDataFrame standalone function
+  4. dataframe_transform API mismatch (column transform returns wrong shape)
+  5. multi_index_* benchmarks have various API issues
+  6. datetime/timedelta/period benchmarks need investigation
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 277 — 2026-04-21T17:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24720788351)
+### Iteration 278 — 2026-04-21T19:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24728467447)
 
 - **Status**: ✅ Accepted
-- **Change**: Fixed 262 files (200+ TS benchmarks + 30+ Python). All benchmark API issues, constructor patterns, pandas 2.x compat.
-- **Metric**: 631 (was 312) — **+319 improvement**, all 631/631 pairs passing
-- **PR**: #166
+- **Change**: Fix 300+ benchmark API bugs: wrong export names, method→standalone function, fromColumns Map pattern, rollingQuantile args, fromDictOriented API; fix parallel runner pgid timeout kill
+- **Metric**: 532 (previous best: 382, delta: +150)
+- **Commit**: cd7ab18
+- **Notes**: Fixed ~35 additional benchmarks beyond the 495 mid-run count, reaching 532/631 pairs. Main remaining issues: expanding/rolling timeouts, df.median()/df.round() not methods.
 
-### Iters 269–276 — ⚠️ error/wrong-branch | metrics claimed 233-400 but canonical push kept failing.
+### Iteration 277 — 2026-04-21T14:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24722137337)
+
+- **Status**: ✅ Accepted
+- **Change**: Fix benchmark constructors (Series/DataFrame), import paths, cummax/cummin standalone; add parallel Python runner with process-group kill; install pandas
+- **Metric**: 382 (previous best: 0 canonical, delta: +382)
+- **Commit**: b95658d
+- **Notes**: Huge improvement from 0→382. Root causes were: pandas not installed (2→11 pairs), wrong Series/DataFrame constructors (142 files), wrong import paths (42 files).
+
+### Iters 269–276 — ⚠️ error/wrong-branch | metrics 233-312 but all on suffixed branches or local-only, canonical was 0.
 
 ### Iters 258–268 — ✅ mix (wrong branches) | metrics claimed 604→610 but canonical was always 0.
 

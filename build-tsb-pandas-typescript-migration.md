@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-21T17:24:54Z |
-| Iteration Count | 231 |
-| Best Metric | 108 |
+| Last Run | 2026-04-12T11:15:07Z |
+| Iteration Count | 230 |
+| Best Metric | 61 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #120 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, accepted, error, error, error, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, error, accepted, error, error, error, accepted, accepted, accepted |
 
 ---
 
@@ -35,15 +35,14 @@
 
 ## 🎯 Current Priorities
 
+- `stats/timedelta_range.ts` — pd.timedelta_range() for generating TimedeltaIndex sequences
 - `core/str_accessor` improvements (findall, extractall)
-- `io/to_json_normalize.ts` — inverse of jsonNormalize (already implemented as json_normalize; consider reverse/export)
-- `period_range` — generating PeriodIndex sequences (mirrors pd.period_range)
+- `io/to_json_normalize.ts` — inverse of jsonNormalize
 
 ---
 
 ## 📚 Lessons Learned
 
-- **Iter 231**: timedelta_range in src/core/ (not stats/) to avoid file counting collision. Supports all pandas param combos: start+end+freq, start+periods+freq, end+periods+freq, start+end+periods (linspace). Multiplier prefixes like "2H","30min". closed=both/left/right/neither. Metric jumped from 107→108 (many features merged to main since last state update).
 - **Biome**: `useBlockStatements --write --unsafe`. `Number.NaN`/`Number.POSITIVE_INFINITY`. Default import fc. `import type` for value-unused imports.
 - **TypeScript**: `(value as unknown) instanceof X` for instanceof-passthrough. `as Scalar`/`as number` for noUncheckedIndexedAccess. `readonly T[]` not `ReadonlyArray<T>`. Extract helpers for ≤15 complexity.
 - **Tests**: Import from `../../src/index.ts`. `Series<Scalar>` type. `Series({dtype: Dtype, name: null|string})`.
@@ -63,15 +62,14 @@
 
 ## 🔭 Future Directions
 
+- `stats/timedelta_range.ts` — pd.timedelta_range()
 - `core/str_accessor` — findall, extractall, normalize
-- `period_range` — pd.period_range() for PeriodIndex sequences
-- `io/to_json_normalize.ts` — reverse of json_normalize (nested DataFrame from flat records)
+- `io/to_json_normalize.ts` — nested records from flat DataFrame
 
 ---
 
 ## 📊 Iteration History
 
-### Iter 231 — 2026-04-21 17:24 UTC — ✅ +timedelta_range. Metric: 108 (prev best: 107). Commit: 54afc7d. [Run](https://github.com/githubnext/tsessebe/actions/runs/24736530340)
 ### Iter 230 — 2026-04-12 11:15 UTC — ✅ +date_range. Metric: 61. Commit: 996705d. [Run](https://github.com/githubnext/tsessebe/actions/runs/24305375139)
 ### Iter 229 — 2026-04-12 10:47 UTC — ✅ +to_timedelta (after 5 push failures). Metric: 60. Commit: 48a486c.
 ### Iters 224–228 — ⚠️ Push failures (MCP policy). to_timedelta + to_datetime code written but not pushed. to_datetime IS on remote at 716a7f3/480c452.
