@@ -446,7 +446,7 @@ function numericCmp(l: Scalar, r: Scalar): number {
 
 function numericOp(l: Scalar, r: Scalar, fn: (a: number, b: number) => number): Scalar {
   if (l == null || r == null) return null;
-  if (typeof l === "number" && typeof r === "number") return fn(l, r);
+  if (typeof l === "number" && typeof r === "number") return canonicalizeZero(fn(l, r));
   return null;
 }
 
@@ -471,8 +471,12 @@ function applyBinOp(op: string, l: Scalar, r: Scalar): Scalar {
 function addScalar(l: Scalar, r: Scalar): Scalar {
   if (l == null || r == null) return null;
   if (typeof l === "string" || typeof r === "string") return String(l) + String(r);
-  if (typeof l === "number" && typeof r === "number") return l + r;
+  if (typeof l === "number" && typeof r === "number") return canonicalizeZero(l + r);
   return null;
+}
+
+function canonicalizeZero(value: number): number {
+  return Object.is(value, -0) ? 0 : value;
 }
 
 function evalInOp(node: Extract<AstNode, { type: "InOp" }>, row: ReadonlyMap<string, Scalar>): boolean {

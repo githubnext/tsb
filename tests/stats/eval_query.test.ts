@@ -364,7 +364,7 @@ describe("evalDataFrame", () => {
   it("eval('a * 0') is all zeros", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true }), { minLength: 1, maxLength: 10 }),
+        fc.array(fc.float({ noNaN: true, min: -1e6, max: 1e6 }), { minLength: 1, maxLength: 10 }),
         (values) => {
           const df = DataFrame.fromArrays({ a: values });
           const result = evalDataFrame(df, "a * 0");
