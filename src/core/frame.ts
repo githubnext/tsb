@@ -132,6 +132,21 @@ export class DataFrame {
   }
 
   /**
+   * Alias for {@link fromColumns}. Create a DataFrame from an object mapping column names to value arrays.
+   *
+   * @example
+   * ```ts
+   * const df = DataFrame.fromArrays({ a: [1, 2, 3], b: [4, 5, 6] });
+   * ```
+   */
+  static fromArrays(
+    data: Readonly<Record<string, readonly Scalar[]>>,
+    options?: DataFrameOptions,
+  ): DataFrame {
+    return DataFrame.fromColumns(data, options);
+  }
+
+  /**
    * Create a DataFrame from an array of row objects.
    *
    * @example
