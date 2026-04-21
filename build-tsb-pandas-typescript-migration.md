@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-21T19:56:52Z |
+| Last Run | 2026-04-21T21:06:32Z |
 | Iteration Count | 232 |
-| Best Metric | 108 |
+| Best Metric | 110 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #174 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, accepted, error, error, error, accepted, accepted, accepted |
+| Recent Statuses | error, accepted, error, error, error, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -29,13 +29,13 @@
 **Goal**: Build tsb — a complete TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
 **Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)
-**Pull Request**: #174 | **Steering Issue**: #107
+**Pull Request**: #174 | **Steering Issue**: #107 | **Experiment Log**: #3
 
 ---
 
 ## 🎯 Current Priorities
 
-- `stats/timedelta_range.ts` — pd.timedelta_range() for generating TimedeltaIndex sequences
+- `stats/timedelta_range.ts` — ✅ done (iter 231)
 - `core/str_accessor` improvements (findall, extractall)
 - `io/to_json_normalize.ts` — inverse of jsonNormalize
 
@@ -44,14 +44,14 @@
 ## 📚 Lessons Learned
 
 - **Biome**: `useBlockStatements --write --unsafe`. `Number.NaN`/`Number.POSITIVE_INFINITY`. Default import fc. `import type` for value-unused imports.
-- **TypeScript**: `(value as unknown) instanceof X` for instanceof-passthrough. `as Scalar`/`as number` for noUncheckedIndexedAccess. `readonly T[]` not `ReadonlyArray<T>`. Extract helpers for ≤15 complexity. Use structural interface (`TimedeltaInput`) for duck-typing across module boundaries without casts.
+- **TypeScript**: `(value as unknown) instanceof X` for instanceof-passthrough. `as Scalar`/`as number` for noUncheckedIndexedAccess. `readonly T[]` not `ReadonlyArray<T>`. Extract helpers for ≤15 complexity.
 - **Tests**: Import from `../../src/index.ts`. `Series<Scalar>` type. `Series({dtype: Dtype, name: null|string})`.
 - **MCP safeoutputs**: session flow: init → notifications/initialized → tools/call with Mcp-Session-Id. Accept: application/json, text/event-stream. `push_to_pull_request_branch` (not create) when PR exists.
 - **Regex**: Global regex requires `lastIndex=0` reset before reuse in loops.
-- **Dual Timedelta classes**: stats/to_timedelta.ts has its own Timedelta (public ctor, totalMs), core/timedelta.ts has full Timedelta (private ctor, totalMilliseconds). Export `Timedelta` from index comes from stats. Use `TimedeltaInput` interface as structural bridge. The stats Timedelta now has `totalMilliseconds` getter + `static fromMilliseconds()`.
-- **Iter 232**: Fixed 33 failing timedelta_range tests by: (1) adding "N days" parse support to core Timedelta.parse, (2) adding totalMilliseconds/fromMilliseconds to stats Timedelta, (3) using TimedeltaInput interface in timedelta_range. Metric: 108.
+- **Iter 232**: Two-Timedelta problem — stats Timedelta (exported) and core Timedelta (used by timedelta_range) are distinct classes. Must add missing structural members to stats Timedelta so tests pass typecheck. `withValues()` preserves index — use `new Series({ data: vals })` for resized results.
 - **Iter 230**: date_range: D/B/h/min/s/ms/W/W-DOW/MS/ME/QS/QE/YS/YE, inclusive, normalize, UNIT_NORM table. Complexity ≤15 via helpers. Metric: 61.
 - **Iter 229**: to_timedelta: RE_PANDAS/RE_ISO/RE_HUMAN_UNIT, Timedelta class, applyErrors(), parseFrac(), formatTimedelta(). 5 prior push failures fixed by using push_to_pull_request_branch targeting PR #120.
+- **Iter 223**: nancumops: 9 nan-ignoring agg fns (nansum/mean/median/var/std/min/max/prod/count). Metric: 58.
 
 ---
 
@@ -63,17 +63,16 @@
 
 ## 🔭 Future Directions
 
-- `stats/timedelta_range.ts` — pd.timedelta_range()
 - `core/str_accessor` — findall, extractall, normalize
 - `io/to_json_normalize.ts` — nested records from flat DataFrame
+- `stats/cut.ts` / `stats/qcut.ts` — binning functions
 
 ---
 
 ## 📊 Iteration History
 
-### Iter 232 — 2026-04-21 19:56 UTC — ✅ Fix 33 timedelta_range test failures. Metric: 108. Commit: 5cfc40c. [Run](https://github.com/githubnext/tsessebe/actions/runs/24743307489)
-- Added "N days"/"N day" format to core Timedelta.parse; refactored parse to private static helpers (#tryIso, #tryPandas, #tryDaysOnly, #tryHms); added totalMilliseconds getter + static fromMilliseconds() to stats Timedelta; introduced TimedeltaInput structural interface in timedelta_range. All 4714 tests pass (was 4681 pass / 33 fail).
-
+### Iter 232 — 2026-04-21 21:06 UTC — ✅ Fix timedelta_range tests + add unique/between. Metric: 110. Commit: ce2b102. [Run](https://github.com/githubnext/tsessebe/actions/runs/24739263127)
+### Iter 231 — 2026-04-21 ~09:00 UTC — ✅ +timedelta_range. Metric: 108. PR #174.
 ### Iter 230 — 2026-04-12 11:15 UTC — ✅ +date_range. Metric: 61. Commit: 996705d. [Run](https://github.com/githubnext/tsessebe/actions/runs/24305375139)
 ### Iter 229 — 2026-04-12 10:47 UTC — ✅ +to_timedelta (after 5 push failures). Metric: 60. Commit: 48a486c.
 ### Iters 224–228 — ⚠️ Push failures (MCP policy). to_timedelta + to_datetime code written but not pushed. to_datetime IS on remote at 716a7f3/480c452.
