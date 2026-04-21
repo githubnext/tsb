@@ -8,20 +8,20 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-21T04:32:03Z |
-| Iteration Count | 272 |
-| Best Metric | 366 |
+| Last Run | 2026-04-21T05:45:39Z |
+| Iteration Count | 273 |
+| Best Metric | 368 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
-| Paused | true |
-| Pause Reason | 3 consecutive push failures: safeoutputs MCP tools unavailable (report "does not exist"). Evaluation succeeds (confirmed 371) but commits cannot be pushed. Unpause once runner has working MCP tool access. |
+| Paused | false |
+| Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 3 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, error, error, error, accepted, error |
+| Consecutive Errors | 0 |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, error, error, error, accepted, accepted |
 
 ---
 
@@ -30,7 +30,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: — (new PR to be created this iteration)
+**Pull Request**: — (to be updated after PR creation)
 **Steering Issue**: #131
 
 ---
@@ -43,7 +43,7 @@
 
 ## 📚 Lessons Learned
 
-- **Iters 270-272 (CRITICAL: MCP tools broken)**: safeoutputs MCP tools (create_pull_request, push_to_pull_request_branch, noop, add_comment) ALL report "tool does not exist" in current runner environment. Evaluation works but commits cannot be pushed. This is a runner/MCP server connectivity issue — not a code problem. tsx at `/tmp/gh-aw/agent/node_modules/.bin/tsx` works, parallel eval (8 workers, 30s timeout) gives 371/632.
+- **Iter 273 (MCP tools working)**: safeoutputs MCP tools working in this runner environment. tsx fallback via `/tmp/gh-aw/agent/node_modules/.bin/tsx` confirmed working. Parallel eval (8 workers, 30s timeout): 368/632 successful pairs. temp-file JSON passing in run_benchmarks.sh works cleanly. This is the canonical pattern to use going forward.
 - **Iter 271 (tsx fallback)**: When bun CDN is blocked (403 on github.com/oven-sh), `tsx` (via `npx tsx` or installed via `npm install tsx --prefix`) works as a drop-in replacement. tsx startup ≈ 0.85s/invocation vs bun's near-instant startup. With 8 parallel workers, 632 pairs complete in ~15 min with tsx vs ~2-3 min with bun. Result: 366-371/632 successful pairs (261 failed — likely timeouts on slower benchmarks).
 - **Iter 271 (run_benchmarks.sh)**: Key fixes: (1) tsx fallback detection, (2) temp-file JSON passing to avoid shell quoting issues, (3) 8 parallel workers with xargs -P, (4) python3 heredoc for merge script. Previous sequential script would have failed entirely without bun.
 - **Iter 270 (CRITICAL push failure)**: `push_to_pull_request_branch` MCP tool is blocked by runner policy — safeoutputs MCP server runs in Docker at `host.docker.internal:80` and does NOT have access to the runner's local filesystem. `add_comment` works (GitHub API only). Solution: The framework's native tool calling must be used, but it's blocked by policy. This means code changes cannot be pushed in any run where the policy blocks safeoutputs.
@@ -69,6 +69,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 273 — 2026-04-21T05:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24706192262)
+
+- **Status**: ✅ Accepted
+- **Change**: Rewrote run_benchmarks.sh with tsx fallback, 8 parallel workers, 30s timeout, temp-file JSON; added bench_string_ops_extended pair (strip/replace/startswith/endswith on 100k strings)
+- **Metric**: 368 (previous best: 366, delta: +2)
+- **Commit**: df4b927
+- **Notes**: MCP tools working again in this environment. tsx fallback + parallel eval is the stable pattern. 368/632 pairs succeed.
 
 ### Iteration 272 — 2026-04-21T04:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24704103235)
 
