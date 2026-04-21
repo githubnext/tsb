@@ -381,3 +381,4 @@ export type { FillDirectionOptions, DataFrameFillOptions } from "./na_ops.ts";
 export { intervalRange } from "./interval.ts";
 export type { ClosedType } from "./interval.ts";
 export { nunique } from "./reduce_ops.ts";
+export { queryDataFrame, evalDataFrame } from "./eval_query.ts";

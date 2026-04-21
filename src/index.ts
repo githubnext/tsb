@@ -555,3 +555,4 @@ export type { FillDirectionOptions, DataFrameFillOptions } from "./stats/index.t
 export { intervalRange } from "./stats/index.ts";
 export type { ClosedType } from "./stats/index.ts";
 export { nunique } from "./stats/index.ts";
+export { queryDataFrame, evalDataFrame } from "./stats/index.ts";
