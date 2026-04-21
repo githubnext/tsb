@@ -361,7 +361,7 @@ export type {
 export { toDatetime } from "./to_datetime.ts";
 export type { DatetimeUnit, DatetimeErrors, ToDatetimeOptions } from "./to_datetime.ts";
 
-export { toTimedelta, parseFrac, formatTimedelta, Timedelta } from "./to_timedelta.ts";
+export { toTimedelta, parseFrac, formatTimedelta } from "./to_timedelta.ts";
 export type { TimedeltaUnit, TimedeltaErrors, ToTimedeltaOptions } from "./to_timedelta.ts";
 export { dateRange, parseFreq, advanceDate, toDateInput } from "./date_range.ts";
 export type {
