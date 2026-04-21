@@ -9,7 +9,7 @@ description: |
   - Persists all state via repo-memory (human-readable, human-editable)
   - Commits accepted improvements to a long-running branch per program
   - Maintains a single draft PR per program that accumulates all accepted iterations
-  - Maintains a living experiment log as a GitHub issue
+  - Maintains a single GitHub issue per program where all status, iteration logs, and human steering live
 
 on:
   schedule: every 30m
@@ -221,9 +221,17 @@ steps:
       for pf in bare_programs:
           program_files.append(pf)
 
-      # Scan GitHub issues with the 'autoloop-program' label
+      # Scan GitHub issues with the 'autoloop-program' label.
+      # Each program (file-based or issue-based) has exactly one such issue —
+      # it serves as the single source of truth for status, iteration log, and
+      # human steering. For file-based programs the issue is auto-created by
+      # the agent on first run with title "[Autoloop: {program-name}]".
       issue_programs_dir = "/tmp/gh-aw/issue-programs"
       os.makedirs(issue_programs_dir, exist_ok=True)
+      # file_program_issues: name -> issue_number for file-based program issues
+      # (auto-created by the agent, recognized here by title "[Autoloop: {name}]").
+      file_program_issues = {}
+      file_program_titles = set()  # known file-based program names (to skip when slugifying)
       try:
           api_url = f"https://api.github.com/repos/{repo}/issues?labels=autoloop-program&state=open&per_page=100"
           req = urllib.request.Request(api_url, headers={
@@ -232,9 +240,33 @@ steps:
           })
           with urllib.request.urlopen(req, timeout=30) as resp:
               issues = json.loads(resp.read().decode())
+          # First pass: identify file-based program issues by their conventional title.
+          # We compute the set of known file-based program names from program_files first.
+          known_file_program_names = set()
+          for pf in program_files:
+              # inline get_program_name (it's defined later in this script)
+              if pf.endswith("/program.md"):
+                  known_file_program_names.add(os.path.basename(os.path.dirname(pf)))
+              else:
+                  known_file_program_names.add(os.path.splitext(os.path.basename(pf))[0])
+          file_program_issue_pattern = re.compile(r'^\s*\[Autoloop:\s*([^\]]+?)\s*\]\s*$')
+          consumed_issue_numbers = set()
+          for issue in issues:
+              if issue.get("pull_request"):
+                  continue
+              title = issue.get("title") or ""
+              m = file_program_issue_pattern.match(title)
+              if m and m.group(1) in known_file_program_names:
+                  file_program_issues[m.group(1)] = issue["number"]
+                  consumed_issue_numbers.add(issue["number"])
+                  print(f"  Found program issue for file-based program '{m.group(1)}': #{issue['number']}")
+
+          # Second pass: any remaining autoloop-program issue is an issue-based program.
           for issue in issues:
               if issue.get("pull_request"):
                   continue  # skip PRs
+              if issue["number"] in consumed_issue_numbers:
+                  continue  # already claimed as a file-based program's issue
               body = issue.get("body") or ""
               title = issue.get("title") or ""
               number = issue["number"]
@@ -401,6 +433,9 @@ steps:
           deferred = [p["name"] for p in due if p["name"] != forced_program]
           if selected in issue_programs:
               selected_issue = issue_programs[selected]["issue_number"]
+          elif selected in file_program_issues:
+              # File-based program with an auto-created program issue.
+              selected_issue = file_program_issues[selected]
           # Find target_metric: check the due list first, then parse from the program file
           for p in due:
               if p["name"] == forced_program:
@@ -428,9 +463,12 @@ steps:
           selected_file = due[0]["file"]
           selected_target_metric = due[0].get("target_metric")
           deferred = [p["name"] for p in due[1:]]
-          # Check if the selected program is issue-based
+          # Check if the selected program is issue-based, or a file-based program
+          # with an auto-created program issue.
           if selected in issue_programs:
               selected_issue = issue_programs[selected]["issue_number"]
+          elif selected in file_program_issues:
+              selected_issue = file_program_issues[selected]
 
       # Look up existing PR for the selected program's canonical branch
       existing_pr = None
@@ -643,7 +681,7 @@ If `selected` is not null:
 2. Parse the three sections: Goal, Target, Evaluation.
 3. Read the current state of all target files.
 4. Read the state file `{selected}.md` from the repo-memory folder for all state: the ⚙️ Machine State table (scheduling fields) plus the research sections (priorities, lessons, foreclosed avenues, iteration history).
-5. If `selected_issue` is not null, this is an issue-based program — also read the issue comments for any human steering input.
+5. `selected_issue` is the program issue number (auto-created for file-based programs, or the source issue for issue-based programs). Read its comments for any human steering input.
 6. **Check `existing_pr`**: if it is not null, a PR already exists — use `push-to-pull-request-branch` to push commits to it. Only call `create-pull-request` when `existing_pr` is null.
 
 ## Multiple Programs
@@ -669,8 +707,7 @@ GitHub Issues (labeled 'autoloop-program'):
 Each program runs independently with its own:
 - Goal, target files, and evaluation command
 - Metric tracking and best-metric history
-- Experiment log issue: `[Autoloop: {program-name}] Experiment Log {YYYY-MM}`
-- Steering issue: `[Autoloop: {program-name}] Steering` (persistent, links branch/PR/state)
+- Program issue: `[Autoloop: {program-name}]` — single GitHub issue (labeled `autoloop-program`) where status, iteration log, and human steering all live
 - Long-running branch: `autoloop/{program-name}` (persists across iterations)
 - Single draft PR per program: `[Autoloop: {program-name}]` (accumulates all accepted iterations)
 - State file: `{program-name}.md` in repo-memory (all state: scheduling, research context, iteration history)
@@ -767,10 +804,10 @@ Examples:
 
 Each program has three coordinated resources:
 - **Branch + PR**: `autoloop/{program-name}` with a single draft PR
-- **Steering Issue**: `[Autoloop: {program-name}] Steering` — persistent GitHub issue linking branch, PR, and state
+- **Program Issue**: `[Autoloop: {program-name}]` — single GitHub issue (labeled `autoloop-program`) that hosts the status comment, every per-iteration comment, and human steering comments
 - **State File**: `{program-name}.md` in repo-memory — all state, history, and research context
 
-All three reference each other. The steering issue is created on the first accepted iteration and updated with links to the PR and state.
+All three reference each other. For file-based programs, the program issue is auto-created on the first run if it does not already exist. For issue-based programs, the source issue itself is the program issue.
 
 ## Iteration Loop
 
@@ -844,131 +881,59 @@ Each run executes **one iteration for the single selected program**:
    d. **If NO PR exists** for `autoloop/{program-name}` (both `existing_pr` is null AND the state file has no PR): create one using `create-pull-request`:
       - Branch: `autoloop/{program-name}` (the branch you already created in Step 3 — do NOT let the framework auto-generate a branch name)
       - Title: `[Autoloop: {program-name}]`
-      - Body includes: a summary of the program goal, link to the steering issue, the current best metric, and AI disclosure: `🤖 *This PR is maintained by Autoloop. Each accepted iteration adds a commit to this branch.*`
+      - Body includes: a summary of the program goal, link to the program issue (#{selected_issue}), the current best metric, and AI disclosure: `🤖 *This PR is maintained by Autoloop. Each accepted iteration adds a commit to this branch.*`
 
    > ⚠️ **Never create a new PR if one already exists for `autoloop/{program-name}`.** Each program must have exactly one draft PR at any time. The pre-step provides `existing_pr` in autoloop.json — always check it first. Only call `create-pull-request` when `existing_pr` is null AND the state file has no PR number.
-4. Ensure the steering issue exists (see [Steering Issue](#steering-issue) below). Add a comment to the steering issue linking to the commit and actions run.
-5. Add an entry to the experiment log issue.
-6. Update the state file `{program-name}.md` in the repo-memory folder:
+4. **Update the program issue** (see [Program Issue](#program-issue) below): edit the status comment in place and post a new per-iteration comment summarizing what changed, the metric delta, and links to the commit / actions run / PR.
+5. Update the state file `{program-name}.md` in the repo-memory folder:
    - Update the **⚙️ Machine State** table: reset `consecutive_errors` to 0, set `best_metric`, increment `iteration_count`, set `last_run` to current UTC timestamp, append `"accepted"` to `recent_statuses` (keep last 10), set `paused` to false.
    - Prepend an entry to **📊 Iteration History** (newest first) with status ✅, metric, PR link, and a one-line summary of what changed and why it worked.
    - Update **📚 Lessons Learned** if this iteration revealed something new about the problem or what works.
    - Update **🔭 Future Directions** if this iteration opened new promising paths.
-7. **If this is an issue-based program** (`selected_issue` is not null): update the status comment and post a per-run comment on the source issue (see [Issue-Based Program Updates](#issue-based-program-updates)).
-8. **Check halting condition** (see [Halting Condition](#halting-condition)): If the program has a `target-metric` in its frontmatter and the new `best_metric` meets or surpasses the target, mark the program as completed.
+6. **Check halting condition** (see [Halting Condition](#halting-condition)): If the program has a `target-metric` in its frontmatter and the new `best_metric` meets or surpasses the target, mark the program as completed.
 
 **If the metric did not improve**:
 1. Discard the code changes (do not commit them to the long-running branch).
-2. Add a "rejected" entry to the experiment log issue.
+2. **Update the program issue**: edit the status comment in place and post a new per-iteration comment with status ❌, the metric, and a one-line summary of what was tried.
 3. Update the state file `{program-name}.md` in the repo-memory folder:
    - Update the **⚙️ Machine State** table: increment `iteration_count`, set `last_run`, append `"rejected"` to `recent_statuses` (keep last 10).
    - Prepend an entry to **📊 Iteration History** with status ❌, metric, and a one-line summary of what was tried.
    - If this approach is conclusively ruled out (e.g., tried multiple variations and all fail), add it to **🚧 Foreclosed Avenues** with a clear explanation.
    - Update **🔭 Future Directions** if this rejection clarified what to try next.
-4. **If this is an issue-based program** (`selected_issue` is not null): update the status comment and post a per-run comment on the source issue (see [Issue-Based Program Updates](#issue-based-program-updates)).
 
 **If evaluation could not run** (build failure, missing dependencies, etc.):
 1. Discard the code changes (do not commit them to the long-running branch).
-2. Add an "error" entry to the experiment log issue.
+2. **Update the program issue**: edit the status comment in place and post a new per-iteration comment with status ⚠️ and a brief description of the error.
 3. Update the state file `{program-name}.md` in the repo-memory folder:
    - Update the **⚙️ Machine State** table: increment `consecutive_errors`, increment `iteration_count`, set `last_run`, append `"error"` to `recent_statuses` (keep last 10).
    - If `consecutive_errors` reaches 3+, set `paused` to `true` and set `pause_reason` in the Machine State table, and create an issue describing the problem.
    - Prepend an entry to **📊 Iteration History** with status ⚠️ and a brief error description.
-4. **If this is an issue-based program** (`selected_issue` is not null): update the status comment and post a per-run comment on the source issue (see [Issue-Based Program Updates](#issue-based-program-updates)).
 
-## Experiment Log Issue
+## Program Issue
 
-Maintain a single open issue **per program** titled `[Autoloop: {program-name}] Experiment Log {YYYY}-{MM}` as a rolling record of that program's iterations.
+Each program has **exactly one** open GitHub issue (labeled `autoloop-program`) titled `[Autoloop: {program-name}]`. This single issue is the source of truth for the program — it hosts:
 
-### Issue Body Format
+- The **status comment** (the earliest bot comment, edited in place each iteration) — a dashboard of current state.
+- A **per-iteration comment** for every iteration (accepted, rejected, or error) — the rolling log.
+- **Human steering comments** — plain-prose comments from maintainers, treated by the agent as directives.
 
-```markdown
-🤖 *Autoloop — an iterative optimization agent for this repository.*
+There are no separate "steering" or "experiment log" issues — they have all been collapsed into this one issue.
 
-| | |
-|---|---|
-| **Branch** | [`autoloop/{program-name}`](https://github.com/{owner}/{repo}/tree/autoloop/{program-name}) |
-| **Pull Request** | #{pr_number} |
-| **Steering Issue** | #{steering_issue_number} |
-| **State File** | [`{program-name}.md`](https://github.com/{owner}/{repo}/blob/memory/autoloop/{program-name}.md) |
+### Auto-creation for File-Based Programs
 
-## Program
+If `selected_issue` is `null` in `/tmp/gh-aw/autoloop.json`, the program is file-based **and** has no program issue yet. On the first run, create one with `create-issue`:
 
-**Goal**: {one-line summary from program.md}
-**Target files**: {list of target files}
-**Metric**: {metric name} ({higher/lower} is better)
-**Current best**: {best_metric} (established in iteration {N})
+- **Title**: `[Autoloop: {program-name}]`
+- **Labels**: `autoloop-program`, `automation`, `autoloop`
+- **Body**: the contents of the program file (so humans can read the goal/target/evaluation directly on the issue), prefixed with `🤖 *Autoloop program issue for `{program-name}`. The program definition below is mirrored from [`{selected_file}`]({link-to-file}). Edit the file to update the definition; comment on this issue to steer the agent.*`
 
-## Iteration History
+After creation, record the issue number in the state file's **⚙️ Machine State** table (`Issue` field) and use it for all subsequent comments and updates this run. On subsequent runs, the pre-step will discover the issue by title and supply it as `selected_issue`.
 
-### Iteration {N} — {YYYY-MM-DD HH:MM UTC} — [Run]({run_url})
-- **Status**: ✅ Accepted / ❌ Rejected / ⚠️ Error
-- **Change**: {one-line description}
-- **Metric**: {value} (previous best: {previous_best}, delta: {delta})
-- **Commit**: {short_sha} (if accepted)
-
-### Iteration {N-1} — {YYYY-MM-DD HH:MM UTC} — [Run]({run_url})
-- **Status**: ❌ Rejected
-- **Change**: {one-line description}
-- **Metric**: {value} (previous best: {previous_best}, delta: {delta})
-- **Reason**: {why it was rejected}
-```
-
-### Format Rules
-
-- Iterations in **reverse chronological order** (newest first).
-- Each iteration heading links to its GitHub Actions run.
-- Use `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}` for the current run URL.
-- The **links table at the top** must always show the current branch, PR, steering issue, and state file. Update the PR number when a new PR is created. When creating a continuation issue for a new month, copy the links table from the previous issue.
-- Close the previous month's issue and create a new one at month boundaries.
-- Maximum 50 iterations per issue; create a continuation issue if exceeded.
-
-## Steering Issue
-
-Maintain a single **persistent** open issue per program titled `[Autoloop: {program-name}] Steering`. Unlike experiment log issues (which rotate monthly), the steering issue lives for the entire lifetime of the program.
-
-The steering issue serves as the central coordination point linking together the program's three key resources:
-- The **long-running branch** `autoloop/{program-name}` and its draft PR
-- The **state file** `{program-name}.md` in repo-memory (on the `memory/autoloop` branch)
-- The **experiment log** issues
-
-### Steering Issue Body Format
-
-```markdown
-🤖 *Autoloop — steering issue for the `{program-name}` program.*
-
-## Links
-
-- **Branch**: [`autoloop/{program-name}`](https://github.com/{owner}/{repo}/tree/autoloop/{program-name})
-- **Pull Request**: #{pr_number}
-- **State File**: [`{program-name}.md`](https://github.com/{owner}/{repo}/blob/memory/autoloop/{program-name}.md)
-- **Experiment Log**: #{experiment_log_issue_number}
-
-## Program
-
-**Goal**: {one-line summary from program.md}
-**Metric**: {metric-name} ({higher/lower} is better)
-**Current best**: {best_metric}
-**Iterations**: {iteration_count}
-```
-
-### Steering Issue Rules
-
-- Create the steering issue on the **first accepted iteration** for the program if it does not already exist.
-- **Update the issue body** whenever the best metric, PR number, or experiment log issue changes.
-- **Add a comment** on each accepted iteration with a link to the commit and actions run.
-- The steering issue is labeled `[automation, autoloop]`.
-- Do NOT close the steering issue when the PR is merged — the branch continues to accumulate future iterations.
-
-## Issue-Based Program Updates
-
-When a program is defined via a GitHub issue (i.e., `selected_issue` is not null in `/tmp/gh-aw/autoloop.json`), the source issue itself serves as the program definition **and** as the primary interface for steering and monitoring the program. In addition to the normal iteration workflow (state file, experiment log, steering issue, PR), you must also update the source issue.
+For **issue-based programs**, the source issue **is** the program issue — do not create a new one. The source issue body is the program definition; do not modify it (the user owns it).
 
 ### Status Comment
 
-On the **first iteration** for an issue-based program, post a comment on the source issue. On **every subsequent iteration**, update that same comment (edit it, do not post a new one). This is the "status comment" — always the earliest bot comment on the issue.
-
-Find the status comment by searching for a comment containing `<!-- AUTOLOOP:STATUS -->`. If multiple comments contain this sentinel, use the earliest one (lowest comment ID) and ignore the others.
+On the **first run** that has access to the program issue, post a status comment. On **every subsequent iteration**, edit that same comment in place — never post a new one. The status comment is always the earliest bot comment containing the sentinel `<!-- AUTOLOOP:STATUS -->`. If multiple comments contain this sentinel, use the earliest one (lowest comment ID) and ignore the others.
 
 **Status comment format:**
 
@@ -986,17 +951,15 @@ Find the status comment by searching for a comment containing `<!-- AUTOLOOP:STA
 | **Branch** | [`autoloop/{program-name}`](https://github.com/{owner}/{repo}/tree/autoloop/{program-name}) |
 | **Pull Request** | #{pr_number} |
 | **State File** | [`{program-name}.md`](https://github.com/{owner}/{repo}/blob/memory/autoloop/{program-name}.md) |
-| **Experiment Log** | #{experiment_log_issue_number} |
-| **Steering Issue** | #{steering_issue_number} |
 
 ### Summary
 
 {2-3 sentence summary of current state: what has been accomplished so far, what the current best approach is, and what direction the next iteration will likely take.}
 ```
 
-### Per-Run Comment
+### Per-Iteration Comment
 
-After **every iteration** (accepted, rejected, or error), post a **new comment** on the source issue with a summary of what happened:
+After **every iteration** (accepted, rejected, or error), post a **new comment** on the program issue:
 
 ```markdown
 🤖 **Iteration {N}** — [{status_emoji} {status}]({run_url})
@@ -1004,20 +967,25 @@ After **every iteration** (accepted, rejected, or error), post a **new comment**
 - **Change**: {one-line description of what was tried}
 - **Metric**: {value} (best: {best_metric}, delta: {+/-delta})
 - **Commit**: {short_sha} *(if accepted)*
+- **PR**: #{pr_number} *(if accepted)*
 - **Result**: {one-sentence summary of what this iteration revealed}
 ```
 
+This is the rolling iteration log — there is no separate experiment-log issue, no monthly rollover, and no continuation issue. A single rolling issue can comfortably hold thousands of comments; if it grows uncomfortably large, collapse older iteration comments into a pinned summary comment rather than splitting issues.
+
 ### Steering via Issue Comments
 
-For issue-based programs, **human comments on the source issue act as steering input** (in addition to the state file's Current Priorities section). Before proposing a change, read all comments on the source issue and treat any human comments as directives — similar to how the Current Priorities section works in the state file.
+**Human comments on the program issue act as steering input** (in addition to the state file's Current Priorities section). Before proposing a change, read all human (non-bot) comments on the program issue and treat them as directives — similar to how the Current Priorities section works in the state file.
 
-### Issue-Based Program Rules
+### Program Issue Rules
 
-- The source issue body IS the program definition — do not modify it (the user owns it).
+- Exactly **one open program issue per program**, labeled `autoloop-program`.
+- For issue-based programs, the source issue body IS the program definition — do not modify it (the user owns it).
+- For file-based programs, the auto-created issue body mirrors the program file at creation time; the program file remains the source of truth for the definition.
 - The `autoloop-program` label must remain on the issue for the program to be discovered. When a program completes (target metric reached), the label is removed automatically and replaced with `autoloop-completed`.
 - Closing the issue stops the program from being discovered (equivalent to deleting a program.md file).
-- Issue-based programs use the same branching model, state files, experiment log, and steering issue as file-based programs.
-- For issue-based programs, the steering issue is optional — the source issue itself serves a similar coordination role. However, if the program grows complex, a separate steering issue may still be created.
+- Do **not** create separate "Steering" or "Experiment Log" issues — they have been deprecated. All status, iteration logs, and steering live on the single program issue.
+- Do NOT close the program issue when the PR is merged — the branch continues to accumulate future iterations.
 
 ## Halting Condition
 
@@ -1033,12 +1001,11 @@ Programs can be **open-ended** (run indefinitely until manually stopped) or **go
 4. When the target is met, **complete** the program:
    - Set `Completed` to `true` in the state file's **⚙️ Machine State** table.
    - Set `Completed Reason` to a human-readable message (e.g., `target metric 0.95 reached with value 0.97`).
-   - **For issue-based programs** (`selected_issue` is not null):
-     - Remove the `autoloop-program` label from the source issue.
-     - Add the `autoloop-completed` label to the source issue.
-   - Update the status comment to show ✅ Completed status.
-   - Post a per-run comment celebrating the achievement: `🎉 **Target metric reached!** The program has achieved its goal.`
-   - Add a comment on the steering issue (if one exists) noting the completion.
+   - **On the program issue** (`selected_issue`):
+     - Remove the `autoloop-program` label.
+     - Add the `autoloop-completed` label.
+     - Update the status comment to show ✅ Completed status.
+     - Post a per-iteration comment celebrating the achievement: `🎉 **Target metric reached!** The program has achieved its goal.`
    - The program will not be selected for future runs (the pre-step skips completed programs).
 
 ### Example
@@ -1127,7 +1094,7 @@ When creating or updating a program's state file in the repo-memory folder, use 
 | Target Metric | — |
 | Branch | `autoloop/{program-name}` |
 | PR | — |
-| Steering Issue | — |
+| Issue | — |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
@@ -1143,7 +1110,7 @@ When creating or updating a program's state file in the repo-memory folder, use 
 **Metric**: {metric-name} ({higher/lower} is better)
 **Branch**: [`autoloop/{program-name}`](../../tree/autoloop/{program-name})
 **Pull Request**: #{pr_number}
-**Steering Issue**: #{steering_issue_number}
+**Issue**: #{program_issue_number}
 
 ---
 
@@ -1198,7 +1165,7 @@ All iterations in reverse chronological order (newest first).
 | Target Metric | number or `—` | Target metric from program frontmatter (halting condition). `—` if open-ended |
 | Branch | branch name | Long-running branch: `autoloop/{program-name}` |
 | PR | `#number` or `—` | Draft PR number for this program |
-| Steering Issue | `#number` or `—` | Steering issue number for this program |
+| Issue | `#number` or `—` | Program issue number (single source of truth for status, iteration log, and human steering) |
 | Paused | `true` or `false` | Whether the program is paused |
 | Pause Reason | text or `—` | Why it is paused (if applicable) |
 | Completed | `true` or `false` | Whether the program has reached its target metric |
