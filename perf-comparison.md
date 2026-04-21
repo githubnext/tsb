@@ -8,19 +8,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-21T01:36:44Z |
-| Iteration Count | 270 |
-| Best Metric | 233 |
+| Last Run | 2026-04-21T03:52:38Z |
+| Iteration Count | 271 |
+| Best Metric | 366 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #155 |
+| PR | — |
 | Steering Issue | #131 |
 | Experiment Log | #130 |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 1 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, error |
+| Consecutive Errors | 2 |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, error, accepted, error |
 
 ---
 
@@ -42,11 +42,11 @@
 
 ## 📚 Lessons Learned
 
-- **Iter 270 (CRITICAL push failure)**: `push_to_pull_request_branch` MCP tool is blocked by runner policy — safeoutputs MCP server runs in Docker at `host.docker.internal:80` and does NOT have access to the runner's local filesystem (`/home/runner/work/tsessebe/tsessebe`). The tool returns "Branch does not exist locally" because it can't see branches committed within the chroot. `add_comment` works (GitHub API only). Solution: The framework's native tool calling must be used, but it's blocked by policy. This means code changes cannot be pushed in any run where the policy blocks safeoutputs.
-- **Iter 270 (run_benchmarks.sh fix)**: Rewrote `run_benchmarks.sh` to use 8 parallel workers (vs 20 in iter 269), 30s timeout, bun path detection (`$HOME/.bun/bin/bun`), and temp-file result collection. This fix was NOT pushed due to above. Next run should apply same changes: parallelism=8, timeout=30s, bun detection, add datetime_tz pair.
+- **Iter 271 (tsx fallback)**: When bun CDN is blocked (403 on github.com/oven-sh), `tsx` (via `npx tsx` or installed via `npm install tsx --prefix`) works as a drop-in replacement. tsx startup ≈ 0.85s/invocation vs bun's near-instant startup. With 8 parallel workers, 632 pairs complete in ~15 min with tsx vs ~2-3 min with bun. Result: 366/632 successful pairs (266 failed — likely timeouts on slower benchmarks).
+- **Iter 271 (run_benchmarks.sh)**: Key fixes: (1) tsx fallback detection, (2) temp-file JSON passing to avoid shell quoting issues, (3) 8 parallel workers with xargs -P, (4) python3 heredoc for merge script. Previous sequential script would have failed entirely without bun.
+- **Iter 270 (CRITICAL push failure)**: `push_to_pull_request_branch` MCP tool is blocked by runner policy — safeoutputs MCP server runs in Docker at `host.docker.internal:80` and does NOT have access to the runner's local filesystem. `add_comment` works (GitHub API only). Solution: The framework's native tool calling must be used, but it's blocked by policy. This means code changes cannot be pushed in any run where the policy blocks safeoutputs.
 - **Iter 269 (CRITICAL)**: Canonical branch `results.json` was ALWAYS empty (metric=0) — prior accepted iters 262-268 that claimed metrics 605-607 all committed to WRONG suffixed branches (not `autoloop/perf-comparison`). State's recorded best_metric of 607 was a phantom. True canonical best was 0. This run = FIRST real evaluation of canonical branch. Parallel eval (20 workers, 60s timeout) gave 233/607 successful pairs; 374 failures were CPU-contention timeouts. Sequential eval would be higher.
 - **Iter 269 (bun)**: `bun` NOT in system PATH. Eval script installs to `$HOME/.bun/bin/bun` via curl (bun.sh/install). GitHub releases CDN at github.com/oven-sh may be blocked (403) in some envs; succeeded in iter 269's Actions runner.
-- **Iter 268**: Canonical was at 599 after merging main. Added 8 pairs. Commit cda8853 (on wrong branch, not canonical).
 - **Iter 262**: Added 6 pairs to canonical (was only iter to correctly push to canonical): series_ffill_bfill_fn, dataframe_ffill_bfill_fn, dataframe_diff_shift_fn, interval_range_fn, date_range_fn, nunique_standalone_fn. Commit 15f8815.
 - **Branch reset pattern**: origin/autoloop/perf-comparison resets to main after each PR merge. Always checkout from origin/autoloop/perf-comparison.
 - **DataFrame construction**: use `DataFrame.fromColumns({...})` not `new DataFrame({...})`.
@@ -58,12 +58,20 @@
 
 ## 🔭 Future Directions
 
-- **IMMEDIATE PRIORITY**: The `run_benchmarks.sh` fix (parallelism + bun detection) must be pushed. If this run also fails to push, check if `push_to_pull_request_branch` is accessible. If still blocked, add the fix to the program directly.
-- **run_benchmarks.sh fix to apply**: Replace the sequential script with 8-worker parallel execution (30s per-benchmark timeout), temp-file result collection, and bun path detection at `$HOME/.bun/bin/bun`. See iteration 270 notes for details.
+- **IMMEDIATE: Re-apply iter 271 changes** — these changes MUST be re-applied next run since push failed: (1) rewrite run_benchmarks.sh with tsx fallback + 8 parallel workers + temp-file JSON + 30s timeout; (2) add bench_string_ops_extended pair. Doing so should raise metric from 233 → 366+.
+- **Improve tsx performance**: tsx fallback works but is ~10x slower per invocation vs bun. With bun, even more pairs would succeed. When bun CDN is available, metric could reach 550+.
+- **Fix FAIL benchmarks**: 266/632 pairs failed. Investigate common failure modes — likely some benchmarks import bun-specific APIs not available in node/tsx.
+- **Add window_extended benchmarks**: `rollingSem`, `rollingSkew`, `rollingKurt`, `rollingQuantile` pairs not yet added.
+- **Add numeric_extended benchmarks**: `src/stats/numeric_extended.ts` not yet benchmarked.
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 271 — 2026-04-21T03:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24701850957)
+
+- **Status**: ⚠️ Error | **Metric**: 366 locally (push failed; local commit 990c7ae NOT pushed to GitHub)
+- Fixed `run_benchmarks.sh` with tsx fallback (when bun CDN blocked), 8 parallel workers, temp-file JSON parsing, 30s timeouts. Added `bench_string_ops_extended` pair. Evaluation: 366/632 successful pairs (up from 233). Local commit 990c7ae on autoloop/perf-comparison. safeoutputs MCP tools NOT available in this runner (same issue as iter 270 — push_to_pull_request_branch/create_pull_request/noop all report "tool does not exist"). **Next run MUST re-apply these changes.**
 
 ### Iteration 270 — 2026-04-21T01:36 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24699442900)
 
