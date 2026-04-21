@@ -48,6 +48,7 @@ imports:
 
 steps:
   - name: Find a PR that needs attention
+    id: find-pr
     env:
       GITHUB_TOKEN: ${{ github.token }}
       GITHUB_REPOSITORY: ${{ github.repository }}
@@ -56,6 +57,14 @@ steps:
       python3 - << 'PYEOF'
       import os, json, re, subprocess, sys
       import urllib.request, urllib.error
+
+      def emit_selected_output(pr_number):
+          """Expose `selected` as a step output for workflow gating.
+          Empty string means no PR needs attention; otherwise the PR number."""
+          gh_output = os.environ.get("GITHUB_OUTPUT")
+          if gh_output:
+              with open(gh_output, "a") as f:
+                  f.write(f"selected={'' if pr_number is None else pr_number}\n")
 
       token = os.environ.get("GITHUB_TOKEN", "")
       repo = os.environ.get("GITHUB_REPOSITORY", "")
@@ -182,6 +191,7 @@ steps:
           print("No open PRs. Nothing to do.")
           with open(output_file, "w") as f:
               json.dump({"selected": None, "reason": "no_open_prs"}, f)
+          emit_selected_output(None)
           sys.exit(0)
 
       # Evaluate each PR deterministically (sorted by PR number ascending)
@@ -256,8 +266,10 @@ steps:
           print(f"\n>>> Selected PR #{selected['pr_number']}: {selected['title']}")
           print(f"    Issues: {selected['issues']}")
           print(f"    Attempt: {selected['attempts'] + 1}/{MAX_ATTEMPTS}")
+          emit_selected_output(selected["pr_number"])
       else:
           print("\nNo PRs need attention. Nothing to do.")
+          emit_selected_output(None)
           sys.exit(0)
       PYEOF
 
