@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T16:34:39Z |
-| Iteration Count | 249 |
-| Best Metric | 132 |
+| Last Run | 2026-04-22T17:23:58Z |
+| Iteration Count | 250 |
+| Best Metric | 133 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #174 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, error, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci |
 
 ---
 
@@ -35,15 +35,16 @@
 
 ## 🎯 Current Priorities
 
-Completed iters 239–249:
+Completed iters 239–250:
 - ✅ swaplevel, truncate, between, update, filter_labels, combine, notna_boolean
 - ✅ rename_ops, math_ops, dot_matmul, transform_agg, map_values, at_iat
 - ✅ join/joinAll/crossJoin (iter 247), infer_objects/convertDtypes (iter 247)
-- ✅ merge_asof (iter 248), merge_ordered (iter 249)
+- ✅ merge_asof (iter 248), merge_ordered (iter 249), period_range (iter 250)
 
 Next:
-- `stats/period_range.ts` — standalone `period_range()` wrapper
-- `stats/map_values.ts` — Series.map (fn/dict/Map/Series mapper, na_action)
+- `stats/map_values.ts` — Series.map (fn/dict/Map/Series mapper, na_action) if not yet done
+- `stats/resample.ts` — DataFrame/Series.resample() time-based groupby
+- `str.normalize()` — Unicode normalization on StringAccessor
 
 ---
 
@@ -71,12 +72,13 @@ Next:
 
 - `core/str_accessor` — wire `.str.extractall()` via late-binding (inject DataFrame factory)
 - `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
-- `merge/merge_ordered.ts` — merge_ordered (ordered merge with optional fill method)
-- `stats/period_range.ts` — standalone `period_range()` top-level function
+- `stats/resample.ts` — DataFrame/Series.resample() time-based groupby aggregation
 
 ---
 
 ## 📊 Iteration History
+### Iter 250 — 2026-04-22 17:23 UTC — ⏳ pending-ci — +periodRange (standalone period_range top-level fn). Metric: 133 (+1). Commit: 09beefb. [Run](https://github.com/githubnext/tsessebe/actions/runs/24792490497)
+
 ### Iter 249 — 2026-04-22 16:34 UTC — ⏳ pending-ci — +mergeOrdered (ordered outer/inner/left/right merge, fill_method:ffill, left_by/right_by groups, left_on/right_on, suffix handling). Metric: 132 (+1). Commit: 0be568b. [Run](https://github.com/githubnext/tsessebe/actions/runs/24790234983)
 
 ### Iter 248 — 2026-04-22 14:36 UTC — ⏳ pending-ci — +merge_asof (backward/forward/nearest, by-groups, tolerance, allow_exact_matches, left_on/right_on, left_index/right_index). Metric: 131 (+1). Commit: 2d9afd6. [Run](https://github.com/githubnext/tsessebe/actions/runs/24784359725)
