@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T08:37:55Z |
-| Iteration Count | 280 |
+| Last Run | 2026-04-22T09:30:00Z |
+| Iteration Count | 281 |
 | Best Metric | 639 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | — (pending creation from iter 280) |
+| PR | — (pending creation) |
 | Steering Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
-| Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted |
+| Consecutive Errors | 1 |
+| Recent Statuses | error, accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -31,7 +31,7 @@
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
 **Metric**: benchmarked_functions (higher is better)
 **Branch**: [`autoloop/perf-comparison`](../../tree/autoloop/perf-comparison)
-**Pull Request**: — (pending creation from iter 280)
+**Pull Request**: — (pending creation)
 **Steering Issue**: #131
 
 ---
@@ -44,6 +44,7 @@
 
 ## 📚 Lessons Learned
 
+- **Iter 281**: Prepared 6 new pairs (aggNamed, nanmin/max/var, ewm span/alpha, MultiIndex.at/toList, nuniqueSeries/nuniqueDataFrame, anyDataFrame/allDataFrame boolOnly). Committed to canonical branch (cf706eb). MCP session expired before push — iteration error.
 - **Iter 280**: Merge main (633 pairs) into canonical branch (was at 508) + 6 new pairs. Result: 639 on canonical branch.
 - **Key insight**: Previous iters 277-279 updated state file best_metric (638) but committed to suffixed/wrong branches. The canonical `autoloop/perf-comparison` was still at 508.
 - **Iter 279**: Merge main (+125 pairs) + 5 new pairs (diffSeries/shiftSeries options, dataFrameFfill axis=1, any/all skipna, nunique). Result: 638.
@@ -63,14 +64,22 @@
 
 ## 🔭 Future Directions
 
-- **Add more benchmarks** (639 pairs, canonical branch up to date):
-  1. Continue adding benchmarks for new functions as tsb library grows
-  2. Look for any remaining options-API variants not yet benchmarked
-  3. Check for any new src/ modules added since iteration 280
+- **Add more benchmarks** (canonical branch has unpushed commit cf706eb with 639 pairs, ready to push):
+  1. Next iter: push existing cf706eb commit via safeoutputs push_to_pull_request_branch (create PR first since existing_pr is null)
+  2. After push: continue adding benchmarks for new functions as tsb library grows
+  3. Look for any remaining options-API variants not yet benchmarked
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 281 — 2026-04-22T09:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24787133298)
+
+- **Status**: ⚠️ Error (MCP session expired before push)
+- **Change**: Prepared 6 new pairs: aggNamed, nanmin/nanmax/nanvar, ewm span/alpha, MultiIndex.at/toList, nuniqueSeries/nuniqueDataFrame, anyDataFrame/allDataFrame boolOnly
+- **Metric**: 639 (would have been, from 633 canonical baseline; push failed)
+- **Commit**: cf706eb (local only, not pushed)
+- **Notes**: Canonical branch was at 633 (synced with main). Added 6 new pairs for 639. MCP session expired — could not push to GitHub. Next iter should push these committed changes or add more pairs.
 
 ### Iteration 280 — 2026-04-22T08:37 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24768692351)
 
