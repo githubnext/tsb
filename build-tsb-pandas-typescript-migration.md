@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T05:50:18Z |
-| Iteration Count | 240 |
-| Best Metric | 118 |
+| Last Run | 2026-04-22T06:41:00Z |
+| Iteration Count | 241 |
+| Best Metric | 120 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #174 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, accepted, error, error, error, accepted, accepted, accepted, pending-ci |
+| Recent Statuses | error, accepted, error, error, error, accepted, accepted, accepted, pending-ci, accepted |
 
 ---
 
@@ -40,10 +40,12 @@
 - `stats/between.ts` ✅ iter 240: seriesBetween (pandas Series.between)
 - `stats/update.ts` ✅ iter 240: seriesUpdate/dataFrameUpdate (pandas DataFrame.update)
 - `stats/filter_labels.ts` ✅ iter 240: filterDataFrame/filterSeries (pandas DataFrame.filter)
+- `stats/combine.ts` ✅ iter 241: combineSeries/combineDataFrame (pandas Series/DataFrame.combine)
+- `stats/notna_boolean.ts` ✅ iter 241: keepTrue/keepFalse/filterBy boolean-mask helpers
+- Note: `stats/assign.ts` already exists as `core/assign.ts` (dataFrameAssign) — skip
 - `core/str_accessor` — add `.str.extractall()` method (blocked by circular dep)
-- Next: `stats/combine.ts` — Series.combine / DataFrame.combine
-- Next: `stats/notna_boolean.ts` — boolean indexing helpers (keepTrue/keepFalse/filterBy)
-- Next: `stats/assign.ts` — DataFrame.assign (add/modify columns fluently)
+- Next: `stats/clip_series_df.ts` — more clip variants (lower/upper per-element arrays)
+- Next: `stats/melt_extended.ts` — wide_to_long, melt with value_vars patterns
 
 ---
 
@@ -71,8 +73,8 @@
 
 - `core/str_accessor` — wire `.str.extractall()` via late-binding (inject DataFrame factory)
 - `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
-- `stats/combine.ts` — Series.combine / DataFrame.combine
-- `stats/notna_boolean.ts` — boolean indexing helpers (keepTrue/keepFalse/filterBy)
+- `stats/clip_series_df.ts` — more clip variants (lower/upper per-element arrays)
+- `stats/melt_extended.ts` — wide_to_long, melt with value_vars patterns
 - `stats/assign.ts` — DataFrame.assign: add/modify columns fluently
 - `stats/clip_series_df.ts` — more clip variants (lower/upper per-element)
 - `stats/melt_extended.ts` — wide_to_long, melt with value_vars patterns
@@ -81,12 +83,8 @@
 
 ## 📊 Iteration History
 
+### Iter 241 — 2026-04-22 06:41 UTC — ✅ Accepted (CI pending) — +combineSeries/combineDataFrame + keepTrue/keepFalse/filterBy. Metric: 120 (+2). Commit: c2d3aa8. [Run](https://github.com/githubnext/tsessebe/actions/runs/24764149736)
 ### Iter 240 — 2026-04-22 05:50 UTC — ✅ Accepted (CI pending) — +seriesBetween + seriesUpdate/dataFrameUpdate + filterDataFrame/filterSeries. Metric: 118 (+3). Commit: 633480e. [Run](https://github.com/githubnext/tsessebe/actions/runs/24762480645)
-### Iter 239 — 2026-04-22 05:12 UTC — ✅ Accepted — Fix 5 TS type errors from iter 237 + +swapLevelSeries/DataFrame/reorderLevels + truncateSeries/DataFrame. Metric: 115→118? (reported 117 +2). Commit: 9bfae87. [Run](https://github.com/githubnext/tsessebe/actions/runs/24761017221)
-### Iter 238 — 2026-04-22 03:41 UTC — ❌ never pushed (state premature) — +swapLevelDataFrame/swapLevelSeries/reorderLevels + truncateDataFrame/truncateSeries. [Run](https://github.com/githubnext/tsessebe/actions/runs/24758931868)
-### Iter 237 — 2026-04-22 00:42 UTC — ✅ +cutBinsToFrame/cutBinCounts/binEdges + xsDataFrame/xsSeries. Metric: 113 (+2). Commit: b542fde. [Run](https://github.com/githubnext/tsessebe/actions/runs/24753646544)
-### Iter 236 — 2026-04-21 23:16 UTC — (state discrepancy: commit 7dc2dc8 not found in branch; iter 237 re-implements same metric) [Run](https://github.com/githubnext/tsessebe/actions/runs/24751361866)
-### Iter 235 — 2026-04-21 22:18 UTC — ✅ +strFindall/strFindallCount/strFindFirst/strFindallExpand + toJsonDenormalize/toJsonRecords/toJsonSplit/toJsonIndex. Metric: 111. Commit: 3f9fcf0. [Run](https://github.com/githubnext/tsessebe/actions/runs/24749266130)
-### Iter 234 — 2026-04-21 21:47 UTC — ✅ Fix eval_query tests + add strFindall/strFindallCount/strFindFirst. Metric: 110. Commit: 72160d1. [Run](https://github.com/githubnext/tsessebe/actions/runs/24748075361)
-### Iters 218–234 — ✅/⚠️ (metrics 51→110): +jsonNormalize(51), +readExcel(50), +nancumops(58), to_timedelta push failures(224-228), +to_timedelta(60), +date_range(61), +timedelta_range(108), +unique/between(110), +queryDataFrame/evalDataFrame(110), fix eval_query+fromArrays(110).
+### Iter 239 — 2026-04-22 05:12 UTC — ✅ Accepted — Fix 5 TS type errors from iter 237 + +swapLevelSeries/DataFrame/reorderLevels + truncateSeries/DataFrame. Metric: 117. Commit: 9bfae87. [Run](https://github.com/githubnext/tsessebe/actions/runs/24761017221)
+### Iters 218–237 — ✅/⚠️ (metrics 51→115): +jsonNormalize(51), +readExcel(50), +nancumops(58), +to_timedelta(60), +date_range(61), +timedelta_range(108), +unique/between(110), +queryDataFrame/evalDataFrame(110), +strFindall+toJson(111), +cutBinsToFrame+xs(113), fix-type-errors(115).
 ### Iters 53–217 — ✅/⚠️ (metrics 8→50): selectDtypes, interpolate, factorize, pivotTable, crosstab, getDummies, Interval, cut/qcut, clip, sample, duplicated, diff_shift, where_mask, replace, astype, idxmin/idxmax, na_ops, 22+ core features.
