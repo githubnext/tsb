@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T21:30:00Z |
-| Iteration Count | 253 |
-| Best Metric | 134 |
+| Last Run | 2026-04-22T22:58:00Z |
+| Iteration Count | 254 |
+| Best Metric | 135 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #174 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci |
 
 ---
 
@@ -35,17 +35,20 @@
 
 ## 🎯 Current Priorities
 
-Completed iters 239–253:
+Completed iters 239–254:
 - ✅ swaplevel, truncate, between, update, filter_labels, combine, notna_boolean
 - ✅ rename_ops, math_ops, dot_matmul, transform_agg, map_values, at_iat
 - ✅ join/joinAll/crossJoin (iter 247), infer_objects/convertDtypes (iter 247)
 - ✅ merge_asof (iter 248), merge_ordered (iter 249)
 - ✅ resample (SeriesResampler/DataFrameResampler, D/H/T/S/W/M/Q/A, agg fns) (iter 251)
-- ✅ period_range (standalone top-level factory: start+periods, end+periods, start+end, freq inference) (iter 253)
+- ✅ str.normalize() (NFC/NFD/NFKC/NFKD) on StringAccessor (iter 254)
+- ✅ ewmCovMatrix/ewmCorrMatrix (pairwise EWM cov/corr matrices) (iter 254)
+- ✅ periodRange() (top-level factory: start+periods, end+periods, start+end) (iter 254)
 
 Next:
-- `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
-- `stats/ewm_extended.ts` — ewm span/halflife/alpha/com variations (DataFrameEwm extended)
+- `DataFrame.pipe()` / `Series.pipe()` with arbitrary function composition
+- `DataFrame.xs()` with `drop_level=False` support
+- `df.where(cond, other=df2)` — fill-with-other-dataframe variant
 
 ---
 
@@ -74,13 +77,14 @@ Next:
 ## 🔭 Future Directions
 
 - `core/str_accessor` — wire `.str.extractall()` via late-binding (inject DataFrame factory)
-- `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
-- `stats/ewm_extended.ts` — DataFrame EWM extended (cov/corr per column pair)
+- `DataFrame.pipe()` / `Series.pipe()` with arbitrary function composition
+- `df.where(cond, other=df2)` — fill-with-other-dataframe variant
 
 ---
 
 ## 📊 Iteration History
-### Iter 253 — 2026-04-22 21:30 UTC — ⏳ pending-ci — +period_range (top-level factory: start+periods/end+periods/start+end, freq inference). Metric: 134 (+1). Commit: d0cb0a3. [Run](https://github.com/githubnext/tsessebe/actions/runs/24803209740)
+### Iter 254 — 2026-04-22 22:58 UTC — ⏳ pending-ci — +str.normalize (NFC/NFD/NFKC/NFKD), +ewmCovMatrix/ewmCorrMatrix, +periodRange. Metric: 135 (+2 from true baseline 133). Commit: e9698f8. [Run](https://github.com/githubnext/tsessebe/actions/runs/24806595120)
+### Iter 253 — 2026-04-22 21:30 UTC — ⚠️ Lost (pending-ci never resolved) — +period_range. Claimed metric: 134 but commit d0cb0a3 never merged.
 ### Iters 246–252 — ✅/⚠️ (metrics 128→133): +resample, +mergeOrdered, +mergeAsof, +join/joinAll/crossJoin, +inferObjects/convertDtypes. Two iterations lost due to branch sync issues.
 ### Iter 245 — 2026-04-22 11:55 UTC — ✅ Accepted — +seriesMap +dataFrameAt/dataFrameIat. Metric: 128 (+2). Commit: db85e5c.
 ### Iters 239–244 — ✅ (metrics 117→126): +swapLevel/truncate, +between/Update/filter, +combine/keepTrue/keepFalse, +squeeze/item/bool/firstValidIndex/autoCorr/corrWith, +rename_ops/math_ops, +dot_matmul/transform_agg.
