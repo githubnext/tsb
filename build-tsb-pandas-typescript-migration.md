@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-21T23:16:22Z |
-| Iteration Count | 236 |
+| Last Run | 2026-04-22T00:42:00Z |
+| Iteration Count | 237 |
 | Best Metric | 113 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, accepted, error, error, error, accepted, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, error, accepted, error, error, error, accepted, accepted, accepted |
 
 ---
 
@@ -35,11 +35,11 @@
 
 ## 🎯 Current Priorities
 
-- `stats/cut_bins_to_frame.ts` — convert cut/qcut results to DataFrame of bin info
-- `core/str_accessor` — add `.str.extractall()` method (blocked by circular dep; standalone `strExtractAll` implemented in iter 236)
-- `stats/str_extract.ts` ✅ iter 236: strExtractAll, strGetDummies, strSplitSeries
-- `stats/str_findall.ts` ✅ iter 235: strFindall, strFindallCount, strFindFirst, strFindallExpand
-- `io/to_json_normalize.ts` ✅ iter 235: toJsonDenormalize, toJsonRecords, toJsonSplit, toJsonIndex
+- `stats/cut_bins_to_frame.ts` ✅ iter 237: cutBinsToFrame, cutBinCounts, binEdges
+- `stats/xs.ts` ✅ iter 237: xsDataFrame, xsSeries (cross-section selection)
+- `core/str_accessor` — add `.str.extractall()` method (blocked by circular dep; standalone `strExtractAll` already in string_ops.ts)
+- Next: `stats/swaplevel.ts` — swapLevel/reorderLevels for MultiIndex DataFrames
+- Next: `stats/truncate.ts` — DataFrame/Series truncation by index
 
 ---
 
@@ -72,7 +72,8 @@
 
 ## 📊 Iteration History
 
-### Iter 236 — 2026-04-21 23:16 UTC — ✅ +strExtractAll/strGetDummies/strSplitSeries. Metric: 113 (+2). Commit: 7dc2dc8. [Run](https://github.com/githubnext/tsessebe/actions/runs/24751361866)
+### Iter 237 — 2026-04-22 00:42 UTC — ⏳ CI pending — +cutBinsToFrame/cutBinCounts/binEdges + xsDataFrame/xsSeries. Metric: 113 (+2). Commit: b542fde. [Run](https://github.com/githubnext/tsessebe/actions/runs/24753646544)
+### Iter 236 — 2026-04-21 23:16 UTC — (state discrepancy: commit 7dc2dc8 not found in branch; iter 237 re-implements same metric) [Run](https://github.com/githubnext/tsessebe/actions/runs/24751361866)
 ### Iter 235 — 2026-04-21 22:18 UTC — ✅ +strFindall/strFindallCount/strFindFirst/strFindallExpand + toJsonDenormalize/toJsonRecords/toJsonSplit/toJsonIndex. Metric: 111. Commit: 3f9fcf0. [Run](https://github.com/githubnext/tsessebe/actions/runs/24749266130)
 ### Iter 234 — 2026-04-21 21:47 UTC — ✅ Fix eval_query tests + add strFindall/strFindallCount/strFindFirst. Metric: 110. Commit: 72160d1. [Run](https://github.com/githubnext/tsessebe/actions/runs/24748075361)
 ### Iters 218–234 — ✅/⚠️ (metrics 51→110): +jsonNormalize(51), +readExcel(50), +nancumops(58), to_timedelta push failures(224-228), +to_timedelta(60), +date_range(61), +timedelta_range(108), +unique/between(110), +queryDataFrame/evalDataFrame(110), fix eval_query+fromArrays(110).
