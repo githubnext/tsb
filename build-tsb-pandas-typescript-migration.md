@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T07:50:00Z |
-| Iteration Count | 242 |
-| Best Metric | 122 |
+| Last Run | 2026-04-22T09:52:00Z |
+| Iteration Count | 243 |
+| Best Metric | 124 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #174 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, accepted, error, error, error, accepted, accepted, accepted, pending-ci |
+| Recent Statuses | error, accepted, error, error, error, accepted, accepted, accepted, pending-ci, accepted |
 
 ---
 
@@ -42,10 +42,12 @@
 - `stats/filter_labels.ts` ✅ iter 240: filterDataFrame/filterSeries (pandas DataFrame.filter)
 - `stats/combine.ts` ✅ iter 241: combineSeries/combineDataFrame (pandas Series/DataFrame.combine)
 - `stats/notna_boolean.ts` ✅ iter 241: keepTrue/keepFalse/filterBy boolean-mask helpers
+- `stats/rename_ops.ts` ✅ iter 243: renameSeriesIndex/renameDataFrame/addPrefixDataFrame/addSuffixDataFrame/addPrefixSeries/addSuffixSeries/setAxisSeries/setAxisDataFrame/seriesToFrame
+- `stats/math_ops.ts` ✅ iter 243: absSeries/absDataFrame/roundSeries/roundDataFrame
 - Note: `stats/assign.ts` already exists as `core/assign.ts` (dataFrameAssign) — skip
 - `core/str_accessor` — add `.str.extractall()` method (blocked by circular dep)
-- Next: `stats/clip_series_df.ts` — more clip variants (lower/upper per-element arrays)
-- Next: `stats/melt_extended.ts` — wide_to_long, melt with value_vars patterns
+- Next: `stats/dot_matmul.ts` — Series.dot/DataFrame.dot (matrix multiplication)
+- Next: `stats/transform_agg.ts` — Series.transform/DataFrame.transform standalone
 
 ---
 
@@ -73,21 +75,16 @@
 
 - `core/str_accessor` — wire `.str.extractall()` via late-binding (inject DataFrame factory)
 - `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
-- `stats/scalar_extract.ts` ✅ iter 242: squeezeSeries/squeezeDataFrame/itemSeries/boolSeries/boolDataFrame/firstValidIndex/lastValidIndex
-- `stats/corrwith.ts` ✅ iter 242: autoCorr (lag-N autocorrelation) + corrWith (DataFrame.corrwith)
-- Next: `stats/clip_series_df.ts` — more clip variants (lower/upper per-element arrays)
-- Next: `stats/melt_extended.ts` — wide_to_long, melt with value_vars patterns
-- `stats/assign.ts` — DataFrame.assign: add/modify columns fluently
-- `stats/clip_series_df.ts` — more clip variants (lower/upper per-element)
-- `stats/melt_extended.ts` — wide_to_long, melt with value_vars patterns
+- `stats/rename_ops.ts` ✅ iter 243: renameSeriesIndex/DataFrame, addPrefix/Suffix, setAxis, seriesToFrame
+- `stats/math_ops.ts` ✅ iter 243: absSeries/absDataFrame/roundSeries/roundDataFrame
+- Next: `stats/dot_matmul.ts` — Series.dot/DataFrame.dot (matrix multiplication)
+- Next: `stats/transform_agg.ts` — Series.transform/DataFrame.transform (standalone, not groupby)
 
 ---
 
 ## 📊 Iteration History
 
-### Iter 242 — 2026-04-22 07:50 UTC — ✅ Accepted (CI pending) — +squeezeSeries/DataFrame/itemSeries/boolSeries/boolDataFrame/firstValidIndex/lastValidIndex + autoCorr/corrWith. Metric: 122 (+2). Commit: e86b389. [Run](https://github.com/githubnext/tsessebe/actions/runs/24766209151)
-### Iter 241 — 2026-04-22 06:41 UTC — ✅ Accepted (CI pending) — +combineSeries/combineDataFrame + keepTrue/keepFalse/filterBy. Metric: 120 (+2). Commit: c2d3aa8. [Run](https://github.com/githubnext/tsessebe/actions/runs/24764149736)
-### Iter 240 — 2026-04-22 05:50 UTC — ✅ Accepted (CI pending) — +seriesBetween + seriesUpdate/dataFrameUpdate + filterDataFrame/filterSeries. Metric: 118 (+3). Commit: 633480e. [Run](https://github.com/githubnext/tsessebe/actions/runs/24762480645)
-### Iter 239 — 2026-04-22 05:12 UTC — ✅ Accepted — Fix 5 TS type errors from iter 237 + +swapLevelSeries/DataFrame/reorderLevels + truncateSeries/DataFrame. Metric: 117. Commit: 9bfae87. [Run](https://github.com/githubnext/tsessebe/actions/runs/24761017221)
-### Iters 218–237 — ✅/⚠️ (metrics 51→115): +jsonNormalize(51), +readExcel(50), +nancumops(58), +to_timedelta(60), +date_range(61), +timedelta_range(108), +unique/between(110), +queryDataFrame/evalDataFrame(110), +strFindall+toJson(111), +cutBinsToFrame+xs(113), fix-type-errors(115).
+### Iter 243 — 2026-04-22 09:52 UTC — ✅ Accepted — +rename_ops (renameSeriesIndex/DataFrame, addPrefix/Suffix, setAxis, seriesToFrame) +math_ops (absSeries/absDataFrame/roundSeries/roundDataFrame). Metric: 124 (+2). Commit: ce632a1. [Run](https://github.com/githubnext/tsessebe/actions/runs/24771121921)
+### Iters 239–242 — ✅ (metrics 117→122): +swapLevel/reorderLevels/truncate(117), +seriesBetween/Update/filter(118), +combineSeries/keepTrue/keepFalse(120), +squeezeDF/itemSeries/boolSeries/firstValidIndex/autoCorr/corrWith(122).
+### Iters 218–238 — ✅/⚠️ (metrics 51→115): +jsonNormalize, +readExcel, +nancumops, +to_timedelta, +date_range, +timedelta_range, +queryDataFrame/evalDataFrame, +strFindall+toJson, +cutBinsToFrame+xs, fix-type-errors.
 ### Iters 53–217 — ✅/⚠️ (metrics 8→50): selectDtypes, interpolate, factorize, pivotTable, crosstab, getDummies, Interval, cut/qcut, clip, sample, duplicated, diff_shift, where_mask, replace, astype, idxmin/idxmax, na_ops, 22+ core features.
