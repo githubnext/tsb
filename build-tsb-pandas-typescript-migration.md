@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T17:23:58Z |
-| Iteration Count | 250 |
+| Last Run | 2026-04-22T18:55:41Z |
+| Iteration Count | 251 |
 | Best Metric | 133 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci |
+| Recent Statuses | error, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci |
 
 ---
 
@@ -35,16 +35,17 @@
 
 ## 🎯 Current Priorities
 
-Completed iters 239–250:
+Completed iters 239–251:
 - ✅ swaplevel, truncate, between, update, filter_labels, combine, notna_boolean
 - ✅ rename_ops, math_ops, dot_matmul, transform_agg, map_values, at_iat
 - ✅ join/joinAll/crossJoin (iter 247), infer_objects/convertDtypes (iter 247)
 - ✅ merge_asof (iter 248), merge_ordered (iter 249), period_range (iter 250)
+- ✅ resample (iter 251) — time-based groupby agg for Series/DataFrame
 
 Next:
-- `stats/map_values.ts` — Series.map (fn/dict/Map/Series mapper, na_action) if not yet done
-- `stats/resample.ts` — DataFrame/Series.resample() time-based groupby
-- `str.normalize()` — Unicode normalization on StringAccessor
+- `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
+- `stats/expanding.ts` — expanding window aggregation (pandas-style)
+- `core/interval.ts` / `IntervalIndex` — interval data type and indexing
 
 ---
 
@@ -77,6 +78,7 @@ Next:
 ---
 
 ## 📊 Iteration History
+### Iter 251 — 2026-04-22 18:55 UTC — ⏳ pending-ci — +resample (time-based resampling for Series/DataFrame: 14 freq strings, sum/mean/min/max/count/first/last/std/var/size/ohlc/agg, empty bin fill). Metric: 134 (+1). Commit: 873c5d2. [Run](https://github.com/githubnext/tsessebe/actions/runs/24795318981)
 ### Iter 250 — 2026-04-22 17:23 UTC — ⏳ pending-ci — +periodRange (standalone period_range top-level fn). Metric: 133 (+1). Commit: 09beefb. [Run](https://github.com/githubnext/tsessebe/actions/runs/24792490497)
 
 ### Iter 249 — 2026-04-22 16:34 UTC — ⏳ pending-ci — +mergeOrdered (ordered outer/inner/left/right merge, fill_method:ffill, left_by/right_by groups, left_on/right_on, suffix handling). Metric: 132 (+1). Commit: 0be568b. [Run](https://github.com/githubnext/tsessebe/actions/runs/24790234983)
