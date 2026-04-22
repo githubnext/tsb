@@ -4,7 +4,8 @@
 
 import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
-import { DataFrame, Index, MultiIndex, Scalar, Series } from "../../src/index.ts";
+import { DataFrame, Index, MultiIndex, Series } from "../../src/index.ts";
+import type { Scalar } from "../../src/index.ts";
 import { xsDataFrame, xsSeries } from "../../src/stats/xs.ts";
 
 // ─── xsDataFrame — flat index ─────────────────────────────────────────────────

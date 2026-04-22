@@ -348,9 +348,7 @@ export type { Attrs } from "./core/index.ts";
 export {
   pipe,
   seriesApply,
-  seriesTransform,
   dataFrameApplyMap,
-  dataFrameTransform,
   dataFrameTransformRows,
 } from "./core/index.ts";
 export {

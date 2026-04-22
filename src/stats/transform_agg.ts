@@ -210,7 +210,7 @@ function resolveBuiltin(name: TransformFuncName): (s: Series<Scalar>) => Series<
         running += toNum(v as Scalar);
         out.push(running as Scalar);
       }
-      return new Series<Scalar>({ data: out, index: s.index, name: s.name ?? undefined });
+      return new Series<Scalar>({ data: out, index: s.index, name: s.name });
     };
     case "cumprod": return (s) => {
       const out: Scalar[] = [];
@@ -220,7 +220,7 @@ function resolveBuiltin(name: TransformFuncName): (s: Series<Scalar>) => Series<
         running *= toNum(v as Scalar);
         out.push(running as Scalar);
       }
-      return new Series<Scalar>({ data: out, index: s.index, name: s.name ?? undefined });
+      return new Series<Scalar>({ data: out, index: s.index, name: s.name });
     };
     case "cummin": return (s) => {
       const out: Scalar[] = [];
@@ -231,7 +231,7 @@ function resolveBuiltin(name: TransformFuncName): (s: Series<Scalar>) => Series<
         if (n < running) running = n;
         out.push(running as Scalar);
       }
-      return new Series<Scalar>({ data: out, index: s.index, name: s.name ?? undefined });
+      return new Series<Scalar>({ data: out, index: s.index, name: s.name });
     };
     case "cummax": return (s) => {
       const out: Scalar[] = [];
@@ -242,7 +242,7 @@ function resolveBuiltin(name: TransformFuncName): (s: Series<Scalar>) => Series<
         if (n > running) running = n;
         out.push(running as Scalar);
       }
-      return new Series<Scalar>({ data: out, index: s.index, name: s.name ?? undefined });
+      return new Series<Scalar>({ data: out, index: s.index, name: s.name });
     };
   }
 }
@@ -281,12 +281,12 @@ function applyOneSeries(
     return new Series<Scalar>({
       data: result.values as Scalar[],
       index: s.index,
-      name: name ?? (result.name ?? s.name ?? undefined),
+      name: name ?? result.name ?? s.name,
     });
   }
   // Scalar: broadcast
   const broadcast: Scalar[] = new Array<Scalar>(s.values.length).fill(result as Scalar);
-  return new Series<Scalar>({ data: broadcast, index: s.index, name: name ?? s.name ?? undefined });
+  return new Series<Scalar>({ data: broadcast, index: s.index, name: name ?? s.name });
 }
 
 // ─── seriesTransform ──────────────────────────────────────────────────────────

@@ -145,7 +145,7 @@ export function seriesDotDataFrame(s: Series<Scalar>, df: DataFrame): Series<Sca
   return new Series<Scalar>({
     data: result,
     index: new Index<Label>(colNames as readonly Label[]),
-    name: s.name ?? undefined,
+    name: s.name,
   });
 }
 

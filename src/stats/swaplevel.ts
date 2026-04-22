@@ -80,7 +80,10 @@ function swapLevelsInMultiIndex(mi: MultiIndex, i: number | string, j: number | 
   newNames[pi] = newNames[pj]!;
   newNames[pj] = tmpName;
 
-  return new MultiIndex(newLevels, newCodes, newNames);
+  const arraysSwap = newLevels.map((levelIdx, idx) =>
+    (newCodes[idx] as readonly number[]).map((code) => (levelIdx.values as readonly Label[])[code] ?? null),
+  );
+  return MultiIndex.fromArrays(arraysSwap, { names: newNames });
 }
 
 /**
@@ -97,7 +100,10 @@ function reorderLevelsInMultiIndex(mi: MultiIndex, order: readonly (number | str
   const newCodes = resolved.map((i) => mi.codes[i]!);
   const newNames = resolved.map((i) => mi.names[i] ?? null);
 
-  return new MultiIndex(newLevels, newCodes, newNames);
+  const arraysReorder = newLevels.map((levelIdx, idx) =>
+    (newCodes[idx] as readonly number[]).map((code) => (levelIdx.values as readonly Label[])[code] ?? null),
+  );
+  return MultiIndex.fromArrays(arraysReorder, { names: newNames });
 }
 
 // ─── swapLevelSeries ──────────────────────────────────────────────────────────

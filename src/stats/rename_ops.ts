@@ -87,7 +87,7 @@ export function renameSeriesIndex<T extends Scalar>(
   return new Series<T>({
     data: s.values,
     index: new Index<Label>(newLabels),
-    name: s.name ?? undefined,
+    name: s.name,
     dtype: s.dtype,
   });
 }
@@ -244,7 +244,7 @@ export function setAxisSeries<T extends Scalar>(
   return new Series<T>({
     data: s.values,
     index: new Index<Label>(labels),
-    name: s.name ?? undefined,
+    name: s.name,
     dtype: s.dtype,
   });
 }

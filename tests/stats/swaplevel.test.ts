@@ -14,13 +14,13 @@ import * as fc from "fast-check";
 import {
   DataFrame,
   MultiIndex,
-  Scalar,
   Series,
   reorderLevelsDataFrame,
   reorderLevelsSeries,
   swapLevelDataFrame,
   swapLevelSeries,
 } from "../../src/index.ts";
+import type { Scalar } from "../../src/index.ts";
 import type { Index } from "../../src/index.ts";
 import type { Label } from "../../src/types.ts";
 
@@ -35,7 +35,7 @@ function seriesWithMultiIndex(
   tuples: (readonly Label[])[],
   names?: (string | null)[],
 ): Series<Scalar> {
-  const mi = MultiIndex.fromTuples(tuples, { names });
+  const mi = MultiIndex.fromTuples(tuples, names !== undefined ? { names } : undefined);
   return new Series<Scalar>({
     data,
     index: mi as unknown as Index<Label>,
@@ -47,7 +47,7 @@ function dfWithMultiIndex(
   tuples: (readonly Label[])[],
   names?: (string | null)[],
 ): DataFrame {
-  const mi = MultiIndex.fromTuples(tuples, { names });
+  const mi = MultiIndex.fromTuples(tuples, names !== undefined ? { names } : undefined);
   const firstCol = Object.keys(data)[0]!;
   const df = DataFrame.fromColumns(data, {
     index: mi as unknown as Index<Label>,

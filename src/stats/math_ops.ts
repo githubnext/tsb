@@ -59,7 +59,7 @@ export function absSeries(s: Series<Scalar>): Series<Scalar> {
     if (typeof v === "number") return Math.abs(v);
     return v; // non-numeric (string, boolean) — pass through unchanged
   });
-  return new Series<Scalar>({ data, index: s.index, name: s.name ?? undefined });
+  return new Series<Scalar>({ data, index: s.index, name: s.name });
 }
 
 // ─── absDataFrame ─────────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ export function roundSeries(s: Series<Scalar>, decimals = 0): Series<Scalar> {
     if (typeof v === "number") return roundNum(v, decimals);
     return v;
   });
-  return new Series<Scalar>({ data, index: s.index, name: s.name ?? undefined });
+  return new Series<Scalar>({ data, index: s.index, name: s.name });
 }
 
 // ─── roundDataFrame ───────────────────────────────────────────────────────────
