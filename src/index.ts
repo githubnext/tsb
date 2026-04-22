@@ -559,3 +559,7 @@ export type { ClosedType } from "./stats/index.ts";
 export { nunique } from "./stats/index.ts";
 export { queryDataFrame, evalDataFrame } from "./stats/index.ts";
 export { strFindall, strFindallCount, strFindFirst, strFindallExpand } from "./stats/index.ts";
+export { cutBinsToFrame, cutBinCounts, binEdges } from "./stats/index.ts";
+export type { CutBinsToFrameOptions } from "./stats/index.ts";
+export { xsDataFrame, xsSeries } from "./stats/index.ts";
+export type { XsDataFrameOptions, XsSeriesOptions } from "./stats/index.ts";

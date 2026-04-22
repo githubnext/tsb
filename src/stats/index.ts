@@ -383,3 +383,11 @@ export type { ClosedType } from "./interval.ts";
 export { nunique } from "./reduce_ops.ts";
 export { queryDataFrame, evalDataFrame } from "./eval_query.ts";
 export { strFindall, strFindallCount, strFindFirst, strFindallExpand } from "./str_findall.ts";
+export {
+  cutBinsToFrame,
+  cutBinCounts,
+  binEdges,
+} from "./cut_bins_to_frame.ts";
+export type { CutBinsToFrameOptions } from "./cut_bins_to_frame.ts";
+export { xsDataFrame, xsSeries } from "./xs.ts";
+export type { XsDataFrameOptions, XsSeriesOptions } from "./xs.ts";
