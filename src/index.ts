@@ -581,3 +581,17 @@ export type { FilterLabelsOptions } from "./stats/index.ts";
 export { combineSeries, combineDataFrame } from "./stats/index.ts";
 export type { CombineDataFrameOptions } from "./stats/index.ts";
 export { keepTrue, keepFalse, filterBy } from "./stats/index.ts";
+export {
+  squeezeSeries,
+  squeezeDataFrame,
+  itemSeries,
+  boolSeries,
+  boolDataFrame,
+  firstValidIndex,
+  lastValidIndex,
+  dataFrameFirstValidIndex,
+  dataFrameLastValidIndex,
+} from "./stats/index.ts";
+export type { SqueezeResult } from "./stats/index.ts";
+export { autoCorr, corrWith } from "./stats/index.ts";
+export type { CorrWithOptions } from "./stats/index.ts";

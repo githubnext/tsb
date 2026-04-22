@@ -410,3 +410,17 @@ export type { FilterLabelsOptions } from "./filter_labels.ts";
 export { combineSeries, combineDataFrame } from "./combine.ts";
 export type { CombineDataFrameOptions } from "./combine.ts";
 export { keepTrue, keepFalse, filterBy } from "./notna_boolean.ts";
+export {
+  squeezeSeries,
+  squeezeDataFrame,
+  itemSeries,
+  boolSeries,
+  boolDataFrame,
+  firstValidIndex,
+  lastValidIndex,
+  dataFrameFirstValidIndex,
+  dataFrameLastValidIndex,
+} from "./scalar_extract.ts";
+export type { SqueezeResult } from "./scalar_extract.ts";
+export { autoCorr, corrWith } from "./corrwith.ts";
+export type { CorrWithOptions } from "./corrwith.ts";
