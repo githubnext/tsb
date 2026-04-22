@@ -400,3 +400,9 @@ export {
 export type { SwapLevelDataFrameOptions, ReorderLevelsDataFrameOptions } from "./swaplevel.ts";
 export { truncateSeries, truncateDataFrame } from "./truncate.ts";
 export type { TruncateOptions } from "./truncate.ts";
+export { seriesBetween } from "./between.ts";
+export type { BetweenInclusive, BetweenOptions } from "./between.ts";
+export { seriesUpdate, dataFrameUpdate } from "./update.ts";
+export type { UpdateOptions } from "./update.ts";
+export { filterDataFrame, filterSeries } from "./filter_labels.ts";
+export type { FilterLabelsOptions } from "./filter_labels.ts";

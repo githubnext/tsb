@@ -572,3 +572,9 @@ export {
 export type { SwapLevelDataFrameOptions, ReorderLevelsDataFrameOptions } from "./stats/swaplevel.ts";
 export { truncateSeries, truncateDataFrame } from "./stats/truncate.ts";
 export type { TruncateOptions } from "./stats/truncate.ts";
+export { seriesBetween } from "./stats/index.ts";
+export type { BetweenInclusive, BetweenOptions } from "./stats/index.ts";
+export { seriesUpdate, dataFrameUpdate } from "./stats/index.ts";
+export type { UpdateOptions } from "./stats/index.ts";
+export { filterDataFrame, filterSeries } from "./stats/index.ts";
+export type { FilterLabelsOptions } from "./stats/index.ts";
