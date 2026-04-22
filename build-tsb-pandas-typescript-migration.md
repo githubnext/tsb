@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T19:10:00Z |
-| Iteration Count | 251 |
-| Best Metric | 133 |
+| Last Run | 2026-04-22T20:22:00Z |
+| Iteration Count | 252 |
+| Best Metric | 134 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #174 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci |
+| Recent Statuses | accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci |
 
 ---
 
@@ -35,17 +35,17 @@
 
 ## 🎯 Current Priorities
 
-Completed iters 239–251:
+Completed iters 239–252:
 - ✅ swaplevel, truncate, between, update, filter_labels, combine, notna_boolean
 - ✅ rename_ops, math_ops, dot_matmul, transform_agg, map_values, at_iat
 - ✅ join/joinAll/crossJoin (iter 247), infer_objects/convertDtypes (iter 247)
 - ✅ merge_asof (iter 248), merge_ordered (iter 249)
 - ✅ resample (SeriesResampler/DataFrameResampler, D/H/T/S/W/M/Q/A, agg fns) (iter 251)
+- ✅ period_range (standalone period_range() factory, start+periods/end+periods/start+end modes) (iter 252)
 
 Next:
 - `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
-- `core/period_range.ts` — standalone top-level `period_range()` function
-- `stats/ewm_extended.ts` — ewm span/halflife/alpha/com variations
+- `stats/ewm_extended.ts` — ewm span/halflife/alpha/com variations (DataFrameEwm extended)
 
 ---
 
@@ -75,11 +75,12 @@ Next:
 
 - `core/str_accessor` — wire `.str.extractall()` via late-binding (inject DataFrame factory)
 - `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
-- `stats/resample.ts` — DataFrame/Series.resample() time-based groupby aggregation
+- `stats/ewm_extended.ts` — DataFrame EWM extended (cov/corr per column pair)
 
 ---
 
 ## 📊 Iteration History
+### Iter 252 — 2026-04-22 20:22 UTC — ⏳ pending-ci — +period_range (standalone period_range() factory: start+periods, end+periods, start+end modes, freq inference from Period objects, full property-based tests). Metric: 134 (+1). Commit: 9deb56b. [Run](https://github.com/githubnext/tsessebe/actions/runs/24800650435)
 ### Iter 251 — 2026-04-22 19:10 UTC — ⏳ pending-ci — +resample (SeriesResampler/DataFrameResampler: D/H/T/S/W/M/Q/A freq, sum/mean/min/max/count/first/last/std/size/median/agg, property-based tests). Metric: 133 (+1). Commit: 6926720. [Run](https://github.com/githubnext/tsessebe/actions/runs/24796561104)
 
 ### Iter 250 — 2026-04-22 17:23 UTC — ⏳ pending-ci — +periodRange (standalone period_range top-level fn). Metric: 133 (+1). Commit: 09beefb. [Run](https://github.com/githubnext/tsessebe/actions/runs/24792490497)
