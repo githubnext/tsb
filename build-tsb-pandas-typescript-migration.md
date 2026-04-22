@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T11:55:00Z |
-| Iteration Count | 245 |
-| Best Metric | 128 |
+| Last Run | 2026-04-22T12:51:32Z |
+| Iteration Count | 246 |
+| Best Metric | 130 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #174 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, error, error, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | error, error, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -35,23 +35,15 @@
 
 ## 🎯 Current Priorities
 
-- `stats/swaplevel.ts` ✅ iter 239: swapLevelDataFrame/swapLevelSeries/reorderLevelsDataFrame/reorderLevelsSeries
-- `stats/truncate.ts` ✅ iter 239: truncateDataFrame/truncateSeries
-- `stats/between.ts` ✅ iter 240: seriesBetween (pandas Series.between)
-- `stats/update.ts` ✅ iter 240: seriesUpdate/dataFrameUpdate (pandas DataFrame.update)
-- `stats/filter_labels.ts` ✅ iter 240: filterDataFrame/filterSeries (pandas DataFrame.filter)
-- `stats/combine.ts` ✅ iter 241: combineSeries/combineDataFrame (pandas Series/DataFrame.combine)
-- `stats/notna_boolean.ts` ✅ iter 241: keepTrue/keepFalse/filterBy boolean-mask helpers
-- `stats/rename_ops.ts` ✅ iter 243: renameSeriesIndex/renameDataFrame/addPrefixDataFrame/addSuffixDataFrame/addPrefixSeries/addSuffixSeries/setAxisSeries/setAxisDataFrame/seriesToFrame
-- `stats/math_ops.ts` ✅ iter 243: absSeries/absDataFrame/roundSeries/roundDataFrame
-- `stats/dot_matmul.ts` ✅ iter 244: seriesDotSeries/DataFrame/dataFrameDotSeries/DataFrame
-- `stats/transform_agg.ts` ✅ iter 244: seriesTransform/dataFrameTransform (20 built-ins, single/array/record forms)
-- `stats/map_values.ts` ✅ iter 245: seriesMap (pandas Series.map — fn/dict/Map/Series mapper, na_action)
-- `stats/at_iat.ts` ✅ iter 245: dataFrameAt/dataFrameIat (fast scalar access by label/position)
-- Note: `stats/assign.ts` already exists as `core/assign.ts` (dataFrameAssign) — skip
-- `core/str_accessor` — add `.str.extractall()` method (blocked by circular dep)
-- Next: `stats/interval_range.ts` — pd.interval_range (create IntervalIndex from range params)
-- Next: `stats/bdate_range.ts` — pd.bdate_range (business day date range)
+Completed iters 239–246:
+- ✅ swaplevel, truncate, between, update, filter_labels, combine, notna_boolean
+- ✅ rename_ops, math_ops, dot_matmul, transform_agg, map_values, at_iat
+- ✅ merge_asof (iter 246), merge_ordered (iter 246)
+
+Next:
+- `stats/period_range.ts` — standalone `period_range()` wrapper
+- `merge/join.ts` — DataFrame.join (label-based join on index)
+- `stats/infer_objects.ts` — infer_objects / convert_dtypes helpers
 
 ---
 
@@ -79,12 +71,14 @@
 
 - `core/str_accessor` — wire `.str.extractall()` via late-binding (inject DataFrame factory)
 - `str.normalize()` — Unicode normalization (NFC/NFD/NFKC/NFKD) on StringAccessor
-- `stats/interval_range.ts` — pd.interval_range (create IntervalIndex from range params)
-- `stats/bdate_range.ts` — pd.bdate_range (business day date range)
+- `merge/join.ts` — DataFrame.join (label-based join, shorthand for merge on index)
+- `stats/period_range.ts` — standalone `period_range()` top-level function
+- `stats/infer_objects.ts` — infer_objects / convert_dtypes helpers
 
 ---
 
 ## 📊 Iteration History
+### Iter 246 — 2026-04-22 12:51 UTC — ✅ Accepted — +merge_asof (asof/nearest-key merge, backward/forward/nearest, tolerance, by-groups) +merge_ordered (sorted outer merge, fill_method=ffill). Metric: 130 (+2). Commit: 268081c. [Run](https://github.com/githubnext/tsessebe/actions/runs/24779203996)
 
 ### Iter 245 — 2026-04-22 11:55 UTC — ✅ Accepted — +seriesMap (pandas Series.map: fn/dict/Map/Series mapper, na_action) +dataFrameAt/dataFrameIat (fast scalar access). Metric: 128 (+2). Commit: db85e5c. [Run](https://github.com/githubnext/tsessebe/actions/runs/24776626741)
 ### Iters 239–244 — ✅ (metrics 117→126): +swapLevel/truncate, +between/Update/filter, +combine/keepTrue/keepFalse, +squeeze/item/bool/firstValidIndex/autoCorr/corrWith, +rename_ops/math_ops, +dot_matmul/transform_agg.
