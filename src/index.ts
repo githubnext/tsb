@@ -578,3 +578,6 @@ export { seriesUpdate, dataFrameUpdate } from "./stats/index.ts";
 export type { UpdateOptions } from "./stats/index.ts";
 export { filterDataFrame, filterSeries } from "./stats/index.ts";
 export type { FilterLabelsOptions } from "./stats/index.ts";
+export { combineSeries, combineDataFrame } from "./stats/index.ts";
+export type { CombineDataFrameOptions } from "./stats/index.ts";
+export { keepTrue, keepFalse, filterBy } from "./stats/index.ts";

@@ -406,3 +406,7 @@ export { seriesUpdate, dataFrameUpdate } from "./update.ts";
 export type { UpdateOptions } from "./update.ts";
 export { filterDataFrame, filterSeries } from "./filter_labels.ts";
 export type { FilterLabelsOptions } from "./filter_labels.ts";
+
+export { combineSeries, combineDataFrame } from "./combine.ts";
+export type { CombineDataFrameOptions } from "./combine.ts";
+export { keepTrue, keepFalse, filterBy } from "./notna_boolean.ts";
