@@ -438,3 +438,11 @@ export {
 export type { LabelMapper, RenameDataFrameOptions } from "./rename_ops.ts";
 export { absSeries, absDataFrame, roundSeries, roundDataFrame } from "./math_ops.ts";
 export type { RoundDataFrameSpec } from "./math_ops.ts";
+export {
+  seriesDotSeries,
+  seriesDotDataFrame,
+  dataFrameDotSeries,
+  dataFrameDotDataFrame,
+} from "./dot_matmul.ts";
+export { seriesTransform, dataFrameTransform } from "./transform_agg.ts";
+export type { TransformFunc, TransformFuncName, DataFrameTransformOptions } from "./transform_agg.ts";

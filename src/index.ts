@@ -609,3 +609,11 @@ export {
 export type { LabelMapper, RenameDataFrameOptions } from "./stats/index.ts";
 export { absSeries, absDataFrame, roundSeries, roundDataFrame } from "./stats/index.ts";
 export type { RoundDataFrameSpec } from "./stats/index.ts";
+export {
+  seriesDotSeries,
+  seriesDotDataFrame,
+  dataFrameDotSeries,
+  dataFrameDotDataFrame,
+} from "./stats/index.ts";
+export { seriesTransform, dataFrameTransform } from "./stats/index.ts";
+export type { TransformFunc, TransformFuncName, DataFrameTransformOptions } from "./stats/index.ts";
