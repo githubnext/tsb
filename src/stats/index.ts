@@ -446,3 +446,16 @@ export {
 } from "./dot_matmul.ts";
 export { seriesTransform, dataFrameTransform } from "./transform_agg.ts";
 export type { TransformFunc, TransformFuncName, DataFrameTransformOptions } from "./transform_agg.ts";
+export { seriesAt, seriesIat, dataFrameAt, dataFrameIat } from "./at_iat.ts";
+export {
+  sortValuesSeries,
+  sortIndexSeries,
+  sortValuesDataFrame,
+  sortIndexDataFrame,
+} from "./sort_ops.ts";
+export type {
+  SortValuesSeriesOptions,
+  SortIndexSeriesOptions,
+  SortValuesDataFrameOptions,
+  SortIndexDataFrameOptions,
+} from "./sort_ops.ts";

@@ -617,3 +617,16 @@ export {
 } from "./stats/index.ts";
 export { seriesTransform, dataFrameTransform } from "./stats/index.ts";
 export type { TransformFunc, TransformFuncName, DataFrameTransformOptions } from "./stats/index.ts";
+export { seriesAt, seriesIat, dataFrameAt, dataFrameIat } from "./stats/index.ts";
+export {
+  sortValuesSeries,
+  sortIndexSeries,
+  sortValuesDataFrame,
+  sortIndexDataFrame,
+} from "./stats/index.ts";
+export type {
+  SortValuesSeriesOptions,
+  SortIndexSeriesOptions,
+  SortValuesDataFrameOptions,
+  SortIndexDataFrameOptions,
+} from "./stats/index.ts";
