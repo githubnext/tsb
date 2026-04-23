@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-22T22:17:59Z |
-| Iteration Count | 282 |
+| Last Run | 2026-04-23T05:47:19Z |
+| Iteration Count | 283 |
 | Best Metric | 637 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — (pending) |
-| Steering Issue | #131 |
+| Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -44,6 +44,7 @@
 
 ## 📚 Lessons Learned
 
+- **Iter 283**: Re-applied iter 282's changes since iter 282's push never landed on canonical. Fast-forward canonical branch to main (633) + 4 new option-variant pairs. Canonical now at 637.
 - **Iter 282**: Fast-forward canonical branch to main (ahead=0, behind=100). Added 4 new option-variant pairs: quantile_df_axis1, interpolate_df_axis1, ffill_bfill_df_limit, ffill_bfill_series_limit. Result: 637.
 - **Best metric clarification**: Previous "639" was on a wrong branch that was never merged. Actual canonical best after iter 281 was 633 (from main). This iter adds 4 new pairs = 637.
 - **Iter 281**: Canonical branch was at 508 (iter 158). Fast-forward merged main (633) + 6 new option-API pairs = 639 (push pending, never confirmed merged).
@@ -72,6 +73,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 283 — 2026-04-23T05:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24819076022)
+
+- **Status**: ✅ Accepted (PR pending CI)
+- **Change**: Fast-forward canonical branch to main (633) + 4 new option-variant pairs (ffill_bfill_series_limit, ffill_bfill_df_limit, quantile_df_axis1, interpolate_df_axis1)
+- **Metric**: 637 (previous canonical: 633 from main, delta: +4)
+- **Commit**: 753483d
+- **Notes**: Iter 282 claimed to add these same pairs but the push never landed on canonical. This iter confirms the branch is now at 637 with a fresh PR.
 
 ### Iteration 282 — 2026-04-22T22:17 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24805528063)
 
