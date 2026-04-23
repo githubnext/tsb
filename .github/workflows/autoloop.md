@@ -293,7 +293,7 @@ A template program file is installed at `.autoloop/programs/example.md`. **Progr
 At the start of every run, check each program file for this sentinel. For any program where it is present:
 
 1. **Skip that program — do not run any iterations for it.**
-2. If no setup issue exists for that program, create one titled `[Autoloop: {program-name}] Action required: configure your program`.
+2. If no setup issue exists for that program, create one titled `[Autoloop: {program-name}] Action required: configure your program` (supply this exact string — do NOT prepend `[Autoloop] `, the `create-issue` safe-output adds that automatically).
 
 ## Branching Model
 
@@ -570,7 +570,7 @@ There are no separate "steering" or "experiment log" issues — they have all be
 
 If `selected_issue` is `null` in `/tmp/gh-aw/autoloop.json`, the program is file-based **and** has no program issue yet. On the first run, create one with `create-issue`:
 
-- **Title**: `[Autoloop: {program-name}]`
+- **Title**: `[Autoloop: {program-name}]` — supply this exact string as the title. **Do NOT prepend `[Autoloop] `** yourself; the `create-issue` safe-output's `title-prefix` config adds that automatically. The final issue title will be `[Autoloop] [Autoloop: {program-name}]` on GitHub, and the scheduler recognizes that form when matching a program issue back to its file-based program.
 - **Labels**: `autoloop-program`, `automation`, `autoloop`
 - **Body**: the contents of the program file (so humans can read the goal/target/evaluation directly on the issue), prefixed with `🤖 *Autoloop program issue for `{program-name}`. The program definition below is mirrored from [`{selected_file}`]({link-to-file}). Edit the file to update the definition; comment on this issue to steer the agent.*`
 
