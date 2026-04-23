@@ -14,6 +14,57 @@ programs_dir = ".autoloop/programs"
 autoloop_dir = ".autoloop/programs"
 template_file = os.path.join(autoloop_dir, "example.md")
 
+# Regex matching the canonical program-issue title, tolerating the
+# `[Autoloop] ` safe-outputs prefix that the `create-issue` machinery
+# auto-prepends. Both `[Autoloop: name]` (raw, before prefix is added) and
+# `[Autoloop] [Autoloop: name]` (after prefix is applied) are recognised so
+# the scheduler matches a program issue back to its file-based program
+# regardless of whether the agent or the safe-outputs layer added the
+# outer marker. The match is case-insensitive for robustness.
+_AUTOLOOP_PREFIX_RE = re.compile(r'^\[Autoloop\]\s*', re.IGNORECASE)
+_AUTOLOOP_NAME_RE = re.compile(r'^\[Autoloop:\s*([^\]]+?)\s*\]\s*$', re.IGNORECASE)
+
+def extract_program_name_from_issue_title(title):
+    """Return the program-name embedded in a canonical program-issue title.
+
+    Accepts titles of the form `[Autoloop: name]` and tolerates any number
+    of leading `[Autoloop] ` prefixes (the safe-outputs prefix can collide
+    with an agent-supplied `[Autoloop]` marker, producing doubly-prefixed
+    titles like `[Autoloop] [Autoloop: name]`). Returns ``None`` when the
+    title does not match the canonical pattern — callers should then fall
+    back to slugification for human-authored issue titles.
+    """
+    if not title:
+        return None
+    s = title.strip()
+    while _AUTOLOOP_PREFIX_RE.match(s):
+        s = _AUTOLOOP_PREFIX_RE.sub('', s, count=1)
+    m = _AUTOLOOP_NAME_RE.match(s)
+    if m:
+        return m.group(1).strip()
+    return None
+
+def slugify(title):
+    """Slugify an issue title to a program name.
+
+    Defensively strips any leading `[Autoloop] ` markers (collapses
+    repeated prefixes) and a `[Autoloop: name]` wrapper before
+    slugifying, so doubly-prefixed titles authored under an old or buggy
+    prompt still collapse to the same slug as the canonical name. This
+    makes the scheduler self-healing: even if Fix 1 (prompt clarification)
+    regresses, this normalisation keeps file-based and issue-based
+    discovery from forking into two programs.
+    """
+    s = (title or "").strip()
+    while _AUTOLOOP_PREFIX_RE.match(s):
+        s = _AUTOLOOP_PREFIX_RE.sub('', s, count=1)
+    m = re.match(r'^\[Autoloop:\s*([^\]]+?)\s*\]\s*', s, re.IGNORECASE)
+    if m:
+        s = m.group(1)
+    slug = re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
+    slug = re.sub(r'-+', '-', slug)
+    return slug
+
 # Read program state from repo-memory (persistent git-backed storage)
 github_token = os.environ.get("GITHUB_TOKEN", "")
 repo = os.environ.get("GITHUB_REPOSITORY", "")
@@ -164,17 +215,20 @@ try:
             known_file_program_names.add(os.path.basename(os.path.dirname(pf)))
         else:
             known_file_program_names.add(os.path.splitext(os.path.basename(pf))[0])
-    file_program_issue_pattern = re.compile(r'^\s*\[Autoloop:\s*([^\]]+?)\s*\]\s*$')
     consumed_issue_numbers = set()
     for issue in issues:
         if issue.get("pull_request"):
             continue
         title = issue.get("title") or ""
-        m = file_program_issue_pattern.match(title)
-        if m and m.group(1) in known_file_program_names:
-            file_program_issues[m.group(1)] = issue["number"]
+        # extract_program_name_from_issue_title tolerates the doubly-prefixed
+        # `[Autoloop] [Autoloop: name]` form produced when the safe-outputs
+        # `title-prefix` collides with an agent-supplied marker, so existing
+        # in-the-wild issues still merge with their file-based program here.
+        extracted = extract_program_name_from_issue_title(title)
+        if extracted and extracted in known_file_program_names:
+            file_program_issues[extracted] = issue["number"]
             consumed_issue_numbers.add(issue["number"])
-            print(f"  Found program issue for file-based program '{m.group(1)}': #{issue['number']}")
+            print(f"  Found program issue for file-based program '{extracted}': #{issue['number']}")
 
     # Second pass: any remaining autoloop-program issue is an issue-based program.
     for issue in issues:
@@ -185,9 +239,12 @@ try:
         body = issue.get("body") or ""
         title = issue.get("title") or ""
         number = issue["number"]
-        # Derive program name from issue title: slugify to lowercase with hyphens
-        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
-        slug = re.sub(r'-+', '-', slug)  # collapse consecutive hyphens
+        # Derive program name from issue title via the defensive slugify
+        # (strips known `[Autoloop]`/`[Autoloop: name]` prefixes before
+        # slugifying, so a stray doubly-prefixed title that didn't match a
+        # known file-based program still produces a clean slug rather than
+        # a `autoloop-autoloop-...` chimera).
+        slug = slugify(title)
         if not slug:
             slug = f"issue-{number}"
         # Avoid slug collisions: if another issue already claimed this slug, append issue number

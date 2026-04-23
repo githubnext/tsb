@@ -5,3 +5,5 @@ package-lock.json
 *.tgz
 playground/benchmarks/
 playground/dist/
+__pycache__/
+*.pyc
