@@ -13,10 +13,10 @@
  * ```
  */
 
-import type { Label, Scalar } from "../types.ts";
 import type { Index } from "../core/base-index.ts";
-import type { Series } from "../core/series.ts";
 import type { DataFrame } from "../core/frame.ts";
+import type { Series } from "../core/series.ts";
+import type { Label, Scalar } from "../types.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -99,9 +99,7 @@ function checkIndexEqual<T extends Label>(
   atol: number,
 ): void {
   if (left.size !== right.size) {
-    throw new AssertionError(
-      `${msg}: Index sizes differ. left=${left.size}, right=${right.size}`,
-    );
+    throw new AssertionError(`${msg}: Index sizes differ. left=${left.size}, right=${right.size}`);
   }
   for (let i = 0; i < left.size; i++) {
     const lv = left.at(i) as Scalar;
@@ -211,9 +209,7 @@ export function assertSeriesEqual(
   const label = options?.objLabel ?? "Series";
 
   if (left.size !== right.size) {
-    throw new AssertionError(
-      `${label}: lengths differ. left=${left.size}, right=${right.size}`,
-    );
+    throw new AssertionError(`${label}: lengths differ. left=${left.size}, right=${right.size}`);
   }
 
   if (checkDtypes && left.dtype.name !== right.dtype.name) {
@@ -331,14 +327,10 @@ export function assertFrameEqual(
   const [rRows, rCols] = right.shape;
 
   if (lRows !== rRows) {
-    throw new AssertionError(
-      `${label}: row counts differ. left=${lRows}, right=${rRows}`,
-    );
+    throw new AssertionError(`${label}: row counts differ. left=${lRows}, right=${rRows}`);
   }
   if (lCols !== rCols) {
-    throw new AssertionError(
-      `${label}: column counts differ. left=${lCols}, right=${rCols}`,
-    );
+    throw new AssertionError(`${label}: column counts differ. left=${lCols}, right=${rCols}`);
   }
 
   // Column presence check

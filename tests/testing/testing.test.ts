@@ -210,14 +210,8 @@ describe("assertFrameEqual — failures", () => {
   });
 
   test("index mismatch throws when checkIndex=true", () => {
-    const a = DataFrame.fromColumns(
-      { x: [1, 2] as Scalar[] },
-      { index: new Index(["a", "b"]) },
-    );
-    const b = DataFrame.fromColumns(
-      { x: [1, 2] as Scalar[] },
-      { index: new Index(["a", "c"]) },
-    );
+    const a = DataFrame.fromColumns({ x: [1, 2] as Scalar[] }, { index: new Index(["a", "b"]) });
+    const b = DataFrame.fromColumns({ x: [1, 2] as Scalar[] }, { index: new Index(["a", "c"]) });
     expect(() => assertFrameEqual(a, b, { checkIndex: true })).toThrow(AssertionError);
   });
 

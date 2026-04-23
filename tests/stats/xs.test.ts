@@ -6,7 +6,7 @@ import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
 import { DataFrame, type Index, MultiIndex, Series } from "../../src/index.ts";
 import type { Scalar } from "../../src/index.ts";
-import { xsDataFrame, xsSeries } from "../../src/stats/xs.ts";
+import { xsDataFrame, xsSeries } from "../../src/index.ts";
 
 // ─── xsDataFrame — flat index ─────────────────────────────────────────────────
 

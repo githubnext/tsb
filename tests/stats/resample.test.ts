@@ -155,11 +155,7 @@ describe("resampleSeries – hourly ('H')", () => {
 
 describe("resampleSeries – minute ('T' / 'min')", () => {
   test("T: sum per minute", () => {
-    const dates = [
-      d("2024-01-01T00:00:10Z"),
-      d("2024-01-01T00:00:50Z"),
-      d("2024-01-01T00:01:30Z"),
-    ];
+    const dates = [d("2024-01-01T00:00:10Z"), d("2024-01-01T00:00:50Z"), d("2024-01-01T00:01:30Z")];
     const s = new Series({ data: [1, 2, 3], index: dates });
     expect(resampleSeries(s, "T").sum().toArray()).toEqual([3, 3]);
   });
@@ -429,10 +425,7 @@ describe("resampleSeries – agg()", () => {
 describe("resampleDataFrame – daily ('D')", () => {
   test("sum per column per day", () => {
     const idx = new Index<Label>([d("2024-01-01Z"), d("2024-01-01T12:00Z"), d("2024-01-02Z")]);
-    const df = DataFrame.fromColumns(
-      { a: [1, 2, 3], b: [10, 20, 30] },
-      { index: idx },
-    );
+    const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [10, 20, 30] }, { index: idx });
     const r = resampleDataFrame(df, "D").sum();
     expect(r.col("a").toArray()).toEqual([3, 3]);
     expect(r.col("b").toArray()).toEqual([30, 30]);
@@ -440,40 +433,32 @@ describe("resampleDataFrame – daily ('D')", () => {
 
   test("mean per column per day", () => {
     const idx = new Index<Label>([d("2024-01-01Z"), d("2024-01-01T12:00Z"), d("2024-01-02Z")]);
-    const df = DataFrame.fromColumns(
-      { a: [1, 3, 10] },
-      { index: idx },
-    );
+    const df = DataFrame.fromColumns({ a: [1, 3, 10] }, { index: idx });
     const r = resampleDataFrame(df, "D").mean();
     expect(r.col("a").toArray()).toEqual([2, 10]);
   });
 
   test("count excludes NaN", () => {
     const idx = new Index<Label>([d("2024-01-01Z"), d("2024-01-01T12:00Z"), d("2024-01-02Z")]);
-    const df = DataFrame.fromColumns(
-      { a: [1, Number.NaN, 3] },
-      { index: idx },
-    );
+    const df = DataFrame.fromColumns({ a: [1, Number.NaN, 3] }, { index: idx });
     const r = resampleDataFrame(df, "D").count();
     expect(r.col("a").toArray()).toEqual([1, 1]);
   });
 
   test("first and last per column per day", () => {
-    const idx = new Index<Label>([d("2024-01-01Z"), d("2024-01-01T06:00Z"), d("2024-01-01T12:00Z")]);
-    const df = DataFrame.fromColumns(
-      { v: [5, 15, 25] },
-      { index: idx },
-    );
+    const idx = new Index<Label>([
+      d("2024-01-01Z"),
+      d("2024-01-01T06:00Z"),
+      d("2024-01-01T12:00Z"),
+    ]);
+    const df = DataFrame.fromColumns({ v: [5, 15, 25] }, { index: idx });
     expect(resampleDataFrame(df, "D").first().col("v").toArray()).toEqual([5]);
     expect(resampleDataFrame(df, "D").last().col("v").toArray()).toEqual([25]);
   });
 
   test("empty bin filled with NaN", () => {
     const idx = new Index<Label>([d("2024-01-01Z"), d("2024-01-03Z")]);
-    const df = DataFrame.fromColumns(
-      { v: [1, 3] },
-      { index: idx },
-    );
+    const df = DataFrame.fromColumns({ v: [1, 3] }, { index: idx });
     const r = resampleDataFrame(df, "D").sum();
     expect(r.shape[0]).toBe(3);
     expect(Number.isNaN(r.col("v").toArray()[1] as number)).toBe(true);
@@ -483,10 +468,7 @@ describe("resampleDataFrame – daily ('D')", () => {
 describe("resampleDataFrame – monthly ('MS')", () => {
   test("sum per month across multiple columns", () => {
     const idx = new Index<Label>([d("2024-01-10Z"), d("2024-01-20Z"), d("2024-02-05Z")]);
-    const df = DataFrame.fromColumns(
-      { x: [1, 2, 3], y: [4, 5, 6] },
-      { index: idx },
-    );
+    const df = DataFrame.fromColumns({ x: [1, 2, 3], y: [4, 5, 6] }, { index: idx });
     const r = resampleDataFrame(df, "MS").sum();
     expect(r.col("x").toArray()).toEqual([3, 3]);
     expect(r.col("y").toArray()).toEqual([9, 6]);
@@ -496,10 +478,7 @@ describe("resampleDataFrame – monthly ('MS')", () => {
 describe("resampleDataFrame – agg() with per-column specs", () => {
   test("different aggregations per column", () => {
     const idx = new Index<Label>([d("2024-01-01Z"), d("2024-01-01T12:00Z"), d("2024-01-02Z")]);
-    const df = DataFrame.fromColumns(
-      { a: [1, 3, 10], b: [100, 200, 300] },
-      { index: idx },
-    );
+    const df = DataFrame.fromColumns({ a: [1, 3, 10], b: [100, 200, 300] }, { index: idx });
     const r = resampleDataFrame(df, "D").agg({ a: "sum", b: "mean" });
     expect(r.col("a").toArray()).toEqual([4, 10]);
     expect(r.col("b").toArray()).toEqual([150, 300]);
@@ -507,10 +486,7 @@ describe("resampleDataFrame – agg() with per-column specs", () => {
 
   test("agg with a custom function for all columns", () => {
     const idx = new Index<Label>([d("2024-01-01Z"), d("2024-01-01T12:00Z")]);
-    const df = DataFrame.fromColumns(
-      { v: [2, 4] },
-      { index: idx },
-    );
+    const df = DataFrame.fromColumns({ v: [2, 4] }, { index: idx });
     const r = resampleDataFrame(df, "D").agg((vals) => {
       const nums = vals.filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
       return nums.length;
@@ -522,10 +498,7 @@ describe("resampleDataFrame – agg() with per-column specs", () => {
 describe("resampleDataFrame – size()", () => {
   test("returns a Series of bin sizes", () => {
     const idx = new Index<Label>([d("2024-01-01Z"), d("2024-01-01T12:00Z"), d("2024-01-02Z")]);
-    const df = DataFrame.fromColumns(
-      { a: [1, 2, 3] },
-      { index: idx },
-    );
+    const df = DataFrame.fromColumns({ a: [1, 2, 3] }, { index: idx });
     const r = resampleDataFrame(df, "D").size();
     expect(r.toArray()).toEqual([2, 1]);
   });

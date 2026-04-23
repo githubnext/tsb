@@ -29,9 +29,9 @@
  * @module
  */
 
+import { Index } from "../core/base-index.ts";
 import { DataFrame } from "../core/frame.ts";
 import { Series } from "../core/series.ts";
-import { Index } from "../core/base-index.ts";
 import type { Label, Scalar } from "../types.ts";
 
 // ─── public types ─────────────────────────────────────────────────────────────
@@ -392,7 +392,11 @@ function resolveAgg(spec: ResampleAggName | ResampleAggFn): AggFn {
 
 // ─── helpers: output index construction ───────────────────────────────────────
 
-function buildDateIndex(groupKeys: readonly number[], freq: string, label: ResampleLabel): Index<Label> {
+function buildDateIndex(
+  groupKeys: readonly number[],
+  freq: string,
+  label: ResampleLabel,
+): Index<Label> {
   return new Index<Label>(groupKeys.map((k) => new Date(keyToLabel(k, freq, label))));
 }
 

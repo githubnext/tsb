@@ -4,14 +4,14 @@
 
 import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
-import { DataFrame } from "../../src/core/index.ts";
-import { Series } from "../../src/core/index.ts";
 import {
+  DataFrame,
+  Series,
   dataFrameRollingAgg,
   dataFrameRollingApply,
   rollingAgg,
   rollingApply,
-} from "../../src/window/rolling_apply.ts";
+} from "../../src/index.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 

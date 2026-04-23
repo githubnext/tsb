@@ -473,7 +473,12 @@ export type {
   InferObjectsOptions,
   ConvertDtypesOptions,
 } from "./infer_objects.ts";
-export { resampleSeries, resampleDataFrame, SeriesResampler, DataFrameResampler } from "./resample.ts";
+export {
+  resampleSeries,
+  resampleDataFrame,
+  SeriesResampler,
+  DataFrameResampler,
+} from "./resample.ts";
 export type {
   ResampleFreq,
   ResampleLabel,
