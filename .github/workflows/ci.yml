@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 jobs:
   test:
@@ -76,3 +77,111 @@ jobs:
 
       - name: Validate Python playground examples
         run: python scripts/validate-python-examples.py playground/
+
+  benchmark:
+    # Run the OpenEvolve benchmark for autoloop *-evolve PRs so the autoloop
+    # agent can read a real fitness number from CI (see .autoloop/strategies/
+    # openevolve/strategy.md, Step 6.5). The sandbox the agent runs in cannot
+    # install bun reliably and so cannot measure fitness itself.
+    name: OpenEvolve benchmark
+    if: |
+      (github.event_name == 'pull_request' && startsWith(github.head_ref, 'autoloop/') && contains(github.head_ref, '-evolve'))
+      || (github.event_name == 'push' && startsWith(github.ref_name, 'autoloop/') && contains(github.ref_name, '-evolve'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install pandas numpy
+
+      - name: Resolve program directory
+        id: program
+        run: |
+          # Resolve the program directory from the branch name:
+          #   autoloop/<program-name>  →  .autoloop/programs/<program-name>/
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          PROGRAM="${BRANCH#autoloop/}"
+          PROGRAM_DIR=".autoloop/programs/${PROGRAM}"
+          echo "program=${PROGRAM}" >> "$GITHUB_OUTPUT"
+          echo "program_dir=${PROGRAM_DIR}" >> "$GITHUB_OUTPUT"
+          if [ -x "${PROGRAM_DIR}/evaluate.sh" ]; then
+            echo "has_evaluator=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No evaluate.sh for program '${PROGRAM}' — skipping benchmark." >&2
+            echo "has_evaluator=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run OpenEvolve benchmark
+        id: bench
+        if: steps.program.outputs.has_evaluator == 'true'
+        run: |
+          PROGRAM_DIR="${{ steps.program.outputs.program_dir }}"
+          # evaluate.sh is contracted to always exit 0 and encode failures in
+          # the JSON, but we tolerate non-zero exits anyway and fall back to a
+          # null fitness so the check-run still gets created.
+          set +e
+          bash "${PROGRAM_DIR}/evaluate.sh" >/tmp/bench-result.json 2>/tmp/bench-stderr
+          rc=$?
+          set -e
+          if [ ! -s /tmp/bench-result.json ]; then
+            echo "{\"fitness\": null, \"rejected_reason\": \"evaluator produced no output (exit ${rc})\"}" \
+              > /tmp/bench-result.json
+          fi
+          cat /tmp/bench-result.json
+          fitness=$(jq -r '.fitness // "null"' /tmp/bench-result.json)
+          echo "fitness=${fitness}" >> "$GITHUB_OUTPUT"
+          # Compact JSON for the check-run output below.
+          echo "result_json=$(jq -c . /tmp/bench-result.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload benchmark result
+        if: steps.program.outputs.has_evaluator == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-result
+          path: /tmp/bench-result.json
+
+      - name: Attach fitness as check-run
+        if: steps.program.outputs.has_evaluator == 'true'
+        uses: actions/github-script@v7
+        env:
+          FITNESS: ${{ steps.bench.outputs.fitness }}
+          RESULT_JSON: ${{ steps.bench.outputs.result_json }}
+        with:
+          script: |
+            const fitness = process.env.FITNESS;
+            let result;
+            try {
+              result = JSON.parse(process.env.RESULT_JSON);
+            } catch {
+              result = { raw: process.env.RESULT_JSON };
+            }
+            const sha = context.payload.pull_request
+              ? context.payload.pull_request.head.sha
+              : context.sha;
+            await github.rest.checks.create({
+              ...context.repo,
+              name: "OpenEvolve benchmark",
+              head_sha: sha,
+              status: "completed",
+              conclusion: fitness === "null" ? "neutral" : "success",
+              output: {
+                title: `fitness=${fitness}`,
+                summary: "```json\n" + JSON.stringify(result, null, 2) + "\n```",
+              },
+            });
