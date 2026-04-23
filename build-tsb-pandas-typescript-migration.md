@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-23T11:37:27Z |
-| Iteration Count | 262 |
+| Last Run | 2026-04-23T12:24:28Z |
+| Iteration Count | 263 |
 | Best Metric | 135 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci |
 
 ---
 
@@ -46,10 +46,11 @@ Completed through iter 261:
 - ✅ pd.testing: assertSeriesEqual/assertFrameEqual/assertIndexEqual (iter 258)
 - ✅ hashPandasObject/hashSeries/hashDataFrame (iter 261)
 - ✅ case_when — caseWhenSeries/caseWhenDataFrame (iter 262)
+- ✅ where/mask aligned — whereSeriesAligned/maskSeriesAligned/whereDataFrameSeries/maskDataFrameAligned etc. (iter 263)
 
 Next:
-- `df.where(cond, other=df2)` — fill-with-other-dataframe/series variant (where_mask_extended.ts)
 - `DataFrame.style` (basic styling API)
+- `Series.pipe()` / `DataFrame.pipe()` with arbitrary function composition
 
 ---
 
@@ -82,6 +83,7 @@ Next:
 ---
 
 ## 📊 Iteration History
+### Iter 263 — 2026-04-23 12:24 UTC — ⏳ pending-ci — +whereSeriesAligned/maskSeriesAligned/whereDataFrameSeries/maskDataFrameSeries/whereDataFrameAligned/maskDataFrameAligned. Metric: 135. Commit: d93bd01. [Run](https://github.com/githubnext/tsessebe/actions/runs/24834967392)
 ### Iter 262 — 2026-04-23 11:37 UTC — ⏳ pending-ci — +caseWhenSeries/caseWhenDataFrame. Metric: 135. Commit: 699ad0e. [Run](https://github.com/githubnext/tsessebe/actions/runs/24832588026)
 ### Iters 257–261 — ⏳/✅ (134→135): +options API, +pd.testing, +hash, +case_when.
 ### Iters 246–256 — ✅/⚠️ (128→134): +resample, +mergeOrdered/Asof, +join, +inferObjects, +str.normalize, +ewmCov/Corr, +xs, +toHtml/Markdown, +toRecords/fromRecords, +isocalendar, +periodRange.
