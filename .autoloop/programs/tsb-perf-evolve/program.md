@@ -55,26 +55,25 @@ Population state lives in the state file on the `memory/autoloop` branch under t
 ## Evaluation
 
 ```bash
-set -euo pipefail
+bash .autoloop/programs/tsb-perf-evolve/evaluate.sh
+```
 
-# 1. Validity — existing tests for sortValues must still pass.
-bun test tests/core/series.sortValues.test.ts >/tmp/perf-evolve-tests.log 2>&1 || {
-  echo '{"fitness": null, "rejected_reason": "tests failed"}'
-  exit 0
-}
+The actual evaluator lives in `evaluate.sh` next to this file so the autoloop
+agent (Step 6 of the OpenEvolve playbook) and CI (the `benchmark` job in
+`.github/workflows/ci.yml`) invoke the **exact same** command and produce
+comparable fitness numbers. See that script for details.
 
-# 2. Benchmark — tsb side.
-tsb_ms=$(bun run .autoloop/programs/tsb-perf-evolve/code/benchmark.ts | python3 -c "import json,sys; print(json.load(sys.stdin)['mean_ms'])")
+It runs the validity tests, then the tsb and pandas benchmarks, and prints a
+single JSON line on stdout:
 
-# 3. Benchmark — pandas side. Skip gracefully if pandas isn't available.
-if ! python3 -c 'import pandas' 2>/dev/null; then
-  pip3 install pandas --quiet 2>/dev/null || true
-fi
-pd_ms=$(python3 .autoloop/programs/tsb-perf-evolve/code/benchmark.py | python3 -c "import json,sys; print(json.load(sys.stdin)['mean_ms'])")
+```json
+{"fitness": <number>, "tsb_mean_ms": <number>, "pandas_mean_ms": <number>}
+```
 
-# 4. Fitness = ratio. Lower is better.
-ratio=$(python3 -c "print(${tsb_ms} / ${pd_ms})")
-echo "{\"fitness\": ${ratio}, \"tsb_mean_ms\": ${tsb_ms}, \"pandas_mean_ms\": ${pd_ms}}"
+or, if validity failed:
+
+```json
+{"fitness": null, "rejected_reason": "tests failed"}
 ```
 
 The metric is `fitness` (= `tsb_mean_ms / pandas_mean_ms`). **Lower is better.** A value below `1.0` means tsb is now faster than pandas on this workload.

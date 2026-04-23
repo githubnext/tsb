@@ -75,6 +75,51 @@ Edit only the files listed in `program.md`'s Target section. The diff style for 
 
 Run the evaluation command from `program.md`. Parse the metric.
 
+The in-sandbox evaluation is a *cheap pre-filter only* — the agent sandbox often cannot install `bun`, run `python3 -c 'import pandas'`, or otherwise reproduce realistic conditions (the `releaseassets.githubusercontent.com` firewall block is the common culprit). A null/missing metric here is **not** grounds for rejecting the candidate; that decision is deferred to Step 6.5.
+
+### Step 6.5. Wait for CI
+
+Before recording the candidate in the population (Step 7) or posting *any* iteration comment on the program issue / PR, wait for CI on the pushed commit. CI is the authoritative source of both correctness (Test & Lint / Build / Validate Python Examples) and fitness (the `OpenEvolve benchmark` check, which runs `bash .autoloop/programs/{program-name}/evaluate.sh` on a real runner with `bun` + `python3` + `pandas` installed).
+
+This step extends — and ties into — the generic `Step 5a → 5b → 5c` flow described in the autoloop workflow. OpenEvolve's only added requirement is that you must reach Step 5c (or the budget-exhausted handler) **before** writing the iteration comment, never after a speculative push.
+
+```bash
+# Resolve the PR — prefer the pre-step lookup, fall back to gh.
+PR=$(jq -r '.existing_pr // empty' /tmp/gh-aw/autoloop.json 2>/dev/null || true)
+if [ -z "$PR" ]; then
+  PR=$(gh pr list --head autoloop/{program-name} --json number -q '.[0].number')
+fi
+
+# Block until every required check terminates (or the wall-clock cap fires).
+gh pr checks "$PR" --watch --interval 30 --fail-fast || true
+
+# Determine an aggregate status. Same awk classifier as Step 5a in the
+# generic autoloop playbook — keep them in sync.
+status=$(gh pr checks "$PR" --json conclusion,state \
+           -q '.[] | (.conclusion // .state // "")' \
+         | awk '
+             BEGIN { r = "success" }
+             /^(FAILURE|CANCELLED|TIMED_OUT|ACTION_REQUIRED|STARTUP_FAILURE|STALE)$/ { r = "failure" }
+             /^(PENDING|QUEUED|IN_PROGRESS|WAITING|REQUESTED)$/ { if (r == "success") r = "pending" }
+             END { print r }')
+
+# Read the fitness from the OpenEvolve benchmark check-run (created by the
+# `benchmark` job in .github/workflows/ci.yml). Title format: `fitness=<num>`
+# or `fitness=null`. SHA = the HEAD of the PR after the latest push/fix.
+SHA=$(gh pr view "$PR" --json headRefOid -q '.headRefOid')
+fitness=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs" \
+           --jq '.check_runs[] | select(.name == "OpenEvolve benchmark") | .output.title' \
+         | sed -n 's/^fitness=//p' | head -n1)
+```
+
+Branch on `$status`:
+
+- **`success`** → record the candidate in the population with `fitness: <number>` from the check-run (or `fitness: null` only if the `OpenEvolve benchmark` check explicitly reported it that way — e.g., correctness held but the benchmark itself errored). Proceed to Step 7. The iteration comment is `✅ Accepted` with the real numeric fitness.
+- **`failure`** → enter the fix-retry loop from the generic autoloop Step 5b (up to 5 attempts, no-progress guard, 60-min wall-clock cap). Do **not** post an "accepted" comment. On a successful fix, loop back through the `gh pr checks --watch` block above on the new HEAD. On exhausted budget, mark the candidate `status: error` in the population with `fitness: null` and `pause_reason: "ci-fix-exhausted: <signature>"`, and post a `❌ Rejected` (or `⚠️ Error`) iteration comment that links to the failing run.
+- **`pending`** (the wall-clock cap fired before CI concluded) → don't post a speculative `⏳ Pending CI` comment. Record the candidate in the population with `fitness: null` and `status: pending-ci`, and leave a single reconciliation-pending comment on the PR/issue that the next iteration's Step 6.5 is allowed to overwrite when it reads the now-concluded status for this same SHA.
+
+In all three branches, the iteration comment posted to the program issue and PR must reflect *terminal* state — never `⏳ Pending CI` as a permanent label. Comments live forever; the pending placeholder is what produced the bug this step exists to fix.
+
 ### Step 7. Update the population
 
 Regardless of whether the iteration is accepted or rejected at the branch level, the candidate has been tried and should be recorded in the population — the population is a memory of what's been explored, not just what's been kept.
@@ -88,7 +133,8 @@ Append a new entry to the `## 🧬 Population` subsection in the state file usin
 
 Continue with the normal autoloop Step 5 (Accept or Reject → commit / discard, update state file's Machine State, Iteration History, Lessons Learned, etc.) as defined in the workflow. The only additional requirements from OpenEvolve are:
 
-- The Iteration History entry must include `operator`, `parent_id(s)`, `island`, and `fitness` fields (in addition to the normal status/change/metric/notes).
+- The Iteration History entry must include `operator`, `parent_id(s)`, `island`, and `fitness` fields (in addition to the normal status/change/metric/notes). The `fitness` value comes from the `OpenEvolve benchmark` check-run resolved in Step 6.5 — never from the in-sandbox Step 6 estimate.
+- The iteration comment posted to the program issue and PR must use the terminal status from Step 6.5 (`✅ Accepted` / `❌ Rejected` / `⚠️ Error` / `⏸ Pending-CI` only when the wall-clock cap genuinely fired). Never post `⏳ Pending CI` as a final state — that placeholder is what Step 6.5 exists to eliminate.
 - Lessons Learned additions should be phrased as *transferable heuristics* about the problem space, not as reports of what this iteration did. (E.g. "Hex layouts dominate grid layouts above n=20" — not "Iteration 17 tried a hex layout.")
 
 ## Feature dimensions
