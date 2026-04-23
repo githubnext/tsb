@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-23T11:52:10Z |
-| Iteration Count | 284 |
+| Last Run | 2026-04-23T18:26:59Z |
+| Iteration Count | 285 |
 | Best Metric | 638 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -44,6 +44,7 @@
 
 ## 📚 Lessons Learned
 
+- **Iter 285**: Fast-forward canonical to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall). Canonical now at 638.
 - **Iter 284**: Fast-forward canonical to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall). Canonical now at 638.
 - **Iter 283**: Re-applied iter 282's changes. Fast-forward canonical branch to main (633) + 4 new option-variant pairs. Canonical at 637.
 - **Key insight**: Iters 277-283 had wrong-branch push issues. Canonical `autoloop/perf-comparison` was at 508 until iter 283 fast-forwarded it to main.
@@ -76,7 +77,13 @@
 - **Change**: Fast-forward canonical branch to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall)
 - **Metric**: 638 (delta: +5)
 
-### Iters 277–283 — ✅/⚠️ mix | metrics 382→637. Wrong-branch issues 277-281. Iters 282-283 fast-forwarded canonical to main (633) + option-variant pairs.
+### Iteration 285 — 2026-04-23T18:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24851814286)
+
+- **Status**: ✅ Accepted (PR pending CI)
+- **Change**: Fast-forward canonical branch to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall)
+- **Metric**: 638 (delta: +5 from main baseline 633)
+
+### Iters 277–284 — ✅/⚠️ mix | metrics 382→638. Iters 277-281 wrong-branch. Iters 282-284 fast-forwarded canonical to main (633) + option-variant pairs.
 
 ### Iters 163–276 — ✅/⚠️ mix | metrics 0→637 (canonical). PR #148 merged 534 to main. Iters 163-268 mostly wrong-branch.
 
