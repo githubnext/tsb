@@ -17,19 +17,12 @@ Things you, the agent, should keep in mind about this specific problem space (<C
 
 ## Test framework setup
 
-<CUSTOMIZE: spell out the exact test framework and conventions for this program — the import line for the runner, the file naming convention, the path to put new tests under, the command to run a single test.>
+<CUSTOMIZE: spell out the exact test framework and conventions for this program — the import line for the runner, the file naming convention, the path to put new tests under, the command to run a single test. A concrete fenced code block here is more useful than prose. Example shape:>
 
-Example for the canonical tsb program:
-
-```ts
-import { describe, it, expect } from "bun:test";
-import { Series } from "tsb";
-
-describe("Series.sortValues", () => {
-  it("places NaN at the end when naPosition is 'last' regardless of ascending", () => {
-    // ...
-  });
-});
+```
+<CUSTOMIZE: a fenced code block in the program's language showing the imports,
+the describe/it (or equivalent) skeleton, and a one-line comment pointing to
+the exact public-API entry point the test should import from.>
 ```
 
 Run a single test with: <CUSTOMIZE: e.g. `bun test tests/path/to/file.test.ts`>.
