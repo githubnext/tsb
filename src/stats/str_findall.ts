@@ -51,6 +51,7 @@ function makeGlobal(pat: string | RegExp, flags?: string): RegExp {
   return new RegExp(pat, f);
 }
 
+/** Extract named capture-group identifiers from a regex source pattern. */
 function extractNamedGroupNames(source: string): string[] {
   const names: string[] = [];
   const re = /\(\?<([A-Za-z_]\w*)>/g;
