@@ -716,25 +716,42 @@ export class Series<T extends Scalar = Scalar> {
     const vals = this._values;
 
     // Pre-partition NaN/null/undefined from finite values in one pass.
-    // This removes the NaN check from the comparator's hot path.
+    // fvals mirrors finBuf: fvals[j] holds the numeric value at finBuf[j]
+    // so the sort comparator reads a typed Float64Array (not a generic T[]),
+    // giving the JIT a monomorphic, unboxed call site.
     const finBuf = new Uint32Array(n);
     const nanBuf = new Uint32Array(n);
+    const fvals = new Float64Array(n);
     let finCount = 0;
     let nanCount = 0;
+    let allNumeric = true;
     for (let i = 0; i < n; i++) {
       const v = vals[i];
       if (v === null || v === undefined || (typeof v === "number" && Number.isNaN(v))) {
         nanBuf[nanCount++] = i;
       } else {
+        if (typeof v === "number") {
+          fvals[finCount] = v;
+        } else {
+          allNumeric = false;
+        }
         finBuf[finCount++] = i;
       }
     }
 
-    // Sort the finite-index slice in-place using an indirect comparator.
-    // Dispatching to one of two monomorphic comparators avoids a per-call
-    // branch on `ascending` inside the sort's hot loop.
+    // Sort the finite-index slice in-place.
+    // For all-numeric data use the Float64Array subtraction comparator —
+    // monomorphic, branchless, and JIT-specialisable.
+    // For mixed/string data fall back to the generic branch comparator.
     const finSlice = finBuf.subarray(0, finCount);
-    if (ascending) {
+    const fvSlice = fvals.subarray(0, finCount);
+    if (allNumeric) {
+      if (ascending) {
+        finSlice.sort((a, b) => fvSlice[a]! - fvSlice[b]!);
+      } else {
+        finSlice.sort((a, b) => fvSlice[b]! - fvSlice[a]!);
+      }
+    } else if (ascending) {
       finSlice.sort((a, b) => {
         const av = vals[a] as number | string | boolean;
         const bv = vals[b] as number | string | boolean;
