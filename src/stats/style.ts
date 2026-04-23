@@ -726,14 +726,6 @@ export class Styler {
     const colNames = this._colNames;
     const colIndices = resolveColIndices(colNames, subset);
 
-  /**
-   * Highlight the minimum value in each column (axis=0), row (axis=1), or table (null).
-   */
-  highlightMin(options: HighlightOptions = {}): this {
-    const { color = "yellow", subset = null, axis = 0 } = options;
-    const colNames = this._colNames;
-    const colIndices = resolveColIndices(colNames, subset);
-
     const highlightFn: AxisStyleFn = (vals) => {
       const nums = numericValues(vals);
       if (nums.length === 0) return vals.map(() => "");
