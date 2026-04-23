@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-23T09:45:00Z |
-| Iteration Count | 261 |
+| Last Run | 2026-04-23T11:37:27Z |
+| Iteration Count | 262 |
 | Best Metric | 135 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci |
 
 ---
 
@@ -45,6 +45,7 @@ Completed through iter 261:
 - ✅ getOption/setOption/resetOption/describeOption/listOptions (iter 257)
 - ✅ pd.testing: assertSeriesEqual/assertFrameEqual/assertIndexEqual (iter 258)
 - ✅ hashPandasObject/hashSeries/hashDataFrame (iter 261)
+- ✅ case_when — caseWhenSeries/caseWhenDataFrame (iter 262)
 
 Next:
 - `df.where(cond, other=df2)` — fill-with-other-dataframe/series variant (where_mask_extended.ts)
@@ -81,7 +82,7 @@ Next:
 ---
 
 ## 📊 Iteration History
-### Iter 261 — 2026-04-23 09:45 UTC — ✅ pending-ci — +hashPandasObject/hashSeries/hashDataFrame. Metric: 135 (+1). Commit: ca62c37. [Run](https://github.com/githubnext/tsessebe/actions/runs/24827972519)
-### Iters 257–260 — ⏳ pending-ci — +options, +pd.testing, +hash attempts. Metrics 134→135.
+### Iter 262 — 2026-04-23 11:37 UTC — ⏳ pending-ci — +caseWhenSeries/caseWhenDataFrame. Metric: 135. Commit: 699ad0e. [Run](https://github.com/githubnext/tsessebe/actions/runs/24832588026)
+### Iters 257–261 — ⏳/✅ (134→135): +options API, +pd.testing, +hash, +case_when.
 ### Iters 246–256 — ✅/⚠️ (128→134): +resample, +mergeOrdered/Asof, +join, +inferObjects, +str.normalize, +ewmCov/Corr, +xs, +toHtml/Markdown, +toRecords/fromRecords, +isocalendar, +periodRange.
 ### Iters 53–245 — ✅/⚠️ (8→128): 185+ pandas features ported.
