@@ -59,7 +59,10 @@ function extractNamedGroupNames(source: string): string[] {
     if (m === null) {
       break;
     }
-    names.push(m[1] ?? "");
+    const name = m[1];
+    if (name !== undefined) {
+      names.push(name);
+    }
   }
   return names;
 }

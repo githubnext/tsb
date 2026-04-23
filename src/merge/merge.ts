@@ -32,8 +32,7 @@
  * @module
  */
 
-import { DataFrame } from "../core/index.ts";
-import type { Index } from "../core/index.ts";
+import { DataFrame, Index } from "../core/index.ts";
 import { RangeIndex } from "../core/index.ts";
 import type { JoinHow, Label, Scalar } from "../types.ts";
 
@@ -473,7 +472,7 @@ function buildResultDataFrame(
       }
       return null;
     });
-    index = new (left.index.constructor as new (values: readonly Label[]) => Index<Label>)(labels);
+    index = new Index<Label>(labels);
   }
   return DataFrame.fromColumns(colData as Record<string, readonly Scalar[]>, { index });
 }

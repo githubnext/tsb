@@ -64,7 +64,7 @@ describe("xsDataFrame (axis=1)", () => {
   });
 
   test("throws TypeError for non-string column key", () => {
-    expect(() => xsDataFrame(df, 42, { axis: 1 })).toThrow(/TypeError/);
+    expect(() => xsDataFrame(df, 42, { axis: 1 })).toThrow(TypeError);
   });
 });
 

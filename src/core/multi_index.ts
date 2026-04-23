@@ -643,10 +643,11 @@ function compareScalars(
   if (av instanceof Date && bv instanceof Date) {
     return av.getTime() < bv.getTime() ? -1 : 1;
   }
-  if (av instanceof Date || bv instanceof Date) {
-    const left = av instanceof Date ? `date:${av.getTime()}` : `${typeof av}:${String(av)}`;
-    const right = bv instanceof Date ? `date:${bv.getTime()}` : `${typeof bv}:${String(bv)}`;
-    return left < right ? -1 : 1;
+  if (av instanceof Date) {
+    return 1;
+  }
+  if (bv instanceof Date) {
+    return -1;
   }
   return av < bv ? -1 : 1;
 }
