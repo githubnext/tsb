@@ -175,7 +175,7 @@ export function xsDataFrame(
   // ── column (axis=1) ─────────────────────────────────────────────────────────
   if (axis === 1) {
     if (typeof key !== "string") {
-      throw new TypeError(`Column key must be a string; got ${typeof key}.`);
+      throw new TypeError(`TypeError: Column key must be a string; got ${typeof key}.`);
     }
     const col = df.get(key);
     if (col === undefined) {

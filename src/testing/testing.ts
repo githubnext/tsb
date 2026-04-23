@@ -56,6 +56,9 @@ function scalarsEqual(
   if (isNaN_(a) !== isNaN_(b)) {
     return false;
   }
+  if (a === b) {
+    return true;
+  }
   if (a instanceof Date && b instanceof Date) {
     return a.getTime() === b.getTime();
   }

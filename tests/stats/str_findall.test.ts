@@ -71,7 +71,7 @@ describe("strFindall", () => {
   test("consecutive matches", () => {
     const s = new Series({ data: ["aababc"] });
     const result = strFindall(s, /a+/);
-    expect(JSON.parse(result.values[0] as string)).toEqual(["a", "a", "a"]);
+    expect(JSON.parse(result.values[0] as string)).toEqual(["aa", "a"]);
   });
 
   // property: count of findall matches equals strFindallCount

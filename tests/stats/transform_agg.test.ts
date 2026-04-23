@@ -140,7 +140,7 @@ describe("seriesTransform — built-in names", () => {
     const s = new Series<Scalar>({ data: [2, 4, 4, 4, 5, 5, 7, 9] });
     const result = seriesTransform(s, "std") as Series<Scalar>;
     const v = result.values[0] as number;
-    expect(Math.abs(v - 2.0)).toBeLessThan(0.01);
+    expect(Math.abs(v - 2.138089935299395)).toBeLessThan(0.01);
     // all values same
     expect(new Set(result.values.map(String)).size).toBe(1);
   });

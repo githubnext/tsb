@@ -129,7 +129,7 @@ describe("toJsonRecords", () => {
   test("column names with dots are NOT split", () => {
     const df = DataFrame.fromColumns({ "a.b": [1, 2] });
     const result = toJsonRecords(df);
-    expect(result[0]).toHaveProperty("a.b", 1);
+    expect(result[0]?.["a.b"]).toBe(1);
   });
 
   test("null values preserved", () => {

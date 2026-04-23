@@ -51,7 +51,14 @@ import type { Label, Scalar } from "../types.ts";
  * ```
  */
 export function seriesAt(s: Series<Scalar>, label: Label): Scalar {
-  return s.at(label);
+  try {
+    return s.at(label);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("KeyError:")) {
+      throw new RangeError(error.message);
+    }
+    throw error;
+  }
 }
 
 /**
@@ -91,7 +98,14 @@ export function seriesIat(s: Series<Scalar>, i: number): Scalar {
  * ```
  */
 export function dataFrameAt(df: DataFrame, rowLabel: Label, colLabel: string): Scalar {
-  return df.col(colLabel).at(rowLabel);
+  try {
+    return df.col(colLabel).at(rowLabel);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("KeyError:")) {
+      throw new RangeError(error.message);
+    }
+    throw error;
+  }
 }
 
 /**

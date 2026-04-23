@@ -51,6 +51,19 @@ function makeGlobal(pat: string | RegExp, flags?: string): RegExp {
   return new RegExp(pat, f);
 }
 
+function extractNamedGroupNames(source: string): string[] {
+  const names: string[] = [];
+  const re = /\(\?<([A-Za-z_]\w*)>/g;
+  for (;;) {
+    const m = re.exec(source);
+    if (m === null) {
+      break;
+    }
+    names.push(m[1] ?? "");
+  }
+  return names;
+}
+
 // ─── strFindall ───────────────────────────────────────────────────────────────
 
 /**
@@ -259,10 +272,8 @@ export function strFindallExpand(
 
   const strs = toInputStrings(input);
 
-  // Determine group names by running a dummy match
-  const testMatch = re.exec("") ?? re.exec("\0");
-  const groups = testMatch?.groups;
-  const namedKeys = groups !== null && groups !== undefined ? Object.keys(groups) : [];
+  // Determine group names from pattern source.
+  const namedKeys = extractNamedGroupNames(source);
 
   // Determine number of capture groups from source
   // Count open parens that aren't non-capturing groups (?:

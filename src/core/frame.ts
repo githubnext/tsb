@@ -773,11 +773,23 @@ export class DataFrame {
 
 // ─── module-level helpers (extracted to keep methods lean) ───────────────────
 
+function isIndexLike(v: unknown): v is Index<Label> {
+  if (typeof v !== "object" || v === null) {
+    return false;
+  }
+  const rec = v as Record<string, unknown>;
+  return (
+    typeof rec["size"] === "number" &&
+    typeof rec["at"] === "function" &&
+    typeof rec["getLoc"] === "function"
+  );
+}
+
 function resolveRowIndex(nRows: number, supplied?: Index<Label> | readonly Label[]): Index<Label> {
   if (supplied === undefined) {
     return defaultRowIndex(nRows);
   }
-  if (supplied instanceof Index) {
+  if (isIndexLike(supplied)) {
     return supplied;
   }
   return new Index<Label>(supplied as Label[]);

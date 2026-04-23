@@ -204,9 +204,15 @@ function buildPlan(
     plan.push({ outputName: lk, side: "coalesce", leftCol: lk, rightCol: rk });
   }
 
-  // 2. Left-by columns (from left only, single source)
-  for (const c of leftBy) {
-    plan.push({ outputName: c, side: "left", leftCol: c, rightCol: null });
+  // 2. By columns
+  for (let i = 0; i < leftBy.length; i++) {
+    const lc = leftBy[i]!;
+    const rc = rightBy[i];
+    if (rc === lc) {
+      plan.push({ outputName: lc, side: "coalesce", leftCol: lc, rightCol: rc });
+    } else {
+      plan.push({ outputName: lc, side: "left", leftCol: lc, rightCol: null });
+    }
   }
 
   // 3. Right-by columns (from right only) — only if different names from left_by

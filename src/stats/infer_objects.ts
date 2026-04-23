@@ -300,6 +300,9 @@ export function convertDtypesSeries(
     // First try direct type inference (handles int/float/bool already).
     const inferred = inferObjectsSeries(s, { objectOnly: false });
     if (inferred.dtype !== s.dtype) {
+      if (convertString && inferred.dtype.kind === "string") {
+        return tryConvertStringToNumeric(inferred);
+      }
       return inferred;
     }
 

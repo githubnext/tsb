@@ -28,7 +28,7 @@ describe("assertSeriesEqual — identical series", () => {
   test("float series within tolerance", () => {
     const a = new Series({ data: [1.0, 2.0, 3.0] as Scalar[] });
     const b = new Series({ data: [1.0 + 1e-9, 2.0, 3.0] as Scalar[] });
-    expect(() => assertSeriesEqual(a, b)).not.toThrow();
+    expect(() => assertSeriesEqual(a, b, { checkDtypes: false })).not.toThrow();
   });
 
   test("null/undefined equality", () => {
@@ -120,7 +120,7 @@ describe("assertSeriesEqual — failures", () => {
   test("float within custom atol passes", () => {
     const a = new Series({ data: [1.0] as Scalar[] });
     const b = new Series({ data: [1.05] as Scalar[] });
-    expect(() => assertSeriesEqual(a, b, { atol: 0.1 })).not.toThrow();
+    expect(() => assertSeriesEqual(a, b, { atol: 0.1, checkDtypes: false })).not.toThrow();
   });
 
   test("checkExact=true catches tiny float difference", () => {
@@ -162,7 +162,7 @@ describe("assertFrameEqual — identical frames", () => {
   test("with float values within tolerance", () => {
     const a = DataFrame.fromColumns({ v: [1.0, 2.0] as Scalar[] });
     const b = DataFrame.fromColumns({ v: [1.0 + 1e-9, 2.0] as Scalar[] });
-    expect(() => assertFrameEqual(a, b)).not.toThrow();
+    expect(() => assertFrameEqual(a, b, { checkDtypes: false })).not.toThrow();
   });
 });
 

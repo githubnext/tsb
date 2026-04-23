@@ -227,6 +227,13 @@ export function corrWith(
   const dfWork = axis === 1 ? transpose(df) : df;
 
   if (other instanceof Series) {
+    if (axis === 1) {
+      const aligned = new Series({
+        data: dfWork.index.toArray().map((_, i) => other.values[i] ?? null),
+        index: dfWork.index,
+      });
+      return _corrWithSeries(dfWork, aligned, minPeriods);
+    }
     return _corrWithSeries(dfWork, other, minPeriods);
   }
 

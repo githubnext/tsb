@@ -302,7 +302,7 @@ describe("reorderLevelsSeries", () => {
 
   test("throws for wrong order length", () => {
     const s = seriesWithMultiIndex([1], [["a", 1]]);
-    expect(() => reorderLevelsSeries(s, [0])).not.toThrow();
+    expect(() => reorderLevelsSeries(s, [0])).toThrow(/order length/);
     expect(() => reorderLevelsSeries(s, [0, 1, 2])).toThrow(/order length/);
   });
 

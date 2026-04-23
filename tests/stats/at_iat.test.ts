@@ -124,9 +124,15 @@ describe("dataFrameAt", () => {
   it("property: matches df.col(c).at(r) for all cells", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.integer({ min: -100, max: 100 }), { minLength: 1, maxLength: 10 }),
-        fc.array(fc.integer({ min: -100, max: 100 }), { minLength: 1, maxLength: 10 }),
-        (col1, col2) => {
+        fc
+          .integer({ min: 1, max: 10 })
+          .chain((len) =>
+            fc.tuple(
+              fc.array(fc.integer({ min: -100, max: 100 }), { minLength: len, maxLength: len }),
+              fc.array(fc.integer({ min: -100, max: 100 }), { minLength: len, maxLength: len }),
+            ),
+          ),
+        ([col1, col2]) => {
           const df = DataFrame.fromColumns({ a: col1, b: col2 });
           const ri = Math.floor(Math.min(col1.length, col2.length) / 2);
           return (
