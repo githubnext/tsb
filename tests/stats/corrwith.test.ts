@@ -199,17 +199,15 @@ describe("corrWith – with DataFrame", () => {
   it("property: correlating a DataFrame with itself on all columns returns 1 or NaN", () => {
     fc.assert(
       fc.property(
-        fc
-          .integer({ min: 3, max: 5 })
-          .chain((len) =>
-            fc.array(
-              fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
-                minLength: len,
-                maxLength: len,
-              }),
-              { minLength: 1, maxLength: 3 },
-            ),
+        fc.integer({ min: 3, max: 5 }).chain((len) =>
+          fc.array(
+            fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+              minLength: len,
+              maxLength: len,
+            }),
+            { minLength: 1, maxLength: 3 },
           ),
+        ),
         (cols) => {
           const data: Record<string, number[]> = {};
           for (let i = 0; i < cols.length; i++) {
