@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-23T20:23:00Z |
-| Iteration Count | 269 |
+| Last Run | 2026-04-23T21:27:00Z |
+| Iteration Count | 270 |
 | Best Metric | 135 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci |
 
 ---
 
@@ -34,18 +34,18 @@
 
 ## 🎯 Current Priorities
 
-Completed through iter 269 (on main through iter ~258, pending-ci 259–269):
+Completed through iter 270 (on main through iter ~258, pending-ci 259–270):
 - ✅ Core (iters 1–52): DataFrame, Series, Index, dtypes, I/O, groupby, merge, reshape, window
 - ✅ Stats (iters 53–244): 185+ pandas ops ported
 - ✅ join/joinAll/crossJoin, infer_objects/convertDtypes, merge_asof/ordered, resample, xs (246–254)
 - ✅ toHtml/Markdown, toRecords/fromRecords, isocalendar, periodRange, options, pd.testing (256–258)
-- ✅ fromDummies — inverse of getDummies, reconstruct categorical from indicators (iter 269, pending-ci)
+- ✅ caseWhen — SQL CASE WHEN for Series (iter 270, pending-ci)
 
 Next:
+- `df.asfreq()` — convert time series to a fixed frequency for DatetimeIndex Series/DataFrame
+- `from_dummies()` — inverse of getDummies, reconstruct categorical from indicators
+- `pd.util.hash_pandas_object()` — FNV-1a row/element hashing
 - `str.extractall()` — wire via late-binding (inject DataFrame factory into StringAccessor)
-- `df.asfreq()` — convert time series to a fixed frequency
-- `pd.util.hash_pandas_object()` — FNV-1a row/element hashing (if not on branch)
-- `df.case_when()` — conditional column construction
 - More string accessor methods (`str.removeprefix`, `str.removesuffix`)
 
 ---
@@ -75,11 +75,12 @@ Next:
 - `str.extractall()` — wire via late-binding
 - `df.asfreq()` — convert time series to a fixed frequency
 - `pd.util.hash_pandas_object()` — FNV-1a hashing
-- `df.case_when()` / `Series.case_when()` — conditional construction
+- `from_dummies()` — inverse of getDummies
 
 ---
 
 ## 📊 Iteration History
+### Iter 270 — 2026-04-23 21:27 UTC — ⏳ pending-ci — +caseWhen: SQL CASE WHEN for Series; first-win conditions (predicate/bool[]/Series<bool>), scalar/array/Series replacements, configurable default. Metric: 135. Commit: 609369e. [Run](https://github.com/githubnext/tsessebe/actions/runs/24859305967)
 ### Iter 269 — 2026-04-23 20:23 UTC — ⏳ pending-ci — +fromDummies: inverse of getDummies; sep-based grouping, defaultCategory, property-based roundtrip tests. Metric: 135. Commit: 1ea6a0f. [Run](https://github.com/githubnext/tsessebe/actions/runs/24856912278)
 ### Iter 268 — 2026-04-23 19:32 UTC — ⏳ pending-ci — +hashPandasObject: FNV-1a row/element hashing for Series/DataFrame; index mixing + hashKey seed. Metric: 135. Commit: a14f850. [Run](https://github.com/githubnext/tsessebe/actions/runs/24854706474)
 ### Iter 267 — 2026-04-23 18:51 UTC — ⏳ pending-ci — +fromDummies: inverse of getDummies; groups columns by prefix. Metric: 136. Commit: 93464fa.
