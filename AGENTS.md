@@ -11,8 +11,8 @@ This file provides project-specific conventions for AI coding agents working in 
 
 ## Key Rules
 
-1. **Never modify `README.md`** — it is read-only, the source of truth for project parameters.
-2. **Never modify `.autoloop/programs/**`** or autoloop workflow files.
+1. **Never modify `README.md`** unless specifically asked to.
+2. **Never modify `.autoloop/programs/**`** unless specifically asked to.
 3. **Strict TypeScript only** — no `any`, no `as` casts, no `@ts-ignore`, no escape hatches.
 4. **Zero core dependencies** — implement everything from scratch.
 5. **100% test coverage** required — unit + property-based (fast-check) + fuzz where applicable.
