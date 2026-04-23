@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-23T05:47:19Z |
-| Iteration Count | 283 |
-| Best Metric | 637 |
+| Last Run | 2026-04-23T11:52:10Z |
+| Iteration Count | 284 |
+| Best Metric | 638 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | — (pending) |
+| PR | — (pending CI) |
 | Issue | #131 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -44,13 +44,9 @@
 
 ## 📚 Lessons Learned
 
-- **Iter 283**: Re-applied iter 282's changes since iter 282's push never landed on canonical. Fast-forward canonical branch to main (633) + 4 new option-variant pairs. Canonical now at 637.
-- **Iter 282**: Fast-forward canonical branch to main (ahead=0, behind=100). Added 4 new option-variant pairs: quantile_df_axis1, interpolate_df_axis1, ffill_bfill_df_limit, ffill_bfill_series_limit. Result: 637.
-- **Best metric clarification**: Previous "639" was on a wrong branch that was never merged. Actual canonical best after iter 281 was 633 (from main). This iter adds 4 new pairs = 637.
-- **Iter 281**: Canonical branch was at 508 (iter 158). Fast-forward merged main (633) + 6 new option-API pairs = 639 (push pending, never confirmed merged).
-- **Key insight**: Previous iters 277-281 updated state file best_metric but committed to wrong/unmerged branches. Canonical `autoloop/perf-comparison` was still at 508 until this iter.
-- **Iter 278**: Fixed 300+ API bugs (wrong names, method→standalone, rollingQuantile args, fromDictOriented). pgid kill. Result: 532.
-- **subprocess timeout**: `Popen` + `start_new_session=True`, then `os.killpg(pgid, SIGKILL)`.
+- **Iter 284**: Fast-forward canonical to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall). Canonical now at 638.
+- **Iter 283**: Re-applied iter 282's changes. Fast-forward canonical branch to main (633) + 4 new option-variant pairs. Canonical at 637.
+- **Key insight**: Iters 277-283 had wrong-branch push issues. Canonical `autoloop/perf-comparison` was at 508 until iter 283 fast-forwarded it to main.
 - **Import paths**: `../../src/index.ts` not `"tsb"`. Series: `new Series({ data: [...] })`. DF: `DataFrame.fromColumns({...})`.
 - **Standalones**: cummax/cummin/cumprod/cumsum/diff/explode/pct_change/seriesAbs/where/mask/sample/replace/astype/pivot.
 - **groupby AggName**: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only.
@@ -74,6 +70,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 284 — 2026-04-23T11:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24833583304)
+
+- **Status**: ✅ Accepted (PR pending CI)
+- **Change**: Fast-forward canonical branch to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall)
+- **Metric**: 638 (previous canonical: 633 from main, delta: +5)
+- **Commit**: eb56027
+- **Notes**: Added benchmarks for truncateSeries, truncateDataFrame, xsDataFrame, seriesUpdate, strFindall/strFindallCount — all previously unbenchmarked src/stats/ functions.
+
 ### Iteration 283 — 2026-04-23T05:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24819076022)
 
 - **Status**: ✅ Accepted (PR pending CI)
@@ -93,17 +97,10 @@
 ### Iteration 281 — 2026-04-22T15:59 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24788564007)
 
 - **Status**: ✅ Accepted (pending CI)
-- **Change**: Merge main (633 pairs) into canonical branch + 6 new option-variant pairs (any_all_axis1, nunique_axis1, diff_series_periods, shift_fillvalue, dataframe_diff_axis1, dataframe_shift_axis1)
-- **Metric**: 639 (previous: 508 on canonical; after merge+new: 639)
-- **Commit**: fcc5985
+- **Change**: Merge main (633) + 6 new option-variant pairs
+- **Metric**: 639 (claimed; push may not have landed)
 
-### Iteration 280 — 2026-04-22T08:37 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24768692351)
-
-- **Status**: ✅ Accepted (push failed, canonical stayed at 508)
-- **Change**: Merge main (633) + 6 new pairs (same strategy as iter 281 but push failed)
-- **Metric**: 639 (claimed, but canonical was 508 after this run)
-
-### Iter 277–280 — ✅/⚠️ mix | metrics 382→639 on canonical branch. Key: iters 277-279 committed to wrong/suffixed branches; iter 280 merged main (633) + 6 new on canonical; iter 281 merged main again (iter 158→633 on canonical) + 6 new option-API pairs.
+### Iters 277–282 — ✅/⚠️ mix | metrics 382→637. Iters 277-281 had wrong-branch issues. Iter 282-283 fast-forwarded canonical to main (633) + option-variant pairs.
 
 ### Iters 269–276 — ⚠️ error/wrong-branch | metrics 233-312 but all on suffixed branches or local-only, canonical was 0.
 
