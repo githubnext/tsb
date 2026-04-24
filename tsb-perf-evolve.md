@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-24T21:24:00Z |
-| Iteration Count | 9 |
+| Last Run | 2026-04-24T22:55:00Z |
+| Iteration Count | 10 |
 | Best Metric | 27.999 |
 | Target Metric | — |
 | Branch | autoloop/tsb-perf-evolve |
@@ -16,18 +16,18 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, not-pushed, not-pushed, pending, pending-ci, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | accepted, not-pushed, not-pushed, pending, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci |
 
 ## 🧬 Population
 
-### c010 · island 3 · fitness pending CI · gen 9
+### c011 · island 3 · fitness pending CI · gen 10
 
 - **Operator**: exploration; **Feature cell**: parallel-typed-arrays · non-comparison
 - **Parent**: c003 (island 1, fitness 27.999)
-- **Approach**: LSD 8-pass radix sort on IEEE-754 bit-transformed float64 keys. `new Uint32Array(fvals.buffer)` for raw bits; module-level _rxA/_rxB ping-pong + _rxKL/_rxKH keyed by row. Zero JS comparator callbacks. Reverse in-place for descending. String/mixed fallback unchanged.
-- **Status**: ⏳ pending CI — commit b2c8640
+- **Approach**: LSD 8-pass radix sort on IEEE-754 bit-transformed float64 keys. Module-level _rxA/_rxB/_rxKL/_rxKH/_rxCnt. `new Uint32Array(fvals.buffer)` for raw bits. Zero JS comparator callbacks. Reverse in-place for descending. String/mixed fallback unchanged. Fixed write-back aliasing by using dst as scratch buffer.
+- **Status**: ⏳ pending CI — commit d25a8b5
 
-### ~~c009~~ · phantom · gen 8 — same radix design, never actually landed on branch (prior runs failed to push)
+### ~~c010~~ · phantom · gen 9 — same radix design; commit b2c8640 was on a pre-merge branch, never landed in main
 
 ### ~~c008,c007,c006,c005,c004~~ · (phantom: commits written but never pushed) · gens 3-7
 
@@ -62,9 +62,15 @@
 
 ## 📊 Iteration History
 
+### Iteration 10 — 2026-04-24 22:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24915319054)
+
+- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · **Candidate**: c011
+- **Change**: LSD 8-pass radix sort; IEEE-754 transform; module-level ping-pong buffers + cnt; fixed write-back aliasing issue from c010 (use dst as scratch for gather); zero JS callbacks
+- **Commit**: d25a8b5 · **Metric**: pending CI
+
 ### Iteration 9 — 2026-04-24 21:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24912509276)
 
-- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · **Candidate**: c010
+- **Status**: ❌ phantom (not pushed — branch was behind main, commit lost on fast-forward) · **Op**: exploration · **Island**: 3 · **Candidate**: c010
 - **Change**: LSD 8-pass radix sort; IEEE-754 transform via `new Uint32Array(fvals.buffer)`; module-level _rxA/_rxB/_rxKL/_rxKH; zero JS callbacks; reverse in-place for descending
 - **Commit**: b2c8640 · **Metric**: pending CI
 
