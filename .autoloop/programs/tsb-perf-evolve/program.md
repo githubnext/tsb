@@ -1,5 +1,5 @@
 ---
-schedule: every 6h
+schedule: every 1h
 ---
 
 # tsb perf evolve — Series.sortValues vs pandas Series.sort_values
