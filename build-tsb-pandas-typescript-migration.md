@@ -8,19 +8,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-24T18:30:00Z |
-| Iteration Count | 276 |
-| Best Metric | 137 |
+| Last Run | 2026-04-24T20:22:53Z |
+| Iteration Count | 277 |
+| Best Metric | 136 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | #207 |
+| PR | — |
 | Issue | #1 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci |
 
 ---
 
@@ -28,26 +28,23 @@
 
 **Goal**: Build tsb — TypeScript port of pandas, one feature at a time.
 **Metric**: pandas_features_ported (higher is better)
-**Branch**: `autoloop/build-tsb-pandas-typescript-migration` | **PR**: #207 | **Issue**: #1
+**Branch**: `autoloop/build-tsb-pandas-typescript-migration` | **PR**: pending-ci | **Issue**: #1
 
 ---
 
 ## 🎯 Current Priorities
 
-Completed through iter 274:
+Completed through iter 277:
 - ✅ Core (iters 1–52): DataFrame, Series, Index, dtypes, I/O, groupby, merge, reshape, window
 - ✅ Stats (iters 53–244): 185+ pandas ops ported
 - ✅ join/joinAll/crossJoin, infer_objects/convertDtypes, merge_asof/ordered, resample, xs (246–254)
 - ✅ toHtml/Markdown, toRecords/fromRecords, isocalendar, periodRange, options, pd.testing (256–258)
-- ✅ hashPandasObject — FNV-1a row/element hashing (iter 273, pending-ci)
-- ✅ caseWhen — SQL CASE WHEN for Series (iter 274, pending-ci)
-
-- ✅ strCat/strCatOthers — pandas str.cat (iter 276, pending-ci)
+- ✅ hashPandasObject, caseWhen, fromDummies, strCat (273–277)
 
 Next:
 - `str.extractall()` — wire via late-binding (inject DataFrame factory into StringAccessor)
 - `asfreq` — convert DatetimeIndex Series/DataFrame to fixed frequency
-- `str.wrap` / `str.center` / `str.ljust` / `str.rjust` — more str accessor methods
+- `Series.str.get_dummies` — split strings by delimiter → DataFrame
 
 ---
 
@@ -80,11 +77,15 @@ Next:
 ---
 
 ## 📊 Iteration History
-### Iter 276 — 2026-04-24 18:30 UTC — ⏳ pending-ci — +strCat/strCatOthers (pandas str.cat). Metric: 137 (+1). [Run](https://github.com/githubnext/tsessebe/actions/runs/24905198133)
-### Iter 275 — 2026-04-24 17:22 UTC — ⏳ pending-ci — +fromDummies: inverse of getDummies/dataFrameGetDummies. Metric: 136 (+1). [Run](https://github.com/githubnext/tsessebe/actions/runs/24902583676)
-### Iter 274 — 2026-04-24 03:20 UTC — ⏳ pending-ci — +caseWhen (SQL CASE WHEN, pandas 2.2). Metric: 135. [Run](https://github.com/githubnext/tsessebe/actions/runs/24870093820)
-### Iter 273 — 2026-04-24 01:37 UTC — ⏳ pending-ci — +hashPandasObject: FNV-1a hashing. Metric: 135. [Run](https://github.com/githubnext/tsessebe/actions/runs/24867722937)
-### Iters 264–272 — ⏳/✅ (134→136): +fromDummies, +hashPandasObject, +caseWhen, +asfreq, +Styler.
+### Iteration 277 — 2026-04-24 20:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24910082527)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +strCat/strCatCollapse + Series.str.cat (pandas str.cat port)
+- **Metric**: 136 (previous best: 135, delta: +1)
+- **Commit**: 247a56f
+- **Notes**: New src/stats/str_cat.ts with element-wise and collapse modes; str.cat() wired inline into StringAccessor to avoid circular deps.
+
+### Iters 264–276 — ⏳/✅ (134→135): +fromDummies, +hashPandasObject, +caseWhen, +asfreq, +Styler, +strCat.
 ### Iters 258–263 — ⏳/✅ (134→135): +pd.testing, +hash, +case_when, +where/mask aligned.
 ### Iters 246–256 — ✅/⚠️ (128→134): +resample, +mergeOrdered/Asof, +join, +inferObjects, +str.normalize, +ewmCov/Corr, +xs, +toHtml/Markdown, +toRecords/fromRecords, +isocalendar, +periodRange.
 ### Iters 53–245 — ✅/⚠️ (8→128): 185+ pandas features ported.
