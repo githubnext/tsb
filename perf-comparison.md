@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-24T06:41:58Z |
-| Iteration Count | 287 |
+| Last Run | 2026-04-24T12:50:30Z |
+| Iteration Count | 288 |
 | Best Metric | 638 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -67,17 +67,15 @@
 
 ## 📊 Iteration History
 
+### Iteration 288 — 2026-04-24T12:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24890345658)
+
+- **Status**: ✅ Accepted (pending CI) · **Metric**: 638 (baseline from main 633, +5) · Fast-forward from main + 5 new pairs (styler, swap_level, keep_true_false, auto_corr, assert_equal)
+
 ### Iteration 287 — 2026-04-24T06:41 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24876099398)
 
 - **Status**: ✅ Accepted (pending CI) · **Metric**: 638 (+5 vs main 633) · Fast-forward from main + 5 new pairs (merge_asof, merge_ordered, join, crossjoin, resample_agg)
 
-### Iteration 286 — 2026-04-24T00:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24865965316)
-
-- **Status**: ✅ Accepted · **Metric**: 642 (+4) · Fast-forward + 9 new pairs (merge_asof/ordered, resample_*, clip_with_bounds, infer_objects, eval_query)
-
-### Iteration 285 — 2026-04-23T18:26 UTC — ✅ · Metric: 638 (+5) · Fast-forward + truncate/xs/update/str_findall pairs
-
-### Iters 277–284 — ✅/⚠️ | Metrics 382→638. Iters 277-281 wrong-branch. 282-284 fast-forwarded canonical to main (633) + option-variant pairs.
+### Iters 277–286 — ✅/⚠️ | Metrics 382→642. Iters 277-281 wrong-branch. 282-286 fast-forwarded canonical to main (633) + option-variant pairs.
 
 ### Iters 163–276 — ✅/⚠️ | Metrics 0→637. PR #148 merged 534 to main.
 
