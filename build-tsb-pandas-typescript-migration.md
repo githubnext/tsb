@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-24T03:20:00Z |
-| Iteration Count | 274 |
-| Best Metric | 135 |
+| Last Run | 2026-04-24T17:22:00Z |
+| Iteration Count | 275 |
+| Best Metric | 136 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | #207 |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci |
 
 ---
 
@@ -42,10 +42,11 @@ Completed through iter 274:
 - ✅ hashPandasObject — FNV-1a row/element hashing (iter 273, pending-ci)
 - ✅ caseWhen — SQL CASE WHEN for Series (iter 274, pending-ci)
 
+- ✅ fromDummies — inverse of getDummies (iter 275, pending-ci)
+
 Next:
 - `str.extractall()` — wire via late-binding (inject DataFrame factory into StringAccessor)
 - `asfreq` — convert DatetimeIndex Series/DataFrame to fixed frequency
-- `fromDummies` — inverse of getDummies
 
 ---
 
@@ -78,6 +79,7 @@ Next:
 ---
 
 ## 📊 Iteration History
+### Iter 275 — 2026-04-24 17:22 UTC — ⏳ pending-ci — +fromDummies: inverse of getDummies/dataFrameGetDummies. Metric: 136 (+1). [Run](https://github.com/githubnext/tsessebe/actions/runs/24902583676)
 ### Iter 274 — 2026-04-24 03:20 UTC — ⏳ pending-ci — +caseWhen (SQL CASE WHEN, pandas 2.2). Metric: 135. [Run](https://github.com/githubnext/tsessebe/actions/runs/24870093820)
 ### Iter 273 — 2026-04-24 01:37 UTC — ⏳ pending-ci — +hashPandasObject: FNV-1a hashing. Metric: 135. [Run](https://github.com/githubnext/tsessebe/actions/runs/24867722937)
 ### Iters 264–272 — ⏳/✅ (134→136): +fromDummies, +hashPandasObject, +caseWhen, +asfreq, +Styler.
