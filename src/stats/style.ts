@@ -353,17 +353,17 @@ function propsToString(props: CellProps | readonly [string, string][]): string {
     .join(" ");
 }
 
-/** Merge two CSS strings (semicolon-separated). */
+/** Merge two CSS strings (semicolon-separated). Always ends with a semicolon. */
 function mergeCss(a: string, b: string): string {
   const trimA = a.trim().replace(/;$/, "");
   const trimB = b.trim().replace(/;$/, "");
   if (!trimA) {
-    return trimB;
+    return trimB ? `${trimB};` : "";
   }
   if (!trimB) {
-    return trimA;
+    return `${trimA};`;
   }
-  return `${trimA}; ${trimB}`;
+  return `${trimA}; ${trimB};`;
 }
 
 /** Resolve column indices from a ColSubset given all column names. */
