@@ -4,9 +4,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-23T17:33:48Z |
-| Iteration Count | 3 |
-| Best Metric | — (pending CI) |
+| Last Run | 2026-04-23T23:47:19Z |
+| Iteration Count | 4 |
+| Best Metric | 27.999 |
 | Target Metric | — |
 | Branch | autoloop/tsb-perf-evolve |
 | PR | #206 |
@@ -16,33 +16,38 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | rejected, pending, pending |
+| Recent Statuses | rejected, accepted, accepted, pending |
 
 ## 🧬 Population
 
-### c004 · island 1 · fitness — (pending) · gen 3
+### c005 · island 1 · fitness — (pending CI) · gen 4
 
-- **Operator**: exploitation (parent: c003); **Feature cell**: parallel-typed-arrays · comparison
-- **Approach**: c003 + skip `Index.take(perm)` for default RangeIndex; directly construct `new Index<Label>(perm)` saving ~200k ops/call
-- **Status**: pending CI (commit 19508f1)
+- **Operator**: exploitation (c003); **Feature cell**: parallel-typed-arrays · comparison
+- **Approach**: Inline introsort (_qsortFin: median-of-3 qsort + heapsort fallback + insertion sort n<16) replacing Uint32Array.sort(callback); + skip Index.take for default RangeIndex
+- **Status**: pending CI (commit 4d03bb2)
 
-### c003 · island 1 · fitness — (pending) · gen 2
+### ~~c004~~ · island 1 · never pushed · gen 3
+
+- **Approach**: RangeIndex skip only — commit 19508f1 recorded but never pushed. Superseded by c005.
+- **Status**: ❌ not pushed
+
+### c003 · island 1 · fitness 27.999 · gen 2
 
 - **Operator**: exploration; **Feature cell**: parallel-typed-arrays · comparison
-- **Approach**: NaN pre-partition + parallel Float64Array; `fvals[a]!-fvals[b]!` numeric comparator; string fallback; fvals indexed by row (fixed from original b07ee72 which used position-based index)
-- **Status**: pending CI (commits b07ee72 + 8d1d4a3 fix)
+- **Approach**: NaN pre-partition + Float64Array fvals; `fvals[a]!-fvals[b]!` numeric comparator; fvals indexed by row
+- **Status**: ✅ accepted — CI run 24843983915; tsb=155.63ms / pandas=5.56ms
 
 ### ~~c002~~ · island 1 · fitness — (CI failed) · gen 1
 
 - **Approach**: NaN pre-partition + Uint32Array indirect sort + generic T[] comparator
-- **Status**: ❌ TS2538; human-fixed + merged to main (PR #190, b230a01)
+- **Status**: ❌ TS2538; human-fixed + merged main (b230a01)
 
 ## 📚 Lessons Learned
 
-- `noUncheckedIndexedAccess`: TypedArray[i]=number|undefined; use `!` or `??`.
-- TS2538 = bracket-index used as index without `!`. `as` casts pass TS fine.
-- Island 1 baseline on main (5792af4). Benchmark: Series<number|null> dtype=float64.
-- c003 had bug: `fvals[finCount]` (position-based) instead of `fvals[i]` (row-based) — caused wrong comparisons → NaN test failures. Fixed in 8d1d4a3.
+- `noUncheckedIndexedAccess`: TypedArray[i]=number|undefined; use `!`.
+- c003 fitness=27.999: tsb=155.63ms vs pandas=5.56ms. ~1.6M JS callback calls in Uint32Array.sort(callback) at ~100ns/call ≈ 160ms. Callback overhead IS the bottleneck.
+- `instanceof RangeIndex` narrows TS type; `.start`/`.step` accessible without `as` cast.
+- RangeIndex.take(perm) for default range = new Index(perm); skip 100k at() calls.
 
 ## 🚧 Foreclosed Avenues
 
@@ -51,26 +56,19 @@
 
 ## 🔭 Future Directions
 
-- Island 3 (radix sort): float64→uint, O(n).
-- Island 4 (hybrid): small-n boxed + large-n typed.
+- Island 3 (radix sort): float64→uint64 transform, O(n).
+- Buffer reuse: module-level TypedArrays amortise allocation across 50 benchmark iterations.
 
 ## 📊 Iteration History
 
-### Iter 3 — 2026-04-23 17:33 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24849430735)
+### Iteration 4 — 2026-04-23 23:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24864559744)
 
-- **Status**: pending · **Op**: exploitation (c003) · **Island**: 1
-- **Change**: Skip `Index.take(perm)` for default RangeIndex; `new Index<Label>(perm)` directly
-- **Commit**: 19508f1
-- **Notes**: Saves ~200k ops/call (100k at() + 100k push eliminated). CI will determine fitness.
+- **Status**: pending CI · **Op**: exploitation · **Island**: 1
+- **Change**: Inline introsort + RangeIndex.take skip
+- **Commit**: 4d03bb2 · **Metric**: pending · **Delta**: TBD
 
-### Iter 2 — 2026-04-23 10:33 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24830395075)
+### Iters 1–3 — 2026-04-23
 
-- **Status**: pending (CI blocked; action_required 0 jobs on 8d1d4a3 fix) · **Op**: exploration · **Island**: 1
-- **Change**: Parallel Float64Array + `fvals[a]!-fvals[b]!` monomorphic comparator (fix: store fvals by row index)
-- **Commit**: b07ee72 → 8d1d4a3 (fix)
-
-### Iter 1 — 2026-04-23 03:52 UTC
-
-- **Status**: ❌ CI failed · **Island**: 1
-- **Change**: NaN pre-partition + Uint32Array indirect sort (generic comparator)
-- **Commit**: 24bbe85 → fixed b230a01 → merged main
+- Iter 3: ❌ not pushed (commit 19508f1 phantom)
+- Iter 2: ✅ accepted — c003 fitness=27.999 (tsb=155.63ms, pandas=5.56ms)
+- Iter 1: ❌ CI failed TS2538; human-fixed → merged main
