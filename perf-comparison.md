@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-23T18:26:59Z |
-| Iteration Count | 285 |
-| Best Metric | 638 |
+| Last Run | 2026-04-24T00:34:31Z |
+| Iteration Count | 286 |
+| Best Metric | 642 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — (pending CI) |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -44,6 +44,7 @@
 
 ## 📚 Lessons Learned
 
+- **Iter 286**: Fast-forward canonical to main (633) + 9 new pairs (merge_asof, merge_ordered, merge_ordered_fill, resample_agg, resample_ohlc, resample_df, clip_with_bounds, infer_objects, eval_query). Canonical now at 642.
 - **Iter 285**: Fast-forward canonical to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall). Canonical now at 638.
 - **Iter 284**: Fast-forward canonical to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall). Canonical now at 638.
 - **Iter 283**: Re-applied iter 282's changes. Fast-forward canonical branch to main (633) + 4 new option-variant pairs. Canonical at 637.
@@ -62,20 +63,21 @@
 
 ## 🔭 Future Directions
 
-- **Add more benchmarks** (637 pairs on canonical branch):
+- **Add more benchmarks** (642 pairs on canonical branch):
   1. Continue adding option-variant benchmarks for axis/limit/method parameters
   2. Check for any new src/ modules added to the tsb library
-  3. Look at interpolate limitDirection variants, quantile skipna variants, etc.
+  3. Look at merge_asof direction variants, resample fill variants, etc.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 284 — 2026-04-23T11:52 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24833583304)
+### Iteration 286 — 2026-04-24T00:34 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24865965316)
 
 - **Status**: ✅ Accepted (PR pending CI)
-- **Change**: Fast-forward canonical branch to main (633) + 5 new pairs (truncate_series, truncate_dataframe, xs_dataframe, update_series, str_findall)
-- **Metric**: 638 (delta: +5)
+- **Change**: Fast-forward canonical branch to main (633) + 9 new pairs (merge_asof, merge_ordered, merge_ordered_fill, resample_agg, resample_ohlc, resample_df, clip_with_bounds, infer_objects, eval_query)
+- **Metric**: 642 (previous best: 638, delta: +4)
+- **Commit**: a7b1055
 
 ### Iteration 285 — 2026-04-23T18:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24851814286)
 
