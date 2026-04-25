@@ -3,16 +3,15 @@ description: |
   An iterative optimization loop inspired by Karpathy's Autoresearch and Claude Code's /loop.
   Runs on a configurable schedule to autonomously improve a target artifact toward a measurable goal.
   Each iteration: reads the program definition, proposes a change, evaluates against a metric,
-  and accepts or rejects the change. Tracks all iterations in a rolling GitHub issue.
+  and accepts or rejects the change.
   - User defines the optimization goal and evaluation criteria in a program.md file
   - Accepts changes only when they improve the metric (ratchet pattern)
   - Persists all state via repo-memory (human-readable, human-editable)
   - Commits accepted improvements to a long-running branch per program
   - Maintains a single draft PR per program that accumulates all accepted iterations
-  - Maintains a single GitHub issue per program where all status, iteration logs, and human steering live
 
 on:
-  schedule: every 15m
+  schedule: every 6h
   workflow_dispatch:
     inputs:
       program:
@@ -24,7 +23,7 @@ on:
 
 permissions: read-all
 
-timeout-minutes: 360
+timeout-minutes: 45
 
 network:
   allowed:
@@ -34,31 +33,29 @@ network:
   - rust
   - java
   - dotnet
-  - releaseassets.githubusercontent.com
 
 safe-outputs:
+  max-patch-size: 10240
   add-comment:
     max: 7
     target: "*"
     hide-older-comments: false
   create-pull-request:
     draft: true
-    title-prefix: "[Autoloop] "
     labels: [automation, autoloop]
     protected-files: fallback-to-issue
     preserve-branch-name: true
     max: 1
   push-to-pull-request-branch:
     target: "*"
-    title-prefix: "[Autoloop] "
+    title-prefix: "[Autoloop"
     max: 1
   create-issue:
-    title-prefix: "[Autoloop] "
     labels: [automation, autoloop]
-    max: 2
+    max: 1
   update-issue:
     target: "*"
-    title-prefix: "[Autoloop] "
+    title-prefix: "[Autoloop"
     max: 3
   add-labels:
     target: "*"
@@ -79,37 +76,36 @@ tools:
   repo-memory:
     branch-name: memory/autoloop
     file-glob: ["*.md"]
+    # 30 KB per state file -- enough for the structured sections plus ~10 most-recent
+    # iteration entries plus ~5 compressed-range summaries. The rolling-compaction
+    # rule in "Update Rules" below keeps files under this budget. Tune up for
+    # short-cadence programs (e.g. `every 5m`); tune down for daily-cadence ones.
     max-file-size: 30720
 
 imports:
   - shared/reporting.md
 
 steps:
-  - name: Clone repo-memory for scheduler
-    # The "Check which programs are due" step below reads program state from
-    # /tmp/gh-aw/repo-memory/autoloop/, but gh-aw's built-in repo-memory clone
-    # runs *after* this pre-step (and clones to a different directory). Without
-    # this step, every program looks like a "first run" and the tiebreaker
-    # starves programs that lose the original-insertion-order tiebreak.
-    # See issue: "Autoloop pre-step can't read state files".
+  - name: Clone repo-memory for scheduling
     env:
-      GITHUB_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ github.token }}
       GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_SERVER_URL: ${{ github.server_url }}
     run: |
-      mkdir -p /tmp/gh-aw/repo-memory
-      if [ -d /tmp/gh-aw/repo-memory/autoloop/.git ]; then
-        echo "repo-memory/autoloop already cloned; skipping"
+      # Clone the repo-memory branch so the scheduling step can read persisted state
+      # from previous runs.  The framework-managed repo-memory clone happens after
+      # pre-steps, so we perform an early shallow clone here.
+      MEMORY_DIR="/tmp/gh-aw/repo-memory/autoloop"
+      BRANCH="memory/autoloop"
+      mkdir -p "$(dirname "$MEMORY_DIR")"
+      REPO_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+      AUTH_URL="$(echo "$REPO_URL" | sed "s|https://|https://x-access-token:${GH_TOKEN}@|")"
+      if git ls-remote --exit-code --heads "$AUTH_URL" "$BRANCH" > /dev/null 2>&1; then
+        git clone --single-branch --branch "$BRANCH" --depth 1 "$AUTH_URL" "$MEMORY_DIR" 2>&1
+        echo "Cloned repo-memory branch to $MEMORY_DIR"
       else
-        # Pass the token via an http.extraHeader rather than embedding it in the
-        # URL — keeps it out of process listings and any logged remote URLs.
-        AUTH_HEADER="Authorization: Basic $(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 -w0)"
-        git -c "http.extraHeader=${AUTH_HEADER}" clone --depth=1 --branch memory/autoloop \
-          "https://github.com/${GITHUB_REPOSITORY}.git" \
-          /tmp/gh-aw/repo-memory/autoloop \
-          || {
-            echo "memory/autoloop branch not found (first run); creating empty dir"
-            mkdir -p /tmp/gh-aw/repo-memory/autoloop
-          }
+        mkdir -p "$MEMORY_DIR"
+        echo "No repo-memory branch found yet (first run). Created empty directory."
       fi
 
   - name: Check which programs are due
@@ -200,21 +196,24 @@ The pre-step has already determined which program to run. Read `/tmp/gh-aw/autol
 - **`selected_file`**: The full path to the program's markdown file (either `.autoloop/programs/<name>/program.md`, `.autoloop/programs/<name>.md`, or `/tmp/gh-aw/issue-programs/<name>.md` for issue-based programs).
 - **`selected_issue`**: The GitHub issue number if the selected program came from an issue, or `null` if it came from a file.
 - **`selected_target_metric`**: The `target-metric` value from the program's frontmatter (a number), or `null` if the program is open-ended. Used to check the [halting condition](#halting-condition) after each accepted iteration.
-- **`existing_pr`**: The PR number (e.g., `42`) of an already-open PR for this program's branch, or `null` if no open PR exists. **If this is not null, you MUST use `push-to-pull-request-branch` to push to this PR — do NOT call `create-pull-request`.**
-- **`head_branch`**: The canonical branch name for this program (e.g., `autoloop/coverage`). Always use this exact branch name — never append suffixes.
+- **`selected_metric_direction`**: One of `"higher"` (default) or `"lower"`, parsed from the program's `metric_direction` frontmatter field. Determines whether **larger** or **smaller** metric values count as improvement. Used by the metric-improved check in [Step 5](#step-5-accept-or-reject), the iteration-history delta sign, and the [halting condition](#halting-condition).
+- **`state_file_size_bytes`**: Current size of the selected program's state file in bytes (0 if it does not exist yet). Use this together with `state_file_max_bytes` to decide whether to compact aggressively this iteration (see [Update Rules](#update-rules) — when size exceeds 80% of the max, collapse older iteration entries).
+- **`state_file_max_bytes`**: The configured `max-file-size` for repo-memory state files (default `30720`, i.e. 30 KB). Files larger than this are rejected by repo-memory, breaking scheduling.
 - **`issue_programs`**: A mapping of program name → issue number for all discovered issue-based programs.
 - **`deferred`**: Other programs that were due but will be handled in future runs.
 - **`unconfigured`**: Programs that still have the sentinel or placeholder content.
 - **`skipped`**: Programs not due yet based on their per-program schedule.
 - **`no_programs`**: If `true`, no program files exist at all.
+- **`not_due`**: If `true`, programs exist but none are due for this run.
+- **`head_branch`**: The canonical long-running branch name for the selected program — always exactly `autoloop/{program-name}`, never with a suffix or hash. Use this value verbatim when creating, checking out, or pushing to the branch.
+- **`existing_pr`**: The number of the open draft PR for `autoloop/{program-name}`, or `null` if no PR exists yet. Use this to enforce the single-PR-per-program invariant — see [Step 5a: Push and wait for CI](#step-5a-push-and-wait-for-ci) and [Step 5c: Accept](#step-5c-accept).
 
 If `selected` is not null:
 1. Read the program file from the `selected_file` path.
 2. Parse the three sections: Goal, Target, Evaluation.
 3. Read the current state of all target files.
 4. Read the state file `{selected}.md` from the repo-memory folder for all state: the ⚙️ Machine State table (scheduling fields) plus the research sections (priorities, lessons, foreclosed avenues, iteration history).
-5. `selected_issue` is the program issue number (auto-created for file-based programs, or the source issue for issue-based programs). Read its comments for any human steering input.
-6. **Check `existing_pr`**: if it is not null, a PR already exists — use `push-to-pull-request-branch` to push commits to it. Only call `create-pull-request` when `existing_pr` is null.
+5. If `selected_issue` is not null, this is an issue-based program — also read the issue comments for any human steering input.
 
 ## Multiple Programs
 
@@ -239,7 +238,7 @@ GitHub Issues (labeled 'autoloop-program'):
 Each program runs independently with its own:
 - Goal, target files, and evaluation command
 - Metric tracking and best-metric history
-- Program issue: `[Autoloop: {program-name}]` — single GitHub issue (labeled `autoloop-program`) where status, iteration log, and human steering all live
+- Program issue: `[Autoloop: {program-name}]` (a single GitHub issue labeled `autoloop-program` — created automatically for file-based programs, the source issue for issue-based programs — that hosts the status comment, per-iteration comments, and human steering)
 - Long-running branch: `autoloop/{program-name}` (persists across iterations)
 - Single draft PR per program: `[Autoloop: {program-name}]` (accumulates all accepted iterations)
 - State file: `{program-name}.md` in repo-memory (all state: scheduling, research context, iteration history)
@@ -261,7 +260,7 @@ schedule: every 1h
 
 ### Target Metric (Halting Condition)
 
-Programs can optionally specify a `target-metric` in the frontmatter to define a halting condition. When the metric reaches or surpasses the target, the program is automatically **completed**: the `autoloop-program` label is removed and an `autoloop-completed` label is added (for issue-based programs), and the state file is marked `Completed: true`.
+Programs can optionally specify a `target-metric` in the frontmatter to define a halting condition. When the metric reaches or surpasses the target (in the direction set by `metric_direction`), the program is automatically **completed**: the `autoloop-program` label is removed and an `autoloop-completed` label is added (for issue-based programs), and the state file is marked `Completed: true`.
 
 Programs without a `target-metric` are **open-ended** and run indefinitely until manually stopped.
 
@@ -274,6 +273,28 @@ target-metric: 0.95
 # Autoloop Program
 ...
 ```
+
+### Metric Direction
+
+By default Autoloop assumes **higher is better** — `best_metric` is ratcheted up each accepted iteration, and a `target-metric` is met when `best_metric >= target-metric`. Programs whose natural fitness is *lower is better* (error, latency, cost, ratio, fitness score) can opt into reversed semantics with the optional `metric_direction` field:
+
+```markdown
+---
+schedule: every 6h
+metric_direction: lower   # defaults to "higher" if omitted
+target-metric: 0.9        # interpreted as "program is complete when best_metric ≤ 0.9"
+---
+```
+
+Allowed values are `higher` (default) and `lower`. Any other value is rejected at frontmatter-parse time, the scheduler logs a warning, and the program falls back to `higher`.
+
+When `metric_direction: lower` is set:
+
+- An iteration's metric is "improved" when `new_metric < best_metric` (instead of `>`).
+- Iteration History entries show a `-<delta>` (negative delta = improvement) instead of `+<delta>`.
+- The halting condition fires when `best_metric <= target-metric` (instead of `>=`).
+
+The agent reads `selected_metric_direction` from `/tmp/gh-aw/autoloop.json` to determine which direction applies to the current iteration. Programs that omit the field are treated as `higher` — no behaviour change for existing programs.
 
 ## Program Definition
 
@@ -294,7 +315,7 @@ A template program file is installed at `.autoloop/programs/example.md`. **Progr
 At the start of every run, check each program file for this sentinel. For any program where it is present:
 
 1. **Skip that program — do not run any iterations for it.**
-2. If no setup issue exists for that program, create one titled `[Autoloop: {program-name}] Action required: configure your program` (supply this exact string — do NOT prepend `[Autoloop] `, the `create-issue` safe-output adds that automatically).
+2. If no setup issue exists for that program, create one titled `[Autoloop: {program-name}] Action required: configure your program`.
 
 ## Branching Model
 
@@ -318,45 +339,30 @@ Examples:
 > - ❌ `autoloop/coverage-iter42-deadbeef`
 > - ❌ `autoloop/coverage-1234567890`
 >
-> Always use the exact canonical name, for example `autoloop/coverage`. If you are implementing a program named `build-tsb-pandas-typescript-migration`, the branch is always `autoloop/build-tsb-pandas-typescript-migration` — nothing more.
->
-> **Never let the gh-aw framework auto-generate a branch name.** You must explicitly name the branch when creating it.
+> **Never let the gh-aw framework auto-generate a branch name.** You must explicitly name the branch when creating it. The pre-step provides the canonical name in the `head_branch` field of `/tmp/gh-aw/autoloop.json` — always use that value verbatim.
+
 
 ### How It Works
 
-1. On the **first accepted iteration**, the branch is created from the default branch using `git checkout -b autoloop/{program-name}`.
-2. On **subsequent iterations**, the agent checks out the existing branch and ensures it is up to date with the default branch (by merging the default branch into it).
-3. **Accepted iterations** are committed and pushed to the branch. Each commit message references the GitHub Actions run URL. Acceptance requires **CI green** on the pushed HEAD (see [Step 5](#step-5-accept-or-reject)) — the sandbox self-evaluation alone is not sufficient.
-4. **Rejected iterations** (sandbox metric did not improve) do not commit — changes are discarded. **CI-failed iterations are not reverted**: the agent runs a bounded fix-retry loop on the same branch until CI is green or the budget is exhausted. If the budget is exhausted, the program is paused (loudly) and the broken commit is left in place for a human or Evergreen to pick up.
-5. A **single draft PR** is created for the branch on the first accepted iteration. Future accepted iterations push additional commits to the same PR — **never create a new PR if one already exists**.
-6. The branch may be **merged into the default branch** at any time (by a maintainer or CI). After merging, the branch continues to be used for future iterations — it is never deleted while the program is active.
-7. A **sync workflow** automatically merges the default branch into all active `autoloop/*` branches whenever the default branch changes, keeping them up to date.
+1. On the **first accepted iteration**, the branch is created from the default branch.
+2. On **subsequent iterations**, the agent checks out the existing branch and ensures it is up to date with the default branch. If the branch's changes have already been merged into the default branch (i.e., `git diff origin/main..autoloop/{program-name}` is empty), the branch is **reset to `origin/main`** to avoid stale commits. Otherwise, the default branch is merged into it.
+3. **Accepted iterations** are committed and pushed to the branch. Each commit message references the GitHub Actions run URL.
+4. **Rejected or errored iterations** do not commit — changes are discarded.
+5. A **single draft PR** is created for the branch on the first accepted iteration. Future accepted iterations push additional commits to the same PR.
+6. The branch may be **merged into the default branch** at any time (by a maintainer or CI). After merging, the branch continues to be used for future iterations — it is never deleted while the program is active. On the next iteration, the branch is automatically reset to the default branch (see step 2) so that already-merged commits do not cause patch conflicts.
 
 ### Cross-Linking
 
 Each program has three coordinated resources:
 - **Branch + PR**: `autoloop/{program-name}` with a single draft PR
-- **Program Issue**: `[Autoloop: {program-name}]` — single GitHub issue (labeled `autoloop-program`) that hosts the status comment, every per-iteration comment, and human steering comments
+- **Program Issue**: `[Autoloop: {program-name}]` — a single GitHub issue (labeled `autoloop-program`) that hosts the status comment, per-iteration comments, and human steering. For issue-based programs this is the source issue. For file-based programs it is auto-created on the first run.
 - **State File**: `{program-name}.md` in repo-memory — all state, history, and research context
 
-All three reference each other. For file-based programs, the program issue is auto-created on the first run if it does not already exist. For issue-based programs, the source issue itself is the program issue.
+All three reference each other. The program issue is created (or, for issue-based programs, adopted) on the first run and updated with links to the PR and state.
 
 ## Iteration Loop
 
 Each run executes **one iteration for the single selected program**:
-
-### Strategy discovery
-
-Before executing the generic iteration loop below, check whether this program has opted into a specialized strategy:
-
-1. Read `<program-dir>/program.md` and look for a `## Evolution Strategy` section.
-2. If that section points to a strategy file — e.g., "This program uses the **OpenEvolve** strategy. Read `strategy/openevolve.md` at the start of every iteration and follow it literally." — read the referenced file and follow it.
-3. The strategy playbook **supersedes** the generic "Step 2: Analyze" through "Step 5: Accept or Reject" steps below. The other steps (state read, branch management, state file updates, CI gating) still apply.
-4. If `## Evolution Strategy` is absent, contains only prose, or points to a file that does not exist, fall back to the default iteration flow below.
-
-Strategy files live under `<program-dir>/strategy/`. Program-specific prompts (e.g., `strategy/prompts/mutation.md`) are read by the strategy playbook at the appropriate step — do not read them pre-emptively, the playbook will tell you when.
-
-Reusable strategy templates (with `<CUSTOMIZE: …>` markers) live in `.autoloop/strategies/`. To author a new strategy-based program, copy the chosen strategy's files into `<program-dir>/strategy/`, resolve the markers, and add the matching `## Evolution Strategy` pointer block to `program.md` (see the strategy's `CUSTOMIZE.md` for guidance).
 
 ### Step 1: Read State
 
@@ -370,8 +376,6 @@ Reusable strategy templates (with `<CUSTOMIZE: …>` markers) live in `.autoloop
    - **📊 Iteration History**: Reverse-chronological log of all past iterations.
    
    If the state file does not yet exist, create it in the repo-memory folder using the template defined in the [Repo Memory](#repo-memory) section.
-
-3. Note the `existing_pr` field from `/tmp/gh-aw/autoloop.json`. If it is not null, that is the **existing draft PR** for this program — you must push to it using `push-to-pull-request-branch`, not create a new one. Also check the `PR` field from the Machine State table as a fallback.
 
 ### Step 2: Analyze and Propose
 
@@ -387,9 +391,7 @@ Reusable strategy templates (with `<CUSTOMIZE: …>` markers) live in `.autoloop
 
 ### Step 3: Implement
 
-1. Check out the program's long-running branch. The branch name is **exactly** `autoloop/{program-name}` — never with a suffix. For example:
-   - Program `coverage` → branch `autoloop/coverage`
-   - Program `build-tsb-pandas-typescript-migration` → branch `autoloop/build-tsb-pandas-typescript-migration`
+1. Check out the program's long-running branch `autoloop/{program-name}`, syncing it with the default branch using an explicit four-case decision tree based on commit ahead/behind counts. Run the following script (substituting `{program-name}`):
 
    ```bash
    git fetch origin main
@@ -413,7 +415,6 @@ Reusable strategy templates (with `<CUSTOMIZE: …>` markers) live in `.autoloop
        git push --force-with-lease origin autoloop/{program-name}
      elif [ "$ahead" != "0" ] && [ "$behind" != "0" ]; then
        # True divergence: branch has unique commits AND main has moved on.
-       # Merge main into the branch so the iteration builds on the latest code.
        git checkout -B autoloop/{program-name} origin/autoloop/{program-name}
        git merge origin/main --no-edit -m "Merge main into autoloop/{program-name}"
      else
@@ -427,6 +428,16 @@ Reusable strategy templates (with `<CUSTOMIZE: …>` markers) live in `.autoloop
    fi
    ```
 
+   The four cases:
+
+   | ahead | behind | Action | Rationale |
+   |---|---|---|---|
+   | 0 | 0 | checkout (nothing to do) | branch is exactly at main |
+   | 0 | >0 | **fast-forward + force-push** | branch's commits already in main; merging would produce noisy merge commit |
+   | >0 | 0 | checkout (nothing to do) | unique work preserved; no upstream drift to merge |
+   | >0 | >0 | checkout + merge | true divergence |
+
+   Use `--force-with-lease` rather than `--force` so that if anyone else is simultaneously pushing to the branch, the update is rejected rather than overwriting their commits.
 2. Make the proposed changes to the target files only.
 3. **Respect the program constraints**: do not modify files outside the target list.
 
@@ -438,124 +449,105 @@ Reusable strategy templates (with `<CUSTOMIZE: …>` markers) live in `.autoloop
 
 ### Step 5: Accept or Reject
 
-> ⚠️ **Acceptance is gated on CI — not on the sandbox self-evaluation.** The sandbox cannot be trusted to catch compile/type/test errors (it can't always install toolchains like `bun`, `tsc`, etc. due to firewall restrictions on `releaseassets.githubusercontent.com`). Real validation must come from CI on the pushed HEAD commit. An iteration is accepted **only** when CI is green on the pushed commit. If CI is red, you enter a bounded fix-retry loop (no revert) until it goes green or you exhaust the budget.
->
-> The sandbox metric check is still useful as a cheap pre-filter (fail fast on obviously-worse changes) and to supply the `best_metric` value, but it no longer makes the accept/reject decision on its own.
+The sandbox-computed metric is necessary but **not sufficient** for acceptance. The agent's sandbox cannot reliably install many project toolchains (e.g., `bun`, `tsc`, `cargo`, `go`, `pytest`) due to network restrictions on asset hosts, so a "metric improved" signal from the sandbox can mask broken commits (e.g., type-check or test failures the sandbox couldn't observe). Acceptance must therefore be gated on **CI green** for the pushed HEAD commit. If CI fails, attempt to fix-and-retry within the same iteration rather than reverting — reverting throws away mostly-correct work and creates `commit→revert→commit` churn on the branch.
 
-**If the sandbox metric did not improve** (and this is not the first run establishing a baseline):
-1. Discard the code changes (do not commit them to the long-running branch).
-2. **Update the program issue**: edit the status comment in place and post a new per-iteration comment with status ❌, the metric, and a one-line summary of what was tried.
-3. Update the state file `{program-name}.md` in the repo-memory folder:
-   - Update the **⚙️ Machine State** table: increment `iteration_count`, set `last_run`, append `"rejected"` to `recent_statuses` (keep last 10).
-   - Prepend an entry to **📊 Iteration History** with status ❌, metric, and a one-line summary of what was tried.
-   - If this approach is conclusively ruled out (e.g., tried multiple variations and all fail), add it to **🚧 Foreclosed Avenues** with a clear explanation.
-   - Update **🔭 Future Directions** if this rejection clarified what to try next.
+The accept path is split into three sub-steps: **5a (push and wait for CI)**, **5b (fix loop)**, **5c (accept)**.
 
-**If evaluation could not run in the sandbox** (toolchain install failure, missing dependencies, network-firewall blocks, etc.):
-- Do **not** immediately mark the iteration as errored and discard. The sandbox is unreliable by construction; CI is the real validation. Proceed to **Step 5a** and let CI decide — it will either pass (accept) or fail (enter the fix loop).
-- Only mark the iteration as ⚠️ error and discard (without pushing) if you cannot even produce a plausible change — e.g., you could not read the repo or the change itself is empty. In that case:
-  - Update the **⚙️ Machine State** table: increment `consecutive_errors`, increment `iteration_count`, set `last_run`, append `"error"` to `recent_statuses` (keep last 10).
-  - If `consecutive_errors` reaches 3+, set `paused` to `true` and set `pause_reason` in the Machine State table, and comment on the program issue describing the problem.
-  - Prepend an entry to **📊 Iteration History** with status ⚠️ and a brief error description.
+**If the metric did not improve**, jump straight to the "metric did not improve" path below — no push, no CI gate.
 
-**Otherwise** (sandbox metric improved, OR this is the first run establishing a baseline, OR the sandbox could not evaluate but produced a plausible change): proceed to **Step 5a → 5b → 5c**.
+#### Step 5a: Push and wait for CI
 
-### Step 5a: Push and wait for CI
+**Only entered if the metric improved** (or this is the first run establishing a baseline).
+
+Improvement is **direction-aware**:
+- If `selected_metric_direction` is `"higher"` (default): the metric improved when `new_metric > best_metric`.
+- If `selected_metric_direction` is `"lower"`: the metric improved when `new_metric < best_metric`.
+
+Read `selected_metric_direction` from `/tmp/gh-aw/autoloop.json` to know which direction applies. The first run (no `best_metric` yet) always counts as an improvement regardless of direction.
 
 1. Commit the changes to the long-running branch `autoloop/{program-name}` with a commit message referencing the actions run:
    - Commit message subject line: `[Autoloop: {program-name}] Iteration <N>: <short description>`
    - Commit message body (after a blank line): `Run: {run_url}` referencing the GitHub Actions run URL.
-2. Push the commit to the long-running branch `autoloop/{program-name}` (via `push-to-pull-request-branch` if a PR exists, or create one — see steps c/d in Step 5c below; you still need a PR to associate CI checks with).
-3. **Wait for CI on the new HEAD commit.** Poll the check runs for the pushed SHA until every check either concludes or times out:
+2. Push the commit to the long-running branch.
+3. **Find or create the PR** so CI runs and `gh pr checks` has a target. Follow these steps in order:
+   a. Check `existing_pr` from `/tmp/gh-aw/autoloop.json`. If it is not null, that is the existing draft PR — use it as `$EXISTING_PR` below; **never** call `create-pull-request`.
+   b. If `existing_pr` is null, also check the `PR` field in the state file's **⚙️ Machine State** table as a fallback. Verify it is still open via the GitHub API; if it has been closed or merged, treat it as if no PR exists and proceed to step (c).
+   c. If no PR exists (both sources are null): create one with `create-pull-request`, specifying `branch: autoloop/{program-name}` (the value of `head_branch` from `autoloop.json`) explicitly — do not let the framework auto-generate a branch name. See Step 5c for the title/body format.
+4. Wait for CI on the new HEAD and reduce all check-runs to a single status — `success`, `failure`, or `pending`:
 
    ```bash
    PR=${EXISTING_PR:-$(gh pr list --head autoloop/{program-name} --json number -q '.[0].number')}
-   # Watch the checks (exits non-zero if any fail — we tolerate that below).
    gh pr checks "$PR" --watch --interval 30 || true
-   # Determine status. Treat any pending/queued/in_progress as failure-to-conclude
-   # (should not happen after --watch returns, but we guard anyway). Neutral and
-   # skipped count as success.
    status=$(gh pr checks "$PR" --json conclusion,state -q '.[] | (.conclusion // .state // "")' \
      | awk '
          BEGIN { r = "success" }
          /^(FAILURE|CANCELLED|TIMED_OUT|ACTION_REQUIRED|STARTUP_FAILURE|STALE)$/ { r = "failure" }
          /^(PENDING|QUEUED|IN_PROGRESS|WAITING|REQUESTED)$/ { if (r == "success") r = "pending" }
          END { print r }')
-   echo "CI status: $status"
-   # If status == "pending" after --watch, treat as failure for safety and re-poll
-   # once more; otherwise proceed with success/failure.
    ```
 
-   Equivalent REST-API fallback: `GET /repos/{owner}/{repo}/commits/{sha}/check-runs` and `GET /repos/.../commits/{sha}/check-suites`, treating any `conclusion` in {`failure`, `timed_out`, `cancelled`, `action_required`} as failure and any check still in `status` ∈ {`queued`, `in_progress`, `waiting`} as not-yet-concluded (keep polling).
+   Three outcomes: `success`, `failure`, or `pending`. `pending` should be rare given `--watch`, but the awk fallback is defensive — never accept on `pending`. Treat `pending` as a non-terminal state: re-run the `gh pr checks --watch` step (it does not consume a fix attempt and the per-attempt `--watch` time still counts toward the 60-min wall-clock cap from Step 5b). If `pending` persists past the wall-clock cap, fall through to the `ci-timeout` handling in Step 5b.7.
 
-4. Respect the **per-iteration wall clock**: 60 minutes total (including all CI waits and fix attempts). If the cap is hit while waiting or fixing, **stop** — do **not** silently abandon. Go to the **budget-exhausted** handler in Step 5b below: set `paused: true` with `pause_reason: "ci-timeout: wall-clock cap reached"`, comment on the program issue, and end the iteration. Do **not** revert — leave the broken commit in place for a human or Evergreen to pick up.
+5. If `status == "success"`, proceed to **Step 5c**. If `status == "failure"`, proceed to **Step 5b**. If `status == "pending"`, re-run this step (subject to the wall-clock cap defined in Step 5b.7).
 
-### Step 5b: Fix loop (up to 5 attempts per iteration)
+#### Step 5b: Fix loop (up to 5 attempts per iteration)
 
-If `status == "failure"`, you must **fix and retry** — do not revert, do not accept.
+If `status == "failure"`, **fix and retry — do not revert, do not accept**:
 
-1. **Fetch the failing check-run logs** for the pushed SHA:
-
-   ```bash
-   # For each failed check, pull the last 200 lines of logs.
-   for run_id in $(gh run list --branch autoloop/{program-name} --limit 5 --json databaseId,conclusion \
-                    -q '.[] | select(.conclusion=="failure") | .databaseId'); do
-     gh run view "$run_id" --log-failed | tail -200
-   done
-   ```
-
-   Or via the MCP `actions` toolset: `get_workflow_run_logs_url` / `get_job_logs` with `failed_only: true`.
-
+1. **Fetch the failing check-run logs** for the pushed SHA via `gh run view --log` or the Checks API.
 2. **Extract a structured failure summary**:
-   - The first ~50 lines of error output from each failing job (compile errors, stack traces).
-   - The set of failing test names (e.g., `tests/stats/eval_query.test.ts`).
-   - A short **failure signature** — a stable, normalized fingerprint of the failures (e.g., the sorted list of failing test names + the top error code, like `TS2339:fromArrays:tests/stats/eval_query.test.ts`). This is used by the **no-progress guard**.
+   - Failing job names and the first error line for each.
+   - **A failure signature** — a stable, normalized fingerprint of the failures (e.g., sorted failing-test names + the top error code, like `TS2339:fromArrays:tests/stats/eval_query.test.ts`). The signature is what the no-progress guard compares.
 
-3. **No-progress guard.** Compare this attempt's failure signature to the previous fix attempt's signature (kept in memory across attempts within this iteration). If they match, **stop looping** — the agent is stuck:
-   - Set `paused: true` on the state file with `pause_reason: "stuck in CI fix loop: <signature>"`.
-   - Post a comment on the program issue with the failure summary and the last up-to-three fix attempts.
-   - End the iteration. Do **not** revert. Leave the broken commit in place for human/Evergreen review.
+   *(The shared failure-signature extractor lives in the scheduler helper module — see issue #34 for the implementation.)*
+3. **No-progress guard**: if this attempt's failure signature exactly matches the previous attempt's signature, **stop**. The agent is stuck in a repeat-loop. Set `paused: true` on the state file with `pause_reason: "stuck in CI fix loop: <signature>"`, append `"ci-fix-exhausted"` to `recent_statuses`, comment on the program issue with the signature and the three most recent attempts, and end the iteration.
+4. **Attempt the fix**: feed the structured failure summary back to the agent as the next sub-task (e.g., "CI failed on `<sha>`. Here are the failures: `<…>`. Fix them and push again."). The agent commits the fix and pushes.
+5. **Loop back to Step 5a** with the new HEAD.
+6. **Budget: 5 fix attempts per iteration.** If the 5th attempt still leaves CI red, set `paused: true` with `pause_reason: "ci-fix-exhausted: <signature>"`, append `"ci-fix-exhausted"` to `recent_statuses`, comment on the program issue, and end the iteration.
+7. **Wall-clock cap: 60 min per iteration** including all CI waits across attempts. If exceeded mid-fix, set `paused: true` with `pause_reason: "ci-timeout"`, append `"ci-fix-exhausted"` to `recent_statuses`, leave the current branch state in place, and end the iteration.
 
-4. **Implement a fix.** Treat the extracted failure summary as the new task:
-   > *"CI failed on `<sha>`. Here are the failures: `<summary>`. Fix them and push again."*
+#### Step 5c: Accept
 
-   Make the minimum surgical change that addresses the reported failures. Do not expand scope.
+**Only entered when `status == "success"`** from Step 5a (possibly after one or more fix attempts in Step 5b).
 
-5. **Commit and push the fix** to the same long-running branch (same PR). Commit subject: `[Autoloop: {program-name}] Iteration <N> fix attempt <k>: <short description>`.
-
-6. **Go back to Step 5a step 3** and wait for CI on the new HEAD.
-
-7. **Budget**: up to **5 fix attempts** per iteration. If the 5th attempt still leaves CI red:
-   - Set `paused: true` on the state file with `pause_reason: "ci-fix-exhausted: <signature>"`.
-   - Append `"ci-fix-exhausted"` to `recent_statuses`.
-   - Post a comment on the program issue with the failing check summary and a brief log of the last 3 fix attempts (what was tried, what still failed). Include a link to each failing run.
-   - End the iteration. Do **not** revert — a human or Evergreen will pick it up from here.
-
-> **Why no revert?** Reverting throws away real work (the proposed change is usually mostly right), creates commit-history churn, and prevents Evergreen from finishing the job. Fix-and-retry produces a single clean commit on accept. The deliberate loud-failure path (pause + comment) gives humans visibility without silent corruption.
-
-### Step 5c: Accept (CI green)
-
-Only when CI is green on the pushed HEAD (original push or any fix-attempt push) do you mark the iteration accepted.
-
-1. **Find the existing PR or create one** — follow these steps in order:
-   a. **First, check `existing_pr` from `/tmp/gh-aw/autoloop.json`.** The pre-step has already looked up the open PR for this program. If `existing_pr` is not null, that is the existing draft PR — skip to step (c).
-   b. If `existing_pr` is null, also check the `PR` field in the state file's **⚙️ Machine State** table as a fallback. If it contains a PR number (e.g., `#42`), verify it is still open via the GitHub API.
-   c. **If an existing PR is found** (from step a or b): use `push-to-pull-request-branch` to push additional commits to the existing PR. Update the PR body with the latest metric and a summary of the most recent accepted iteration. Add a comment to the PR summarizing the iteration: what changed, old metric, new metric, improvement delta, the CI status, and a link to the actions run. **Do NOT call `create-pull-request`.**
-   d. **If NO PR exists** for `autoloop/{program-name}` (both `existing_pr` is null AND the state file has no PR): create one using `create-pull-request`:
-      - Branch: `autoloop/{program-name}` (the branch you already created in Step 3 — do NOT let the framework auto-generate a branch name)
-      - Title: `[Autoloop: {program-name}]`
-      - Body includes: a summary of the program goal, link to the program issue (#{selected_issue}), the current best metric, and AI disclosure: `🤖 *This PR is maintained by Autoloop. Each accepted iteration adds a commit to this branch.*`
-
-   > ⚠️ **Never create a new PR if one already exists for `autoloop/{program-name}`.** Each program must have exactly one draft PR at any time. The pre-step provides `existing_pr` in autoloop.json — always check it first. Only call `create-pull-request` when `existing_pr` is null AND the state file has no PR number.
-2. **Update the program issue** (see [Program Issue](#program-issue) below): edit the status comment in place and post a new per-iteration comment summarizing what changed, the metric delta, the number of fix attempts required (if any), and links to the commit / actions run / PR.
-3. Update the state file `{program-name}.md` in the repo-memory folder:
-   - Update the **⚙️ Machine State** table: reset `consecutive_errors` to 0, set `best_metric`, increment `iteration_count`, set `last_run` to current UTC timestamp, append `"accepted"` to `recent_statuses` (keep last 10), set `paused` to `false`, and clear `pause_reason` (set to `—`).
-   - Prepend an entry to **📊 Iteration History** (newest first) with status ✅, metric, PR link, CI run link, number of fix attempts, and a one-line summary of what changed and why it worked.
-   - Update **📚 Lessons Learned** if this iteration revealed something new about the problem or what works (including CI-only failure modes the sandbox missed).
+1. The commit(s) are already on the long-running branch (pushed in Step 5a / 5b). No further pushing needed.
+2. If a draft PR does not already exist for this branch (i.e., `existing_pr` from `autoloop.json` is null AND the state file's `PR` field is null or refers to a closed PR), create one — specify `branch: autoloop/{program-name}` (the value of `head_branch` from `autoloop.json`) explicitly so the framework does not auto-generate a branch name:
+   - Title: `[Autoloop: {program-name}]`
+   - Body includes: a summary of the program goal, link to the program issue, the current best metric, and AI disclosure: `🤖 *This PR is maintained by Autoloop. Each accepted iteration adds a commit to this branch.*`
+   If a draft PR already exists, use `push-to-pull-request-branch` (never `create-pull-request`). Update the PR body with the latest metric and a summary of the most recent accepted iteration. Add a comment to the PR summarizing the iteration: what changed, old metric, new metric, improvement delta, the **fix-attempt count** if `> 0`, and a link to the actions run.
+4. Ensure the program issue exists (see [Program Issue](#program-issue) below) — for file-based programs that have no program issue yet (`selected_issue` is null in `/tmp/gh-aw/autoloop.json`), create one and record its number in the state file's `Issue` field.
+5. Update the state file `{program-name}.md` in the repo-memory folder:
+   - Update the **⚙️ Machine State** table: reset `consecutive_errors` to 0, set `best_metric`, increment `iteration_count`, set `last_run` to current UTC timestamp, append `"accepted"` to `recent_statuses` (keep last 10), set `paused` to false.
+   - Prepend an entry to **📊 Iteration History** (newest first) with status ✅, metric, **signed delta** (`+<delta>` for `higher`-direction programs, `-<delta>` for `lower`-direction programs — both arrows point in the "improvement" direction), PR link, the fix-attempt count if `> 0`, and a one-line summary of what changed and why it worked.
+   - Update **📚 Lessons Learned** if this iteration revealed something new about the problem or what works.
    - Update **🔭 Future Directions** if this iteration opened new promising paths.
-4. **Check halting condition** (see [Halting Condition](#halting-condition)): If the program has a `target-metric` in its frontmatter and the new `best_metric` meets or surpasses the target, mark the program as completed.
+6. **Update the program issue**: edit the status comment and post a per-iteration comment on the program issue (see [Program Issue](#program-issue)). Note the fix-attempt count in the per-iteration comment if `> 0`.
+7. **Check halting condition** (see [Halting Condition](#halting-condition)): If the program has a `target-metric` in its frontmatter, compare the new `best_metric` against it using the program's metric direction (read `selected_metric_direction` from `/tmp/gh-aw/autoloop.json`):
+   - `higher`: completed when `best_metric >= target-metric`.
+   - `lower`: completed when `best_metric <= target-metric`.
 
-> **Invariant**: No iteration can be marked accepted while CI is red on the pushed HEAD. No autoloop PR should sit with persistent red CI unnoticed — if the fix loop gives up, the program is paused loudly (state file + issue comment) for a human or Evergreen to pick up.
+   When the target is met, mark the program as completed (set `Completed: true`, remove the `autoloop-program` label, add `autoloop-completed`).
+
+#### Coordination with PR-health-keeper workflows
+
+If a repo ships a companion PR-health-keeper workflow (e.g., an "Evergreen" workflow that fixes failing CI on open PRs), it should be able to pick up paused Autoloop PRs using the same rules as human-authored PRs. The handoff is via the `pause_reason` field — `ci-fix-exhausted: <signature>`, `stuck in CI fix loop: <signature>`, and `ci-timeout` are all signals that the branch is red and needs an external nudge. Absent such a workflow, the loud pause + structured reason gives a human enough signal to intervene.
+
+**If the metric did not improve**:
+1. Discard the code changes (do not commit them to the long-running branch).
+2. Update the state file `{program-name}.md` in the repo-memory folder:
+   - Update the **⚙️ Machine State** table: increment `iteration_count`, set `last_run`, append `"rejected"` to `recent_statuses` (keep last 10).
+   - Prepend an entry to **📊 Iteration History** with status ❌, metric, and a one-line summary of what was tried.
+   - If this approach is conclusively ruled out (e.g., tried multiple variations and all fail), add it to **🚧 Foreclosed Avenues** with a clear explanation.
+   - Update **🔭 Future Directions** if this rejection clarified what to try next.
+3. **Update the program issue**: edit the status comment and post a per-iteration comment on the program issue (see [Program Issue](#program-issue)).
+
+**If evaluation could not run** (build failure, missing dependencies, etc.):
+1. Discard the code changes (do not commit them to the long-running branch).
+2. Update the state file `{program-name}.md` in the repo-memory folder:
+   - Update the **⚙️ Machine State** table: increment `consecutive_errors`, increment `iteration_count`, set `last_run`, append `"error"` to `recent_statuses` (keep last 10).
+   - If `consecutive_errors` reaches 3+, set `paused` to `true` and set `pause_reason` in the Machine State table, and create an issue describing the problem.
+   - Prepend an entry to **📊 Iteration History** with status ⚠️ and a brief error description.
+3. **Update the program issue**: edit the status comment and post a per-iteration comment on the program issue (see [Program Issue](#program-issue)).
 
 ## Program Issue
 
@@ -567,21 +559,23 @@ Each program has **exactly one** open GitHub issue (labeled `autoloop-program`) 
 
 There are no separate "steering" or "experiment log" issues — they have all been collapsed into this one issue.
 
-### Auto-creation for File-Based Programs
+### Auto-Creation for File-Based Programs
 
 If `selected_issue` is `null` in `/tmp/gh-aw/autoloop.json`, the program is file-based **and** has no program issue yet. On the first run, create one with `create-issue`:
 
-- **Title**: `[Autoloop: {program-name}]` — supply this exact string as the title. **Do NOT prepend `[Autoloop] `** yourself; the `create-issue` safe-output's `title-prefix` config adds that automatically. The final issue title will be `[Autoloop] [Autoloop: {program-name}]` on GitHub, and the scheduler recognizes that form when matching a program issue back to its file-based program.
-- **Labels**: `autoloop-program`, `automation`, `autoloop`
-- **Body**: the contents of the program file (so humans can read the goal/target/evaluation directly on the issue), prefixed with `🤖 *Autoloop program issue for `{program-name}`. The program definition below is mirrored from [`{selected_file}`]({link-to-file}). Edit the file to update the definition; comment on this issue to steer the agent.*`
+- **Title**: `[Autoloop: {program-name}]`.
+- **Body**: the contents of the program file (`program.md`) plus a placeholder for the status comment so maintainers know one will be edited in place.
+- **Labels**: `[autoloop-program, automation, autoloop]`.
 
-After creation, record the issue number in the state file's **⚙️ Machine State** table (`Issue` field) and use it for all subsequent comments and updates this run. On subsequent runs, the pre-step will discover the issue by title and supply it as `selected_issue`.
+Record the new issue number in the state file's `Issue` field. On subsequent runs, the pre-step will discover the existing program issue (it scans open issues with the `autoloop-program` label) and `selected_issue` will be populated automatically.
 
-For **issue-based programs**, the source issue **is** the program issue — do not create a new one. The source issue body is the program definition; do not modify it (the user owns it).
+For issue-based programs (`selected_issue` is not null on the very first run), no creation is needed — the source issue is already the program issue. The flow below is identical from there on.
 
 ### Status Comment
 
-On the **first run** that has access to the program issue, post a status comment. On **every subsequent iteration**, edit that same comment in place — never post a new one. The status comment is always the earliest bot comment containing the sentinel `<!-- AUTOLOOP:STATUS -->`. If multiple comments contain this sentinel, use the earliest one (lowest comment ID) and ignore the others.
+On the **first iteration**, post a comment on the program issue. On **every subsequent iteration**, update that same comment (edit it, do not post a new one). This is the "status comment" — always the earliest bot comment on the issue.
+
+Find the status comment by searching for a comment containing `<!-- AUTOLOOP:STATUS -->`. If multiple comments contain this sentinel, use the earliest one (lowest comment ID) and ignore the others.
 
 **Status comment format:**
 
@@ -599,6 +593,7 @@ On the **first run** that has access to the program issue, post a status comment
 | **Branch** | [`autoloop/{program-name}`](https://github.com/{owner}/{repo}/tree/autoloop/{program-name}) |
 | **Pull Request** | #{pr_number} |
 | **State File** | [`{program-name}.md`](https://github.com/{owner}/{repo}/blob/memory/autoloop/{program-name}.md) |
+| **Paused** | {true/false} ({pause_reason if paused}) |
 
 ### Summary
 
@@ -607,7 +602,7 @@ On the **first run** that has access to the program issue, post a status comment
 
 ### Per-Iteration Comment
 
-After **every iteration** (accepted, rejected, or error), post a **new comment** on the program issue:
+After **every iteration** (accepted, rejected, or error), post a **new comment** on the program issue with a summary of what happened:
 
 ```markdown
 🤖 **Iteration {N}** — [{status_emoji} {status}]({run_url})
@@ -615,25 +610,28 @@ After **every iteration** (accepted, rejected, or error), post a **new comment**
 - **Change**: {one-line description of what was tried}
 - **Metric**: {value} (best: {best_metric}, delta: {+/-delta})
 - **Commit**: {short_sha} *(if accepted)*
-- **PR**: #{pr_number} *(if accepted)*
 - **Result**: {one-sentence summary of what this iteration revealed}
 ```
 
-This is the rolling iteration log — there is no separate experiment-log issue, no monthly rollover, and no continuation issue. A single rolling issue can comfortably hold thousands of comments; if it grows uncomfortably large, collapse older iteration comments into a pinned summary comment rather than splitting issues.
-
 ### Steering via Issue Comments
 
-**Human comments on the program issue act as steering input** (in addition to the state file's Current Priorities section). Before proposing a change, read all human (non-bot) comments on the program issue and treat them as directives — similar to how the Current Priorities section works in the state file.
+**Human comments on the program issue act as steering input** (in addition to the state file's Current Priorities section). Before proposing a change, read all comments on the program issue and treat any human (non-bot) comments posted since the last iteration as directives — similar to how the Current Priorities section works in the state file.
 
 ### Program Issue Rules
 
-- Exactly **one open program issue per program**, labeled `autoloop-program`.
 - For issue-based programs, the source issue body IS the program definition — do not modify it (the user owns it).
-- For file-based programs, the auto-created issue body mirrors the program file at creation time; the program file remains the source of truth for the definition.
+- For file-based programs, the program issue body is informational and may be lightly updated (e.g., to refresh the program summary), but the program file (`program.md`) remains the source of truth for the goal/target/evaluation.
 - The `autoloop-program` label must remain on the issue for the program to be discovered. When a program completes (target metric reached), the label is removed automatically and replaced with `autoloop-completed`.
-- Closing the issue stops the program from being discovered (equivalent to deleting a program.md file).
-- Do **not** create separate "Steering" or "Experiment Log" issues — they have been deprecated. All status, iteration logs, and steering live on the single program issue.
-- Do NOT close the program issue when the PR is merged — the branch continues to accumulate future iterations.
+- Closing the program issue stops the program from being discovered (equivalent to deleting a program file). Do NOT close the program issue when the PR is merged — the branch continues to accumulate future iterations.
+- Program issues are labeled `[autoloop-program, automation, autoloop]`.
+
+### Migration from the Old Three-Issue Model
+
+Older Autoloop installations created up to three issues per program: the program issue (issue-based only), a separate `[Autoloop: {name}] Steering` issue, and monthly `[Autoloop: {name}] Experiment Log` issues. These have been collapsed into the single program issue described above.
+
+- Before creating a new program issue for a file-based program, check whether one with the title `[Autoloop: {program-name}]` already exists (open or closed). If found and open, adopt it; if closed, reopen it rather than creating a new one.
+- Existing `Steering` and monthly `Experiment Log` issues can be manually closed by maintainers; the agent must stop posting to them.
+- The state file's legacy `Steering Issue` field is deprecated; the new `Issue` field replaces it. If only the legacy field is present, copy its value into the new `Issue` field on the next iteration.
 
 ## Halting Condition
 
@@ -643,17 +641,18 @@ Programs can be **open-ended** (run indefinitely until manually stopped) or **go
 
 1. Parse the `target-metric` value from the program's YAML frontmatter (if present).
 2. After each **accepted** iteration, compare the new `best_metric` against the `target-metric`.
-3. Determine whether the target is met based on the metric direction:
-   - If the program says "**higher is better**": the target is met when `best_metric >= target-metric`.
-   - If the program says "**lower is better**": the target is met when `best_metric <= target-metric`.
+3. Determine whether the target is met based on the program's `metric_direction` (read from `selected_metric_direction` in `/tmp/gh-aw/autoloop.json`; defaults to `higher` when unset):
+   - `higher` (default): the target is met when `best_metric >= target-metric`.
+   - `lower`: the target is met when `best_metric <= target-metric`.
 4. When the target is met, **complete** the program:
    - Set `Completed` to `true` in the state file's **⚙️ Machine State** table.
    - Set `Completed Reason` to a human-readable message (e.g., `target metric 0.95 reached with value 0.97`).
-   - **On the program issue** (`selected_issue`):
-     - Remove the `autoloop-program` label.
-     - Add the `autoloop-completed` label.
-     - Update the status comment to show ✅ Completed status.
-     - Post a per-iteration comment celebrating the achievement: `🎉 **Target metric reached!** The program has achieved its goal.`
+   - **For issue-based programs** (`selected_issue` is not null):
+     - Remove the `autoloop-program` label from the source issue.
+     - Add the `autoloop-completed` label to the source issue.
+   - Update the status comment to show ✅ Completed status.
+   - Post a per-run comment celebrating the achievement: `🎉 **Target metric reached!** The program has achieved its goal.`
+   - Post a per-iteration comment on the program issue noting the completion.
    - The program will not be selected for future runs (the pre-step skips completed programs).
 
 ### Example
@@ -740,6 +739,7 @@ When creating or updating a program's state file in the repo-memory folder, use 
 | Iteration Count | 0 |
 | Best Metric | — |
 | Target Metric | — |
+| Metric Direction | higher |
 | Branch | `autoloop/{program-name}` |
 | PR | — |
 | Issue | — |
@@ -758,7 +758,7 @@ When creating or updating a program's state file in the repo-memory folder, use 
 **Metric**: {metric-name} ({higher/lower} is better)
 **Branch**: [`autoloop/{program-name}`](../../tree/autoloop/{program-name})
 **Pull Request**: #{pr_number}
-**Issue**: #{program_issue_number}
+**Issue**: #{issue_number}
 
 ---
 
@@ -811,15 +811,16 @@ All iterations in reverse chronological order (newest first).
 | Iteration Count | integer | Total iterations completed |
 | Best Metric | number | Best metric value achieved so far |
 | Target Metric | number or `—` | Target metric from program frontmatter (halting condition). `—` if open-ended |
+| Metric Direction | `higher` or `lower` | Whether larger or smaller metric values count as improvement. Defaults to `higher` if absent (back-compat). Set from the program's `metric_direction` frontmatter field. |
 | Branch | branch name | Long-running branch: `autoloop/{program-name}` |
 | PR | `#number` or `—` | Draft PR number for this program |
-| Issue | `#number` or `—` | Program issue number (single source of truth for status, iteration log, and human steering) |
+| Issue | `#number` or `—` | The single program issue (`[Autoloop: {program-name}]`) for this program. Hosts the status comment, per-iteration comments, and human steering comments. |
 | Paused | `true` or `false` | Whether the program is paused |
-| Pause Reason | text or `—` | Why it is paused. Recognized values set by the CI-gated acceptance flow: `ci-fix-exhausted: <signature>` (5 fix attempts exhausted), `stuck in CI fix loop: <signature>` (no-progress guard triggered), `ci-timeout: wall-clock cap reached` (60-min per-iteration cap hit). Other free-form text may be set for errors. |
+| Pause Reason | text or `—` | Why it is paused (if applicable). Common values include `manual`, `consecutive errors`, `ci-fix-exhausted: <signature>` (5 fix attempts didn't fix CI), `stuck in CI fix loop: <signature>` (no-progress guard tripped — same failure signature twice in a row), and `ci-timeout` (60-min wall-clock cap hit). |
 | Completed | `true` or `false` | Whether the program has reached its target metric |
 | Completed Reason | text or `—` | Why it completed (e.g., `target metric 0.95 reached with value 0.97`) |
 | Consecutive Errors | integer | Count of consecutive evaluation failures |
-| Recent Statuses | comma-separated words | Last 10 outcomes: `accepted`, `rejected`, `error`, or `ci-fix-exhausted` |
+| Recent Statuses | comma-separated words | Last 10 outcomes: `accepted`, `rejected`, `error`, or `ci-fix-exhausted`. The `ci-fix-exhausted` value is the coarse bucket for *any* iteration that ended because the CI gate could not be made green within the per-iteration budget — including no-progress-guard trips, 5-attempt budget exhaustion, and `ci-timeout`. The fine-grained reason is in `pause_reason`. |
 
 ### Iteration History Entry Format
 
@@ -830,10 +831,13 @@ After each iteration, prepend an entry to the **📊 Iteration History** section
 
 - **Status**: ✅ Accepted / ❌ Rejected / ⚠️ Error
 - **Change**: {one-line description of what was tried}
-- **Metric**: {value} (previous best: {previous_best}, delta: {+/-delta})
+- **Metric**: {value} (previous best: {previous_best}, delta: {signed-delta})
 - **Commit**: {short_sha} *(if accepted)*
+- **CI fix attempts**: {N} *(omit if 0; only present for accepted iterations that needed fix-and-retry)*
 - **Notes**: {one or two sentences on what this iteration revealed}
 ```
+
+The `delta` is **signed by metric direction**: for `higher`-direction programs an improvement is `+<delta>`; for `lower`-direction programs an improvement is `-<delta>`. In both cases the sign points in the "improvement" direction so the entry reads naturally.
 
 ### Update Rules
 
@@ -841,17 +845,22 @@ After each iteration, prepend an entry to the **📊 Iteration History** section
 - **Always** update the state file after each iteration, regardless of outcome.
 - **Update the Machine State table first** — the scheduling pre-step depends on it.
 - **Prepend** iteration history entries (newest first).
-- **Keep the state file compact.** The state file must stay under 30 KB. When prepending a new iteration entry, collapse older iteration entries (beyond the most recent 10) into compressed summary lines (e.g. `### Iters 50–100 — ✅ (metrics 20→55): brief summary`). Also prune Lessons Learned to only the most recent and relevant entries.
 - **Accumulate** Lessons Learned — add new insights, don't overwrite existing ones.
 - **Add to Foreclosed Avenues** only when an approach is conclusively ruled out (not just rejected once).
 - **Respect Current Priorities** — if a maintainer has written priorities, follow them in your next proposal.
 - **Write the state file** to the repo-memory folder. Changes are automatically committed and pushed to the `memory/autoloop` branch after the workflow completes.
+- **Keep the state file compact.** The state file must stay under the configured `max-file-size` (default 30 KB — see `state_file_max_bytes` in `/tmp/gh-aw/autoloop.json`). When prepending a new iteration entry, collapse older iteration entries (beyond the most recent 10) into compressed summary lines. Example format for collapsed entries:
+
+    ```markdown
+    ### Iters 50–100 — ✅ (metrics 20→55): brief summary of what worked across this range
+    ```
+
+    Also prune **📚 Lessons Learned** to the most recent and most relevant entries, and consolidate similar entries in **🚧 Foreclosed Avenues** if it grows beyond a page. If `state_file_size_bytes` from `/tmp/gh-aw/autoloop.json` is already greater than 80% of `state_file_max_bytes`, **compact aggressively** this iteration: collapse to the most recent 5 detailed entries and merge older compressed ranges into broader bands. Repo-memory rejects files larger than `max-file-size`, which breaks scheduling — so keeping the file under budget is mandatory, not optional.
 
 ## Guidelines
 
 - **One change per iteration.** Keep changes small and targeted.
-- **No breaking changes.** Target files must remain functional even if the iteration is rejected. **CI must be green before an iteration is accepted** — the sandbox self-evaluation alone is not authoritative.
-- **CI is the acceptance gate.** After pushing, wait for CI on the new HEAD. If red, fetch the failure logs and fix — up to 5 attempts per iteration, with a 60-minute wall-clock cap and a no-progress guard (same failure signature twice → stop). On budget exhaustion, set `paused: true` with an explicit `pause_reason` and comment on the program issue — **never revert**.
+- **No breaking changes.** Target files must remain functional even if the iteration is rejected.
 - **Respect the evaluation budget.** If the evaluation command has a time constraint, respect it.
 - **Repo-memory state file is the single source of truth.** All state lives in `{program-name}.md` in the repo-memory folder — scheduling fields, history, lessons, priorities. Keep it up to date.
 - **Learn from the state file.** The Foreclosed Avenues and Lessons Learned sections exist to prevent repeating failures. Read them before every proposal.
@@ -867,21 +876,11 @@ After each iteration, prepend an entry to the **📊 Iteration History** section
 > ❌ **Do NOT create a new branch with a suffix for each iteration.**
 > Correct: `autoloop/coverage`
 > Wrong: `autoloop/coverage-abc123`, `autoloop/coverage-iter42`, `autoloop/coverage-deadbeef1234`
-> Use the `head_branch` field from `autoloop.json` — it is always the canonical name.
+> Use the `head_branch` field from `/tmp/gh-aw/autoloop.json` — it is always the canonical name. Never let the gh-aw framework auto-generate a branch name.
 
 > ❌ **Do NOT create a new PR if one already exists for `autoloop/{program-name}`.**
-> The pre-step provides `existing_pr` in `autoloop.json`. If it is not null, **always** use `push-to-pull-request-branch` — never call `create-pull-request`. Only create a PR when `existing_pr` is null AND the state file has no PR number.
+> The pre-step provides `existing_pr` in `/tmp/gh-aw/autoloop.json`. If it is not null, **always** use `push-to-pull-request-branch` — never call `create-pull-request`. Only create a PR when `existing_pr` is null AND the state file's `PR` field is also null (or refers to a closed PR).
 
-> ❌ **Do NOT let the gh-aw framework auto-generate a branch name when creating a PR.**
-> Always specify the branch explicitly as `autoloop/{program-name}` when calling `create-pull-request`.
+> ❌ **Do NOT modify files outside the program's Target list.**
+> The Target section of the program file is the allowlist. Touching anything else (including the evaluation script or the program file itself) is forbidden.
 
-> ❌ **Do NOT push to the default branch (e.g., `main`).**
-> All accepted changes go to `autoloop/{program-name}` only.
-
-> ❌ **Do NOT revert a commit just because CI went red.**
-> Run the Step 5b fix loop (up to 5 attempts) on the same branch. Only if the budget is exhausted do you pause the program (with `pause_reason: "ci-fix-exhausted: <signature>"`) and leave the commit in place for a human or Evergreen to pick up. Reverting throws away the 80% that was right.
-
-> ❌ **Do NOT mark an iteration accepted while CI is red.**
-> Acceptance requires CI green on the pushed HEAD. If CI is red, you are in the fix loop, not in the accept path.
-
-> ✅ **One program = one long-running branch = one draft PR.** This is the invariant that must hold at all times.
