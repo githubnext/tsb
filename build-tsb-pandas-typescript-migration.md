@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T10:15:00Z |
-| Iteration Count | 284 |
+| Last Run | 2026-04-25T11:30:00Z |
+| Iteration Count | 285 |
 | Best Metric | 136 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted |
 
 ---
 
@@ -48,9 +48,10 @@ Completed through iter 279:
 - ✅ readFwf / read_fwf — fixed-width format reader (283)
 - ✅ unionCategoricals / pd.api.types.union_categoricals (284)
 
+- ✅ strCenter/strLjust/strRjust/strZfill/strWrap — string padding/justification (285)
+
 Next:
-- `str.extractall()` — wire via late-binding (returns MultiIndex DataFrame)
-- `pd.api.types.union_categoricals()` — ✅ done iter 284
+- More `str.*` accessor extensions or pandas datetime utilities
 
 ---
 
@@ -82,6 +83,13 @@ Next:
 ---
 
 ## 📊 Iteration History
+### Iteration 285 — 2026-04-25 11:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24929866462)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +strCenter/strLjust/strRjust/strZfill/strWrap — text padding/justification methods
+- **Metric**: 136 (previous best: 135→136, delta: +1), Commit: 175caa3
+- **Notes**: New src/stats/string_padding.ts; overloads for scalar/array/Series; 30+ tests with fast-check property tests.
+
 ### Iteration 284 — 2026-04-25 10:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24928423917)
 
 - **Status**: ⏳ pending-ci
