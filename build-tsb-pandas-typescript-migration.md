@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T15:40:00Z |
-| Iteration Count | 288 |
+| Last Run | 2026-04-25T16:49:49Z |
+| Iteration Count | 289 |
 | Best Metric | 136 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci, pending-ci |
 
 ---
 
@@ -36,7 +36,7 @@
 
 - ✅ Core (iters 1–52), Stats (53–244), various ops (246–288)
 - ✅ Through iter 288: itertuples added. 136 features on branch.
-- Next: convert_dtypes, to_html on DataFrame/Series, Flags, api.types
+- Next: itertuples on DataFrame, DataFrame.Flags, pd.api.types extensions
 
 ---
 
@@ -51,6 +51,7 @@
 - **Circular deps**: `string_accessor.ts` cannot import `DataFrame`.
 - **CI action_required**: Means human approval needed, not test failure.
 - **git stash**: Does NOT stash untracked files.
+- **to_html**: Use df.col(col).at(i) for cell values; df.index.at(i) for index labels.
 
 ---
 
@@ -71,6 +72,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 289 — 2026-04-25 16:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24935744381)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +to_html — dataFrameToHtml / seriesToHtml for HTML table rendering
+- **Metric**: 136 (delta: +1 from main baseline 135)
+- **Commit**: 4e55926
 
 ### Iteration 288 — 2026-04-25 15:40 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24934236156)
 
