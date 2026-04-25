@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T11:30:00Z |
-| Iteration Count | 285 |
+| Last Run | 2026-04-25T12:58:00Z |
+| Iteration Count | 286 |
 | Best Metric | 136 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted |
 
 ---
 
@@ -49,8 +49,10 @@ Completed through iter 279:
 - ✅ unionCategoricals / pd.api.types.union_categoricals (284)
 
 - ✅ strCenter/strLjust/strRjust/strZfill/strWrap — string padding/justification (285)
+- ✅ lreshape — wide-to-long reshape with named parallel column groups (286)
 
 Next:
+- `swapaxes` / `DataFrame.swapaxes`, `readFwf`, `unionCategoricals` — features from pending-ci iters not yet on main branch
 - More `str.*` accessor extensions or pandas datetime utilities
 
 ---
@@ -83,26 +85,16 @@ Next:
 ---
 
 ## 📊 Iteration History
-### Iteration 285 — 2026-04-25 11:30 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24929866462)
+### Iteration 286 — 2026-04-25 12:58 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24931293995)
 
-- **Status**: ⏳ pending-ci
-- **Change**: +strCenter/strLjust/strRjust/strZfill/strWrap — text padding/justification methods
-- **Metric**: 136 (previous best: 135→136, delta: +1), Commit: 175caa3
-- **Notes**: New src/stats/string_padding.ts; overloads for scalar/array/Series; 30+ tests with fast-check property tests.
+- **Status**: ✅ Accepted
+- **Change**: +lreshape — wide-to-long reshape with named parallel column groups (mirrors pandas.lreshape)
+- **Metric**: 136 (previous best: 135, delta: +1)
+- **Commit**: cc828e3
+- **Notes**: New src/stats/lreshape.ts; dropna support; 30+ unit/property tests; playground page.
 
-### Iteration 284 — 2026-04-25 10:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24928423917)
+### Iteration 285 — ⏳ pending-ci (136): +strCenter/strLjust/strRjust/strZfill/strWrap — string padding/justification. Commit: 175caa3.
 
-- **Status**: ⏳ pending-ci
-- **Change**: +unionCategoricals — mirrors pandas.api.types.union_categoricals
-- **Metric**: 136 (previous best: 135, delta: +1), Commit: 77637b4
-- **Notes**: New file src/stats/union_categoricals.ts; supports sortCategories and ignoreOrder options.
-
-### Iteration 283 — 2026-04-25 08:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24926859048)
-
-- **Status**: ⏳ pending-ci
-- **Change**: +readFwf — fixed-width format reader (mirrors pandas.read_fwf)
-- **Metric**: 135, Commit: ef7cc07
-
-### Iters 280–282 — ⏳ pending-ci (136): +lreshape, +strGetDummies, +swapaxes.
+### Iters 280–284 — ⏳ pending-ci (133→136): +lreshape, +strGetDummies, +swapaxes, +readFwf, +unionCategoricals.
 
 ### Iters 277–279 — ⏳ pending-ci (135): +strCat, +asfreq, +atTime/betweenTime, +extractAll, +firstRows/lastRows, +monthName/dayName.
