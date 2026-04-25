@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T08:11:00Z |
-| Iteration Count | 291 |
-| Best Metric | 648 |
+| Last Run | 2026-04-25T14:32:00Z |
+| Iteration Count | 292 |
+| Best Metric | 653 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — (pending CI) |
-| Issue | — (created this run) |
+| Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted |
+| Recent Statuses | error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -68,6 +68,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 292 — 2026-04-25T14:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24933142674)
+
+- **Status**: ✅ Accepted (pending CI)
+- **Change**: Add 5 benchmark pairs: squeeze_ops, corr_with, add_prefix_suffix, infer_convert_dtypes, dot_matmul
+- **Metric**: 653 (previous best: 648, delta: +5)
+- **Commit**: 0a8a25b
+- **Notes**: Benchmarked squeezeSeries/squeezeDataFrame, corrWith (corr_with DataFrame×Series), add_prefix/suffix, inferObjects/convertDtypes, and dot/matmul operations.
 
 ### Iteration 291 — 2026-04-25T08:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24926433071)
 
