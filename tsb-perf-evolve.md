@@ -4,30 +4,30 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T03:47:36Z |
-| Iteration Count | 12 |
+| Last Run | 2026-04-25T05:47:00Z |
+| Iteration Count | 13 |
 | Best Metric | 27.999 |
 | Target Metric | — |
 | Branch | autoloop/tsb-perf-evolve |
-| PR | pending creation |
+| PR | pending CI |
 | Issue | #189 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, not-pushed, not-pushed, pending, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, not-pushed, not-pushed, pending, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci |
 
 ## 🧬 Population
 
-### c013 · island 3 · fitness pending CI · gen 12
+### c014 · island 3 · fitness pending CI · gen 13
 
 - **Operator**: exploration; **Feature cell**: parallel-typed-arrays · non-comparison
 - **Parent**: c003 (island 1, fitness 27.999)
-- **Approach**: LSD 8-pass radix sort on IEEE-754 bit-transformed float64 keys. Module-level _rxA_idx/_rxB_idx/_rxA_lo/_rxB_lo/_rxA_hi/_rxB_hi ping-pong buffers; _rxCnt 256-bucket histogram. `new Uint32Array(fvals.buffer)` for raw bits. Zero JS comparator callbacks. Descending by reverse copy. String/mixed fallback unchanged. Commit 1affdf2.
-- **Status**: ⏳ pending CI — commit 1affdf2
+- **Approach**: LSD 8-pass radix sort on IEEE-754 bit-transformed uint32 key pairs. Module-level _rxSrc/_rxDst/_rxKeyHi/_rxKeyLo ping-pong buffers; _rxCnt 256-bucket histogram. Uint32Array overlay on fvals.buffer for raw bits. Zero JS comparator callbacks. Descending by reverse-iterate. String/mixed fallback unchanged. Commit 5440d62.
+- **Status**: ⏳ pending CI — commit 5440d62
 
-### ~~c012~~ · phantom · gen 11 — same radix design; commit 2c2d728 never reached remote (computed patch was 2.6 MB due to stale remote branch ref; rebased on old tip to fix)
+### ~~c013~~ · phantom · gen 12 — same radix design; commit 1affdf2 not found in remote (previous phantom)
 
 ### c011 · island 3 · ~~phantom~~ · gen 10 — same radix design, never pushed (d25a8b5 lost on fast-forward)
 
@@ -51,7 +51,7 @@
 - Island 3 (LSD radix sort): 8-pass on IEEE-754 transformed keys eliminates callbacks.
 - After even number of ping-pong swaps, src arrays hold final result.
 - `arr[i]!++` invalid in strict TS; use `const v=arr[i]!; arr[i]=v+1;`.
-- **Patch size fix**: When remote branch is stale, safeoutputs diff is large. Fix: base commit on origin/autoloop/tsb-perf-evolve directly (not origin/main) so patch = only sortValues change.
+- **Patch size fix**: Remote branch stale vs main → fast-forward branch to origin/main before making change. PR diff = only sortValues change (120+/-30 lines).
 
 ## 🚧 Foreclosed Avenues
 
@@ -66,19 +66,14 @@
 
 ## 📊 Iteration History
 
-### Iteration 12 — 2026-04-25 03:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24921830984)
+### Iteration 13 — 2026-04-25 05:47 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24923827970)
 
-- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · **Candidate**: c013
-- **Change**: LSD 8-pass radix sort on IEEE-754 transformed float64 keys; module-level ping-pong buffers; zero comparator callbacks; rebased on old remote tip to keep PR patch small
-- **Commit**: 1affdf2 · **Metric**: pending CI
-- **Notes**: Previous c012 was phantom due to 2.6 MB patch (remote branch stale vs main); fixed by basing commit on origin/autoloop/tsb-perf-evolve directly.
+- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · **Candidate**: c014
+- **Change**: LSD 8-pass radix sort; Uint32Array key pairs from fvals.buffer; module-level ping-pong buffers; no comparator callbacks; fast-forwarded branch to main before commit to fix patch size
+- **Commit**: 5440d62 · **Metric**: pending CI
+- **Notes**: Branch fast-forwarded to origin/main first; diff vs main = sortValues only (150 lines).
 
-### Iteration 11 — 2026-04-25 00:51 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24918488164)
-
-- **Status**: ❌ phantom (c012 commit 2c2d728 never reached remote; patch size 2.6 MB exceeded limit)
-- **Notes**: Patch was large because remote branch was 33 commits behind main; fix: rebase on old remote tip.
-
-### Iters 5–10 — 2026-04-24 — ❌ phantoms — exploration island 3; LSD radix sort attempts, commits never pushed
+### Iters 9–12 — 2026-04-24–25 — ❌ phantoms — island 3 LSD radix; same radix design re-tried, commits never reached remote
 
 ### Iters 1–4 — 2026-04-23
 - Iter 2: ✅ c003 fitness=27.999 (tsb=155.63ms, pandas=5.56ms); PR #206 merged
