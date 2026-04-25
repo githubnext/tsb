@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-24T22:55:00Z |
-| Iteration Count | 10 |
+| Last Run | 2026-04-25T00:51:37Z |
+| Iteration Count | 11 |
 | Best Metric | 27.999 |
 | Target Metric | — |
 | Branch | autoloop/tsb-perf-evolve |
@@ -16,16 +16,18 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, not-pushed, not-pushed, pending, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | accepted, not-pushed, not-pushed, pending, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci |
 
 ## 🧬 Population
 
-### c011 · island 3 · fitness pending CI · gen 10
+### c012 · island 3 · fitness pending CI · gen 11
 
 - **Operator**: exploration; **Feature cell**: parallel-typed-arrays · non-comparison
 - **Parent**: c003 (island 1, fitness 27.999)
-- **Approach**: LSD 8-pass radix sort on IEEE-754 bit-transformed float64 keys. Module-level _rxA/_rxB/_rxKL/_rxKH/_rxCnt. `new Uint32Array(fvals.buffer)` for raw bits. Zero JS comparator callbacks. Reverse in-place for descending. String/mixed fallback unchanged. Fixed write-back aliasing by using dst as scratch buffer.
-- **Status**: ⏳ pending CI — commit d25a8b5
+- **Approach**: LSD 8-pass radix sort on IEEE-754 bit-transformed float64 keys. Module-level _rxA/_rxB/_rxKL/_rxKH ping-pong buffers (module-level _rxCnt). `new Uint32Array(fvals.buffer)` for raw bits. Zero JS comparator callbacks. Descending by reverse iteration. String/mixed fallback unchanged. Uses `pos = pos + 1` pattern throughout. Commit 2c2d728.
+- **Status**: ⏳ pending CI — commit 2c2d728
+
+### c011 · island 3 · ~~phantom~~ · gen 10 — same radix design, never pushed (d25a8b5 lost on fast-forward)
 
 ### ~~c010~~ · phantom · gen 9 — same radix design; commit b2c8640 was on a pre-merge branch, never landed in main
 
@@ -62,25 +64,16 @@
 
 ## 📊 Iteration History
 
-### Iteration 10 — 2026-04-24 22:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24915319054)
+### Iteration 11 — 2026-04-25 00:51 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24918488164)
 
-- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · **Candidate**: c011
-- **Change**: LSD 8-pass radix sort; IEEE-754 transform; module-level ping-pong buffers + cnt; fixed write-back aliasing issue from c010 (use dst as scratch for gather); zero JS callbacks
-- **Commit**: d25a8b5 · **Metric**: pending CI
+- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · **Candidate**: c012
+- **Change**: LSD 8-pass radix sort; IEEE-754 transform; module-level ping-pong buffers; descend by reverse iteration; uses `pos = pos + 1` to avoid strict TS rvalue issues
+- **Commit**: 2c2d728 · **Metric**: pending CI
+- **Notes**: c011 was a phantom (d25a8b5 never landed); c012 is a clean re-implementation pushed to branch successfully.
 
-### Iteration 9 — 2026-04-24 21:24 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24912509276)
+### Iteration 10 — 2026-04-24 22:55 UTC — ❌ phantom (c011 commit d25a8b5 never landed; fast-forwarded away)
 
-- **Status**: ❌ phantom (not pushed — branch was behind main, commit lost on fast-forward) · **Op**: exploration · **Island**: 3 · **Candidate**: c010
-- **Change**: LSD 8-pass radix sort; IEEE-754 transform via `new Uint32Array(fvals.buffer)`; module-level _rxA/_rxB/_rxKL/_rxKH; zero JS callbacks; reverse in-place for descending
-- **Commit**: b2c8640 · **Metric**: pending CI
-
-### Iteration 8 — 2026-04-24 19:51 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24908806371)
-
-- **Status**: ❌ phantom (not pushed) · **Op**: exploration · **Island**: 3 · **Candidate**: c009
-- **Change**: LSD radix sort — same design as c010, but never successfully pushed to branch
-- **Commit**: — · **Metric**: n/a
-
-### Iters 5–7 — 2026-04-24 (phantoms) — exploration island 3; commits written but never pushed
+### Iters 5–9 — 2026-04-24 — ❌ phantoms — exploration island 3; LSD radix sort attempts, commits never pushed
 
 ### Iters 1–4 — 2026-04-23
 - Iter 2: ✅ c003 fitness=27.999 (tsb=155.63ms, pandas=5.56ms); PR #206 merged
