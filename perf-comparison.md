@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-24T19:25:00Z |
-| Iteration Count | 289 |
-| Best Metric | 638 |
+| Last Run | 2026-04-25T01:41:00Z |
+| Iteration Count | 290 |
+| Best Metric | 643 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — (pending CI) |
-| Issue | #aw_pcissue |
+| Issue | — |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, error, error, accepted, accepted, error, error, accepted, accepted |
 
 ---
 
@@ -47,6 +47,10 @@
 - **groupby AggName**: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only.
 - **merge_asof**: mergeAsof(left, right, { on: "key", direction: "backward"|"forward"|"nearest" }) — DFs must be sorted.
 - **crossJoin**: crossJoin(left, right) — small DFs only (100×100 safe).
+- **string_accessor**: available as `series.str.lower()`, `.strip()`, `.len()`, `.replace(pat, repl)`, `.split(sep)`.
+- **insert_pop**: exported as `insertColumn(df, loc, col, values)` and `popColumn(df, col)`.
+- **natsort**: exported as `natSorted(arr)` from src/index.ts.
+
 ## 🚧 Foreclosed Avenues
 
 - **Suffixed branches**: Never commit to `autoloop/perf-comparison-{suffix}` branches. Only `autoloop/perf-comparison` counts.
@@ -59,14 +63,23 @@
 
 - Continue adding option-variant benchmarks (axis/limit/method parameters)
 - Check for new src/ modules added to tsb library
+- More string_accessor variants: startswith, endswith, findall, extract
 
 ---
 
 ## 📊 Iteration History
 
+### Iteration 290 — 2026-04-25T01:41 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24919519451)
+
+- **Status**: ✅ Accepted (pending CI)
+- **Change**: Add 5 benchmark pairs: string_accessor lower/strip, len/replace, split/join, insert_pop, natsort
+- **Metric**: 643 (previous best: 638, delta: +5)
+- **Commit**: fa861a0
+- **Notes**: Added str accessor (lower+strip, len+replace, split), insertColumn/popColumn, and natSorted benchmarks.
+
 ### Iteration 289 — 2026-04-24T19:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24907776457)
 
-- **Status**: ✅ Accepted (pending CI) · **Metric**: 638 (baseline 633, +5 from main) · 5 new pairs: xs_dataframe, xs_series, at_iat_dataframe, at_iat_series, series_apply_fn
+- **Status**: ✅ Accepted (pending CI) · **Metric**: 638 (baseline 633, +5) · 5 new pairs: xs_dataframe, xs_series, at_iat_dataframe, at_iat_series, series_apply_fn
 
 ### Iter 287–288 — ✅ | +5 pairs each (fast-forward from main 633 → 638). New: merge_asof, merge_ordered, join, crossjoin, resample_agg, styler, swap_level, keep_true_false, auto_corr, assert_equal.
 
