@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T15:04:03Z |
-| Iteration Count | 19 |
+| Last Run | 2026-04-25T16:20:18Z |
+| Iteration Count | 20 |
 | Best Metric | 27.999 |
 | Target Metric | — |
 | Branch | autoloop/tsb-perf-evolve |
@@ -16,17 +16,17 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, not-pushed, not-pushed, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, not-pushed, not-pushed, pending-ci |
 
 ## 🧬 Population
 
-### c020 · island 3 · fitness pending CI · gen 19
+### c021 · island 3 · fitness pending CI · gen 20
 
 - **Op**: exploration; **Cell**: parallel-typed-arrays · non-comparison; **Parent**: c003
-- **Approach**: ALL buffers module-level (_rBufA/_rBufB/_rKeyHi/_rKeyLo/_rFinBuf/_rNanBuf/_rFvals, grow-only). Keys by ROW. 8-pass LSD radix on float64 → uint64 sortable keys. Commit a90f9df.
+- **Approach**: LSD 8-pass radix; ALL buffers module-level (incl. _rFinBuf/_rNanBuf/_rFvals/_rCnt + aliased _f64view/_u32view). Branch ff'd to origin/main (0 ahead, 33 behind). Commit 4df2df5.
 - **Status**: ⏳ pending CI
 
-### ~~c019~~ · island 3 · gen 18 · never confirmed (branch reset)
+### ~~c020~~ · island 3 · gen 19 · lost to branch reset (commit a90f9df never pushed)
 
 ### ~~c017~~ · phantom gen 16 · same radix design; lost to branch reset
 
@@ -53,10 +53,16 @@
 
 ## 🔭 Future Directions
 
-- c020 (radix, ALL buffers module-level including _rFinBuf/_rNanBuf/_rFvals) awaiting CI. If accepted, explore 4-pass 16-bit radix (may be more cache-friendly).
+- c021 (radix, ALL buffers module-level, branch ff'd clean to main, commit 4df2df5) awaiting CI. If accepted, explore 4-pass 16-bit radix (may be more cache-friendly).
 - If radix still fails: try Island 4 hybrid (callback sort for small n, radix for large).
 
 ## 📊 Iteration History
+
+### Iteration 20 — 2026-04-25 16:20 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24935182137)
+
+- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · c021
+- **Change**: LSD 8-pass radix; ALL buffers module-level (_rBufA/_rBufB/_rKeyHi/_rKeyLo/_rFinBuf/_rNanBuf/_rFvals/_rCnt + _f64view/_u32view). Branch ff'd clean to origin/main. Commit 4df2df5.
+- **Notes**: Rebuilt c020 from scratch on clean main-based branch. Zero per-call allocations. PR created.
 
 ### Iteration 19 — 2026-04-25 15:04 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24933725916)
 
