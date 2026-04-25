@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T13:35:00Z |
-| Iteration Count | 18 |
+| Last Run | 2026-04-25T15:04:03Z |
+| Iteration Count | 19 |
 | Best Metric | 27.999 |
 | Target Metric | — |
 | Branch | autoloop/tsb-perf-evolve |
@@ -16,21 +16,17 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, not-pushed, not-pushed, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, not-pushed, not-pushed, pending-ci, pending-ci |
 
 ## 🧬 Population
 
-### c019 · island 3 · fitness pending CI · gen 18
+### c020 · island 3 · fitness pending CI · gen 19
 
 - **Op**: exploration; **Cell**: parallel-typed-arrays · non-comparison; **Parent**: c003
-- **Approach**: LSD 8-pass radix sort on IEEE-754 → sortable-uint64 keys. Module-level `_rSrc/_rDst/_rKHi/_rKLo` (128k cap, grow-only). Keys indexed by ROW (not position); slots carry row indices. Ping-pong curA/curB local vars; 8 swaps → result in curA. Descending: reverse finBuf after ascending sort. Commit 6a6e514.
+- **Approach**: ALL buffers module-level (_rBufA/_rBufB/_rKeyHi/_rKeyLo/_rFinBuf/_rNanBuf/_rFvals, grow-only). Keys by ROW. 8-pass LSD radix on float64 → uint64 sortable keys. Commit a90f9df.
 - **Status**: ⏳ pending CI
 
-### c018 · island 3 · fitness unknown · gen 17
-
-- **Op**: exploration; **Cell**: parallel-typed-arrays · non-comparison; **Parent**: c003
-- **Approach**: LSD 8-pass radix sort on IEEE-754 uint64 keys, with module-level pre-allocated `_rSrc/_rDst/_rKHi/_rKLo` buffers (128k cap). `fview=new Uint32Array(fvals.buffer)` for key extraction. keyHi/keyLo indexed by position (0..finCount-1). Ping-pong curSrc/curDst; 8 swaps → result in curSrc. Commit f0e96a7.
-- **Status**: ❓ never confirmed (branch was reset to main before CI)
+### ~~c019~~ · island 3 · gen 18 · never confirmed (branch reset)
 
 ### ~~c017~~ · phantom gen 16 · same radix design; lost to branch reset
 
@@ -41,6 +37,7 @@
 
 ## 📚 Lessons Learned
 
+- **All per-call TypedArray allocations eliminated** once module-level buffers are warm: zero GC pressure on the hot path after first call. Benchmark measures 50 iterations, so it's essentially free after warmup.
 - `noUncheckedIndexedAccess`: TypedArray[i] = number|undefined; use `!`.
 - Callback overhead bottleneck at n=100k: ~1.6M calls × 100ns = 160ms.
 - `new Uint32Array(fvals.buffer)` valid TypeScript; no `as` needed.
@@ -56,18 +53,17 @@
 
 ## 🔭 Future Directions
 
-- c019 (radix, keys-by-row) awaiting CI. If accepted, explore 4-pass 16-bit radix (may be more cache-friendly).
+- c020 (radix, ALL buffers module-level including _rFinBuf/_rNanBuf/_rFvals) awaiting CI. If accepted, explore 4-pass 16-bit radix (may be more cache-friendly).
 - If radix still fails: try Island 4 hybrid (callback sort for small n, radix for large).
 
 ## 📊 Iteration History
 
-### Iteration 18 — 2026-04-25 13:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24932091850)
+### Iteration 19 — 2026-04-25 15:04 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24933725916)
 
-- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · c019
-- **Change**: LSD 8-pass radix sort; keys indexed by ROW (not position); module-level 128k pre-alloc buffers; local curA/curB ping-pong
-- **Commit**: 6a6e514 · **Metric**: pending CI
-- **Notes**: Branch fast-forwarded to main (ahead=0, behind=33). c018 was never confirmed. c019 corrects key indexing design to row-indexed (cleaner, no finBuf copy needed).
+- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · c020
+- **Change**: LSD 8-pass radix; ALL buffers module-level. Zero per-call alloc after warmup. Commit a90f9df.
+- **Notes**: Branch ff'd to main. c019 lost to reset. c020 adds _rFinBuf/_rNanBuf/_rFvals as module-level.
 
-### Iters 2–16 — 2026-04-23–25 — ✅ c003 fitness=27.999 (tsb=155.63ms, pandas=5.56ms); iters 3–16 all phantom/pending-ci radix attempts lost to branch resets
+### Iters 3–18 — 2026-04-23–25 — all phantom/pending-ci radix attempts lost to branch resets
 
-### Iter 1 — 2026-04-23 — ❌ TS2538
+### Iters 1–2 — 2026-04-23 — ✅ c003 fitness=27.999 (tsb=155.63ms, pandas=5.56ms); iter 1 ❌ TS2538
