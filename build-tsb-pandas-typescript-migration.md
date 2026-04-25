@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T02:48:00Z |
-| Iteration Count | 280 |
-| Best Metric | 138 |
+| Last Run | 2026-04-25T05:05:00Z |
+| Iteration Count | 281 |
+| Best Metric | 135 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | pending-ci |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci |
 
 ---
 
@@ -43,10 +43,11 @@ Completed through iter 279:
 - ✅ firstRows/lastRows/firstSeries/lastSeries, monthName/dayName (279)
 
 - ✅ lreshape (280)
+- ✅ strGetDummies / str.get_dummies (281)
 
 Next:
-- `Series.str.get_dummies` — wire into StringAccessor (circular dep challenge)
-- `DataFrame.swapaxes` — swap row/column axes
+- `DataFrame.swapaxes` — swap row/column axes (transpose variant)
+- `str.extractall()` — wire via late-binding (returns MultiIndex DataFrame)
 
 ---
 
@@ -79,6 +80,14 @@ Next:
 ---
 
 ## 📊 Iteration History
+### Iteration 281 — 2026-04-25 05:05 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24923038245)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +strGetDummies (Series.str.get_dummies port)
+- **Metric**: 135 (previous confirmed: 134, delta: +1)
+- **Commit**: 6855cb2
+- **Notes**: New src/stats/str_get_dummies.ts; splits string Series by sep, returns binary indicator DataFrame. Avoided circular dep by using standalone function pattern. Sorted columns, null→zero-row.
+
 ### Iteration 280 — 2026-04-25 02:48 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24920662939)
 
 - **Status**: ⏳ pending-ci
