@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T08:45:00Z |
-| Iteration Count | 283 |
-| Best Metric | 135 |
+| Last Run | 2026-04-25T10:15:00Z |
+| Iteration Count | 284 |
+| Best Metric | 136 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | pending-ci |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
 
 ---
 
@@ -46,10 +46,11 @@ Completed through iter 279:
 - ✅ strGetDummies / str.get_dummies (281)
 - ✅ swapaxes / DataFrame.swapaxes / Series.swapaxes (282)
 - ✅ readFwf / read_fwf — fixed-width format reader (283)
+- ✅ unionCategoricals / pd.api.types.union_categoricals (284)
 
 Next:
 - `str.extractall()` — wire via late-binding (returns MultiIndex DataFrame)
-- `pd.api.types.union_categoricals()` — combine categoricals
+- `pd.api.types.union_categoricals()` — ✅ done iter 284
 
 ---
 
@@ -81,6 +82,13 @@ Next:
 ---
 
 ## 📊 Iteration History
+### Iteration 284 — 2026-04-25 10:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24928423917)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +unionCategoricals — mirrors pandas.api.types.union_categoricals
+- **Metric**: 136 (previous best: 135, delta: +1), Commit: 77637b4
+- **Notes**: New file src/stats/union_categoricals.ts; supports sortCategories and ignoreOrder options.
+
 ### Iteration 283 — 2026-04-25 08:45 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24926859048)
 
 - **Status**: ⏳ pending-ci
