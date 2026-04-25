@@ -782,8 +782,8 @@ export class Series<T extends Scalar = Scalar> {
         let lo = fvalsU32[origIdx * 2]!;
         let hi = fvalsU32[origIdx * 2 + 1]!;
         if (hi & 0x80000000) {
-          lo = (~lo) >>> 0;
-          hi = (~hi) >>> 0;
+          lo = ~lo >>> 0;
+          hi = ~hi >>> 0;
         } else {
           hi = (hi ^ 0x80000000) >>> 0;
         }
