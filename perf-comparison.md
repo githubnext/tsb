@@ -69,38 +69,6 @@
 
 ## 📊 Iteration History
 
-### Iteration 292 — 2026-04-25T14:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24933142674)
+### Iters 289–292 — ✅ | Metrics 638→653 (+5 each). New pairs: xs_dataframe/series, at_iat, series_apply_fn, merge_asof/ordered, crossjoin, resample, styler, swap_level, auto_corr, string_accessor, insert_pop, natsort, truncate, update, filter_labels, window_extended, squeeze_ops, corr_with, add_prefix_suffix, infer_convert_dtypes, dot_matmul.
 
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Add 5 benchmark pairs: squeeze_ops, corr_with, add_prefix_suffix, infer_convert_dtypes, dot_matmul
-- **Metric**: 653 (previous best: 648, delta: +5)
-- **Commit**: 0a8a25b
-- **Notes**: Benchmarked squeezeSeries/squeezeDataFrame, corrWith (corr_with DataFrame×Series), add_prefix/suffix, inferObjects/convertDtypes, and dot/matmul operations.
-
-### Iteration 291 — 2026-04-25T08:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24926433071)
-
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Add 5 benchmark pairs: str_findall, truncate, update, filter_labels, window_extended
-- **Metric**: 648 (previous best: 643, delta: +5)
-- **Commit**: 9f0cdd0
-- **Notes**: Filled gaps in regex string ops, series/df truncation, in-place update, label-based filtering, and extended rolling stats.
-
-### Iteration 290 — 2026-04-25T01:41 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24919519451)
-
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Add 5 benchmark pairs: string_accessor lower/strip, len/replace, split/join, insert_pop, natsort
-- **Metric**: 643 (previous best: 638, delta: +5)
-- **Commit**: fa861a0
-- **Notes**: Added str accessor (lower+strip, len+replace, split), insertColumn/popColumn, and natSorted benchmarks.
-
-### Iteration 289 — 2026-04-24T19:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24907776457)
-
-- **Status**: ✅ Accepted (pending CI) · **Metric**: 638 (baseline 633, +5) · 5 new pairs: xs_dataframe, xs_series, at_iat_dataframe, at_iat_series, series_apply_fn
-
-### Iter 287–288 — ✅ | +5 pairs each (fast-forward from main 633 → 638). New: merge_asof, merge_ordered, join, crossjoin, resample_agg, styler, swap_level, keep_true_false, auto_corr, assert_equal.
-
-### Iters 277–286 — ✅/⚠️ | Metrics 382→642. Iters 277-281 wrong-branch. 282-286 fast-forwarded canonical to main (633) + option-variant pairs.
-
-### Iters 163–276 — ✅/⚠️ | Metrics 0→637. PR #148 merged 534 to main.
-
-### Iters 1–162 — ✅/⚠️ | Metrics 0→508. Full baseline benchmarks established.
+### Iters 1–288 — ✅/⚠️ | Metrics 0→653. See git history for details.

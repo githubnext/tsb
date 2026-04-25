@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T16:20:18Z |
-| Iteration Count | 20 |
+| Last Run | 2026-04-25T17:57:00Z |
+| Iteration Count | 21 |
 | Best Metric | 27.999 |
 | Target Metric | — |
 | Branch | autoloop/tsb-perf-evolve |
@@ -16,11 +16,17 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, not-pushed, not-pushed, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, not-pushed, not-pushed, pending-ci, pending-ci |
 
 ## 🧬 Population
 
-### c021 · island 3 · fitness pending CI · gen 20
+### c022 · island 3 · fitness pending CI · gen 21
+
+- **Op**: exploration (rebuild of c021 on clean ff'd branch); **Cell**: parallel-typed-arrays · non-comparison; **Parent**: c003
+- **Approach**: LSD 8-pass radix sort (_putKey IEEE-754 sign-flip → hi/lo uint32; _rBufA/_rBufB ping-pong; _rKeyHi/_rKeyLo per row; _rNanBuf; _rHist 256-bucket). All buffers module-level (_RSORT_CAP=200001). Descending via reversed prefix-sum. Fallback for n>cap or non-numeric. Commit 47b4029.
+- **Status**: ⏳ pending CI
+
+### c021 · island 3 · fitness pending CI · gen 20 · lost (branch reset)
 
 - **Op**: exploration; **Cell**: parallel-typed-arrays · non-comparison; **Parent**: c003
 - **Approach**: LSD 8-pass radix; ALL buffers module-level (incl. _rFinBuf/_rNanBuf/_rFvals/_rCnt + aliased _f64view/_u32view). Branch ff'd to origin/main (0 ahead, 33 behind). Commit 4df2df5.
@@ -58,18 +64,12 @@
 
 ## 📊 Iteration History
 
-### Iteration 20 — 2026-04-25 16:20 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24935182137)
+### Iteration 21 — 2026-04-25 17:57 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24936876897)
 
-- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · c021
-- **Change**: LSD 8-pass radix; ALL buffers module-level (_rBufA/_rBufB/_rKeyHi/_rKeyLo/_rFinBuf/_rNanBuf/_rFvals/_rCnt + _f64view/_u32view). Branch ff'd clean to origin/main. Commit 4df2df5.
-- **Notes**: Rebuilt c020 from scratch on clean main-based branch. Zero per-call allocations. PR created.
+- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · c022
+- **Change**: LSD 8-pass radix sort with module-level buffers. _putKey stores IEEE-754 sign-flip hi/lo keys. _radixSort ping-pongs _rBufA↔_rBufB for 8 passes. PR created. Commit 47b4029.
+- **Notes**: Clean rebuild of c021 on ff'd branch. Proper descending via reversed prefix-sum. Falls back for non-numeric/large n.
 
-### Iteration 19 — 2026-04-25 15:04 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24933725916)
-
-- **Status**: ⏳ pending CI · **Op**: exploration · **Island**: 3 · c020
-- **Change**: LSD 8-pass radix; ALL buffers module-level. Zero per-call alloc after warmup. Commit a90f9df.
-- **Notes**: Branch ff'd to main. c019 lost to reset. c020 adds _rFinBuf/_rNanBuf/_rFvals as module-level.
-
-### Iters 3–18 — 2026-04-23–25 — all phantom/pending-ci radix attempts lost to branch resets
+### Iters 3–20 — 2026-04-23–25 — all phantom/pending-ci radix attempts (c017–c021) lost to branch resets or pending CI. See earlier state file versions for details.
 
 ### Iters 1–2 — 2026-04-23 — ✅ c003 fitness=27.999 (tsb=155.63ms, pandas=5.56ms); iter 1 ❌ TS2538
