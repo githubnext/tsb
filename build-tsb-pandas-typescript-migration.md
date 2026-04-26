@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T18:29:00Z |
-| Iteration Count | 290 |
-| Best Metric | 136 |
+| Last Run | 2026-04-26T13:25:00Z |
+| Iteration Count | 291 |
+| Best Metric | 137 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | pending-ci |
@@ -34,9 +34,9 @@
 
 ## 🎯 Current Priorities
 
-- ✅ Core (iters 1–52), Stats (53–244), various ops (246–290)
-- ✅ Through iter 290: itertuples + Flags added. 136 features on branch.
-- Next: DataFrame.toHtml/Series.toHtml standalone, pd.api.types extensions, str.extractall wiring
+- ✅ Core (iters 1–52), Stats (53–244), various ops (246–291)
+- ✅ Through iter 291: +to_html + Flags added. 137 features on branch.
+- Next: pd.api.types extensions, str.extractall wiring, DataFrame.pipe improvements
 
 ---
 
@@ -50,8 +50,9 @@
 - **MultiIndex**: `mi as unknown as Index<Label>`. `mi.at(i)` returns `readonly Label[]`.
 - **Circular deps**: `string_accessor.ts` cannot import `DataFrame`.
 - **CI action_required**: Means human approval needed, not test failure.
-- **git stash**: Does NOT stash untracked files.
+- **git stash**: Does NOT stash untracked files (untracked files persist through stash).
 - **to_html**: Use df.col(col).at(i) for cell values; df.index.at(i) for index labels.
+- **Baseline metric**: Always check `main` baseline by temporarily removing the new file. git stash doesn't remove untracked files.
 
 ---
 
@@ -63,14 +64,22 @@
 
 ## 🔭 Future Directions
 
-- `DataFrame.toHtml()` / `Series.toHtml()` — standalone HTML rendering (Styler.toHtml exists, need standalone)
 - `pd.api.types` extensions — more type predicates
 - `str.extractall()` — wire via late-binding
 - `DataFrame.convert_dtypes()` — already exported, check if more refinement needed
+- `DataFrame.pipe()` improvements — already exists, check completeness
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 291 — 2026-04-26 13:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24957618908)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +to_html (dataFrameToHtml/seriesToHtml) + Flags class (dataFrameFlags/seriesFlags)
+- **Metric**: 137 (previous best: 136, delta: +1)
+- **Commit**: 8955089
+- **Notes**: Two new files: src/stats/to_html.ts and src/core/flags.ts. Main was already at 135; branch brings it to 137. Main had merged previous pending-ci iterations, so baseline was 135.
 
 ### Iteration 290 — 2026-04-25 18:29 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24937530889)
 
@@ -78,29 +87,7 @@
 - **Change**: +DataFrame.itertuples() + Flags class (df.flags attribute)
 - **Metric**: 136 (delta: +1 new file from main baseline 135)
 - **Commit**: 78189c0
-- **Notes**: Added itertuples generator method to DataFrame and new Flags class with allows_duplicate_labels property.
 
-### Iteration 289 — 2026-04-25 16:49 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24935744381)
-
-- **Status**: ⏳ pending-ci
-- **Change**: +to_html — dataFrameToHtml / seriesToHtml for HTML table rendering
-- **Metric**: 136 (delta: +1 from main baseline 135)
-- **Commit**: 4e55926
-
-### Iteration 288 — 2026-04-25 15:40 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24934236156)
-
-- **Status**: ⏳ pending-ci
-- **Change**: +itertuples — iterate over DataFrame rows as plain JS objects
-- **Metric**: 136 (delta: +1 from main baseline 135)
-- **Commit**: ee442e9
-
-### Iteration 287 — 2026-04-25 14:15 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24932687823)
-
-- **Status**: ⏳ pending-ci
-- **Change**: +dropLevelSeries / dropLevelDataFrame
-- **Metric**: 136 (delta: 0 on main)
-- **Commit**: 27d992a
-
-### Iters 273–286 — accepted/pending-ci (130→136): +lreshape, +strCenter/strLjust/strRjust/strZfill/strWrap, +strGetDummies, +swapaxes, +readFwf, +unionCategoricals, +strCat, +asfreq, +atTime/betweenTime, +extractAll, +firstRows/lastRows, +monthName/dayName.
+### Iters 273–289 — pending-ci/accepted (130→136): +lreshape, +strCenter/strLjust/strRjust/strZfill/strWrap, +strGetDummies, +swapaxes, +readFwf, +unionCategoricals, +strCat, +asfreq, +atTime/betweenTime, +extractAll, +firstRows/lastRows, +monthName/dayName, +to_html, +itertuples, +dropLevel.
 
 ### Iters 1–272 — accepted (0→130): full pandas core + stats + io + merge + reshape + window + groupby.
