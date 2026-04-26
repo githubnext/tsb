@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-25T17:57:00Z |
-| Iteration Count | 21 |
+| Last Run | 2026-04-26T07:22:00Z |
+| Iteration Count | 22 |
 | Best Metric | 27.999 |
 | Target Metric | — |
 | Branch | autoloop/tsb-perf-evolve |
@@ -16,25 +16,27 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, not-pushed, not-pushed, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, not-pushed, not-pushed |
 
 ## 🧬 Population
 
-### c022 · island 3 · fitness pending CI · gen 21
+### c023 · island 3 · fitness pending CI · gen 22
+
+- **Op**: exploitation (c022 on clean ff'd branch); **Cell**: parallel-typed-arrays · non-comparison; **Parent**: c022
+- **Approach**: Same LSD 8-pass radix as c022 but also make `finBuf` (400KB), `nanBuf` (400KB), `fvals` (800KB), and `fvalsU32` (view) module-level grow-on-demand buffers. Eliminates 1.6MB of TypedArray GC per sort call (80MB total across 50 bench iterations). Commit 12276e5.
+- **Status**: ⏳ pending CI
+
+### c022 · island 3 · fitness unknown (merged via PR #226) · gen 21
 
 - **Op**: exploration (rebuild of c021 on clean ff'd branch); **Cell**: parallel-typed-arrays · non-comparison; **Parent**: c003
 - **Approach**: LSD 8-pass radix sort (_putKey IEEE-754 sign-flip → hi/lo uint32; _rBufA/_rBufB ping-pong; _rKeyHi/_rKeyLo per row; _rNanBuf; _rHist 256-bucket). All buffers module-level (_RSORT_CAP=200001). Descending via reversed prefix-sum. Fallback for n>cap or non-numeric. Commit 47b4029.
 - **Status**: ⏳ pending CI
 
-### c021 · island 3 · fitness pending CI · gen 20 · lost (branch reset)
+### ~~c021~~ · island 3 · gen 20 · lost (branch reset) — LSD 8-pass radix; ALL buffers module-level
 
-- **Op**: exploration; **Cell**: parallel-typed-arrays · non-comparison; **Parent**: c003
-- **Approach**: LSD 8-pass radix; ALL buffers module-level (incl. _rFinBuf/_rNanBuf/_rFvals/_rCnt + aliased _f64view/_u32view). Branch ff'd to origin/main (0 ahead, 33 behind). Commit 4df2df5.
-- **Status**: ⏳ pending CI
+### ~~c020~~ · island 3 · gen 19 · lost (branch reset)
 
-### ~~c020~~ · island 3 · gen 19 · lost to branch reset (commit a90f9df never pushed)
-
-### ~~c017~~ · phantom gen 16 · same radix design; lost to branch reset
+### ~~c017~~ · phantom gen 16 · LSD radix design; lost to branch reset
 
 ### c003 · island 1 · fitness 27.999 · gen 2
 
@@ -59,10 +61,16 @@
 
 ## 🔭 Future Directions
 
-- c021 (radix, ALL buffers module-level, branch ff'd clean to main, commit 4df2df5) awaiting CI. If accepted, explore 4-pass 16-bit radix (may be more cache-friendly).
-- If radix still fails: try Island 4 hybrid (callback sort for small n, radix for large).
+- c022 (radix, all rx buffers module-level, merged via PR #226) — fitness unknown, never measured by autoloop (merged externally). Radix is confirmed in main.
+- Next: c023 (also make finBuf/nanBuf/fvals module-level) awaiting CI. If accepted and fitness improved, explore 4-pass 16-bit radix or interleaved key layout.
 
 ## 📊 Iteration History
+
+### Iteration 22 — 2026-04-26 07:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24951061682)
+
+- **Status**: ⏳ pending CI · **Op**: exploitation · **Island**: 3 · c023
+- **Change**: Make finBuf/nanBuf/fvals/fvalsU32 module-level grow-on-demand (was per-call). Eliminates 1.6MB TypedArray GC per call (80MB for 50 bench iters). Branch ff'd to main + 1 commit 12276e5.
+- **Metric**: pending CI (sandbox bun unavailable)
 
 ### Iteration 21 — 2026-04-25 17:57 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24936876897)
 
