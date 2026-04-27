@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-26T13:25:00Z |
-| Iteration Count | 291 |
-| Best Metric | 137 |
+| Last Run | 2026-04-27T07:55:00Z |
+| Iteration Count | 292 |
+| Best Metric | 136 |
 | Target Metric | — |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
 | PR | pending-ci |
@@ -20,7 +20,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
 
 ---
 
@@ -34,9 +34,9 @@
 
 ## 🎯 Current Priorities
 
-- ✅ Core (iters 1–52), Stats (53–244), various ops (246–291)
-- ✅ Through iter 291: +to_html + Flags added. 137 features on branch.
-- Next: pd.api.types extensions, str.extractall wiring, DataFrame.pipe improvements
+- ✅ Core (iters 1–52), Stats (53–244), various ops (246–292)
+- ✅ Through iter 292: +DataFrame.info()/seriesInfo() added. 136 features on branch.
+- Next: pd.util.hash_pandas_object, DataFrame.bool(), pd.Grouper, more string ops
 
 ---
 
@@ -52,7 +52,8 @@
 - **CI action_required**: Means human approval needed, not test failure.
 - **git stash**: Does NOT stash untracked files (untracked files persist through stash).
 - **to_html**: Use df.col(col).at(i) for cell values; df.index.at(i) for index labels.
-- **Baseline metric**: Always check `main` baseline by temporarily removing the new file. git stash doesn't remove untracked files.
+- **Baseline metric**: Always check `main` baseline. Branch fast-forwarded to main when ahead=0.
+- **info.ts**: Use `df.col(col) as Series<Scalar>` + `series.values as readonly Scalar[]` + `series.dtype.name`. `df.shape[0]` for nRows, `df.shape[1]` for nCols.
 
 ---
 
@@ -64,14 +65,23 @@
 
 ## 🔭 Future Directions
 
+- `pd.util.hash_pandas_object()` — hash each row/element
+- `DataFrame.bool()` — evaluate DataFrame as boolean
+- `pd.Grouper` class — groupby helper
 - `pd.api.types` extensions — more type predicates
-- `str.extractall()` — wire via late-binding
-- `DataFrame.convert_dtypes()` — already exported, check if more refinement needed
-- `DataFrame.pipe()` improvements — already exists, check completeness
+- More string ops, `str.extractall()` late-binding
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 292 — 2026-04-27 07:55 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24982683414)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +dataFrameInfo()/seriesInfo() — mirrors pandas.DataFrame.info()
+- **Metric**: 136 (previous best: 135, delta: +1)
+- **Commit**: 3e7c2dc
+- **Notes**: New file src/stats/info.ts. Returns structured DataFrameInfoResult with text, nRows, nCols, columns (name/nonNull/dtype). Includes memoryUsage option and verbose mode.
 
 ### Iteration 291 — 2026-04-26 13:25 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24957618908)
 
@@ -81,13 +91,6 @@
 - **Commit**: 8955089
 - **Notes**: Two new files: src/stats/to_html.ts and src/core/flags.ts. Main was already at 135; branch brings it to 137. Main had merged previous pending-ci iterations, so baseline was 135.
 
-### Iteration 290 — 2026-04-25 18:29 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/24937530889)
-
-- **Status**: ⏳ pending-ci
-- **Change**: +DataFrame.itertuples() + Flags class (df.flags attribute)
-- **Metric**: 136 (delta: +1 new file from main baseline 135)
-- **Commit**: 78189c0
-
-### Iters 273–289 — pending-ci/accepted (130→136): +lreshape, +strCenter/strLjust/strRjust/strZfill/strWrap, +strGetDummies, +swapaxes, +readFwf, +unionCategoricals, +strCat, +asfreq, +atTime/betweenTime, +extractAll, +firstRows/lastRows, +monthName/dayName, +to_html, +itertuples, +dropLevel.
+### Iters 273–290 — pending-ci/accepted (130→136): +lreshape, +strCenter/strLjust/strRjust/strZfill/strWrap, +strGetDummies, +swapaxes, +readFwf, +unionCategoricals, +strCat, +asfreq, +atTime/betweenTime, +extractAll, +firstRows/lastRows, +monthName/dayName, +to_html, +itertuples, +dropLevel, +flags.
 
 ### Iters 1–272 — accepted (0→130): full pandas core + stats + io + merge + reshape + window + groupby.
