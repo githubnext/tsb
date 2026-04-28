@@ -20,19 +20,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      # Install gh-aw built from main (pinned to a91e3d2deadaf27496e563b7a4591125e1093d22)
+      # Install gh-aw built from main (pinned to c439037c57f5af1ada2f1d8c49e0d06d192ec698)
       # so the Copilot Agent's gh-aw matches the version used to compile the workflow
       # lock files in this repo. The latest gh-aw release (v0.71.1) is missing the
-      # create_pull_request file-limit fix from https://github.com/github/gh-aw/pull/28472,
-      # which is needed to unblock autoloop. The setup-cli action only installs tagged
-      # releases, so we build from source pinned to a SHA on main instead.
+      # create_pull_request fixes from https://github.com/github/gh-aw/pull/28472 and
+      # https://github.com/github/gh-aw/pull/28960, which are needed to unblock autoloop.
+      # The setup-cli action only installs tagged releases, so we build from source
+      # pinned to a SHA on main instead.
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version: '1.25'
       - name: Build and install gh-aw from main (pinned commit)
         env:
-          GH_AW_REF: a91e3d2deadaf27496e563b7a4591125e1093d22
+          GH_AW_REF: c439037c57f5af1ada2f1d8c49e0d06d192ec698
         run: |
           set -euo pipefail
           mkdir -p "${RUNNER_TEMP}/gh-aw-src"
