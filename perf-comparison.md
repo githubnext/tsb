@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-27T13:23:54Z |
-| Iteration Count | 295 |
+| Last Run | 2026-04-28T07:12:13Z |
+| Iteration Count | 296 |
 | Best Metric | 634 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, accepted, error, error, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, accepted, error, error, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -68,6 +68,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 296 — 2026-04-28T07:12:13Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25039058101)
+
+- **Status**: ✅ Accepted
+- **Change**: Added benchmark pair for `compare` — element-wise comparison (`seriesEq`, `seriesLt`, `dataFrameEq`) vs pandas `Series.eq()`, `Series.lt()`, `DataFrame.eq()`.
+- **Metric**: 634 (previous best: 633 on main, delta: +1)
+- **Commit**: 70e115e
+- **Notes**: `compare` module (12 comparison ops) was unbenchmarked. Branch was reset to main (633 pairs) before adding new pair.
 
 ### Iteration 295 — 2026-04-27T13:23:54Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/24997568696)
 
