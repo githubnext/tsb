@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-29T15:21:57Z |
-| Iteration Count | 295 |
+| Last Run | 2026-04-29T23:35:48Z |
+| Iteration Count | 296 |
 | Best Metric | 137 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -21,7 +21,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci |
 
 ---
 
@@ -35,8 +35,9 @@
 
 ## 🎯 Current Priorities
 
-- ✅ Core + Stats + IO + Merge + Reshape + Window + GroupBy + Grouper complete (iters 1–295)
-- Next: `pd.api.types` extensions, `pd.util.hash_array()`, `DataFrame.items()`/`Series.items()`
+- ✅ Core + Stats + IO + Merge + Reshape + Window + GroupBy complete (iters 1–295)
+- ✅ hashPandasObject added (iter 296)
+- Next: `pd.Grouper`, `DataFrame.items()`/`Series.items()`, `pd.util.hash_array()`, more `pd.api.types` predicates
 
 ---
 
@@ -51,7 +52,7 @@
 - **CI action_required**: Human approval needed, not test failure.
 - **to_html**: Use df.col(col).at(i) for cell values; df.index.at(i) for index labels.
 - **Baseline metric**: Always check `main` baseline. Branch fast-forwarded when ahead=0.
-- **hash_pandas_object**: Use `s.iat(i)` + `s.index.at(i)`. Result: `new Series(hashes, { index: s.index, dtype: "float64" })`.
+- **DataFrame construction in tests**: Use `DataFrame.fromColumns({...})` not `new DataFrame({...})`. Use default `fc` import, not `* as fc`.
 
 ---
 
@@ -63,14 +64,22 @@
 
 ## 🔭 Future Directions
 
-- `pd.api.types` extensions — more type predicates
-- More string ops, `str.extractall()` late-binding
-- `pd.util.hash_array()` — hash an array of values
+- `pd.Grouper` — spec object for groupby/resample
+- `pd.util.hash_array()` — hash an arbitrary array of values
 - `DataFrame.items()` / `Series.items()` — iterate as (label, value) pairs
+- More `pd.api.types` predicates
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 296 — 2026-04-29 23:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25139337654)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +hashPandasObject — FNV-1a 64-bit hashing for Series/DataFrame
+- **Metric**: 137 (previous best: 136 on main, delta: +1)
+- **Commit**: 2838571
+- **Notes**: src/stats/hash_pandas_object.ts. hashPandasObject(s/df, {index?}). FNV-1a 64-bit per element (Series) or row (DataFrame). Exported from stats/index.ts + src/index.ts.
 
 ### Iteration 295 — 2026-04-29 15:21 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25117554579)
 
@@ -80,15 +89,7 @@
 - **Commit**: 1e210b0
 - **Notes**: src/groupby/grouper.ts. Grouper(key, level, freq, sort, closed, label, base). parseFreq + binFloor helpers. binDate() for constant-ms freqs.
 
-### Iteration 294 — 2026-04-29 04:44 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25091308179)
-
-- **Status**: ⏳ pending-ci
-- **Change**: +hashPandasObject — FNV-1a 64-bit hash per element/row
-- **Metric**: 137 (previous best: 136, delta: +1)
-- **Commit**: d8a133d
-- **Notes**: src/stats/hash_pandas_object.ts. Hashes Series elements or DataFrame rows via FNV-1a 64-bit. index=false excludes index from hash.
-
-### Iters 285–293 — pending-ci/accepted (133→136): +info, +extractAll, +firstRows/lastRows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject(prev attempt).
+### Iters 285–294 — pending-ci/accepted (133→136): +info, +extractAll, +firstRows/lastRows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject(prev attempt).
 
 ### Iters 273–284 — pending-ci/accepted (130→133): +lreshape, +strCenter/Ljust/Rjust/Zfill/Wrap, +strGetDummies, +swapaxes, +readFwf, +unionCategoricals.
 
