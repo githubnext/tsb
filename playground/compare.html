@@ -22,252 +22,342 @@
       color: var(--text);
       font-family: system-ui, -apple-system, sans-serif;
       line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
     }
-    header {
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
       background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
     }
-    header h1 { font-size: 1.5rem; color: var(--accent); }
-    header p { color: #8b949e; font-size: 0.95rem; }
-    main {
-      max-width: 860px;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
     }
-    h2 {
-      font-size: 1.6rem;
-      margin-bottom: 0.5rem;
-      color: var(--accent);
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
-    h3 {
-      font-size: 1.15rem;
-      margin: 1.5rem 0 0.5rem;
-      color: var(--green);
-    }
-    p { margin-bottom: 0.75rem; color: #c9d1d9; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
     .section {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 0.75rem;
       padding: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
-    .code-block {
-      background: #0d1117;
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
       padding: 1rem;
       font-family: var(--font-mono);
-      font-size: 0.88rem;
-      overflow-x: auto;
-      margin-bottom: 1rem;
-      white-space: pre;
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
     }
-    .keyword { color: #ff7b72; }
-    .func    { color: #d2a8ff; }
-    .string  { color: #a5d6ff; }
-    .num     { color: #79c0ff; }
-    .comment { color: #8b949e; }
-    .output  { color: var(--green); }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
     }
-    th, td {
+
+    .playground-output {
+      background: #1c2333;
       border: 1px solid var(--border);
-      padding: 0.5rem 0.75rem;
-      text-align: left;
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
     }
-    th { background: #1f2937; color: var(--accent); }
-    td:first-child { font-family: var(--font-mono); color: var(--green); }
-    .badge {
-      display: inline-block;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
     }
-    .badge-blue { background: #1f3a5f; color: var(--accent); }
-    .badge-green { background: #1a3a2a; color: var(--green); }
-    a { color: var(--accent); }
+
     footer {
       text-align: center;
-      padding: 2rem;
+      padding: 2rem 0;
       color: #8b949e;
       font-size: 0.85rem;
       border-top: 1px solid var(--border);
-      margin-top: 3rem;
+      margin-top: 2rem;
     }
   </style>
 </head>
 <body>
-<header>
-  <div>
-    <h1>tsb <span style="color:#8b949e;font-weight:400">playground</span></h1>
-    <p>Interactive tutorial — <strong>Element-wise Comparison Operations</strong> &nbsp;·&nbsp; <a href="index.html">← back to index</a></p>
-  </div>
-</header>
 
-<main>
-
-  <div class="section">
-    <h2>🔍 Comparison Operations</h2>
-    <p>
-      <strong>tsb</strong> implements all six pandas comparison methods:
-      <code>eq</code>, <code>ne</code>, <code>lt</code>, <code>gt</code>, <code>le</code>, <code>ge</code>.
-      They work on both <strong>Series</strong> and <strong>DataFrame</strong>, and accept either a scalar
-      or another Series/DataFrame as the <code>other</code> argument.
-    </p>
-    <p>All functions return a <strong>boolean</strong> Series/DataFrame. Missing values (<code>null</code> / <code>NaN</code>) always yield <code>false</code>.</p>
-
-    <table>
-      <thead>
-        <tr><th>Function</th><th>pandas equivalent</th><th>Operator</th><th>Description</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>seriesEq(s, other)</td><td>s.eq(other)</td><td>==</td><td>Element-wise equality</td></tr>
-        <tr><td>seriesNe(s, other)</td><td>s.ne(other)</td><td>!=</td><td>Element-wise inequality</td></tr>
-        <tr><td>seriesLt(s, other)</td><td>s.lt(other)</td><td>&lt;</td><td>Less than</td></tr>
-        <tr><td>seriesGt(s, other)</td><td>s.gt(other)</td><td>&gt;</td><td>Greater than</td></tr>
-        <tr><td>seriesLe(s, other)</td><td>s.le(other)</td><td>&lt;=</td><td>Less than or equal</td></tr>
-        <tr><td>seriesGe(s, other)</td><td>s.ge(other)</td><td>&gt;=</td><td>Greater than or equal</td></tr>
-      </tbody>
-    </table>
-    <p>DataFrame variants follow the same pattern: <code>dataFrameEq</code>, <code>dataFrameNe</code>, etc.</p>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
   </div>
 
-  <!-- Section 1: seriesEq scalar -->
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Comparison Ops | Interactive Playground</h1>
+  <p class="subtitle">Interactive tutorial — <strong>Element-wise Comparison Operations</strong> &nbsp;·&nbsp; <a href="index.html">← back to index</a></p>
+
   <div class="section">
-    <h3>1 — seriesEq with a scalar</h3>
-    <p>Compare every element of a Series against a single scalar value:</p>
-    <div class="code-block"><span class="keyword">import</span> { Series, seriesEq } <span class="keyword">from</span> <span class="string">"tsb"</span>;
+    <h2>1 — seriesEq with a scalar</h2>
+      <p>Compare every element of a Series against a single scalar value:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesEq } from "tsb";
 
-<span class="keyword">const</span> s = <span class="keyword">new</span> <span class="func">Series</span>({ data: [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span>] });
+const s = new Series({ data: [1, 2, 3, 2, 1] });
 
-<span class="keyword">const</span> result = <span class="func">seriesEq</span>(s, <span class="num">2</span>);
-<span class="comment">// → [false, true, false, true, false]</span>
+const result = seriesEq(s, 2);
+// → [false, true, false, true, false]
 
-<span class="comment">// Use this as a boolean mask for filtering:</span>
-<span class="comment">// s.values.filter((_, i) => result.values[i]) → [2, 2]</span></div>
+// Use this as a boolean mask for filtering:
+// s.values.filter((_, i) =&gt; result.values[i]) → [2, 2]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <!-- Section 2: seriesNe scalar -->
   <div class="section">
-    <h3>2 — seriesNe: inequality</h3>
-    <p><code>seriesNe</code> is the complement of <code>seriesEq</code> for non-null values:</p>
-    <div class="code-block"><span class="keyword">import</span> { Series, seriesNe } <span class="keyword">from</span> <span class="string">"tsb"</span>;
+    <h2>2 — seriesNe: inequality</h2>
+      <p><code>seriesNe</code> is the complement of <code>seriesEq</code> for non-null values:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesNe } from "tsb";
 
-<span class="keyword">const</span> s = <span class="keyword">new</span> <span class="func">Series</span>({ data: [<span class="string">"apple"</span>, <span class="string">"banana"</span>, <span class="string">"apple"</span>, <span class="string">"cherry"</span>] });
+const s = new Series({ data: ["apple", "banana", "apple", "cherry"] });
 
-<span class="func">seriesNe</span>(s, <span class="string">"apple"</span>).values;
-<span class="comment">// → [false, true, false, true]</span></div>
+seriesNe(s, "apple").values;
+// → [false, true, false, true]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <!-- Section 3: lt / gt / le / ge -->
   <div class="section">
-    <h3>3 — Ordering comparisons: lt, gt, le, ge</h3>
-    <p>Order comparisons work for numbers, strings, or any comparable type:</p>
-    <div class="code-block"><span class="keyword">import</span> { Series, seriesLt, seriesGt, seriesLe, seriesGe } <span class="keyword">from</span> <span class="string">"tsb"</span>;
+    <h2>3 — Ordering comparisons: lt, gt, le, ge</h2>
+      <p>Order comparisons work for numbers, strings, or any comparable type:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesLt, seriesGt, seriesLe, seriesGe } from "tsb";
 
-<span class="keyword">const</span> scores = <span class="keyword">new</span> <span class="func">Series</span>({ data: [<span class="num">45</span>, <span class="num">72</span>, <span class="num">88</span>, <span class="num">60</span>, <span class="num">95</span>] });
+const scores = new Series({ data: [45, 72, 88, 60, 95] });
 
-<span class="func">seriesLt</span>(scores, <span class="num">60</span>).values;  <span class="comment">// [true, false, false, false, false]</span>
-<span class="func">seriesGe</span>(scores, <span class="num">60</span>).values;  <span class="comment">// [false, true, true, true, true]</span>
+seriesLt(scores, 60).values;  // [true, false, false, false, false]
+seriesGe(scores, 60).values;  // [false, true, true, true, true]
 
-<span class="comment">// lt and ge are always complementary for finite, non-null values:</span>
-<span class="comment">// lt[i] !== ge[i]  for every i</span></div>
+// lt and ge are always complementary for finite, non-null values:
+// lt[i] !== ge[i]  for every i</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <!-- Section 4: Series-to-Series comparison -->
   <div class="section">
-    <h3>4 — Comparing two Series element-by-element</h3>
-    <p>Pass a Series as <code>other</code> to compare position-by-position:</p>
-    <div class="code-block"><span class="keyword">import</span> { Series, seriesEq, seriesLt } <span class="keyword">from</span> <span class="string">"tsb"</span>;
+    <h2>4 — Comparing two Series element-by-element</h2>
+      <p>Pass a Series as <code>other</code> to compare position-by-position:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesEq, seriesLt } from "tsb";
 
-<span class="keyword">const</span> actual   = <span class="keyword">new</span> <span class="func">Series</span>({ data: [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>] });
-<span class="keyword">const</span> expected = <span class="keyword">new</span> <span class="func">Series</span>({ data: [<span class="num">1</span>, <span class="num">3</span>, <span class="num">3</span>, <span class="num">2</span>] });
+const actual   = new Series({ data: [1, 2, 3, 4] });
+const expected = new Series({ data: [1, 3, 3, 2] });
 
-<span class="func">seriesEq</span>(actual, expected).values;  <span class="comment">// [true, false, true, false]</span>
-<span class="func">seriesLt</span>(actual, expected).values;  <span class="comment">// [false, true, false, false]</span>
+seriesEq(actual, expected).values;  // [true, false, true, false]
+seriesLt(actual, expected).values;  // [false, true, false, false]
 
-<span class="comment">// Throws RangeError if lengths differ</span></div>
+// Throws RangeError if lengths differ</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <!-- Section 5: missing values -->
   <div class="section">
-    <h3>5 — Missing value behaviour</h3>
-    <p>
-      Following pandas' NaN-propagation convention: comparing a missing value against
-      <em>anything</em> (including another missing value) always returns <code>false</code>.
-    </p>
-    <div class="code-block"><span class="keyword">import</span> { Series, seriesEq, seriesNe, seriesLt } <span class="keyword">from</span> <span class="string">"tsb"</span>;
+    <h2>5 — Missing value behaviour</h2>
+      <p>Following pandas' NaN-propagation convention: comparing a missing value against
+      <em>anything</em> (including another missing value) always returns <code>false</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesEq, seriesNe, seriesLt } from "tsb";
 
-<span class="keyword">const</span> s = <span class="keyword">new</span> <span class="func">Series</span>({ data: [<span class="num">1</span>, <span class="keyword">null</span>, <span class="num">NaN</span>, <span class="num">3</span>] });
+const s = new Series({ data: [1, null, NaN, 3] });
 
-<span class="func">seriesEq</span>(s, <span class="num">1</span>).values;    <span class="comment">// [true,  false, false, false]</span>
-<span class="func">seriesNe</span>(s, <span class="num">1</span>).values;    <span class="comment">// [false, false, false, true ]</span>
-<span class="func">seriesLt</span>(s, <span class="num">2</span>).values;    <span class="comment">// [true,  false, false, false]</span>
+seriesEq(s, 1).values;    // [true,  false, false, false]
+seriesNe(s, 1).values;    // [false, false, false, true ]
+seriesLt(s, 2).values;    // [true,  false, false, false]
 
-<span class="comment">// null eq null → false (NaN != NaN convention)</span>
-<span class="func">seriesEq</span>(s, <span class="keyword">null</span>).values;  <span class="comment">// [false, false, false, false]</span></div>
+// null eq null → false (NaN != NaN convention)
+seriesEq(s, null).values;  // [false, false, false, false]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <!-- Section 6: DataFrame comparison -->
   <div class="section">
-    <h3>6 — DataFrame comparison with a scalar</h3>
-    <p>Broadcast a scalar to every cell in a DataFrame:</p>
-    <div class="code-block"><span class="keyword">import</span> { DataFrame, dataFrameGt, dataFrameLe } <span class="keyword">from</span> <span class="string">"tsb"</span>;
+    <h2>6 — DataFrame comparison with a scalar</h2>
+      <p>Broadcast a scalar to every cell in a DataFrame:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameGt, dataFrameLe } from "tsb";
 
-<span class="keyword">const</span> df = DataFrame.<span class="func">fromColumns</span>({
-  math:    [<span class="num">55</span>, <span class="num">72</span>, <span class="num">88</span>],
-  science: [<span class="num">60</span>, <span class="num">45</span>, <span class="num">91</span>],
+const df = DataFrame.fromColumns({
+  math:    [55, 72, 88],
+  science: [60, 45, 91],
 });
 
-<span class="func">dataFrameGt</span>(df, <span class="num">60</span>).col(<span class="string">"math"</span>).values;
-<span class="comment">// → [false, true, true]</span>
+dataFrameGt(df, 60).col("math").values;
+// → [false, true, true]
 
-<span class="func">dataFrameLe</span>(df, <span class="num">60</span>).col(<span class="string">"science"</span>).values;
-<span class="comment">// → [true, true, false]</span></div>
+dataFrameLe(df, 60).col("science").values;
+// → [true, true, false]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <!-- Section 7: DataFrame-to-DataFrame comparison -->
   <div class="section">
-    <h3>7 — DataFrame compared against another DataFrame</h3>
-    <p>Column names are used to align the two DataFrames. Missing columns in <code>other</code> yield <code>false</code>:</p>
-    <div class="code-block"><span class="keyword">import</span> { DataFrame, dataFrameEq } <span class="keyword">from</span> <span class="string">"tsb"</span>;
+    <h2>7 — DataFrame compared against another DataFrame</h2>
+      <p>Column names are used to align the two DataFrames. Missing columns in <code>other</code> yield <code>false</code>:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameEq } from "tsb";
 
-<span class="keyword">const</span> df1 = DataFrame.<span class="func">fromColumns</span>({ a: [<span class="num">1</span>, <span class="num">2</span>], b: [<span class="num">3</span>, <span class="num">4</span>] });
-<span class="keyword">const</span> df2 = DataFrame.<span class="func">fromColumns</span>({ a: [<span class="num">1</span>, <span class="num">0</span>], b: [<span class="num">3</span>, <span class="num">5</span>] });
+const df1 = DataFrame.fromColumns({ a: [1, 2], b: [3, 4] });
+const df2 = DataFrame.fromColumns({ a: [1, 0], b: [3, 5] });
 
-<span class="func">dataFrameEq</span>(df1, df2).col(<span class="string">"a"</span>).values;  <span class="comment">// [true, false]</span>
-<span class="func">dataFrameEq</span>(df1, df2).col(<span class="string">"b"</span>).values;  <span class="comment">// [true, false]</span></div>
+dataFrameEq(df1, df2).col("a").values;  // [true, false]
+dataFrameEq(df1, df2).col("b").values;  // [true, false]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <!-- Section 8: combining with whereSeries -->
   <div class="section">
-    <h3>8 — Combining with whereSeries for conditional selection</h3>
-    <p>Comparison ops pair naturally with <code>whereSeries</code> / <code>maskSeries</code>:</p>
-    <div class="code-block"><span class="keyword">import</span> { Series, seriesGe, whereSeries } <span class="keyword">from</span> <span class="string">"tsb"</span>;
+    <h2>8 — Combining with whereSeries for conditional selection</h2>
+      <p>Comparison ops pair naturally with <code>whereSeries</code> / <code>maskSeries</code>:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesGe, whereSeries } from "tsb";
 
-<span class="keyword">const</span> temps = <span class="keyword">new</span> <span class="func">Series</span>({ data: [<span class="num">18</span>, <span class="num">22</span>, <span class="num">30</span>, <span class="num">15</span>, <span class="num">27</span>] });
+const temps = new Series({ data: [18, 22, 30, 15, 27] });
 
-<span class="comment">// Mark values below 20 as null using the boolean mask:</span>
-<span class="keyword">const</span> isWarm = <span class="func">seriesGe</span>(temps, <span class="num">20</span>);  <span class="comment">// [false, true, true, false, true]</span>
-<span class="keyword">const</span> warmOnly = <span class="func">whereSeries</span>(temps, isWarm);
+// Mark values below 20 as null using the boolean mask:
+const isWarm = seriesGe(temps, 20);  // [false, true, true, false, true]
+const warmOnly = whereSeries(temps, isWarm);
 
-warmOnly.values;  <span class="comment">// [null, 22, 30, null, 27]</span></div>
+warmOnly.values;  // [null, 22, 30, null, 27]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-</main>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-<footer>
-  <p>Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a> — an automated research and experimentation platform.</p>
-</footer>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

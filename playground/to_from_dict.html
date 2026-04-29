@@ -5,57 +5,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — toDictOriented / fromDictOriented</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #1a1a1a; }
-    h1 { color: #0066cc; }
-    h2 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
-    pre { background: #f6f8fa; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.9em; }
-    code { font-family: 'Fira Code', 'Cascadia Code', monospace; }
-    .note { background: #fffbea; border-left: 4px solid #f5a623; padding: 0.7rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
-    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-    th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
-    th { background: #f0f4f8; }
-    a { color: #0066cc; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <p><a href="index.html">← tsb playground</a></p>
 
-  <h1><code>toDictOriented</code> / <code>fromDictOriented</code></h1>
-  <p>
-    Convert a DataFrame to and from dictionary structures with flexible orientation — mirrors
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_dict.html" target="_blank">
-    <code>pandas.DataFrame.to_dict(orient=...)</code></a> and
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.from_dict.html" target="_blank">
-    <code>pandas.DataFrame.from_dict(orient=...)</code></a>.
-  </p>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-  <h2>Supported orientations — <code>toDictOriented</code></h2>
-  <table>
-    <thead><tr><th>Orient</th><th>Return type</th><th>Description</th></tr></thead>
-    <tbody>
-      <tr><td><code>"dict"</code> / <code>"columns"</code></td><td><code>Record&lt;col, Record&lt;rowLabel, value&gt;&gt;</code></td><td>Nested column → row-label → value map</td></tr>
-      <tr><td><code>"list"</code></td><td><code>Record&lt;col, value[]&gt;</code></td><td>Column name → array of values</td></tr>
-      <tr><td><code>"series"</code></td><td><code>Record&lt;col, Series&gt;</code></td><td>Column name → Series object</td></tr>
-      <tr><td><code>"split"</code></td><td><code>{ index, columns, data }</code></td><td>Serialisable split structure</td></tr>
-      <tr><td><code>"tight"</code></td><td><code>{ index, columns, data, index_names, column_names }</code></td><td>Split plus axis-name metadata</td></tr>
-      <tr><td><code>"records"</code></td><td><code>Record&lt;col, value&gt;[]</code></td><td>Array of row objects</td></tr>
-      <tr><td><code>"index"</code></td><td><code>Record&lt;rowLabel, Record&lt;col, value&gt;&gt;</code></td><td>Row-label → column → value</td></tr>
-    </tbody>
-  </table>
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>toDictOriented / fromDictOriented</h1>
+  <p class="subtitle"><a href="index.html">← tsb playground</a></p>
 
-  <h2>Supported orientations — <code>fromDictOriented</code></h2>
-  <table>
-    <thead><tr><th>Orient</th><th>Input shape</th></tr></thead>
-    <tbody>
-      <tr><td><code>"columns"</code> (default)</td><td><code>{ col: value[] }</code></td></tr>
-      <tr><td><code>"index"</code></td><td><code>{ rowLabel: { col: value } }</code></td></tr>
-      <tr><td><code>"split"</code></td><td><code>{ index?, columns, data }</code></td></tr>
-      <tr><td><code>"tight"</code></td><td>Same as <code>"split"</code>, extra fields ignored</td></tr>
-    </tbody>
-  </table>
-
-  <h2>Example — all orientations</h2>
-  <pre><code>import { DataFrame } from "tsb";
+  <div class="section">
+    <h2>Example — all orientations</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame } from "tsb";
 import { toDictOriented, fromDictOriented } from "tsb";
 
 const df = DataFrame.fromColumns(
@@ -95,18 +201,23 @@ fromDictOriented(
 // fromDictOriented — split (round-trip)
 const split = toDictOriented(df, "split");
 const df2 = fromDictOriented(split, "split");
-// df2 is equivalent to df
-</code></pre>
-
-  <h2>Missing values</h2>
-  <div class="note">
-    Missing values (<code>null</code> / <code>undefined</code>) are preserved as <code>null</code>
-    in all orientations.  When using <code>fromDictOriented</code> with <code>"index"</code>
-    orientation, any column that is absent from a given row object is filled with <code>null</code>.
+// df2 is equivalent to df</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>Type signatures</h2>
-  <pre><code>function toDictOriented(df: DataFrame, orient: "dict" | "columns"): Record&lt;string, Record&lt;string, Scalar&gt;&gt;;
+  <div class="section">
+    <h2>Type signatures</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">function toDictOriented(df: DataFrame, orient: "dict" | "columns"): Record&lt;string, Record&lt;string, Scalar&gt;&gt;;
 function toDictOriented(df: DataFrame, orient: "list"): Record&lt;string, Scalar[]&gt;;
 function toDictOriented(df: DataFrame, orient: "series"): Record&lt;string, Series&lt;Scalar&gt;&gt;;
 function toDictOriented(df: DataFrame, orient: "split"): DictSplit;
@@ -116,7 +227,19 @@ function toDictOriented(df: DataFrame, orient: "index"): Record&lt;string, Recor
 
 function fromDictOriented(data: Record&lt;string, readonly Scalar[]&gt;, orient?: "columns"): DataFrame;
 function fromDictOriented(data: Record&lt;string, Record&lt;string, Scalar&gt;&gt;, orient: "index"): DataFrame;
-function fromDictOriented(data: SplitInput, orient: "split" | "tight"): DataFrame;
-</code></pre>
+function fromDictOriented(data: SplitInput, orient: "split" | "tight"): DataFrame;</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

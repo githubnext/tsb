@@ -3,36 +3,168 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>rename_ops — Rename, Prefix/Suffix, set_axis, to_frame — tsb playground</title>
+  <title>tsb — rename_ops — Rename, Prefix/Suffix, set_axis, to_frame — tsb playground</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { color: #1a56db; }
-    pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
-    .output { background: #e8f5e9; padding: 1rem; border-radius: 6px; white-space: pre; font-family: monospace; min-height: 4rem; }
-    button { background: #1a56db; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; margin: 0.2rem; }
-    button:hover { background: #1345b3; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <h1>rename_ops — Rename, add_prefix/suffix, set_axis, to_frame</h1>
-  <p>
-    Functions for renaming labels, adding prefix/suffix to column or index labels,
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>rename_ops — Rename, Prefix/Suffix, set_axis, to_frame — tsb playground</h1>
+  <p class="subtitle">Functions for renaming labels, adding prefix/suffix to column or index labels,
     replacing an axis entirely (<code>set_axis</code>), and converting a Series to a
     single-column DataFrame (<code>to_frame</code>). Mirrors the corresponding
-    pandas methods.
-  </p>
+    pandas methods.</p>
 
-  <h2>Interactive Demo</h2>
-  <button onclick="runRenameColumns()">renameDataFrame (columns)</button>
-  <button onclick="runRenameIndex()">renameSeriesIndex</button>
-  <button onclick="runAddPrefix()">addPrefixDataFrame</button>
-  <button onclick="runAddSuffix()">addSuffixSeries</button>
-  <button onclick="runSetAxis()">setAxisDataFrame (axis=1)</button>
-  <button onclick="runToFrame()">seriesToFrame</button>
-  <div class="output" id="output">Click a button above to run an example.</div>
-
-  <h2>Code Examples</h2>
-  <pre><code>import {
+  <div class="section">
+    <h2>Code Examples</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import {
   Series, DataFrame,
   renameSeriesIndex, renameDataFrame,
   addPrefixDataFrame, addSuffixDataFrame,
@@ -48,7 +180,7 @@ const s = new Series({ data: [1, 2, 3], index: ["a", "b", "c"] });
 renameSeriesIndex(s, { a: "x", c: "z" }).index.values;  // ["x", "b", "z"]
 
 // Function mapper — called for every index label
-renameSeriesIndex(s, l => l.toUpperCase()).index.values; // ["A", "B", "C"]
+renameSeriesIndex(s, l =&gt; l.toUpperCase()).index.values; // ["A", "B", "C"]
 
 // ── renameDataFrame ──────────────────────────────────────────────────────────
 const df = DataFrame.fromColumns({ a: [1, 2], b: [3, 4] },
@@ -75,70 +207,19 @@ setAxisDataFrame(df, ["rowA","rowB"], 0).index.values;   // ["rowA","rowB"]
 // ── to_frame ─────────────────────────────────────────────────────────────────
 const score = new Series({ data: [90, 80, 70], name: "score" });
 seriesToFrame(score).columns.values;          // ["score"]
-seriesToFrame(score, "points").columns.values; // ["points"]
-</code></pre>
+seriesToFrame(score, "points").columns.values; // ["points"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <script type="module">
-    import {
-      Series, DataFrame,
-      renameSeriesIndex, renameDataFrame,
-      addPrefixDataFrame, addSuffixSeries,
-      setAxisDataFrame,
-      seriesToFrame,
-    } from "https://esm.sh/tsb@latest";
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    const out = document.getElementById("output");
-    function show(text) { out.textContent = text; }
-
-    window.runRenameColumns = function() {
-      try {
-        const df = DataFrame.fromColumns({ a: [1, 2], b: [3, 4] });
-        const r = renameDataFrame(df, { columns: { a: "x", b: "y" } });
-        show(`columns: ${JSON.stringify([...r.columns.values])}\n`
-           + `col "x": ${JSON.stringify([...r.col("x").values])}\n`
-           + `col "y": ${JSON.stringify([...r.col("y").values])}`);
-      } catch(e) { show("Note: requires tsb package (use with bundler).\n" + e); }
-    };
-
-    window.runRenameIndex = function() {
-      try {
-        const s = new Series({ data: [1, 2, 3], index: ["a", "b", "c"] });
-        const r = renameSeriesIndex(s, { a: "x", c: "z" });
-        show(`index: ${JSON.stringify([...r.index.values])}\nvalues: ${JSON.stringify([...r.values])}`);
-      } catch(e) { show("Note: requires tsb package.\n" + e); }
-    };
-
-    window.runAddPrefix = function() {
-      try {
-        const df = DataFrame.fromColumns({ alpha: [1], beta: [2] });
-        const r = addPrefixDataFrame(df, "col_");
-        show(`columns: ${JSON.stringify([...r.columns.values])}`);
-      } catch(e) { show("Note: requires tsb package.\n" + e); }
-    };
-
-    window.runAddSuffix = function() {
-      try {
-        const s = new Series({ data: [10, 20], index: ["a", "b"] });
-        const r = addSuffixSeries(s, "_end");
-        show(`index: ${JSON.stringify([...r.index.values])}\nvalues: ${JSON.stringify([...r.values])}`);
-      } catch(e) { show("Note: requires tsb package.\n" + e); }
-    };
-
-    window.runSetAxis = function() {
-      try {
-        const df = DataFrame.fromColumns({ a: [1, 2], b: [3, 4] });
-        const r = setAxisDataFrame(df, ["col1", "col2"], 1);
-        show(`columns: ${JSON.stringify([...r.columns.values])}\ncol1: ${JSON.stringify([...r.col("col1").values])}`);
-      } catch(e) { show("Note: requires tsb package.\n" + e); }
-    };
-
-    window.runToFrame = function() {
-      try {
-        const s = new Series({ data: [90, 80, 70], name: "score" });
-        const df = seriesToFrame(s);
-        show(`columns: ${JSON.stringify([...df.columns.values])}\nscore: ${JSON.stringify([...df.col("score").values])}`);
-      } catch(e) { show("Note: requires tsb package.\n" + e); }
-    };
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

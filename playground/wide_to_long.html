@@ -1,135 +1,193 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb · wide_to_long</title>
-    <style>
-      :root {
-        --bg: #0d1117;
-        --surface: #161b22;
-        --border: #30363d;
-        --text: #e6edf3;
-        --muted: #8b949e;
-        --accent: #58a6ff;
-        --green: #3fb950;
-        --yellow: #d29922;
-        --red: #f85149;
-        --code-bg: #1f2937;
-      }
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; }
-      header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
-      header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
-      header h1 { font-size: 1.4rem; font-weight: 600; }
-      main { max-width: 900px; margin: 0 auto; padding: 2rem; }
-      section { margin-bottom: 2.5rem; }
-      h2 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
-      p { margin-bottom: 0.75rem; color: var(--muted); font-size: 0.95rem; }
-      code { background: var(--code-bg); padding: 0.1em 0.4em; border-radius: 4px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.88em; }
-      pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.85rem; font-family: "SFMono-Regular", Consolas, monospace; line-height: 1.5; }
-      .editor { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-      textarea { width: 100%; background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.82rem; resize: vertical; line-height: 1.5; outline: none; }
-      textarea:focus { border-color: var(--accent); }
-      button { background: var(--accent); color: #0d1117; border: none; border-radius: 6px; padding: 0.5rem 1.25rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-      button:hover { opacity: 0.85; }
-      .output { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.82rem; white-space: pre; min-height: 120px; color: var(--green); overflow-x: auto; }
-      .output.error { color: var(--red); }
-      label { font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 0.3rem; }
-      .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
-      input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.85rem; width: 100%; outline: none; }
-      input[type="text"]:focus { border-color: var(--accent); }
-      table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-      th { background: var(--surface); border: 1px solid var(--border); padding: 0.4rem 0.75rem; text-align: left; color: var(--accent); }
-      td { border: 1px solid var(--border); padding: 0.35rem 0.75rem; color: var(--text); font-family: "SFMono-Regular", Consolas, monospace; }
-      tr:nth-child(even) td { background: #1a1f27; }
-    </style>
-  </head>
-  <body>
-    <header>
-      <a href="index.html">← tsb</a>
-      <h1>🔀 wide_to_long</h1>
-    </header>
-    <main>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — tsb · wide_to_long</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
 
-      <section>
-        <h2>Overview</h2>
-        <p>
-          <code>wideToLong(df, stubnames, i, j, options?)</code> mirrors
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>tsb · wide_to_long</h1>
+  <p class="subtitle"><code>wideToLong(df, stubnames, i, j, options?)</code> mirrors
           <code>pandas.wide_to_long()</code>. It reshapes a <strong>wide</strong>
           DataFrame — where multiple columns share a common prefix (stub) and a
           varying suffix — into a <strong>long</strong> DataFrame with one row per
-          (original row, suffix) pair.
-        </p>
-        <p>
-          Unlike the simpler <code>melt</code> (which treats every column value
-          independently), <code>wideToLong</code> keeps related stub columns
-          <em>side by side</em> and extracts the suffix as a new identifier column.
-        </p>
-        <pre>wideToLong(df, stubnames, i, j, { sep?, suffix? })</pre>
-        <p>
-          <code>stubnames</code> — prefix(es) of the grouped columns (e.g.
-          <code>["A","B"]</code>).<br />
-          <code>i</code> — identifier column(s) that are carried along
-          unchanged.<br />
-          <code>j</code> — name for the new column that holds the extracted
-          suffixes.<br />
-          <code>sep</code> — separator between stub and suffix
-          (<code>""</code> by default).<br />
-          <code>suffix</code> — RegExp or string pattern that matches the suffix
-          (<code>/\d+/</code> by default).
-        </p>
-      </section>
+          (original row, suffix) pair.</p>
 
-      <section>
-        <h2>Interactive playground</h2>
-        <p>Edit the CSV data, stubs, and options then click <strong>Run</strong>.</p>
-
-        <div class="controls">
-          <div>
-            <label>stubnames (comma-separated)</label>
-            <input type="text" id="stubs" value="A,B" />
-          </div>
-          <div>
-            <label>i (id column(s), comma-separated)</label>
-            <input type="text" id="icols" value="id" />
-          </div>
-          <div>
-            <label>j (new suffix column name)</label>
-            <input type="text" id="jcol" value="year" />
-          </div>
-          <div>
-            <label>sep (separator, blank = none)</label>
-            <input type="text" id="sep" value="" />
-          </div>
-          <div>
-            <label>suffix (regex, blank = \d+)</label>
-            <input type="text" id="suffix" value="" />
-          </div>
+  <div class="section">
+    <h2>Overview</h2>
+      <p><code>wideToLong(df, stubnames, i, j, options?)</code> mirrors
+          <code>pandas.wide_to_long()</code>. It reshapes a <strong>wide</strong>
+          DataFrame — where multiple columns share a common prefix (stub) and a
+          varying suffix — into a <strong>long</strong> DataFrame with one row per
+          (original row, suffix) pair.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
         </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">wideToLong(df, stubnames, i, j, { sep?, suffix? })</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-        <div class="editor">
-          <div>
-            <label>Wide CSV data</label>
-            <textarea id="csv-input" rows="8">id,A1,A2,B1,B2
-x,1,3,5,7
-y,2,4,6,8</textarea>
-          </div>
-          <div>
-            <label>Long output</label>
-            <div class="output" id="output">Click Run…</div>
-          </div>
+  <div class="section">
+    <h2>1 · Numeric suffix (default)</h2>
+      <p>Column names like <code>A1</code>, <code>A2</code> share stub <code>A</code>; the suffix <code>1</code>/<code>2</code> becomes the <code>year</code> column.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
         </div>
-        <br />
-        <button onclick="runExample()">Run</button>
-      </section>
-
-      <section>
-        <h2>Examples</h2>
-
-        <h2 style="color:var(--text);font-size:0.95rem;border:none;padding:0;margin-bottom:0.5rem;">1 · Numeric suffix (default)</h2>
-        <p>Column names like <code>A1</code>, <code>A2</code> share stub <code>A</code>; the suffix <code>1</code>/<code>2</code> becomes the <code>year</code> column.</p>
-        <pre>const df = DataFrame.fromColumns({
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromColumns({
   id: ["x", "y"],
   A1: [1, 2],  A2: [3, 4],
   B1: [5, 6],  B2: [7, 8],
@@ -139,12 +197,24 @@ wideToLong(df, ["A", "B"], "id", "year");
 // x   1     1  5
 // y   1     2  6
 // x   2     3  7
-// y   2     4  8</pre>
+// y   2     4  8</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-        <br />
-        <h2 style="color:var(--text);font-size:0.95rem;border:none;padding:0;margin-bottom:0.5rem;">2 · Underscore separator</h2>
-        <p>Use <code>sep: "_"</code> for column names like <code>score_pre</code> / <code>score_post</code>.</p>
-        <pre>const df = DataFrame.fromColumns({
+  <div class="section">
+    <h2>2 · Underscore separator</h2>
+      <p>Use <code>sep: "_"</code> for column names like <code>score_pre</code> / <code>score_post</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromColumns({
   subject: [1, 2],
   score_pre:  [80, 90],
   score_post: [85, 95],
@@ -157,12 +227,24 @@ wideToLong(df, "score", "subject", "phase", {
 // 1        pre    80
 // 2        pre    90
 // 1        post   85
-// 2        post   95</pre>
+// 2        post   95</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-        <br />
-        <h2 style="color:var(--text);font-size:0.95rem;border:none;padding:0;margin-bottom:0.5rem;">3 · Multiple id columns</h2>
-        <p>Pass an array to <code>i</code> to preserve several identifier columns.</p>
-        <pre>const df = DataFrame.fromColumns({
+  <div class="section">
+    <h2>3 · Multiple id columns</h2>
+      <p>Pass an array to <code>i</code> to preserve several identifier columns.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromColumns({
   country: ["US","UK","DE"],
   region:  ["East","South","West"],
   gdp2020: [21, 2.7, 3.8],
@@ -175,89 +257,19 @@ wideToLong(df, "gdp", ["country","region"], "year", { sep: "" });
 // DE       West    2020  3.8
 // US       East    2021  23
 // UK       South   2021  3.1
-// DE       West    2021  4.2</pre>
-      </section>
+// DE       West    2021  4.2</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <section>
-        <h2>vs melt</h2>
-        <p>
-          Both <code>melt</code> and <code>wideToLong</code> convert wide data to
-          long. The key difference:
-        </p>
-        <table>
-          <tr><th></th><th>melt</th><th>wideToLong</th></tr>
-          <tr><td>Column grouping</td><td>None — each column → one variable/value row</td><td>Groups by stub; related columns land in the <em>same</em> output row</td></tr>
-          <tr><td>New columns</td><td><code>variable</code> + <code>value</code></td><td>One column per stub + <code>j</code></td></tr>
-          <tr><td>Suffix extraction</td><td>No</td><td>Yes — suffix becomes <code>j</code> value</td></tr>
-          <tr><td>Use when…</td><td>Each wide column is independent</td><td>Columns share a common prefix and varying suffix</td></tr>
-        </table>
-      </section>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    </main>
-
-    <script type="module">
-      import { DataFrame, wideToLong } from "./tsb.js";
-
-      function parseCSV(text) {
-        const lines = text.trim().split("\n").filter(Boolean);
-        const headers = lines[0].split(",").map(s => s.trim());
-        const rows = lines.slice(1).map(l =>
-          l.split(",").map(s => {
-            const v = s.trim();
-            const n = Number(v);
-            return isNaN(n) || v === "" ? v : n;
-          })
-        );
-        const data = {};
-        for (let c = 0; c < headers.length; c++) {
-          data[headers[c]] = rows.map(r => r[c] ?? null);
-        }
-        return data;
-      }
-
-      function dfToTable(df) {
-        const cols = [...df.columns.values];
-        let html = "<table><tr>";
-        for (const c of cols) html += `<th>${c}</th>`;
-        html += "</tr>";
-        const nRows = df.shape[0];
-        for (let r = 0; r < nRows; r++) {
-          html += "<tr>";
-          for (const c of cols) {
-            const v = df.col(c).values[r];
-            html += `<td>${v === null || v === undefined ? "<em style='color:var(--muted)'>null</em>" : v}</td>`;
-          }
-          html += "</tr>";
-        }
-        html += "</table>";
-        return html;
-      }
-
-      window.runExample = function() {
-        const out = document.getElementById("output");
-        try {
-          const csv = document.getElementById("csv-input").value;
-          const stubs = document.getElementById("stubs").value.split(",").map(s => s.trim()).filter(Boolean);
-          const icols = document.getElementById("icols").value.split(",").map(s => s.trim()).filter(Boolean);
-          const jcol = document.getElementById("jcol").value.trim();
-          const sep = document.getElementById("sep").value;
-          const suffixRaw = document.getElementById("suffix").value.trim();
-
-          const data = parseCSV(csv);
-          const df = DataFrame.fromColumns(data);
-
-          const opts = {};
-          if (sep) opts.sep = sep;
-          if (suffixRaw) opts.suffix = new RegExp(suffixRaw);
-
-          const result = wideToLong(df, stubs, icols.length === 1 ? icols[0] : icols, jcol, opts);
-          out.className = "output";
-          out.innerHTML = dfToTable(result);
-        } catch(e) {
-          out.className = "output error";
-          out.textContent = String(e);
-        }
-      };
-    </script>
-  </body>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

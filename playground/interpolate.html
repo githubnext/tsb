@@ -4,42 +4,168 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — interpolate</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    table { border-collapse: collapse; width: 100%; margin: .75rem 0; font-size: .9rem; }
-    th, td { text-align: left; padding: .4rem .8rem; border: 1px solid #ddd; }
-    th { background: #f0f0f0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>interpolate</h1>
-<p class="subtitle">
-  Fill missing values by interpolation —
-  mirrors <code>pandas.Series.interpolate()</code> and <code>pandas.DataFrame.interpolate()</code>.
-</p>
 
-<!-- ─── 1. Linear interpolation ─────────────────────────────────────────── -->
-<section>
-  <h2>1 · Linear interpolation (default)</h2>
-  <p>
-    <code>interpolateSeries(series)</code> fills each run of missing values
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>interpolate</h1>
+  <p class="subtitle">Fill missing values by interpolation —
+  mirrors <code>pandas.Series.interpolate()</code> and <code>pandas.DataFrame.interpolate()</code>.</p>
+
+  <div class="section">
+    <h2>1 · Linear interpolation (default)</h2>
+      <p><code>interpolateSeries(series)</code> fills each run of missing values
     (<code>null</code>, <code>undefined</code>, <code>NaN</code>) that lies
-    <em>between two known values</em> using straight-line interpolation.
-  </p>
-  <pre><code>import { Series, interpolateSeries } from "tsb";
+    <em>between two known values</em> using straight-line interpolation.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, interpolateSeries } from "tsb";
 
 const s = new Series({ data: [1, null, null, 4] });
 //                           ^  ^    ^    ^
@@ -47,80 +173,97 @@ const s = new Series({ data: [1, null, null, 4] });
 
 const filled = interpolateSeries(s);
 filled.values;
-// → [1, 2, 3, 4]
-</code></pre>
-  <div class="output">
-filled.values → [1, 2, 3, 4]
-
-Position 1: 1 + (4 − 1) × (1/3) = 2
-Position 2: 1 + (4 − 1) × (2/3) = 3
+// → [1, 2, 3, 4]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <div class="note">
-    ⚠ <strong>Leading &amp; trailing gaps</strong> are <em>not</em> filled by
-    the linear method — there is no anchor on one side to interpolate from.
-    Use <code>method: "ffill"</code> or <code>method: "bfill"</code> to fill
-    those (see sections 2 and 3 below).
-  </div>
-
-  <pre><code>const t = new Series({ data: [null, 1, null, 3, null] });
+  <div class="section">
+    <h2>1 · Linear interpolation (default)</h2>
+      <p><code>interpolateSeries(series)</code> fills each run of missing values
+    (<code>null</code>, <code>undefined</code>, <code>NaN</code>) that lies
+    <em>between two known values</em> using straight-line interpolation.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const t = new Series({ data: [null, 1, null, 3, null] });
 
 interpolateSeries(t).values;
 // → [null, 1, 2, 3, null]
 //    ^^^^              ^^^^
 //    leading          trailing
-//    (unchanged)      (unchanged)
-</code></pre>
-  <div class="output">[null, 1, 2, 3, null]</div>
-</section>
+//    (unchanged)      (unchanged)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 2. Forward fill ──────────────────────────────────────────────────── -->
-<section>
-  <h2>2 · Forward fill (ffill / pad / zero)</h2>
-  <p>
-    <code>method: "ffill"</code> carries the last known value forward into each
-    following gap.  <code>"pad"</code> and <code>"zero"</code> are aliases.
-  </p>
-  <pre><code>import { Series, interpolateSeries } from "tsb";
+  <div class="section">
+    <h2>2 · Forward fill (ffill / pad / zero)</h2>
+      <p><code>method: "ffill"</code> carries the last known value forward into each
+    following gap.  <code>"pad"</code> and <code>"zero"</code> are aliases.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, interpolateSeries } from "tsb";
 
 const s = new Series({ data: [1, null, null, 4, null] });
 
 interpolateSeries(s, { method: "ffill" }).values;
-// → [1, 1, 1, 4, 4]
-</code></pre>
-  <div class="output">[1, 1, 1, 4, 4]</div>
-
-  <div class="note">
-    🔔 Leading NaN (no value to carry forward from) remain missing.
+// → [1, 1, 1, 4, 4]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
-</section>
 
-<!-- ─── 3. Backward fill ─────────────────────────────────────────────────── -->
-<section>
-  <h2>3 · Backward fill (bfill / backfill)</h2>
-  <p>
-    <code>method: "bfill"</code> fills each gap from the <em>next</em> known
-    value looking backwards.
-  </p>
-  <pre><code>import { Series, interpolateSeries } from "tsb";
+  <div class="section">
+    <h2>3 · Backward fill (bfill / backfill)</h2>
+      <p><code>method: "bfill"</code> fills each gap from the <em>next</em> known
+    value looking backwards.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, interpolateSeries } from "tsb";
 
 const s = new Series({ data: [null, 2, null, null, 5] });
 
 interpolateSeries(s, { method: "bfill" }).values;
-// → [2, 2, 5, 5, 5]
-</code></pre>
-  <div class="output">[2, 2, 5, 5, 5]</div>
-</section>
+// → [2, 2, 5, 5, 5]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 4. Nearest ──────────────────────────────────────────────────────── -->
-<section>
-  <h2>4 · Nearest-neighbor</h2>
-  <p>
-    <code>method: "nearest"</code> fills each missing position with the value
+  <div class="section">
+    <h2>4 · Nearest-neighbor</h2>
+      <p><code>method: "nearest"</code> fills each missing position with the value
     of its closest non-missing neighbor.  When equidistant, the
-    <em>right</em> neighbor wins.
-  </p>
-  <pre><code>import { Series, interpolateSeries } from "tsb";
+    <em>right</em> neighbor wins.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, interpolateSeries } from "tsb";
 
 // [1, ?, ?, 4]
 // pos 1: dist-left=1, dist-right=2  → left wins  → 1
@@ -128,35 +271,48 @@ interpolateSeries(s, { method: "bfill" }).values;
 const s = new Series({ data: [1, null, null, 4] });
 
 interpolateSeries(s, { method: "nearest" }).values;
-// → [1, 1, 4, 4]
-</code></pre>
-  <div class="output">[1, 1, 4, 4]</div>
+// → [1, 1, 4, 4]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <pre><code>// Tie at equidistance: right wins
+  <div class="section">
+    <h2>4 · Nearest-neighbor</h2>
+      <p><code>method: "nearest"</code> fills each missing position with the value
+    of its closest non-missing neighbor.  When equidistant, the
+    <em>right</em> neighbor wins.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Tie at equidistance: right wins
 const t = new Series({ data: [10, null, 30] });
 interpolateSeries(t, { method: "nearest" }).values;
-// → [10, 30, 30]   (pos 1 equidistant; right value 30 chosen)
-</code></pre>
-  <div class="output">[10, 30, 30]</div>
-</section>
+// → [10, 30, 30]   (pos 1 equidistant; right value 30 chosen)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 5. Limit parameter ────────────────────────────────────────────────── -->
-<section>
-  <h2>5 · Limiting how many values are filled</h2>
-  <p>
-    The <code>limit</code> option caps the number of consecutive missing values
+  <div class="section">
+    <h2>5 · Limiting how many values are filled</h2>
+      <p>The <code>limit</code> option caps the number of consecutive missing values
     that can be filled within a single gap.  Pair it with
-    <code>limitDirection</code> to control which end of the gap is filled first.
-  </p>
-
-  <table>
-    <tr><th>limitDirection</th><th>Fills from</th></tr>
-    <tr><td><code>"forward"</code> (default)</td><td>Left boundary of each gap</td></tr>
-    <tr><td><code>"backward"</code></td><td>Right boundary of each gap</td></tr>
-    <tr><td><code>"both"</code></td><td>Left <em>and</em> right boundaries</td></tr>
-  </table>
-
-  <pre><code>import { Series, interpolateSeries } from "tsb";
+    <code>limitDirection</code> to control which end of the gap is filled first.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, interpolateSeries } from "tsb";
 
 // Gap of size 3 between 0 and 4
 const s = new Series({ data: [0, null, null, null, 4] });
@@ -171,23 +327,25 @@ interpolateSeries(s, { limit: 1, limitDirection: "backward" }).values;
 
 // limit=1, both: fill one from each end
 interpolateSeries(s, { limit: 1, limitDirection: "both" }).values;
-// → [0, 1, null, 3, 4]
-</code></pre>
-  <div class="output">
-forward:  [0, 1, null, null, 4]
-backward: [0, null, null, 3, 4]
-both:     [0, 1, null, 3, 4]
+// → [0, 1, null, 3, 4]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
-</section>
 
-<!-- ─── 6. DataFrame column-wise ─────────────────────────────────────────── -->
-<section>
-  <h2>6 · DataFrame — column-wise (axis=0, default)</h2>
-  <p>
-    <code>dataFrameInterpolate(df)</code> applies the chosen method
-    independently down each column.
-  </p>
-  <pre><code>import { DataFrame, dataFrameInterpolate } from "tsb";
+  <div class="section">
+    <h2>6 · DataFrame — column-wise (axis=0, default)</h2>
+      <p><code>dataFrameInterpolate(df)</code> applies the chosen method
+    independently down each column.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameInterpolate } from "tsb";
 
 const df = DataFrame.fromColumns({
   temperature: [20, null, null, 23],
@@ -196,22 +354,25 @@ const df = DataFrame.fromColumns({
 
 const filled = dataFrameInterpolate(df);
 filled.col("temperature").values; // [20, 21, 22, 23]
-filled.col("humidity").values;    // [60, 65, 70, null]  ← trailing not filled
-</code></pre>
-  <div class="output">
-temperature: [20, 21, 22, 23]
-humidity:    [60, 65, 70, null]
+filled.col("humidity").values;    // [60, 65, 70, null]  ← trailing not filled</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
-</section>
 
-<!-- ─── 7. DataFrame row-wise ────────────────────────────────────────────── -->
-<section>
-  <h2>7 · DataFrame — row-wise (axis=1)</h2>
-  <p>
-    Set <code>axis: 1</code> (or <code>axis: "columns"</code>) to interpolate
-    <em>across columns</em> for each row.
-  </p>
-  <pre><code>import { DataFrame, dataFrameInterpolate } from "tsb";
+  <div class="section">
+    <h2>7 · DataFrame — row-wise (axis=1)</h2>
+      <p>Set <code>axis: 1</code> (or <code>axis: "columns"</code>) to interpolate
+    <em>across columns</em> for each row.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameInterpolate } from "tsb";
 
 const df = DataFrame.fromColumns({
   t0: [0,  10],
@@ -224,57 +385,19 @@ const df = DataFrame.fromColumns({
 // Row 1 interpolates 10 → 22
 const filled = dataFrameInterpolate(df, { axis: 1 });
 filled.col("t1").values; // [2, 14]
-filled.col("t2").values; // [4, 18]
-</code></pre>
-  <div class="output">
-Row 0: [0, 2, 4, 6]
-Row 1: [10, 14, 18, 22]
+filled.col("t2").values; // [4, 18]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
-</section>
 
-<!-- ─── 8. API summary ────────────────────────────────────────────────────── -->
-<section>
-  <h2>8 · API summary</h2>
-  <table>
-    <tr><th>Function</th><th>Description</th></tr>
-    <tr>
-      <td><code>interpolateSeries(series, options?)</code></td>
-      <td>Fill missing values in a Series</td>
-    </tr>
-    <tr>
-      <td><code>dataFrameInterpolate(df, options?)</code></td>
-      <td>Fill missing values in a DataFrame (column-wise or row-wise)</td>
-    </tr>
-  </table>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-  <table>
-    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
-    <tr>
-      <td><code>method</code></td>
-      <td><code>InterpolateMethod</code></td>
-      <td><code>"linear"</code></td>
-      <td>Interpolation strategy</td>
-    </tr>
-    <tr>
-      <td><code>limit</code></td>
-      <td><code>number</code></td>
-      <td><code>Infinity</code></td>
-      <td>Max consecutive NaN values to fill</td>
-    </tr>
-    <tr>
-      <td><code>limitDirection</code></td>
-      <td><code>LimitDirection</code></td>
-      <td><code>"forward"</code></td>
-      <td>Which end of each gap the limit counts from</td>
-    </tr>
-    <tr>
-      <td><code>axis</code> (DataFrame only)</td>
-      <td><code>0 | 1 | "index" | "columns"</code></td>
-      <td><code>0</code></td>
-      <td>Column-wise (0) or row-wise (1)</td>
-    </tr>
-  </table>
-</section>
-
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

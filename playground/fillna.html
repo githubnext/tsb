@@ -4,41 +4,167 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — fillna</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    table { border-collapse: collapse; width: 100%; margin: .75rem 0; font-size: .9rem; }
-    th, td { text-align: left; padding: .4rem .8rem; border: 1px solid #ddd; }
-    th { background: #f0f0f0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>fillna</h1>
-<p class="subtitle">
-  Fill missing values with a constant, forward fill, or backward fill —
-  mirrors <code>pandas.Series.fillna()</code> and <code>pandas.DataFrame.fillna()</code>.
-</p>
 
-<!-- ─── 1. Scalar fill ───────────────────────────────────────────────────── -->
-<section>
-  <h2>1 · Scalar fill</h2>
-  <p>
-    Pass <code>{ value: scalar }</code> to replace every missing element
-    (<code>null</code>, <code>undefined</code>, <code>NaN</code>) with a constant.
-  </p>
-  <pre><code>import { Series, fillnaSeries } from "tsb";
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>fillna</h1>
+  <p class="subtitle">Fill missing values with a constant, forward fill, or backward fill —
+  mirrors <code>pandas.Series.fillna()</code> and <code>pandas.DataFrame.fillna()</code>.</p>
+
+  <div class="section">
+    <h2>1 · Scalar fill</h2>
+      <p>Pass <code>{ value: scalar }</code> to replace every missing element
+    (<code>null</code>, <code>undefined</code>, <code>NaN</code>) with a constant.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, fillnaSeries } from "tsb";
 
 const s = new Series({ data: [1, null, null, 4] });
 fillnaSeries(s, { value: 0 }).values;
@@ -46,20 +172,26 @@ fillnaSeries(s, { value: 0 }).values;
 
 const t = new Series({ data: [NaN, 2, NaN] });
 fillnaSeries(t, { value: 99 }).values;
-// → [99, 2, 99]</code></pre>
-  <div class="output">[1, 0, 0, 4]
-[99, 2, 99]</div>
-</section>
+// → [99, 2, 99]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 2. Forward fill ──────────────────────────────────────────────────── -->
-<section>
-  <h2>2 · Forward fill (ffill / pad)</h2>
-  <p>
-    <code>method: "ffill"</code> (alias <code>"pad"</code>) carries the last known value
+  <div class="section">
+    <h2>2 · Forward fill (ffill / pad)</h2>
+      <p><code>method: "ffill"</code> (alias <code>"pad"</code>) carries the last known value
     forward into subsequent missing positions.  Leading <code>null</code>s (before the
-    first known value) are left unchanged.
-  </p>
-  <pre><code>import { Series, fillnaSeries } from "tsb";
+    first known value) are left unchanged.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, fillnaSeries } from "tsb";
 
 const s = new Series({ data: [null, 1, null, null, 4] });
 fillnaSeries(s, { method: "ffill" }).values;
@@ -68,20 +200,26 @@ fillnaSeries(s, { method: "ffill" }).values;
 // Trailing nulls are filled too
 const t = new Series({ data: [1, null, null] });
 fillnaSeries(t, { method: "ffill" }).values;
-// → [1, 1, 1]</code></pre>
-  <div class="output">[null, 1, 1, 1, 4]
-[1, 1, 1]</div>
-</section>
+// → [1, 1, 1]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 3. Backward fill ─────────────────────────────────────────────────── -->
-<section>
-  <h2>3 · Backward fill (bfill / backfill)</h2>
-  <p>
-    <code>method: "bfill"</code> (alias <code>"backfill"</code>) carries the next known
+  <div class="section">
+    <h2>3 · Backward fill (bfill / backfill)</h2>
+      <p><code>method: "bfill"</code> (alias <code>"backfill"</code>) carries the next known
     value backward into preceding missing positions.  Trailing <code>null</code>s (after
-    the last known value) are left unchanged.
-  </p>
-  <pre><code>import { Series, fillnaSeries } from "tsb";
+    the last known value) are left unchanged.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, fillnaSeries } from "tsb";
 
 const s = new Series({ data: [null, null, 3, null, 5] });
 fillnaSeries(s, { method: "bfill" }).values;
@@ -90,19 +228,25 @@ fillnaSeries(s, { method: "bfill" }).values;
 // Leading nulls are filled from the first known value
 const t = new Series({ data: [null, null, 10] });
 fillnaSeries(t, { method: "bfill" }).values;
-// → [10, 10, 10]</code></pre>
-  <div class="output">[3, 3, 3, 5, 5]
-[10, 10, 10]</div>
-</section>
+// → [10, 10, 10]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 4. limit ─────────────────────────────────────────────────────────── -->
-<section>
-  <h2>4 · Limiting the fill — <code>limit</code></h2>
-  <p>
-    <code>limit</code> caps the number of consecutive missing values filled per
-    run.  Positions beyond the limit remain missing.
-  </p>
-  <pre><code>import { Series, fillnaSeries } from "tsb";
+  <div class="section">
+    <h2>4 · Limiting the fill — limit</h2>
+      <p><code>limit</code> caps the number of consecutive missing values filled per
+    run.  Positions beyond the limit remain missing.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, fillnaSeries } from "tsb";
 
 // Only fill up to 1 consecutive missing value
 const s = new Series({ data: [1, null, null, null, 5] });
@@ -111,19 +255,25 @@ fillnaSeries(s, { method: "ffill", limit: 1 }).values;
 
 // bfill with limit=2
 fillnaSeries(s, { method: "bfill", limit: 2 }).values;
-// → [null, null, 5, 5, 5]</code></pre>
-  <div class="output">[1, 1, null, null, 5]
-[null, null, 5, 5, 5]</div>
-</section>
+// → [null, null, 5, 5, 5]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 5. DataFrame scalar fill ────────────────────────────────────────── -->
-<section>
-  <h2>5 · DataFrame — scalar fill</h2>
-  <p>
-    <code>fillnaDataFrame(df, { value: 0 })</code> fills every missing cell in
-    every column.
-  </p>
-  <pre><code>import { DataFrame, fillnaDataFrame } from "tsb";
+  <div class="section">
+    <h2>5 · DataFrame — scalar fill</h2>
+      <p><code>fillnaDataFrame(df, { value: 0 })</code> fills every missing cell in
+    every column.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, fillnaDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [1, null, 3],
@@ -132,19 +282,25 @@ const df = DataFrame.fromColumns({
 
 const result = fillnaDataFrame(df, { value: 0 });
 result.col("a").values; // [1, 0, 3]
-result.col("b").values; // [0, 2, 0]</code></pre>
-  <div class="output">a: [1, 0, 3]
-b: [0, 2, 0]</div>
-</section>
+result.col("b").values; // [0, 2, 0]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 6. DataFrame per-column fill ─────────────────────────────────────── -->
-<section>
-  <h2>6 · DataFrame — per-column fill map</h2>
-  <p>
-    Pass a plain object <code>{ colName: fillValue }</code> to use a different
-    fill value for each column.  Columns absent from the map are left unchanged.
-  </p>
-  <pre><code>import { DataFrame, fillnaDataFrame } from "tsb";
+  <div class="section">
+    <h2>6 · DataFrame — per-column fill map</h2>
+      <p>Pass a plain object <code>{ colName: fillValue }</code> to use a different
+    fill value for each column.  Columns absent from the map are left unchanged.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, fillnaDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [null, 2, null],
@@ -155,21 +311,26 @@ const df = DataFrame.fromColumns({
 const result = fillnaDataFrame(df, { value: { a: -1, b: 99 } });
 result.col("a").values; // [-1, 2, -1]
 result.col("b").values; // [1, 99, 3]
-result.col("c").values; // [null, null, null]  ← untouched</code></pre>
-  <div class="output">a: [-1, 2, -1]
-b: [1, 99, 3]
-c: [null, null, null]</div>
-</section>
+result.col("c").values; // [null, null, null]  ← untouched</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── 7. DataFrame method fill ─────────────────────────────────────────── -->
-<section>
-  <h2>7 · DataFrame — method fill (axis=0 / axis=1)</h2>
-  <p>
-    <code>method</code> fills propagate along an axis.  The default
+  <div class="section">
+    <h2>7 · DataFrame — method fill (axis=0 / axis=1)</h2>
+      <p><code>method</code> fills propagate along an axis.  The default
     <code>axis=0</code> fills <em>down each column</em>; <code>axis=1</code>
-    fills <em>across each row</em>.
-  </p>
-  <pre><code>import { DataFrame, fillnaDataFrame } from "tsb";
+    fills <em>across each row</em>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, fillnaDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [1, null, null],
@@ -187,27 +348,26 @@ byCol.col("c").values; // [null, null, 3]
 const byRow = fillnaDataFrame(df, { method: "bfill", axis: 1 });
 // row 0: [1, null, null] → bfill → [1, null, null]
 // row 1: [null, 2, null] → bfill → [2, 2, null]
-// row 2: [null, null, 3] → bfill → [3, 3, 3]</code></pre>
-  <div class="output">axis=0 ffill:
-  a: [1, 1, 1]
-  b: [null, 2, 2]
-  c: [null, null, 3]
+// row 2: [null, null, 3] → bfill → [3, 3, 3]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-axis=1 bfill:
-  row 0: [1, null, null]
-  row 1: [2, 2, null]
-  row 2: [3, 3, 3]</div>
-</section>
-
-<!-- ─── 8. Series fill-value from Series index ───────────────────────────── -->
-<section>
-  <h2>8 · DataFrame — fill values from a Series</h2>
-  <p>
-    When <code>value</code> is a <code>Series&lt;Scalar&gt;</code>, its index labels
+  <div class="section">
+    <h2>8 · DataFrame — fill values from a Series</h2>
+      <p>When <code>value</code> is a <code>Series&lt;Scalar&gt;</code>, its index labels
     are matched to DataFrame column names.  This is the TypeScript equivalent of
-    <code>df.fillna(series)</code> in pandas.
-  </p>
-  <pre><code>import { DataFrame, Series, fillnaDataFrame } from "tsb";
+    <code>df.fillna(series)</code> in pandas.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, Series, fillnaDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   price:  [10, null, 30],
@@ -222,56 +382,19 @@ const fills = new Series({
 
 const result = fillnaDataFrame(df, { value: fills });
 result.col("price").values;  // [10, 0, 30]
-result.col("volume").values; // [0, 200, 0]</code></pre>
-  <div class="output">price:  [10, 0, 30]
-volume: [0, 200, 0]</div>
-</section>
+result.col("volume").values; // [0, 200, 0]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ─── API summary ──────────────────────────────────────────────────────── -->
-<section>
-  <h2>API summary</h2>
-  <table>
-    <tr><th>Function</th><th>Signature (simplified)</th><th>Description</th></tr>
-    <tr>
-      <td><code>fillnaSeries</code></td>
-      <td><code>(series, { value?, method?, limit? })</code></td>
-      <td>Fill missing values in a Series</td>
-    </tr>
-    <tr>
-      <td><code>fillnaDataFrame</code></td>
-      <td><code>(df, { value?, method?, limit?, axis? })</code></td>
-      <td>Fill missing values in a DataFrame</td>
-    </tr>
-  </table>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-  <table>
-    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
-    <tr>
-      <td><code>value</code></td>
-      <td><code>Scalar | ColumnFillMap | Series</code></td>
-      <td>—</td>
-      <td>Constant or per-column fill value</td>
-    </tr>
-    <tr>
-      <td><code>method</code></td>
-      <td><code>"ffill" | "pad" | "bfill" | "backfill"</code></td>
-      <td>—</td>
-      <td>Propagation direction</td>
-    </tr>
-    <tr>
-      <td><code>limit</code></td>
-      <td><code>number</code></td>
-      <td><code>Infinity</code></td>
-      <td>Max consecutive fills per run</td>
-    </tr>
-    <tr>
-      <td><code>axis</code></td>
-      <td><code>0 | 1 | "index" | "columns"</code></td>
-      <td><code>0</code></td>
-      <td>Direction for method-based fill on DataFrames</td>
-    </tr>
-  </table>
-</section>
-
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

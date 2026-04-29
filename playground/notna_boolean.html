@@ -3,37 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>keepTrue / keepFalse / filterBy — Boolean Indexing — tsb playground</title>
+  <title>tsb — keepTrue / keepFalse / filterBy — Boolean Indexing — tsb playground</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { color: #1a56db; }
-    pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
-    .output { background: #e8f5e9; padding: 1rem; border-radius: 6px; white-space: pre; font-family: monospace; min-height: 4rem; }
-    button { background: #1a56db; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; margin: 0.2rem; }
-    button:hover { background: #1345b3; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <h1>keepTrue / keepFalse / filterBy — Boolean Indexing</h1>
-  <p>
-    Boolean-mask selection helpers that mirror the pandas
-    <code>series[mask]</code> / <code>df[mask]</code> idiom.
-  </p>
-  <ul>
-    <li><code>keepTrue(series, mask)</code> — keep elements where mask is truthy</li>
-    <li><code>keepFalse(series, mask)</code> — keep elements where mask is falsy</li>
-    <li><code>filterBy(df, mask)</code> — filter DataFrame rows by boolean mask</li>
-  </ul>
 
-  <h2>Interactive Demo</h2>
-  <button onclick="runKeepTrue()">keepTrue</button>
-  <button onclick="runKeepFalse()">keepFalse</button>
-  <button onclick="runFilterBy()">filterBy (DataFrame)</button>
-  <button onclick="runSeriesMask()">Series as mask</button>
-  <div class="output" id="output">Click a button above to run an example.</div>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-  <h2>Code Examples</h2>
-  <pre><code>import { Series, DataFrame, keepTrue, keepFalse, filterBy } from "tsb";
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>keepTrue / keepFalse / filterBy — Boolean Indexing — tsb playground</h1>
+  <p class="subtitle">Boolean-mask selection helpers that mirror the pandas
+    <code>series[mask]</code> / <code>df[mask]</code> idiom.</p>
+
+  <div class="section">
+    <h2>Code Examples</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, DataFrame, keepTrue, keepFalse, filterBy } from "tsb";
 
 const s = new Series({ data: [10, 20, 30, 40], index: ["a", "b", "c", "d"] });
 
@@ -48,57 +177,24 @@ const df = DataFrame.fromColumns(
   { age: [25, 30, 35, 40], score: [88, 72, 95, 60] },
   { index: ["alice", "bob", "carol", "dave"] },
 );
-const highScore = df.col("score").values.map((v) => (v as number) >= 80);
+const highScore = df.col("score").values.map((v) =&gt; (v as number) &gt;= 80);
 filterBy(df, highScore).col("age").values; // [25, 35]
 
 // Use a Series as a mask
 const mask = new Series({ data: [true, null, true, false], index: ["a", "b", "c", "d"] });
-keepTrue(s, mask).values; // [10, 30]  (null treated as false)
-</code></pre>
+keepTrue(s, mask).values; // [10, 30]  (null treated as false)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <script type="module">
-    const mod = await import("../src/index.ts").catch(() => null);
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    function display(label, text) {
-      document.getElementById("output").textContent = label + "\n\n" + text;
-    }
-
-    window.runKeepTrue = function () {
-      if (!mod) { display("", "(Module unavailable — run via bun)"); return; }
-      const { Series, keepTrue } = mod;
-      const s = new Series({ data: [10, 20, 30, 40], index: ["a", "b", "c", "d"] });
-      const result = keepTrue(s, [true, false, true, false]);
-      display("keepTrue(s, [true, false, true, false]):", String(result));
-    };
-
-    window.runKeepFalse = function () {
-      if (!mod) { display("", "(Module unavailable — run via bun)"); return; }
-      const { Series, keepFalse } = mod;
-      const s = new Series({ data: [10, 20, 30, 40], index: ["a", "b", "c", "d"] });
-      const result = keepFalse(s, [true, false, true, false]);
-      display("keepFalse(s, [true, false, true, false]):", String(result));
-    };
-
-    window.runFilterBy = function () {
-      if (!mod) { display("", "(Module unavailable — run via bun)"); return; }
-      const { DataFrame, filterBy } = mod;
-      const df = DataFrame.fromColumns(
-        { age: [25, 30, 35, 40], score: [88, 72, 95, 60] },
-        { index: ["alice", "bob", "carol", "dave"] },
-      );
-      const mask = df.col("score").values.map((v) => (v) >= 80);
-      const result = filterBy(df, mask);
-      display("filterBy(df, score >= 80):", String(result));
-    };
-
-    window.runSeriesMask = function () {
-      if (!mod) { display("", "(Module unavailable — run via bun)"); return; }
-      const { Series, keepTrue } = mod;
-      const s = new Series({ data: [10, 20, 30, 40], index: ["a", "b", "c", "d"] });
-      const mask = new Series({ data: [true, null, true, false], index: ["a", "b", "c", "d"] });
-      const result = keepTrue(s, mask);
-      display("keepTrue(s, Series mask with null):", String(result));
-    };
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

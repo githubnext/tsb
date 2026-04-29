@@ -5,133 +5,269 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — skew &amp; kurtosis</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; background: #f9fafb; color: #1a1a2e; }
-    h1 { color: #4f46e5; }
-    h2 { color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
-    .demo { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 16px 0; }
-    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 14px; }
-    .output { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 12px; font-family: monospace; white-space: pre; margin-top: 10px; }
-    a { color: #4f46e5; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <p><a href="index.html">← tsb playground</a></p>
-  <h1>📐 skewSeries / kurtSeries</h1>
-  <p>
-    <strong><code>skewSeries</code></strong> / <strong><code>kurtSeries</code></strong> —
-    compute the adjusted Fisher–Pearson skewness and excess kurtosis (bias-corrected), mirroring
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.skew.html"><code>Series.skew()</code></a> and
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.kurt.html"><code>Series.kurt()</code></a>.
-  </p>
-  <p>Equivalent Python: <code>series.skew()</code> / <code>series.kurt()</code></p>
 
-  <h2>1 · Symmetric distribution — skew ≈ 0</h2>
-  <div class="demo">
-    <pre>const s = new Series({ data: [1, 2, 3, 4, 5] });
-skewSeries(s);
-// → 0</pre>
-    <div class="output" id="demo1"></div>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
   </div>
 
-  <h2>2 · Right-skewed distribution — positive skew</h2>
-  <div class="demo">
-    <pre>const s = new Series({ data: [1, 2, 3, 4, 100] });
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>skew &amp; kurtosis</h1>
+  <p class="subtitle"><a href="index.html">← tsb playground</a></p>
+
+  <div class="section">
+    <h2>1 · Symmetric distribution — skew ≈ 0</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const s = new Series({ data: [1, 2, 3, 4, 5] });
 skewSeries(s);
-// → large positive value</pre>
-    <div class="output" id="demo2"></div>
+// → 0</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>3 · Kurtosis — uniform-like (platykurtic, negative excess)</h2>
-  <div class="demo">
-    <pre>const s = new Series({ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
+  <div class="section">
+    <h2>2 · Right-skewed distribution — positive skew</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const s = new Series({ data: [1, 2, 3, 4, 100] });
+skewSeries(s);
+// → large positive value</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3 · Kurtosis — uniform-like (platykurtic, negative excess)</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const s = new Series({ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
 kurtSeries(s);
-// → negative (flatter than normal)</pre>
-    <div class="output" id="demo3"></div>
+// → negative (flatter than normal)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>4 · NaN propagation — too few values</h2>
-  <div class="demo">
-    <pre>skewSeries(new Series({ data: [1, 2] }));  // NaN — need ≥ 3
-kurtSeries(new Series({ data: [1, 2, 3] })); // NaN — need ≥ 4</pre>
-    <div class="output" id="demo4"></div>
+  <div class="section">
+    <h2>4 · NaN propagation — too few values</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">skewSeries(new Series({ data: [1, 2] }));  // NaN — need ≥ 3
+kurtSeries(new Series({ data: [1, 2, 3] })); // NaN — need ≥ 4</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>5 · DataFrame column-wise skewness</h2>
-  <div class="demo">
-    <pre>const df = DataFrame.fromColumns({
+  <div class="section">
+    <h2>5 · DataFrame column-wise skewness</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromColumns({
   symmetric: [1, 2, 3, 4, 5],
   right_skew: [1, 2, 3, 4, 100],
 });
-skewDataFrame(df).values;</pre>
-    <div class="output" id="demo5"></div>
+skewDataFrame(df).values;</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>6 · DataFrame row-wise kurtosis</h2>
-  <div class="demo">
-    <pre>const df = DataFrame.fromColumns({
+  <div class="section">
+    <h2>6 · DataFrame row-wise kurtosis</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromColumns({
   a: [1, 10], b: [2, 10], c: [3, 10], d: [4, 10], e: [100, 10], f: [5, 10],
 });
-kurtDataFrame(df, { axis: 1 }).values;</pre>
-    <div class="output" id="demo6"></div>
+kurtDataFrame(df, { axis: 1 }).values;</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <script type="module">
-    import {
-      Series, DataFrame,
-      skewSeries, kurtSeries, skewDataFrame, kurtDataFrame,
-    } from "./tsb.js";
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    function show(id, val) {
-      document.getElementById(id).textContent = JSON.stringify(val, null, 2);
-    }
-
-    // Demo 1
-    {
-      const s = new Series({ data: [1, 2, 3, 4, 5] });
-      show("demo1", skewSeries(s));
-    }
-
-    // Demo 2
-    {
-      const s = new Series({ data: [1, 2, 3, 4, 100] });
-      show("demo2", skewSeries(s));
-    }
-
-    // Demo 3
-    {
-      const s = new Series({ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
-      show("demo3", kurtSeries(s));
-    }
-
-    // Demo 4
-    {
-      show("demo4", {
-        "skewSeries([1,2])": skewSeries(new Series({ data: [1, 2] })),
-        "kurtSeries([1,2,3])": kurtSeries(new Series({ data: [1, 2, 3] })),
-      });
-    }
-
-    // Demo 5
-    {
-      const df = DataFrame.fromColumns({
-        symmetric: [1, 2, 3, 4, 5],
-        right_skew: [1, 2, 3, 4, 100],
-      });
-      const result = skewDataFrame(df);
-      show("demo5", {
-        symmetric: result.values[0],
-        right_skew: result.values[1],
-      });
-    }
-
-    // Demo 6
-    {
-      const df = DataFrame.fromColumns({
-        a: [1, 10], b: [2, 10], c: [3, 10], d: [4, 10], e: [100, 10], f: [5, 10],
-      });
-      const result = kurtDataFrame(df, { axis: 1 });
-      show("demo6", [...result.values]);
-    }
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

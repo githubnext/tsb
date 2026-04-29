@@ -4,50 +4,193 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — apply</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>apply</h1>
-<p class="subtitle">Element-wise and axis-wise function application — mirrors <code>pandas.Series.apply()</code>, <code>pandas.DataFrame.applymap()</code>, and <code>pandas.DataFrame.apply()</code>.</p>
 
-<section>
-  <h2>1 — Series.apply: transform each element</h2>
-  <p><code>applySeries(series, fn)</code> calls <code>fn(value, label)</code> for every element and returns a new Series with the results.</p>
-  <pre><code id="ex1-code">import { Series, applySeries } from "tsb";
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>apply</h1>
+  <p class="subtitle">Element-wise and axis-wise function application — mirrors <code>pandas.Series.apply()</code>, <code>pandas.DataFrame.applymap()</code>, and <code>pandas.DataFrame.apply()</code>.</p>
+
+  <div class="section">
+    <h2>1 — Series.apply: transform each element</h2>
+      <p><code>applySeries(series, fn)</code> calls <code>fn(value, label)</code> for every element and returns a new Series with the results.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, applySeries } from "tsb";
 
 const s = new Series({ data: [1, 4, 9, 16], name: "squares" });
 
 // Square root of each element
-const r = applySeries(s, (v) => Math.sqrt(v));
+const r = applySeries(s, (v) =&gt; Math.sqrt(v));
 console.log([...r.values]); // [1, 2, 3, 4]
 
 // Use the label in the transform
 const s2 = new Series({ data: [10, 20, 30], index: ["a", "b", "c"] });
-const labeled = applySeries(s2, (v, lbl) => `${lbl}=${v}`);
-console.log([...labeled.values]); // ["a=10", "b=20", "c=30"]
-</code></pre>
-  <div class="output" id="ex1-output">Loading…</div>
-</section>
+const labeled = applySeries(s2, (v, lbl) =&gt; `${lbl}=${v}`);
+console.log([...labeled.values]); // ["a=10", "b=20", "c=30"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>2 — DataFrame.applymap: element-wise over entire DataFrame</h2>
-  <p><code>applymap(df, fn)</code> calls <code>fn(value, colName)</code> for every cell and returns a new DataFrame with the same shape.</p>
-  <pre><code id="ex2-code">import { DataFrame, applymap } from "tsb";
+  <div class="section">
+    <h2>2 — DataFrame.applymap: element-wise over entire DataFrame</h2>
+      <p><code>applymap(df, fn)</code> calls <code>fn(value, colName)</code> for every cell and returns a new DataFrame with the same shape.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, applymap } from "tsb";
 
 const df = DataFrame.fromColumns({
   price: [10.5, 22.0, 8.75],
@@ -55,20 +198,29 @@ const df = DataFrame.fromColumns({
 });
 
 // Round every number to 1 decimal place
-const rounded = applymap(df, (v) => Math.round(v * 10) / 10);
+const rounded = applymap(df, (v) =&gt; Math.round(v * 10) / 10);
 console.log([...rounded.col("price").values]); // [10.5, 22, 8.8]
 
 // Use the column name in the transform
-const tagged = applymap(df, (v, col) => `${col}:${v}`);
-console.log(tagged.col("price").values[0]); // "price:10.5"
-</code></pre>
-  <div class="output" id="ex2-output">Loading…</div>
-</section>
+const tagged = applymap(df, (v, col) =&gt; `${col}:${v}`);
+console.log(tagged.col("price").values[0]); // "price:10.5"</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>3 — DataFrame.apply (axis=0): aggregate each column</h2>
-  <p><code>dataFrameApply(df, fn)</code> with default <code>axis=0</code> passes each column as a Series to <code>fn</code> and returns a Series indexed by column names.</p>
-  <pre><code id="ex3-code">import { DataFrame, dataFrameApply } from "tsb";
+  <div class="section">
+    <h2>3 — DataFrame.apply (axis=0): aggregate each column</h2>
+      <p><code>dataFrameApply(df, fn)</code> with default <code>axis=0</code> passes each column as a Series to <code>fn</code> and returns a Series indexed by column names.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameApply } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [1, 2, 3],
@@ -77,21 +229,30 @@ const df = DataFrame.fromColumns({
 });
 
 // Sum of each column
-const colSums = dataFrameApply(df, (col) => col.sum());
+const colSums = dataFrameApply(df, (col) =&gt; col.sum());
 console.log([...colSums.index.values]); // ["a", "b", "c"]
 console.log([...colSums.values]);       // [6, 60, 600]
 
 // Mean of each column
-const colMeans = dataFrameApply(df, (col) => col.mean());
-console.log([...colMeans.values]); // [2, 20, 200]
-</code></pre>
-  <div class="output" id="ex3-output">Loading…</div>
-</section>
+const colMeans = dataFrameApply(df, (col) =&gt; col.mean());
+console.log([...colMeans.values]); // [2, 20, 200]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>4 — DataFrame.apply (axis=1): aggregate each row</h2>
-  <p><code>dataFrameApply(df, fn, { axis: 1 })</code> passes each row as a Series to <code>fn</code> and returns a Series indexed by row labels.</p>
-  <pre><code id="ex4-code">import { DataFrame, dataFrameApply } from "tsb";
+  <div class="section">
+    <h2>4 — DataFrame.apply (axis=1): aggregate each row</h2>
+      <p><code>dataFrameApply(df, fn, { axis: 1 })</code> passes each row as a Series to <code>fn</code> and returns a Series indexed by row labels.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameApply } from "tsb";
 
 const df = DataFrame.fromColumns(
   { a: [1, 2, 3], b: [4, 5, 6] },
@@ -99,30 +260,48 @@ const df = DataFrame.fromColumns(
 );
 
 // Sum across columns for each row
-const rowSums = dataFrameApply(df, (row) => row.sum(), { axis: 1 });
+const rowSums = dataFrameApply(df, (row) =&gt; row.sum(), { axis: 1 });
 console.log([...rowSums.index.values]); // ["r0", "r1", "r2"]
 console.log([...rowSums.values]);       // [5, 7, 9]
 
 // Max value in each row
-const rowMax = dataFrameApply(df, (row) => row.max(), { axis: 1 });
-console.log([...rowMax.values]); // [4, 5, 6]
-</code></pre>
-  <div class="output" id="ex4-output">Loading…</div>
-</section>
+const rowMax = dataFrameApply(df, (row) =&gt; row.max(), { axis: 1 });
+console.log([...rowMax.values]); // [4, 5, 6]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>5 — Handling missing values</h2>
-  <p>The callback receives <code>null</code> / <code>NaN</code> as-is — you decide how to handle them.</p>
-  <pre><code id="ex5-code">import { Series, applySeries } from "tsb";
+  <div class="section">
+    <h2>5 — Handling missing values</h2>
+      <p>The callback receives <code>null</code> / <code>NaN</code> as-is — you decide how to handle them.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, applySeries } from "tsb";
 
 const s = new Series({ data: [1, null, 3, null, 5] });
 
 // Replace nulls with 0, double numbers
-const r = applySeries(s, (v) => (v === null ? 0 : v * 2));
-console.log([...r.values]); // [2, 0, 6, 0, 10]
-</code></pre>
-  <div class="output" id="ex5-output">Loading…</div>
-</section>
+const r = applySeries(s, (v) =&gt; (v === null ? 0 : v * 2));
+console.log([...r.values]); // [2, 0, 6, 0, 10]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

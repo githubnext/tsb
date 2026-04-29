@@ -4,54 +4,165 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — pow / mod / floordiv</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    table { border-collapse: collapse; font-size: .875rem; margin: .75rem 0; }
-    th, td { border: 1px solid #ddd; padding: .4rem .75rem; text-align: left; }
-    th { background: #f5f5f5; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>pow / mod / floordiv</h1>
-<p class="subtitle">
-  Element-wise exponentiation, modulo, and floor-division for Series and DataFrame —
-  mirroring <code>pandas.Series.pow</code>, <code>.mod</code>, and <code>.floordiv</code>.
-</p>
 
-<section>
-  <h2>Overview</h2>
-  <p>All three operations work element-wise on <code>Series</code> and <code>DataFrame</code>:</p>
-  <table>
-    <thead><tr><th>Function</th><th>pandas equivalent</th><th>Operator</th><th>Description</th></tr></thead>
-    <tbody>
-      <tr><td><code>seriesPow(s, other)</code></td><td><code>s.pow(other)</code></td><td><code>**</code></td><td>Raise to power</td></tr>
-      <tr><td><code>seriesMod(s, other)</code></td><td><code>s.mod(other)</code></td><td><code>%</code></td><td>Modulo (Python/pandas sign rule)</td></tr>
-      <tr><td><code>seriesFloorDiv(s, other)</code></td><td><code>s.floordiv(other)</code></td><td><code>//</code></td><td>Floor division (rounds toward −∞)</td></tr>
-      <tr><td><code>dataFramePow(df, other)</code></td><td><code>df.pow(other)</code></td><td><code>**</code></td><td>Column-wise exponentiation</td></tr>
-      <tr><td><code>dataFrameMod(df, other)</code></td><td><code>df.mod(other)</code></td><td><code>%</code></td><td>Column-wise modulo</td></tr>
-      <tr><td><code>dataFrameFloorDiv(df, other)</code></td><td><code>df.floordiv(other)</code></td><td><code>//</code></td><td>Column-wise floor division</td></tr>
-    </tbody>
-  </table>
-  <p>The <code>other</code> operand may be a <strong>scalar number</strong> or another <strong>Series / DataFrame</strong>
-  of the same shape (positional alignment). Missing values (<code>null</code> / <code>NaN</code>) propagate unchanged.</p>
-</section>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-<section>
-  <h2>seriesPow — exponentiation</h2>
-  <pre><code>import { Series, seriesPow } from "tsb";
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>pow / mod / floordiv</h1>
+  <p class="subtitle">Element-wise exponentiation, modulo, and floor-division for Series and DataFrame —
+  mirroring <code>pandas.Series.pow</code>, <code>.mod</code>, and <code>.floordiv</code>.</p>
+
+  <div class="section">
+    <h2>seriesPow — exponentiation</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesPow } from "tsb";
 
 // Scalar exponent: each element raised to the power 2
 const s = new Series({ data: [1, 2, 3, 4, 5], name: "x" });
@@ -66,20 +177,23 @@ console.log(seriesPow(s, exponents).values);
 // Square root via pow(0.5)
 const sq = new Series({ data: [4, 9, 16, 25] });
 console.log(seriesPow(sq, 0.5).values);
-// [2, 3, 4, 5]</code></pre>
-  <div class="output">[1, 4, 9, 16, 25]
-[1, 4, 27, 256, 3125]
-[2, 3, 4, 5]</div>
-</section>
-
-<section>
-  <h2>seriesMod — Python-style modulo</h2>
-  <div class="note">
-    <strong>Sign rule:</strong> Unlike JavaScript's <code>%</code> operator (which follows C semantics),
-    <code>seriesMod</code> uses <strong>Python / pandas semantics</strong>: the result always has the
-    same sign as the <em>divisor</em>. For example, <code>-7 mod 3 = 2</code> (not <code>-1</code>).
+// [2, 3, 4, 5]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
-  <pre><code>import { Series, seriesMod } from "tsb";
+
+  <div class="section">
+    <h2>seriesMod — Python-style modulo</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesMod } from "tsb";
 
 // Positive divisor: result is always in [0, divisor)
 const s = new Series({ data: [-7, -4, 0, 3, 10] });
@@ -97,20 +211,23 @@ console.log(seriesMod(s, divisors).values);
 // Missing values propagate unchanged
 const withNull = new Series({ data: [10, null, 15] });
 console.log(seriesMod(withNull, 4).values);
-// [2, null, 3]</code></pre>
-  <div class="output">[2, 2, 0, 0, 1]
-[2, 0, 0, 3, 3]
-[2, null, 3]</div>
-</section>
-
-<section>
-  <h2>seriesFloorDiv — floor division</h2>
-  <div class="note">
-    <strong>Rounding rule:</strong> <code>seriesFloorDiv</code> rounds toward <strong>−∞</strong>
-    (Python / pandas <code>//</code> semantics). This differs from JavaScript's
-    <code>Math.trunc</code> for negative values: <code>-7 // 2 = -4</code> (not <code>-3</code>).
+// [2, null, 3]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
-  <pre><code>import { Series, seriesFloorDiv } from "tsb";
+
+  <div class="section">
+    <h2>seriesFloorDiv — floor division</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesFloorDiv } from "tsb";
 
 const s = new Series({ data: [7, -7, 10, -10, 0] });
 
@@ -128,14 +245,23 @@ console.log(seriesFloorDiv(s, divisors).values);
 // [3, -3, 2, -2, 0]
 
 // The div-mod identity: floordiv(a,b)*b + mod(a,b) === a (for integers)
-// -7 = (-4)*2 + 1  ✓  (not (-3)*2 + (-1) which is JS % behavior)</code></pre>
-  <div class="output">[3, -4, 5, -5, 0]
-[3, -3, 2, -2, 0]</div>
-</section>
+// -7 = (-4)*2 + 1  ✓  (not (-3)*2 + (-1) which is JS % behavior)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>DataFrame operations</h2>
-  <pre><code>import { DataFrame, dataFramePow, dataFrameMod, dataFrameFloorDiv } from "tsb";
+  <div class="section">
+    <h2>DataFrame operations</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFramePow, dataFrameMod, dataFrameFloorDiv } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [2,  3,  4],
@@ -160,23 +286,23 @@ console.log(dataFrameFloorDiv(df, 3).col("b").values);  // [2, -3, 3]
 // DataFrame × DataFrame: column-aligned
 const df2 = DataFrame.fromColumns({ a: [1, 2, 3], b: [3, 4, 5] });
 console.log("pow(df2):");
-console.log(dataFramePow(df, df2).col("a").values);  // [2, 9, 64]</code></pre>
-  <div class="output">pow(2):
-[4, 9, 16]
-[49, 49, 100]
-mod(3):
-[2, 0, 1]
-[1, 2, 1]
-floordiv(3):
-[0, 1, 1]
-[2, -3, 3]
-pow(df2):
-[2, 9, 64]</div>
-</section>
+console.log(dataFramePow(df, df2).col("a").values);  // [2, 9, 64]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>Pandas comparison</h2>
-  <pre><code># pandas equivalent
+  <div class="section">
+    <h2>Pandas comparison</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false"># pandas equivalent
 import pandas as pd
 
 s = pd.Series([-7, 0, 7, 10])
@@ -187,8 +313,19 @@ print(s.floordiv(2))  # [-4, 0, 3, 5]  (floor toward -∞)
 df = pd.DataFrame({"a": [2, 3, 4], "b": [7, -7, 10]})
 print(df.pow(2))       # a: [4,9,16]  b: [49,49,100]
 print(df.mod(3))       # a: [2,0,1]   b: [1,2,1]
-print(df.floordiv(3))  # a: [0,1,1]   b: [2,-3,3]</code></pre>
-</section>
+print(df.floordiv(3))  # a: [0,1,1]   b: [2,-3,3]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

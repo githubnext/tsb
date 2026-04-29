@@ -4,40 +4,167 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — Timedelta &amp; TimedeltaIndex</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .875rem; }
-    th, td { border: 1px solid #ddd; padding: .5rem .75rem; text-align: left; }
-    th { background: #f5f5f5; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>Timedelta &amp; TimedeltaIndex</h1>
-<p class="subtitle">
-  Fixed-duration time spans and ordered index of durations —
-  mirrors <code>pandas.Timedelta</code> and <code>pandas.TimedeltaIndex</code>.
-</p>
 
-<section>
-  <h2>1 — Creating a Timedelta</h2>
-  <p>
-    A <code>Timedelta</code> stores a duration as a whole number of milliseconds.
-    Construct from component fields, a raw millisecond count, or a string.
-  </p>
-  <pre><code id="ex1-code">import { Timedelta } from "tsb";
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Timedelta &amp; TimedeltaIndex</h1>
+  <p class="subtitle">Fixed-duration time spans and ordered index of durations —
+  mirrors <code>pandas.Timedelta</code> and <code>pandas.TimedeltaIndex</code>.</p>
+
+  <div class="section">
+    <h2>1 — Creating a Timedelta</h2>
+      <p>A <code>Timedelta</code> stores a duration as a whole number of milliseconds.
+    Construct from component fields, a raw millisecond count, or a string.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Timedelta } from "tsb";
 
 // From components
 const td1 = Timedelta.fromComponents({ days: 1, hours: 2, minutes: 30 });
@@ -54,20 +181,27 @@ console.log(td3.totalDays);           // 2.25
 
 // Parse ISO 8601
 const td4 = Timedelta.parse("P1DT12H");
-console.log(td4.totalHours);          // 36
-</code></pre>
-  <div class="output" id="ex1-output">Loading…</div>
-</section>
+console.log(td4.totalHours);          // 36</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>2 — Component accessors</h2>
-  <p>
-    Access the individual components of a duration. For negative durations the
+  <div class="section">
+    <h2>2 — Component accessors</h2>
+      <p>Access the individual components of a duration. For negative durations the
     <code>days</code> component carries the sign; <code>hours</code>,
     <code>minutes</code>, <code>seconds</code>, and <code>milliseconds</code>
-    are always non-negative remainders.
-  </p>
-  <pre><code id="ex2-code">import { Timedelta } from "tsb";
+    are always non-negative remainders.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Timedelta } from "tsb";
 
 const td = Timedelta.fromComponents({
   days: 1, hours: 2, minutes: 3, seconds: 4, milliseconds: 567
@@ -82,18 +216,25 @@ console.log("milliseconds:", td.milliseconds); // 567
 // Negative duration
 const neg = Timedelta.fromComponents({ hours: -25 });
 console.log("days (neg)  :", neg.days);        // -1
-console.log("hours (neg) :", neg.hours);       //  1
-</code></pre>
-  <div class="output" id="ex2-output">Loading…</div>
-</section>
+console.log("hours (neg) :", neg.hours);       //  1</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>3 — Arithmetic</h2>
-  <p>
-    Timedeltas support addition, subtraction, scalar multiplication, negation,
-    absolute value, and ratio (dividing one duration by another).
-  </p>
-  <pre><code id="ex3-code">import { Timedelta } from "tsb";
+  <div class="section">
+    <h2>3 — Arithmetic</h2>
+      <p>Timedeltas support addition, subtraction, scalar multiplication, negation,
+    absolute value, and ratio (dividing one duration by another).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Timedelta } from "tsb";
 
 const h1 = Timedelta.fromComponents({ hours: 1 });
 const h2 = Timedelta.fromComponents({ hours: 2 });
@@ -108,28 +249,27 @@ console.log(neg.abs().totalHours);    // 3
 
 // Ratio between two durations
 const day = Timedelta.fromComponents({ days: 1 });
-console.log(day.divBy(h1));           // 24
-</code></pre>
-  <div class="output" id="ex3-output">Loading…</div>
-</section>
+console.log(day.divBy(h1));           // 24</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>4 — String formats</h2>
-  <p>
-    <code>toString()</code> produces a pandas-compatible representation.
+  <div class="section">
+    <h2>4 — String formats</h2>
+      <p><code>toString()</code> produces a pandas-compatible representation.
     <code>toISOString()</code> produces an ISO 8601 duration.
     <code>Timedelta.parse()</code> accepts both formats plus plain
-    <code>HH:MM:SS</code>.
-  </p>
-  <table>
-    <tr><th>Format</th><th>Example</th></tr>
-    <tr><td>pandas-style</td><td><code>1 days 02:30:00</code></td></tr>
-    <tr><td>pandas-style (ms)</td><td><code>0 days 00:00:01.500</code></td></tr>
-    <tr><td>ISO 8601</td><td><code>P1DT2H30M</code></td></tr>
-    <tr><td>HH:MM:SS</td><td><code>02:30:00</code></td></tr>
-    <tr><td>Negative</td><td><code>-1 days 01:00:00</code></td></tr>
-  </table>
-  <pre><code id="ex4-code">import { Timedelta } from "tsb";
+    <code>HH:MM:SS</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Timedelta } from "tsb";
 
 const td = Timedelta.fromComponents({ days: 1, hours: 2, minutes: 30 });
 console.log(td.toString());      // "1 days 02:30:00"
@@ -142,19 +282,26 @@ console.log(parsed.equals(td));  // true
 // Negative
 const neg = Timedelta.fromComponents({ hours: -25 });
 console.log(neg.toString());     // "-1 days 01:00:00"
-console.log(neg.toISOString());  // "-P1DT1H"
-</code></pre>
-  <div class="output" id="ex4-output">Loading…</div>
-</section>
+console.log(neg.toISOString());  // "-P1DT1H"</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>5 — TimedeltaIndex</h2>
-  <p>
-    <code>TimedeltaIndex</code> is an ordered array of <code>Timedelta</code>
+  <div class="section">
+    <h2>5 — TimedeltaIndex</h2>
+      <p><code>TimedeltaIndex</code> is an ordered array of <code>Timedelta</code>
     values — useful as a row index for time-series data with irregular or
-    regular durations.
-  </p>
-  <pre><code id="ex5-code">import { Timedelta, TimedeltaIndex } from "tsb";
+    regular durations.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Timedelta, TimedeltaIndex } from "tsb";
 
 // Build from a range (like pandas.timedelta_range)
 const idx = TimedeltaIndex.fromRange(
@@ -169,20 +316,27 @@ console.log("name   :", idx.name);           // "duration"
 console.log("at(0)  :", idx.at(0).toString()); // "0 days 00:00:00"
 console.log("at(4)  :", idx.at(4).toString()); // "0 days 04:00:00"
 console.log("min    :", idx.min().totalHours); // 0
-console.log("max    :", idx.max().totalHours); // 4
-</code></pre>
-  <div class="output" id="ex5-output">Loading…</div>
-</section>
+console.log("max    :", idx.max().totalHours); // 4</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>6 — Index operations</h2>
-  <p>
-    <code>TimedeltaIndex</code> supports sorting, deduplication, shifting,
-    filtering, and renaming.
-  </p>
-  <pre><code id="ex6-code">import { Timedelta, TimedeltaIndex } from "tsb";
+  <div class="section">
+    <h2>6 — Index operations</h2>
+      <p><code>TimedeltaIndex</code> supports sorting, deduplication, shifting,
+    filtering, and renaming.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Timedelta, TimedeltaIndex } from "tsb";
 
-const vals = [3, 1, 2, 1].map(h => Timedelta.fromComponents({ hours: h }));
+const vals = [3, 1, 2, 1].map(h =&gt; Timedelta.fromComponents({ hours: h }));
 const idx = TimedeltaIndex.fromTimedeltas(vals);
 
 // Sort
@@ -199,42 +353,49 @@ const shifted = idx.shift(Timedelta.fromComponents({ hours: 10 }));
 console.log("shifted[0]:", shifted.at(0).totalHours); // 13
 
 // Filter
-const large = idx.filter(td => td.totalHours >= 2);
+const large = idx.filter(td =&gt; td.totalHours &gt;= 2);
 console.log("large size:", large.size); // 2
 
 // Parse from strings
 const fromStr = TimedeltaIndex.fromStrings(["01:00:00", "02:00:00", "03:00:00"]);
-console.log("fromStr[1]:", fromStr.at(1).totalHours); // 2
-</code></pre>
-  <div class="output" id="ex6-output">Loading…</div>
-</section>
+console.log("fromStr[1]:", fromStr.at(1).totalHours); // 2</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>7 — Comparison</h2>
-  <pre><code id="ex7-code">import { Timedelta } from "tsb";
+  <div class="section">
+    <h2>7 — Comparison</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Timedelta } from "tsb";
 
 const h1 = Timedelta.fromComponents({ hours: 1 });
 const h2 = Timedelta.fromComponents({ hours: 2 });
 
 console.log(h1.equals(h2));             // false
 console.log(h1.equals(Timedelta.fromComponents({ hours: 1 }))); // true
-console.log(h1.compareTo(h2));          // negative  → h1 < h2
-console.log(h2.compareTo(h1));          // positive  → h2 > h1
-console.log(h1.compareTo(Timedelta.fromComponents({ hours: 1 }))); // 0
-</code></pre>
-  <div class="output" id="ex7-output">Loading…</div>
-</section>
+console.log(h1.compareTo(h2));          // negative  → h1 &lt; h2
+console.log(h2.compareTo(h1));          // positive  → h2 &gt; h1
+console.log(h1.compareTo(Timedelta.fromComponents({ hours: 1 }))); // 0</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<script>
-window.__tsb_examples = [
-  { outputId: "ex1-output", codeId: "ex1-code" },
-  { outputId: "ex2-output", codeId: "ex2-code" },
-  { outputId: "ex3-output", codeId: "ex3-code" },
-  { outputId: "ex4-output", codeId: "ex4-code" },
-  { outputId: "ex5-output", codeId: "ex5-code" },
-  { outputId: "ex6-output", codeId: "ex6-code" },
-  { outputId: "ex7-output", codeId: "ex7-code" },
-];
-</script>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

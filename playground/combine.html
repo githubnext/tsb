@@ -3,47 +3,181 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>combine — Element-wise Combination — tsb playground</title>
+  <title>tsb — combine — Element-wise Combination — tsb playground</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { color: #1a56db; }
-    pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
-    .output { background: #e8f5e9; padding: 1rem; border-radius: 6px; white-space: pre; font-family: monospace; min-height: 4rem; }
-    button { background: #1a56db; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; margin: 0.2rem; }
-    button:hover { background: #1345b3; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <h1>combine — Element-wise Combination</h1>
-  <p>
-    <code>combineSeries(a, b, func)</code> and <code>combineDataFrame(a, b, func)</code>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>combine — Element-wise Combination — tsb playground</h1>
+  <p class="subtitle"><code>combineSeries(a, b, func)</code> and <code>combineDataFrame(a, b, func)</code>
     combine two objects element-wise using a caller-supplied binary function.
     The result index is the <strong>union</strong> of both indices; a
     <code>fillValue</code> (default <code>null</code>) is used when only one
-    side has a value for a given label.
-  </p>
+    side has a value for a given label.</p>
 
-  <h2>Interactive Demo</h2>
-  <button onclick="runSeriesMax()">Series: max</button>
-  <button onclick="runSeriesUnion()">Series: union index</button>
-  <button onclick="runDfShared()">DataFrame: shared columns</button>
-  <button onclick="runDfUnion()">DataFrame: union columns</button>
-  <div class="output" id="output">Click a button above to run an example.</div>
-
-  <h2>Code Examples</h2>
-  <pre><code>import { Series, DataFrame, combineSeries, combineDataFrame } from "tsb";
+  <div class="section">
+    <h2>Code Examples</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, DataFrame, combineSeries, combineDataFrame } from "tsb";
 
 // ── Series ──────────────────────────────────────────────────────────────────
 const a = new Series({ data: [1, 5, 3], index: [0, 1, 2] });
 const b = new Series({ data: [10, 2, 30], index: [0, 1, 2] });
 
 // Element-wise max
-combineSeries(a, b, (x, y) => Math.max(x, y)).values; // [10, 5, 30]
+combineSeries(a, b, (x, y) =&gt; Math.max(x, y)).values; // [10, 5, 30]
 
 // Union index with fillValue=0
 const c = new Series({ data: [1, 2], index: ["x", "y"] });
 const d = new Series({ data: [10, 30], index: ["x", "z"] });
-combineSeries(c, d, (x, y) => (x ?? 0) + (y ?? 0), 0).values;
+combineSeries(c, d, (x, y) =&gt; (x ?? 0) + (y ?? 0), 0).values;
 // x:11, y:2, z:30
 
 // ── DataFrame ───────────────────────────────────────────────────────────────
@@ -51,59 +185,23 @@ const df1 = DataFrame.fromColumns({ a: [1, 5], b: [100, 200] });
 const df2 = DataFrame.fromColumns({ a: [10, 2], c: [1000, 2000] });
 
 // Shared column "a": element-wise min; unshared columns processed with fillValue
-combineDataFrame(df1, df2, (p, q) => Math.min(p ?? Infinity, q ?? Infinity));
+combineDataFrame(df1, df2, (p, q) =&gt; Math.min(p ?? Infinity, q ?? Infinity));
 
 // overwrite: false — unshared columns preserved as-is
-combineDataFrame(df1, df2, (p, q) => Math.min(p ?? Infinity, q ?? Infinity),
-  { overwrite: false });
-</code></pre>
+combineDataFrame(df1, df2, (p, q) =&gt; Math.min(p ?? Infinity, q ?? Infinity),
+  { overwrite: false });</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <script type="module">
-    const mod = await import("../src/index.ts").catch(() => null);
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    function display(label, text) {
-      document.getElementById("output").textContent = label + "\n\n" + text;
-    }
-
-    window.runSeriesMax = function () {
-      if (!mod) { display("", "(Module unavailable — run via bun)"); return; }
-      const { Series, combineSeries } = mod;
-      const a = new Series({ data: [1, 5, 3], index: [0, 1, 2] });
-      const b = new Series({ data: [10, 2, 30], index: [0, 1, 2] });
-      const result = combineSeries(a, b, (x, y) => Math.max(x, y));
-      display("combineSeries(a, b, Math.max):", String(result));
-    };
-
-    window.runSeriesUnion = function () {
-      if (!mod) { display("", "(Module unavailable — run via bun)"); return; }
-      const { Series, combineSeries } = mod;
-      const c = new Series({ data: [1, 2], index: ["x", "y"] });
-      const d = new Series({ data: [10, 30], index: ["x", "z"] });
-      const result = combineSeries(c, d, (x, y) => (x ?? 0) + (y ?? 0), 0);
-      display("combineSeries with union index (fillValue=0):", String(result));
-    };
-
-    window.runDfShared = function () {
-      if (!mod) { display("", "(Module unavailable — run via bun)"); return; }
-      const { DataFrame, combineDataFrame } = mod;
-      const df1 = DataFrame.fromColumns({ a: [1, 5, 3], b: [100, 200, 300] });
-      const df2 = DataFrame.fromColumns({ a: [10, 2, 30], b: [50, 250, 150] });
-      const result = combineDataFrame(df1, df2, (p, q) => Math.max(p, q));
-      display("combineDataFrame(df1, df2, Math.max) — shared columns:", String(result));
-    };
-
-    window.runDfUnion = function () {
-      if (!mod) { display("", "(Module unavailable — run via bun)"); return; }
-      const { DataFrame, combineDataFrame } = mod;
-      const df1 = DataFrame.fromColumns({ a: [1, 2], b: [10, 20] });
-      const df2 = DataFrame.fromColumns({ a: [100, 200], c: [1000, 2000] });
-      const result = combineDataFrame(df1, df2, (p, q) => {
-        if (p === null) return q;
-        if (q === null) return p;
-        return Math.min(p, q);
-      }, { overwrite: false });
-      display("combineDataFrame — union columns, overwrite=false:", String(result));
-    };
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

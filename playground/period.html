@@ -4,56 +4,166 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — Period &amp; PeriodIndex</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .875rem; }
-    th, td { border: 1px solid #ddd; padding: .5rem .75rem; text-align: left; }
-    th { background: #f5f5f5; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>Period &amp; PeriodIndex</h1>
-<p class="subtitle">
-  Fixed-frequency time spans — mirrors
-  <code>pandas.Period</code> and <code>pandas.PeriodIndex</code>.
-</p>
 
-<section>
-  <h2>1 — Supported frequencies</h2>
-  <p>
-    A <code>Period</code> represents a single time span at a fixed frequency.
-    tsb supports eight frequencies:
-  </p>
-  <table>
-    <tr><th>Code</th><th>Alias</th><th>Description</th><th>Example string</th></tr>
-    <tr><td><code>"A"</code></td><td><code>"Y"</code></td><td>Calendar year</td><td><code>2024</code></td></tr>
-    <tr><td><code>"Q"</code></td><td>—</td><td>Calendar quarter</td><td><code>2024Q2</code></td></tr>
-    <tr><td><code>"M"</code></td><td>—</td><td>Calendar month</td><td><code>2024-03</code></td></tr>
-    <tr><td><code>"W"</code></td><td>—</td><td>ISO week (Mon–Sun)</td><td><code>2024-01-01/2024-01-07</code></td></tr>
-    <tr><td><code>"D"</code></td><td>—</td><td>Day</td><td><code>2024-01-15</code></td></tr>
-    <tr><td><code>"H"</code></td><td>—</td><td>Hour</td><td><code>2024-01-15 14:00</code></td></tr>
-    <tr><td><code>"T"</code></td><td><code>"min"</code></td><td>Minute</td><td><code>2024-01-15 14:35</code></td></tr>
-    <tr><td><code>"S"</code></td><td>—</td><td>Second</td><td><code>2024-01-15 14:35:42</code></td></tr>
-  </table>
-</section>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-<section>
-  <h2>2 — Creating periods</h2>
-  <p>Create periods from dates, strings, or directly from ordinals:</p>
-  <pre><code id="ex2-code">import { Period } from "tsb";
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Period &amp; PeriodIndex</h1>
+  <p class="subtitle">Fixed-frequency time spans — mirrors
+  <code>pandas.Period</code> and <code>pandas.PeriodIndex</code>.</p>
+
+  <div class="section">
+    <h2>2 — Creating periods</h2>
+      <p>Create periods from dates, strings, or directly from ordinals:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
 
 // From a Date object
 const m = Period.fromDate(new Date("2024-03-15T00:00:00Z"), "M");
@@ -68,18 +178,25 @@ console.log(q.startTime.toISOString()); // "2024-07-01T00:00:00.000Z"
 
 // Direct construction from ordinal
 const p = new Period(54, "M");   // 54 months after Jan 1970 = July 2024
-console.log(p.toString());       // "2024-07"
-</code></pre>
-  <div id="ex2-output" class="output">Run to see output</div>
-</section>
+console.log(p.toString());       // "2024-07"</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>3 — Period arithmetic</h2>
-  <p>
-    Periods support shift (<code>add</code>), difference (<code>diff</code>),
-    and comparison. Arithmetic is always within the same frequency.
-  </p>
-  <pre><code id="ex3-code">import { Period } from "tsb";
+  <div class="section">
+    <h2>3 — Period arithmetic</h2>
+      <p>Periods support shift (<code>add</code>), difference (<code>diff</code>),
+    and comparison. Arithmetic is always within the same frequency.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
 
 const jan = Period.fromDate(new Date("2024-01-01T00:00:00Z"), "M");
 const apr = jan.add(3);
@@ -89,26 +206,33 @@ const dec = Period.fromDate(new Date("2024-12-01T00:00:00Z"), "M");
 console.log(dec.diff(jan));     // 11  (months between)
 
 // Comparison
-console.log(jan.compareTo(dec) < 0);  // true  (jan is earlier)
+console.log(jan.compareTo(dec) &lt; 0);  // true  (jan is earlier)
 console.log(jan.equals(jan.add(0)));  // true
 
 // contains: does a Date fall within a Period?
 const march15 = new Date("2024-03-15T00:00:00Z");
 const march = Period.fromDate(march15, "M");
 console.log(march.contains(march15));   // true
-console.log(march.contains(new Date("2024-04-01T00:00:00Z"))); // false
-</code></pre>
-  <div id="ex3-output" class="output">Run to see output</div>
-</section>
+console.log(march.contains(new Date("2024-04-01T00:00:00Z"))); // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>4 — Frequency conversion with asfreq</h2>
-  <p>
-    <code>asfreq()</code> converts a period to a different frequency.
+  <div class="section">
+    <h2>4 — Frequency conversion with asfreq</h2>
+      <p><code>asfreq()</code> converts a period to a different frequency.
     The <code>how</code> parameter picks the start or end of the current period
-    as the anchor point.
-  </p>
-  <pre><code id="ex4-code">import { Period } from "tsb";
+    as the anchor point.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
 
 const q2 = Period.fromString("2024Q2", "Q");
 
@@ -121,18 +245,25 @@ console.log(q2.asfreq("M", "end").toString());    // "2024-06"
 // Going coarser: month → year
 const aug = Period.fromString("2024-08", "M");
 console.log(aug.asfreq("A").toString());           // "2024"
-console.log(aug.asfreq("Q").toString());           // "2024Q3"
-</code></pre>
-  <div id="ex4-output" class="output">Run to see output</div>
-</section>
+console.log(aug.asfreq("Q").toString());           // "2024Q3"</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>5 — PeriodIndex: building ranges</h2>
-  <p>
-    A <code>PeriodIndex</code> is an ordered sequence of periods at a uniform
-    frequency, suitable for use as a row index.
-  </p>
-  <pre><code id="ex5-code">import { Period, PeriodIndex } from "tsb";
+  <div class="section">
+    <h2>5 — PeriodIndex: building ranges</h2>
+      <p>A <code>PeriodIndex</code> is an ordered sequence of periods at a uniform
+    frequency, suitable for use as a row index.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
 
 // All four quarters of 2024
 const start = Period.fromDate(new Date("2024-01-01T00:00:00Z"), "Q");
@@ -153,14 +284,23 @@ console.log(months.at(11).toString()); // "2024-12"
 // Iteration
 for (const q of quarters) {
   console.log(q.toString());
-}
-</code></pre>
-  <div id="ex5-output" class="output">Run to see output</div>
-</section>
+}</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>6 — PeriodIndex: lookup and transformation</h2>
-  <pre><code id="ex6-code">import { Period, PeriodIndex } from "tsb";
+  <div class="section">
+    <h2>6 — PeriodIndex: lookup and transformation</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
 
 const idx = PeriodIndex.periodRange(
   Period.fromDate(new Date("2024-01-01T00:00:00Z"), "M"),
@@ -185,18 +325,25 @@ console.log(asQtr.unique().size);    // 2 (Q1 and Q2)
 
 // Get Date arrays
 const starts = idx.toDatetimeStart();
-console.log(starts[0]?.toISOString()); // "2024-01-01T00:00:00.000Z"
-</code></pre>
-  <div id="ex6-output" class="output">Run to see output</div>
-</section>
+console.log(starts[0]?.toISOString()); // "2024-01-01T00:00:00.000Z"</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>7 — Weekly periods</h2>
-  <p>
-    Weekly periods span Monday–Sunday. The string representation shows the
-    full range: <code>YYYY-MM-DD/YYYY-MM-DD</code>.
-  </p>
-  <pre><code id="ex7-code">import { Period, PeriodIndex } from "tsb";
+  <div class="section">
+    <h2>7 — Weekly periods</h2>
+      <p>Weekly periods span Monday–Sunday. The string representation shows the
+    full range: <code>YYYY-MM-DD/YYYY-MM-DD</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
 
 // 1970-01-01 is a Thursday — it belongs to week 0 (Mon 1969-12-29 → Sun 1970-01-04)
 const w0 = Period.fromDate(new Date("1970-01-01T00:00:00Z"), "W");
@@ -212,14 +359,23 @@ const fourWeeks = PeriodIndex.periodRange(
 );
 for (const w of fourWeeks) {
   console.log(w.toString());
-}
-</code></pre>
-  <div id="ex7-output" class="output">Run to see output</div>
-</section>
+}</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>8 — Sub-daily periods</h2>
-  <pre><code id="ex8-code">import { Period } from "tsb";
+  <div class="section">
+    <h2>8 — Sub-daily periods</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
 
 // Hourly
 const h = Period.fromDate(new Date("2024-03-15T14:35:00Z"), "H");
@@ -234,20 +390,19 @@ console.log(t.freq);         // "T"
 // Secondly
 const s = Period.fromDate(new Date("2024-03-15T14:35:42.500Z"), "S");
 console.log(s.toString());   // "2024-03-15 14:35:42"
-console.log(s.durationMs);  // 1_000
-</code></pre>
-  <div id="ex8-output" class="output">Run to see output</div>
-</section>
+console.log(s.durationMs);  // 1_000</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    if (typeof window.runTsbExample === "function") {
-      ["ex2", "ex3", "ex4", "ex5", "ex6", "ex7", "ex8"].forEach((id) => {
-        const code = document.getElementById(`${id}-code`)?.textContent ?? "";
-        window.runTsbExample(code, `${id}-output`);
-      });
-    }
-  });
-</script>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

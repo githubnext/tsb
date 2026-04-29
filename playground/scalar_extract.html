@@ -1,50 +1,214 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>scalar_extract — tsb playground</title>
-    <style>
-      body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
-      h1 { font-size: 1.6rem; }
-      h2 { font-size: 1.2rem; margin-top: 2rem; }
-      pre { background: #f6f8fa; border-radius: 6px; padding: 1rem; overflow-x: auto; }
-      code { font-family: monospace; }
-      .label { color: #555; font-size: 0.85rem; }
-      .back { display: inline-block; margin-bottom: 1rem; color: #0969da; text-decoration: none; }
-      .back:hover { text-decoration: underline; }
-    </style>
-  </head>
-  <body>
-    <a class="back" href="index.html">← Back to playground index</a>
-    <h1>scalar_extract — squeeze / item / bool / first_valid_index / last_valid_index</h1>
-    <p>
-      Utilities to extract scalar values from Series and DataFrames.
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — scalar_extract — tsb playground</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>scalar_extract — tsb playground</h1>
+  <p class="subtitle">Utilities to extract scalar values from Series and DataFrames.
       Mirrors <code>pandas.Series.squeeze()</code>, <code>Series.item()</code>,
       <code>Series.bool()</code>, <code>Series.first_valid_index()</code>,
-      <code>Series.last_valid_index()</code>, and their DataFrame equivalents.
-    </p>
+      <code>Series.last_valid_index()</code>, and their DataFrame equivalents.</p>
 
+  <div class="section">
     <h2>squeezeSeries — extract scalar from a single-element Series</h2>
-    <p class="label">Python pandas equivalent:</p>
-    <pre><code>import pandas as pd
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
 s = pd.Series([42])
 print(s.squeeze())    # 42
 
 s2 = pd.Series([1, 2, 3])
-print(s2.squeeze())   # Series unchanged
-</code></pre>
-    <p class="label">tsb equivalent:</p>
-    <pre><code>import { Series, squeezeSeries } from "tsb";
+print(s2.squeeze())   # Series unchanged</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>squeezeSeries — extract scalar from a single-element Series</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, squeezeSeries } from "tsb";
 
 squeezeSeries(new Series({ data: [42] }));     // 42
-squeezeSeries(new Series({ data: [1, 2, 3] })); // Series([1, 2, 3])
-</code></pre>
+squeezeSeries(new Series({ data: [1, 2, 3] })); // Series([1, 2, 3])</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>squeezeDataFrame — squeeze 1-D axis objects</h2>
-    <p class="label">Python pandas equivalent:</p>
-    <pre><code>import pandas as pd
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
 df1x1 = pd.DataFrame({"A": [10]})
 print(df1x1.squeeze())          # 10 (scalar)
@@ -54,10 +218,24 @@ print(df1xN.squeeze())          # Series indexed by column names
 
 dfNx1 = pd.DataFrame({"A": [1, 2, 3]})
 print(dfNx1.squeeze())          # Series indexed by row labels
-print(dfNx1.squeeze(axis=1))    # same as above
-</code></pre>
-    <p class="label">tsb equivalent:</p>
-    <pre><code>import { DataFrame, squeezeDataFrame } from "tsb";
+print(dfNx1.squeeze(axis=1))    # same as above</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>squeezeDataFrame — squeeze 1-D axis objects</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, squeezeDataFrame } from "tsb";
 
 // 1×1 → scalar
 squeezeDataFrame(DataFrame.fromColumns({ A: [10] }));          // 10
@@ -69,46 +247,110 @@ squeezeDataFrame(DataFrame.fromColumns({ A: [1], B: [2] }));   // Series([1, 2])
 squeezeDataFrame(DataFrame.fromColumns({ A: [1, 2, 3] }));     // Series([1, 2, 3])
 
 // axis=1: force squeeze along columns axis
-squeezeDataFrame(DataFrame.fromColumns({ A: [1, 2, 3] }), 1);  // Series([1, 2, 3])
-</code></pre>
+squeezeDataFrame(DataFrame.fromColumns({ A: [1, 2, 3] }), 1);  // Series([1, 2, 3])</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>itemSeries — return the single element of a Series</h2>
-    <p class="label">Python pandas equivalent:</p>
-    <pre><code>import pandas as pd
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
 s = pd.Series([7])
 print(s.item())   # 7
 
 s2 = pd.Series([1, 2])
-s2.item()  # ValueError
-</code></pre>
-    <p class="label">tsb equivalent:</p>
-    <pre><code>import { Series, itemSeries } from "tsb";
+s2.item()  # ValueError</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>itemSeries — return the single element of a Series</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, itemSeries } from "tsb";
 
 itemSeries(new Series({ data: [7] }));       // 7
-itemSeries(new Series({ data: [1, 2] }));    // throws RangeError
-</code></pre>
+itemSeries(new Series({ data: [1, 2] }));    // throws RangeError</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>boolSeries / boolDataFrame — convert to boolean</h2>
-    <p class="label">Python pandas equivalent:</p>
-    <pre><code>import pandas as pd
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
 pd.Series([1]).bool()     # True
 pd.Series([0]).bool()     # False
-pd.DataFrame({"A": [1]}).bool()  # True
-</code></pre>
-    <p class="label">tsb equivalent:</p>
-    <pre><code>import { Series, DataFrame, boolSeries, boolDataFrame } from "tsb";
+pd.DataFrame({"A": [1]}).bool()  # True</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>boolSeries / boolDataFrame — convert to boolean</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, DataFrame, boolSeries, boolDataFrame } from "tsb";
 
 boolSeries(new Series({ data: [1] }));               // true
 boolSeries(new Series({ data: [0] }));               // false
 boolDataFrame(DataFrame.fromColumns({ A: [1] }));    // true
-boolDataFrame(DataFrame.fromColumns({ A: [false] })); // false
-</code></pre>
+boolDataFrame(DataFrame.fromColumns({ A: [false] })); // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>firstValidIndex / lastValidIndex — find first/last non-NA label</h2>
-    <p class="label">Python pandas equivalent:</p>
-    <pre><code>import pandas as pd
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 import numpy as np
 
 s = pd.Series([None, np.nan, 3.0, 4.0], index=["a", "b", "c", "d"])
@@ -116,41 +358,89 @@ print(s.first_valid_index())  # "a" ... wait: "c"
 print(s.last_valid_index())   # "d"
 
 s_all_na = pd.Series([None, None])
-print(s_all_na.first_valid_index())  # None
-</code></pre>
-    <p class="label">tsb equivalent:</p>
-    <pre><code>import { Series, firstValidIndex, lastValidIndex } from "tsb";
+print(s_all_na.first_valid_index())  # None</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>firstValidIndex / lastValidIndex — find first/last non-NA label</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, firstValidIndex, lastValidIndex } from "tsb";
 
 const s = new Series({ data: [null, NaN, 3, 4], index: ["a", "b", "c", "d"] });
 firstValidIndex(s);   // "c"
 lastValidIndex(s);    // "d"
 
 const allNA = new Series({ data: [null, null] });
-firstValidIndex(allNA);  // null
-</code></pre>
+firstValidIndex(allNA);  // null</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>dataFrameFirstValidIndex / dataFrameLastValidIndex</h2>
-    <p class="label">Python pandas equivalent:</p>
-    <pre><code>import pandas as pd
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 import numpy as np
 
 df = pd.DataFrame({"A": [None, None, 1], "B": [None, 2, 3]})
 print(df.first_valid_index())  # 1  (row 1 has B=2)
-print(df.last_valid_index())   # 2  (row 2 has A=1, B=3)
-</code></pre>
-    <p class="label">tsb equivalent:</p>
-    <pre><code>import { DataFrame, dataFrameFirstValidIndex, dataFrameLastValidIndex } from "tsb";
+print(df.last_valid_index())   # 2  (row 2 has A=1, B=3)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>dataFrameFirstValidIndex / dataFrameLastValidIndex</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameFirstValidIndex, dataFrameLastValidIndex } from "tsb";
 
 const df = DataFrame.fromColumns({
   A: [null, null, 1],
   B: [null, 2, 3],
 });
 dataFrameFirstValidIndex(df);  // 1
-dataFrameLastValidIndex(df);   // 2
-</code></pre>
+dataFrameLastValidIndex(df);   // 2</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <footer style="margin-top: 3rem; color: #777; font-size: 0.85rem;">
-      <p>🤖 Generated by <a href="https://github.com/githubnext/autoloop">Autoloop</a>.</p>
-    </footer>
-  </body>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

@@ -1,41 +1,192 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — nunique / any / all</title>
-    <style>
-      body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
-      h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
-      h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 0.25rem; }
-      pre { background: #f5f5f5; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }
-      .result { background: #e8f5e9; padding: 0.75rem 1rem; border-left: 4px solid #4caf50; margin: 0.5rem 0; border-radius: 0 6px 6px 0; }
-      .note { background: #fff3e0; padding: 0.5rem 1rem; border-left: 4px solid #ff9800; margin: 0.5rem 0; border-radius: 0 6px 6px 0; font-size: 0.9rem; }
-      a { color: #1565c0; }
-      code { font-family: monospace; background: #f0f0f0; padding: 0.1em 0.3em; border-radius: 3px; }
-    </style>
-  </head>
-  <body>
-    <h1>tsb — <code>nunique</code> / <code>any</code> / <code>all</code></h1>
-    <p>
-      Reduction operations that summarise a Series or DataFrame column/row into a scalar or
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — nunique / any / all</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>nunique / any / all</h1>
+  <p class="subtitle">Reduction operations that summarise a Series or DataFrame column/row into a scalar or
       boolean result — mirroring
       <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.nunique.html">pandas.Series.nunique</a>,
       <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.any.html">DataFrame.any</a>,
       and
-      <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.all.html">DataFrame.all</a>.
-    </p>
+      <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.all.html">DataFrame.all</a>.</p>
 
+  <div class="section">
     <h2>nuniqueSeries — count distinct values</h2>
-    <pre><code>import { Series, nuniqueSeries } from "tsb";
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, nuniqueSeries } from "tsb";
 
 const s = new Series([1, 2, 2, null, 3]);
 nuniqueSeries(s);                    // 3   (null excluded by default)
-nuniqueSeries(s, { dropna: false }); // 4   (null counted as a distinct value)</code></pre>
-    <div class="result" id="out-nunique-series"></div>
+nuniqueSeries(s, { dropna: false }); // 4   (null counted as a distinct value)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>nunique — count distinct per column (axis=0, default)</h2>
-    <pre><code>import { DataFrame, nunique } from "tsb";
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, nunique } from "tsb";
 
 const df = DataFrame.fromColumns({
   brand:  ["apple", "banana", "apple", "cherry"],
@@ -43,16 +194,40 @@ const df = DataFrame.fromColumns({
   flag:   [true, false, true, null],
 });
 nunique(df);
-// Series { brand: 3, rating: 3, flag: 2 }</code></pre>
-    <div class="result" id="out-nunique-col"></div>
+// Series { brand: 3, rating: 3, flag: 2 }</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>nunique — count distinct per row (axis=1)</h2>
-    <pre><code>nunique(df, { axis: 1 });
-// Series [3, 3, 3, 3]  — each row has 3 distinct values</code></pre>
-    <div class="result" id="out-nunique-row"></div>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">nunique(df, { axis: 1 });
+// Series [3, 3, 3, 3]  — each row has 3 distinct values</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>anySeries / allSeries</h2>
-    <pre><code>import { Series, anySeries, allSeries } from "tsb";
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, anySeries, allSeries } from "tsb";
 
 const flags = new Series([false, false, true]);
 anySeries(flags);  // true  — at least one truthy
@@ -64,11 +239,23 @@ allSeries(ones);   // true  — all truthy
 // skipna option
 const withNull = new Series([1, null, 2]);
 allSeries(withNull);                   // true  (null skipped)
-allSeries(withNull, { skipna: false }); // false (null is falsy)</code></pre>
-    <div class="result" id="out-bool-series"></div>
+allSeries(withNull, { skipna: false }); // false (null is falsy)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>anyDataFrame / allDataFrame</h2>
-    <pre><code>import { DataFrame, anyDataFrame, allDataFrame } from "tsb";
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, anyDataFrame, allDataFrame } from "tsb";
 
 const df2 = DataFrame.fromColumns({
   a: [0, 0, 1],
@@ -84,45 +271,42 @@ allDataFrame(df2);
 
 // axis=1: reduce across columns → one boolean per row
 anyDataFrame(df2, { axis: 1 });
-// Series [true, true, true]  (row 0: 0,1,0 → any=true via b)</code></pre>
-    <div class="result" id="out-bool-df"></div>
+// Series [true, true, true]  (row 0: 0,1,0 → any=true via b)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>boolOnly option</h2>
-    <pre><code>const mixed = DataFrame.fromColumns({
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const mixed = DataFrame.fromColumns({
   nums: [1, 2, 3],
   flag: [true, false, true],
 });
 
 // Only consider boolean columns
 anyDataFrame(mixed, { boolOnly: true });
-// Series { flag: true }   — 'nums' column excluded</code></pre>
-    <div class="result" id="out-bool-only"></div>
-
-    <div class="note">
-      <strong>Pandas parity note:</strong>
-      <code>nunique</code>, <code>any</code>, and <code>all</code> follow pandas' default
-      behaviour: missing values (<code>null</code>, <code>undefined</code>, <code>NaN</code>)
-      are excluded by default (<code>dropna/skipna = true</code>). Use
-      <code>{ dropna: false }</code> or <code>{ skipna: false }</code> to include them.
+// Series { flag: true }   — 'nums' column excluded</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
+  </div>
 
-    <p><a href="index.html">← Back to playground index</a></p>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    <script type="module">
-      // Live demo using tsb built from source
-      // (requires `bun build` output; shown as static examples below)
-      const results = {
-        "out-nunique-series": "nuniqueSeries([1,2,2,null,3]) = 3 | dropna:false = 4",
-        "out-nunique-col":    "nunique(df, axis=0) = Series { brand:3, rating:3, flag:2 }",
-        "out-nunique-row":    "nunique(df, axis=1) = Series [3, 3, 3, 3]",
-        "out-bool-series":    "anySeries([false,false,true]) = true | allSeries = false | allSeries([1,2,3]) = true",
-        "out-bool-df":        "anyDataFrame = {a:true,b:true,c:false} | allDataFrame = {a:false,b:true,c:false}",
-        "out-bool-only":      "anyDataFrame(mixed, {boolOnly:true}) = Series { flag: true }",
-      };
-      for (const [id, text] of Object.entries(results)) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = "▶ " + text;
-      }
-    </script>
-  </body>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

@@ -39,16 +39,14 @@
       padding: 0.1rem 0.4rem;
     }
     .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
     #playground-loading {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(13, 17, 23, 0.92);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      gap: 1rem;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
     }
     .spinner {
       width: 40px; height: 40px;
@@ -58,77 +56,117 @@
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .card {
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
     }
-    textarea {
-      width: 100%;
-      min-height: 140px;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      background: var(--bg);
-      color: var(--text);
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
       border: 1px solid var(--border);
       border-radius: 0.35rem;
-      padding: 0.75rem;
-      resize: vertical;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
     }
-    button {
-      background: var(--accent);
-      color: #0d1117;
-      border: none;
-      border-radius: 0.35rem;
-      padding: 0.5rem 1.25rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 0.75rem;
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
     }
-    button:hover { opacity: 0.85; }
-    .output {
-      margin-top: 0.75rem;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      white-space: pre-wrap;
-      background: var(--bg);
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
       border: 1px solid var(--border);
-      border-radius: 0.35rem;
-      padding: 0.75rem;
-      min-height: 3rem;
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
     }
-    .output.error { color: var(--red); }
-    .output.ok { color: var(--green); }
-    table { border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem; }
-    th, td { border: 1px solid var(--border); padding: 0.3rem 0.75rem; }
-    th { background: var(--surface); color: var(--accent); }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<div id="playground-loading">
-  <div class="spinner"></div>
-  <span>Loading tsb runtime…</span>
-</div>
 
-<a class="back" href="index.html">← back to index</a>
-<h1>🏷️ Categorical Ops</h1>
-<p>
-  Standalone categorical utility functions that complement the <code>Series.cat</code> accessor.
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Categorical Ops</h1>
+  <p class="subtitle">Standalone categorical utility functions that complement the <code>Series.cat</code> accessor.
   Mirrors <code>pd.Categorical.from_codes</code>, set operations on categories, frequency helpers,
-  and cross-tabulation.
-</p>
+  and cross-tabulation.</p>
 
-<!-- ── catFromCodes ─────────────────────────────────────────────────── -->
-<div class="card">
-  <h2><code>catFromCodes(codes, categories, opts?)</code></h2>
-  <p>
-    Construct a categorical Series from integer codes (0-based) and a categories array.
+  <div class="section">
+    <h2>catFromCodes(codes, categories, opts?)</h2>
+      <p>Construct a categorical Series from integer codes (0-based) and a categories array.
     Code <code>-1</code> maps to <code>null</code> (missing). Mirrors
-    <code>pd.Categorical.from_codes</code>.
-  </p>
-  <textarea id="code-from-codes">const { catFromCodes } = tsb;
+    <code>pd.Categorical.from_codes</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { catFromCodes } from "tsb";
 
 // Build a categorical from codes + category list
 const s = catFromCodes([0, 2, 1, -1, 0], ["red", "green", "blue"]);
@@ -140,21 +178,26 @@ console.log("ordered:", s.cat.ordered);
 const grade = catFromCodes([2, 0, 1, 2], ["F", "C", "A"], { ordered: true, name: "grade" });
 console.log("grade values:", grade.toArray());
 console.log("grade ordered:", grade.cat.ordered);
-console.log("grade codes back:", grade.cat.codes.toArray());
-</textarea>
-  <button onclick="run('code-from-codes','out-from-codes')">▶ Run</button>
-  <div class="output" id="out-from-codes"></div>
-</div>
+console.log("grade codes back:", grade.cat.codes.toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── Category set operations ──────────────────────────────────────── -->
-<div class="card">
-  <h2>Category set operations</h2>
-  <p>
-    <code>catUnionCategories</code>, <code>catIntersectCategories</code>,
+  <div class="section">
+    <h2>Category set operations</h2>
+      <p><code>catUnionCategories</code>, <code>catIntersectCategories</code>,
     <code>catDiffCategories</code>, and <code>catEqualCategories</code> let you
-    combine or compare the category sets of two Series.
-  </p>
-  <textarea id="code-set-ops">const { Series, catUnionCategories, catIntersectCategories, catDiffCategories, catEqualCategories } = tsb;
+    combine or compare the category sets of two Series.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, catUnionCategories, catIntersectCategories, catDiffCategories, catEqualCategories } from "tsb";
 
 const a = new Series({ data: ["x", "y", "z"] }).cat.setCategories(["x", "y", "z"]);
 const b = new Series({ data: ["y", "z", "w"] }).cat.setCategories(["y", "z", "w"]);
@@ -172,20 +215,25 @@ console.log("diff vals:", diff.toArray());                   // x null null
 
 console.log("equal?", catEqualCategories(a, b));             // false
 const c = new Series({ data: [] }).cat.setCategories(["z", "x", "y"]);
-console.log("equal (diff order)?", catEqualCategories(a, c)); // true
-</textarea>
-  <button onclick="run('code-set-ops','out-set-ops')">▶ Run</button>
-  <div class="output" id="out-set-ops"></div>
-</div>
+console.log("equal (diff order)?", catEqualCategories(a, c)); // true</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── catSortByFreq ────────────────────────────────────────────────── -->
-<div class="card">
-  <h2><code>catSortByFreq(series, opts?)</code></h2>
-  <p>
-    Reorder categories by their frequency in the data (most frequent first by default).
-    Mirrors <code>s.cat.reorder_categories(s.value_counts().index)</code>.
-  </p>
-  <textarea id="code-sort-freq">const { Series, catSortByFreq } = tsb;
+  <div class="section">
+    <h2>catSortByFreq(series, opts?)</h2>
+      <p>Reorder categories by their frequency in the data (most frequent first by default).
+    Mirrors <code>s.cat.reorder_categories(s.value_counts().index)</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, catSortByFreq } from "tsb";
 
 const s = new Series({ data: ["b", "a", "b", "c", "b", "a"] })
   .cat.setCategories(["a", "b", "c"]);
@@ -196,40 +244,50 @@ console.log("categories (most frequent first):", sorted.cat.categories.values);
 
 const asc = catSortByFreq(s, { ascending: true });
 console.log("categories (rarest first):", asc.cat.categories.values);
-// → ["c", "a", "b"]
-</textarea>
-  <button onclick="run('code-sort-freq','out-sort-freq')">▶ Run</button>
-  <div class="output" id="out-sort-freq"></div>
-</div>
+// → ["c", "a", "b"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── catToOrdinal ─────────────────────────────────────────────────── -->
-<div class="card">
-  <h2><code>catToOrdinal(series, order)</code></h2>
-  <p>
-    Create an ordered categorical from a Series using <code>order</code> to define both the
-    category set and their rank.  Values not in <code>order</code> become <code>null</code>.
-  </p>
-  <textarea id="code-to-ordinal">const { Series, catToOrdinal } = tsb;
+  <div class="section">
+    <h2>catToOrdinal(series, order)</h2>
+      <p>Create an ordered categorical from a Series using <code>order</code> to define both the
+    category set and their rank.  Values not in <code>order</code> become <code>null</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, catToOrdinal } from "tsb";
 
 const s = new Series({ data: ["med", "low", "high", "med", "extreme"] });
 const ord = catToOrdinal(s, ["low", "med", "high"]);
 
 console.log("values:", ord.toArray());         // med low high med null
 console.log("ordered:", ord.cat.ordered);      // true
-console.log("categories:", ord.cat.categories.values); // low med high
-</textarea>
-  <button onclick="run('code-to-ordinal','out-to-ordinal')">▶ Run</button>
-  <div class="output" id="out-to-ordinal"></div>
-</div>
+console.log("categories:", ord.cat.categories.values); // low med high</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── catFreqTable ─────────────────────────────────────────────────── -->
-<div class="card">
-  <h2><code>catFreqTable(series)</code></h2>
-  <p>
-    Return a plain <code>Record&lt;string, number&gt;</code> of counts per category.
-    Zero-frequency categories are included.
-  </p>
-  <textarea id="code-freq-table">const { Series, catFreqTable } = tsb;
+  <div class="section">
+    <h2>catFreqTable(series)</h2>
+      <p>Return a plain <code>Record&lt;string, number&gt;</code> of counts per category.
+    Zero-frequency categories are included.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, catFreqTable } from "tsb";
 
 const s = new Series({ data: ["b", "a", "b", null] })
   .cat.setCategories(["a", "b", "c"]);
@@ -239,22 +297,27 @@ console.log("frequency table:", table);
 // { a: 1, b: 2, c: 0 }
 
 // Sum equals non-null count
-const total = Object.values(table).reduce((sum, n) => sum + n, 0);
-console.log("total (non-null):", total); // 3
-</textarea>
-  <button onclick="run('code-freq-table','out-freq-table')">▶ Run</button>
-  <div class="output" id="out-freq-table"></div>
-</div>
+const total = Object.values(table).reduce((sum, n) =&gt; sum + n, 0);
+console.log("total (non-null):", total); // 3</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── catCrossTab ──────────────────────────────────────────────────── -->
-<div class="card">
-  <h2><code>catCrossTab(a, b, opts?)</code></h2>
-  <p>
-    Cross-tabulation of two categorical Series. Rows = <code>a</code>'s categories,
+  <div class="section">
+    <h2>catCrossTab(a, b, opts?)</h2>
+      <p>Cross-tabulation of two categorical Series. Rows = <code>a</code>'s categories,
     columns = <code>b</code>'s categories, cells = co-occurrence counts.
-    Supports margins and normalization.
-  </p>
-  <textarea id="code-crosstab">const { Series, catCrossTab } = tsb;
+    Supports margins and normalization.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, catCrossTab } from "tsb";
 
 const gender = new Series({ data: ["M","F","M","F","M","F","M"] })
   .cat.setCategories(["M","F"]);
@@ -275,20 +338,25 @@ console.log("All col:", ctm.get("All").toArray());
 
 // Normalized
 const ctn = catCrossTab(gender, response, { normalize: true });
-console.log("\nNormalized Yes col:", ctn.get("Yes").toArray());
-</textarea>
-  <button onclick="run('code-crosstab','out-crosstab')">▶ Run</button>
-  <div class="output" id="out-crosstab"></div>
-</div>
+console.log("\nNormalized Yes col:", ctn.get("Yes").toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── catRecode ────────────────────────────────────────────────────── -->
-<div class="card">
-  <h2><code>catRecode(series, mapping)</code></h2>
-  <p>
-    Rename categories via an object map or a transform function. Unmapped categories
-    are left unchanged.
-  </p>
-  <textarea id="code-recode">const { Series, catRecode } = tsb;
+  <div class="section">
+    <h2>catRecode(series, mapping)</h2>
+      <p>Rename categories via an object map or a transform function. Unmapped categories
+    are left unchanged.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, catRecode } from "tsb";
 
 const s = new Series({ data: ["a", "b", "c"] }).cat.setCategories(["a", "b", "c"]);
 
@@ -298,41 +366,21 @@ console.log("via map:", r1.cat.categories.values);  // alpha beta c
 console.log("values:", r1.toArray());               // alpha beta c
 
 // Transform function
-const r2 = catRecode(s, (x) => x.toUpperCase());
+const r2 = catRecode(s, (x) =&gt; x.toUpperCase());
 console.log("via fn:", r2.cat.categories.values);   // A B C
-console.log("values:", r2.toArray());               // A B C
-</textarea>
-  <button onclick="run('code-recode','out-recode')">▶ Run</button>
-  <div class="output" id="out-recode"></div>
-</div>
+console.log("values:", r2.toArray());               // A B C</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<script src="playground-runtime.js"></script>
-<script>
-async function run(codeId, outId) {
-  const code = document.getElementById(codeId).value;
-  const out = document.getElementById(outId);
-  out.className = 'output';
-  out.textContent = '…';
-  try {
-    const lines = [];
-    const tsb = await getTsb();
-    const origLog = console.log;
-    console.log = (...args) => lines.push(args.map(v =>
-      typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v)
-    ).join(' '));
-    try {
-      const fn = new Function('tsb', code);
-      await fn(tsb);
-    } finally {
-      console.log = origLog;
-    }
-    out.textContent = lines.join('\n') || '(no output)';
-    out.classList.add('ok');
-  } catch (e) {
-    out.textContent = String(e);
-    out.classList.add('error');
-  }
-}
-</script>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

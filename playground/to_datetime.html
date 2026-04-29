@@ -1,61 +1,167 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — toDatetime</title>
-    <style>
-      body { font-family: system-ui, sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #222; }
-      h1 { font-size: 1.8rem; }
-      h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
-      pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; overflow: auto; font-size: 0.85rem; }
-      code { font-family: "SFMono-Regular", Consolas, monospace; }
-      .tag { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 1px 8px; font-size: 0.75rem; font-weight: bold; }
-      table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-      th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
-      th { background: #f6f8fa; }
-      textarea { width: 100%; font-family: monospace; font-size: 0.85rem; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
-      .output { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 12px; margin-top: 8px; min-height: 40px; white-space: pre; font-family: monospace; font-size: 0.85rem; }
-      button { background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; cursor: pointer; font-size: 0.9rem; margin-top: 8px; }
-      button:hover { background: #1d4ed8; }
-      a { color: #2563eb; }
-    </style>
-  </head>
-  <body>
-    <p><a href="index.html">← tsb playground</a></p>
-    <h1>toDatetime <span class="tag">stats</span></h1>
-    <p>
-      Convert scalars, arrays, or <code>Series</code> values to JavaScript
-      <code>Date</code> objects — mirroring
-      <a href="https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html"
-        ><code>pandas.to_datetime()</code></a
-      >.
-    </p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — toDatetime</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
 
-    <h2>Supported input formats</h2>
-    <table>
-      <tr><th>Format</th><th>Example</th><th>Result</th></tr>
-      <tr><td>ISO 8601 date</td><td><code>"2024-03-15"</code></td><td>Mar 15 2024</td></tr>
-      <tr><td>ISO 8601 datetime</td><td><code>"2024-03-15T12:00:00Z"</code></td><td>Mar 15 2024 12:00 UTC</td></tr>
-      <tr><td>US format (MM/DD/YYYY)</td><td><code>"01/15/2024"</code></td><td>Jan 15 2024</td></tr>
-      <tr><td>European (DD-MM-YYYY)</td><td><code>"15-03-2024"</code></td><td>Mar 15 2024</td></tr>
-      <tr><td>Compact (YYYYMMDD)</td><td><code>"20240315"</code></td><td>Mar 15 2024</td></tr>
-      <tr><td>Unix ms (number)</td><td><code>1710460800000</code></td><td>Mar 15 2024 00:00 UTC</td></tr>
-      <tr><td>Unix s (unit="s")</td><td><code>1710460800</code></td><td>Mar 15 2024 00:00 UTC</td></tr>
-      <tr><td>Date object</td><td><code>new Date(2024,2,15)</code></td><td>unchanged</td></tr>
-      <tr><td>null / undefined / NaN</td><td><code>null</code></td><td><code>null</code></td></tr>
-    </table>
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
 
-    <h2>Error handling</h2>
-    <table>
-      <tr><th>errors=</th><th>Behaviour</th></tr>
-      <tr><td><code>"raise"</code> (default)</td><td>Throws <code>TypeError</code> on unparseable input</td></tr>
-      <tr><td><code>"coerce"</code></td><td>Returns <code>null</code> on unparseable input</td></tr>
-      <tr><td><code>"ignore"</code></td><td>Returns the original value unchanged</td></tr>
-    </table>
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
 
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>toDatetime</h1>
+  <p class="subtitle"><a href="index.html">← tsb playground</a></p>
+
+  <div class="section">
     <h2>Quick examples</h2>
-    <pre><code>import { toDatetime, Series } from "tsb";
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { toDatetime, Series } from "tsb";
 
 // Scalar
 toDatetime("2024-03-15");         // Date: Mar 15 2024
@@ -67,15 +173,28 @@ toDatetime("nope", { errors: "ignore" }); // "nope"
 
 // Array
 toDatetime(["2024-01-01", null, "2024-06-15"]);
-// => [Date, null, Date]
+// =&gt; [Date, null, Date]
 
 // Series
 const s = new Series({ data: ["2024-01-01", "2024-06-15", null] });
 toDatetime(s);
-// => Series&lt;Date | null&gt; with dtype=datetime</code></pre>
+// =&gt; Series&lt;Date | null&gt; with dtype=datetime</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>Python / pandas equivalent</h2>
-    <textarea rows="10" readonly>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">
 import pandas as pd
 
 # Scalar (returns Timestamp or NaT)
@@ -90,29 +209,19 @@ pd.to_datetime(["2024-01-01", None, "2024-06-15"])
 
 # Series
 s = pd.Series(["2024-01-01", "2024-06-15", None])
-pd.to_datetime(s)
-    </textarea>
+pd.to_datetime(s)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <h2>Live demo</h2>
-    <p>Enter a date string or number and click <em>Convert</em>:</p>
-    <input id="inp" type="text" value="2024-03-15" style="width:100%;padding:8px;font-size:0.9rem;border:1px solid #ddd;border-radius:6px;" />
-    <button onclick="runDemo()">Convert</button>
-    <div class="output" id="out">—</div>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    <script type="module">
-      import { toDatetime, Series } from "https://esm.sh/tsb@0.0.1";
-
-      window.runDemo = function () {
-        const raw = document.getElementById("inp").value.trim();
-        const out = document.getElementById("out");
-        try {
-          const input = /^-?\d+$/.test(raw) ? Number(raw) : raw;
-          const result = toDatetime(input, { errors: "coerce" });
-          out.textContent = result === null ? "null" : result.toString();
-        } catch (e) {
-          out.textContent = "Error: " + e.message;
-        }
-      };
-    </script>
-  </body>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>
