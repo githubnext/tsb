@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-29T04:44:00Z |
-| Iteration Count | 294 |
+| Last Run | 2026-04-29T15:21:57Z |
+| Iteration Count | 295 |
 | Best Metric | 137 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -35,8 +35,8 @@
 
 ## 🎯 Current Priorities
 
-- ✅ Core + Stats + IO + Merge + Reshape + Window + GroupBy complete (iters 1–294)
-- ✅ 137 features on branch. Next: pd.Grouper, pd.api.types extensions, pd.util.hash_array()
+- ✅ Core + Stats + IO + Merge + Reshape + Window + GroupBy + Grouper complete (iters 1–295)
+- Next: `pd.api.types` extensions, `pd.util.hash_array()`, `DataFrame.items()`/`Series.items()`
 
 ---
 
@@ -63,7 +63,6 @@
 
 ## 🔭 Future Directions
 
-- `pd.Grouper` class — groupby helper
 - `pd.api.types` extensions — more type predicates
 - More string ops, `str.extractall()` late-binding
 - `pd.util.hash_array()` — hash an array of values
@@ -72,6 +71,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 295 — 2026-04-29 15:21 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25117554579)
+
+- **Status**: ⏳ pending-ci
+- **Change**: +Grouper — pd.Grouper spec object for groupby/resample
+- **Metric**: 137 (previous best: 136 on main, delta: +1)
+- **Commit**: 1e210b0
+- **Notes**: src/groupby/grouper.ts. Grouper(key, level, freq, sort, closed, label, base). parseFreq + binFloor helpers. binDate() for constant-ms freqs.
 
 ### Iteration 294 — 2026-04-29 04:44 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25091308179)
 
