@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-04-29T07:38:52Z |
-| Iteration Count | 297 |
-| Best Metric | 635 |
+| Last Run | 2026-04-29T19:22:43Z |
+| Iteration Count | 298 |
+| Best Metric | 636 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, accepted, error, error, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -68,6 +68,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 298 — 2026-04-29T19:22:43Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25129063173)
+
+- **Status**: ✅ Accepted · **Change**: Added benchmark pairs for `assign` (dataFrameAssign with callables), `pipe_apply` (pipe + seriesApply + dataFrameApplyMap), and `to_from_dict` (toDictOriented/fromDictOriented round-trip). **Metric**: 636 (previous best: 635, delta: +1). Commit db58c02.
 
 ### Iteration 297 — 2026-04-29T07:38:52Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25096656047)
 
