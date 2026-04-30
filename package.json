@@ -23,8 +23,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.1.14",
     "fast-check": "^3.22.0",
-    "@types/bun": "^1.1.14"
+    "playwright": "1.59.1"
   },
   "peerDependencies": {
     "typescript": "^5.7.0"
