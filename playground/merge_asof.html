@@ -1,48 +1,169 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — merge_asof (ordered nearest-key join)</title>
-    <style>
-      body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
-      h1 { color: #1a1a2e; }
-      h2 { color: #16213e; border-bottom: 2px solid #0f3460; padding-bottom: 0.25rem; }
-      pre { background: #f4f4f4; border-left: 4px solid #0f3460; padding: 1rem; overflow-x: auto; border-radius: 4px; }
-      code { font-family: 'Fira Code', monospace; font-size: 0.9em; }
-      .note { background: #e8f4fd; border: 1px solid #bee3f8; border-radius: 4px; padding: 0.75rem 1rem; margin: 1rem 0; }
-      table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-      th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
-      th { background: #f0f0f0; }
-      .back { display: inline-block; margin-bottom: 1rem; color: #0f3460; text-decoration: none; }
-      .back:hover { text-decoration: underline; }
-    </style>
-  </head>
-  <body>
-    <a class="back" href="index.html">← Back to tsb playground</a>
-    <h1>merge_asof — Ordered Nearest-Key Join</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — merge_asof (ordered nearest-key join)</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
 
-    <div class="note">
-      <strong>pandas equivalent:</strong> <code>pd.merge_asof(left, right, on="time")</code>
-    </div>
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
 
-    <p>
-      <code>mergeAsof</code> is an ordered left-join that matches on the <em>nearest key</em>
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>merge_asof (ordered nearest-key join)</h1>
+  <p class="subtitle"><code>mergeAsof</code> is an ordered left-join that matches on the <em>nearest key</em>
       rather than an exact key. It is especially useful for time-series data — e.g., matching
-      each trade to the most recent quote.
-    </p>
+      each trade to the most recent quote.</p>
 
-    <h2>Key concepts</h2>
-    <ul>
-      <li>Both DataFrames must be <strong>sorted ascending</strong> by the key column before calling <code>mergeAsof</code>.</li>
-      <li>The result always has the <strong>same number of rows as the left DataFrame</strong>.</li>
-      <li><code>direction</code>: controls whether to look <em>backward</em> (default), <em>forward</em>, or for the <em>nearest</em> key.</li>
-      <li><code>by</code>: require additional columns to match exactly before doing the asof lookup (e.g. by ticker).</li>
-      <li><code>tolerance</code>: ignore matches further than this numeric distance.</li>
-    </ul>
-
+  <div class="section">
     <h2>Basic example — backward (default)</h2>
-    <pre><code>import { DataFrame, mergeAsof } from "tsb";
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, mergeAsof } from "tsb";
 
 // Each trade is matched to the most recent quote (backward asof)
 const trades = DataFrame.fromColumns({
@@ -58,10 +179,23 @@ const result = mergeAsof(trades, quotes, { on: "time" });
 // time | price | bid
 //    1 |   100 | null   ← no quote ≤ 1
 //    5 |   200 |   98   ← most recent quote ≤ 5 is at time=2
-//   10 |   300 |  195   ← most recent quote ≤ 10 is at time=6</code></pre>
+//   10 |   300 |  195   ← most recent quote ≤ 10 is at time=6</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>Forward direction</h2>
-    <pre><code>// Match each event to the next scheduled announcement
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Match each event to the next scheduled announcement
 const events = DataFrame.fromColumns({ t: [1, 3, 7], v: [10, 30, 70] });
 const schedule = DataFrame.fromColumns({ t: [2, 6, 10], w: [20, 60, 100] });
 
@@ -69,17 +203,43 @@ const result = mergeAsof(events, schedule, {
   on: "t",
   direction: "forward",
 });
-// t=1 → t=2 (w=20), t=3 → t=6 (w=60), t=7 → t=10 (w=100)</code></pre>
+// t=1 → t=2 (w=20), t=3 → t=6 (w=60), t=7 → t=10 (w=100)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>Nearest direction</h2>
-    <pre><code>const result = mergeAsof(trades, quotes, {
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const result = mergeAsof(trades, quotes, {
   on: "time",
   direction: "nearest",
 });
-// Picks the quote with the smallest absolute time difference.</code></pre>
+// Picks the quote with the smallest absolute time difference.</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <h2>Grouping with <code>by</code></h2>
-    <pre><code>// Match trades to quotes within the same ticker symbol
+  <div class="section">
+    <h2>Grouping with by</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Match trades to quotes within the same ticker symbol
 const trades = DataFrame.fromColumns({
   time:   [1,    2,      3,    4],
   ticker: ["AAPL","MSFT","AAPL","MSFT"],
@@ -91,36 +251,74 @@ const quotes = DataFrame.fromColumns({
   bid:    [99,   198,    109,   208],
 });
 
-mergeAsof(trades, quotes, { on: "time", by: "ticker" });</code></pre>
+mergeAsof(trades, quotes, { on: "time", by: "ticker" });</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>Tolerance</h2>
-    <pre><code>// Only match if the key distance is ≤ 2
-mergeAsof(left, right, { on: "t", tolerance: 2 });</code></pre>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Only match if the key distance is ≤ 2
+mergeAsof(left, right, { on: "t", tolerance: 2 });</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>Different key column names (left_on / right_on)</h2>
-    <pre><code>mergeAsof(left, right, {
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">mergeAsof(left, right, {
   left_on: "trade_time",
   right_on: "quote_time",
-});</code></pre>
+});</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>Using index as key</h2>
-    <pre><code>mergeAsof(left, right, {
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">mergeAsof(left, right, {
   left_index: true,
   right_on: "timestamp",
-});</code></pre>
+});</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <h2>Options reference</h2>
-    <table>
-      <tr><th>Option</th><th>Default</th><th>Description</th></tr>
-      <tr><td><code>on</code></td><td>—</td><td>Shared key column name</td></tr>
-      <tr><td><code>left_on</code> / <code>right_on</code></td><td>—</td><td>Different key columns per side</td></tr>
-      <tr><td><code>left_index</code> / <code>right_index</code></td><td><code>false</code></td><td>Use index as key</td></tr>
-      <tr><td><code>by</code></td><td>—</td><td>Column(s) that must match exactly</td></tr>
-      <tr><td><code>left_by</code> / <code>right_by</code></td><td>—</td><td>Different by-columns per side</td></tr>
-      <tr><td><code>direction</code></td><td><code>"backward"</code></td><td><code>"backward"</code>, <code>"forward"</code>, or <code>"nearest"</code></td></tr>
-      <tr><td><code>tolerance</code></td><td><code>null</code></td><td>Max numeric key distance for a match</td></tr>
-      <tr><td><code>allow_exact_matches</code></td><td><code>true</code></td><td>Include exact key matches</td></tr>
-      <tr><td><code>suffixes</code></td><td><code>["_x","_y"]</code></td><td>Suffixes for overlapping column names</td></tr>
-    </table>
-  </body>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

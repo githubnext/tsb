@@ -4,31 +4,165 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — sample</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>sample</h1>
-<p class="subtitle">Random sampling from Series and DataFrame — mirrors <code>pandas.Series.sample()</code> and <code>pandas.DataFrame.sample()</code>.</p>
 
-<section>
-  <h2>1 — Basic Series sampling</h2>
-  <p><code>sampleSeries(s, { n })</code> returns a new Series with <em>n</em> randomly chosen elements. Pass <code>randomState</code> for reproducible results.</p>
-  <pre><code id="ex1-code">import { Series, sampleSeries } from "tsb";
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>sample</h1>
+  <p class="subtitle">Random sampling from Series and DataFrame — mirrors <code>pandas.Series.sample()</code> and <code>pandas.DataFrame.sample()</code>.</p>
+
+  <div class="section">
+    <h2>1 — Basic Series sampling</h2>
+      <p><code>sampleSeries(s, { n })</code> returns a new Series with <em>n</em> randomly chosen elements. Pass <code>randomState</code> for reproducible results.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, sampleSeries } from "tsb";
 
 const s = new Series({
   data: [10, 20, 30, 40, 50],
@@ -38,64 +172,100 @@ const s = new Series({
 // Sample 3 elements — same result every time with randomState
 const r = sampleSeries(s, { n: 3, randomState: 42 });
 console.log([...r.values]);         // 3 values from [10,20,30,40,50]
-console.log([...r.index.values]);   // corresponding labels
-</code></pre>
-  <div class="output" id="ex1-output">Loading…</div>
-</section>
+console.log([...r.index.values]);   // corresponding labels</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>2 — Sampling a fraction</h2>
-  <p>Instead of a fixed count, use <code>frac</code> to specify a proportion of the data (0–1).</p>
-  <pre><code id="ex2-code">import { Series, sampleSeries } from "tsb";
+  <div class="section">
+    <h2>2 — Sampling a fraction</h2>
+      <p>Instead of a fixed count, use <code>frac</code> to specify a proportion of the data (0–1).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, sampleSeries } from "tsb";
 
 const s = new Series({ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
 
 // Sample 40% of the data
 const r = sampleSeries(s, { frac: 0.4, randomState: 0 });
 console.log(r.size);        // 4  (= round(0.4 × 10))
-console.log([...r.values]); // 4 random values
-</code></pre>
-  <div class="output" id="ex2-output">Loading…</div>
-</section>
+console.log([...r.values]); // 4 random values</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>3 — Sampling with replacement</h2>
-  <p>Set <code>replace: true</code> to allow the same element to be selected more than once. This also lets you request more items than the Series contains.</p>
-  <pre><code id="ex3-code">import { Series, sampleSeries } from "tsb";
+  <div class="section">
+    <h2>3 — Sampling with replacement</h2>
+      <p>Set <code>replace: true</code> to allow the same element to be selected more than once. This also lets you request more items than the Series contains.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, sampleSeries } from "tsb";
 
 const s = new Series({ data: [1, 2, 3] });
 
 // 6 samples from a 3-element Series — duplicates allowed
 const r = sampleSeries(s, { n: 6, replace: true, randomState: 7 });
 console.log(r.size);        // 6
-console.log([...r.values]); // may contain repeated values, e.g. [3, 1, 3, 2, 1, 1]
-</code></pre>
-  <div class="output" id="ex3-output">Loading…</div>
-</section>
+console.log([...r.values]); // may contain repeated values, e.g. [3, 1, 3, 2, 1, 1]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>4 — Weighted sampling</h2>
-  <p>Provide a <code>weights</code> array to bias the random draw. Higher weight → higher probability of selection. Weights are normalised automatically.</p>
-  <pre><code id="ex4-code">import { Series, sampleSeries } from "tsb";
+  <div class="section">
+    <h2>4 — Weighted sampling</h2>
+      <p>Provide a <code>weights</code> array to bias the random draw. Higher weight → higher probability of selection. Weights are normalised automatically.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, sampleSeries } from "tsb";
 
 const s = new Series({ data: ["apple", "banana", "cherry"] });
 // cherry has 8× the weight of apple and 4× the weight of banana
 const weights = [1, 2, 8];
 
 const counts = { apple: 0, banana: 0, cherry: 0 };
-for (let seed = 0; seed < 200; seed++) {
+for (let seed = 0; seed &lt; 200; seed++) {
   const v = sampleSeries(s, { n: 1, weights, randomState: seed }).values[0];
   counts[v]++;
 }
-console.log(counts); // cherry ~145/200, banana ~36/200, apple ~18/200
-</code></pre>
-  <div class="output" id="ex4-output">Loading…</div>
-</section>
+console.log(counts); // cherry ~145/200, banana ~36/200, apple ~18/200</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>5 — ignoreIndex</h2>
-  <p>Set <code>ignoreIndex: true</code> to reset the result index to 0, 1, 2, … instead of preserving the original labels.</p>
-  <pre><code id="ex5-code">import { Series, sampleSeries } from "tsb";
+  <div class="section">
+    <h2>5 — ignoreIndex</h2>
+      <p>Set <code>ignoreIndex: true</code> to reset the result index to 0, 1, 2, … instead of preserving the original labels.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, sampleSeries } from "tsb";
 
 const s = new Series({
   data: [100, 200, 300],
@@ -106,15 +276,24 @@ const r = sampleSeries(s, { n: 2, randomState: 1 });
 console.log([...r.index.values]);   // e.g. ["z", "x"] — original labels
 
 const r2 = sampleSeries(s, { n: 2, randomState: 1, ignoreIndex: true });
-console.log([...r2.index.values]);  // [0, 1] — reset
-</code></pre>
-  <div class="output" id="ex5-output">Loading…</div>
-</section>
+console.log([...r2.index.values]);  // [0, 1] — reset</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>6 — DataFrame row sampling</h2>
-  <p><code>sampleDataFrame(df, { n })</code> returns a DataFrame with <em>n</em> randomly selected rows. Row integrity is preserved — all columns stay aligned.</p>
-  <pre><code id="ex6-code">import { DataFrame, sampleDataFrame } from "tsb";
+  <div class="section">
+    <h2>6 — DataFrame row sampling</h2>
+      <p><code>sampleDataFrame(df, { n })</code> returns a DataFrame with <em>n</em> randomly selected rows. Row integrity is preserved — all columns stay aligned.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, sampleDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   name:  ["Alice", "Bob", "Carol", "Dave", "Eve"],
@@ -124,15 +303,24 @@ const df = DataFrame.fromColumns({
 
 const sample = sampleDataFrame(df, { n: 3, randomState: 5 });
 console.log([...sample.col("name").values]);   // 3 names
-console.log([...sample.col("score").values]);  // corresponding scores
-</code></pre>
-  <div class="output" id="ex6-output">Loading…</div>
-</section>
+console.log([...sample.col("score").values]);  // corresponding scores</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>7 — DataFrame column sampling (axis=1)</h2>
-  <p>Set <code>axis: 1</code> to sample columns instead of rows. Useful for random feature selection.</p>
-  <pre><code id="ex7-code">import { DataFrame, sampleDataFrame } from "tsb";
+  <div class="section">
+    <h2>7 — DataFrame column sampling (axis=1)</h2>
+      <p>Set <code>axis: 1</code> to sample columns instead of rows. Useful for random feature selection.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, sampleDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [1, 2, 3],
@@ -143,45 +331,51 @@ const df = DataFrame.fromColumns({
 
 // Pick 2 random columns
 const r = sampleDataFrame(df, { n: 2, axis: 1, randomState: 3 });
-console.log([...r.columns.values]);  // e.g. ["b", "d"]
-</code></pre>
-  <div class="output" id="ex7-output">Loading…</div>
-</section>
+console.log([...r.columns.values]);  // e.g. ["b", "d"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>8 — Bootstrapping example</h2>
-  <p>Sampling with replacement is the foundation of <em>bootstrapping</em> — re-sampling your data to estimate statistics.</p>
-  <pre><code id="ex8-code">import { Series, sampleSeries } from "tsb";
+  <div class="section">
+    <h2>8 — Bootstrapping example</h2>
+      <p>Sampling with replacement is the foundation of <em>bootstrapping</em> — re-sampling your data to estimate statistics.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, sampleSeries } from "tsb";
 
 const data = new Series({ data: [2.1, 3.4, 5.5, 2.9, 4.2, 3.8, 5.1, 4.6, 3.3, 2.7] });
 const n = data.size;
 
 // 50 bootstrap means
 const means = [];
-for (let seed = 0; seed < 50; seed++) {
+for (let seed = 0; seed &lt; 50; seed++) {
   const boot = sampleSeries(data, { n, replace: true, randomState: seed });
-  const sum = (boot.values as number[]).reduce((a, b) => a + b, 0);
+  const sum = (boot.values as number[]).reduce((a, b) =&gt; a + b, 0);
   means.push(sum / n);
 }
-means.sort((a, b) => a - b);
+means.sort((a, b) =&gt; a - b);
 const lo = means[Math.floor(means.length * 0.025)].toFixed(2);
 const hi = means[Math.floor(means.length * 0.975)].toFixed(2);
-console.log(`Bootstrap 95% CI for mean: [${lo}, ${hi}]`);
-</code></pre>
-  <div class="output" id="ex8-output">Loading…</div>
-</section>
+console.log(`Bootstrap 95% CI for mean: [${lo}, ${hi}]`);</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<script>
-window.__tsb_examples = [
-  { id: "ex1", requires: ["sampleSeries", "Series"] },
-  { id: "ex2", requires: ["sampleSeries", "Series"] },
-  { id: "ex3", requires: ["sampleSeries", "Series"] },
-  { id: "ex4", requires: ["sampleSeries", "Series"] },
-  { id: "ex5", requires: ["sampleSeries", "Series"] },
-  { id: "ex6", requires: ["sampleDataFrame", "DataFrame"] },
-  { id: "ex7", requires: ["sampleDataFrame", "DataFrame"] },
-  { id: "ex8", requires: ["sampleSeries", "Series"] },
-];
-</script>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

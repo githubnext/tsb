@@ -3,26 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dot_matmul — dot product &amp; matrix multiply — tsb playground</title>
+  <title>tsb — dot_matmul — dot product &amp; matrix multiply — tsb playground</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { color: #1a56db; }
-    pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
-    .output { background: #e8f5e9; padding: 1rem; border-radius: 6px; white-space: pre; font-family: monospace; min-height: 4rem; }
-    button { background: #1a56db; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; margin: 0.2rem; }
-    button:hover { background: #1345b3; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <h1>dot_matmul — dot product &amp; matrix multiplication</h1>
-  <p>
-    Dot product and matrix multiplication for Series and DataFrame.
-    Mirrors <code>pandas.Series.dot()</code> and <code>pandas.DataFrame.dot()</code>.
-    Index alignment is performed automatically (inner join on shared labels).
-  </p>
 
-  <h2>API</h2>
-  <pre>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>dot_matmul — dot product &amp; matrix multiply — tsb playground</h1>
+  <p class="subtitle">Dot product and matrix multiplication for Series and DataFrame.
+    Mirrors <code>pandas.Series.dot()</code> and <code>pandas.DataFrame.dot()</code>.
+    Index alignment is performed automatically (inner join on shared labels).</p>
+
+  <div class="section">
+    <h2>API</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">
 import { seriesDotSeries, seriesDotDataFrame, dataFrameDotSeries, dataFrameDotDataFrame } from "tsb";
 
 // Series · Series → scalar
@@ -35,18 +176,23 @@ seriesDotDataFrame(s, df);
 dataFrameDotSeries(df, s);
 
 // DataFrame · DataFrame → DataFrame
-dataFrameDotDataFrame(A, B);
-  </pre>
+dataFrameDotDataFrame(A, B);</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Interactive Demo</h2>
-  <button onclick="runSeriesDot()">Series · Series</button>
-  <button onclick="runSeriesDotDf()">Series · DataFrame</button>
-  <button onclick="runDfDotSeries()">DataFrame · Series</button>
-  <button onclick="runMatMul()">Matrix multiply</button>
-  <div class="output" id="output">Click a button above to run an example.</div>
-
-  <h2>Examples</h2>
-  <pre>
+  <div class="section">
+    <h2>Examples</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">
 // Series dot product
 const a = new Series({ data: [1, 2, 3], index: ["x","y","z"] });
 const b = new Series({ data: [4, 5, 6], index: ["x","y","z"] });
@@ -60,62 +206,19 @@ dataFrameDotSeries(df, v).values; // [4, 6]  (row sums)
 // Matrix multiply
 const A = DataFrame.fromColumns({ k: [1, 2] });     // 2×1
 // ... B with row index ["k"] ...
-dataFrameDotDataFrame(A, B).col("r").values;         // [3, 6]
-  </pre>
+dataFrameDotDataFrame(A, B).col("r").values;         // [3, 6]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <script type="module">
-    import {
-      Series,
-      DataFrame,
-      seriesDotSeries,
-      seriesDotDataFrame,
-      dataFrameDotSeries,
-      dataFrameDotDataFrame,
-      Index,
-    } from "../src/index.ts";
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    const out = (msg) => { document.getElementById("output").textContent = msg; };
-
-    window.runSeriesDot = () => {
-      const a = new Series({ data: [1, 2, 3], index: ["x","y","z"] });
-      const b = new Series({ data: [4, 5, 6], index: ["x","y","z"] });
-      const result = seriesDotSeries(a, b);
-      out(`seriesDotSeries([1,2,3] · [4,5,6]) = ${result}\n(expected 32: 1×4 + 2×5 + 3×6)`);
-    };
-
-    window.runSeriesDotDf = () => {
-      const s = new Series({ data: [1, 2], index: [0, 1] });
-      const df = DataFrame.fromColumns({ a: [1, 3], b: [2, 4] });
-      const result = seriesDotDataFrame(s, df);
-      out(`seriesDotDataFrame([1,2] · df{a:[1,3],b:[2,4]}):\n  a = ${result.values[0]}  (1×1 + 2×3 = 7)\n  b = ${result.values[1]}  (1×2 + 2×4 = 10)`);
-    };
-
-    window.runDfDotSeries = () => {
-      const df = DataFrame.fromColumns({ a: [1, 2], b: [3, 4] });
-      const v  = new Series({ data: [1, 1], index: ["a", "b"] });
-      const result = dataFrameDotSeries(df, v);
-      out(`dataFrameDotSeries(df{a:[1,2],b:[3,4]} · [1,1]):\n  row0 = ${result.values[0]}  (1×1 + 3×1 = 4)\n  row1 = ${result.values[1]}  (2×1 + 4×1 = 6)`);
-    };
-
-    window.runMatMul = () => {
-      // A = [[1,2],[3,4]] (rows [0,1], cols ["c0","c1"])
-      // B = [[5,6],[7,8]] (rows ["c0","c1"], cols ["d0","d1"])
-      const A = DataFrame.fromColumns({ c0: [1, 3], c1: [2, 4] });
-      const colIdx = new Series({ data: [0, 0], index: ["c0","c1"] }).index;
-      const B = new DataFrame(
-        new Map([
-          ["d0", new Series({ data: [5, 7], index: colIdx })],
-          ["d1", new Series({ data: [6, 8], index: colIdx })],
-        ]),
-        colIdx,
-      );
-      const result = dataFrameDotDataFrame(A, B);
-      out(
-        `dataFrameDotDataFrame([[1,2],[3,4]] × [[5,6],[7,8]]):\n` +
-        `  d0: [${[...result.col("d0").values]}]  (expected [19, 43])\n` +
-        `  d1: [${[...result.col("d1").values]}]  (expected [22, 50])`
-      );
-    };
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

@@ -4,71 +4,223 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — where / mask</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>where / mask</h1>
-<p class="subtitle">Conditional value selection and replacement — mirrors <code>pandas.Series.where</code> and <code>pandas.DataFrame.mask</code>.</p>
 
-<section>
-  <h2>1 — whereSeries: keep values where condition is true</h2>
-  <p><code>whereSeries(series, cond)</code> keeps each element where <code>cond</code> is <code>true</code> and replaces it with <code>null</code> (or a custom <code>other</code>) where <code>cond</code> is <code>false</code>.</p>
-  <pre><code id="ex1-code">import { Series, whereSeries } from "tsb";
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>where / mask</h1>
+  <p class="subtitle">Conditional value selection and replacement — mirrors <code>pandas.Series.where</code> and <code>pandas.DataFrame.mask</code>.</p>
+
+  <div class="section">
+    <h2>1 — whereSeries: keep values where condition is true</h2>
+      <p><code>whereSeries(series, cond)</code> keeps each element where <code>cond</code> is <code>true</code> and replaces it with <code>null</code> (or a custom <code>other</code>) where <code>cond</code> is <code>false</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, whereSeries } from "tsb";
 
 const scores = new Series({ data: [45, 72, 58, 88, 91, 30], name: "score" });
 
-// Keep only passing scores (>= 60); replace failing scores with null
-const passing = whereSeries(scores, (v) => v >= 60);
+// Keep only passing scores (&gt;= 60); replace failing scores with null
+const passing = whereSeries(scores, (v) =&gt; v &gt;= 60);
 console.log("passing:", [...passing.values]);
 // → [null, 72, null, 88, 91, null]
 
 // Replace failing scores with 0 instead of null
-const zeroFail = whereSeries(scores, (v) => v >= 60, { other: 0 });
+const zeroFail = whereSeries(scores, (v) =&gt; v &gt;= 60, { other: 0 });
 console.log("zero-fail:", [...zeroFail.values]);
-// → [0, 72, 0, 88, 91, 0]
-</code></pre>
-  <div class="output" id="ex1-out">▶ run</div>
-</section>
+// → [0, 72, 0, 88, 91, 0]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>2 — maskSeries: replace values where condition is true</h2>
-  <p><code>maskSeries</code> is the inverse of <code>whereSeries</code>: it replaces where <code>cond</code> is <code>true</code> and keeps where <code>cond</code> is <code>false</code>.</p>
-  <pre><code id="ex2-code">import { Series, maskSeries } from "tsb";
+  <div class="section">
+    <h2>2 — maskSeries: replace values where condition is true</h2>
+      <p><code>maskSeries</code> is the inverse of <code>whereSeries</code>: it replaces where <code>cond</code> is <code>true</code> and keeps where <code>cond</code> is <code>false</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, maskSeries } from "tsb";
 
 const temps = new Series({ data: [-5, 12, -3, 20, 7], name: "temp_C" });
 
 // Mask (hide) sub-zero temperatures
-const noFrost = maskSeries(temps, (v) => v < 0);
+const noFrost = maskSeries(temps, (v) =&gt; v &lt; 0);
 console.log("no frost:", [...noFrost.values]);
 // → [null, 12, null, 20, 7]
 
 // Replace sub-zero with a sentinel value
-const clamped = maskSeries(temps, (v) => v < 0, { other: 0 });
+const clamped = maskSeries(temps, (v) =&gt; v &lt; 0, { other: 0 });
 console.log("clamped: ", [...clamped.values]);
-// → [0, 12, 0, 20, 7]
-</code></pre>
-  <div class="output" id="ex2-out">▶ run</div>
-</section>
+// → [0, 12, 0, 20, 7]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>3 — Boolean Series as condition</h2>
-  <p>Pass a <code>Series&lt;boolean&gt;</code> (or a plain boolean array) as the condition for position-aligned filtering.</p>
-  <pre><code id="ex3-code">import { Series, whereSeries, maskSeries } from "tsb";
+  <div class="section">
+    <h2>3 — Boolean Series as condition</h2>
+      <p>Pass a <code>Series&lt;boolean&gt;</code> (or a plain boolean array) as the condition for position-aligned filtering.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, whereSeries, maskSeries } from "tsb";
 
 const prices = new Series({ data: [100, 200, 150, 80, 300], name: "price" });
 const inStock = new Series({ data: [true, false, true, false, true] });
@@ -79,17 +231,26 @@ console.log("in-stock prices:", [...available.values]);
 // → [100, null, 150, null, 300]
 
 // Mask out-of-stock prices (same result — cond is inverted)
-const masked = maskSeries(prices, inStock.values.map((v) => !v));
+const masked = maskSeries(prices, inStock.values.map((v) =&gt; !v));
 console.log("masked:         ", [...masked.values]);
-// → [100, null, 150, null, 300]
-</code></pre>
-  <div class="output" id="ex3-out">▶ run</div>
-</section>
+// → [100, null, 150, null, 300]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>4 — whereDataFrame: cell-wise filtering on a DataFrame</h2>
-  <p><code>whereDataFrame(df, cond)</code> applies the condition independently to each cell across all columns.</p>
-  <pre><code id="ex4-code">import { DataFrame, whereDataFrame } from "tsb";
+  <div class="section">
+    <h2>4 — whereDataFrame: cell-wise filtering on a DataFrame</h2>
+      <p><code>whereDataFrame(df, cond)</code> applies the condition independently to each cell across all columns.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, whereDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [1, -2,  3],
@@ -98,17 +259,26 @@ const df = DataFrame.fromColumns({
 });
 
 // Keep non-negative values; replace negatives with null
-const positive = whereDataFrame(df, (v) => v >= 0);
+const positive = whereDataFrame(df, (v) =&gt; v &gt;= 0);
 console.log("a:", [...positive.col("a").values]); // [1,  null, 3]
 console.log("b:", [...positive.col("b").values]); // [null, 5, null]
-console.log("c:", [...positive.col("c").values]); // [7,  8,  9]
-</code></pre>
-  <div class="output" id="ex4-out">▶ run</div>
-</section>
+console.log("c:", [...positive.col("c").values]); // [7,  8,  9]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>5 — maskDataFrame: replace cells matching condition</h2>
-  <pre><code id="ex5-code">import { DataFrame, maskDataFrame } from "tsb";
+  <div class="section">
+    <h2>5 — maskDataFrame: replace cells matching condition</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, maskDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   revenue: [100, 0, 250, -50, 0],
@@ -116,19 +286,28 @@ const df = DataFrame.fromColumns({
 });
 
 // Mask zeros (replace with null to mark as missing)
-const noZeros = maskDataFrame(df, (v) => v === 0);
+const noZeros = maskDataFrame(df, (v) =&gt; v === 0);
 console.log("revenue:", [...noZeros.col("revenue").values]);
 // → [100, null, 250, -50, null]
 console.log("cost:   ", [...noZeros.col("cost").values]);
-// → [80, null, 200, 30, null]
-</code></pre>
-  <div class="output" id="ex5-out">▶ run</div>
-</section>
+// → [80, null, 200, 30, null]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>6 — DataFrame condition (boolean DataFrame)</h2>
-  <p>Pass a boolean <code>DataFrame</code> as the condition for per-cell control.</p>
-  <pre><code id="ex6-code">import { DataFrame, whereDataFrame } from "tsb";
+  <div class="section">
+    <h2>6 — DataFrame condition (boolean DataFrame)</h2>
+      <p>Pass a boolean <code>DataFrame</code> as the condition for per-cell control.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, whereDataFrame } from "tsb";
 
 const data = DataFrame.fromColumns({
   x: [10, 20, 30],
@@ -143,39 +322,51 @@ const cond = DataFrame.fromColumns({
 
 const result = whereDataFrame(data, cond);
 console.log("x:", [...result.col("x").values]); // [10, null, 30]
-console.log("y:", [...result.col("y").values]); // [null, 50, 60]
-</code></pre>
-  <div class="output" id="ex6-out">▶ run</div>
-</section>
+console.log("y:", [...result.col("y").values]); // [null, 50, 60]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>7 — Combining where and mask for range clamping</h2>
-  <p>Chaining <code>whereSeries</code> and <code>maskSeries</code> is a clean way to apply lower and upper bounds.</p>
-  <pre><code id="ex7-code">import { Series, whereSeries, maskSeries } from "tsb";
+  <div class="section">
+    <h2>7 — Combining where and mask for range clamping</h2>
+      <p>Chaining <code>whereSeries</code> and <code>maskSeries</code> is a clean way to apply lower and upper bounds.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, whereSeries, maskSeries } from "tsb";
 
 const raw = new Series({ data: [-10, 0, 5, 15, 100, 3], name: "value" });
 const LO = 0, HI = 10;
 
 // 1) Replace values below lower bound with LO
-const step1 = whereSeries(raw, (v) => (v as number) >= LO, { other: LO });
+const step1 = whereSeries(raw, (v) =&gt; (v as number) &gt;= LO, { other: LO });
 // 2) Replace values above upper bound with HI
-const clamped = whereSeries(step1, (v) => (v as number) <= HI, { other: HI });
+const clamped = whereSeries(step1, (v) =&gt; (v as number) &lt;= HI, { other: HI });
 
 console.log("clamped:", [...clamped.values]);
-// → [0, 0, 5, 10, 10, 3]
-</code></pre>
-  <div class="output" id="ex7-out">▶ run</div>
-</section>
-
-<section>
-  <h2>8 — where / mask vs. clip</h2>
-  <div class="note">
-    <strong>When to use which?</strong><br>
-    Use <code>clip()</code> for simple numeric lower/upper bounds.<br>
-    Use <code>where()</code> / <code>mask()</code> for arbitrary conditions — including non-numeric types,
-    string patterns, or per-cell boolean DataFrames.
+// → [0, 0, 5, 10, 10, 3]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
-  <pre><code id="ex8-code">import { Series, whereSeries, clip } from "tsb";
+
+  <div class="section">
+    <h2>8 — where / mask vs. clip</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, whereSeries, clip } from "tsb";
 
 const s = new Series({ data: [-3, 1, 5, 10], name: "val" });
 
@@ -184,11 +375,20 @@ const clipped  = clip(s, { lower: 0, upper: 6 });
 console.log("clipped: ", [...clipped.values]);  // [0, 1, 5, 6]
 
 // where gives full control — replace out-of-range with null instead of clamping
-const filtered = whereSeries(s, (v) => (v as number) >= 0 && (v as number) <= 6);
-console.log("filtered:", [...filtered.values]); // [null, 1, 5, null]
-</code></pre>
-  <div class="output" id="ex8-out">▶ run</div>
-</section>
+const filtered = whereSeries(s, (v) =&gt; (v as number) &gt;= 0 &amp;&amp; (v as number) &lt;= 6);
+console.log("filtered:", [...filtered.values]); // [null, 1, 5, null]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

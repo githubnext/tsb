@@ -1,79 +1,167 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — toTimedelta</title>
-    <style>
-      body { font-family: system-ui, sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #222; }
-      h1 { font-size: 1.8rem; }
-      h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
-      pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; overflow: auto; font-size: 0.85rem; }
-      code { font-family: "SFMono-Regular", Consolas, monospace; }
-      .tag { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 1px 8px; font-size: 0.75rem; font-weight: bold; }
-      table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-      th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
-      th { background: #f6f8fa; }
-      textarea { width: 100%; font-family: monospace; font-size: 0.85rem; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
-      .output { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 12px; margin-top: 8px; min-height: 40px; white-space: pre; font-family: monospace; font-size: 0.85rem; }
-      button { background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 8px 18px; cursor: pointer; font-size: 0.9rem; margin-top: 8px; }
-      button:hover { background: #1d4ed8; }
-      a { color: #2563eb; }
-    </style>
-  </head>
-  <body>
-    <p><a href="index.html">← tsb playground</a></p>
-    <h1>toTimedelta <span class="tag">stats</span></h1>
-    <p>
-      Convert scalars, arrays, or <code>Series</code> values to
-      <code>Timedelta</code> objects — mirroring
-      <a href="https://pandas.pydata.org/docs/reference/api/pandas.to_timedelta.html"
-        ><code>pandas.to_timedelta()</code></a
-      >.
-    </p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — toTimedelta</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
 
-    <h2>Supported input formats</h2>
-    <table>
-      <tr><th>Format</th><th>Example</th><th>Result (ms)</th></tr>
-      <tr><td>Pandas-style</td><td><code>"1 days 02:03:04"</code></td><td>93 784 000 ms</td></tr>
-      <tr><td>Clock (HH:MM:SS)</td><td><code>"01:30:00"</code></td><td>5 400 000 ms</td></tr>
-      <tr><td>ISO 8601</td><td><code>"P1DT2H"</code></td><td>93 600 000 ms</td></tr>
-      <tr><td>Human-readable</td><td><code>"1h 30m 20s"</code></td><td>5 420 000 ms</td></tr>
-      <tr><td>number (unit="ns")</td><td><code>1_000_000_000</code></td><td>1 000 ms</td></tr>
-      <tr><td>number (unit="ms")</td><td><code>5000</code></td><td>5 000 ms</td></tr>
-      <tr><td>Timedelta</td><td><code>new Timedelta(1000)</code></td><td>unchanged</td></tr>
-      <tr><td>null / undefined / NaN</td><td><code>null</code></td><td><code>null</code></td></tr>
-    </table>
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
 
-    <h2>Timedelta class</h2>
-    <table>
-      <tr><th>Property / Method</th><th>Description</th></tr>
-      <tr><td><code>.totalMs</code></td><td>Total duration in milliseconds (signed)</td></tr>
-      <tr><td><code>.days</code></td><td>Whole days</td></tr>
-      <tr><td><code>.hours</code></td><td>Hours within the current day (0–23)</td></tr>
-      <tr><td><code>.minutes</code></td><td>Minutes within the current hour (0–59)</td></tr>
-      <tr><td><code>.seconds</code></td><td>Seconds within the current minute (0–59)</td></tr>
-      <tr><td><code>.ms</code></td><td>Milliseconds within the current second (0–999)</td></tr>
-      <tr><td><code>.abs()</code></td><td>Absolute value</td></tr>
-      <tr><td><code>.add(other)</code></td><td>Add two Timedeltas</td></tr>
-      <tr><td><code>.subtract(other)</code></td><td>Subtract a Timedelta</td></tr>
-      <tr><td><code>.scale(n)</code></td><td>Multiply by a scalar</td></tr>
-      <tr><td><code>.lt(other)</code></td><td>Less-than comparison</td></tr>
-      <tr><td><code>.gt(other)</code></td><td>Greater-than comparison</td></tr>
-      <tr><td><code>.eq(other)</code></td><td>Equality comparison</td></tr>
-      <tr><td><code>.toString()</code></td><td>Pandas-style string representation</td></tr>
-    </table>
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
 
-    <h2>Error handling</h2>
-    <table>
-      <tr><th>errors=</th><th>Behaviour</th></tr>
-      <tr><td><code>"raise"</code> (default)</td><td>Throws <code>TypeError</code> on unparseable input</td></tr>
-      <tr><td><code>"coerce"</code></td><td>Returns <code>null</code> on unparseable input</td></tr>
-      <tr><td><code>"ignore"</code></td><td>Returns the original value unchanged</td></tr>
-    </table>
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
 
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>toTimedelta</h1>
+  <p class="subtitle"><a href="index.html">← tsb playground</a></p>
+
+  <div class="section">
     <h2>Quick examples</h2>
-    <pre><code>import { toTimedelta, Timedelta, formatTimedelta, Series } from "tsb";
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { toTimedelta, Timedelta, formatTimedelta, Series } from "tsb";
 
 // Scalar — various string formats
 toTimedelta("1 days 02:03:04");       // Timedelta(93_784_000 ms)
@@ -99,19 +187,32 @@ a.subtract(b).totalMs;        // 1_800_000
 
 // Array
 toTimedelta(["1h", "30m", null]);
-// => [Timedelta(3_600_000), Timedelta(1_800_000), null]
+// =&gt; [Timedelta(3_600_000), Timedelta(1_800_000), null]
 
 // Series
 const s = new Series({ data: ["1h", "30m", null] });
 toTimedelta(s);
-// => Series&lt;Timedelta | null&gt; with dtype=timedelta
+// =&gt; Series&lt;Timedelta | null&gt; with dtype=timedelta
 
 // formatTimedelta
 formatTimedelta(new Timedelta(86_400_000 + 3_661_000));
-// => "1 day 01:01:01"</code></pre>
+// =&gt; "1 day 01:01:01"</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <div class="section">
     <h2>Python / pandas equivalent</h2>
-    <textarea rows="14" readonly>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">
 import pandas as pd
 
 # Scalar
@@ -126,7 +227,19 @@ s = pd.Series(["1h", "30m", None])
 pd.to_timedelta(s)
 
 # Timedelta arithmetic
-pd.Timedelta("1h") + pd.Timedelta("30m")
-    </textarea>
-  </body>
+pd.Timedelta("1h") + pd.Timedelta("30m")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

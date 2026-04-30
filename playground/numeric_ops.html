@@ -4,69 +4,197 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — numeric math operations</title>
-  <script src="playground-runtime.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-    h1   { font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { color: #555; margin-bottom: 2rem; }
-    section  { margin-bottom: 2.5rem; }
-    h2   { font-size: 1.25rem; border-bottom: 2px solid #e0e0e0; padding-bottom: .35rem; margin-bottom: 1rem; }
-    pre  { background: #f5f5f5; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
-    code { font-family: "JetBrains Mono", "Fira Code", monospace; }
-    .output { background: #eaf7ea; border-left: 4px solid #4caf50; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin-top: .5rem; font-size: .875rem; white-space: pre; font-family: monospace; }
-    .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .6rem 1rem; border-radius: 0 6px 6px 0; font-size: .9rem; margin: .75rem 0; }
-    nav  { margin-bottom: 1.5rem; font-size: .9rem; color: #555; }
-    nav a { color: #0366d6; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    table { border-collapse: collapse; font-size: .875rem; margin: .75rem 0; }
-    th, td { border: 1px solid #ddd; padding: .4rem .75rem; text-align: left; }
-    th { background: #f5f5f5; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">← tsb playground</a></nav>
-<h1>numeric math operations</h1>
-<p class="subtitle">
-  Element-wise mathematical functions for Series and DataFrame —
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>numeric math operations</h1>
+  <p class="subtitle">Element-wise mathematical functions for Series and DataFrame —
   mirrors NumPy ufuncs applied to a pandas Series/DataFrame:
   <code>floor</code>, <code>ceil</code>, <code>trunc</code>,
   <code>sqrt</code>, <code>exp</code>, <code>log</code>,
-  <code>log2</code>, <code>log10</code>, <code>sign</code>.
-</p>
+  <code>log2</code>, <code>log10</code>, <code>sign</code>.</p>
 
-<div class="note">
-  All functions are <strong>pure</strong> — they return a new Series/DataFrame
-  without mutating the input. Missing values (<code>null</code> / <code>NaN</code>)
-  propagate through every operation unchanged.
-</div>
-
-<section>
-  <h2>1 — floor, ceil, trunc: rounding toward integers</h2>
-  <p>
-    <code>seriesFloor(s)</code> replaces each element with the largest integer ≤ the value.<br>
+  <div class="section">
+    <h2>1 — floor, ceil, trunc: rounding toward integers</h2>
+      <p><code>seriesFloor(s)</code> replaces each element with the largest integer ≤ the value.<br>
     <code>seriesCeil(s)</code>  replaces each element with the smallest integer ≥ the value.<br>
     <code>seriesTrunc(s)</code> removes the fractional part, rounding toward zero.<br>
     For <em>negative</em> numbers: <code>floor(-1.7) = -2</code>,
-    <code>ceil(-1.7) = -1</code>, <code>trunc(-1.7) = -1</code>.
-  </p>
-  <pre><code id="ex1-code">import { Series, seriesFloor, seriesCeil, seriesTrunc } from "tsb";
+    <code>ceil(-1.7) = -1</code>, <code>trunc(-1.7) = -1</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesFloor, seriesCeil, seriesTrunc } from "tsb";
 
 const s = new Series({ data: [-1.7, -0.2, 0, 1.2, 1.9] });
 
 console.log([...seriesFloor(s).values]);  // [-2, -1, 0, 1, 1]
 console.log([...seriesCeil(s).values]);   // [-1,  0, 0, 2, 2]
-console.log([...seriesTrunc(s).values]);  // [-1,  0, 0, 1, 1]
-</code></pre>
-  <div class="output" id="ex1-output">Loading…</div>
-</section>
+console.log([...seriesTrunc(s).values]);  // [-1,  0, 0, 1, 1]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>2 — floor / ceil / trunc on a DataFrame</h2>
-  <p>
-    DataFrame variants (<code>dataFrameFloor</code>, <code>dataFrameCeil</code>,
-    <code>dataFrameTrunc</code>) apply the operation to every numeric column.
-  </p>
-  <pre><code id="ex2-code">import { DataFrame, dataFrameFloor, dataFrameCeil } from "tsb";
+  <div class="section">
+    <h2>2 — floor / ceil / trunc on a DataFrame</h2>
+      <p>DataFrame variants (<code>dataFrameFloor</code>, <code>dataFrameCeil</code>,
+    <code>dataFrameTrunc</code>) apply the operation to every numeric column.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameFloor, dataFrameCeil } from "tsb";
 
 const df = DataFrame.fromColumns({
   price:  [10.49, 20.01, 30.99],
@@ -78,64 +206,78 @@ console.log([...floored.col("price").values]);  // [10, 20, 30]
 console.log([...floored.col("change").values]); // [-1, 1, 2]
 
 const ceiled = dataFrameCeil(df);
-console.log([...ceiled.col("price").values]);   // [11, 21, 31]
-</code></pre>
-  <div class="output" id="ex2-output">Loading…</div>
-</section>
+console.log([...ceiled.col("price").values]);   // [11, 21, 31]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>3 — sqrt: square root</h2>
-  <p>
-    <code>seriesSqrt(s)</code> returns <code>√x</code> for each element.
+  <div class="section">
+    <h2>3 — sqrt: square root</h2>
+      <p><code>seriesSqrt(s)</code> returns <code>√x</code> for each element.
     Negative values produce <code>NaN</code> (real-valued, same as NumPy by default).
-    Mirrors <code>np.sqrt(series)</code>.
-  </p>
-  <pre><code id="ex3-code">import { Series, seriesSqrt } from "tsb";
+    Mirrors <code>np.sqrt(series)</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesSqrt } from "tsb";
 
 const s = new Series({ data: [0, 1, 4, 9, 16, 25] });
 console.log([...seriesSqrt(s).values]); // [0, 1, 2, 3, 4, 5]
 
 // Negative values → NaN
 const mixed = new Series({ data: [-4, 0, 9] });
-console.log([...seriesSqrt(mixed).values]); // [NaN, 0, 3]
-</code></pre>
-  <div class="output" id="ex3-output">Loading…</div>
-</section>
+console.log([...seriesSqrt(mixed).values]); // [NaN, 0, 3]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>4 — exp: exponential function</h2>
-  <p>
-    <code>seriesExp(s)</code> computes <em>e</em><sup>x</sup> for each element.
-    Mirrors <code>np.exp(series)</code>.
-  </p>
-  <pre><code id="ex4-code">import { Series, seriesExp } from "tsb";
+  <div class="section">
+    <h2>4 — exp: exponential function</h2>
+      <p><code>seriesExp(s)</code> computes <em>e</em><sup>x</sup> for each element.
+    Mirrors <code>np.exp(series)</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesExp } from "tsb";
 
 const s = new Series({ data: [0, 1, 2, -1] });
 const result = seriesExp(s);
 console.log(result.values[0].toFixed(4)); // 1.0000  (e^0 = 1)
 console.log(result.values[1].toFixed(4)); // 2.7183  (e^1 = e)
 console.log(result.values[2].toFixed(4)); // 7.3891  (e^2)
-console.log(result.values[3].toFixed(4)); // 0.3679  (e^-1 = 1/e)
-</code></pre>
-  <div class="output" id="ex4-output">Loading…</div>
-</section>
+console.log(result.values[3].toFixed(4)); // 0.3679  (e^-1 = 1/e)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>5 — log, log2, log10: logarithms</h2>
-  <p>
-    Three logarithm functions, matching the NumPy counterparts:
-  </p>
-  <table>
-    <tr><th>Function</th><th>Base</th><th>Mirrors</th></tr>
-    <tr><td><code>seriesLog</code></td><td>e (natural)</td><td><code>np.log</code></td></tr>
-    <tr><td><code>seriesLog2</code></td><td>2</td><td><code>np.log2</code></td></tr>
-    <tr><td><code>seriesLog10</code></td><td>10</td><td><code>np.log10</code></td></tr>
-  </table>
-  <p>Values ≤ 0 produce <code>-Infinity</code> (for 0) or <code>NaN</code> (for negative).</p>
-  <pre><code id="ex5-code">import { Series, seriesLog, seriesLog2, seriesLog10 } from "tsb";
+  <div class="section">
+    <h2>5 — log, log2, log10: logarithms</h2>
+      <p>Three logarithm functions, matching the NumPy counterparts:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesLog, seriesLog2, seriesLog10 } from "tsb";
 
 const naturals = new Series({ data: [1, Math.E, Math.E ** 2] });
-console.log(seriesLog(naturals).values.map(v => +v.toFixed(4)));
+console.log(seriesLog(naturals).values.map(v =&gt; +v.toFixed(4)));
 // [0, 1, 2]
 
 const powersOf2 = new Series({ data: [1, 2, 4, 8, 1024] });
@@ -144,65 +286,95 @@ console.log([...seriesLog2(powersOf2).values]);
 
 const powersOf10 = new Series({ data: [1, 10, 100, 1000] });
 console.log([...seriesLog10(powersOf10).values]);
-// [0, 1, 2, 3]
-</code></pre>
-  <div class="output" id="ex5-output">Loading…</div>
-</section>
+// [0, 1, 2, 3]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>6 — sign: element sign</h2>
-  <p>
-    <code>seriesSign(s)</code> returns <code>-1</code> for negative values,
+  <div class="section">
+    <h2>6 — sign: element sign</h2>
+      <p><code>seriesSign(s)</code> returns <code>-1</code> for negative values,
     <code>0</code> for zero, and <code>1</code> for positive values.
-    Mirrors <code>np.sign(series)</code>.
-  </p>
-  <pre><code id="ex6-code">import { Series, seriesSign } from "tsb";
+    Mirrors <code>np.sign(series)</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesSign } from "tsb";
 
 const s = new Series({ data: [-100, -0.001, 0, 0.001, 100] });
-console.log([...seriesSign(s).values]); // [-1, -1, 0, 1, 1]
-</code></pre>
-  <div class="output" id="ex6-output">Loading…</div>
-</section>
+console.log([...seriesSign(s).values]); // [-1, -1, 0, 1, 1]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>7 — missing value propagation</h2>
-  <p>
-    All numeric ops propagate <code>null</code> and non-numeric values unchanged.
-    This matches the behaviour of pandas, where missing values are not coerced.
-  </p>
-  <pre><code id="ex7-code">import { Series, seriesFloor, seriesSqrt, seriesLog } from "tsb";
+  <div class="section">
+    <h2>7 — missing value propagation</h2>
+      <p>All numeric ops propagate <code>null</code> and non-numeric values unchanged.
+    This matches the behaviour of pandas, where missing values are not coerced.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesFloor, seriesSqrt, seriesLog } from "tsb";
 
 const s = new Series({ data: [null, 4, null, 9] });
 
 console.log([...seriesFloor(s).values]); // [null, 4, null, 9]
 console.log([...seriesSqrt(s).values]);  // [null, 2, null, 3]
-console.log([...seriesLog(s).values]);   // [null, ~1.386, null, ~2.197]
-</code></pre>
-  <div class="output" id="ex7-output">Loading…</div>
-</section>
+console.log([...seriesLog(s).values]);   // [null, ~1.386, null, ~2.197]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<section>
-  <h2>8 — composing operations</h2>
-  <p>
-    Combine multiple operations. For example, compute the log-transformed
-    square root of a price column — a common technique in data normalisation.
-  </p>
-  <pre><code id="ex8-code">import { Series, seriesSqrt, seriesLog } from "tsb";
+  <div class="section">
+    <h2>8 — composing operations</h2>
+      <p>Combine multiple operations. For example, compute the log-transformed
+    square root of a price column — a common technique in data normalisation.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, seriesSqrt, seriesLog } from "tsb";
 
 // Log-sqrt transformation: log(√x) = log(x)/2
 const prices = new Series({ data: [1, 4, 9, 100, 10000], name: "price" });
 
 const logSqrt = seriesLog(seriesSqrt(prices));
-console.log(logSqrt.values.map(v => +v.toFixed(4)));
+console.log(logSqrt.values.map(v =&gt; +v.toFixed(4)));
 // [0, 0.6931, 1.0986, 2.3026, 4.6052]
 
 // Verify: equals log(x) / 2
-const logHalf = seriesLog(prices).values.map(v => +(v / 2).toFixed(4));
+const logHalf = seriesLog(prices).values.map(v =&gt; +(v / 2).toFixed(4));
 console.log(logHalf);
-// [0, 0.6931, 1.0986, 2.3026, 4.6052]
-</code></pre>
-  <div class="output" id="ex8-output">Loading…</div>
-</section>
+// [0, 0.6931, 1.0986, 2.3026, 4.6052]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

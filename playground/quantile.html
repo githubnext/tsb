@@ -5,178 +5,293 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — quantile</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; background: #f9fafb; color: #1a1a2e; }
-    h1 { color: #4f46e5; }
-    h2 { color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
-    .demo { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 16px 0; }
-    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 14px; }
-    .output { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 12px; font-family: monospace; white-space: pre; margin-top: 10px; }
-    a { color: #4f46e5; }
-    table { border-collapse: collapse; margin-top: 8px; }
-    th, td { border: 1px solid #e5e7eb; padding: 6px 12px; text-align: right; }
-    th { background: #f3f4f6; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <p><a href="index.html">← tsb playground</a></p>
-  <h1>📐 quantile</h1>
-  <p>
-    <strong><code>quantileSeries</code></strong> / <strong><code>quantileDataFrame</code></strong> —
-    compute quantile(s) / percentile(s), mirroring
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.quantile.html"><code>Series.quantile()</code></a> and
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.quantile.html"><code>DataFrame.quantile()</code></a>.
-  </p>
-  <p>Equivalent Python: <code>series.quantile(q=0.5)</code> / <code>df.quantile(q=0.5)</code></p>
 
-  <h2>1 · Scalar quantile (median)</h2>
-  <div class="demo">
-    <pre>const s = new Series({ data: [1, 2, 3, 4, 5] });
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>quantile</h1>
+  <p class="subtitle"><a href="index.html">← tsb playground</a></p>
+
+  <div class="section">
+    <h2>1 · Scalar quantile (median)</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const s = new Series({ data: [1, 2, 3, 4, 5] });
 quantileSeries(s);          // default q=0.5 → 3
 quantileSeries(s, { q: 0.25 }); // → 2
-quantileSeries(s, { q: 0.75 }); // → 4</pre>
-    <div class="output" id="demo1"></div>
+quantileSeries(s, { q: 0.75 }); // → 4</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>2 · Multiple quantile levels</h2>
-  <div class="demo">
-    <pre>const s = new Series({ data: [1, 2, 3, 4, 5] });
+  <div class="section">
+    <h2>2 · Multiple quantile levels</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const s = new Series({ data: [1, 2, 3, 4, 5] });
 const q = quantileSeries(s, { q: [0.25, 0.5, 0.75] });
-// Series indexed by q-values: { 0.25: 2, 0.5: 3, 0.75: 4 }</pre>
-    <div class="output" id="demo2"></div>
+// Series indexed by q-values: { 0.25: 2, 0.5: 3, 0.75: 4 }</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>3 · Interpolation methods</h2>
-  <div class="demo">
-    <pre>const s = new Series({ data: [0, 10] });
+  <div class="section">
+    <h2>3 · Interpolation methods</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const s = new Series({ data: [0, 10] });
 // q=0.5 → position 0.5 between indices 0 and 1
 quantileSeries(s, { q: 0.5, interpolation: "linear" });   // 5
 quantileSeries(s, { q: 0.5, interpolation: "lower" });    // 0
 quantileSeries(s, { q: 0.5, interpolation: "higher" });   // 10
 quantileSeries(s, { q: 0.5, interpolation: "midpoint" }); // 5
-quantileSeries(s, { q: 0.5, interpolation: "nearest" });  // 0</pre>
-    <div class="output" id="demo3"></div>
+quantileSeries(s, { q: 0.5, interpolation: "nearest" });  // 0</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>4 · NaN handling (skipna=true by default)</h2>
-  <div class="demo">
-    <pre>const s = new Series({ data: [1, null, 3, NaN, 5] });
+  <div class="section">
+    <h2>4 · NaN handling (skipna=true by default)</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const s = new Series({ data: [1, null, 3, NaN, 5] });
 quantileSeries(s, { q: 0.5 });             // ignores null/NaN → 3
-quantileSeries(s, { q: 0.5, skipna: false }); // NaN propagates → NaN</pre>
-    <div class="output" id="demo4"></div>
+quantileSeries(s, { q: 0.5, skipna: false }); // NaN propagates → NaN</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>5 · DataFrame — axis=0 (per-column quantiles)</h2>
-  <div class="demo">
-    <pre>const df = DataFrame.fromColumns({ a: [1, 2, 3, 4], b: [10, 20, 30, 40] });
+  <div class="section">
+    <h2>5 · DataFrame — axis=0 (per-column quantiles)</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromColumns({ a: [1, 2, 3, 4], b: [10, 20, 30, 40] });
 quantileDataFrame(df, { q: 0.5 });
 // Series { a: 2.5, b: 25 }
 
 quantileDataFrame(df, { q: [0.25, 0.5, 0.75] });
-// DataFrame 3×2: rows=[0.25, 0.5, 0.75], cols=[a, b]</pre>
-    <div class="output" id="demo5"></div>
+// DataFrame 3×2: rows=[0.25, 0.5, 0.75], cols=[a, b]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>6 · DataFrame — axis=1 (per-row quantiles)</h2>
-  <div class="demo">
-    <pre>const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [3, 4, 5], c: [5, 6, 7] });
+  <div class="section">
+    <h2>6 · DataFrame — axis=1 (per-row quantiles)</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [3, 4, 5], c: [5, 6, 7] });
 quantileDataFrame(df, { axis: 1, q: 0.5 });
-// Series — median of each row: [3, 4, 5]</pre>
-    <div class="output" id="demo6"></div>
+// Series — median of each row: [3, 4, 5]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>7 · Q=[0, 0.25, 0.5, 0.75, 1] summary table</h2>
-  <div class="demo">
-    <pre>const df = DataFrame.fromColumns({ score: [55, 70, 80, 88, 92, 95, 99] });
+  <div class="section">
+    <h2>7 · Q=[0, 0.25, 0.5, 0.75, 1] summary table</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromColumns({ score: [55, 70, 80, 88, 92, 95, 99] });
 quantileDataFrame(df, { q: [0, 0.25, 0.5, 0.75, 1] });
-// → summary statistics table</pre>
-    <div id="demo7"></div>
+// → summary statistics table</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <script type="module">
-    import { Series, DataFrame, quantileSeries, quantileDataFrame } from "./tsb.js";
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    function show(id, val) {
-      document.getElementById(id).textContent = JSON.stringify(val, null, 2);
-    }
-
-    // Demo 1
-    {
-      const s = new Series({ data: [1, 2, 3, 4, 5] });
-      show("demo1", {
-        "q=0.5 (default)": quantileSeries(s),
-        "q=0.25": quantileSeries(s, { q: 0.25 }),
-        "q=0.75": quantileSeries(s, { q: 0.75 }),
-      });
-    }
-
-    // Demo 2
-    {
-      const s = new Series({ data: [1, 2, 3, 4, 5] });
-      const result = quantileSeries(s, { q: [0.25, 0.5, 0.75] });
-      const idx = [...result.index.values];
-      const vals = [...result.values];
-      const obj = {};
-      for (let i = 0; i < idx.length; i++) obj[idx[i]] = vals[i];
-      show("demo2", obj);
-    }
-
-    // Demo 3
-    {
-      const s = new Series({ data: [0, 10] });
-      show("demo3", {
-        linear: quantileSeries(s, { q: 0.5, interpolation: "linear" }),
-        lower: quantileSeries(s, { q: 0.5, interpolation: "lower" }),
-        higher: quantileSeries(s, { q: 0.5, interpolation: "higher" }),
-        midpoint: quantileSeries(s, { q: 0.5, interpolation: "midpoint" }),
-        nearest: quantileSeries(s, { q: 0.5, interpolation: "nearest" }),
-      });
-    }
-
-    // Demo 4
-    {
-      const s = new Series({ data: [1, null, 3, NaN, 5] });
-      show("demo4", {
-        "skipna=true": quantileSeries(s, { q: 0.5 }),
-        "skipna=false": quantileSeries(s, { q: 0.5, skipna: false }),
-      });
-    }
-
-    // Demo 5
-    {
-      const df = DataFrame.fromColumns({ a: [1, 2, 3, 4], b: [10, 20, 30, 40] });
-      const scalar = quantileDataFrame(df, { q: 0.5 });
-      const multi = quantileDataFrame(df, { q: [0.25, 0.5, 0.75] });
-      show("demo5", {
-        "axis=0 single q=0.5": { a: [...scalar.col("a").values][0] ?? scalar.values[0], b: scalar.values[1] },
-        "axis=0 multi-q shape": multi.shape,
-        "axis=0 multi-q row 0.25 a": multi.col("a").values[0],
-        "axis=0 multi-q row 0.5 a": multi.col("a").values[1],
-        "axis=0 multi-q row 0.75 a": multi.col("a").values[2],
-      });
-    }
-
-    // Demo 6
-    {
-      const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [3, 4, 5], c: [5, 6, 7] });
-      const r = quantileDataFrame(df, { axis: 1, q: 0.5 });
-      show("demo6", { "axis=1 q=0.5 per row": [...r.values] });
-    }
-
-    // Demo 7 — summary table
-    {
-      const df = DataFrame.fromColumns({ score: [55, 70, 80, 88, 92, 95, 99] });
-      const result = quantileDataFrame(df, { q: [0, 0.25, 0.5, 0.75, 1] });
-      const table = document.createElement("table");
-      const labels = ["min (q=0)", "Q1 (q=0.25)", "median (q=0.5)", "Q3 (q=0.75)", "max (q=1)"];
-      const vals = [...result.col("score").values];
-      let html = "<thead><tr><th>Statistic</th><th>score</th></tr></thead><tbody>";
-      for (let i = 0; i < labels.length; i++) {
-        html += `<tr><td>${labels[i]}</td><td>${vals[i]}</td></tr>`;
-      }
-      html += "</tbody>";
-      table.innerHTML = html;
-      document.getElementById("demo7").appendChild(table);
-    }
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

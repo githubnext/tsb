@@ -1,75 +1,168 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb · json_normalize</title>
-    <style>
-      :root {
-        --bg: #0d1117;
-        --surface: #161b22;
-        --border: #30363d;
-        --text: #e6edf3;
-        --muted: #8b949e;
-        --accent: #58a6ff;
-        --green: #3fb950;
-        --yellow: #d29922;
-        --red: #f85149;
-        --code-bg: #1f2937;
-      }
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; }
-      header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
-      header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
-      header h1 { font-size: 1.4rem; font-weight: 600; }
-      main { max-width: 900px; margin: 0 auto; padding: 2rem; }
-      section { margin-bottom: 2.5rem; }
-      h2 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
-      p { margin-bottom: 0.75rem; color: var(--muted); font-size: 0.95rem; }
-      code { background: var(--code-bg); padding: 0.1em 0.4em; border-radius: 4px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.88em; }
-      pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.85rem; font-family: "SFMono-Regular", Consolas, monospace; line-height: 1.5; }
-      .playground { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
-      .field-row { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
-      label { font-size: 0.88rem; color: var(--muted); }
-      textarea, input[type="text"] { background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.85rem; padding: 0.5rem; width: 100%; }
-      textarea { min-height: 120px; resize: vertical; }
-      button { background: var(--accent); color: #0d1117; border: none; border-radius: 4px; padding: 0.5rem 1.2rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-      button:hover { opacity: 0.85; }
-      .output { margin-top: 1rem; min-height: 60px; }
-      .output.error { color: var(--red); font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
-      table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-      th { background: var(--code-bg); color: var(--accent); padding: 0.4rem 0.6rem; text-align: left; border: 1px solid var(--border); }
-      td { padding: 0.35rem 0.6rem; border: 1px solid var(--border); }
-      tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    </style>
-  </head>
-  <body>
-    <header>
-      <a href="index.html">← tsb</a>
-      <h1>json_normalize</h1>
-    </header>
-    <main>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — tsb · json_normalize</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
 
-      <section>
-        <h2>Overview</h2>
-        <p>
-          <code>jsonNormalize(data, options?)</code> flattens semi-structured (nested) JSON into
-          a flat <code>DataFrame</code> — mirroring <code>pandas.json_normalize()</code>.
-        </p>
-        <p>Key options:</p>
-        <ul style="color:var(--muted);font-size:0.95rem;padding-left:1.5rem;margin-bottom:0.75rem;">
-          <li><code>sep</code> — separator for nested key paths (default <code>"."</code>)</li>
-          <li><code>recordPath</code> — path to a nested array of child records</li>
-          <li><code>meta</code> — parent fields to attach to every child row</li>
-          <li><code>metaPrefix</code> / <code>recordPrefix</code> — column prefixes</li>
-          <li><code>maxLevel</code> — limit nesting depth</li>
-          <li><code>errors</code> — <code>"raise"</code> (default) or <code>"ignore"</code> for missing meta keys</li>
-        </ul>
-      </section>
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
 
-      <section>
-        <h2>Example 1 — flatten nested dicts</h2>
-        <pre>import { jsonNormalize } from "tsb";
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>tsb · json_normalize</h1>
+  <p class="subtitle"><code>jsonNormalize(data, options?)</code> flattens semi-structured (nested) JSON into
+          a flat <code>DataFrame</code> — mirroring <code>pandas.json_normalize()</code>.</p>
+
+  <div class="section">
+    <h2>Example 1 — flatten nested dicts</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { jsonNormalize } from "tsb";
 
 const data = [
   { id: 1, info: { name: "Alice", city: "NY" } },
@@ -79,12 +172,23 @@ const data = [
 const df = jsonNormalize(data);
 // id  info.name  info.city
 // 1   Alice      NY
-// 2   Bob        LA</pre>
-      </section>
+// 2   Bob        LA</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <section>
-        <h2>Example 2 — recordPath + meta</h2>
-        <pre>const orders = [
+  <div class="section">
+    <h2>Example 2 — recordPath + meta</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const orders = [
   { orderId: "A1", customer: "Alice", items: [{ sku: "X", qty: 2 }, { sku: "Y", qty: 1 }] },
   { orderId: "B2", customer: "Bob",   items: [{ sku: "Z", qty: 5 }] },
 ];
@@ -96,104 +200,38 @@ const df = jsonNormalize(orders, {
 // sku  qty  orderId  customer
 // X    2    A1       Alice
 // Y    1    A1       Alice
-// Z    5    B2       Bob</pre>
-      </section>
+// Z    5    B2       Bob</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <section>
-        <h2>Example 3 — maxLevel</h2>
-        <pre>const data = [{ a: { b: { c: { d: 99 } } } }];
+  <div class="section">
+    <h2>Example 3 — maxLevel</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const data = [{ a: { b: { c: { d: 99 } } } }];
 
 jsonNormalize(data, { maxLevel: 1 });
-// a.b  →  {"c":{"d":99}}   (depth 2 is not expanded)</pre>
-      </section>
+// a.b  →  {"c":{"d":99}}   (depth 2 is not expanded)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <section>
-        <h2>Interactive playground</h2>
-        <div class="playground">
-          <div class="field-row">
-            <label>JSON input (array of objects or single object)</label>
-            <textarea id="json-input">[
-  { "id": 1, "name": "Alice", "address": { "city": "NY", "zip": "10001" } },
-  { "id": 2, "name": "Bob",   "address": { "city": "LA", "zip": "90001" } }
-]</textarea>
-          </div>
-          <div class="field-row">
-            <label>recordPath (optional, e.g. <code>items</code> or <code>a.b</code> for nested)</label>
-            <input type="text" id="record-path" placeholder="leave blank for flat normalization" />
-          </div>
-          <div class="field-row">
-            <label>meta fields (comma-separated, e.g. <code>id,name</code>)</label>
-            <input type="text" id="meta-fields" placeholder="leave blank" />
-          </div>
-          <div class="field-row">
-            <label>sep (separator for nested keys, default <code>.</code>)</label>
-            <input type="text" id="sep" value="." style="width:4rem" />
-          </div>
-          <div class="field-row">
-            <label>maxLevel (blank = unlimited)</label>
-            <input type="text" id="max-level" placeholder="blank = unlimited" style="width:6rem" />
-          </div>
-          <button onclick="runExample()">Normalize →</button>
-          <div class="output" id="output"></div>
-        </div>
-      </section>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    </main>
-
-    <script type="module">
-      import { jsonNormalize } from "./tsb.js";
-
-      function dfToTable(df) {
-        const cols = [...df.columns.values];
-        if (cols.length === 0) return "<em style='color:var(--muted)'>empty DataFrame</em>";
-        let html = "<table><tr>";
-        for (const c of cols) html += `<th>${c}</th>`;
-        html += "</tr>";
-        const nRows = df.shape[0];
-        for (let r = 0; r < nRows; r++) {
-          html += "<tr>";
-          for (const c of cols) {
-            const v = df.col(c).values[r];
-            html += `<td>${v === null || v === undefined ? "<em style='color:var(--muted)'>null</em>" : v}</td>`;
-          }
-          html += "</tr>";
-        }
-        html += "</table>";
-        return html;
-      }
-
-      window.runExample = function () {
-        const out = document.getElementById("output");
-        try {
-          const rawJson = document.getElementById("json-input").value.trim();
-          const recordPathRaw = document.getElementById("record-path").value.trim();
-          const metaRaw = document.getElementById("meta-fields").value.trim();
-          const sep = document.getElementById("sep").value || ".";
-          const maxLevelRaw = document.getElementById("max-level").value.trim();
-
-          const data = JSON.parse(rawJson);
-          const opts = { sep };
-
-          if (recordPathRaw) {
-            const parts = recordPathRaw.split(".");
-            opts.recordPath = parts.length === 1 ? parts[0] : parts;
-          }
-          if (metaRaw) {
-            opts.meta = metaRaw.split(",").map(s => s.trim()).filter(Boolean);
-          }
-          if (maxLevelRaw !== "") {
-            const n = parseInt(maxLevelRaw, 10);
-            if (!isNaN(n)) opts.maxLevel = n;
-          }
-
-          const df = jsonNormalize(data, opts);
-          out.className = "output";
-          out.innerHTML = dfToTable(df);
-        } catch (e) {
-          out.className = "output error";
-          out.textContent = String(e);
-        }
-      };
-    </script>
-  </body>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

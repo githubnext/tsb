@@ -1,71 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — resample()</title>
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, sans-serif; line-height: 1.6; background: #f8f9fa; color: #212529; }
-      header { background: #0d6efd; color: #fff; padding: 1.5rem 2rem; }
-      header h1 { font-size: 1.8rem; }
-      header p { opacity: 0.85; margin-top: 0.25rem; }
-      main { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
-      section { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 2rem; padding: 1.5rem; }
-      h2 { font-size: 1.25rem; margin-bottom: 1rem; color: #0d6efd; border-bottom: 1px solid #e9ecef; padding-bottom: 0.5rem; }
-      h3 { font-size: 1rem; margin: 1rem 0 0.5rem; color: #495057; }
-      pre { background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; }
-      code { font-family: "Cascadia Code", "Fira Code", monospace; }
-      .run-btn { background: #0d6efd; color: #fff; border: none; padding: 0.4rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; margin-top: 0.75rem; }
-      .run-btn:hover { background: #0b5ed7; }
-      .output { margin-top: 0.75rem; min-height: 2rem; background: #f1f3f5; border-radius: 4px; padding: 0.75rem; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; color: #212529; }
-      .tag { display: inline-block; background: #e9ecef; color: #495057; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.8rem; margin-right: 0.25rem; }
-      table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
-      th, td { border: 1px solid #dee2e6; padding: 0.4rem 0.7rem; text-align: left; }
-      th { background: #f1f3f5; font-weight: 600; }
-      a { color: #0d6efd; text-decoration: none; }
-      a:hover { text-decoration: underline; }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>tsb — <code>resample()</code></h1>
-      <p>Time-based resampling and aggregation for Series and DataFrame · mirrors <code>pandas.DataFrame.resample</code></p>
-    </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — resample()</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
 
-    <main>
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
 
-      <!-- Intro -->
-      <section>
-        <h2>Overview</h2>
-        <p>
-          <strong>resample</strong> groups a time-indexed Series or DataFrame into fixed-size time bins
-          (seconds, minutes, hours, days, weeks, months, quarters, or years) and applies an aggregation
-          function to each bin.  Empty bins are automatically included in the output, filled with
-          <code>NaN</code> for numeric aggregations or <code>0</code> for count/size.
-        </p>
-        <h3>Supported frequencies</h3>
-        <table>
-          <tr><th>String</th><th>Interval</th><th>Default label</th></tr>
-          <tr><td><code>"S"</code></td><td>Second</td><td>left (bin start)</td></tr>
-          <tr><td><code>"T"</code> / <code>"min"</code></td><td>Minute</td><td>left</td></tr>
-          <tr><td><code>"H"</code></td><td>Hour</td><td>left</td></tr>
-          <tr><td><code>"D"</code></td><td>Calendar day (UTC)</td><td>left — UTC midnight</td></tr>
-          <tr><td><code>"W"</code> / <code>"W-SUN"</code></td><td>Week ending Sunday</td><td>right — Sunday</td></tr>
-          <tr><td><code>"W-MON"</code> … <code>"W-SAT"</code></td><td>Week ending on weekday</td><td>right — anchor day</td></tr>
-          <tr><td><code>"MS"</code></td><td>Month start (1st)</td><td>left</td></tr>
-          <tr><td><code>"ME"</code></td><td>Month end (last day)</td><td>right — last day</td></tr>
-          <tr><td><code>"QS"</code></td><td>Quarter start</td><td>left</td></tr>
-          <tr><td><code>"QE"</code></td><td>Quarter end</td><td>right — last day of quarter</td></tr>
-          <tr><td><code>"AS"</code> / <code>"YS"</code></td><td>Year start (Jan 1)</td><td>left</td></tr>
-          <tr><td><code>"AE"</code> / <code>"YE"</code></td><td>Year end (Dec 31)</td><td>right</td></tr>
-        </table>
-      </section>
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
 
-      <!-- Example 1: daily sum -->
-      <section>
-        <h2>Example 1 — Daily sum of a price Series</h2>
-        <pre><code id="ex1-code">import { Series, resampleSeries } from "tsb";
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>resample()</h1>
+  <p class="subtitle">Time-based resampling and aggregation for Series and DataFrame · mirrors <code>pandas.DataFrame.resample</code></p>
+
+  <div class="section">
+    <h2>Example 1 — Daily sum of a price Series</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, resampleSeries } from "tsb";
 
 const dates = [
   new Date("2024-01-01T09:00Z"),
@@ -78,16 +174,24 @@ const prices = new Series({ data: [100, 105, 98, 110, 120], index: dates, name: 
 
 const daily = resampleSeries(prices, "D").sum();
 // Jan 1: 205   Jan 2: 208   Jan 3: NaN (empty)   Jan 4: 120
-console.log(daily.index.values.map(d => d.toISOString().slice(0,10)));
-console.log(daily.toArray());</code></pre>
-        <button class="run-btn" onclick="runEx1()">▶ Run</button>
-        <div class="output" id="ex1-output">Click "Run" to execute.</div>
-      </section>
+console.log(daily.index.values.map(d =&gt; d.toISOString().slice(0,10)));
+console.log(daily.toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <!-- Example 2: monthly mean -->
-      <section>
-        <h2>Example 2 — Monthly mean with month-start labels</h2>
-        <pre><code id="ex2-code">import { Series, resampleSeries } from "tsb";
+  <div class="section">
+    <h2>Example 2 — Monthly mean with month-start labels</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, resampleSeries } from "tsb";
 
 const timestamps = [
   new Date("2024-01-05Z"), new Date("2024-01-20Z"),
@@ -98,16 +202,24 @@ const values = new Series({ data: [10, 20, 30, 40, 50], index: timestamps });
 
 const monthly = resampleSeries(values, "MS").mean();
 // Jan: 15   Feb: 35   Mar: 50
-console.log(monthly.index.values.map(d => d.toISOString().slice(0,7)));
-console.log(monthly.toArray());</code></pre>
-        <button class="run-btn" onclick="runEx2()">▶ Run</button>
-        <div class="output" id="ex2-output">Click "Run" to execute.</div>
-      </section>
+console.log(monthly.index.values.map(d =&gt; d.toISOString().slice(0,7)));
+console.log(monthly.toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <!-- Example 3: OHLC -->
-      <section>
-        <h2>Example 3 — OHLC (Open-High-Low-Close) aggregation</h2>
-        <pre><code id="ex3-code">import { Series, resampleSeries } from "tsb";
+  <div class="section">
+    <h2>Example 3 — OHLC (Open-High-Low-Close) aggregation</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, resampleSeries } from "tsb";
 
 const ticks = [
   new Date("2024-01-01T09:00Z"), new Date("2024-01-01T10:00Z"),
@@ -119,15 +231,23 @@ const ohlc = resampleSeries(px, "D").ohlc();
 console.log("open :", ohlc.col("open").toArray());
 console.log("high :", ohlc.col("high").toArray());
 console.log("low  :", ohlc.col("low").toArray());
-console.log("close:", ohlc.col("close").toArray());</code></pre>
-        <button class="run-btn" onclick="runEx3()">▶ Run</button>
-        <div class="output" id="ex3-output">Click "Run" to execute.</div>
-      </section>
+console.log("close:", ohlc.col("close").toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <!-- Example 4: DataFrame resample -->
-      <section>
-        <h2>Example 4 — DataFrame resample with per-column aggregations</h2>
-        <pre><code id="ex4-code">import { DataFrame, Index, resampleDataFrame } from "tsb";
+  <div class="section">
+    <h2>Example 4 — DataFrame resample with per-column aggregations</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, Index, resampleDataFrame } from "tsb";
 
 const idx = new Index([
   new Date("2024-01-01Z"), new Date("2024-01-01T12:00Z"),
@@ -145,15 +265,23 @@ const result = resampleDataFrame(df, "D").agg({
 });
 console.log("revenue:", result.col("revenue").toArray()); // [300, 200]
 console.log("visits :", result.col("visits").toArray());  // [15, 10]
-console.log("index  :", result.index.values.map(d => d.toISOString().slice(0,10)));</code></pre>
-        <button class="run-btn" onclick="runEx4()">▶ Run</button>
-        <div class="output" id="ex4-output">Click "Run" to execute.</div>
-      </section>
+console.log("index  :", result.index.values.map(d =&gt; d.toISOString().slice(0,10)));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <!-- Example 5: Weekly -->
-      <section>
-        <h2>Example 5 — Weekly resample (labeled by Sunday)</h2>
-        <pre><code id="ex5-code">import { Series, resampleSeries } from "tsb";
+  <div class="section">
+    <h2>Example 5 — Weekly resample (labeled by Sunday)</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, resampleSeries } from "tsb";
 
 // Jan 8 2024 = Monday, Jan 14 = Sunday
 const dates = [
@@ -164,16 +292,24 @@ const s = new Series({ data: [1, 2, 3, 4, 5], index: dates });
 const weekly = resampleSeries(s, "W").sum();
 
 // Week 1 (ends Jan 14): 1+2+3=6   Week 2 (ends Jan 21): 4+5=9
-console.log(weekly.index.values.map(d => d.toISOString().slice(0,10)));
-console.log(weekly.toArray());</code></pre>
-        <button class="run-btn" onclick="runEx5()">▶ Run</button>
-        <div class="output" id="ex5-output">Click "Run" to execute.</div>
-      </section>
+console.log(weekly.index.values.map(d =&gt; d.toISOString().slice(0,10)));
+console.log(weekly.toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <!-- Example 6: custom aggregation -->
-      <section>
-        <h2>Example 6 — Custom aggregation function</h2>
-        <pre><code id="ex6-code">import { Series, resampleSeries } from "tsb";
+  <div class="section">
+    <h2>Example 6 — Custom aggregation function</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, resampleSeries } from "tsb";
 
 const dates = [
   new Date("2024-01-01Z"), new Date("2024-01-01T12:00Z"),
@@ -182,142 +318,22 @@ const dates = [
 const s = new Series({ data: [2, 4, 8], index: dates });
 
 // Product of each bin
-const product = resampleSeries(s, "D").agg((vals) =>
-  vals.reduce((acc, v) => (typeof v === "number" ? acc * v : acc), 1)
+const product = resampleSeries(s, "D").agg((vals) =&gt;
+  vals.reduce((acc, v) =&gt; (typeof v === "number" ? acc * v : acc), 1)
 );
-console.log(product.toArray()); // [8, 8]</code></pre>
-        <button class="run-btn" onclick="runEx6()">▶ Run</button>
-        <div class="output" id="ex6-output">Click "Run" to execute.</div>
-      </section>
+console.log(product.toArray()); // [8, 8]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      <section>
-        <h2>API Reference</h2>
-        <h3>resampleSeries(series, freq, options?)</h3>
-        <p>Returns a <code>SeriesResampler</code> with methods: <code>.sum()</code>, <code>.mean()</code>, <code>.min()</code>, <code>.max()</code>, <code>.count()</code>, <code>.first()</code>, <code>.last()</code>, <code>.std()</code>, <code>.var()</code>, <code>.size()</code>, <code>.ohlc()</code>, <code>.agg(spec)</code>.</p>
-        <h3>resampleDataFrame(df, freq, options?)</h3>
-        <p>Returns a <code>DataFrameResampler</code> with the same numeric aggregation methods (each returning a DataFrame), plus <code>.size()</code> (returns a Series), and <code>.agg(spec)</code> where <code>spec</code> can be a per-column object.</p>
-        <h3>options</h3>
-        <table>
-          <tr><th>Option</th><th>Type</th><th>Description</th></tr>
-          <tr><td><code>label</code></td><td><code>"left" | "right"</code></td><td>Override the default label side for the output index.</td></tr>
-        </table>
-      </section>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-      <section>
-        <h2>See also</h2>
-        <p>
-          <a href="groupby.html">groupby</a> — label-based grouping ·
-          <a href="rolling.html">rolling</a> — rolling window ·
-          <a href="date_range.html">date_range</a> — generate datetime indices
-        </p>
-      </section>
-
-    </main>
-
-    <script type="module">
-      import { Series, DataFrame, Index, resampleSeries, resampleDataFrame } from "https://esm.sh/tsb@latest";
-
-      function capture(fn) {
-        const logs = [];
-        const orig = console.log;
-        console.log = (...args) => logs.push(args.map(a => JSON.stringify(a, null, 2)).join(" "));
-        try { fn(); } catch (e) { logs.push("Error: " + e.message); }
-        console.log = orig;
-        return logs.join("\n");
-      }
-
-      window.runEx1 = () => {
-        const out = capture(() => {
-          const dates = [
-            new Date("2024-01-01T09:00Z"), new Date("2024-01-01T15:00Z"),
-            new Date("2024-01-02T10:00Z"), new Date("2024-01-02T16:00Z"),
-            new Date("2024-01-04T09:00Z"),
-          ];
-          const prices = new Series({ data: [100, 105, 98, 110, 120], index: dates, name: "price" });
-          const daily = resampleSeries(prices, "D").sum();
-          console.log(daily.index.values.map(d => d.toISOString().slice(0,10)));
-          console.log(daily.toArray());
-        });
-        document.getElementById("ex1-output").textContent = out;
-      };
-
-      window.runEx2 = () => {
-        const out = capture(() => {
-          const timestamps = [
-            new Date("2024-01-05Z"), new Date("2024-01-20Z"),
-            new Date("2024-02-10Z"), new Date("2024-02-25Z"),
-            new Date("2024-03-15Z"),
-          ];
-          const values = new Series({ data: [10, 20, 30, 40, 50], index: timestamps });
-          const monthly = resampleSeries(values, "MS").mean();
-          console.log(monthly.index.values.map(d => d.toISOString().slice(0,7)));
-          console.log(monthly.toArray());
-        });
-        document.getElementById("ex2-output").textContent = out;
-      };
-
-      window.runEx3 = () => {
-        const out = capture(() => {
-          const ticks = [
-            new Date("2024-01-01T09:00Z"), new Date("2024-01-01T10:00Z"),
-            new Date("2024-01-01T11:00Z"), new Date("2024-01-01T15:00Z"),
-          ];
-          const px = new Series({ data: [100, 108, 95, 103], index: ticks, name: "AAPL" });
-          const ohlc = resampleSeries(px, "D").ohlc();
-          console.log("open :", ohlc.col("open").toArray());
-          console.log("high :", ohlc.col("high").toArray());
-          console.log("low  :", ohlc.col("low").toArray());
-          console.log("close:", ohlc.col("close").toArray());
-        });
-        document.getElementById("ex3-output").textContent = out;
-      };
-
-      window.runEx4 = () => {
-        const out = capture(() => {
-          const idx = new Index([
-            new Date("2024-01-01Z"), new Date("2024-01-01T12:00Z"),
-            new Date("2024-01-02Z"), new Date("2024-01-02T18:00Z"),
-          ]);
-          const df = DataFrame.fromColumns(
-            { revenue: [100, 200, 150, 50], visits: [10, 20, 5, 15] },
-            { index: idx },
-          );
-          const result = resampleDataFrame(df, "D").agg({ revenue: "sum", visits: "mean" });
-          console.log("revenue:", result.col("revenue").toArray());
-          console.log("visits :", result.col("visits").toArray());
-          console.log("index  :", result.index.values.map(d => d.toISOString().slice(0,10)));
-        });
-        document.getElementById("ex4-output").textContent = out;
-      };
-
-      window.runEx5 = () => {
-        const out = capture(() => {
-          const dates = [
-            new Date("2024-01-08Z"), new Date("2024-01-10Z"), new Date("2024-01-14Z"),
-            new Date("2024-01-15Z"), new Date("2024-01-18Z"),
-          ];
-          const s = new Series({ data: [1, 2, 3, 4, 5], index: dates });
-          const weekly = resampleSeries(s, "W").sum();
-          console.log(weekly.index.values.map(d => d.toISOString().slice(0,10)));
-          console.log(weekly.toArray());
-        });
-        document.getElementById("ex5-output").textContent = out;
-      };
-
-      window.runEx6 = () => {
-        const out = capture(() => {
-          const dates = [
-            new Date("2024-01-01Z"), new Date("2024-01-01T12:00Z"),
-            new Date("2024-01-02Z"),
-          ];
-          const s = new Series({ data: [2, 4, 8], index: dates });
-          const product = resampleSeries(s, "D").agg((vals) =>
-            vals.reduce((acc, v) => (typeof v === "number" ? acc * v : acc), 1)
-          );
-          console.log(product.toArray());
-        });
-        document.getElementById("ex6-output").textContent = out;
-      };
-    </script>
-  </body>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

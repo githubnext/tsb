@@ -5,45 +5,164 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — infer_objects / convert_dtypes</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
-    h1 { color: #2563eb; }
-    h2 { color: #1e40af; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.4rem; }
-    pre { background: #f1f5f9; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.9em; }
-    .note { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 0.75rem 1rem; border-radius: 4px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
-    th { background: #f8fafc; font-weight: 600; }
-    a { color: #2563eb; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <a href="index.html">← Back to tsb playground</a>
-  <h1>infer_objects / convert_dtypes</h1>
 
-  <div class="note">
-    <strong>pandas equivalent:</strong>
-    <code>Series.infer_objects()</code> &nbsp;/&nbsp;
-    <code>DataFrame.infer_objects()</code> &nbsp;/&nbsp;
-    <code>Series.convert_dtypes()</code> &nbsp;/&nbsp;
-    <code>DataFrame.convert_dtypes()</code>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
   </div>
 
-  <h2>What it does</h2>
-  <p>
-    These utilities refine dtypes automatically — useful after reading data from
-    CSV/JSON where everything starts as <code>object</code> or <code>string</code>:
-  </p>
-  <ul>
-    <li><strong><code>inferObjectsSeries</code></strong> — promotes an <code>object</code>-typed Series to a
-      more specific dtype (int, float, bool, string) when all values have a consistent type.</li>
-    <li><strong><code>inferObjectsDataFrame</code></strong> — applies per-column inference to every column.</li>
-    <li><strong><code>convertDtypesSeries</code></strong> — like <code>inferObjectsSeries</code> but also
-      parses string columns as numbers when possible.</li>
-    <li><strong><code>convertDtypesDataFrame</code></strong> — per-column <code>convertDtypesSeries</code>.</li>
-  </ul>
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>infer_objects / convert_dtypes</h1>
+  <p class="subtitle">These utilities refine dtypes automatically — useful after reading data from
+    CSV/JSON where everything starts as <code>object</code> or <code>string</code>:</p>
 
-  <h2>inferObjectsSeries — promote object → typed</h2>
-  <pre><code>import { Series, Dtype, inferObjectsSeries } from "tsb";
+  <div class="section">
+    <h2>inferObjectsSeries — promote object → typed</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, Dtype, inferObjectsSeries } from "tsb";
 
 // Object series holding integers
 const s = new Series({ data: [1, 2, 3], dtype: Dtype.object });
@@ -59,10 +178,23 @@ inferObjectsSeries(mixed).dtype.kind; // "object"
 
 // All null — no inference possible
 const nulls = new Series({ data: [null, null], dtype: Dtype.object });
-inferObjectsSeries(nulls).dtype.kind; // "object"</code></pre>
+inferObjectsSeries(nulls).dtype.kind; // "object"</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>inferObjectsDataFrame — all columns at once</h2>
-  <pre><code>import { DataFrame, inferObjectsDataFrame } from "tsb";
+  <div class="section">
+    <h2>inferObjectsDataFrame — all columns at once</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, inferObjectsDataFrame } from "tsb";
 
 const df = DataFrame.fromColumns({
   ints:   [1, 2, 3],
@@ -75,10 +207,23 @@ const inferred = inferObjectsDataFrame(df);
 inferred.col("ints").dtype.kind;   // "int"
 inferred.col("floats").dtype.kind; // "float"
 inferred.col("strs").dtype.kind;   // "string"
-inferred.col("bools").dtype.kind;  // "bool"</code></pre>
+inferred.col("bools").dtype.kind;  // "bool"</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>convertDtypesSeries — also parses numeric strings</h2>
-  <pre><code>import { Series, convertDtypesSeries } from "tsb";
+  <div class="section">
+    <h2>convertDtypesSeries — also parses numeric strings</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, convertDtypesSeries } from "tsb";
 
 // String values that look like integers
 const ints = new Series({ data: ["1", "2", "3"] });
@@ -98,10 +243,23 @@ convertDtypesSeries(text);  // same Series, dtype "string"
 import { Dtype } from "tsb";
 const withNull = new Series({ data: [1, null, 3], dtype: Dtype.int64 });
 convertDtypesSeries(withNull, { convertIntegerToFloat: true }).dtype.kind;
-// "float"  (null becomes NaN-compatible)</code></pre>
+// "float"  (null becomes NaN-compatible)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>convertDtypesDataFrame — per-column conversion</h2>
-  <pre><code>import { DataFrame, convertDtypesDataFrame } from "tsb";
+  <div class="section">
+    <h2>convertDtypesDataFrame — per-column conversion</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, convertDtypesDataFrame } from "tsb";
 
 // After reading a CSV, all columns come back as strings:
 const raw = DataFrame.fromColumns({
@@ -113,40 +271,19 @@ const raw = DataFrame.fromColumns({
 const typed = convertDtypesDataFrame(raw);
 typed.col("age").dtype.kind;   // "int"
 typed.col("score").dtype.kind; // "float"
-typed.col("name").dtype.kind;  // "string" (unchanged — not numeric)</code></pre>
+typed.col("name").dtype.kind;  // "string" (unchanged — not numeric)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>API reference</h2>
-  <table>
-    <tr><th>Function</th><th>Description</th></tr>
-    <tr><td><code>inferObjectsSeries(s, options?)</code></td><td>Infer better dtype for object-typed Series</td></tr>
-    <tr><td><code>inferObjectsDataFrame(df, options?)</code></td><td>Infer better dtypes for all columns</td></tr>
-    <tr><td><code>convertDtypesSeries(s, options?)</code></td><td>Convert to best dtype, including string→number parsing</td></tr>
-    <tr><td><code>convertDtypesDataFrame(df, options?)</code></td><td>Per-column <code>convertDtypesSeries</code></td></tr>
-  </table>
-
-  <h3>InferObjectsOptions</h3>
-  <table>
-    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
-    <tr><td><code>objectOnly</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Only infer for object-dtype Series (mirrors pandas default)</td></tr>
-  </table>
-
-  <h3>ConvertDtypesOptions</h3>
-  <table>
-    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
-    <tr><td><code>convertString</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Parse string values as numbers when possible</td></tr>
-    <tr><td><code>convertIntegerToFloat</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Convert int series with nulls to float</td></tr>
-  </table>
-
-  <h2>When to use which</h2>
-  <table>
-    <tr><th>Use case</th><th>Function</th></tr>
-    <tr><td>Promote object columns after creation</td><td><code>inferObjectsSeries / DataFrame</code></td></tr>
-    <tr><td>Parse CSV/JSON string columns to numbers</td><td><code>convertDtypesSeries / DataFrame</code></td></tr>
-    <tr><td>Make int columns nullable (float)</td><td><code>convertDtypesSeries(s, { convertIntegerToFloat: true })</code></td></tr>
-  </table>
-
-  <footer style="margin-top:3rem; color:#64748b; font-size:0.85em;">
-    tsb — TypeScript port of pandas &nbsp;|&nbsp; <a href="index.html">← back to playground</a>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
   </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

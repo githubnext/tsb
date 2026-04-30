@@ -5,36 +5,165 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — Numeric Utilities (digitize, histogram, linspace, arange, zscore…)</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; line-height: 1.6; color: #1a1a1a; }
-    h1 { font-size: 1.7rem; }
-    h2 { font-size: 1.2rem; margin-top: 2rem; color: #2563eb; }
-    pre { background: #f3f4f6; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.88rem; }
-    code { font-family: "Fira Code", "Cascadia Code", monospace; }
-    .output { background: #ecfdf5; border-left: 3px solid #10b981; padding: 0.75rem 1rem; margin-top: 0.5rem; border-radius: 4px; white-space: pre; font-family: monospace; font-size: 0.87rem; }
-    .section { border-bottom: 1px solid #e5e7eb; padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
-    a { color: #2563eb; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <h1>🔢 Numeric Utilities</h1>
-  <p>
-    <a href="index.html">← back to index</a>
-  </p>
-  <p>
-    <code>tsb</code> ships numpy/scipy-style numeric utility functions — all implemented
-    from scratch with no external dependencies:
-    <code>digitize</code>, <code>histogram</code>, <code>linspace</code>, <code>arange</code>,
-    <code>percentileOfScore</code>, <code>zscore</code>, <code>minMaxNormalize</code>,
-    <code>coefficientOfVariation</code>.
-  </p>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Numeric Utilities (digitize, histogram, linspace, arange, zscore…)</h1>
+  <p class="subtitle"><a href="index.html">← back to index</a></p>
 
   <div class="section">
     <h2>digitize — bin values</h2>
-    <p>
-      Map each value to the index of the bin it falls into. Mirrors <code>numpy.digitize</code>.
-      Indices are 0-based; values below the first edge return <code>-1</code>.
-    </p>
-    <pre><code>import { digitize, seriesDigitize, Series } from "tsb";
+      <p>Map each value to the index of the bin it falls into. Mirrors <code>numpy.digitize</code>.
+      Indices are 0-based; values below the first edge return <code>-1</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { digitize, seriesDigitize, Series } from "tsb";
 
 // Find which [0,33), [33,66), [66,100] bucket each score belongs to
 const scores = [15, 45, 70, 33, 100];
@@ -51,14 +180,24 @@ const bins = digitize(scores, edges);
 // Series version — preserves index
 const s = new Series({ data: [15, 45, 70], index: ["Alice","Bob","Carol"] });
 seriesDigitize(s, [33, 66, 100]);
-// Series: Alice→-1, Bob→1, Carol→2</code></pre>
-    <div class="output" id="out-digitize">Running…</div>
+// Series: Alice→-1, Bob→1, Carol→2</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
   <div class="section">
     <h2>histogram — frequency counts</h2>
-    <p>Count how many values fall in each bin. Mirrors <code>numpy.histogram</code>.</p>
-    <pre><code>import { histogram } from "tsb";
+      <p>Count how many values fall in each bin. Mirrors <code>numpy.histogram</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { histogram } from "tsb";
 
 const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -70,14 +209,24 @@ const { counts: d, binEdges: e } = histogram(data, { bins: 5, density: true });
 
 // Explicit edges
 histogram(data, { binEdges: [1, 4, 7, 10] });
-// counts: [ 3, 3, 4 ]</code></pre>
-    <div class="output" id="out-histogram">Running…</div>
+// counts: [ 3, 3, 4 ]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
   <div class="section">
     <h2>linspace &amp; arange — number sequences</h2>
-    <p>Generate evenly-spaced sequences, mirroring <code>numpy.linspace</code> and <code>numpy.arange</code>.</p>
-    <pre><code>import { linspace, arange } from "tsb";
+      <p>Generate evenly-spaced sequences, mirroring <code>numpy.linspace</code> and <code>numpy.arange</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { linspace, arange } from "tsb";
 
 // 5 values from 0 to 1 (inclusive)
 linspace(0, 1, 5);
@@ -93,34 +242,50 @@ arange(2, 10, 2);
 
 // Descending
 arange(5, 0, -1);
-// → [5, 4, 3, 2, 1]</code></pre>
-    <div class="output" id="out-linspace">Running…</div>
+// → [5, 4, 3, 2, 1]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
   <div class="section">
     <h2>percentileOfScore — percentile rank</h2>
-    <p>
-      Compute what percentile a given score falls at within a dataset.
-      Mirrors <code>scipy.stats.percentileofscore</code>.
-    </p>
-    <pre><code>import { percentileOfScore } from "tsb";
+      <p>Compute what percentile a given score falls at within a dataset.
+      Mirrors <code>scipy.stats.percentileofscore</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { percentileOfScore } from "tsb";
 
 const grades = [55, 60, 70, 75, 80, 85, 90, 95];
 
 // What percentile is a score of 75?
 percentileOfScore(grades, 75);            // 50 (rank — default)
 percentileOfScore(grades, 75, "weak");    // 50 (≤ 75: 4/8 = 50%)
-percentileOfScore(grades, 75, "strict");  // 37.5 (< 75: 3/8 = 37.5%)</code></pre>
-    <div class="output" id="out-percentile">Running…</div>
+percentileOfScore(grades, 75, "strict");  // 37.5 (&lt; 75: 3/8 = 37.5%)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
   <div class="section">
     <h2>zscore — standardisation</h2>
-    <p>
-      Transform values to zero mean and unit variance. Mirrors <code>scipy.stats.zscore</code>.
-      Missing values are propagated; zero-variance data returns all <code>NaN</code>.
-    </p>
-    <pre><code>import { zscore, Series } from "tsb";
+      <p>Transform values to zero mean and unit variance. Mirrors <code>scipy.stats.zscore</code>.
+      Missing values are propagated; zero-variance data returns all <code>NaN</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { zscore, Series } from "tsb";
 
 const s = new Series({ data: [2, 4, 4, 4, 5, 5, 7, 9], name: "values" });
 const z = zscore(s);
@@ -128,17 +293,25 @@ const z = zscore(s);
 // z.values ≈ [-1.5, -0.5, -0.5, -0.5, 0, 0, 1, 2]
 
 // With population std (ddof=0)
-const zPop = zscore(s, { ddof: 0 });</code></pre>
-    <div class="output" id="out-zscore">Running…</div>
+const zPop = zscore(s, { ddof: 0 });</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
   <div class="section">
     <h2>minMaxNormalize — scale to [0, 1]</h2>
-    <p>
-      Scale all values to the interval <code>[0, 1]</code> (or a custom range).
-      Mirrors <code>sklearn MinMaxScaler</code>.
-    </p>
-    <pre><code>import { minMaxNormalize, Series } from "tsb";
+      <p>Scale all values to the interval <code>[0, 1]</code> (or a custom range).
+      Mirrors <code>sklearn MinMaxScaler</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { minMaxNormalize, Series } from "tsb";
 
 const s = new Series({ data: [0, 25, 50, 75, 100] });
 minMaxNormalize(s).values;
@@ -146,17 +319,25 @@ minMaxNormalize(s).values;
 
 // Scale to [-1, 1]
 minMaxNormalize(s, { featureRangeMin: -1, featureRangeMax: 1 }).values;
-// → [-1, -0.5, 0, 0.5, 1]</code></pre>
-    <div class="output" id="out-minmax">Running…</div>
+// → [-1, -0.5, 0, 0.5, 1]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
   <div class="section">
     <h2>coefficientOfVariation — relative spread</h2>
-    <p>
-      Dimensionless measure of dispersion: <code>std / |mean|</code>.
-      Useful for comparing spread across datasets with different units.
-    </p>
-    <pre><code>import { coefficientOfVariation, Series } from "tsb";
+      <p>Dimensionless measure of dispersion: <code>std / |mean|</code>.
+      Useful for comparing spread across datasets with different units.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { coefficientOfVariation, Series } from "tsb";
 
 // Dataset A: [10, 20, 30]  mean=20, std=10  → CV=0.5
 coefficientOfVariation(new Series({ data: [10, 20, 30] }));
@@ -165,189 +346,19 @@ coefficientOfVariation(new Series({ data: [10, 20, 30] }));
 coefficientOfVariation(new Series({ data: [100, 200, 300] }));
 
 // CV with population std
-coefficientOfVariation(new Series({ data: [1, 2, 3, 4, 5] }), { ddof: 0 });</code></pre>
-    <div class="output" id="out-cv">Running…</div>
+coefficientOfVariation(new Series({ data: [1, 2, 3, 4, 5] }), { ddof: 0 });</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <script type="module">
-    // ── tiny helpers ──────────────────────────────────────────────────────────
-    function show(id, lines) {
-      document.getElementById(id).textContent = lines.join("\n");
-    }
-    function fmtArr(arr) {
-      return "[" + arr.map(v => (typeof v === "number" ? +v.toFixed(4) : v)).join(", ") + "]";
-    }
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    // ── inline micro-implementations (no bundler needed) ──────────────────────
-    // digitize
-    function digitize(values, bins, right = false) {
-      return values.map(v => {
-        if (v === null || (typeof v === "number" && isNaN(v))) return NaN;
-        const n = bins.length;
-        if (right) {
-          for (let i = 0; i < n; i++) if (v <= bins[i]) return i - 1;
-          return n - 1;
-        } else {
-          for (let i = 0; i < n; i++) if (v < bins[i]) return i - 1;
-          return n - 1;
-        }
-      });
-    }
-
-    // histogram
-    function histogram(values, opts = {}) {
-      const nums = values.filter(v => typeof v === "number" && !isNaN(v));
-      const nbins = opts.bins ?? 10;
-      const lo = Math.min(...nums);
-      const hi = Math.max(...nums);
-      const edges = [];
-      for (let i = 0; i <= nbins; i++) edges.push(lo + (i / nbins) * (hi - lo));
-      const counts = new Array(nbins).fill(0);
-      for (const v of nums) {
-        if (v === hi) { counts[nbins - 1]++; continue; }
-        let l = 0, r = nbins - 1;
-        while (l < r) { const m = (l + r) >> 1; if (v < edges[m + 1]) r = m; else l = m + 1; }
-        counts[l]++;
-      }
-      return { counts, binEdges: edges };
-    }
-
-    // linspace
-    function linspace(start, stop, num = 50) {
-      if (num === 0) return [];
-      if (num === 1) return [start];
-      const result = [];
-      for (let i = 0; i < num; i++) result.push(i === num - 1 ? stop : start + i * (stop - start) / (num - 1));
-      return result;
-    }
-
-    // arange
-    function arange(startOrStop, stop, step = 1) {
-      let start, s;
-      if (stop === undefined) { start = 0; s = startOrStop; }
-      else { start = startOrStop; s = stop; }
-      const result = [];
-      if (step > 0) for (let v = start; v < s; v = start + result.length * step) result.push(v);
-      else for (let v = start; v > s; v = start + result.length * step) result.push(v);
-      return result;
-    }
-
-    // percentileOfScore
-    function percentileOfScore(arr, score, kind = "rank") {
-      const nums = arr.filter(v => typeof v === "number" && !isNaN(v));
-      const n = nums.length;
-      if (n === 0) return NaN;
-      const weak = nums.filter(v => v <= score).length / n * 100;
-      const strict = nums.filter(v => v < score).length / n * 100;
-      return kind === "weak" ? weak : kind === "strict" ? strict : (weak + strict) / 2;
-    }
-
-    // zscore
-    function zscore(arr) {
-      const nums = arr.filter(v => typeof v === "number" && !isNaN(v));
-      const n = nums.length;
-      if (n < 2) return arr.map(() => NaN);
-      const mean = nums.reduce((a, b) => a + b, 0) / n;
-      const std = Math.sqrt(nums.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1));
-      return arr.map(v => (typeof v === "number" && !isNaN(v)) ? (v - mean) / std : v);
-    }
-
-    // minMaxNormalize
-    function minMaxNormalize(arr, rMin = 0, rMax = 1) {
-      const nums = arr.filter(v => typeof v === "number" && !isNaN(v));
-      const lo = Math.min(...nums), hi = Math.max(...nums);
-      const span = hi - lo;
-      return arr.map(v => typeof v === "number" && !isNaN(v) ? span === 0 ? (rMin + rMax) / 2 : ((v - lo) / span) * (rMax - rMin) + rMin : v);
-    }
-
-    // CV
-    function cv(arr) {
-      const nums = arr.filter(v => typeof v === "number" && !isNaN(v));
-      const n = nums.length;
-      const mean = nums.reduce((a, b) => a + b, 0) / n;
-      const std = Math.sqrt(nums.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1));
-      return std / Math.abs(mean);
-    }
-
-    // ── demos ─────────────────────────────────────────────────────────────────
-    try {
-      const scores = [15, 45, 70, 33, 100];
-      const edges  = [33, 66, 100];
-      const bins = digitize(scores, edges);
-      show("out-digitize", [
-        `scores = ${JSON.stringify(scores)}`,
-        `edges  = ${JSON.stringify(edges)}`,
-        `bins   = ${JSON.stringify(bins)}`,
-        `  15 < 33  → -1 (below first edge)`,
-        `  45 ∈ [33,66) → 1`,
-        `  70 ∈ [66,100)→ 2`,
-        `  33 ∈ [33,66) → 0`,
-        ` 100 = max   → 2`,
-      ]);
-    } catch (e) { show("out-digitize", ["Error: " + e.message]); }
-
-    try {
-      const data = [1,2,3,4,5,6,7,8,9,10];
-      const { counts, binEdges } = histogram(data, { bins: 5 });
-      const explicitCounts = histogram(data, { bins: 3 }).counts;
-      show("out-histogram", [
-        `data = [1..10]`,
-        `5 bins: counts = ${JSON.stringify(counts)}`,
-        `        edges  = [${binEdges.map(v => +v.toFixed(2)).join(", ")}]`,
-        `3 bins: counts = ${JSON.stringify(explicitCounts)}`,
-      ]);
-    } catch (e) { show("out-histogram", ["Error: " + e.message]); }
-
-    try {
-      show("out-linspace", [
-        `linspace(0, 1, 5) = ${fmtArr(linspace(0, 1, 5))}`,
-        `linspace(0, 10, 3) = ${fmtArr(linspace(0, 10, 3))}`,
-        `arange(5)         = ${fmtArr(arange(5))}`,
-        `arange(2, 10, 2)  = ${fmtArr(arange(2, 10, 2))}`,
-        `arange(5, 0, -1)  = ${fmtArr(arange(5, 0, -1))}`,
-      ]);
-    } catch (e) { show("out-linspace", ["Error: " + e.message]); }
-
-    try {
-      const grades = [55, 60, 70, 75, 80, 85, 90, 95];
-      show("out-percentile", [
-        `grades = ${JSON.stringify(grades)}`,
-        `percentileOfScore(grades, 75) [rank]   = ${percentileOfScore(grades, 75)}`,
-        `percentileOfScore(grades, 75, "weak")  = ${percentileOfScore(grades, 75, "weak")}`,
-        `percentileOfScore(grades, 75, "strict")= ${percentileOfScore(grades, 75, "strict")}`,
-      ]);
-    } catch (e) { show("out-percentile", ["Error: " + e.message]); }
-
-    try {
-      const data = [2, 4, 4, 4, 5, 5, 7, 9];
-      const z = zscore(data);
-      show("out-zscore", [
-        `data = ${JSON.stringify(data)}`,
-        `zscore = ${fmtArr(z)}`,
-        `mean(z) ≈ ${(z.reduce((a, b) => a + b, 0) / z.length).toExponential(2)} (≈ 0)`,
-        `std(z)  ≈ ${+(Math.sqrt(z.reduce((a, b) => a + b ** 2, 0) / (z.length - 1))).toFixed(4)} (≈ 1)`,
-      ]);
-    } catch (e) { show("out-zscore", ["Error: " + e.message]); }
-
-    try {
-      const data = [0, 25, 50, 75, 100];
-      const norm01  = minMaxNormalize(data, 0, 1);
-      const normN1P1 = minMaxNormalize(data, -1, 1);
-      show("out-minmax", [
-        `data      = ${JSON.stringify(data)}`,
-        `[0,1]     = ${fmtArr(norm01)}`,
-        `[-1,1]    = ${fmtArr(normN1P1)}`,
-      ]);
-    } catch (e) { show("out-minmax", ["Error: " + e.message]); }
-
-    try {
-      show("out-cv", [
-        `CV([10,20,30])      = ${+cv([10,20,30]).toFixed(4)}  (expect 0.5)`,
-        `CV([100,200,300])   = ${+cv([100,200,300]).toFixed(4)} (expect 0.5)`,
-        `CV([1,2,3,4,5])     = ${+cv([1,2,3,4,5]).toFixed(4)}`,
-        `CV([1,1,1]) std=0   = 0`,
-      ]);
-    } catch (e) { show("out-cv", ["Error: " + e.message]); }
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

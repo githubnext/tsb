@@ -6,204 +6,179 @@
   <title>tsb — timedelta_range</title>
   <style>
     :root {
-      --bg: #0d1117; --surface: #161b22; --border: #30363d;
-      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
-      --green: #3fb950; --red: #f85149; --yellow: #d29922;
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; line-height: 1.6; }
-    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; }
-    header h1 { font-size: 1.4rem; }
-    header h1 span { color: var(--accent); }
-    header p { color: var(--muted); font-size: 0.9rem; }
-    main { max-width: 960px; margin: 0 auto; padding: 2rem; }
-    h2 { color: var(--accent); margin: 2rem 0 0.75rem; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
-    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.25rem; margin-top: 0.75rem; }
-    input, select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 0.4rem 0.6rem; width: 100%; font-size: 0.9rem; }
-    input:focus, select:focus { outline: none; border-color: var(--accent); }
-    button { background: var(--accent); color: #0d1117; border: none; border-radius: 4px; padding: 0.45rem 1.2rem; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin-top: 1rem; }
-    button:hover { opacity: 0.85; }
-    .output { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1rem; font-family: monospace; font-size: 0.82rem; white-space: pre-wrap; max-height: 360px; overflow-y: auto; color: var(--green); margin-top: 1rem; }
-    .error { color: var(--red) !important; }
-    table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
-    th, td { border: 1px solid var(--border); padding: 0.4rem 0.75rem; text-align: left; }
-    th { background: var(--surface); color: var(--muted); font-weight: 500; }
-    td { font-family: monospace; }
-    .pill { display: inline-block; background: var(--border); border-radius: 3px; padding: 0.1rem 0.4rem; font-family: monospace; font-size: 0.8rem; }
-    .back { color: var(--muted); font-size: 0.85rem; text-decoration: none; }
-    .back:hover { color: var(--accent); }
-    code { background: var(--border); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.85rem; }
-    p { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<header>
-  <h1>tsb — <span>timedelta_range</span></h1>
-  <p>Generate fixed-frequency TimedeltaIndex sequences · mirrors <code>pandas.timedelta_range</code></p>
-</header>
-<main>
-  <a href="index.html" class="back">← back to index</a>
 
-  <h2>Frequency Reference</h2>
-  <div class="card">
-    <table>
-      <thead><tr><th>String</th><th>Duration</th><th>Example</th></tr></thead>
-      <tbody>
-        <tr><td><span class="pill">W</span></td><td>1 week (7 days)</td><td><code>"2W"</code> → 14 days per step</td></tr>
-        <tr><td><span class="pill">D</span></td><td>1 calendar day</td><td><code>"3D"</code> → 3 days per step</td></tr>
-        <tr><td><span class="pill">H</span></td><td>1 hour</td><td><code>"6H"</code> → 6 hours per step</td></tr>
-        <tr><td><span class="pill">T</span> / <span class="pill">min</span></td><td>1 minute</td><td><code>"30min"</code> → 30 minutes</td></tr>
-        <tr><td><span class="pill">S</span></td><td>1 second</td><td><code>"10S"</code> → 10 seconds</td></tr>
-        <tr><td><span class="pill">L</span> / <span class="pill">ms</span></td><td>1 millisecond</td><td><code>"500ms"</code> → 500 ms</td></tr>
-      </tbody>
-    </table>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
   </div>
 
-  <h2>Interactive Builder</h2>
-  <div class="card">
-    <p>Provide at least <strong>2</strong> of: <code>start</code>, <code>end</code>, <code>periods</code>, <code>freq</code>.</p>
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>timedelta_range</h1>
+  <p class="subtitle">Generate fixed-frequency TimedeltaIndex sequences · mirrors <code>pandas.timedelta_range</code></p>
 
-    <div class="grid">
-      <div>
-        <label>start (e.g. "0 days", "1 days 02:00:00", leave blank)</label>
-        <input id="start" type="text" value="0 days" placeholder='e.g. "0 days"' />
+  <div class="section">
+    <h2>Try it</h2>
+      <p>Edit and press <strong>▶ Run</strong> to execute. Use the imports listed below as a starting point.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
       </div>
-      <div>
-        <label>end (e.g. "4 days", leave blank)</label>
-        <input id="end" type="text" value="4 days" placeholder='e.g. "4 days"' />
-      </div>
-      <div>
-        <label>periods (integer, leave blank)</label>
-        <input id="periods" type="number" value="" placeholder="e.g. 5" />
-      </div>
-      <div>
-        <label>freq (e.g. "D", "6H", "30min", leave blank)</label>
-        <input id="freq" type="text" value="D" placeholder='e.g. "D"' />
-      </div>
-      <div>
-        <label>name (optional)</label>
-        <input id="name" type="text" value="" placeholder="optional label" />
-      </div>
-      <div>
-        <label>closed</label>
-        <select id="closed">
-          <option value="both" selected>both (default)</option>
-          <option value="left">left</option>
-          <option value="right">right</option>
-          <option value="neither">neither</option>
-        </select>
-      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Timedelta, timedelta_range } from "tsb";
+
+// Starter example for timedelta_range — edit and press ▶ Run to experiment.
+console.log("Available exports:", ["Timedelta","timedelta_range"]);
+</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
-
-    <button onclick="run()">Generate</button>
-    <div id="out" class="output">Click Generate to produce the TimedeltaIndex.</div>
   </div>
 
-  <h2>Preset Examples</h2>
-  <div class="card">
-    <table>
-      <thead><tr><th>Description</th><th>Code</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>5 daily intervals from 0</td>
-          <td><code>timedelta_range({ start:"0 days", periods:5, freq:"D" })</code></td>
-          <td><button style="margin:0;padding:0.25rem 0.7rem;" onclick="preset('0 days','','5','D','','both')">Run</button></td>
-        </tr>
-        <tr>
-          <td>1-to-3 days in daily steps</td>
-          <td><code>timedelta_range({ start:"1 days", end:"3 days", freq:"D" })</code></td>
-          <td><button style="margin:0;padding:0.25rem 0.7rem;" onclick="preset('1 days','3 days','','D','','both')">Run</button></td>
-        </tr>
-        <tr>
-          <td>4 entries ending at 3 days (freq D)</td>
-          <td><code>timedelta_range({ end:"3 days", periods:4, freq:"D" })</code></td>
-          <td><button style="margin:0;padding:0.25rem 0.7rem;" onclick="preset('','3 days','4','D','','both')">Run</button></td>
-        </tr>
-        <tr>
-          <td>Linear space 0→2 days, 5 points</td>
-          <td><code>timedelta_range({ start:"0 days", end:"2 days", periods:5 })</code></td>
-          <td><button style="margin:0;padding:0.25rem 0.7rem;" onclick="preset('0 days','2 days','5','','','both')">Run</button></td>
-        </tr>
-        <tr>
-          <td>6-hour steps, closed=left</td>
-          <td><code>timedelta_range({ start:"0 days", end:"1 days", freq:"6H", closed:"left" })</code></td>
-          <td><button style="margin:0;padding:0.25rem 0.7rem;" onclick="preset('0 days','1 days','','6H','','left')">Run</button></td>
-        </tr>
-        <tr>
-          <td>30-minute intervals, 8 periods</td>
-          <td><code>timedelta_range({ start:"0 days", periods:8, freq:"30min" })</code></td>
-          <td><button style="margin:0;padding:0.25rem 0.7rem;" onclick="preset('0 days','','8','30min','','both')">Run</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</main>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-<script type="module">
-import { timedelta_range, Timedelta } from "../src/index.ts";
-
-function fmtTd(td) {
-  const sign = td.totalMilliseconds < 0 ? "-" : "";
-  const abs = Math.abs(td.totalMilliseconds);
-  const d = Math.floor(abs / 86400000);
-  const rem = abs % 86400000;
-  const h = Math.floor(rem / 3600000).toString().padStart(2,"0");
-  const m = Math.floor((rem % 3600000) / 60000).toString().padStart(2,"0");
-  const s = Math.floor((rem % 60000) / 1000).toString().padStart(2,"0");
-  const ms = (rem % 1000);
-  const msPart = ms > 0 ? `.${ms.toString().padStart(3,"0")}` : "";
-  return `${sign}${d} days ${h}:${m}:${s}${msPart}`;
-}
-
-function buildAndRender(opts) {
-  const out = document.getElementById("out");
-  try {
-    const idx = timedelta_range(opts);
-    let lines = [`TimedeltaIndex (size=${idx.size}, name=${JSON.stringify(idx.name)})`, ""];
-    for (let i = 0; i < idx.size; i++) {
-      const td = idx.at(i);
-      lines.push(`  [${i}]  ${fmtTd(td)}   (${td.totalMilliseconds} ms)`);
-    }
-    if (idx.size === 0) lines.push("  (empty)");
-    out.textContent = lines.join("\n");
-    out.className = "output";
-  } catch (e) {
-    out.textContent = String(e);
-    out.className = "output error";
-  }
-}
-
-window.run = function() {
-  const start = document.getElementById("start").value.trim();
-  const end = document.getElementById("end").value.trim();
-  const periodsRaw = document.getElementById("periods").value.trim();
-  const freq = document.getElementById("freq").value.trim();
-  const name = document.getElementById("name").value.trim() || null;
-  const closed = document.getElementById("closed").value;
-
-  const opts = {};
-  if (start) opts.start = start;
-  if (end) opts.end = end;
-  if (periodsRaw) opts.periods = parseInt(periodsRaw, 10);
-  if (freq) opts.freq = freq;
-  if (name) opts.name = name;
-  opts.closed = closed;
-
-  buildAndRender(opts);
-};
-
-window.preset = function(start, end, periods, freq, name, closed) {
-  document.getElementById("start").value = start;
-  document.getElementById("end").value = end;
-  document.getElementById("periods").value = periods;
-  document.getElementById("freq").value = freq;
-  document.getElementById("name").value = name;
-  document.getElementById("closed").value = closed;
-  window.run();
-};
-</script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

@@ -4,40 +4,164 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — natsort</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <a href="index.html">← tsb playground</a>
-    <h1>natsort</h1>
-    <p>Natural-order sorting for strings — mirrors the <code>natsort</code> package used by pandas.</p>
-  </header>
 
-  <main>
-    <section class="intro">
-      <p>
-        Standard lexicographic sort places <code>"file10"</code> <em>before</em> <code>"file2"</code> because
-        <code>"1" &lt; "2"</code>. Natural sort compares <strong>embedded numbers numerically</strong>, so
-        <code>"file2"</code> correctly sorts before <code>"file10"</code>.
-      </p>
-      <p>
-        tsb exports four helpers:
-        <code>natCompare(a, b)</code> — comparator for <code>Array.sort</code>;
-        <code>natSorted(arr)</code> — returns a new naturally-sorted array;
-        <code>natSortKey(s)</code> — returns the token array used internally;
-        <code>natArgSort(arr)</code> — returns the permutation indices (like <code>pandas.Index.argsort</code>).
-      </p>
-      <p>
-        Mirrors
-        <a href="https://pandas.pydata.org/docs/reference/api/pandas.Index.sort_values.html" target="_blank"><code>pandas.Index.sort_values(key=natsort_keygen())</code></a>
-        and
-        <a href="https://natsort.readthedocs.io/en/stable/api.html" target="_blank"><code>natsort.natsorted()</code></a>.
-      </p>
-    </section>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-    <section>
-      <h2>1 · Basic usage</h2>
-      <pre><code>import { natSorted, natCompare, natSortKey, natArgSort } from "tsb";
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>natsort</h1>
+  <p class="subtitle">Natural-order sorting for strings — mirrors the <code>natsort</code> package used by pandas.</p>
+
+  <div class="section">
+    <h2>1 · Basic usage</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { natSorted, natCompare, natSortKey, natArgSort } from "tsb";
 
 // File names sort by embedded number
 const files = ["file10.txt", "file2.txt", "file1.txt"];
@@ -52,24 +176,46 @@ console.log(natSorted(versions));
 // Use as Array.sort comparator
 const copy = [...files];
 copy.sort(natCompare);
-// → ["file1.txt", "file2.txt", "file10.txt"]</code></pre>
-    </section>
+// → ["file1.txt", "file2.txt", "file10.txt"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section>
-      <h2>2 · Options</h2>
-      <pre><code>// ignoreCase — text tokens are folded to lower-case
+  <div class="section">
+    <h2>2 · Options</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// ignoreCase — text tokens are folded to lower-case
 const words = ["Banana", "apple", "Cherry"];
 natSorted(words, { ignoreCase: true });
 // → ["apple", "Banana", "Cherry"]
 
 // reverse — descending natural order
 natSorted(["file1", "file10", "file2"], { reverse: true });
-// → ["file10", "file2", "file1"]</code></pre>
-    </section>
+// → ["file10", "file2", "file1"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section>
-      <h2>3 · Sorting objects with a key function</h2>
-      <pre><code>const rows = [
+  <div class="section">
+    <h2>3 · Sorting objects with a key function</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const rows = [
   { path: "img/photo10.jpg" },
   { path: "img/photo2.jpg" },
   { path: "img/photo1.jpg" },
@@ -77,14 +223,25 @@ natSorted(["file1", "file10", "file2"], { reverse: true });
 
 // key extracts the string to sort by
 import { natSorted } from "tsb";
-const sorted = natSorted(rows, { key: r => r.path });
-sorted.map(r => r.path);
-// → ["img/photo1.jpg", "img/photo2.jpg", "img/photo10.jpg"]</code></pre>
-    </section>
+const sorted = natSorted(rows, { key: r =&gt; r.path });
+sorted.map(r =&gt; r.path);
+// → ["img/photo1.jpg", "img/photo2.jpg", "img/photo10.jpg"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section>
-      <h2>4 · natSortKey — inspect the token representation</h2>
-      <pre><code>import { natSortKey } from "tsb";
+  <div class="section">
+    <h2>4 · natSortKey — inspect the token representation</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { natSortKey } from "tsb";
 
 natSortKey("file10.txt");   // → ["file", 10, ".txt"]
 natSortKey("007bonds");     // → [7, "bonds"]  (leading zeros stripped)
@@ -93,28 +250,50 @@ natSortKey("42");           // → [42]
 
 // ignoreCase folds text tokens
 natSortKey("File10.TXT", { ignoreCase: true });
-// → ["file", 10, ".txt"]</code></pre>
-    </section>
+// → ["file", 10, ".txt"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section>
-      <h2>5 · natArgSort — permutation indices</h2>
-      <pre><code>import { natArgSort } from "tsb";
+  <div class="section">
+    <h2>5 · natArgSort — permutation indices</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { natArgSort } from "tsb";
 
 const arr = ["file10", "file2", "file1"];
 const idx = natArgSort(arr);
 // → [2, 1, 0]   (indices of "file1", "file2", "file10")
 
-idx.map(i => arr[i]);
+idx.map(i =&gt; arr[i]);
 // → ["file1", "file2", "file10"]
 
 // Use with a tsb Index to sort labels naturally:
 // index.argsort() uses default lexicographic order;
-// natArgSort(index.values) gives natural order.</code></pre>
-    </section>
+// natArgSort(index.values) gives natural order.</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section>
-      <h2>6 · Comparison with lexicographic sort</h2>
-      <pre><code>const data = ["item1", "item12", "item2", "item20", "item3"];
+  <div class="section">
+    <h2>6 · Comparison with lexicographic sort</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const data = ["item1", "item12", "item2", "item20", "item3"];
 
 // Lexicographic (default Array.sort)
 [...data].sort();
@@ -122,12 +301,19 @@ idx.map(i => arr[i]);
 
 // Natural sort
 natSorted(data);
-// → ["item1", "item2", "item3", "item12", "item20"]  ← correct</code></pre>
-    </section>
-  </main>
+// → ["item1", "item2", "item3", "item12", "item20"]  ← correct</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
   <footer>
-    <p>Built by <a href="https://github.com/githubnext/autoloop" style="color: var(--accent);">Autoloop</a> — an automated research and experimentation platform.</p>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
   </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

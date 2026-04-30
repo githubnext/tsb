@@ -4,46 +4,164 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — combine_first</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <a href="index.html">← tsb playground</a>
-    <h1>combine_first</h1>
-    <p>Patch missing values in a Series or DataFrame with values from another — mirrors <code>pandas.Series.combine_first</code> and <code>pandas.DataFrame.combine_first</code>.</p>
-  </header>
 
-  <main>
-    <section class="intro">
-      <p>
-        <code>combineFirstSeries(self, other)</code> and <code>combineFirstDataFrame(self, other)</code>
-        update the calling object with non-null values from <code>other</code>.
-        The result index is the <strong>union</strong> of both index sets.
-        For each label, <code>self</code>'s value takes priority; <code>other</code>'s value is only
-        used when <code>self</code>'s value is missing (<code>null</code>, <code>undefined</code>, or <code>NaN</code>).
-      </p>
-      <p>
-        Mirrors
-        <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.combine_first.html" target="_blank"><code>pandas.Series.combine_first</code></a>
-        and
-        <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.combine_first.html" target="_blank"><code>pandas.DataFrame.combine_first</code></a>.
-      </p>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-      <h3>Semantics</h3>
-      <table>
-        <thead><tr><th>Self value</th><th>Other value</th><th>Result</th></tr></thead>
-        <tbody>
-          <tr><td>non-null</td><td>anything</td><td>self value</td></tr>
-          <tr><td>null / NaN</td><td>non-null</td><td>other value</td></tr>
-          <tr><td>null / NaN</td><td>null / missing</td><td><code>null</code></td></tr>
-          <tr><td>—</td><td>any (new label)</td><td>other value</td></tr>
-        </tbody>
-      </table>
-    </section>
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>combine_first</h1>
+  <p class="subtitle">Patch missing values in a Series or DataFrame with values from another — mirrors <code>pandas.Series.combine_first</code> and <code>pandas.DataFrame.combine_first</code>.</p>
 
-    <section class="example">
-      <h2>Example 1 — Series: fill gaps with values from another Series</h2>
-      <pre><code>import { Series, combineFirstSeries } from "tsb";
+  <div class="section">
+    <h2>Example 1 — Series: fill gaps with values from another Series</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, combineFirstSeries } from "tsb";
 
 const a = new Series({ data: [1, null, 3], index: ["x", "y", "z"] });
 const b = new Series({ data: [10, 20, 30, 40], index: ["x", "y", "z", "w"] });
@@ -55,13 +173,23 @@ const result = combineFirstSeries(a, b);
 // - "x": a has 1 (non-null) → keeps 1
 // - "y": a has null → filled from b → 20
 // - "z": a has 3 (non-null) → keeps 3
-// - "w": a has no entry → comes from b → 40
-</code></pre>
-    </section>
+// - "w": a has no entry → comes from b → 40</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 2 — DataFrame: patch missing cells across row/column union</h2>
-      <pre><code>import { DataFrame, combineFirstDataFrame } from "tsb";
+  <div class="section">
+    <h2>Example 2 — DataFrame: patch missing cells across row/column union</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, combineFirstDataFrame } from "tsb";
 
 const a = DataFrame.fromColumns(
   { x: [1, null], y: [3, 4] },
@@ -84,13 +212,23 @@ const result = combineFirstDataFrame(a, b);
 // result["r2"]["y"] = null (no r2 in a, no y in b)
 // result["r0"]["z"] = 30  (b only)
 // result["r1"]["z"] = null (b has no r1)
-// result["r2"]["z"] = 40  (b only)
-</code></pre>
-    </section>
+// result["r2"]["z"] = 40  (b only)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 3 — NaN is treated as missing</h2>
-      <pre><code>import { Series, combineFirstSeries } from "tsb";
+  <div class="section">
+    <h2>Example 3 — NaN is treated as missing</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, combineFirstSeries } from "tsb";
 
 const sensor1 = new Series({
   data: [NaN, 22.5, 23.1, NaN],
@@ -105,13 +243,23 @@ const sensor2 = new Series({
 
 const merged = combineFirstSeries(sensor1, sensor2);
 // values: [21.0, 22.5, 23.1, 24.0]
-// Gaps in sensor1 filled from sensor2
-</code></pre>
-    </section>
+// Gaps in sensor1 filled from sensor2</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 4 — Temporal data backfill</h2>
-      <pre><code>import { Series, combineFirstSeries } from "tsb";
+  <div class="section">
+    <h2>Example 4 — Temporal data backfill</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, combineFirstSeries } from "tsb";
 
 // Primary data source with some gaps
 const primary = new Series({
@@ -127,9 +275,19 @@ const backup = new Series({
 
 const complete = combineFirstSeries(primary, backup);
 // index:  2024-01, 2024-02, 2024-03, 2024-04, 2024-05, 2024-06
-// values: 100,     101,     102,     103,     104,     106
-</code></pre>
-    </section>
-  </main>
+// values: 100,     101,     102,     103,     104,     106</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

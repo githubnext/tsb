@@ -5,93 +5,311 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — api_types: Runtime type-checking predicates</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
-    h1 { border-bottom: 2px solid #e2e8f0; padding-bottom: .5rem; }
-    h2 { margin-top: 2rem; color: #2d3748; }
-    h3 { color: #4a5568; margin-top: 1.5rem; }
-    pre { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .9rem; }
-    code { font-family: 'Fira Code', monospace; }
-    .result { background: #ebf8ff; border-left: 4px solid #4299e1; padding: .5rem 1rem; margin: .5rem 0; border-radius: 0 6px 6px 0; font-family: monospace; }
-    .ok { color: #276749; }
-    .fail { color: #c53030; }
-    .section { background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
-    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-    th, td { border: 1px solid #e2e8f0; padding: .4rem .8rem; text-align: left; }
-    th { background: #f7fafc; font-weight: 600; }
-    a { color: #3182ce; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <h1>📦 <code>api_types</code> — Runtime type-checking predicates</h1>
-  <p>
-    Port of <a href="https://pandas.pydata.org/docs/reference/api/pandas.api.types.html" target="_blank"><code>pandas.api.types</code></a>.
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>api_types: Runtime type-checking predicates</h1>
+  <p class="subtitle">Port of <a href="https://pandas.pydata.org/docs/reference/api/pandas.api.types.html" target="_blank"><code>pandas.api.types</code></a>.
     Two groups of predicates:
     <strong>value-level</strong> (work on arbitrary JS values) and
-    <strong>dtype-level</strong> (work on <code>Dtype</code> instances or dtype name strings).
-  </p>
+    <strong>dtype-level</strong> (work on <code>Dtype</code> instances or dtype name strings).</p>
 
-  <h2>Value-Level Predicates</h2>
-
-  <h3><code>isScalar(val)</code></h3>
-  <p>Returns <code>true</code> for primitives and <code>Date</code>. Mirrors <code>pd.api.types.is_scalar</code>.</p>
-  <pre><code>import { isScalar } from "tsb";
+  <div class="section">
+    <h2>isScalar(val)</h2>
+      <p>Returns <code>true</code> for primitives and <code>Date</code>. Mirrors <code>pd.api.types.is_scalar</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { isScalar } from "tsb";
 
 isScalar(42);            // true
 isScalar("hello");       // true
 isScalar(null);          // true
 isScalar(new Date());    // true
 isScalar([1, 2]);        // false
-isScalar({ a: 1 });      // false</code></pre>
-  <div id="scalar-demo" class="result"></div>
+isScalar({ a: 1 });      // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h3><code>isListLike(val)</code></h3>
-  <p>Returns <code>true</code> for iterables (excluding strings) and objects with a numeric <code>length</code>.</p>
-  <pre><code>isListLike([1, 2, 3]);      // true
+  <div class="section">
+    <h2>isListLike(val)</h2>
+      <p>Returns <code>true</code> for iterables (excluding strings) and objects with a numeric <code>length</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">isListLike([1, 2, 3]);      // true
 isListLike(new Set([1]));   // true
 isListLike("abc");          // false
-isListLike(42);             // false</code></pre>
-  <div id="listlike-demo" class="result"></div>
+isListLike(42);             // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h3><code>isArrayLike(val)</code></h3>
-  <p>Returns <code>true</code> for values with a non-negative integer <code>length</code> (including strings).</p>
-  <pre><code>isArrayLike([1, 2]);      // true
+  <div class="section">
+    <h2>isArrayLike(val)</h2>
+      <p>Returns <code>true</code> for values with a non-negative integer <code>length</code> (including strings).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">isArrayLike([1, 2]);      // true
 isArrayLike("hello");     // true
-isArrayLike(42);          // false</code></pre>
+isArrayLike(42);          // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h3><code>isDictLike(val)</code></h3>
-  <p>Returns <code>true</code> for plain objects and <code>Map</code>.</p>
-  <pre><code>isDictLike({ a: 1 });   // true
+  <div class="section">
+    <h2>isDictLike(val)</h2>
+      <p>Returns <code>true</code> for plain objects and <code>Map</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">isDictLike({ a: 1 });   // true
 isDictLike(new Map());  // true
-isDictLike([]);         // false</code></pre>
+isDictLike([]);         // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h3><code>isNumber / isBool / isStringValue / isFloat / isInteger</code></h3>
-  <pre><code>isNumber(3.14);      // true
+  <div class="section">
+    <h2>isNumber / isBool / isStringValue / isFloat / isInteger</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">isNumber(3.14);      // true
 isNumber(NaN);       // true  (typeof NaN === "number")
 isBool(true);        // true
 isStringValue("hi"); // true
 isFloat(3.14);       // true
 isFloat(3.0);        // false  (integer value)
 isInteger(42);       // true
-isInteger(3.14);     // false</code></pre>
-  <div id="value-demo" class="result"></div>
+isInteger(3.14);     // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h3><code>isMissing(val)</code></h3>
-  <p>Returns <code>true</code> for <code>null</code>, <code>undefined</code>, or <code>NaN</code>.</p>
-  <pre><code>isMissing(null);       // true
+  <div class="section">
+    <h2>isMissing(val)</h2>
+      <p>Returns <code>true</code> for <code>null</code>, <code>undefined</code>, or <code>NaN</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">isMissing(null);       // true
 isMissing(undefined);  // true
 isMissing(NaN);        // true
-isMissing(0);          // false</code></pre>
+isMissing(0);          // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h3><code>isHashable(val)</code></h3>
-  <p>Returns <code>true</code> for values safe to use as object keys (primitives).</p>
-  <pre><code>isHashable("key");  // true
+  <div class="section">
+    <h2>isHashable(val)</h2>
+      <p>Returns <code>true</code> for values safe to use as object keys (primitives).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">isHashable("key");  // true
 isHashable(42);     // true
-isHashable({});     // false</code></pre>
+isHashable({});     // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Dtype-Level Predicates</h2>
-  <p>All accept a <code>Dtype</code> instance or a dtype name string.</p>
-
-  <pre><code>import { Dtype, isNumericDtype, isFloatDtype, isIntegerDtype,
+  <div class="section">
+    <h2>Dtype-Level Predicates</h2>
+      <p>All accept a <code>Dtype</code> instance or a dtype name string.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Dtype, isNumericDtype, isFloatDtype, isIntegerDtype,
          isStringDtype, isDatetimeDtype, isCategoricalDtype } from "tsb";
 
 isNumericDtype(Dtype.float64);    // true
@@ -107,116 +325,19 @@ isDatetimeDtype("datetime");      // true
 isCategoricalDtype("category");   // true
 isObjectDtype("object");          // true
 isExtensionArrayDtype("category"); // true
-isExtensionArrayDtype("int32");    // false</code></pre>
-  <div id="dtype-demo" class="result"></div>
+isExtensionArrayDtype("int32");    // false</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Complete Predicate Reference</h2>
-  <table>
-    <tr><th>Function</th><th>Pandas equivalent</th><th>Description</th></tr>
-    <tr><td><code>isScalar(val)</code></td><td><code>is_scalar</code></td><td>Primitive or Date</td></tr>
-    <tr><td><code>isListLike(val)</code></td><td><code>is_list_like</code></td><td>Iterable (not string) or has length</td></tr>
-    <tr><td><code>isArrayLike(val)</code></td><td><code>is_array_like</code></td><td>Has non-negative integer length</td></tr>
-    <tr><td><code>isDictLike(val)</code></td><td><code>is_dict_like</code></td><td>Plain object or Map</td></tr>
-    <tr><td><code>isIterator(val)</code></td><td><code>is_iterator</code></td><td>Has callable <code>next</code> method</td></tr>
-    <tr><td><code>isNumber(val)</code></td><td><code>is_number</code></td><td><code>typeof === "number"</code></td></tr>
-    <tr><td><code>isBool(val)</code></td><td><code>is_bool</code></td><td><code>typeof === "boolean"</code></td></tr>
-    <tr><td><code>isStringValue(val)</code></td><td><code>is_string</code></td><td><code>typeof === "string"</code></td></tr>
-    <tr><td><code>isFloat(val)</code></td><td><code>is_float</code></td><td>Finite number with fractional part</td></tr>
-    <tr><td><code>isInteger(val)</code></td><td><code>is_integer</code></td><td>Integer-valued number</td></tr>
-    <tr><td><code>isBigInt(val)</code></td><td>—</td><td><code>typeof === "bigint"</code></td></tr>
-    <tr><td><code>isRegExp(val)</code></td><td><code>is_re</code></td><td>RegExp instance</td></tr>
-    <tr><td><code>isReCompilable(val)</code></td><td><code>is_re_compilable</code></td><td>String or RegExp</td></tr>
-    <tr><td><code>isMissing(val)</code></td><td><code>isna</code></td><td>null / undefined / NaN</td></tr>
-    <tr><td><code>isHashable(val)</code></td><td><code>is_hashable</code></td><td>Safe as object key (primitive)</td></tr>
-    <tr><td><code>isDate(val)</code></td><td>—</td><td>Date instance</td></tr>
-    <tr><td><code>isNumericDtype(d)</code></td><td><code>is_numeric_dtype</code></td><td>Int, uint, or float</td></tr>
-    <tr><td><code>isIntegerDtype(d)</code></td><td><code>is_integer_dtype</code></td><td>Any integer (signed or unsigned)</td></tr>
-    <tr><td><code>isSignedIntegerDtype(d)</code></td><td><code>is_signed_integer_dtype</code></td><td>int8–int64</td></tr>
-    <tr><td><code>isUnsignedIntegerDtype(d)</code></td><td><code>is_unsigned_integer_dtype</code></td><td>uint8–uint64</td></tr>
-    <tr><td><code>isFloatDtype(d)</code></td><td><code>is_float_dtype</code></td><td>float32 or float64</td></tr>
-    <tr><td><code>isBoolDtype(d)</code></td><td><code>is_bool_dtype</code></td><td>bool</td></tr>
-    <tr><td><code>isStringDtype(d)</code></td><td><code>is_string_dtype</code></td><td>string dtype</td></tr>
-    <tr><td><code>isDatetimeDtype(d)</code></td><td><code>is_datetime64_dtype</code></td><td>datetime</td></tr>
-    <tr><td><code>isTimedeltaDtype(d)</code></td><td><code>is_timedelta64_dtype</code></td><td>timedelta</td></tr>
-    <tr><td><code>isCategoricalDtype(d)</code></td><td><code>is_categorical_dtype</code></td><td>category</td></tr>
-    <tr><td><code>isObjectDtype(d)</code></td><td><code>is_object_dtype</code></td><td>object</td></tr>
-    <tr><td><code>isComplexDtype(d)</code></td><td><code>is_complex_dtype</code></td><td>Always false (no complex in tsb)</td></tr>
-    <tr><td><code>isExtensionArrayDtype(d)</code></td><td><code>is_extension_array_dtype</code></td><td>string/object/datetime/timedelta/category</td></tr>
-    <tr><td><code>isPeriodDtype(d)</code></td><td><code>is_period_dtype</code></td><td>Maps to datetime</td></tr>
-    <tr><td><code>isIntervalDtype(d)</code></td><td><code>is_interval_dtype</code></td><td>Numeric dtypes</td></tr>
-  </table>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-  <script type="module">
-    // Inline demo (no bundler required for playground)
-    function show(id, lines) {
-      document.getElementById(id).innerHTML = lines
-        .map(([expr, val]) => `<span class="${val ? 'ok' : 'fail'}">${expr}: ${val}</span>`)
-        .join('<br>');
-    }
-
-    // Value predicate demos (inline implementations for playground)
-    function isScalar(val) {
-      if (val === null || val === undefined) return true;
-      const t = typeof val;
-      if (t === "string" || t === "number" || t === "bigint" || t === "boolean" || t === "symbol") return true;
-      if (val instanceof Date) return true;
-      return false;
-    }
-    function isListLike(val) {
-      if (val === null || val === undefined || typeof val === "string") return false;
-      if (typeof val === "number" || typeof val === "boolean") return false;
-      if (typeof val === "object") {
-        if (Symbol.iterator in val) return true;
-        const len = val["length"];
-        if (typeof len === "number" && len >= 0 && Number.isInteger(len)) return true;
-      }
-      return false;
-    }
-
-    show("scalar-demo", [
-      ["isScalar(42)", isScalar(42)],
-      ["isScalar('hello')", isScalar("hello")],
-      ["isScalar(null)", isScalar(null)],
-      ["isScalar([1, 2])", isScalar([1, 2])],
-      ["isScalar({ a: 1 })", isScalar({ a: 1 })],
-    ]);
-
-    show("listlike-demo", [
-      ["isListLike([1, 2, 3])", isListLike([1, 2, 3])],
-      ["isListLike(new Set([1]))", isListLike(new Set([1]))],
-      ["isListLike('abc')", isListLike("abc")],
-      ["isListLike(42)", isListLike(42)],
-    ]);
-
-    function isFloat(val) {
-      if (typeof val !== "number" || !Number.isFinite(val)) return false;
-      return val !== Math.trunc(val);
-    }
-    function isInteger(val) { return typeof val === "number" && Number.isInteger(val); }
-
-    show("value-demo", [
-      ["isNumber(3.14)", typeof 3.14 === "number"],
-      ["isNumber(NaN)", typeof NaN === "number"],
-      ["isBool(true)", typeof true === "boolean"],
-      ["isFloat(3.14)", isFloat(3.14)],
-      ["isFloat(3.0)", isFloat(3.0)],
-      ["isInteger(42)", isInteger(42)],
-      ["isInteger(3.14)", isInteger(3.14)],
-    ]);
-
-    // Dtype demo table output
-    const dtypes = {
-      isNumeric: name => ["int8","int16","int32","int64","uint8","uint16","uint32","uint64","float32","float64"].includes(name),
-      isFloat: name => ["float32","float64"].includes(name),
-      isInteger: name => ["int8","int16","int32","int64","uint8","uint16","uint32","uint64"].includes(name),
-    };
-    show("dtype-demo", [
-      ["isNumericDtype('float64')", dtypes.isNumeric("float64")],
-      ["isNumericDtype('int32')", dtypes.isNumeric("int32")],
-      ["isNumericDtype('string')", dtypes.isNumeric("string")],
-      ["isFloatDtype('float32')", dtypes.isFloat("float32")],
-      ["isIntegerDtype('int64')", dtypes.isInteger("int64")],
-    ]);
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

@@ -3,39 +3,170 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cutBinsToFrame — tsb playground</title>
+  <title>tsb — cutBinsToFrame — tsb playground</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { color: #1a56db; }
-    pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
-    .output { background: #e8f5e9; padding: 1rem; border-radius: 6px; white-space: pre; font-family: monospace; }
-    button { background: #1a56db; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #1345b3; }
-    label { font-weight: 600; }
-    input[type=number], input[type=range] { margin: 0.25rem 0.5rem; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <h1>cutBinsToFrame</h1>
-  <p>
-    <code>cutBinsToFrame(result, { data })</code> converts the output of
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>cutBinsToFrame — tsb playground</h1>
+  <p class="subtitle"><code>cutBinsToFrame(result, { data })</code> converts the output of
     <code>cut()</code> or <code>qcut()</code> into a summary DataFrame with
-    one row per bin, showing the bin label, edges, count, and frequency.
-  </p>
+    one row per bin, showing the bin label, edges, count, and frequency.</p>
 
-  <h2>Interactive Demo</h2>
-  <p>
-    <label>Number of values: <input type="number" id="nValues" value="20" min="5" max="200" /></label>
-    <label>Number of bins: <input type="number" id="nBins" value="4" min="2" max="10" /></label>
-    <button onclick="run()">Run</button>
-  </p>
-  <div class="output" id="output">Click "Run" to see the result.</div>
-
-  <h2>What it does</h2>
-  <pre><code>import { cut, cutBinsToFrame, cutBinCounts, binEdges } from "tsb";
+  <div class="section">
+    <h2>What it does</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { cut, cutBinsToFrame, cutBinCounts, binEdges } from "tsb";
 
 // Bin 20 random values into 4 equal-width bins
-const data = Array.from({ length: 20 }, () => Math.random() * 100);
+const data = Array.from({ length: 20 }, () =&gt; Math.random() * 100);
 const result = cut(data, 4);
 
 // Summary DataFrame: bin | left | right | count | frequency
@@ -46,47 +177,19 @@ const counts = cutBinCounts(result);
 // { "(0.0, 25.0]": 5, "(25.0, 50.0]": 6, ... }
 
 // Just edges indexed by label
-const edges = binEdges(result);
-</code></pre>
+const edges = binEdges(result);</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Related Functions</h2>
-  <ul>
-    <li><code>cut(data, bins)</code> — bin values into equal-width bins</li>
-    <li><code>qcut(data, bins)</code> — bin values into quantile-based bins</li>
-    <li><code>cutBinsToFrame(result, { data })</code> — summary DataFrame</li>
-    <li><code>cutBinCounts(result)</code> — label → count dictionary</li>
-    <li><code>binEdges(result)</code> — edges DataFrame indexed by label</li>
-  </ul>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-  <script type="module">
-    // Dynamic import for browser use
-    const { cut, qcut, cutBinsToFrame, cutBinCounts } = await import("../src/index.ts").catch(() => {
-      document.getElementById("output").textContent = "(Module unavailable in static preview — run via bun)";
-    }) ?? {};
-
-    window.run = function() {
-      if (!cut) { return; }
-      const n = parseInt(document.getElementById("nValues").value) || 20;
-      const b = parseInt(document.getElementById("nBins").value) || 4;
-      const data = Array.from({ length: n }, () => Math.random() * 100);
-      const result = cut(data, b, { duplicates: "drop" });
-      const df = cutBinsToFrame(result, { data });
-      const counts = cutBinCounts(result);
-
-      let out = `cut([${n} values], ${b})\n\n`;
-      out += `cutBinsToFrame result (${df.shape[0]} rows × ${df.shape[1]} cols):\n`;
-      out += `${"bin".padEnd(20)} ${"left".padEnd(10)} ${"right".padEnd(10)} ${"count".padEnd(8)} frequency\n`;
-      out += `${"-".repeat(20)} ${"-".repeat(10)} ${"-".repeat(10)} ${"-".repeat(8)} ---------\n`;
-      const binCol = df.get("bin")?.values ?? [];
-      const leftCol = df.get("left")?.values ?? [];
-      const rightCol = df.get("right")?.values ?? [];
-      const cntCol = df.get("count")?.values ?? [];
-      const freqCol = df.get("frequency")?.values ?? [];
-      for (let i = 0; i < binCol.length; i++) {
-        out += `${String(binCol[i]).padEnd(20)} ${String(leftCol[i]).slice(0,9).padEnd(10)} ${String(rightCol[i]).slice(0,9).padEnd(10)} ${String(cntCol[i]).padEnd(8)} ${Number(freqCol[i]).toFixed(4)}\n`;
-      }
-      document.getElementById("output").textContent = out;
-    };
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

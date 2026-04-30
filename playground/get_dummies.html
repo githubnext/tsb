@@ -1,153 +1,360 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — get_dummies: one-hot encoding</title>
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; padding: 2rem; }
-      h1 { color: #58a6ff; font-size: 1.8rem; margin-bottom: .5rem; }
-      h2 { color: #79c0ff; font-size: 1.2rem; margin: 2rem 0 .75rem; }
-      p  { color: #8b949e; margin-bottom: 1rem; max-width: 800px; }
-      code { background: #161b22; padding: .1rem .4rem; border-radius: 4px; font-family: monospace; font-size: .9em; color: #a5d6ff; }
-      .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 900px; }
-      textarea { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-family: monospace; font-size: .85rem; padding: .75rem; resize: vertical; min-height: 160px; }
-      button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: .5rem 1.25rem; cursor: pointer; font-size: .9rem; margin-top: .75rem; }
-      button:hover { background: #2ea043; }
-      pre { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .82rem; margin-top: .75rem; white-space: pre-wrap; word-break: break-all; min-height: 60px; }
-      .tag { display: inline-block; background: #388bfd26; color: #58a6ff; border: 1px solid #388bfd; border-radius: 12px; padding: .1rem .6rem; font-size: .75rem; margin-left: .5rem; vertical-align: middle; }
-    </style>
-  </head>
-  <body>
-    <h1>get_dummies <span class="tag">tsb</span></h1>
-    <p>
-      One-hot / dummy encoding — the TypeScript port of
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — get_dummies: one-hot encoding</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>get_dummies: one-hot encoding</h1>
+  <p class="subtitle">One-hot / dummy encoding — the TypeScript port of
       <code>pandas.get_dummies()</code>.
       Convert categorical variables into binary indicator columns,
-      one column per unique value.
-    </p>
-    <p>
-      Common in machine learning pipelines before fitting linear models.
-      Supports <code>prefix</code>, <code>prefixSep</code>,
-      <code>dummyNa</code>, and <code>dropFirst</code> options.
-    </p>
+      one column per unique value.</p>
 
+  <div class="section">
     <h2>1. Series → indicator DataFrame</h2>
-    <div class="card">
       <p>Each unique value becomes a binary column (1 = present, 0 = absent).</p>
-      <textarea id="series-code">
-const s = new tsb.Series({ data: ["cat", "dog", "cat", "bird", "dog"] });
-const df = tsb.getDummies(s);
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, getDummies } from "tsb";
+
+
+const s = new Series({ data: ["cat", "dog", "cat", "bird", "dog"] });
+const df = getDummies(s);
 
 console.log("Columns:", df.columns.values);
 // ["cat", "dog", "bird"]
 
 for (const c of df.columns.values) {
   console.log(c + ":", df.col(c).values);
-}
-      </textarea>
-      <button onclick="run('series')">▶ Run</button>
-      <pre id="series-out">Click ▶ Run to execute</pre>
+}</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
+  </div>
 
+  <div class="section">
+    <h2>1. Series → indicator DataFrame</h2>
+      <p>Each unique value becomes a binary column (1 = present, 0 = absent).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">Click ▶ Run to execute</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
     <h2>2. DataFrame — encode categorical columns</h2>
-    <div class="card">
-      <p>
-        <code>dataFrameGetDummies</code> auto-detects string columns and
-        replaces them with indicator columns. Numeric columns are kept as-is.
-      </p>
-      <textarea id="df-code">
-const df = tsb.DataFrame.fromColumns({
+      <p><code>dataFrameGetDummies</code> auto-detects string columns and
+        replaces them with indicator columns. Numeric columns are kept as-is.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameGetDummies } from "tsb";
+
+
+const df = DataFrame.fromColumns({
   color:  ["red", "blue", "red", "green"],
   size:   ["S", "M", "L", "M"],
   weight: [1.2, 0.8, 1.5, 0.9],
 });
 
-const encoded = tsb.dataFrameGetDummies(df);
+const encoded = dataFrameGetDummies(df);
 console.log("Columns:", encoded.columns.values);
 console.log("weight (unchanged):", encoded.col("weight").values);
 console.log("color_red:", encoded.col("color_red").values);
-console.log("size_M:", encoded.col("size_M").values);
-      </textarea>
-      <button onclick="run('df')">▶ Run</button>
-      <pre id="df-out">Click ▶ Run to execute</pre>
+console.log("size_M:", encoded.col("size_M").values);</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
+  </div>
 
+  <div class="section">
+    <h2>2. DataFrame — encode categorical columns</h2>
+      <p><code>dataFrameGetDummies</code> auto-detects string columns and
+        replaces them with indicator columns. Numeric columns are kept as-is.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">Click ▶ Run to execute</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
     <h2>3. Options: prefix, dummyNa, dropFirst</h2>
-    <div class="card">
       <p>Fine-tune the encoding with optional parameters.</p>
-      <textarea id="opts-code">
-const s = new tsb.Series({ data: ["a", "b", null, "a"] });
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, getDummies } from "tsb";
+
+
+const s = new Series({ data: ["a", "b", null, "a"] });
 
 // Custom prefix
-const prefixed = tsb.getDummies(s, { prefix: "col" });
+const prefixed = getDummies(s, { prefix: "col" });
 console.log("Prefixed columns:", prefixed.columns.values);
 // ["col_a", "col_b"]
 
 // Include NaN indicator column
-const withNa = tsb.getDummies(s, { dummyNa: true });
+const withNa = getDummies(s, { dummyNa: true });
 console.log("With NaN columns:", withNa.columns.values);
 console.log("NaN column:", withNa.col("NaN").values);
 // [0, 0, 1, 0]
 
 // Drop first category (avoid dummy variable trap)
-const dropped = tsb.getDummies(new tsb.Series({ data: ["x", "y", "z", "x"] }), { dropFirst: true });
+const dropped = getDummies(new Series({ data: ["x", "y", "z", "x"] }), { dropFirst: true });
 console.log("After dropFirst:", dropped.columns.values);
-// ["y", "z"]  — "x" was first, dropped
-      </textarea>
-      <button onclick="run('opts')">▶ Run</button>
-      <pre id="opts-out">Click ▶ Run to execute</pre>
+// ["y", "z"]  — "x" was first, dropped</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
+  </div>
 
+  <div class="section">
+    <h2>3. Options: prefix, dummyNa, dropFirst</h2>
+      <p>Fine-tune the encoding with optional parameters.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">Click ▶ Run to execute</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
     <h2>4. Encode specific columns only</h2>
-    <div class="card">
       <p>Pass <code>columns</code> to control which DataFrame columns are encoded.</p>
-      <textarea id="select-code">
-const df = tsb.DataFrame.fromColumns({
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dataFrameGetDummies } from "tsb";
+
+
+const df = DataFrame.fromColumns({
   country: ["US", "UK", "US", "DE"],
   city:    ["NY", "LDN", "LA", "BER"],
   pop:     [8, 9, 4, 4],   // millions
 });
 
 // Only encode 'country'; keep 'city' and 'pop' as-is
-const encoded = tsb.dataFrameGetDummies(df, { columns: ["country"] });
+const encoded = dataFrameGetDummies(df, { columns: ["country"] });
 console.log("All columns:", encoded.columns.values);
 console.log("city kept:", encoded.col("city").values);
-console.log("country_US:", encoded.col("country_US").values);
-      </textarea>
-      <button onclick="run('select')">▶ Run</button>
-      <pre id="select-out">Click ▶ Run to execute</pre>
+console.log("country_US:", encoded.col("country_US").values);</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
+  </div>
 
-    <script type="module">
-      // Load tsb from the built bundle (served by Pages or local dev server)
-      let tsb;
-      try {
-        tsb = await import("../dist/index.js");
-      } catch {
-        document.querySelectorAll("pre").forEach(el => {
-          el.textContent = "⚠️  Bundle not found. Run: bun build ./src/index.ts --outdir ./dist --target browser";
-        });
-      }
-      window.tsb = tsb;
+  <div class="section">
+    <h2>4. Encode specific columns only</h2>
+      <p>Pass <code>columns</code> to control which DataFrame columns are encoded.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">Click ▶ Run to execute</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-      window.run = function (id) {
-        const code = document.getElementById(id + "-code").value;
-        const out = document.getElementById(id + "-out");
-        const lines = [];
-        const origLog = console.log;
-        console.log = (...args) => lines.push(args.map(String).join(" "));
-        try {
-          // eslint-disable-next-line no-new-func
-          new Function("tsb", code)(tsb);
-          out.textContent = lines.join("\n") || "(no output)";
-        } catch (e) {
-          out.textContent = "Error: " + e.message;
-        } finally {
-          console.log = origLog;
-        }
-      };
-    </script>
-  </body>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

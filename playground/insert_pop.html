@@ -5,64 +5,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — insertColumn / popColumn</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #1a1a1a; }
-    h1 { color: #0066cc; }
-    h2 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
-    pre { background: #f6f8fa; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.9em; }
-    code { font-family: 'Fira Code', 'Cascadia Code', monospace; }
-    .note { background: #fffbea; border-left: 4px solid #f5a623; padding: 0.7rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
-    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-    th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
-    th { background: #f0f4f8; }
-    a { color: #0066cc; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <p><a href="index.html">← tsb playground</a></p>
 
-  <h1><code>insertColumn</code> / <code>popColumn</code></h1>
-  <p>
-    Column insertion and removal for DataFrames — mirrors
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.insert.html" target="_blank">
-    <code>pandas.DataFrame.insert()</code></a> and
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.pop.html" target="_blank">
-    <code>pandas.DataFrame.pop()</code></a>.
-  </p>
-  <p>
-    Because tsb DataFrames are <strong>immutable</strong>, both functions return a new DataFrame
-    rather than mutating the original.  <code>popColumn</code> returns both the extracted
-    <code>Series</code> and the resulting DataFrame.
-  </p>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-  <h2>API summary</h2>
-  <table>
-    <thead><tr><th>Function</th><th>Pandas equivalent</th><th>Description</th></tr></thead>
-    <tbody>
-      <tr>
-        <td><code>insertColumn(df, loc, col, values)</code></td>
-        <td><code>df.insert(loc, col, value)</code></td>
-        <td>Insert a new column at integer position <code>loc</code></td>
-      </tr>
-      <tr>
-        <td><code>popColumn(df, col)</code></td>
-        <td><code>df.pop(col)</code></td>
-        <td>Remove a column; returns <code>{ series, df }</code></td>
-      </tr>
-      <tr>
-        <td><code>reorderColumns(df, order)</code></td>
-        <td><code>df[order]</code></td>
-        <td>Reorder (and optionally subset) columns</td>
-      </tr>
-      <tr>
-        <td><code>moveColumn(df, col, newLoc)</code></td>
-        <td>—</td>
-        <td>Move an existing column to a new integer position</td>
-      </tr>
-    </tbody>
-  </table>
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>insertColumn / popColumn</h1>
+  <p class="subtitle"><a href="index.html">← tsb playground</a></p>
 
-  <h2>Example 1 — <code>insertColumn</code></h2>
-  <pre><code>import { DataFrame, insertColumn } from "tsb";
+  <div class="section">
+    <h2>Example 1 — insertColumn</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, insertColumn } from "tsb";
 
 const df = DataFrame.fromColumns({
   name: ["Alice", "Bob", "Carol"],
@@ -76,21 +175,45 @@ const df2 = insertColumn(df, 1, "city", ["NY", "LA", "SF"]);
 // df2.col("city").values → ["NY", "LA", "SF"]
 
 // Original is unchanged
-// df.columns.values → ["name", "age"]
-</code></pre>
+// df.columns.values → ["name", "age"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Example 2 — Insert with a Series</h2>
-  <pre><code>import { DataFrame, Series, insertColumn } from "tsb";
+  <div class="section">
+    <h2>Example 2 — Insert with a Series</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, Series, insertColumn } from "tsb";
 
 const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [4, 5, 6] });
 const salary = new Series({ data: [100_000, 90_000, 120_000], name: "salary" });
 
 const df2 = insertColumn(df, 0, "salary", salary);
-// df2.columns.values → ["salary", "a", "b"]
-</code></pre>
+// df2.columns.values → ["salary", "a", "b"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Example 3 — <code>popColumn</code></h2>
-  <pre><code>import { DataFrame, popColumn } from "tsb";
+  <div class="section">
+    <h2>Example 3 — popColumn</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, popColumn } from "tsb";
 
 const df = DataFrame.fromColumns({
   id:   [1, 2, 3],
@@ -102,11 +225,23 @@ const df = DataFrame.fromColumns({
 const { series: ageSeries, df: df2 } = popColumn(df, "age");
 // ageSeries.values       → [30, 25, 35]
 // df2.columns.values     → ["id", "name"]
-// df.columns.values      → ["id", "name", "age"]  ← original unchanged
-</code></pre>
+// df.columns.values      → ["id", "name", "age"]  ← original unchanged</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Example 4 — <code>reorderColumns</code></h2>
-  <pre><code>import { DataFrame, reorderColumns } from "tsb";
+  <div class="section">
+    <h2>Example 4 — reorderColumns</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, reorderColumns } from "tsb";
 
 const df = DataFrame.fromColumns({ a: [1], b: [2], c: [3], d: [4] });
 
@@ -116,11 +251,23 @@ const df2 = reorderColumns(df, ["d", "c", "b", "a"]);
 
 // Select a subset (drops columns not listed)
 const df3 = reorderColumns(df, ["a", "c"]);
-// df3.columns.values → ["a", "c"]   (b and d are dropped)
-</code></pre>
+// df3.columns.values → ["a", "c"]   (b and d are dropped)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Example 5 — <code>moveColumn</code></h2>
-  <pre><code>import { DataFrame, moveColumn } from "tsb";
+  <div class="section">
+    <h2>Example 5 — moveColumn</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, moveColumn } from "tsb";
 
 const df = DataFrame.fromColumns({
   year:  [2020, 2021, 2022],
@@ -131,11 +278,23 @@ const df = DataFrame.fromColumns({
 
 // Move "label" to the front
 const df2 = moveColumn(df, "label", 0);
-// df2.columns.values → ["label", "year", "value"]
-</code></pre>
+// df2.columns.values → ["label", "year", "value"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>Error cases</h2>
-  <pre><code>// Duplicate column name (default: not allowed)
+  <div class="section">
+    <h2>Error cases</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Duplicate column name (default: not allowed)
 insertColumn(df, 1, "a", [1, 2, 3]);
 // → RangeError: Column "a" already exists. Use allowDuplicates=true to permit...
 
@@ -149,24 +308,19 @@ insertColumn(df, 0, "x", [1]);  // df has 3 rows
 
 // Column not found
 popColumn(df, "missing");
-// → RangeError: Column "missing" not found in DataFrame.
-</code></pre>
-
-  <div class="note">
-    <strong>Immutability:</strong> Like all tsb DataFrame operations, these functions never
-    mutate the original DataFrame.  Always assign the return value to a new variable.
+// → RangeError: Column "missing" not found in DataFrame.</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>pandas equivalence table</h2>
-  <table>
-    <thead>
-      <tr><th>pandas</th><th>tsb</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>df.insert(1, "x", [1,2,3])</code> *(mutates)*</td><td><code>insertColumn(df, 1, "x", [1,2,3])</code></td></tr>
-      <tr><td><code>series = df.pop("col")</code> *(mutates)*</td><td><code>const { series, df: df2 } = popColumn(df, "col")</code></td></tr>
-      <tr><td><code>df[["c","a","b"]]</code></td><td><code>reorderColumns(df, ["c","a","b"])</code></td></tr>
-    </tbody>
-  </table>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

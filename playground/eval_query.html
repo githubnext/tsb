@@ -5,38 +5,180 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — DataFrame.query() and DataFrame.eval()</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.6; color: #1a1a1a; }
-    h1 { color: #1a56db; }
-    h2 { color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.4rem; margin-top: 2rem; }
-    pre { background: #f3f4f6; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }
-    code { background: #f3f4f6; padding: 0.15rem 0.35rem; border-radius: 3px; font-size: 0.9em; }
-    .output { background: #ecfdf5; border-left: 4px solid #10b981; padding: 0.75rem 1rem; margin-top: 0.5rem; border-radius: 0 6px 6px 0; font-family: monospace; white-space: pre; font-size: 0.875rem; }
-    .note { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; }
-    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-    th, td { border: 1px solid #d1d5db; padding: 0.5rem 0.75rem; text-align: left; }
-    th { background: #f9fafb; font-weight: 600; }
-    a { color: #1a56db; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <p><a href="index.html">← tsb playground</a></p>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
   <h1>DataFrame.query() and DataFrame.eval()</h1>
-  <p>
-    <strong>queryDataFrame</strong> and <strong>evalDataFrame</strong> let you filter rows or evaluate
-    expressions using a Python-pandas-style expression string. This mirrors
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html"
-       target="_blank" rel="noopener"><code>pandas.DataFrame.query()</code></a>
-    and
-    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.eval.html"
-       target="_blank" rel="noopener"><code>pandas.DataFrame.eval()</code></a>.
-  </p>
+  <p class="subtitle"><a href="index.html">← tsb playground</a></p>
 
-  <h2>Import</h2>
-  <pre><code>import { queryDataFrame, evalDataFrame, DataFrame } from "tsb";</code></pre>
+  <div class="section">
+    <h2>Import</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { queryDataFrame, evalDataFrame, DataFrame } from "tsb";</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>queryDataFrame(df, expr)</h2>
-  <p>Returns a new DataFrame containing only the rows where <code>expr</code> evaluates to truthy.</p>
-  <pre><code>const df = DataFrame.fromArrays({
+  <div class="section">
+    <h2>queryDataFrame(df, expr)</h2>
+      <p>Returns a new DataFrame containing only the rows where <code>expr</code> evaluates to truthy.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const df = DataFrame.fromArrays({
   name:   ["Alice", "Bob", "Carol", "Dave"],
   age:    [25, 32, 28, 45],
   score:  [88, 72, 95, 60],
@@ -44,11 +186,11 @@
 });
 
 // Simple comparison
-queryDataFrame(df, "age > 28");
+queryDataFrame(df, "age &gt; 28");
 // name: ["Bob", "Dave"]  age: [32, 45]  score: [72, 60]
 
 // Combined conditions
-queryDataFrame(df, "age < 35 and score >= 85");
+queryDataFrame(df, "age &lt; 35 and score &gt;= 85");
 // name: ["Alice", "Carol"]
 
 // String equality
@@ -63,11 +205,24 @@ queryDataFrame(df, "age not in [25, 45]");
 
 // Backtick-quoted column (for names with spaces)
 const df2 = DataFrame.fromArrays({ "first name": ["Alice", "Bob"] });
-queryDataFrame(df2, "`first name` == 'Alice'");</code></pre>
+queryDataFrame(df2, "`first name` == 'Alice'");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <h2>evalDataFrame(df, expr)</h2>
-  <p>Evaluates an arithmetic or logical expression and returns a new <code>Series</code>.</p>
-  <pre><code>const sales = DataFrame.fromArrays({
+  <div class="section">
+    <h2>evalDataFrame(df, expr)</h2>
+      <p>Evaluates an arithmetic or logical expression and returns a new <code>Series</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const sales = DataFrame.fromArrays({
   price: [10.0, 25.0, 5.0, 40.0],
   qty:   [100,   50, 200,   10],
 });
@@ -77,7 +232,7 @@ evalDataFrame(sales, "price * qty");
 // Series [1000, 1250, 1000, 400]
 
 // Boolean expression (useful as a mask)
-evalDataFrame(sales, "price > 10");
+evalDataFrame(sales, "price &gt; 10");
 // Series [false, true, false, true]
 
 // Function calls
@@ -87,69 +242,19 @@ evalDataFrame(sales, "round(price * qty / 100, 1)");
 // String operations
 const df3 = DataFrame.fromArrays({ tag: ["Foo", "Bar", "Baz"] });
 evalDataFrame(df3, "lower(tag)");
-// Series ["foo", "bar", "baz"]</code></pre>
-
-  <h2>Supported Expression Syntax</h2>
-
-  <h3>Column references</h3>
-  <table>
-    <tr><th>Syntax</th><th>Example</th></tr>
-    <tr><td>Bare identifier</td><td><code>age</code></td></tr>
-    <tr><td>Backtick-quoted (spaces allowed)</td><td><code>`first name`</code></td></tr>
-  </table>
-
-  <h3>Literals</h3>
-  <table>
-    <tr><th>Type</th><th>Examples</th></tr>
-    <tr><td>Number</td><td><code>42</code>, <code>3.14</code>, <code>1e6</code></td></tr>
-    <tr><td>String</td><td><code>"hello"</code>, <code>'world'</code></td></tr>
-    <tr><td>Boolean</td><td><code>True</code>, <code>False</code>, <code>true</code>, <code>false</code></td></tr>
-    <tr><td>Null</td><td><code>None</code>, <code>null</code>, <code>NaN</code></td></tr>
-  </table>
-
-  <h3>Operators</h3>
-  <table>
-    <tr><th>Category</th><th>Operators</th></tr>
-    <tr><td>Arithmetic</td><td><code>+  -  *  /  %  **</code></td></tr>
-    <tr><td>Comparison</td><td><code>==  !=  &lt;  &lt;=  &gt;  &gt;=</code></td></tr>
-    <tr><td>Logical</td><td><code>and  or  not</code></td></tr>
-    <tr><td>Membership</td><td><code>in [...]</code>, <code>not in [...]</code></td></tr>
-  </table>
-
-  <h3>Built-in functions</h3>
-  <table>
-    <tr><th>Function</th><th>Description</th></tr>
-    <tr><td><code>abs(x)</code></td><td>Absolute value</td></tr>
-    <tr><td><code>round(x, d?)</code></td><td>Round to <em>d</em> decimal places (default 0)</td></tr>
-    <tr><td><code>floor(x)</code>, <code>ceil(x)</code></td><td>Floor / ceiling</td></tr>
-    <tr><td><code>sqrt(x)</code>, <code>log(x)</code>, <code>log2(x)</code>, <code>log10(x)</code></td><td>Math functions</td></tr>
-    <tr><td><code>str(x)</code>, <code>len(x)</code></td><td>Convert to string / string length</td></tr>
-    <tr><td><code>lower(x)</code>, <code>upper(x)</code></td><td>String case conversion</td></tr>
-    <tr><td><code>isnull(x)</code> / <code>isna(x)</code></td><td>True if null / NaN</td></tr>
-    <tr><td><code>notnull(x)</code> / <code>notna(x)</code></td><td>True if not null</td></tr>
-  </table>
-
-  <h2>Pandas API comparison</h2>
-  <table>
-    <tr><th>pandas</th><th>tsb</th></tr>
-    <tr><td><code>df.query("col &gt; 5")</code></td><td><code>queryDataFrame(df, "col &gt; 5")</code></td></tr>
-    <tr><td><code>df.eval("a + b")</code></td><td><code>evalDataFrame(df, "a + b")</code></td></tr>
-    <tr><td><code>df.query("col in [1,2,3]")</code></td><td><code>queryDataFrame(df, "col in [1, 2, 3]")</code></td></tr>
-    <tr><td><code>df.query("`col name` == 'x'")</code></td><td><code>queryDataFrame(df, "`col name` == 'x'")</code></td></tr>
-    <tr><td><code>df.eval("func(col)")</code></td><td><code>evalDataFrame(df, "abs(col)")</code> (built-in functions)</td></tr>
-  </table>
-
-  <div class="note">
-    <strong>Note:</strong> Unlike pandas, external variable substitution (<code>@var</code>) is not supported.
-    Use template literals to embed values: <code>queryDataFrame(df, `age &gt; ${minAge}`)</code>.
+// Series ["foo", "bar", "baz"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
   </div>
 
-  <h2>Tips</h2>
-  <ul>
-    <li>Operator precedence follows Python/math conventions: <code>**</code> &gt; unary <code>-</code> &gt; <code>* / %</code> &gt; <code>+ -</code> &gt; comparisons &gt; <code>not</code> &gt; <code>and</code> &gt; <code>or</code>.</li>
-    <li><code>and</code>/<code>or</code> short-circuit: <code>false and f()</code> won't evaluate <code>f()</code>.</li>
-    <li>Null propagation: arithmetic/comparison on null yields null (treated as falsy in logical ops).</li>
-    <li>For null checks, prefer <code>isnull(col)</code> over <code>col == None</code>.</li>
-  </ul>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

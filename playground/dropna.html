@@ -4,53 +4,186 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — dropna</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <a href="index.html">← tsb playground</a>
-    <h1>dropna</h1>
-    <p>Remove missing values from a Series or DataFrame — mirrors <code>pandas.DataFrame.dropna</code> and <code>pandas.Series.dropna</code>.</p>
-  </header>
 
-  <main>
-    <section class="intro">
-      <p>
-        <code>dropna(input, options?)</code> removes rows or columns that contain missing values
-        (<code>null</code>, <code>undefined</code>, or <code>NaN</code>) from a Series or DataFrame.
-        It mirrors
-        <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html" target="_blank"><code>pandas.DataFrame.dropna</code></a>
-        and
-        <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.dropna.html" target="_blank"><code>pandas.Series.dropna</code></a>.
-      </p>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-      <h3>Options (DataFrame only)</h3>
-      <table>
-        <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>axis</code></td><td><code>0 | 1 | "index" | "columns"</code></td><td><code>0</code></td><td>Drop rows (<code>0</code>) or columns (<code>1</code>).</td></tr>
-          <tr><td><code>how</code></td><td><code>"any" | "all"</code></td><td><code>"any"</code></td><td>Drop if <em>any</em> value is missing, or only if <em>all</em> are missing.</td></tr>
-          <tr><td><code>thresh</code></td><td><code>number</code></td><td>—</td><td>Minimum non-null count to keep (overrides <code>how</code>).</td></tr>
-          <tr><td><code>subset</code></td><td><code>string[]</code></td><td>—</td><td>Only check these columns when scanning rows (<code>axis=0</code> only).</td></tr>
-        </tbody>
-      </table>
-    </section>
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>dropna</h1>
+  <p class="subtitle">Remove missing values from a Series or DataFrame — mirrors <code>pandas.DataFrame.dropna</code> and <code>pandas.Series.dropna</code>.</p>
 
-    <section class="example">
-      <h2>Example 1 — Series: drop missing elements</h2>
-      <pre><code>import { Series, dropna } from "tsb";
+  <div class="section">
+    <h2>Example 1 — Series: drop missing elements</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, dropna } from "tsb";
 
 const s = new Series({ data: [1, null, NaN, 4, undefined, 6] });
 const clean = dropna(s);
 
 clean.values;  // [1, 4, 6]
-clean.size;    // 3
-</code></pre>
-    </section>
+clean.size;    // 3</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 2 — DataFrame: drop rows with any missing value (default)</h2>
-      <pre><code>import { DataFrame, dropna } from "tsb";
+  <div class="section">
+    <h2>Example 2 — DataFrame: drop rows with any missing value (default)</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dropna } from "tsb";
 
 const df = DataFrame.fromColumns({
   name:  ["Alice", "Bob",  "Carol", "Dave"],
@@ -60,13 +193,23 @@ const df = DataFrame.fromColumns({
 
 // Drop any row that has at least one null
 const clean = dropna(df);
-clean.shape;   // [1, 3]  — only "Alice" row survives (score=95, grade="A")
-</code></pre>
-    </section>
+clean.shape;   // [1, 3]  — only "Alice" row survives (score=95, grade="A")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 3 — how = "all": only drop fully-null rows</h2>
-      <pre><code>import { DataFrame, dropna } from "tsb";
+  <div class="section">
+    <h2>Example 3 — how = "all": only drop fully-null rows</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dropna } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [1,    null, null],
@@ -76,13 +219,23 @@ const df = DataFrame.fromColumns({
 // Row 1: both null → dropped
 // Row 0 and Row 2: at least one non-null → kept
 const clean = dropna(df, { how: "all" });
-clean.shape;   // [2, 2]
-</code></pre>
-    </section>
+clean.shape;   // [2, 2]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 4 — thresh: require at least N non-null values</h2>
-      <pre><code>import { DataFrame, dropna } from "tsb";
+  <div class="section">
+    <h2>Example 4 — thresh: require at least N non-null values</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dropna } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [1,    null, 3   ],
@@ -95,13 +248,23 @@ const df = DataFrame.fromColumns({
 // Row 1: 0 present → drop
 // Row 2: 2 present → keep
 const clean = dropna(df, { thresh: 2 });
-clean.shape;   // [2, 3]
-</code></pre>
-    </section>
+clean.shape;   // [2, 3]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 5 — subset: only check specific columns</h2>
-      <pre><code>import { DataFrame, dropna } from "tsb";
+  <div class="section">
+    <h2>Example 5 — subset: only check specific columns</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dropna } from "tsb";
 
 const df = DataFrame.fromColumns({
   id:    [1,    2,    3   ],
@@ -112,13 +275,23 @@ const df = DataFrame.fromColumns({
 // Only check the "score" column for nulls — ignore "notes"
 const clean = dropna(df, { subset: ["score"] });
 // Row 1 (score=null) is dropped; Row 2 (notes=null but score=88) is kept.
-clean.shape;   // [2, 3]
-</code></pre>
-    </section>
+clean.shape;   // [2, 3]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 6 — axis = 1: drop columns with missing values</h2>
-      <pre><code>import { DataFrame, dropna } from "tsb";
+  <div class="section">
+    <h2>Example 6 — axis = 1: drop columns with missing values</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dropna } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [1, null, 3],   // has a null → dropped
@@ -128,13 +301,23 @@ const df = DataFrame.fromColumns({
 
 const clean = dropna(df, { axis: 1 });
 clean.columns.toArray();  // ["b"]
-clean.shape;              // [3, 1]
-</code></pre>
-    </section>
+clean.shape;              // [3, 1]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <section class="example">
-      <h2>Example 7 — axis = 1, how = "all": only drop all-null columns</h2>
-      <pre><code>import { DataFrame, dropna } from "tsb";
+  <div class="section">
+    <h2>Example 7 — axis = 1, how = "all": only drop all-null columns</h2>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, dropna } from "tsb";
 
 const df = DataFrame.fromColumns({
   a: [null, null, null],  // all null  → dropped
@@ -143,29 +326,19 @@ const df = DataFrame.fromColumns({
 });
 
 const clean = dropna(df, { axis: 1, how: "all" });
-clean.columns.toArray();  // ["b", "c"]
-</code></pre>
-    </section>
-
-    <section class="example">
-      <h2>Pandas equivalence table</h2>
-      <table>
-        <thead><tr><th>tsb</th><th>pandas</th></tr></thead>
-        <tbody>
-          <tr><td><code>dropna(series)</code></td><td><code>series.dropna()</code></td></tr>
-          <tr><td><code>dropna(df)</code></td><td><code>df.dropna()</code></td></tr>
-          <tr><td><code>dropna(df, { how: "all" })</code></td><td><code>df.dropna(how="all")</code></td></tr>
-          <tr><td><code>dropna(df, { thresh: 2 })</code></td><td><code>df.dropna(thresh=2)</code></td></tr>
-          <tr><td><code>dropna(df, { subset: ["a", "b"] })</code></td><td><code>df.dropna(subset=["a", "b"])</code></td></tr>
-          <tr><td><code>dropna(df, { axis: 1 })</code></td><td><code>df.dropna(axis=1)</code></td></tr>
-          <tr><td><code>dropna(df, { axis: 1, how: "all" })</code></td><td><code>df.dropna(axis=1, how="all")</code></td></tr>
-        </tbody>
-      </table>
-    </section>
-  </main>
+clean.columns.toArray();  // ["b", "c"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
   <footer>
-    <p>tsb — a TypeScript port of pandas. <a href="https://github.com/githubnext/tsessebe">GitHub</a></p>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
   </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>
