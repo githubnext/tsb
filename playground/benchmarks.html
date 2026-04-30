@@ -23,13 +23,13 @@
       font-family: system-ui, -apple-system, sans-serif;
       line-height: 1.6;
       padding: 2rem;
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
     }
     a { color: var(--accent); }
     h1 { color: var(--accent); margin-bottom: 0.5rem; }
-    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
-    p { color: #8b949e; margin-bottom: 1rem; }
+    h2 { margin-top: 2rem; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p, .desc { color: #8b949e; margin-bottom: 1rem; }
     code {
       font-family: var(--font-mono);
       font-size: 0.875em;
@@ -39,141 +39,145 @@
       padding: 0.1rem 0.4rem;
     }
     .back { margin-bottom: 2rem; display: inline-block; }
-    .subtitle { margin-bottom: 1.5rem; }
 
-    #playground-loading {
-      position: fixed; inset: 0;
-      background: rgba(13, 17, 23, 0.92);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      z-index: 1000; gap: 1rem;
+    /* Benchmark table */
+    .bench-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
     }
-    .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .bench-table th, .bench-table td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #playground-status { color: #8b949e; font-size: 0.95rem; }
+    .bench-table th {
+      background: var(--surface);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .bench-table td {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+    }
+    .bench-table tr:nth-child(even) {
+      background: rgba(22, 27, 34, 0.5);
+    }
+    .faster-tsb { color: var(--green); font-weight: 600; }
+    .faster-pandas { color: var(--orange); font-weight: 600; }
+    .ratio-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.3rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .ratio-badge.fast { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+    .ratio-badge.slow { background: rgba(210, 153, 34, 0.15); color: var(--orange); }
 
-    .section {
+    .info-box {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 0.75rem;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
     }
-    .section p { margin-bottom: 0.75rem; }
+    .info-box h3 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    .info-box p, .info-box li {
+      color: #8b949e;
+      font-size: 0.875rem;
+    }
+    .info-box ul {
+      margin-left: 1.25rem;
+      margin-top: 0.5rem;
+    }
+    .info-box li { margin-bottom: 0.25rem; }
 
-    .playground-block { margin-top: 0.75rem; }
-    .playground-header {
-      display: flex; align-items: center; justify-content: space-between;
-      background: #1c2128;
-      border: 1px solid var(--border);
-      border-bottom: none;
-      border-radius: 0.5rem 0.5rem 0 0;
-      padding: 0.4rem 0.75rem;
-    }
-    .playground-label {
-      font-size: 0.75rem; color: #8b949e;
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .playground-actions { display: flex; gap: 0.5rem; }
-    .playground-actions button {
-      background: transparent; color: var(--accent);
-      border: 1px solid var(--border);
-      border-radius: 0.35rem;
-      padding: 0.25rem 0.7rem;
-      font-size: 0.8rem; cursor: pointer;
-      font-family: system-ui, sans-serif;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .playground-actions button:hover:not(:disabled) {
-      background: rgba(88, 166, 255, 0.1);
-      border-color: var(--accent);
-    }
-    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .playground-run { font-weight: 600; }
-
-    .playground-editor {
-      display: block; width: 100%; min-height: 80px;
-      background: #0d1117; color: var(--text);
-      border: 1px solid var(--border);
-      border-top: none; border-bottom: none;
-      padding: 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.875rem; line-height: 1.55;
-      resize: vertical; outline: none;
-      tab-size: 2; white-space: pre; overflow-x: auto;
-    }
-    .playground-editor:focus {
-      border-color: var(--accent);
-      box-shadow: inset 0 0 0 1px var(--accent);
-    }
-
-    .playground-output {
-      background: #1c2333;
-      border: 1px solid var(--border);
-      border-radius: 0 0 0.5rem 0.5rem;
-      padding: 0.75rem 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.85rem; color: #8b949e;
-      white-space: pre-wrap; min-height: 2rem;
-      word-break: break-word;
-    }
-    .playground-output.active { color: var(--green); border-color: var(--green); }
-    .playground-output.error { color: var(--red); border-color: var(--red); }
-    .playground-hint {
-      font-size: 0.75rem; color: #484f58;
-      margin-top: 0.35rem; text-align: right;
+    .timestamp {
+      color: #484f58;
+      font-size: 0.8rem;
+      margin-top: 1rem;
     }
 
     footer {
       text-align: center;
-      padding: 2rem 0;
+      padding: 2rem;
       color: #8b949e;
       font-size: 0.85rem;
       border-top: 1px solid var(--border);
-      margin-top: 2rem;
+      margin-top: 3rem;
     }
+
+    #no-data {
+      text-align: center;
+      padding: 3rem;
+      color: #8b949e;
+    }
+    #no-data p { color: #8b949e; font-size: 1rem; }
   </style>
 </head>
 <body>
+  <a class="back" href="index.html">← back to index</a>
+  <h1>⚡ Performance Benchmarks</h1>
+  <p class="desc">
+    Side-by-side performance comparison of <code>tsb</code> (TypeScript/Bun) vs
+    <code>pandas</code> (Python). Each function is benchmarked with identical datasets
+    and the same number of iterations.
+  </p>
 
-  <div id="playground-loading">
-    <div class="spinner"></div>
-    <div id="playground-status">Initializing playground…</div>
+  <div id="no-data" style="display: none;">
+    <p>📊 No benchmark data available yet.</p>
+    <p style="font-size: 0.875rem; margin-top: 0.5rem;">
+      Benchmarks are added automatically by the
+      <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+      perf-comparison program. Each iteration adds a new function benchmark.
+    </p>
   </div>
 
-  <a class="back" href="index.html">← Back to roadmap</a>
-  <h1>Performance Benchmarks: tsb vs pandas</h1>
-  <p class="subtitle">Side-by-side performance comparison of <code>tsb</code> (TypeScript/Bun) vs
-    <code>pandas</code> (Python). Each function is benchmarked with identical datasets
-    and the same number of iterations.</p>
+  <!-- Table section -->
+  <h2 id="table-heading" style="display: none;">Detailed Results</h2>
+  <table id="bench-table" class="bench-table" style="display: none;">
+    <thead>
+      <tr>
+        <th>Function</th>
+        <th>tsb (ms)</th>
+        <th>pandas (ms)</th>
+        <th>Ratio</th>
+        <th>Faster</th>
+      </tr>
+    </thead>
+    <tbody id="bench-tbody"></tbody>
+  </table>
+  <p id="bench-timestamp" class="timestamp" style="display: none;"></p>
 
-  <div class="section">
-    <h2>Try it</h2>
-      <p>Edit and press <strong>▶ Run</strong> to execute. Use the imports listed below as a starting point.</p>
-    <div class="playground-block">
-      <div class="playground-header">
-        <span class="playground-label">TypeScript</span>
-        <div class="playground-actions">
-          <button class="playground-run" disabled>▶ Run</button>
-          <button class="playground-reset">↺ Reset</button>
-        </div>
-      </div>
-      <textarea class="playground-editor" spellcheck="false">// benchmarks — interactive playground.
-// Edit this code and press ▶ Run (or Ctrl+Enter) to execute.
-import { Series } from "tsb";
+  <!-- Methodology -->
+  <div class="info-box">
+    <h3>📐 Methodology</h3>
+    <p>Each benchmark follows a consistent protocol:</p>
+    <ul>
+      <li><strong>Dataset</strong>: 100,000 elements, deterministic generation</li>
+      <li><strong>Warm-up</strong>: 5 untimed iterations</li>
+      <li><strong>Measured</strong>: 50 timed iterations, mean reported</li>
+      <li><strong>tsb runtime</strong>: Bun (latest)</li>
+      <li><strong>pandas runtime</strong>: CPython + pandas (latest)</li>
+      <li><strong>Ratio</strong>: tsb_time / pandas_time — below 1.0 means tsb is faster</li>
+    </ul>
+  </div>
 
-const s = new Series({ data: [1, 2, 3] });
-console.log(s.toString());
-</textarea>
-      <div class="playground-output">Click ▶ Run to execute</div>
-      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
-    </div>
+  <div class="info-box">
+    <h3>🤖 About</h3>
+    <p>
+      These benchmarks are generated automatically by the Autoloop
+      <code>perf-comparison</code> program. Each iteration adds a new function
+      comparison. Results are updated on every accepted iteration and deployed
+      to this page.
+    </p>
   </div>
 
   <footer>
@@ -183,6 +187,66 @@ console.log(s.toString());
     </p>
   </footer>
 
-  <script type="module" src="playground-runtime.js"></script>
+  <script>
+    // Load benchmark results and render
+    (async function () {
+      const noData = document.getElementById("no-data");
+      const tableHeading = document.getElementById("table-heading");
+      const benchTable = document.getElementById("bench-table");
+      const benchTbody = document.getElementById("bench-tbody");
+      const benchTimestamp = document.getElementById("bench-timestamp");
+
+      let data;
+      try {
+        const resp = await fetch("../benchmarks/results.json");
+        if (!resp.ok) throw new Error("fetch failed");
+        data = await resp.json();
+      } catch {
+        // Try alternate path (deployed from playground/)
+        try {
+          const resp2 = await fetch("benchmarks/results.json");
+          if (!resp2.ok) throw new Error("fetch failed");
+          data = await resp2.json();
+        } catch {
+          noData.style.display = "block";
+          return;
+        }
+      }
+
+      const benchmarks = data.benchmarks || [];
+      if (benchmarks.length === 0) {
+        noData.style.display = "block";
+        return;
+      }
+
+      // Show sections
+      tableHeading.style.display = "";
+      benchTable.style.display = "";
+      if (data.timestamp) {
+        benchTimestamp.style.display = "";
+        benchTimestamp.textContent = "Last updated: " + data.timestamp;
+      }
+
+      // Render table
+      for (const b of benchmarks) {
+        const ratio = b.ratio;
+        const faster = ratio < 1 ? "tsb" : "pandas";
+        const badgeClass = ratio < 1 ? "fast" : "slow";
+        const fasterClass = ratio < 1 ? "faster-tsb" : "faster-pandas";
+        const displayRatio = ratio < 1
+          ? (1 / ratio).toFixed(2) + "x faster"
+          : ratio.toFixed(2) + "x slower";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+          "<td>" + b.function.replace(/_/g, " ") + "</td>" +
+          "<td>" + b.tsb.mean_ms + "</td>" +
+          "<td>" + b.pandas.mean_ms + "</td>" +
+          '<td><span class="ratio-badge ' + badgeClass + '">' + ratio + "x</span></td>" +
+          '<td class="' + fasterClass + '">' + faster + " (" + displayRatio + ")</td>";
+        benchTbody.appendChild(tr);
+      }
+    })();
+  </script>
 </body>
 </html>
