@@ -26,6 +26,8 @@ const PLAYGROUND_DIR = join(import.meta.dir, "..", "playground");
 const NON_PLAYGROUND_PAGES = new Set<string>([
   // The landing page is a roadmap/index — no executable code blocks.
   "index.html",
+  // The benchmarks page is a results chart (tsb vs pandas), not a playground.
+  "benchmarks.html",
 ]);
 
 function listPlaygroundHtmlFiles(): string[] {
