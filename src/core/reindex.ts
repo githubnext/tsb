@@ -205,7 +205,7 @@ function applyNearest(values: Scalar[], present: readonly boolean[]): Scalar[] {
   const right = buildRightNearest(values, present);
   for (let i = 0; i < values.length; i++) {
     if (!present[i]) {
-      out[i] = pickNearest(left.dist[i], right.dist[i], left.val[i], right.val[i]);
+      out[i] = pickNearest(left.dist[i] ?? -1, right.dist[i] ?? -1, left.val[i] ?? null, right.val[i] ?? null);
     }
   }
   return out;
