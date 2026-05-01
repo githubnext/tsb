@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "test": "bun test tests",
+    "test": "bun test ./tests/",
     "test:e2e": "bun test --timeout 600000 tests-e2e",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
