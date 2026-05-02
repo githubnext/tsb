@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-01T18:38:13Z |
-| Iteration Count | 301 |
-| Best Metric | 640 |
+| Last Run | 2026-05-02T12:39:05Z |
+| Iteration Count | 302 |
+| Best Metric | 643 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, accepted, accepted, error, accepted, error, error, accepted, accepted |
+| Recent Statuses | error, accepted, accepted, error, accepted, error, error, accepted, accepted, accepted |
 
 ---
 
@@ -68,6 +68,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 302 — 2026-05-02T12:39:05Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25251927678)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 3 benchmark pairs: `squeeze` (squeezeSeries/squeezeDataFrame), `hash_pandas_object` (hashPandasObject Series+DF), `infer_objects` (inferObjectsSeries/inferObjectsDataFrame).
+- **Metric**: 643 (previous best: 640, delta: +3) · **Commit**: 6ec27bb
 
 ### Iteration 301 — 2026-05-01T18:38:13Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25227439051)
 
