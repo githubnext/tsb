@@ -685,3 +685,4 @@ export type {
 } from "./stats/index.ts";
 export { hashPandasObject } from "./stats/index.ts";
 export type { HashPandasObjectOptions } from "./stats/index.ts";
+export { hashArray } from "./stats/index.ts";

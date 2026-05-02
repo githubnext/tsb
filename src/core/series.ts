@@ -1180,6 +1180,34 @@ export class Series<T extends Scalar = Scalar> {
   groupby(by: readonly Scalar[] | Series<Scalar>): SeriesGroupBy {
     return new SeriesGroupBy(this as Series<Scalar>, by);
   }
+
+  // ─── items / iteritems ────────────────────────────────────────────────────
+
+  /**
+   * Lazily iterate over `(label, value)` pairs — mirrors `Series.items()`.
+   *
+   * @example
+   * ```ts
+   * const s = new Series({ data: [10, 20], index: ["a", "b"] });
+   * for (const [label, value] of s.items()) {
+   *   console.log(label, value); // "a" 10  then  "b" 20
+   * }
+   * ```
+   */
+  *items(): IterableIterator<[Label, T]> {
+    const n = this.index.size;
+    for (let i = 0; i < n; i++) {
+      yield [this.index.at(i) as Label, this.iat(i) as T];
+    }
+  }
+
+  /**
+   * Alias for `items()` — mirrors `Series.iteritems()` (deprecated in pandas
+   * 1.5 but still widely used).
+   */
+  *iteritems(): IterableIterator<[Label, T]> {
+    yield* this.items();
+  }
 }
 
 function isIndexLike(v: unknown): v is Index<Label> {

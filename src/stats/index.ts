@@ -503,3 +503,4 @@ export type {
 } from "./style.ts";
 export { hashPandasObject } from "./hash_pandas_object.ts";
 export type { HashPandasObjectOptions } from "./hash_pandas_object.ts";
+export { hashArray } from "./hash_array.ts";

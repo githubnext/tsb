@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — hashArray / itertuples / Series.items Playground</title>
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #e6edf3; --accent: #58a6ff; --green: #3fb950;
+      --orange: #d29922; --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui,-apple-system,sans-serif; line-height:1.6; padding:2rem; max-width:900px; margin:0 auto; }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom:0.5rem; }
+    h2 { margin-top:0; margin-bottom:0.5rem; font-size:1.25rem; }
+    p { color:#8b949e; margin-bottom:1rem; }
+    code { font-family:var(--font-mono); font-size:0.875em; background:var(--surface); border:1px solid var(--border); border-radius:0.3rem; padding:0.1rem 0.4rem; }
+    .back { margin-bottom:2rem; display:inline-block; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:0.75rem; padding:1.5rem; margin-bottom:1.5rem; }
+    textarea { width:100%; font-family:var(--font-mono); font-size:0.85rem; background:#0d1117; color:var(--text); border:1px solid var(--border); border-radius:0.5rem; padding:0.75rem; resize:vertical; }
+    button { background:var(--accent); color:#0d1117; border:none; border-radius:0.4rem; padding:0.5rem 1.2rem; font-size:0.9rem; font-weight:600; cursor:pointer; margin-top:0.75rem; }
+    button:hover { opacity:0.85; }
+    pre { background:#0d1117; border:1px solid var(--border); border-radius:0.5rem; padding:1rem; font-family:var(--font-mono); font-size:0.85rem; overflow-x:auto; margin-top:0.75rem; white-space:pre-wrap; }
+    .ok  { color: var(--green); }
+    .err { color: var(--red); }
+  </style>
+</head>
+<body>
+<a class="back" href="index.html">← Back to playground index</a>
+<h1>hashArray / itertuples / Series.items</h1>
+<p>
+  Utility hashing and row-iteration APIs — mirrors
+  <code>pandas.util.hash_array</code>, <code>DataFrame.itertuples()</code>,
+  and <code>Series.items()</code>.
+</p>
+
+<div class="card">
+  <h2>hashArray</h2>
+  <p>Hash an array of scalar values element-wise (FNV-1a 64-bit).</p>
+  <textarea id="code-hash" rows="6">
+import { hashArray } from "tsb";
+
+const arr = [1, "hello", null, true, 42];
+const hashes = hashArray(arr);
+console.log("Hashes:", hashes);
+
+// Duplicate inputs get the same hash
+const h2 = hashArray(["a", "b", "a"]);
+console.log("h2[0] === h2[2]:", h2[0] === h2[2]);
+  </textarea>
+  <button onclick="run('code-hash','out-hash')">▶ Run</button>
+  <pre id="out-hash">Click ▶ Run</pre>
+</div>
+
+<div class="card">
+  <h2>Series.items() / iteritems()</h2>
+  <p>Iterate over <code>(label, value)</code> pairs from a Series.</p>
+  <textarea id="code-items" rows="8">
+import { Series } from "tsb";
+
+const s = new Series({ data: [10, 20, 30], index: ["a", "b", "c"] });
+for (const [label, value] of s.items()) {
+  console.log(label, "→", value);
+}
+
+// iteritems() is an alias
+console.log("\nvia iteritems:");
+console.log([...s.iteritems()]);
+  </textarea>
+  <button onclick="run('code-items','out-items')">▶ Run</button>
+  <pre id="out-items">Click ▶ Run</pre>
+</div>
+
+<div class="card">
+  <h2>DataFrame.itertuples()</h2>
+  <p>Iterate over rows as plain objects with an <code>Index</code> field.</p>
+  <textarea id="code-tuples" rows="8">
+import { DataFrame } from "tsb";
+
+const df = new DataFrame({ name: ["Alice", "Bob", "Carol"], score: [95, 87, 92] });
+for (const row of df.itertuples()) {
+  console.log(row);
+}
+
+console.log("\nWithout index:");
+console.log([...df.itertuples(false)]);
+  </textarea>
+  <button onclick="run('code-tuples','out-tuples')">▶ Run</button>
+  <pre id="out-tuples">Click ▶ Run</pre>
+</div>
+
+<script type="module">
+  const logs = [];
+  const _log = console.log.bind(console);
+  window._intercept = function(outId) {
+    logs.length = 0;
+    console.log = (...args) => {
+      _log(...args);
+      logs.push(args.map(a => {
+        if (Array.isArray(a)) return JSON.stringify(a);
+        if (typeof a === "object" && a !== null) return JSON.stringify(a);
+        return String(a);
+      }).join(" "));
+    };
+  };
+  window._restore = function() { console.log = _log; };
+  window.run = async function(codeId, outId) {
+    const code = document.getElementById(codeId).value.trim();
+    const out = document.getElementById(outId);
+    out.textContent = "Running…";
+    out.className = "";
+    window._intercept(outId);
+    try {
+      const blob = new Blob([code], { type: "application/javascript" });
+      const url = URL.createObjectURL(blob);
+      await import(/* @vite-ignore */ url);
+      URL.revokeObjectURL(url);
+      out.textContent = logs.join("\n") || "(no output)";
+      out.className = "ok";
+    } catch(e) {
+      out.textContent = String(e);
+      out.className = "err";
+    } finally {
+      window._restore();
+    }
+  };
+</script>
+</body>
+</html>

@@ -581,6 +581,46 @@ export class DataFrame {
     yield* this._columns.entries();
   }
 
+  /**
+   * Iterate over DataFrame rows as objects with an `Index` property plus
+   * one property per column — mirrors `DataFrame.itertuples()`.
+   *
+   * Unlike pandas' named-tuples (which are positional), JavaScript does not
+   * have positional tuples with named fields, so each row is returned as a
+   * plain object `{ Index: label, col1: val, col2: val, ... }`.  The `Index`
+   * key matches the pandas `itertuples(name="Pandas")` default.
+   *
+   * @param index - Whether to include the row index as the `Index` field.
+   *               Default `true`.
+   * @param name  - Unused (kept for API parity); TypeScript records have no
+   *               class name.
+   *
+   * @example
+   * ```ts
+   * const df = new DataFrame({ a: [1, 2], b: ["x", "y"] });
+   * for (const row of df.itertuples()) {
+   *   console.log(row); // { Index: 0, a: 1, b: "x" }  then  { Index: 1, a: 2, b: "y" }
+   * }
+   * ```
+   */
+  *itertuples(
+    index = true,
+    _name?: string,
+  ): IterableIterator<Record<string, Scalar>> {
+    const nRows = this.index.size;
+    const colNames = this.columns.values as readonly string[];
+    for (let i = 0; i < nRows; i++) {
+      const row: Record<string, Scalar> = {};
+      if (index) {
+        row["Index"] = this.index.at(i) as Scalar;
+      }
+      for (const name of colNames) {
+        row[name] = this.col(name).iat(i);
+      }
+      yield row;
+    }
+  }
+
   /** Iterate over `(rowLabel, rowSeries)` pairs — mirrors `DataFrame.iterrows()`. */
   *iterrows(): IterableIterator<[Label, Series<Scalar>]> {
     const nRows = this.index.size;
