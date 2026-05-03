@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-02T18:31:31Z |
-| Iteration Count | 300 |
-| Best Metric | 139 |
+| Last Run | 2026-05-03T12:32:13Z |
+| Iteration Count | 301 |
+| Best Metric | 140 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -23,7 +23,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
 
 ---
 
@@ -41,24 +41,20 @@
 - ✅ hashPandasObject added (iter 296)
 - ✅ hashArray + Series.items()/iteritems() + DataFrame.itertuples() added (iter 299)
 - ✅ pd.Grouper spec object added (iter 300)
-- Next: `pd.util.hash_biject_array()`, more `pd.api.types` predicates (is_float_dtype, is_integer_dtype, etc.), `Series.map()` with dict/Series
+- ✅ pd.api.indexers (BaseIndexer, FixedForwardWindowIndexer, VariableOffsetWindowIndexer) added (iter 301)
+- Next: `pd.util.hash_biject_array()`, `Series.map()` with dict/Series mapper, more `pd.api.types` predicates
 
 ---
 
 ## 📚 Lessons Learned
 
-- **CI type errors**: `Index<Label>.size`. `Series<Scalar>`. Non-null `arr[i]!` for noUncheckedIndexedAccess.
+- **CI type errors**: Non-null `arr[i]!` for noUncheckedIndexedAccess. `as Scalar`/`as number` casts.
 - **Biome**: `useBlockStatements`. `Number.NaN`. Default import fc. `import type` for unused imports.
 - **Imports**: `src/stats/*.ts` from `../core`, `../types.ts`. Tests from `../../src/index.ts`.
-- **TypeScript**: `as Scalar`/`as number` for noUncheckedIndexedAccess. `df.columns.values`.
 - **MultiIndex**: `mi as unknown as Index<Label>`. `mi.at(i)` returns `readonly Label[]`.
 - **Circular deps**: `string_accessor.ts` cannot import `DataFrame`.
-- **CI action_required**: Human approval needed, not test failure.
-- **to_html**: Use df.col(col).at(i) for cell values; df.index.at(i) for index labels.
-- **Baseline metric**: Always check `main` baseline. Branch fast-forwarded when ahead=0.
-- **DataFrame construction in tests**: Use `DataFrame.fromColumns({...})` not `new DataFrame({...})`. Use default `fc` import, not `* as fc`.
-- **fast-check not installed in sandbox**: Don't use fast-check in new tests unless confirmed installed. Node_modules may not be present in CI sandbox.
-- **DataFrame.fromColumns index option**: Second argument is `DataFrameOptions` with `{ index: [...] }`, not a plain array.
+- **DataFrame construction**: Use `DataFrame.fromColumns({...})`. Options `{ index: [...] }` (not plain array).
+- **Tests**: Avoid fast-check unless confirmed installed. No `new DataFrame({...})` — use `.fromColumns`.
 
 ---
 
@@ -80,6 +76,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 301 — 2026-05-03 12:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25279200195)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `pd.api.indexers` — `BaseIndexer`, `FixedForwardWindowIndexer`, `VariableOffsetWindowIndexer`, `applyIndexer()`
+- **Metric**: 140 (previous best: 139, delta: +1)
+- **Commit**: 563f60f
+- **Notes**: New `src/window/indexers.ts` provides custom window indexers for rolling computations. `FixedForwardWindowIndexer` enables forward-looking windows; `VariableOffsetWindowIndexer` supports per-row variable depth. 28 tests cover all classes and `applyIndexer` helper.
+
 ### Iteration 300 — 2026-05-02 18:31 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25258809663)
 
 - **Status**: ✅ Accepted (pending CI)
@@ -88,16 +92,6 @@
 - **Commit**: e3f7774
 - **Notes**: Grouper mirrors pandas.Grouper — key, freq, level, sort, dropna, closed, label options. isKeyGrouper/isFreqGrouper/isLevelGrouper helpers. 21 tests pass in sandbox.
 
-### Iteration 299 — 2026-05-02 01:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25239808128)
-
-- **Status**: ✅ Accepted
-- **Change**: +hashArray (element-wise FNV-1a hashing) + Series.items()/iteritems() + DataFrame.itertuples()
-- **Metric**: 138 (previous best: 137, delta: +1)
-- **Commit**: 738c2e4
-- **Notes**: hashArray mirrors pd.util.hash_array; Series.items/iteritems yield (label, value) pairs; DataFrame.itertuples yields row objects with Index field. All 18 new tests pass; typecheck clean.
-
-### Iters 296–298 — pending-ci (137→138): +hashPandasObject, +hashArray attempts (merged into iter 299).
-
-### Iters 273–295 — pending-ci/accepted (130→137): +Grouper, +lreshape, +strCenter/Ljust/Rjust/Zfill/Wrap, +strGetDummies, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +firstRows/lastRows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html.
+### Iters 273–300 — accepted/pending-ci (130→139): +Grouper, +lreshape, +str ops, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +rows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject, +hashArray/iteritems, +Grouper spec.
 
 ### Iters 1–272 — accepted (0→130): full pandas core + stats + io + merge + reshape + window + groupby.
