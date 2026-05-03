@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb — Window Indexers</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+      h1 { color: #1a1a2e; }
+      h2 { color: #16213e; margin-top: 2rem; }
+      pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+      .note { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
+      th { background: #f0f0f0; }
+      output { display: block; background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 6px; min-height: 3rem; font-family: monospace; white-space: pre; }
+      button { background: #2196f3; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+      button:hover { background: #1976d2; }
+      .section { margin-bottom: 2rem; }
+    </style>
+  </head>
+  <body>
+    <h1>🪟 Window Indexers — <code>tsb</code></h1>
+    <p>
+      Custom window indexers let you define arbitrary window shapes for rolling computations.
+      Mirrors <a href="https://pandas.pydata.org/docs/reference/api/pandas.api.indexers.BaseIndexer.html" target="_blank"><code>pandas.api.indexers</code></a>.
+    </p>
+
+    <div class="note">
+      <strong>Classes:</strong>
+      <code>BaseIndexer</code> · <code>FixedForwardWindowIndexer</code> · <code>VariableOffsetWindowIndexer</code> · <code>applyIndexer()</code>
+    </div>
+
+    <!-- FixedForwardWindowIndexer demo -->
+    <div class="section">
+      <h2>1. <code>FixedForwardWindowIndexer</code></h2>
+      <p>
+        The default pandas <code>Rolling</code> looks <em>backward</em>. <code>FixedForwardWindowIndexer</code>
+        instead looks <em>forward</em> — each row's window covers the next <em>N</em> rows.
+      </p>
+      <pre><code>import { FixedForwardWindowIndexer, applyIndexer } from "tsb";
+
+const idx = new FixedForwardWindowIndexer({ windowSize: 3 });
+const values = [10, 20, 30, 40, 50];
+const result = applyIndexer(idx, values, nums => nums.reduce((a,b)=>a+b,0));
+// → [60, 90, 120, 90, 50]
+</code></pre>
+      <label>windowSize: <input id="ff-window" type="number" value="3" min="1" style="width:5rem"></label>
+      &nbsp;
+      <label>values (comma-separated): <input id="ff-values" value="10,20,30,40,50" style="width:20rem"></label>
+      <br><br>
+      <button onclick="runForwardDemo()">Run</button>
+      <output id="ff-output">Click Run to see output.</output>
+    </div>
+
+    <!-- VariableOffsetWindowIndexer demo -->
+    <div class="section">
+      <h2>2. <code>VariableOffsetWindowIndexer</code></h2>
+      <p>
+        Defines a different look-back (or look-forward) depth for each row. Useful for
+        event-driven windows or irregular-frequency time series.
+      </p>
+      <pre><code>import { VariableOffsetWindowIndexer, applyIndexer } from "tsb";
+
+// Trailing window — look back by offsets[i] rows
+const idx = new VariableOffsetWindowIndexer({ offsets: [0, 1, 2, 1, 0] });
+const result = applyIndexer(idx, [10,20,30,40,50], nums => nums.reduce((a,b)=>a+b,0));
+// → [10, 30, 60, 70, 50]
+</code></pre>
+      <label>offsets (comma-separated): <input id="vo-offsets" value="0,1,2,1,0" style="width:15rem"></label>
+      &nbsp;
+      <label>values: <input id="vo-values" value="10,20,30,40,50" style="width:15rem"></label>
+      &nbsp;
+      <label><input id="vo-forward" type="checkbox"> forward</label>
+      <br><br>
+      <button onclick="runVariableDemo()">Run</button>
+      <output id="vo-output">Click Run to see output.</output>
+    </div>
+
+    <!-- Custom subclass demo -->
+    <div class="section">
+      <h2>3. Custom <code>BaseIndexer</code> subclass</h2>
+      <p>Subclass <code>BaseIndexer</code> to implement any window shape you need.</p>
+      <pre><code>import { BaseIndexer, applyIndexer } from "tsb";
+
+// Symmetric (centered) window
+class CenteredIndexer extends BaseIndexer {
+  constructor(private half: number) { super({ windowSize: 2 * half + 1 }); }
+  getWindowBounds(n: number) {
+    const start = new Int32Array(n);
+    const end   = new Int32Array(n);
+    for (let i = 0; i &lt; n; i++) {
+      start[i] = Math.max(0, i - this.half);
+      end[i]   = Math.min(n, i + this.half + 1);
+    }
+    return [start, end];
+  }
+}
+
+const idx = new CenteredIndexer(1); // window of [-1, 0, +1]
+const result = applyIndexer(idx, [10,20,30,40,50], nums => nums.reduce((a,b)=>a+b,0)/nums.length);
+// → [15, 20, 30, 40, 45]
+</code></pre>
+      <label>half (radius): <input id="ce-half" type="number" value="1" min="0" style="width:5rem"></label>
+      &nbsp;
+      <label>values: <input id="ce-values" value="10,20,30,40,50" style="width:20rem"></label>
+      <br><br>
+      <button onclick="runCustomDemo()">Run</button>
+      <output id="ce-output">Click Run to see output.</output>
+    </div>
+
+    <!-- Window bounds table -->
+    <div class="section">
+      <h2>4. Window Bounds Inspector</h2>
+      <p>Inspect the raw <code>[start, end)</code> bounds for any indexer.</p>
+      <select id="insp-type">
+        <option value="forward">FixedForwardWindowIndexer</option>
+        <option value="variable-trailing">VariableOffsetWindowIndexer (trailing)</option>
+        <option value="variable-forward">VariableOffsetWindowIndexer (forward)</option>
+      </select>
+      &nbsp;
+      <label>window/offsets: <input id="insp-param" value="3" style="width:15rem"></label>
+      &nbsp;
+      <label>n: <input id="insp-n" type="number" value="6" min="1" style="width:5rem"></label>
+      <br><br>
+      <button onclick="runBoundsInspector()">Inspect</button>
+      <div id="insp-table"></div>
+    </div>
+
+    <script type="module">
+      import {
+        FixedForwardWindowIndexer,
+        VariableOffsetWindowIndexer,
+        BaseIndexer,
+        applyIndexer,
+      } from "https://esm.sh/tsb@latest" // or use local build
+
+      const sum  = (nums) => nums.reduce((a,b)=>a+b,0);
+      const mean = (nums) => sum(nums) / nums.length;
+      const parseNums = (s) => s.split(",").map(x=>parseFloat(x.trim()));
+
+      window.runForwardDemo = () => {
+        const w = parseInt(document.getElementById("ff-window").value);
+        const vals = parseNums(document.getElementById("ff-values").value);
+        const idx = new FixedForwardWindowIndexer({ windowSize: w });
+        const start = Array.from(idx.getWindowBounds(vals.length)[0]);
+        const end   = Array.from(idx.getWindowBounds(vals.length)[1]);
+        const result = applyIndexer(idx, vals, sum);
+        document.getElementById("ff-output").textContent =
+          `bounds:\n  start = [${start}]\n  end   = [${end}]\n\nresult (sum): [${result}]`;
+      };
+
+      window.runVariableDemo = () => {
+        const offsets = parseNums(document.getElementById("vo-offsets").value).map(Math.round);
+        const vals    = parseNums(document.getElementById("vo-values").value);
+        const fwd     = document.getElementById("vo-forward").checked;
+        const idx = new VariableOffsetWindowIndexer({ offsets, forward: fwd });
+        const [s,e] = idx.getWindowBounds(vals.length);
+        const result = applyIndexer(idx, vals, sum);
+        document.getElementById("vo-output").textContent =
+          `direction: ${fwd ? "forward" : "trailing"}\nstart = [${Array.from(s)}]\nend   = [${Array.from(e)}]\n\nresult (sum): [${result}]`;
+      };
+
+      class CenteredIndexer extends BaseIndexer {
+        constructor(half) { super({ windowSize: 2*half+1 }); this._half=half; }
+        getWindowBounds(n) {
+          const start=new Int32Array(n), end=new Int32Array(n);
+          for(let i=0;i<n;i++){start[i]=Math.max(0,i-this._half);end[i]=Math.min(n,i+this._half+1);}
+          return [start,end];
+        }
+      }
+
+      window.runCustomDemo = () => {
+        const half = parseInt(document.getElementById("ce-half").value);
+        const vals = parseNums(document.getElementById("ce-values").value);
+        const idx  = new CenteredIndexer(half);
+        const result = applyIndexer(idx, vals, mean);
+        document.getElementById("ce-output").textContent = `result (mean): [${result.map(v=>v===null?"null":v.toFixed(2))}]`;
+      };
+
+      window.runBoundsInspector = () => {
+        const type = document.getElementById("insp-type").value;
+        const param = document.getElementById("insp-param").value;
+        const n = parseInt(document.getElementById("insp-n").value);
+        let idx;
+        if(type==="forward") idx = new FixedForwardWindowIndexer({windowSize:parseInt(param)});
+        else {
+          const offsets = param.split(",").map(x=>parseInt(x.trim()));
+          idx = new VariableOffsetWindowIndexer({offsets, forward:type.includes("forward")});
+        }
+        const [start,end] = idx.getWindowBounds(n);
+        let html = "<table><tr><th>i</th><th>start</th><th>end</th><th>window size</th></tr>";
+        for(let i=0;i<n;i++) html+=`<tr><td>${i}</td><td>${start[i]}</td><td>${end[i]}</td><td>${end[i]-start[i]}</td></tr>`;
+        html+="</table>";
+        document.getElementById("insp-table").innerHTML = html;
+      };
+    </script>
+  </body>
+</html>

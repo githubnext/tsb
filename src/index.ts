@@ -77,6 +77,13 @@ export {
   dataFrameRollingAgg,
 } from "./window/index.ts";
 export type { RollingApplyOptions, RollingAggOptions, AggFunctions } from "./window/index.ts";
+export {
+  BaseIndexer,
+  FixedForwardWindowIndexer,
+  VariableOffsetWindowIndexer,
+  applyIndexer,
+} from "./window/index.ts";
+export type { WindowBoundsOptions, WindowBounds } from "./window/index.ts";
 export { DataFrameEwm } from "./core/index.ts";
 export { CategoricalAccessor } from "./core/index.ts";
 export type { CatSeriesLike } from "./core/index.ts";
