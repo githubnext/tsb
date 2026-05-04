@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-03T18:35:00Z |
-| Iteration Count | 33 |
+| Last Run | 2026-05-04T12:51:00Z |
+| Iteration Count | 34 |
 | Best Metric | 21.048 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,15 +17,17 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, rejected, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, rejected |
 
 ## 🧬 Population
 
-### c033 · island 3 · fitness pending CI · gen 33
+### c034 · island 3 · fitness pending CI · gen 34
 
-- **Op**: exploitation; **Cell**: aos-typed-array · non-comparison; **Parent**: c029 (via c030 on branch)
-- **Approach**: Histogram accumulated inline during init loop — zero `_rxHisto`, then for each numeric element compute lo/hi and update all 8 histogram buckets immediately. Removes separate O(n) AoS-buffer scan. Commit 19cabe8.
+- **Op**: exploitation; **Cell**: aos-typed-array · non-comparison; **Parent**: c029 (best, fitness 21.048)
+- **Approach**: Merge histogram accumulation inline into init loop (eliminating separate O(n) AoS re-scan) + si stride counter in scatter loop (avoids i*3 multiply) + RangeIndex fast path in gather phase (skip 100k bounds-checked at() calls). Commit a9065e9.
 - **Status**: ⏳ pending CI
+
+### ~~c033~~ superseded by c034 (same core approach + RangeIndex fast path, correctly placed on branch)
 
 ### ~~c032~~ (commit a9daa8b not found on branch; superseded by c033 same approach)
 
@@ -47,8 +49,9 @@
 - Even pass count (8) → result in srcBuf after all passes (no final copy needed).
 - Benchmark noise: pandas time varies (~4-5.5ms); need ≥10% tsb speedup to clear noise.
 - AoS scatter packs all 3 writes/element on same cache line; SoA is worse for writes.
-- Merging histogram accumulation into init loop saves one O(n) pass over _rxA.
+- Merging histogram accumulation into init loop saves one O(n) pass over _rxA (eliminates separate re-scan of AoS buffer).
 - `index.take(perm)` calls at() with bounds-check for each element; RangeIndex fast path saves this.
+- Accumulated stride counter (si += 3) avoids one multiply per scatter element; may help JIT.
 
 ## 🚧 Foreclosed Avenues
 
@@ -62,36 +65,28 @@
 
 ## 📊 Iteration History
 
-### Iteration 33 — 2026-05-03 18:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25287191173)
+### Iteration 34 — 2026-05-04 12:51 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25319882149)
 
-- **Status**: ⏳ pending CI · c033 · exploitation · island 3
-- **Operator**: exploitation · **Parent**: c029/c030 (fitness 21.048)
-- **Change**: Merge histogram accumulation into init loop; eliminates separate O(n) AoS-buffer re-read. Commit 19cabe8.
+- **Status**: ⏳ pending CI · c034 · exploitation · island 3
+- **Operator**: exploitation · **Parent**: c029 (fitness 21.048)
+- **Change**: Merge histogram accumulation into init loop + accumulated si stride counter + RangeIndex fast path for index.take(perm). Commit a9065e9 (pushed via safeoutputs).
 - **Metric**: pending CI (best: 21.048)
 
-### Iteration 32 — 2026-05-03 01:11 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25266324977)
+### Iteration 33 — 2026-05-03 18:35 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25287191173)
 
-- **Status**: ⏳ pending CI · c032 · exploitation · island 3 (commit lost)
-- **Change**: Same merged-histogram approach; commit a9daa8b not found on branch.
+- **Status**: ⏳ pending CI · c033 · exploitation · island 3 (commit lost from branch)
+- **Change**: Merge histogram accumulation into init loop. Same as c034 approach.
 
-### Iteration 31 — 2026-05-02 06:53 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25246208804)
+### Iters 30–32 — ⏳ pending CI / lost commits · exploitation · island 3 · pre-compute/merge histogram approaches.
 
-- **Status**: ⏳ pending CI · c031 · exploitation · island 3
-- **Change**: Merged histogram into init loop + RangeIndex fast path for index.take(perm).
+### Iteration 29 — 2026-04-30 18:44 UTC
 
-### Iteration 30 — 2026-05-01 12:36 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25214403845)
-
-- **Status**: ⏳ pending CI (CI action_required) · c030 · exploitation · island 3
-- **Change**: Pre-compute all 8 histograms in one O(n) scan.
-
-### Iteration 29 — 2026-04-30 18:44 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25183052353)
-
-- **Status**: ✅ Accepted fitness=21.048 delta=-0.793; merged PR #255
+- **Status**: ✅ Accepted fitness=21.048; merged PR #255
 - **Change**: AoS scatter layout.
 
 ### Iteration 28 — 2026-04-30 01:08 UTC
 
-- **Status**: ✅ Accepted fitness=21.841 delta=-6.158; merged PR #249
+- **Status**: ✅ Accepted fitness=21.841; merged PR #249
 - **Change**: Merge partition+radix-init into one pass.
 
-### Iters 1–27 — c022 ✅ merged PR #226 (LSD 8-pass radix). c027 ❌ fitness=29.573.
+### Iters 1–27 — c022 ✅ merged PR #226 (LSD 8-pass radix, fitness ~29→21). c027 ❌ fitness=29.573.
