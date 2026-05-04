@@ -35,7 +35,7 @@ jobs:
         run: bun run lint
 
       - name: Test
-        run: bun test --coverage tests
+        run: bun test --coverage ./tests/
 
   playground-e2e:
     name: Playground E2E (Playwright)
