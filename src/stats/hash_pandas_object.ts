@@ -79,12 +79,11 @@ function fnvScalar(hash: bigint, val: Scalar): bigint {
     }
     // Encode as little-endian 8-byte IEEE 754
     const buf = new ArrayBuffer(8);
-    new DataView(buf).setFloat64(0, val, true);
-    const bytes = new Uint8Array(buf);
+    const view = new DataView(buf);
+    view.setFloat64(0, val, true);
     let h = hash;
     for (let i = 0; i < 8; i++) {
-      const b = bytes[i];
-      h = fnvByte(h, b === undefined ? 0 : b);
+      h = fnvByte(h, view.getUint8(i));
     }
     return h;
   }
