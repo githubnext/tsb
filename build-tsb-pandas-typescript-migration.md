@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-03T12:32:13Z |
-| Iteration Count | 301 |
-| Best Metric | 140 |
+| Last Run | 2026-05-04T07:21:08Z |
+| Iteration Count | 302 |
+| Best Metric | 141 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -23,7 +23,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
 
 ---
 
@@ -42,7 +42,8 @@
 - ✅ hashArray + Series.items()/iteritems() + DataFrame.itertuples() added (iter 299)
 - ✅ pd.Grouper spec object added (iter 300)
 - ✅ pd.api.indexers (BaseIndexer, FixedForwardWindowIndexer, VariableOffsetWindowIndexer) added (iter 301)
-- Next: `pd.util.hash_biject_array()`, `Series.map()` with dict/Series mapper, more `pd.api.types` predicates
+- ✅ Series.map() dict/Series/Map overloads + hashBijectArray/hashBijectInverse added (iter 302)
+- Next: more `pd.api.types` predicates, `DataFrame.map()` (element-wise apply), `pd.cut()` improvements
 
 ---
 
@@ -76,6 +77,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 302 — 2026-05-04 07:21 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25306204417)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `Series.map()` dict/Series/Map overloads + `hashBijectArray()` + `hashBijectInverse()`
+- **Metric**: 141 (previous best: 140, delta: +1)
+- **Commit**: a1356c7
+- **Notes**: `Series.map()` now accepts Record/Series/Map in addition to functions, mirroring pandas.Series.map(). Added `naAction:'ignore'` for NA pass-through. `hashBijectArray` provides bijective zero-based integer codes for categorical arrays; `hashBijectInverse` recovers original values. 32 new tests.
+
 ### Iteration 301 — 2026-05-03 12:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25279200195)
 
 - **Status**: ✅ Accepted
@@ -84,14 +93,6 @@
 - **Commit**: 563f60f
 - **Notes**: New `src/window/indexers.ts` provides custom window indexers for rolling computations. `FixedForwardWindowIndexer` enables forward-looking windows; `VariableOffsetWindowIndexer` supports per-row variable depth. 28 tests cover all classes and `applyIndexer` helper.
 
-### Iteration 300 — 2026-05-02 18:31 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25258809663)
-
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Add `pd.Grouper` spec object with `isGrouper()` type-guard
-- **Metric**: 139 (previous best: 138, delta: +1)
-- **Commit**: e3f7774
-- **Notes**: Grouper mirrors pandas.Grouper — key, freq, level, sort, dropna, closed, label options. isKeyGrouper/isFreqGrouper/isLevelGrouper helpers. 21 tests pass in sandbox.
-
-### Iters 273–300 — accepted/pending-ci (130→139): +Grouper, +lreshape, +str ops, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +rows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject, +hashArray/iteritems, +Grouper spec.
+### Iters 273–301 — accepted/pending-ci (130→140): +Grouper, +lreshape, +str ops, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +rows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject, +hashArray/iteritems, +Grouper spec, +api.indexers.
 
 ### Iters 1–272 — accepted (0→130): full pandas core + stats + io + merge + reshape + window + groupby.
