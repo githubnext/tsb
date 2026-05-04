@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-04T01:09:41Z |
-| Iteration Count | 304 |
-| Best Metric | 649 |
+| Last Run | 2026-05-04T18:47:55Z |
+| Iteration Count | 305 |
+| Best Metric | 651 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -22,14 +22,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, error, accepted, error, error, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, error, accepted, error, error, accepted, accepted, accepted, accepted |
 
 ---
 
 ## 📋 Program Info
 
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
-**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: #265
+**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: (new, #265 merged)
 
 ---
 
@@ -69,6 +69,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 305 — 2026-05-04T18:47:55Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25336857327)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 2 benchmark pairs: `dropna` (Series + DataFrame how=any/all) and `fillna` (Series + DataFrame scalar/ffill/bfill).
+- **Metric**: 651 (previous best: 649, delta: +2) · **Commit**: a9eb584
 
 ### Iteration 304 — 2026-05-04T01:09:41Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25296135822)
 
