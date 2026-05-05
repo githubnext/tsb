@@ -1,95 +1,232 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — Window Indexers</title>
-    <style>
-      body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-      h1 { color: #1a1a2e; }
-      h2 { color: #16213e; margin-top: 2rem; }
-      pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
-      .note { background: #e8f4fd; border-left: 4px solid #2196f3; padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; }
-      table { border-collapse: collapse; width: 100%; }
-      th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
-      th { background: #f0f0f0; }
-      output { display: block; background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 6px; min-height: 3rem; font-family: monospace; white-space: pre; }
-      button { background: #2196f3; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; font-size: 1rem; }
-      button:hover { background: #1976d2; }
-      .section { margin-bottom: 2rem; }
-    </style>
-  </head>
-  <body>
-    <h1>🪟 Window Indexers — <code>tsb</code></h1>
-    <p>
-      Custom window indexers let you define arbitrary window shapes for rolling computations.
-      Mirrors <a href="https://pandas.pydata.org/docs/reference/api/pandas.api.indexers.BaseIndexer.html" target="_blank"><code>pandas.api.indexers</code></a>.
-    </p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Window Indexers</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
 
-    <div class="note">
-      <strong>Classes:</strong>
-      <code>BaseIndexer</code> · <code>FixedForwardWindowIndexer</code> · <code>VariableOffsetWindowIndexer</code> · <code>applyIndexer()</code>
-    </div>
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
 
-    <!-- FixedForwardWindowIndexer demo -->
-    <div class="section">
-      <h2>1. <code>FixedForwardWindowIndexer</code></h2>
-      <p>
-        The default pandas <code>Rolling</code> looks <em>backward</em>. <code>FixedForwardWindowIndexer</code>
-        instead looks <em>forward</em> — each row's window covers the next <em>N</em> rows.
-      </p>
-      <pre><code>import { FixedForwardWindowIndexer, applyIndexer } from "tsb";
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>🪟 Window Indexers</h1>
+  <p class="subtitle">Custom window indexers let you define arbitrary window shapes for rolling computations — mirrors <a href="https://pandas.pydata.org/docs/reference/api/pandas.api.indexers.BaseIndexer.html"><code>pandas.api.indexers</code></a>.</p>
+
+  <div class="section">
+    <h2>1 — FixedForwardWindowIndexer</h2>
+    <p>The default rolling looks <em>backward</em>. <code>FixedForwardWindowIndexer</code> looks <em>forward</em> — each row's window covers the next <em>N</em> rows.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { FixedForwardWindowIndexer, applyIndexer } from "tsb";
 
 const idx = new FixedForwardWindowIndexer({ windowSize: 3 });
 const values = [10, 20, 30, 40, 50];
-const result = applyIndexer(idx, values, nums => nums.reduce((a,b)=>a+b,0));
-// → [60, 90, 120, 90, 50]
-</code></pre>
-      <label>windowSize: <input id="ff-window" type="number" value="3" min="1" style="width:5rem"></label>
-      &nbsp;
-      <label>values (comma-separated): <input id="ff-values" value="10,20,30,40,50" style="width:20rem"></label>
-      <br><br>
-      <button onclick="runForwardDemo()">Run</button>
-      <output id="ff-output">Click Run to see output.</output>
-    </div>
 
-    <!-- VariableOffsetWindowIndexer demo -->
-    <div class="section">
-      <h2>2. <code>VariableOffsetWindowIndexer</code></h2>
-      <p>
-        Defines a different look-back (or look-forward) depth for each row. Useful for
-        event-driven windows or irregular-frequency time series.
-      </p>
-      <pre><code>import { VariableOffsetWindowIndexer, applyIndexer } from "tsb";
+// Sum of the next 3 elements (forward window)
+const result = applyIndexer(idx, values, nums => nums.reduce((a, b) => a + b, 0));
+console.log(result); // [60, 90, 120, 90, 50]
+
+// Inspect raw bounds
+const [start, end] = idx.getWindowBounds(values.length);
+console.log([...start]); // [0, 1, 2, 3, 4]
+console.log([...end]);   // [3, 4, 5, 5, 5]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2 — VariableOffsetWindowIndexer</h2>
+    <p>Define a different look-back (or look-forward) depth for each row. Useful for event-driven windows or irregular-frequency time series.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { VariableOffsetWindowIndexer, applyIndexer } from "tsb";
 
 // Trailing window — look back by offsets[i] rows
 const idx = new VariableOffsetWindowIndexer({ offsets: [0, 1, 2, 1, 0] });
-const result = applyIndexer(idx, [10,20,30,40,50], nums => nums.reduce((a,b)=>a+b,0));
-// → [10, 30, 60, 70, 50]
-</code></pre>
-      <label>offsets (comma-separated): <input id="vo-offsets" value="0,1,2,1,0" style="width:15rem"></label>
-      &nbsp;
-      <label>values: <input id="vo-values" value="10,20,30,40,50" style="width:15rem"></label>
-      &nbsp;
-      <label><input id="vo-forward" type="checkbox"> forward</label>
-      <br><br>
-      <button onclick="runVariableDemo()">Run</button>
-      <output id="vo-output">Click Run to see output.</output>
-    </div>
+const result = applyIndexer(idx, [10, 20, 30, 40, 50], nums => nums.reduce((a, b) => a + b, 0));
+console.log(result); // [10, 30, 60, 70, 50]
 
-    <!-- Custom subclass demo -->
-    <div class="section">
-      <h2>3. Custom <code>BaseIndexer</code> subclass</h2>
-      <p>Subclass <code>BaseIndexer</code> to implement any window shape you need.</p>
-      <pre><code>import { BaseIndexer, applyIndexer } from "tsb";
+// Forward window — look ahead by offsets[i] rows
+const fwdIdx = new VariableOffsetWindowIndexer({ offsets: [2, 1, 0, 1, 0], forward: true });
+const fwdResult = applyIndexer(fwdIdx, [10, 20, 30, 40, 50], nums => nums.reduce((a, b) => a + b, 0));
+console.log(fwdResult); // [60, 50, 30, 90, 50]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3 — Custom BaseIndexer subclass</h2>
+    <p>Subclass <code>BaseIndexer</code> to implement any window shape you need.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { BaseIndexer, applyIndexer } from "tsb";
 
 // Symmetric (centered) window
 class CenteredIndexer extends BaseIndexer {
   constructor(private half: number) { super({ windowSize: 2 * half + 1 }); }
-  getWindowBounds(n: number) {
+  getWindowBounds(n: number): [Int32Array, Int32Array] {
     const start = new Int32Array(n);
     const end   = new Int32Array(n);
-    for (let i = 0; i &lt; n; i++) {
+    for (let i = 0; i < n; i++) {
       start[i] = Math.max(0, i - this.half);
       end[i]   = Math.min(n, i + this.half + 1);
     }
@@ -98,102 +235,20 @@ class CenteredIndexer extends BaseIndexer {
 }
 
 const idx = new CenteredIndexer(1); // window of [-1, 0, +1]
-const result = applyIndexer(idx, [10,20,30,40,50], nums => nums.reduce((a,b)=>a+b,0)/nums.length);
-// → [15, 20, 30, 40, 45]
-</code></pre>
-      <label>half (radius): <input id="ce-half" type="number" value="1" min="0" style="width:5rem"></label>
-      &nbsp;
-      <label>values: <input id="ce-values" value="10,20,30,40,50" style="width:20rem"></label>
-      <br><br>
-      <button onclick="runCustomDemo()">Run</button>
-      <output id="ce-output">Click Run to see output.</output>
+const result = applyIndexer(idx, [10, 20, 30, 40, 50], nums => nums.reduce((a, b) => a + b, 0) / nums.length);
+console.log(result.map(v => Math.round(v * 100) / 100)); // [15, 20, 30, 40, 45]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
+  </div>
 
-    <!-- Window bounds table -->
-    <div class="section">
-      <h2>4. Window Bounds Inspector</h2>
-      <p>Inspect the raw <code>[start, end)</code> bounds for any indexer.</p>
-      <select id="insp-type">
-        <option value="forward">FixedForwardWindowIndexer</option>
-        <option value="variable-trailing">VariableOffsetWindowIndexer (trailing)</option>
-        <option value="variable-forward">VariableOffsetWindowIndexer (forward)</option>
-      </select>
-      &nbsp;
-      <label>window/offsets: <input id="insp-param" value="3" style="width:15rem"></label>
-      &nbsp;
-      <label>n: <input id="insp-n" type="number" value="6" min="1" style="width:5rem"></label>
-      <br><br>
-      <button onclick="runBoundsInspector()">Inspect</button>
-      <div id="insp-table"></div>
-    </div>
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-    <script type="module">
-      import {
-        FixedForwardWindowIndexer,
-        VariableOffsetWindowIndexer,
-        BaseIndexer,
-        applyIndexer,
-      } from "https://esm.sh/tsb@latest" // or use local build
-
-      const sum  = (nums) => nums.reduce((a,b)=>a+b,0);
-      const mean = (nums) => sum(nums) / nums.length;
-      const parseNums = (s) => s.split(",").map(x=>parseFloat(x.trim()));
-
-      window.runForwardDemo = () => {
-        const w = parseInt(document.getElementById("ff-window").value);
-        const vals = parseNums(document.getElementById("ff-values").value);
-        const idx = new FixedForwardWindowIndexer({ windowSize: w });
-        const start = Array.from(idx.getWindowBounds(vals.length)[0]);
-        const end   = Array.from(idx.getWindowBounds(vals.length)[1]);
-        const result = applyIndexer(idx, vals, sum);
-        document.getElementById("ff-output").textContent =
-          `bounds:\n  start = [${start}]\n  end   = [${end}]\n\nresult (sum): [${result}]`;
-      };
-
-      window.runVariableDemo = () => {
-        const offsets = parseNums(document.getElementById("vo-offsets").value).map(Math.round);
-        const vals    = parseNums(document.getElementById("vo-values").value);
-        const fwd     = document.getElementById("vo-forward").checked;
-        const idx = new VariableOffsetWindowIndexer({ offsets, forward: fwd });
-        const [s,e] = idx.getWindowBounds(vals.length);
-        const result = applyIndexer(idx, vals, sum);
-        document.getElementById("vo-output").textContent =
-          `direction: ${fwd ? "forward" : "trailing"}\nstart = [${Array.from(s)}]\nend   = [${Array.from(e)}]\n\nresult (sum): [${result}]`;
-      };
-
-      class CenteredIndexer extends BaseIndexer {
-        constructor(half) { super({ windowSize: 2*half+1 }); this._half=half; }
-        getWindowBounds(n) {
-          const start=new Int32Array(n), end=new Int32Array(n);
-          for(let i=0;i<n;i++){start[i]=Math.max(0,i-this._half);end[i]=Math.min(n,i+this._half+1);}
-          return [start,end];
-        }
-      }
-
-      window.runCustomDemo = () => {
-        const half = parseInt(document.getElementById("ce-half").value);
-        const vals = parseNums(document.getElementById("ce-values").value);
-        const idx  = new CenteredIndexer(half);
-        const result = applyIndexer(idx, vals, mean);
-        document.getElementById("ce-output").textContent = `result (mean): [${result.map(v=>v===null?"null":v.toFixed(2))}]`;
-      };
-
-      window.runBoundsInspector = () => {
-        const type = document.getElementById("insp-type").value;
-        const param = document.getElementById("insp-param").value;
-        const n = parseInt(document.getElementById("insp-n").value);
-        let idx;
-        if(type==="forward") idx = new FixedForwardWindowIndexer({windowSize:parseInt(param)});
-        else {
-          const offsets = param.split(",").map(x=>parseInt(x.trim()));
-          idx = new VariableOffsetWindowIndexer({offsets, forward:type.includes("forward")});
-        }
-        const [start,end] = idx.getWindowBounds(n);
-        let html = "<table><tr><th>i</th><th>start</th><th>end</th><th>window size</th></tr>";
-        for(let i=0;i<n;i++) html+=`<tr><td>${i}</td><td>${start[i]}</td><td>${end[i]}</td><td>${end[i]-start[i]}</td></tr>`;
-        html+="</table>";
-        document.getElementById("insp-table").innerHTML = html;
-      };
-    </script>
-  </body>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>
