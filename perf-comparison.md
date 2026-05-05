@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-04T18:47:55Z |
-| Iteration Count | 305 |
-| Best Metric | 651 |
+| Last Run | 2026-05-05T18:48:00Z |
+| Iteration Count | 306 |
+| Best Metric | 653 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, accepted, error, error, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, accepted, error, error, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -69,6 +69,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 306 — 2026-05-05T18:48:00Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25395459295)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 2 benchmark pairs: `replace` (Series + DataFrame scalar replacement) and `cum_ops` (cumsum/cumprod/cummax/cummin for Series and DataFrame).
+- **Metric**: 653 (previous best: 651, delta: +2) · **Commit**: 83a9122
 
 ### Iteration 305 — 2026-05-04T18:47:55Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25336857327)
 
