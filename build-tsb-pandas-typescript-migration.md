@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-04T07:21:08Z |
-| Iteration Count | 302 |
+| Last Run | 2026-05-05T01:23:30Z |
+| Iteration Count | 303 |
 | Best Metric | 141 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -23,7 +23,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted |
 
 ---
 
@@ -43,7 +43,8 @@
 - ✅ pd.Grouper spec object added (iter 300)
 - ✅ pd.api.indexers (BaseIndexer, FixedForwardWindowIndexer, VariableOffsetWindowIndexer) added (iter 301)
 - ✅ Series.map() dict/Series/Map overloads + hashBijectArray/hashBijectInverse added (iter 302)
-- Next: more `pd.api.types` predicates, `DataFrame.map()` (element-wise apply), `pd.cut()` improvements
+- ✅ pd.options system (set_option, get_option, reset_option, option_context, options proxy) added (iter 303)
+- Next: DataFrame.map() element-wise apply alias, pd.api.types namespace object, more pd.util utilities
 
 ---
 
@@ -77,22 +78,21 @@
 
 ## 📊 Iteration History
 
+### Iteration 303 — 2026-05-05 01:23 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25352784668)
+
+- **Status**: ✅ Accepted (pending CI)
+- **Change**: Add `pd.options` system — `setOption`, `getOption`, `resetOption`, `describeOption`, `optionContext`, `options` proxy, `registerOption`
+- **Metric**: 142 (previous best: 141, delta: +1)
+- **Commit**: b35cadc
+- **Notes**: New `src/core/options.ts` mirrors `pandas.set_option`/`get_option`/`reset_option`/`describe_option`/`option_context`/`pd.options`. Ships 11 built-in options across `display.*`, `mode.*`, `compute.*` namespaces. Full proxy support for `options.display.max_rows = 20` syntax. 45+ tests covering all functions, validators, nested contexts, async run, and `registerOption` extension point.
+
 ### Iteration 302 — 2026-05-04 07:21 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25306204417)
 
 - **Status**: ✅ Accepted
 - **Change**: Add `Series.map()` dict/Series/Map overloads + `hashBijectArray()` + `hashBijectInverse()`
 - **Metric**: 141 (previous best: 140, delta: +1)
 - **Commit**: a1356c7
-- **Notes**: `Series.map()` now accepts Record/Series/Map in addition to functions, mirroring pandas.Series.map(). Added `naAction:'ignore'` for NA pass-through. `hashBijectArray` provides bijective zero-based integer codes for categorical arrays; `hashBijectInverse` recovers original values. 32 new tests.
 
-### Iteration 301 — 2026-05-03 12:32 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25279200195)
-
-- **Status**: ✅ Accepted
-- **Change**: Add `pd.api.indexers` — `BaseIndexer`, `FixedForwardWindowIndexer`, `VariableOffsetWindowIndexer`, `applyIndexer()`
-- **Metric**: 140 (previous best: 139, delta: +1)
-- **Commit**: 563f60f
-- **Notes**: New `src/window/indexers.ts` provides custom window indexers for rolling computations. `FixedForwardWindowIndexer` enables forward-looking windows; `VariableOffsetWindowIndexer` supports per-row variable depth. 28 tests cover all classes and `applyIndexer` helper.
-
-### Iters 273–301 — accepted/pending-ci (130→140): +Grouper, +lreshape, +str ops, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +rows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject, +hashArray/iteritems, +Grouper spec, +api.indexers.
+### Iters 273–301 — accepted/pending-ci (130→141): +Grouper, +lreshape, +str ops, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +rows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject, +hashArray/iteritems, +Grouper spec, +api.indexers, +Series.map/hashBiject.
 
 ### Iters 1–272 — accepted (0→130): full pandas core + stats + io + merge + reshape + window + groupby.
