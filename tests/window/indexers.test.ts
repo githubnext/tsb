@@ -7,10 +7,10 @@
 
 import { describe, expect, test } from "bun:test";
 import {
-  applyIndexer,
   BaseIndexer,
   FixedForwardWindowIndexer,
   VariableOffsetWindowIndexer,
+  applyIndexer,
 } from "../../src/window/indexers.ts";
 import type { WindowBounds } from "../../src/window/indexers.ts";
 
@@ -196,7 +196,7 @@ describe("applyIndexer", () => {
 
   test("all NaN values with minPeriods=1 → all null", () => {
     const idx = new FixedForwardWindowIndexer({ windowSize: 2 });
-    const result = applyIndexer(idx, [NaN, NaN, NaN], sum, 1);
+    const result = applyIndexer(idx, [Number.NaN, Number.NaN, Number.NaN], sum, 1);
     expect(result).toEqual([null, null, null]);
   });
 
@@ -227,9 +227,7 @@ describe("Custom BaseIndexer subclass", () => {
 
   test("custom expanding indexer sums correctly", () => {
     const idx = new ExpandingIndexer();
-    const result = applyIndexer(idx, [1, 2, 3, 4, 5], (nums) =>
-      nums.reduce((a, b) => a + b, 0),
-    );
+    const result = applyIndexer(idx, [1, 2, 3, 4, 5], (nums) => nums.reduce((a, b) => a + b, 0));
     expect(result).toEqual([1, 3, 6, 10, 15]);
   });
 });

@@ -135,7 +135,10 @@ describe("Series.map — Map overload", () => {
 
   it("returns null for keys not in Map", () => {
     const s = new Series({ data: [1, 2, 99] });
-    const m = new Map<number | string | null | boolean | bigint | Date | undefined, string>([[1, "one"], [2, "two"]]);
+    const m = new Map<number | string | null | boolean | bigint | Date | undefined, string>([
+      [1, "one"],
+      [2, "two"],
+    ]);
     const result = s.map(m);
     expect(result.toArray()).toEqual(["one", "two", null]);
   });

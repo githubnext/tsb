@@ -78,7 +78,9 @@ describe("Grouper.toString()", () => {
   });
 
   test("freq grouper", () => {
-    expect(new Grouper({ key: "date", freq: "ME" }).toString()).toBe('Grouper(key="date", freq="ME")');
+    expect(new Grouper({ key: "date", freq: "ME" }).toString()).toBe(
+      'Grouper(key="date", freq="ME")',
+    );
   });
 
   test("sort and dropna", () => {

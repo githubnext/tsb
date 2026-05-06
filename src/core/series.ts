@@ -1097,7 +1097,9 @@ export class Series<T extends Scalar = Scalar> {
 
     if (typeof mapperOrFn === "function") {
       return new Series<U>({
-        data: this._values.map((v, i) => (mapperOrFn as (value: T, index: Label, pos: number) => U)(v, this.index.at(i), i)),
+        data: this._values.map((v, i) =>
+          (mapperOrFn as (value: T, index: Label, pos: number) => U)(v, this.index.at(i), i),
+        ),
         index: this.index,
         name: this.name,
       });
