@@ -530,39 +530,47 @@ export function bdate_range(options: DateRangeOptions): DatetimeIndex {
 
 const MAX_ITER = 1_000_000;
 
+function resolveBoundDates(
+  start: string | Date | undefined,
+  end: string | Date | undefined,
+  normalize: boolean,
+): { startDate: Date | null; endDate: Date | null } {
+  if (start === undefined && end === undefined) {
+    throw new Error("date_range: at least one of 'start' or 'end' must be provided");
+  }
+  let startDate = start !== undefined ? toDate(start) : null;
+  let endDate = end !== undefined ? toDate(end) : null;
+  if (normalize) {
+    if (startDate !== null) { startDate = normDate(startDate); }
+    if (endDate !== null) { endDate = normDate(endDate); }
+  }
+  return { startDate, endDate };
+}
+
+function selectDates(
+  startDate: Date | null,
+  endDate: Date | null,
+  periods: number | undefined,
+  offset: DateOffset,
+): Date[] {
+  if (startDate !== null && endDate !== null && periods === undefined) {
+    return rangeStartEnd(startDate, endDate, offset);
+  }
+  if (startDate !== null && periods !== undefined) {
+    return rangeStartPeriods(startDate, periods, offset);
+  }
+  if (endDate !== null && periods !== undefined) {
+    return rangeEndPeriods(endDate, periods, offset);
+  }
+  throw new Error("date_range: provide at least two of 'start', 'end', 'periods'");
+}
+
 function buildRange(options: DateRangeOptions, defaultFreq: DateRangeFreq): DatetimeIndex {
   const { start, end, periods, normalize = false, name = null } = options;
   const freq = options.freq ?? defaultFreq;
   const offset = freqToOffset(freq);
-
-  if (start === undefined && end === undefined) {
-    throw new Error("date_range: at least one of 'start' or 'end' must be provided");
-  }
-
-  let startDate = start !== undefined ? toDate(start) : null;
-  let endDate = end !== undefined ? toDate(end) : null;
-
-  if (normalize) {
-    if (startDate !== null) {
-      startDate = normDate(startDate);
-    }
-    if (endDate !== null) {
-      endDate = normDate(endDate);
-    }
-  }
-
-  let dates: Date[];
-
-  if (startDate !== null && endDate !== null && periods === undefined) {
-    dates = rangeStartEnd(startDate, endDate, offset);
-  } else if (startDate !== null && periods !== undefined) {
-    dates = rangeStartPeriods(startDate, periods, offset);
-  } else if (endDate !== null && periods !== undefined) {
-    dates = rangeEndPeriods(endDate, periods, offset);
-  } else {
-    throw new Error("date_range: provide at least two of 'start', 'end', 'periods'");
-  }
-
+  const { startDate, endDate } = resolveBoundDates(start, end, normalize);
+  const dates = selectDates(startDate, endDate, periods, offset);
   return DatetimeIndex.fromDates(dates, name);
 }
 
