@@ -274,7 +274,7 @@ console.log([...s.iteritems()]);</pre>
       </div>
       <pre class="playground-editor" contenteditable="true" spellcheck="false">import { DataFrame } from "tsb";
 
-const df = new DataFrame({
+const df = DataFrame.fromColumns({
   name:  ["Alice", "Bob", "Carol"],
   score: [95, 87, 92],
 });
