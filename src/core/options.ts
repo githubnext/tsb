@@ -49,7 +49,9 @@ function _lookupEntry(key: string): OptionEntry {
   const k = _normalizeKey(key);
   const entry = _registry.get(k);
   if (entry === undefined) {
-    throw new Error(`No such option: ${key}. Available options:\n${[..._registry.keys()].sort().join("\n")}`);
+    throw new Error(
+      `No such option: ${key}. Available options:\n${[..._registry.keys()].sort().join("\n")}`,
+    );
   }
   return entry;
 }
@@ -155,7 +157,9 @@ export interface OptionContextToken {
  * ctx.exit();
  * ```
  */
-export function optionContext(...keyValuePairs: ReadonlyArray<OptionValue | string>): OptionContextToken {
+export function optionContext(
+  ...keyValuePairs: readonly (OptionValue | string)[]
+): OptionContextToken {
   if (keyValuePairs.length % 2 !== 0) {
     throw new Error("optionContext requires pairs of (key, value) arguments");
   }
@@ -188,7 +192,6 @@ export function optionContext(...keyValuePairs: ReadonlyArray<OptionValue | stri
 
 // ─── `options` Proxy ──────────────────────────────────────────────────────────
 
-// biome-ignore lint/suspicious/noEmptyInterface: intentional recursive interface
 export interface OptionsProxy extends Record<string, OptionsProxy | OptionValue> {}
 
 function _makeProxy(prefix: string): OptionsProxy {
@@ -199,7 +202,7 @@ function _makeProxy(prefix: string): OptionsProxy {
       // If there is a direct match, return its value
       const k = _normalizeKey(key);
       if (_registry.has(k)) {
-        return _registry.get(k)!.currentValue;
+        return _registry.get(k)?.currentValue;
       }
       // Otherwise return a nested proxy for deeper access
       return _makeProxy(k);
@@ -228,27 +231,66 @@ export const options: OptionsProxy = _makeProxy("");
 // ─── Built-in options ─────────────────────────────────────────────────────────
 
 function _posInt(name: string): OptionValidator {
-  return (v) => (typeof v === "number" && Number.isInteger(v) && v >= 0 ? undefined : `${name} must be a non-negative integer`);
+  return (v): string | undefined =>
+    typeof v === "number" && Number.isInteger(v) && v >= 0
+      ? undefined
+      : `${name} must be a non-negative integer`;
 }
 
 function _bool(name: string): OptionValidator {
-  return (v) => (typeof v === "boolean" ? undefined : `${name} must be a boolean`);
+  return (v): string | undefined =>
+    typeof v === "boolean" ? undefined : `${name} must be a boolean`;
 }
 
-function _oneOf(name: string, choices: ReadonlyArray<OptionValue>): OptionValidator {
-  return (v) =>
+function _oneOf(name: string, choices: readonly OptionValue[]): OptionValidator {
+  return (v): string | undefined =>
     choices.includes(v) ? undefined : `${name} must be one of: ${choices.map(String).join(", ")}`;
 }
 
 // display.*
-registerOption("display.max_rows", 60, "Maximum number of rows to display.", _posInt("display.max_rows"));
-registerOption("display.min_rows", 10, "Minimum rows displayed when the frame is truncated.", _posInt("display.min_rows"));
-registerOption("display.max_columns", 20, "Maximum number of columns to display.", _posInt("display.max_columns"));
-registerOption("display.max_colwidth", 50, "Maximum width of column values (characters) before truncation.", _posInt("display.max_colwidth"));
+registerOption(
+  "display.max_rows",
+  60,
+  "Maximum number of rows to display.",
+  _posInt("display.max_rows"),
+);
+registerOption(
+  "display.min_rows",
+  10,
+  "Minimum rows displayed when the frame is truncated.",
+  _posInt("display.min_rows"),
+);
+registerOption(
+  "display.max_columns",
+  20,
+  "Maximum number of columns to display.",
+  _posInt("display.max_columns"),
+);
+registerOption(
+  "display.max_colwidth",
+  50,
+  "Maximum width of column values (characters) before truncation.",
+  _posInt("display.max_colwidth"),
+);
 registerOption("display.width", 80, "Terminal width used for wrapping.", _posInt("display.width"));
-registerOption("display.precision", 6, "Floating-point display precision (significant digits).", _posInt("display.precision"));
-registerOption("display.show_dimensions", true, "Whether to show DataFrame dimensions at the end of repr.", _bool("display.show_dimensions"));
-registerOption("display.unicode.east_asian_width", false, "Whether to account for east-Asian character widths.", _bool("display.unicode.east_asian_width"));
+registerOption(
+  "display.precision",
+  6,
+  "Floating-point display precision (significant digits).",
+  _posInt("display.precision"),
+);
+registerOption(
+  "display.show_dimensions",
+  true,
+  "Whether to show DataFrame dimensions at the end of repr.",
+  _bool("display.show_dimensions"),
+);
+registerOption(
+  "display.unicode.east_asian_width",
+  false,
+  "Whether to account for east-Asian character widths.",
+  _bool("display.unicode.east_asian_width"),
+);
 registerOption(
   "display.float_format",
   null,
@@ -275,8 +317,23 @@ registerOption(
   _oneOf("mode.dtype_backend", ["numpy", "arrow"]),
 );
 registerOption("mode.use_inf_as_na", false, "Treat infinity as NA.", _bool("mode.use_inf_as_na"));
-registerOption("mode.copy_on_write", false, "Enable copy-on-write semantics.", _bool("mode.copy_on_write"));
+registerOption(
+  "mode.copy_on_write",
+  false,
+  "Enable copy-on-write semantics.",
+  _bool("mode.copy_on_write"),
+);
 
 // compute.*
-registerOption("compute.use_bottleneck", false, "Use the bottleneck library for numeric operations.", _bool("compute.use_bottleneck"));
-registerOption("compute.use_numexpr", false, "Use numexpr for large array eval().", _bool("compute.use_numexpr"));
+registerOption(
+  "compute.use_bottleneck",
+  false,
+  "Use the bottleneck library for numeric operations.",
+  _bool("compute.use_bottleneck"),
+);
+registerOption(
+  "compute.use_numexpr",
+  false,
+  "Use numexpr for large array eval().",
+  _bool("compute.use_numexpr"),
+);

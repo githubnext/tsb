@@ -5,178 +5,277 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tsb — pd.options system</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; }
-    h1 { color: #1a1a2e; }
-    pre { background: #f4f4f8; padding: 16px; border-radius: 8px; overflow-x: auto; }
-    .result { background: #e8f5e9; padding: 12px; border-radius: 6px; margin: 8px 0; font-family: monospace; }
-    button { background: #4f46e5; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; margin: 4px 2px; }
-    button:hover { background: #4338ca; }
-    hr { border: none; border-top: 1px solid #e0e0e0; margin: 32px 0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-  <h1>📦 pd.options system</h1>
-  <p>The <strong>options system</strong> mirrors <code>pandas.get_option</code> / <code>pandas.set_option</code>. It manages display, mode, and compute settings with full validation support.</p>
 
-  <hr />
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-  <h2>Cell 1 — getOption / setOption / resetOption</h2>
-  <pre>
-import { getOption, setOption, resetOption } from "tsb";
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>pd.options system</h1>
+  <p class="subtitle">The <strong>options system</strong> mirrors <code>pandas.get_option</code> /
+  <code>pandas.set_option</code>. It manages display, mode, and compute settings with full
+  validation support.</p>
 
-getOption("display.max_rows");          // 60
+  <div class="section">
+    <h2>1 — getOption / setOption / resetOption</h2>
+    <p>Read, write, and restore option values by dot-separated key.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { getOption, setOption, resetOption } from "tsb";
+
+console.log(getOption("display.max_rows"));   // 60
 setOption("display.max_rows", 20);
-getOption("display.max_rows");          // 20
+console.log(getOption("display.max_rows"));   // 20
 resetOption("display.max_rows");
-getOption("display.max_rows");          // 60 (restored)
-  </pre>
-  <button onclick="cell1()">Run</button>
-  <div id="out1" class="result">(not run yet)</div>
+console.log(getOption("display.max_rows"));   // 60 (restored)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <hr />
+  <div class="section">
+    <h2>2 — describeOption</h2>
+    <p>Pretty-print documentation for one or all options.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { describeOption } from "tsb";
 
-  <h2>Cell 2 — describeOption</h2>
-  <pre>
-import { describeOption } from "tsb";
-describeOption("display.precision");
-  </pre>
-  <button onclick="cell2()">Run</button>
-  <div id="out2" class="result">(not run yet)</div>
+console.log(describeOption("display.precision"));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <hr />
-
-  <h2>Cell 3 — optionContext (scoped override)</h2>
-  <pre>
-import { optionContext, getOption } from "tsb";
+  <div class="section">
+    <h2>3 — optionContext (scoped override)</h2>
+    <p>Temporarily override options and restore them with <code>enter()</code> / <code>exit()</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { optionContext, getOption } from "tsb";
 
 const ctx = optionContext("display.max_rows", 5, "display.precision", 2);
 ctx.enter();
-// inside context:
-getOption("display.max_rows");   // 5
-getOption("display.precision");  // 2
+console.log(getOption("display.max_rows"));   // 5
+console.log(getOption("display.precision"));  // 2
 ctx.exit();
-// restored:
-getOption("display.max_rows");   // 60
-  </pre>
-  <button onclick="cell3()">Run</button>
-  <div id="out3" class="result">(not run yet)</div>
+console.log(getOption("display.max_rows"));   // 60 (restored)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <hr />
+  <div class="section">
+    <h2>4 — options proxy</h2>
+    <p>Access options via a deeply-nested proxy object for ergonomic reads and writes.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { options, resetOption } from "tsb";
 
-  <h2>Cell 4 — options proxy</h2>
-  <pre>
-import { options } from "tsb";
-
-options.display.max_rows;          // 60
+console.log(options.display.max_rows);   // 60
 options.display.max_rows = 99;
-options.display.max_rows;          // 99
-  </pre>
-  <button onclick="cell4()">Run</button>
-  <div id="out4" class="result">(not run yet)</div>
+console.log(options.display.max_rows);   // 99
+resetOption("display.max_rows");
+console.log(options.display.max_rows);   // 60 (restored)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-  <script type="module">
-    // Inline minimal shim for demo purposes
-    const _registry = new Map();
-    function _normalizeKey(k) { return k.toLowerCase().replace(/-/g, "_"); }
-    function _lookupEntry(key) {
-      const k = _normalizeKey(key);
-      const e = _registry.get(k);
-      if (!e) throw new Error(`No such option: ${key}`);
-      return e;
-    }
-    function registerOption(key, defaultValue, doc = "", validator) {
-      const k = _normalizeKey(key);
-      if (_registry.has(k)) return; // idempotent in demo
-      _registry.set(k, { defaultValue, currentValue: defaultValue, doc, validator });
-    }
-    function getOption(key) { return _lookupEntry(key).currentValue; }
-    function setOption(key, value) {
-      const e = _lookupEntry(key);
-      if (e.validator) { const err = e.validator(value); if (err) throw new Error(err); }
-      e.currentValue = value;
-    }
-    function resetOption(key) {
-      if (_normalizeKey(key) === "all") { for (const e of _registry.values()) e.currentValue = e.defaultValue; return; }
-      const e = _lookupEntry(key); e.currentValue = e.defaultValue;
-    }
-    function describeOption(key) {
-      const prefix = key ? _normalizeKey(key) : "";
-      const lines = [];
-      for (const [k, e] of _registry.entries()) {
-        if (!prefix || k === prefix || k.startsWith(prefix + ".")) {
-          lines.push(`${k}\n  Default : ${e.defaultValue}\n  Current : ${e.currentValue}\n  ${e.doc}`);
-        }
-      }
-      if (!lines.length) throw new Error(`No option matching: ${key}`);
-      return lines.join("\n\n");
-    }
-    function optionContext(...kvs) {
-      if (kvs.length % 2 !== 0) throw new Error("pairs required");
-      const pairs = [];
-      for (let i = 0; i < kvs.length; i += 2) pairs.push({ key: kvs[i], value: kvs[i+1] });
-      const saved = new Map();
-      return {
-        enter() { for (const {key,value} of pairs) { saved.set(key, getOption(key)); setOption(key, value); } },
-        exit()  { for (const {key} of [...pairs].reverse()) { const p = saved.get(key); if (p !== undefined) setOption(key, p); } saved.clear(); },
-      };
-    }
-    function makeProxy(prefix) {
-      return new Proxy({}, {
-        get(_, prop) {
-          if (typeof prop !== "string") return undefined;
-          const k = prefix ? `${prefix}.${prop}` : prop;
-          const nk = _normalizeKey(k);
-          if (_registry.has(nk)) return _registry.get(nk).currentValue;
-          return makeProxy(nk);
-        },
-        set(_, prop, value) {
-          if (typeof prop !== "string") return false;
-          setOption(prefix ? `${prefix}.${prop}` : prop, value); return true;
-        },
-      });
-    }
-    const options = makeProxy("");
-    // seed options
-    const posInt = (n) => (v) => (typeof v === "number" && Number.isInteger(v) && v >= 0) ? undefined : `${n} must be a non-negative integer`;
-    const bool_ = (n) => (v) => typeof v === "boolean" ? undefined : `${n} must be a boolean`;
-    registerOption("display.max_rows", 60, "Maximum rows to display.", posInt("display.max_rows"));
-    registerOption("display.min_rows", 10, "Minimum rows when truncated.", posInt("display.min_rows"));
-    registerOption("display.precision", 6, "Floating-point display precision.", posInt("display.precision"));
-    registerOption("display.max_columns", 20, "Maximum columns.", posInt("display.max_columns"));
-    registerOption("mode.use_inf_as_na", false, "Treat infinity as NA.", bool_("mode.use_inf_as_na"));
-    registerOption("mode.dtype_backend", "numpy", "Default dtype backend.");
+  <div class="section">
+    <h2>5 — registerOption (custom option)</h2>
+    <p>Extend the registry with application-specific options, including custom validators.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { registerOption, getOption, setOption } from "tsb";
 
-    window.cell1 = function() {
-      resetOption("all");
-      const lines = [];
-      lines.push(`getOption("display.max_rows") → ${getOption("display.max_rows")}`);
-      setOption("display.max_rows", 20);
-      lines.push(`After setOption(20): ${getOption("display.max_rows")}`);
-      resetOption("display.max_rows");
-      lines.push(`After resetOption: ${getOption("display.max_rows")}`);
-      document.getElementById("out1").textContent = lines.join("\n");
-    };
-    window.cell2 = function() {
-      document.getElementById("out2").textContent = describeOption("display.precision");
-    };
-    window.cell3 = function() {
-      resetOption("all");
-      const lines = [];
-      const ctx = optionContext("display.max_rows", 5, "display.precision", 2);
-      ctx.enter();
-      lines.push(`Inside context — max_rows: ${getOption("display.max_rows")}, precision: ${getOption("display.precision")}`);
-      ctx.exit();
-      lines.push(`After exit     — max_rows: ${getOption("display.max_rows")}, precision: ${getOption("display.precision")}`);
-      document.getElementById("out3").textContent = lines.join("\n");
-    };
-    window.cell4 = function() {
-      resetOption("all");
-      const lines = [];
-      lines.push(`options.display.max_rows (before) → ${options.display.max_rows}`);
-      options.display.max_rows = 99;
-      lines.push(`options.display.max_rows (after)  → ${options.display.max_rows}`);
-      document.getElementById("out4").textContent = lines.join("\n");
-    };
-  </script>
+registerOption(
+  "myapp.theme",
+  "dark",
+  "UI theme: 'dark' or 'light'.",
+  (v) => (v === "dark" || v === "light" ? undefined : "must be 'dark' or 'light'"),
+);
+console.log(getOption("myapp.theme"));   // dark
+setOption("myapp.theme", "light");
+console.log(getOption("myapp.theme"));   // light</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>
