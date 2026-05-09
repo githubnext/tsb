@@ -11,8 +11,8 @@ import {
   FixedForwardWindowIndexer,
   VariableOffsetWindowIndexer,
   applyIndexer,
-} from "../../src/window/indexers.ts";
-import type { WindowBounds } from "../../src/window/indexers.ts";
+} from "../../src/window/index.ts";
+import type { WindowBounds } from "../../src/window/index.ts";
 
 // ─── FixedForwardWindowIndexer ────────────────────────────────────────────────
 
@@ -132,8 +132,8 @@ describe("VariableOffsetWindowIndexer — forward", () => {
 // ─── applyIndexer ─────────────────────────────────────────────────────────────
 
 describe("applyIndexer", () => {
-  const sum = (nums: readonly number[]) => nums.reduce((a, b) => a + b, 0);
-  const mean = (nums: readonly number[]) => nums.reduce((a, b) => a + b, 0) / nums.length;
+  const sum = (nums: readonly number[]): number => nums.reduce((a, b) => a + b, 0);
+  const mean = (nums: readonly number[]): number => nums.reduce((a, b) => a + b, 0) / nums.length;
 
   test("FixedForward sum window=2 over [1,2,3,4,5]", () => {
     const idx = new FixedForwardWindowIndexer({ windowSize: 2 });

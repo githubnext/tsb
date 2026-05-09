@@ -73,7 +73,9 @@ export function registerOption(
     throw new Error(`Option already registered: ${key}`);
   }
   const entry: OptionEntry = { defaultValue, currentValue: defaultValue, doc };
-  if (validator !== undefined) { entry.validator = validator; }
+  if (validator !== undefined) {
+    entry.validator = validator;
+  }
   _registry.set(k, entry);
 }
 
@@ -167,7 +169,9 @@ export function optionContext(
   for (let i = 0; i < keyValuePairs.length; i += 2) {
     const k = keyValuePairs[i];
     const v = keyValuePairs[i + 1];
-    if (typeof k !== "string") { throw new Error("optionContext keys must be strings"); }
+    if (typeof k !== "string") {
+      throw new Error("optionContext keys must be strings");
+    }
     pairs.push({ key: k, value: v as OptionValue });
   }
 
@@ -183,7 +187,9 @@ export function optionContext(
     exit(): void {
       for (const { key } of [...pairs].reverse()) {
         const prev = saved.get(key);
-        if (prev !== undefined) { setOption(key, prev); }
+        if (prev !== undefined) {
+          setOption(key, prev);
+        }
       }
       saved.clear();
     },
@@ -197,7 +203,9 @@ export interface OptionsProxy extends Record<string, OptionsProxy | OptionValue>
 function _makeProxy(prefix: string): OptionsProxy {
   return new Proxy({} as OptionsProxy, {
     get(_target, prop: string | symbol): OptionsProxy | OptionValue {
-      if (typeof prop !== "string") { return undefined as unknown as OptionValue; }
+      if (typeof prop !== "string") {
+        return undefined as unknown as OptionValue;
+      }
       const key = prefix !== "" ? `${prefix}.${prop}` : prop;
       // If there is a direct match, return its value
       const k = _normalizeKey(key);
@@ -208,7 +216,9 @@ function _makeProxy(prefix: string): OptionsProxy {
       return _makeProxy(k);
     },
     set(_target, prop: string | symbol, value: unknown): boolean {
-      if (typeof prop !== "string") { return false; }
+      if (typeof prop !== "string") {
+        return false;
+      }
       const key = prefix !== "" ? `${prefix}.${prop}` : prop;
       setOption(key, value as OptionValue);
       return true;
