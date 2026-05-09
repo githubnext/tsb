@@ -70,7 +70,9 @@ export function registerOption(
   if (_registry.has(k)) {
     throw new Error(`Option already registered: ${key}`);
   }
-  _registry.set(k, { defaultValue, currentValue: defaultValue, doc, validator });
+  const entry: OptionEntry = { defaultValue, currentValue: defaultValue, doc };
+  if (validator !== undefined) entry.validator = validator;
+  _registry.set(k, entry);
 }
 
 /**
@@ -186,7 +188,8 @@ export function optionContext(...keyValuePairs: ReadonlyArray<OptionValue | stri
 
 // ─── `options` Proxy ──────────────────────────────────────────────────────────
 
-export type OptionsProxy = Record<string, OptionsProxy | OptionValue>;
+// biome-ignore lint/suspicious/noEmptyInterface: intentional recursive interface
+export interface OptionsProxy extends Record<string, OptionsProxy | OptionValue> {}
 
 function _makeProxy(prefix: string): OptionsProxy {
   return new Proxy({} as OptionsProxy, {
