@@ -541,8 +541,12 @@ function resolveBoundDates(
   let startDate = start !== undefined ? toDate(start) : null;
   let endDate = end !== undefined ? toDate(end) : null;
   if (normalize) {
-    if (startDate !== null) { startDate = normDate(startDate); }
-    if (endDate !== null) { endDate = normDate(endDate); }
+    if (startDate !== null) {
+      startDate = normDate(startDate);
+    }
+    if (endDate !== null) {
+      endDate = normDate(endDate);
+    }
   }
   return { startDate, endDate };
 }

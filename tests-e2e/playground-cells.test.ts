@@ -126,7 +126,7 @@ async function startPlaygroundServer(): Promise<ServerHandle> {
       return new Response("Not found", { status: 404 });
     },
   });
-  return { kill: () => server.stop(true) };
+  return { kill: (): void => { server.stop(true); } };
 }
 
 function classifyOutput(text: string, cls: string): CellOutcome["reason"] | null {
@@ -182,7 +182,9 @@ async function executePageCells(ctx: BrowserContext, file: string): Promise<Cell
     const blocks = await page.locator(".playground-block").all();
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
-      if (!block) { continue; }
+      if (!block) {
+        continue;
+      }
       outcomes.push(await runCell(block, i + 1, page));
     }
   } finally {
@@ -199,8 +201,14 @@ async function executePageCells(ctx: BrowserContext, file: string): Promise<Cell
   return outcomes;
 }
 
-function assertPageOutcomes(file: string, outcomes: CellOutcome[] | undefined, allowed: KnownFailures): void {
-  expect(outcomes, `no outcomes recorded for ${file}`).toBeDefined();
+function assertPageOutcomes(
+  file: string,
+  outcomes: CellOutcome[] | undefined,
+  allowed: KnownFailures,
+): void {
+  if (outcomes === undefined) {
+    throw new Error(`no outcomes recorded for ${file}`);
+  }
   const allowedCells = new Set(allowed[file] ?? []);
   const unexpectedFailures: string[] = [];
   const unexpectedPasses: number[] = [];
@@ -236,6 +244,7 @@ function assertPageOutcomes(file: string, outcomes: CellOutcome[] | undefined, a
 }
 
 
+let server: ServerHandle | null = null;
 let browser: Browser | null = null;
 let context: BrowserContext | null = null;
 const allOutcomes: Map<string, CellOutcome[]> = new Map();
