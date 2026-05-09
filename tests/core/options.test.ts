@@ -169,11 +169,15 @@ describe("options system", () => {
   // ─── options proxy ────────────────────────────────────────────────────────
   describe("options proxy", () => {
     test("reads option value via proxy", () => {
-      expect(options["display"]["max_rows"]).toBe(60);
+      const display = options["display"];
+      if (typeof display !== "object" || display == null) throw new Error("expected nested proxy");
+      expect(display["max_rows"]).toBe(60);
     });
 
     test("writes option value via proxy", () => {
-      options["display"]["max_rows"] = 77;
+      const display = options["display"];
+      if (typeof display !== "object" || display == null) throw new Error("expected nested proxy");
+      display["max_rows"] = 77;
       expect(getOption("display.max_rows")).toBe(77);
     });
   });
