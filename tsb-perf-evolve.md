@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-05T07:33:00Z |
-| Iteration Count | 35 |
+| Last Run | 2026-05-09T01:26:46Z |
+| Iteration Count | 36 |
 | Best Metric | 21.048 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,24 +17,27 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci |
 
 ## 🧬 Population
 
-### c035 · island 3 · fitness pending CI · gen 35
+### c036 · island 3 · fitness pending CI · gen 36
 
-- **Op**: exploitation; **Cell**: aos-typed-array · non-comparison; **Parent**: c029 (best, fitness 21.048)
-- **Approach**: Merge all 8 histogram passes inline into the partition/init loop (eliminates separate O(n) AoS histogram scan) + si stride counters in scatter and gather loops (avoids i*3 multiply) + RangeIndex fast path (bypasses 100k bounds-checked at() calls). Commit 3873563.
+- **Op**: exploitation; **Cell**: aos-typed-array · non-comparison; **Parent**: c035
+- **Approach**: Unroll all 8 radix scatter passes into explicit loops with inlined constants. Eliminates outer-loop ternary; lets JIT specialise each inner loop. Passes 3/7 drop `& 0xff`. Commit 4994f95.
 - **Status**: ⏳ pending CI
 
-### ~~c030–c034~~ (all pending-CI / lost from branch; same merged-histogram + stride + RangeIndex approach as c035)
+### c035 · island 3 · fitness pending CI · gen 35
+
+- **Approach**: Merge all 8 histogram passes inline + si stride counters + RangeIndex fast path. Commit 3873563.
+- **Status**: ✅ merged to main PR #272
 
 ### c029 · island 3 · fitness 21.048 · gen 29
 
 - **Approach**: AoS scatter; all 3 writes/element on same cache line. Commit 150c0be.
 - **Status**: ✅ accepted CI 25183916807 — tsb=112.50ms / pandas=5.34ms
 
-### ~~c028~~ fitness 21.841 · ~~c027~~ rejected · ~~c022~~ merged PR #226 (LSD 8-pass radix) · ~~c003~~ island 1 fitness 27.999
+### ~~c028~~ fitness 21.841 · ~~c027~~ rejected · ~~c022~~ merged PR #226 (LSD 8-pass radix) · ~~c003~~ island 1 fitness 27.999 · ~~c030–c034~~ lost
 
 ## 📚 Lessons Learned
 
@@ -59,23 +62,12 @@
 
 ## 📊 Iteration History
 
-### Iteration 35 — 2026-05-05 07:33 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25363647445)
+### Iteration 36 — 2026-05-09 01:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25587692274)
 
-- **Status**: ⏳ pending CI · c035 · exploitation · island 3
-- **Operator**: exploitation · **Parent**: c029 (fitness 21.048)
-- **Change**: Merge all 8 histogram passes into partition/init loop + si stride counters + RangeIndex fast path. Commit 3873563.
+- **Status**: ⏳ pending CI · c036 · exploitation · island 3
+- **Change**: Unroll 8 radix scatter passes with inlined constants; drop redundant & 0xff for shift=24.
 - **Metric**: pending CI (best: 21.048)
 
-### Iters 30–34 — ⏳ all pending-CI / lost from branch after PR #262 merge reset · same merged-histogram approach.
+### Iters 29–35 — ✅ accepted (fitness 21.048); c035 merged PR #272 (merged-histogram + stride + RangeIndex fast path)
 
-### Iteration 29 — 2026-04-30 18:44 UTC
-
-- **Status**: ✅ Accepted fitness=21.048; merged PR #255
-- **Change**: AoS scatter layout.
-
-### Iteration 28 — 2026-04-30 01:08 UTC
-
-- **Status**: ✅ Accepted fitness=21.841; merged PR #249
-- **Change**: Merge partition+radix-init into one pass.
-
-### Iters 1–27 — c022 ✅ merged PR #226 (LSD 8-pass radix, fitness ~29→21). c027 ❌ fitness=29.573.
+### Iters 1–28 — c022 ✅ merged PR #226 (LSD 8-pass radix, fitness ~29→21.841→21.048)
