@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-06T01:03:45Z |
-| Iteration Count | 304 |
-| Best Metric | 142 |
+| Last Run | 2026-05-09T13:22:10Z |
+| Iteration Count | 305 |
+| Best Metric | 143 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -23,7 +23,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted |
 
 ---
 
@@ -44,7 +44,8 @@
 - ✅ pd.api.indexers (BaseIndexer, FixedForwardWindowIndexer, VariableOffsetWindowIndexer) added (iter 301)
 - ✅ Series.map() dict/Series/Map overloads + hashBijectArray/hashBijectInverse added (iter 302)
 - ✅ pd.options system (set_option, get_option, reset_option, option_context, options proxy) added (iter 303/304)
-- Next: pd.api.types namespace object, DataFrame.map() alias, more pd.util utilities
+- ✅ pd.options system (options.ts) + pd.api namespace (pd_api.ts with api.types) added (iter 305)
+- Next: DataFrame.map() alias, more pd.util utilities, pd.api.extensions
 
 ---
 
@@ -78,15 +79,15 @@
 
 ## 📊 Iteration History
 
-### Iteration 304 — 2026-05-06 01:03 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25410851662)
+### Iteration 305 — 2026-05-09 13:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25602148943)
 
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Add `pd.options` system — `setOption`, `getOption`, `resetOption`, `describeOption`, `optionContext`, `options` proxy, `registerOption`
-- **Metric**: 142 (previous best: 141, delta: +1)
-- **Commit**: 7084ec2
-- **Notes**: New `src/core/options.ts` with 14 built-in options across `display.*`, `mode.*`, `compute.*` namespaces. Full proxy support. 50+ tests. Iteration 303 had same feature but code wasn't committed to branch; this iteration commits it cleanly.
+- **Status**: ✅ Accepted
+- **Change**: Add `pd.options` system (`options.ts`) and `pd.api` namespace (`pd_api.ts` with `api.types`)
+- **Metric**: 143 (previous best: 142, delta: +1)
+- **Commit**: 01624f2
+- **Notes**: getOption/setOption/resetOption/describeOption/optionContext/options proxy; 20+ built-in options; api.types bundles all api_types predicates.
 
-### Iters 302–303 — accepted/pending-ci (141→142): +Series.map/hashBiject (302), +pd.options attempt (303, not committed).
+### Iters 302–304 — accepted/pending-ci (141→142): +Series.map/hashBiject (302), +pd.options attempts (303–304).
 
 ### Iters 273–301 — accepted/pending-ci (130→141): +Grouper, +lreshape, +str ops, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +rows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject, +hashArray/iteritems, +Grouper spec, +api.indexers, +Series.map/hashBiject.
 
