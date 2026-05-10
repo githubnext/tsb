@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-09T13:22:10Z |
-| Iteration Count | 305 |
-| Best Metric | 143 |
+| Last Run | 2026-05-10T07:39:18Z |
+| Iteration Count | 306 |
+| Best Metric | 144 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -23,7 +23,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, pending-ci, accepted |
 
 ---
 
@@ -45,7 +45,8 @@
 - ✅ Series.map() dict/Series/Map overloads + hashBijectArray/hashBijectInverse added (iter 302)
 - ✅ pd.options system (set_option, get_option, reset_option, option_context, options proxy) added (iter 303/304)
 - ✅ pd.options system (options.ts) + pd.api namespace (pd_api.ts with api.types) added (iter 305)
-- Next: DataFrame.map() alias, more pd.util utilities, pd.api.extensions
+- ✅ interval_range() added (iter 306)
+- Next: period_range(), pd.api.extensions, more pd.util utilities
 
 ---
 
@@ -79,16 +80,14 @@
 
 ## 📊 Iteration History
 
-### Iteration 305 — 2026-05-09 13:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25602148943)
+### Iteration 306 — 2026-05-10 07:39 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25623094296)
 
 - **Status**: ✅ Accepted
-- **Change**: Add `pd.options` system (`options.ts`) and `pd.api` namespace (`pd_api.ts` with `api.types`)
-- **Metric**: 143 (previous best: 142, delta: +1)
-- **Commit**: 01624f2
-- **Notes**: getOption/setOption/resetOption/describeOption/optionContext/options proxy; 20+ built-in options; api.types bundles all api_types predicates.
+- **Change**: Add `interval_range()` — fixed-frequency `IntervalIndex` factory
+- **Metric**: 144 (previous best: 143, delta: +1)
+- **Commit**: 30c606a
+- **Notes**: Mirrors pandas.interval_range(); supports start/end/periods/freq with all 4 closure modes; full test suite + playground page.
 
-### Iters 302–304 — accepted/pending-ci (141→142): +Series.map/hashBiject (302), +pd.options attempts (303–304).
-
-### Iters 273–301 — accepted/pending-ci (130→141): +Grouper, +lreshape, +str ops, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +rows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject, +hashArray/iteritems, +Grouper spec, +api.indexers, +Series.map/hashBiject.
+### Iters 273–305 — accepted/pending-ci (130→143): +Grouper, +lreshape, +str ops, +swapaxes, +readFwf, +unionCategoricals, +info, +extractAll, +rows, +monthName/dayName, +itertuples, +dropLevel, +flags, +to_html, +hashPandasObject, +hashArray/iteritems, +Grouper spec, +api.indexers, +Series.map/hashBiject, +pd.options, +pd.api namespace.
 
 ### Iters 1–272 — accepted (0→130): full pandas core + stats + io + merge + reshape + window + groupby.
