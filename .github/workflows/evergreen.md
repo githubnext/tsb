@@ -170,30 +170,58 @@ steps:
               return 0
 
       def trigger_ci_workflow(branch):
-          """Dispatch the `ci.yml` workflow on `branch`. Uses the dedicated
-          CI trigger token if available so the run is attributed to a real
-          user account (workflows triggered with the default GITHUB_TOKEN
-          do not in turn dispatch further workflow events, but workflow_dispatch
-          is one of the events that can run via GITHUB_TOKEN; we still prefer
-          the CI trigger token for parity with autoloop's push attribution).
-          Returns True on success."""
-          dispatch_token = os.environ.get("GH_AW_CI_TRIGGER_TOKEN", "") or token
-          url = f"https://api.github.com/repos/{repo}/actions/workflows/ci.yml/dispatches"
-          payload = json.dumps({"ref": branch}).encode()
-          req = urllib.request.Request(url, data=payload, method="POST", headers={
-              "Authorization": f"token {dispatch_token}",
-              "Accept": "application/vnd.github.v3+json",
-              "Content-Type": "application/json",
-          })
+          """Trigger CI on `branch` by pushing an empty commit. This fires the
+          `push` event on `autoloop/**` branches, which triggers ci.yml without
+          needing workflow_dispatch approval. Uses GH_AW_CI_TRIGGER_TOKEN so
+          the push is attributed to a real user (pushes via GITHUB_TOKEN don't
+          trigger other workflows)."""
+          ci_token = os.environ.get("GH_AW_CI_TRIGGER_TOKEN", "") or token
+          auth_header = base64.b64encode(f"x-access-token:{ci_token}".encode()).decode()
           try:
+              # Get current HEAD SHA
+              url = f"https://api.github.com/repos/{repo}/git/ref/heads/{branch}"
+              req = urllib.request.Request(url, headers={
+                  "Authorization": f"token {ci_token}",
+                  "Accept": "application/vnd.github.v3+json",
+              })
               with urllib.request.urlopen(req, timeout=30) as resp:
-                  # 204 No Content on success
+                  head_sha = json.loads(resp.read().decode())["object"]["sha"]
+
+              # Create an empty commit on top of HEAD
+              url = f"https://api.github.com/repos/{repo}/git/commits"
+              payload = json.dumps({
+                  "message": "chore: trigger CI [evergreen]",
+                  "tree": json.loads(urllib.request.urlopen(
+                      urllib.request.Request(
+                          f"https://api.github.com/repos/{repo}/git/commits/{head_sha}",
+                          headers={"Authorization": f"token {ci_token}", "Accept": "application/vnd.github.v3+json"},
+                      ), timeout=30
+                  ).read().decode())["tree"]["sha"],
+                  "parents": [head_sha],
+              }).encode()
+              req = urllib.request.Request(url, data=payload, method="POST", headers={
+                  "Authorization": f"token {ci_token}",
+                  "Accept": "application/vnd.github.v3+json",
+                  "Content-Type": "application/json",
+              })
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  new_sha = json.loads(resp.read().decode())["sha"]
+
+              # Update the branch ref to the new commit
+              url = f"https://api.github.com/repos/{repo}/git/refs/heads/{branch}"
+              payload = json.dumps({"sha": new_sha}).encode()
+              req = urllib.request.Request(url, data=payload, method="PATCH", headers={
+                  "Authorization": f"token {ci_token}",
+                  "Accept": "application/vnd.github.v3+json",
+                  "Content-Type": "application/json",
+              })
+              with urllib.request.urlopen(req, timeout=30) as resp:
                   return 200 <= resp.status < 300
           except urllib.error.HTTPError as e:
-              print(f"  Warning: workflow_dispatch failed for {branch}: HTTP {e.code} {e.reason}")
+              print(f"  Warning: CI trigger (empty commit) failed for {branch}: HTTP {e.code} {e.reason}")
               return False
           except Exception as e:
-              print(f"  Warning: workflow_dispatch failed for {branch}: {e}")
+              print(f"  Warning: CI trigger (empty commit) failed for {branch}: {e}")
               return False
 
       def post_pr_comment(pr_number, body):
