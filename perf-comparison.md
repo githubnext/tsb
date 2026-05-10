@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-09T07:28:52Z |
-| Iteration Count | 307 |
-| Best Metric | 655 |
+| Last Run | 2026-05-10T01:27:31Z |
+| Iteration Count | 308 |
+| Best Metric | 656 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, accepted, error, error, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -65,12 +65,17 @@
 
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
-- `window_extended` (rollingSem/rollingSkew/rollingKurt/rollingQuantile)
-- `format_ops`, `scalar_extract`, `swaplevel`
+- `format_ops`, `swaplevel`
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 308 — 2026-05-10T01:27:31Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25616542195)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 3 benchmark pairs: `window_extended` (rollingSem/rollingSkew/rollingKurt/rollingQuantile), `str_findall` (strFindall/strFindallCount/strFindFirst), `scalar_extract` (squeezeSeries/squeezeDataFrame/firstValidIndex/lastValidIndex).
+- **Metric**: 656 (previous best: 655, delta: +1) · **Commit**: a4252cf
 
 ### Iteration 307 — 2026-05-09T07:28:52Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25595320643)
 
@@ -84,18 +89,6 @@
 - **Change**: Added 2 benchmark pairs: `replace` (Series + DataFrame scalar replacement) and `cum_ops` (cumsum/cumprod/cummax/cummin for Series and DataFrame).
 - **Metric**: 653 (previous best: 651, delta: +2) · **Commit**: 83a9122
 
-### Iteration 305 — 2026-05-04T18:47:55Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25336857327)
+### Iters 305–307 — ✅ | Metrics 649→651→653→655: dropna/fillna, replace/cum_ops, str_findall/combine (unmerged).
 
-- **Status**: ✅ Accepted
-- **Change**: Added 2 benchmark pairs: `dropna` (Series + DataFrame how=any/all) and `fillna` (Series + DataFrame scalar/ffill/bfill).
-- **Metric**: 651 (previous best: 649, delta: +2) · **Commit**: a9eb584
-
-### Iteration 304 — 2026-05-04T01:09:41Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25296135822)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 3 benchmark pairs: `corrwith` (autoCorr lag-1 + corrWith DataFrame vs Series), `dot_matmul` (seriesDotSeries + dataFrameDotDataFrame), `eval_query` (queryDataFrame + evalDataFrame on 100k-row DF).
-- **Metric**: 649 (previous best: 646, delta: +3) · **Commit**: 259c75b
-
-### Iters 302–303 — ✅ | Metrics 640→643→646: squeeze/hash_pandas_object/infer_objects, keep_true_false/merge_ordered/styler.
-
-### Iters 1–301 — ✅/⚠️ | Metrics 0→640. See git history on autoloop/perf-comparison branch.
+### Iters 1–304 — ✅/⚠️ | Metrics 0→649. See git history on autoloop/perf-comparison branch.
