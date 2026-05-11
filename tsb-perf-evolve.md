@@ -80,10 +80,6 @@
 - **Change**: 4-pass hi-word radix + tie-break (halve scatter passes). tsb=116ms, pandas=10ms(noise).
 - **Metric**: 11.721 (best: 21.048) — improvement was pandas variability, not tsb speedup.
 
-### Iters 1–37 — c022 ✅ (fitness ~29), c035 ✅ (fitness 21.048), c037/c036 superseded, c038 ❌### Iteration 36 — 2026-05-09 01:26 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25587692274)
-
-- **Status**: superseded (branch reset to main); c036 — unroll 8 scatter passes
-
-### Iters 29–35 — ✅ accepted (fitness 21.048); c035 merged PR #272
+### Iters 1–37 — c022 ✅ (fitness ~29), c035 ✅ (fitness 21.048), c037/c036 superseded, c038 ❌
 
 ### Iters 1–28 — c022 ✅ merged PR #226 (LSD 8-pass radix, fitness ~29→21.048)
