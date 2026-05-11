@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-11T02:37:10Z |
-| Iteration Count | 39 |
+| Last Run | 2026-05-11T18:50:34Z |
+| Iteration Count | 40 |
 | Best Metric | 21.048 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,15 +17,20 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, rejected, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, rejected, pending-ci, pending-ci |
 
 ## 🧬 Population
 
-### c039 · island 3 · fitness pending-ci · gen 39
+### c040 · island 3 · fitness pending-ci · gen 40
+
+- **Op**: exploitation; **Cell**: aos-typed-array · non-comparison; **Parent**: c029/c035
+- **Approach**: Inverse IEEE-754 gather — reconstruct float values from sorted AoS key words instead of `vals[origIdx]` random reads into holey JS Array. _fvalsU32[0..1]/_fvals[0] used as 1-element scratch.
+- **Status**: ⏳ pending CI evaluation
+
+### ~~c039~~ (evicted — never committed to branch; iteration 39 run produced no candidate)
 
 - **Op**: exploitation; **Cell**: aos-typed-array · non-comparison; **Parent**: c029
-- **Approach**: Module-level perm buffer reuse (save 1 alloc/call) + invMap (Uint32Array) for typed-array gather from `_fvals` instead of HOLEY `vals[]`.
-- **Status**: ⏳ pending CI evaluation
+- *(code never committed)*
 
 ### c038 · island 3 · fitness 11.721 (noise) · gen 38
 
@@ -61,25 +66,22 @@
 ## 🔭 Future Directions
 
 - Profile what fraction of 112ms is: scatter writes vs gather vs JS/JIT overhead vs perm/outData allocation.
-- **c039 in progress**: perm reuse + invMap typed-array gather — CI pending.
 - Skip-pass: if a histogram bucket is 100% (all elements same byte), skip scatter without swap.
 - Island 4 hybrid: native sort for n < 1k, radix for n ≥ 1k.
-- If invMap+fvals doesn't help: try outData as pre-allocated Float64Array (returned as backing store for Series).
+- If c040 inverse-transform gather helps: also try pre-allocating perm as module-level number[] to save one allocation.
 
 ## 📊 Iteration History
 
+### Iteration 40 — 2026-05-11 18:50 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25690378732)
+
+- **Status**: ⏳ Pending CI · c040 · exploitation · island 3
+- **Change**: Inverse IEEE-754 gather — reconstruct float values from sorted AoS key words (`srcBuf[si+1]`, `srcBuf[si+2]`) using `_fvalsU32`/`_fvals[0]` scratch, eliminating `vals[origIdx]` random reads.
+- **Metric**: pending CI evaluation (no bun in sandbox)
+
 ### Iteration 39 — 2026-05-11 02:37 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25647336180)
 
-- **Status**: ⏳ Pending CI · c039 · exploitation · island 3
-- **Change**: Perm reuse (module-level `_permBuf`) + invMap typed-array gather (`_fvals[_invMap[idx]]`).
-- **Metric**: pending CI evaluation (sandbox has no bun runtime)
+- **Status**: ❌ Not committed · c039 was proposed but never pushed to branch (prior run exited without committing)
+- **Change**: N/A
+- **Metric**: N/A
 
-### Iteration 38 — 2026-05-10 13:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25629811599)
-
-- **Status**: ❌ Rejected · c038 · exploitation · island 3
-- **Change**: 4-pass hi-word radix + tie-break (halve scatter passes). tsb=116ms, pandas=10ms(noise).
-- **Metric**: 11.721 (best: 21.048) — improvement was pandas variability, not tsb speedup.
-
-### Iters 1–37 — c022 ✅ (fitness ~29), c035 ✅ (fitness 21.048), c037/c036 superseded, c038 ❌
-
-### Iters 1–28 — c022 ✅ merged PR #226 (LSD 8-pass radix, fitness ~29→21.048)
+### Iters 1–38 — c022 ✅ (fitness ~29), c035 ✅ (fitness 21.048, best), c038 ❌ (4-pass radix no help), c036/c037 ❌
