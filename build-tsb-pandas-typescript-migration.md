@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-11T13:19:16Z |
-| Iteration Count | 308 |
+| Last Run | 2026-05-12T01:27:02Z |
+| Iteration Count | 309 |
 | Best Metric | 144 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -23,7 +23,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
@@ -48,7 +48,8 @@
 - ✅ interval_range() added (iter 306)
 - ✅ period_range() + pd.util namespace added (iter 307)
 - ✅ infer_freq() added (iter 308)
-- Next: pd.api.extensions, more type predicates, infer_freq improvements
+- ✅ pd.api.extensions (ExtensionDtype, ExtensionArray, register_extension_dtype) added (iter 309)
+- Next: DataFrame.xs() improvements, groupby(Grouper) integration, more pd.api.types predicates
 
 ---
 
@@ -73,14 +74,20 @@
 ## 🔭 Future Directions
 
 - More `pd.api.types` predicates (is_float_dtype, is_integer_dtype, is_numeric_dtype, etc.)
-- `infer_freq()` — infer frequency string from DatetimeIndex or TimedeltaIndex
 - `DataFrame.xs()` improvements (multi-level key lookup)
 - Full `groupby(Grouper)` integration (use Grouper.key in DataFrameGroupBy/SeriesGroupBy)
-- `pd.api.extensions` — ExtensionDtype/ExtensionArray base classes
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 309 — 2026-05-12 01:27 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25707498886)
+
+- **Status**: pending-ci (awaiting CI gate)
+- **Change**: Add `pd.api.extensions` — `ExtensionDtype`, `ExtensionArray`, `register_extension_dtype`, `construct_extension_dtype_from_string`
+- **Metric**: 144 (previous best: 144, delta: +1 from main baseline of 143)
+- **Commit**: b8c14a0
+- **Notes**: Mirrors pandas.api.extensions. TypeScript abstract classes enforce implementation. Available as `api.extensions` sub-namespace.
 
 ### Iteration 308 — 2026-05-11 13:19 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25672568067)
 
