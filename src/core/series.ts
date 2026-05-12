@@ -909,8 +909,8 @@ export class Series<T extends Scalar = Scalar> {
               _fvalsU32[0] = keyLo;
               _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
             } else {
-              _fvalsU32[0] = (~keyLo) >>> 0;
-              _fvalsU32[1] = (~keyHi) >>> 0;
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
             }
             outData[pos] = _fvals[0] as T;
             pos = pos + 1;
@@ -925,8 +925,8 @@ export class Series<T extends Scalar = Scalar> {
               _fvalsU32[0] = keyLo;
               _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
             } else {
-              _fvalsU32[0] = (~keyLo) >>> 0;
-              _fvalsU32[1] = (~keyHi) >>> 0;
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
             }
             outData[pos] = _fvals[0] as T;
             pos = pos + 1;
@@ -954,8 +954,8 @@ export class Series<T extends Scalar = Scalar> {
               _fvalsU32[0] = keyLo;
               _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
             } else {
-              _fvalsU32[0] = (~keyLo) >>> 0;
-              _fvalsU32[1] = (~keyHi) >>> 0;
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
             }
             outData[pos] = _fvals[0] as T;
             pos = pos + 1;
@@ -970,8 +970,8 @@ export class Series<T extends Scalar = Scalar> {
               _fvalsU32[0] = keyLo;
               _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
             } else {
-              _fvalsU32[0] = (~keyLo) >>> 0;
-              _fvalsU32[1] = (~keyHi) >>> 0;
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
             }
             outData[pos] = _fvals[0] as T;
             pos = pos + 1;
