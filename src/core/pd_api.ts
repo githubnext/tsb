@@ -45,6 +45,7 @@ import {
   isTimedeltaDtype,
   isUnsignedIntegerDtype,
 } from "./api_types.ts";
+import { apiExtensions } from "./extensions.ts";
 
 // ─── api.types ────────────────────────────────────────────────────────────────
 
@@ -103,6 +104,8 @@ export type ApiTypes = typeof apiTypes;
 export const api = {
   /** Type-checking predicates — mirrors `pandas.api.types`. */
   types: apiTypes,
+  /** Extension type/array system and accessor registration — mirrors `pandas.api.extensions`. */
+  extensions: apiExtensions,
 } as const;
 
 export type Api = typeof api;

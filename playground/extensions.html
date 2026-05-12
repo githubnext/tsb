@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — api.extensions: Custom Extension Types</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { color: var(--text); margin: 1.5rem 0 0.5rem; font-size: 1.1rem; }
+    p { margin-bottom: 0.75rem; color: #8b949e; }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+      white-space: pre;
+    }
+    .kw { color: #ff7b72; }
+    .str { color: #a5d6ff; }
+    .num { color: #79c0ff; }
+    .cmt { color: #8b949e; font-style: italic; }
+    .type { color: #ffa657; }
+    .fn { color: #d2a8ff; }
+    .result {
+      background: #0d2318;
+      border: 1px solid var(--green);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      color: var(--green);
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #1f3a1f;
+      color: var(--green);
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+    }
+    th { background: var(--surface); color: var(--accent); }
+    .nav { margin-bottom: 1.5rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+<div class="nav"><a href="index.html">← tsb playground</a></div>
+
+<h1>pd.api.extensions <span class="badge">new in pandas 0.23</span></h1>
+<p>
+  The <code>api.extensions</code> namespace lets you build custom array types and dtypes
+  that integrate with tsb DataFrames and Series — mirroring <code>pandas.api.extensions</code>.
+</p>
+
+<h2>Overview</h2>
+<table>
+  <tr><th>Symbol</th><th>Mirrors</th><th>Description</th></tr>
+  <tr><td><code>ExtensionDtype</code></td><td><code>pandas.api.extensions.ExtensionDtype</code></td><td>Abstract base class for custom dtypes</td></tr>
+  <tr><td><code>ExtensionArray</code></td><td><code>pandas.api.extensions.ExtensionArray</code></td><td>Abstract base class for custom 1-D arrays</td></tr>
+  <tr><td><code>registerExtensionDtype(cls)</code></td><td><code>register_extension_dtype</code></td><td>Register a dtype so it can be resolved from a string</td></tr>
+  <tr><td><code>constructExtensionDtypeFromString(s)</code></td><td>internal pandas helper</td><td>Resolve a string to a registered extension dtype</td></tr>
+  <tr><td><code>registerSeriesAccessor(name, cls)</code></td><td><code>register_series_accessor</code></td><td>Register a custom accessor on Series</td></tr>
+  <tr><td><code>registerDataFrameAccessor(name, cls)</code></td><td><code>register_dataframe_accessor</code></td><td>Register a custom accessor on DataFrame</td></tr>
+  <tr><td><code>registerIndexAccessor(name, cls)</code></td><td><code>register_index_accessor</code></td><td>Register a custom accessor on Index</td></tr>
+  <tr><td><code>getRegisteredAccessors(target)</code></td><td>—</td><td>Return all registered accessors for a target</td></tr>
+</table>
+
+<h2>1 — Custom ExtensionDtype</h2>
+<p>
+  Subclass <code>ExtensionDtype</code> to define a new dtype.
+  Implement <code>name</code>, <code>type</code>, <code>kind</code>, and
+  optionally <code>construct_from_string</code> so the dtype can be resolved
+  from a plain string.
+</p>
+<pre><span class="kw">import</span> { <span class="type">ExtensionDtype</span> } <span class="kw">from</span> <span class="str">"tsb"</span>;
+
+<span class="kw">class</span> <span class="type">IPDtype</span> <span class="kw">extends</span> <span class="type">ExtensionDtype</span> {
+  <span class="kw">get</span> <span class="fn">name</span>() { <span class="kw">return</span> <span class="str">"ip"</span>; }
+  <span class="kw">get</span> <span class="fn">type</span>() { <span class="kw">return</span> <span class="type">String</span>; }
+  <span class="kw">get</span> <span class="fn">kind</span>() { <span class="kw">return</span> <span class="str">"O"</span>; }
+
+  <span class="kw">static override</span> <span class="fn">construct_from_string</span>(s: <span class="type">string</span>): <span class="type">IPDtype</span> | <span class="kw">null</span> {
+    <span class="kw">return</span> s === <span class="str">"ip"</span> ? <span class="kw">new</span> <span class="type">IPDtype</span>() : <span class="kw">null</span>;
+  }
+}
+
+<span class="kw">const</span> d = <span class="kw">new</span> <span class="type">IPDtype</span>();
+console.log(d.name);      <span class="cmt">// "ip"</span>
+console.log(d.kind);      <span class="cmt">// "O"</span>
+console.log(d.isNumeric); <span class="cmt">// false</span>
+console.log(String(d));   <span class="cmt">// "ip"</span></pre>
+<div class="result">
+name    = "ip"<br>
+kind    = "O"<br>
+isNumeric = false<br>
+toString  = "ip"
+</div>
+
+<h2>2 — Custom ExtensionArray</h2>
+<p>
+  Subclass <code>ExtensionArray</code> to hold a column of your custom elements.
+  At a minimum, implement <code>dtype</code>, <code>length</code>, <code>getItem</code>,
+  and <code>slice</code>.  The default <code>isna</code> and <code>toArray</code>
+  implementations call <code>getItem</code> repeatedly — override them for performance.
+</p>
+<pre><span class="kw">import</span> { <span class="type">ExtensionArray</span> } <span class="kw">from</span> <span class="str">"tsb"</span>;
+
+<span class="kw">class</span> <span class="type">IPArray</span> <span class="kw">extends</span> <span class="type">ExtensionArray</span> {
+  <span class="kw">readonly</span> _data: (<span class="type">string</span> | <span class="kw">null</span>)[];
+
+  <span class="fn">constructor</span>(data: (<span class="type">string</span> | <span class="kw">null</span>)[]) {
+    <span class="kw">super</span>();
+    <span class="kw">this</span>._data = data;
+  }
+
+  <span class="kw">get</span> <span class="fn">dtype</span>() { <span class="kw">return new</span> <span class="type">IPDtype</span>(); }
+  <span class="kw">get</span> <span class="fn">length</span>() { <span class="kw">return this</span>._data.length; }
+
+  <span class="fn">getItem</span>(i: <span class="type">number</span>): <span class="type">string</span> | <span class="kw">null</span> {
+    <span class="kw">const</span> idx = i &lt; <span class="num">0</span> ? <span class="kw">this</span>._data.length + i : i;
+    <span class="kw">return this</span>._data[idx] ?? <span class="kw">null</span>;
+  }
+
+  <span class="fn">slice</span>(start: <span class="type">number</span>, stop: <span class="type">number</span>): <span class="type">IPArray</span> {
+    <span class="kw">return new</span> <span class="type">IPArray</span>(<span class="kw">this</span>._data.slice(start, stop));
+  }
+}
+
+<span class="kw">const</span> arr = <span class="kw">new</span> <span class="type">IPArray</span>([<span class="str">"1.1.1.1"</span>, <span class="kw">null</span>, <span class="str">"8.8.8.8"</span>]);
+console.log(arr.length);       <span class="cmt">// 3</span>
+console.log(arr.getItem(<span class="num">0</span>));   <span class="cmt">// "1.1.1.1"</span>
+console.log(arr.getItem(<span class="num">-1</span>));  <span class="cmt">// "8.8.8.8"</span>
+console.log(arr.isna());       <span class="cmt">// [false, true, false]</span>
+console.log(arr.toArray());    <span class="cmt">// ["1.1.1.1", null, "8.8.8.8"]</span></pre>
+<div class="result">
+length       = 3<br>
+getItem(0)   = "1.1.1.1"<br>
+getItem(-1)  = "8.8.8.8"<br>
+isna()       = [false, true, false]<br>
+toArray()    = ["1.1.1.1", null, "8.8.8.8"]
+</div>
+
+<h2>3 — Register a dtype</h2>
+<p>
+  Call <code>registerExtensionDtype</code> to make a dtype resolvable by name.
+  Then use <code>constructExtensionDtypeFromString</code> to look it up — this
+  is what tsb uses internally when you pass a dtype string.
+</p>
+<pre><span class="kw">import</span> {
+  <span class="fn">registerExtensionDtype</span>,
+  <span class="fn">constructExtensionDtypeFromString</span>,
+} <span class="kw">from</span> <span class="str">"tsb"</span>;
+
+<span class="fn">registerExtensionDtype</span>(<span class="type">IPDtype</span>);
+
+<span class="kw">const</span> dtype = <span class="fn">constructExtensionDtypeFromString</span>(<span class="str">"ip"</span>);
+console.log(dtype?.name);      <span class="cmt">// "ip"</span>
+console.log(dtype <span class="kw">instanceof</span> <span class="type">IPDtype</span>);  <span class="cmt">// true</span>
+
+<span class="fn">constructExtensionDtypeFromString</span>(<span class="str">"unknown"</span>);  <span class="cmt">// null</span></pre>
+<div class="result">
+dtype.name = "ip"<br>
+dtype instanceof IPDtype = true<br>
+constructExtensionDtypeFromString("unknown") = null
+</div>
+
+<h2>4 — Register custom accessors</h2>
+<p>
+  Use <code>registerSeriesAccessor</code>, <code>registerDataFrameAccessor</code>,
+  or <code>registerIndexAccessor</code> to attach a custom accessor class to tsb objects.
+  Call <code>getRegisteredAccessors("series")</code> to retrieve all registered
+  accessors for a given target.
+</p>
+<pre><span class="kw">import</span> {
+  <span class="fn">registerSeriesAccessor</span>,
+  <span class="fn">getRegisteredAccessors</span>,
+} <span class="kw">from</span> <span class="str">"tsb"</span>;
+
+<span class="kw">class</span> <span class="type">GeoAccessor</span> {
+  <span class="fn">constructor</span>(<span class="kw">private readonly</span> _series: <span class="type">unknown</span>) {}
+  <span class="fn">centroid</span>() { <span class="kw">return</span> [<span class="num">0</span>, <span class="num">0</span>]; }
+}
+
+<span class="fn">registerSeriesAccessor</span>(<span class="str">"geo"</span>, <span class="type">GeoAccessor</span>);
+
+<span class="kw">const</span> accessors = <span class="fn">getRegisteredAccessors</span>(<span class="str">"series"</span>);
+<span class="kw">const</span> <span class="type">Cls</span> = accessors.get(<span class="str">"geo"</span>)!;
+<span class="kw">const</span> acc = <span class="kw">new</span> <span class="type">Cls</span>(mySeries);
+<span class="cmt">// acc.centroid() → [0, 0]</span></pre>
+<div class="result">
+accessors.has("geo") = true<br>
+new GeoAccessor(series).centroid() = [0, 0]
+</div>
+
+<h2>5 — Accessing via <code>api.extensions</code></h2>
+<p>
+  All the above is also available through the unified <code>api</code> namespace:
+</p>
+<pre><span class="kw">import</span> { api } <span class="kw">from</span> <span class="str">"tsb"</span>;
+
+api.extensions.registerExtensionDtype(<span class="type">IPDtype</span>);
+api.extensions.constructExtensionDtypeFromString(<span class="str">"ip"</span>);   <span class="cmt">// IPDtype instance</span>
+api.extensions.registerSeriesAccessor(<span class="str">"geo"</span>, <span class="type">GeoAccessor</span>);
+api.extensions.getRegisteredAccessors(<span class="str">"series"</span>).get(<span class="str">"geo"</span>); <span class="cmt">// GeoAccessor</span></pre>
+
+<h2>API reference</h2>
+<table>
+  <tr><th>Method / Class</th><th>Signature</th><th>Description</th></tr>
+  <tr><td><code>ExtensionDtype</code></td><td>abstract class</td><td>Base for custom dtypes. Implement <code>name</code>, <code>type</code>, <code>kind</code>.</td></tr>
+  <tr><td><code>ExtensionArray</code></td><td>abstract class</td><td>Base for custom arrays. Implement <code>dtype</code>, <code>length</code>, <code>getItem</code>, <code>slice</code>.</td></tr>
+  <tr><td><code>registerExtensionDtype(cls)</code></td><td><code>(cls: typeof ExtensionDtype) → void</code></td><td>Register a dtype subclass by name.</td></tr>
+  <tr><td><code>constructExtensionDtypeFromString(s)</code></td><td><code>(s: string) → ExtensionDtype | null</code></td><td>Resolve a string to a registered dtype.</td></tr>
+  <tr><td><code>registerSeriesAccessor(name, cls)</code></td><td><code>(name: string, cls: new(obj) → unknown) → void</code></td><td>Register accessor on Series.</td></tr>
+  <tr><td><code>registerDataFrameAccessor(name, cls)</code></td><td><code>(name: string, cls: new(obj) → unknown) → void</code></td><td>Register accessor on DataFrame.</td></tr>
+  <tr><td><code>registerIndexAccessor(name, cls)</code></td><td><code>(name: string, cls: new(obj) → unknown) → void</code></td><td>Register accessor on Index.</td></tr>
+  <tr><td><code>getRegisteredAccessors(target)</code></td><td><code>("series" | "dataframe" | "index") → ReadonlyMap</code></td><td>Get all registered accessors for a target.</td></tr>
+</table>
+
+</body>
+</html>
