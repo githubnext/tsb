@@ -154,6 +154,16 @@ let _nanBuf: Uint32Array = new Uint32Array(0);
 let _fvals: Float64Array = new Float64Array(0);
 /** Uint32 view of _fvals.buffer; updated whenever _fvals is reallocated. */
 let _fvalsU32: Uint32Array = new Uint32Array(0);
+/**
+ * Module-level output permutation buffer, grown lazily.
+ * Safe to reuse across calls because Index copies its input via Object.freeze([...data]).
+ */
+let _permBuf: number[] = [];
+/**
+ * Module-level output value buffer, grown lazily.
+ * Safe to reuse across calls because Series copies its input via Object.freeze([...data]).
+ */
+let _outBuf: number[] = [];
 
 // ─── SeriesOptions ────────────────────────────────────────────────────────────
 
@@ -888,8 +898,14 @@ export class Series<T extends Scalar = Scalar> {
     // Build the output permutation and gather values.
     // For the numeric path, read sorted row indices directly from srcBuf[i*3] (no
     // intermediate copy to finSlice), saving one O(finCount) loop.
-    const perm = new Array<number>(n);
-    const outData = new Array<T>(n);
+    // Reuse module-level buffers — Index and Series both copy their inputs via
+    // Object.freeze([...data]), so sharing across calls is safe.
+    if (_permBuf.length < n) {
+      _permBuf = new Array<number>(n);
+      _outBuf = new Array<number>(n);
+    }
+    const perm = _permBuf;
+    const outData = _outBuf as unknown as T[];
     let pos = 0;
     if (naPosition === "first") {
       for (let i = 0; i < nanCount; i++) {
