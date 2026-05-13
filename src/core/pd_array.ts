@@ -80,10 +80,10 @@ function inferDtype(data: readonly Scalar[]): DtypeName {
     } else if (typeof v === "bigint") {
       hasBigInt = true;
     } else if (typeof v === "number") {
-      if (!Number.isInteger(v)) {
-        hasFloat = true;
-      } else {
+      if (Number.isInteger(v)) {
         hasInt = true;
+      } else {
+        hasFloat = true;
       }
     } else if (typeof v === "string") {
       hasString = true;
@@ -120,10 +120,7 @@ function inferDtype(data: readonly Scalar[]): DtypeName {
  * pdArray(["a", null, "c"]);        // dtype inferred as "string"
  * ```
  */
-export function pdArray(
-  data: Iterable<Scalar>,
-  dtype?: DtypeName,
-): PandasArray {
+export function pdArray(data: Iterable<Scalar>, dtype?: DtypeName): PandasArray {
   const arr = Array.from(data);
   const resolvedDtype = dtype ?? inferDtype(arr);
   return new PandasArray(arr, resolvedDtype);

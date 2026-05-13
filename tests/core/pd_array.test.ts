@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
-import { pdArray, PandasArray } from "../../src/index.ts";
+import { PandasArray, pdArray } from "../../src/index.ts";
 
 describe("pdArray", () => {
   test("creates an int64 array when all values are integers", () => {

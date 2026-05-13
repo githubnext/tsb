@@ -2,17 +2,17 @@
  * Tests for pd.api.extensions — ExtensionDtype, ExtensionArray, and accessor registration.
  */
 
-import { describe, expect, test, beforeEach } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
-  ExtensionDtype,
   ExtensionArray,
-  registerExtensionDtype,
-  constructExtensionDtypeFromString,
-  registerSeriesAccessor,
-  registerDataFrameAccessor,
-  registerIndexAccessor,
-  getRegisteredAccessors,
+  ExtensionDtype,
   apiExtensions,
+  constructExtensionDtypeFromString,
+  getRegisteredAccessors,
+  registerDataFrameAccessor,
+  registerExtensionDtype,
+  registerIndexAccessor,
+  registerSeriesAccessor,
 } from "../../src/core/extensions.ts";
 
 // ─── Concrete test implementations ───────────────────────────────────────────
@@ -21,8 +21,12 @@ class IPDtype extends ExtensionDtype {
   override get name() {
     return "ip";
   }
-  override get type(): abstract new (...args: readonly unknown[]) => unknown {
-    return String as unknown as abstract new (...args: readonly unknown[]) => unknown;
+  override get type(): abstract new (
+    ...args: readonly unknown[]
+  ) => unknown {
+    return String as unknown as abstract new (
+      ...args: readonly unknown[]
+    ) => unknown;
   }
   override get kind() {
     return "O";
@@ -58,9 +62,7 @@ class IPArray extends ExtensionArray {
   }
 
   override fillna(value: unknown): IPArray {
-    return new IPArray(
-      this._data.map((v) => (v === null || v === undefined ? String(value) : v)),
-    );
+    return new IPArray(this._data.map((v) => (v === null || v === undefined ? String(value) : v)));
   }
 }
 

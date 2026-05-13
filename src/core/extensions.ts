@@ -16,7 +16,6 @@
  */
 
 import type { Scalar } from "../types.ts";
-import type { Dtype } from "./dtype.ts";
 
 // ─── ExtensionDtype ───────────────────────────────────────────────────────────
 
@@ -44,7 +43,9 @@ export abstract class ExtensionDtype {
    * The scalar type for the array — the JavaScript class that represents
    * individual elements (e.g. `Number`, `String`, or a custom class).
    */
-  abstract get type(): abstract new (...args: readonly unknown[]) => unknown;
+  abstract get type(): abstract new (
+    ...args: readonly unknown[]
+  ) => unknown;
 
   /**
    * A single character code that categorises the dtype, following NumPy
@@ -83,9 +84,7 @@ export abstract class ExtensionDtype {
    * Used by tsb internally when constructing arrays of this type.
    * Override in subclasses or use {@link registerExtensionDtype}.
    */
-  static construct_array_type(): abstract new (
-    data: readonly unknown[],
-  ) => ExtensionArray {
+  static construct_array_type(): abstract new (data: readonly unknown[]) => ExtensionArray {
     throw new Error("construct_array_type must be overridden in subclasses");
   }
 
@@ -195,10 +194,7 @@ export abstract class ExtensionArray {
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 /** Map from dtype name → ExtensionDtype subclass constructor. */
-const _dtypeRegistry = new Map<
-  string,
-  { new (): ExtensionDtype } & typeof ExtensionDtype
->();
+const _dtypeRegistry = new Map<string, { new (): ExtensionDtype } & typeof ExtensionDtype>();
 
 /**
  * Register a custom {@link ExtensionDtype} subclass so that tsb can
@@ -225,9 +221,7 @@ export function registerExtensionDtype(
  *
  * Returns `null` if no registered dtype can handle the string.
  */
-export function constructExtensionDtypeFromString(
-  dtypeStr: string,
-): ExtensionDtype | null {
+export function constructExtensionDtypeFromString(dtypeStr: string): ExtensionDtype | null {
   for (const dtypeClass of _dtypeRegistry.values()) {
     const result = dtypeClass.construct_from_string(dtypeStr);
     if (result !== null) {
@@ -243,14 +237,9 @@ export function constructExtensionDtypeFromString(
  * Registered custom accessors keyed by target ("series" | "dataframe" | "index")
  * and accessor name.
  */
-const _accessorRegistry = new Map<
-  string,
-  Map<string, new (obj: unknown) => unknown>
->();
+const _accessorRegistry = new Map<string, Map<string, new (obj: unknown) => unknown>>();
 
-function _getAccessorMap(
-  target: string,
-): Map<string, new (obj: unknown) => unknown> {
+function _getAccessorMap(target: string): Map<string, new (obj: unknown) => unknown> {
   let m = _accessorRegistry.get(target);
   if (m === undefined) {
     m = new Map();
@@ -351,6 +340,4 @@ export type ApiExtensions = typeof apiExtensions;
 export type ExtensionDtypeConstructor = { new (): ExtensionDtype } & typeof ExtensionDtype;
 
 /** Type-level helper: any concrete subclass of {@link ExtensionArray}. */
-export type ExtensionArrayConstructor = new (
-  data: readonly unknown[],
-) => ExtensionArray;
+export type ExtensionArrayConstructor = new (data: readonly unknown[]) => ExtensionArray;
