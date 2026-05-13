@@ -4,22 +4,28 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-12T13:00:45Z |
-| Iteration Count | 42 |
+| Last Run | 2026-05-13T07:22:00Z |
+| Iteration Count | 43 |
 | Best Metric | 21.048 |
 | Target Metric | — |
 | Metric Direction | lower |
 | Branch | autoloop/tsb-perf-evolve |
-| PR | — |
+| PR | #303 |
 | Issue | #189 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, rejected, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, rejected, pending-ci |
 
 ## 🧬 Population
+
+### c043 · island 3 · fitness pending-ci · gen 43
+
+- **Op**: exploitation; **Cell**: aos-typed-array · non-comparison; **Parent**: c042
+- **Approach**: Stride counters `fsi` (= finCount×2) and `rxBase` (= finCount×3) replace `j*2` and `j*3` multiplications in the main partition loop. Also removes redundant `typeof v === "number" &&` guard from the NaN check.
+- **Status**: ⏳ pending CI evaluation
 
 ### c042 · island 3 · fitness pending-ci · gen 42
 
@@ -33,10 +39,7 @@
 - **Approach**: Inverse IEEE-754 gather — replace `vals[origIdx]` random read with sequential `srcBuf[si+1]`/`srcBuf[si+2]` reads + ~6 arithmetic ops to reconstruct float via `_fvalsU32[0..1]`/`_fvals[0]` scratch. Avoids cold-cache random access into JS array.
 - **Status**: ⏳ pending CI evaluation
 
-### ~~c040~~ (evicted — never committed to branch; iteration 40 run produced no committed code)
-
-- **Op**: exploitation; **Cell**: aos-typed-array · non-comparison; **Parent**: c029
-- *(code never committed)*
+### ~~c040~~ (evicted — never committed)
 
 ### c038 · island 3 · fitness 11.721 (noise) · gen 38
 
@@ -78,20 +81,23 @@
 
 ## 📊 Iteration History
 
+### Iteration 43 — 2026-05-13 07:22 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25784510541)
+
+- **Status**: ⏳ Pending CI · c043 · exploitation · island 3
+- **Change**: Stride counters `fsi`/`rxBase` replace `j*2`/`j*3` multiplications in partition loop; remove redundant `typeof` guard from NaN check.
+- **Metric**: pending CI evaluation (no bun in sandbox)
+- **Notes**: Eliminates ~190k multiplications for n=95k. Removes data dependency on `j` for AoS buffer writes, potentially aiding instruction scheduling in JSC.
+
 ### Iteration 42 — 2026-05-12 13:00 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25735886900)
 
 - **Status**: ⏳ Pending CI · c042 · exploitation · island 3
-- **Op**: exploitation; **Parent**: c041 (fitness pending, same island 3)
-- **Change**: Add module-level `_permBuf` + `_outBuf` (grown lazily). Reuse instead of allocating `new Array<number>(n)` + `new Array<T>(n)` per call.
+- **Change**: Add module-level `_permBuf` + `_outBuf` (grown lazily) to reuse per-call JS array allocations.
 - **Metric**: pending CI evaluation (no bun in sandbox)
-- **Hypothesis**: 55 calls × 2 × 800KB = ~88MB of per-call JS array allocations drive GC. Both Index and Series copy their inputs so buffer reuse is safe. Eliminating these allocations should reduce mean_ms.
-- **Notes**: c041 was merged to main via PR #297. c042 builds on it by addressing the per-call allocation overhead identified in iter 38 notes.
 
 ### Iteration 41 — 2026-05-12 04:12 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25712799061)
 
 - **Status**: ⏳ Pending CI · c041 · exploitation · island 3
-- **Change**: Inverse IEEE-754 gather — replace `vals[origIdx]` random access with sequential srcBuf key reads + inverse-transform via `_fvalsU32[0..1]`/`_fvals[0]` scratch.
+- **Change**: Inverse IEEE-754 gather — replace `vals[origIdx]` random access with inline transform via `_fvalsU32[0..1]`/`_fvals[0]`.
 - **Metric**: pending CI evaluation (no bun in sandbox)
-- **Notes**: c039/c040 were proposed in iterations 39/40 but never committed to branch (prior runs exited without committing). c041 is the same idea, properly committed.
 
 ### Iters 1–40 — c022 ✅ (fitness ~29), c035 ✅ (fitness 21.048, best), c038 ❌ (4-pass radix no help), c036/c037 ❌, c039/c040 never committed
