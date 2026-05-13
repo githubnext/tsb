@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-12T18:51:56Z |
-| Iteration Count | 313 |
-| Best Metric | 657 |
+| Last Run | 2026-05-13T13:02:48Z |
+| Iteration Count | 314 |
+| Best Metric | 659 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #300 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -62,6 +62,13 @@
 
 ## 📊 Iteration History
 
+### Iteration 314 — 2026-05-13T13:02:48Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25800686638)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `indexers` (FixedForwardWindowIndexer + VariableOffsetWindowIndexer on 100k rows) and `scalar_extract` (squeezeSeries, squeezeDataFrame, firstValidIndex, lastValidIndex on 100k-row Series/DataFrame) benchmark pairs
+- **Metric**: 659 (previous best: 657, delta: +2) · **Commit**: 6ed3c7b
+- **Notes**: Both modules had no benchmark coverage; pandas equivalents use `pd.api.indexers` and the `.first_valid_index()`/`.last_valid_index()` methods.
+
 ### Iteration 313 — 2026-05-12T18:51:56Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25755262251)
 
 - **Status**: ✅ Accepted
@@ -69,16 +76,4 @@
 - **Metric**: 657 (previous best: 655, delta: +2) · **Commit**: 5ae546a
 - **Notes**: cat_accessor and hash_biject_array were both listed in Future Directions with zero benchmark coverage; Python equivalents simulate the same bijection logic.
 
-### Iteration 312 — 2026-05-12T06:36:28Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25717773514)
-
-- **Status**: ✅ Accepted
-- **Change**: Added hash_array and swaplevel benchmark pairs
-- **Metric**: 655 (delta: +2) · **Commit**: 5dd1faf
-
-### Iteration 311 — 2026-05-11T23:15:05Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25702866515)
-
-- **Status**: ✅ Accepted
-- **Change**: Added apply and rename_ops benchmark pairs
-- **Metric**: 655 (delta: +2) · **Commit**: f260ab1
-
-### Iters 310–312 — ✅ | Metrics 653→655: Added math_ops, na_ops, reduce_ops, numeric_ops, apply, rename_ops, hash_array, swaplevel (8 pairs).
+### Iters 310–313 — ✅ | Metrics 653→657: Added math_ops, na_ops, reduce_ops, numeric_ops, apply, rename_ops, hash_array, swaplevel, cat_accessor, hash_biject_array (10 pairs).
