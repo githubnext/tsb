@@ -773,6 +773,10 @@ export class Series<T extends Scalar = Scalar> {
     let finCount = 0;
     let nanCount = 0;
     let allNumeric = true;
+    // Stride counters: fsi = finCount * 2 (float view stride), rxBase = finCount * 3 (AoS stride).
+    // Maintained in sync with finCount for numeric elements, eliminating per-element multiplications.
+    let fsi = 0;
+    let rxBase = 0;
 
     // Clear histograms before the init loop so we can accumulate them inline.
     _rxHisto.fill(0);
@@ -782,7 +786,7 @@ export class Series<T extends Scalar = Scalar> {
     // separate O(n) histogram scan that the previous implementation required.
     for (let i = 0; i < n; i++) {
       const v = vals[i];
-      if (v === null || v === undefined || (typeof v === "number" && Number.isNaN(v))) {
+      if (v === null || v === undefined || Number.isNaN(v)) {
         nanBuf[nanCount] = i;
         nanCount = nanCount + 1;
       } else {
@@ -791,8 +795,8 @@ export class Series<T extends Scalar = Scalar> {
         if (typeof v === "number") {
           fvals[j] = v;
           // Read the IEEE-754 bits via the shared Uint32 view (same buffer, no copy).
-          let lo = fvalsU32[j * 2]!;
-          let hi = fvalsU32[j * 2 + 1]!;
+          let lo = fvalsU32[fsi]!;
+          let hi = fvalsU32[fsi + 1]!;
           // Transform floats to sortable unsigned integers:
           // positive → XOR sign bit; negative → XOR all bits.
           if (hi & 0x80000000) {
@@ -801,10 +805,11 @@ export class Series<T extends Scalar = Scalar> {
           } else {
             hi = (hi ^ 0x80000000) >>> 0;
           }
-          const base = j * 3;
-          _rxA[base] = i;
-          _rxA[base + 1] = lo;
-          _rxA[base + 2] = hi;
+          _rxA[rxBase] = i;
+          _rxA[rxBase + 1] = lo;
+          _rxA[rxBase + 2] = hi;
+          fsi += 2;
+          rxBase += 3;
           // Accumulate all 8 histogram passes inline — no second scan needed.
           let idx: number;
           idx = lo & 0xff;
