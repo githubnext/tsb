@@ -908,6 +908,12 @@ export class Series<T extends Scalar = Scalar> {
     if (_permBuf.length < n) {
       _permBuf = new Array<number>(n);
       _outBuf = new Array<number>(n);
+    } else {
+      // Truncate to exactly n so that [...perm] / [...outData] spreads only the
+      // n elements we are about to write — not stale tail entries from a prior
+      // larger sort call.
+      _permBuf.length = n;
+      _outBuf.length = n;
     }
     const perm = _permBuf;
     const outData = _outBuf as unknown as T[];
