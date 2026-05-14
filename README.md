@@ -1,4 +1,4 @@
-# Tsessebe
+# TSB
 
 <img src="assets/tsessebe-logo.png" alt="Tsessebe logo — stylized head of a tsessebe antelope" width="180" align="left" style="margin-right: 16px;" />
 
@@ -6,7 +6,7 @@ A TypeScript port of [pandas](https://github.com/pandas-dev/pandas), built from 
 
 🎮 **[Try the interactive playground →](https://githubnext.github.io/tsessebe/)**
 
-> **Pronounced** *tseh-SEH-bee* · IPA /tsɛˈsɛbi/ — named after the [tsessebe](https://en.wikipedia.org/wiki/Common_tsessebe) (*Damaliscus lunatus*), a southern African antelope. The word is Setswana; it carries the "ts" as one sound, the middle "se" takes the stress, and the final "be" is unstressed.
+TSB is named after the [tsessebe](https://en.wikipedia.org/wiki/Common_tsessebe) (*tseh-SEH-bee* · IPA /tsɛˈsɛbi/) —  a southern African antelope.
 
 <br clear="left">
 
