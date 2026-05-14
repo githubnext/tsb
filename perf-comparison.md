@@ -10,26 +10,26 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-14T05:59:24Z |
-| Iteration Count | 315 |
-| Best Metric | 660 |
+| Last Run | 2026-05-14T19:31:43Z |
+| Iteration Count | 316 |
+| Best Metric | 661 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | (new PR pending — #300 was merged) |
+| PR | #311 |
 | Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
 ## 📋 Program Info
 
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
-**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: (new PR pending)
+**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: #311
 
 ---
 
@@ -61,6 +61,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 316 — 2026-05-14T19:31:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/25880729267)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `str_findall` benchmark pair: `strFindall` + `strFindFirst` + `strFindallCount` on 10k-element string Series
+- **Metric**: 661 (previous best: 660, delta: +1) · **Commit**: 0dd114e
+- **Notes**: `str_findall.ts` exports were uncovered; Python uses `str.findall`, `str.extract`, `str.count` as equivalents.
 
 ### Iteration 315 — 2026-05-14T05:59:24Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25844508188)
 
