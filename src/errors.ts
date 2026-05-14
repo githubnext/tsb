@@ -9,6 +9,25 @@
  */
 
 // ---------------------------------------------------------------------------
+// Base error helpers (must be declared first so derived classes can extend them)
+// ---------------------------------------------------------------------------
+
+/** TypeError-compatible base for value-related errors (mirrors Python's ValueError). */
+export class ValueError extends TypeError {
+  override readonly name = "ValueError";
+}
+
+/** Error-compatible base for key-related errors (mirrors Python's KeyError). */
+export class KeyError extends Error {
+  override readonly name = "KeyError";
+}
+
+/** Error-compatible base for index-related errors (mirrors Python's IndexError). */
+export class IndexError extends RangeError {
+  override readonly name = "IndexError";
+}
+
+// ---------------------------------------------------------------------------
 // Error classes
 // ---------------------------------------------------------------------------
 
@@ -200,27 +219,6 @@ export class AccessorRegistrationWarning extends Error {
 /** Raised when a value and label have mismatched types in a Categorical. */
 export class ValueLabelTypeMismatch extends Error {
   override readonly name = "ValueLabelTypeMismatch";
-}
-
-// ---------------------------------------------------------------------------
-// Base error helpers used above (JavaScript does not have ValueError / KeyError
-// / IndexError natively, so we define lightweight stand-ins here that still
-// inherit from Error and therefore work with `instanceof Error`).
-// ---------------------------------------------------------------------------
-
-/** TypeError-compatible base for value-related errors (mirrors Python's ValueError). */
-export class ValueError extends TypeError {
-  override readonly name = "ValueError";
-}
-
-/** Error-compatible base for key-related errors (mirrors Python's KeyError). */
-export class KeyError extends Error {
-  override readonly name = "KeyError";
-}
-
-/** Error-compatible base for index-related errors (mirrors Python's IndexError). */
-export class IndexError extends RangeError {
-  override readonly name = "IndexError";
 }
 
 // ---------------------------------------------------------------------------

@@ -38,7 +38,7 @@ import {
   ValueError,
   ValueLabelTypeMismatch,
   errors,
-} from "../../src/index.ts";
+} from "../src/index.ts";
 
 // ---------------------------------------------------------------------------
 // Helper: assert that a class is throwable and catchable
@@ -47,7 +47,7 @@ function assertThrowable<T extends Error>(
   Cls: new (...args: never[]) => T,
   args: ConstructorParameters<typeof Cls>,
   expectedMessage?: string,
-): T {
+): void {
   const instance = new Cls(...(args as ConstructorParameters<typeof Cls>));
   expect(instance).toBeInstanceOf(Error);
   expect(instance).toBeInstanceOf(Cls);
@@ -62,7 +62,6 @@ function assertThrowable<T extends Error>(
     caught = e;
   }
   expect(caught).toBeInstanceOf(Cls);
-  return instance;
 }
 
 // ---------------------------------------------------------------------------
@@ -323,8 +322,10 @@ describe("errors namespace", () => {
   });
 
   test("all namespace entries are constructors", () => {
-    for (const [key, Cls] of Object.entries(errors)) {
-      const instance = new Cls(key);
+    const errorKeys = Object.keys(errors) as Array<keyof typeof errors>;
+    for (const key of errorKeys) {
+      const Cls = errors[key];
+      const instance = new Cls(key as never);
       expect(instance).toBeInstanceOf(Error);
     }
   });
