@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-13T19:27:00Z |
-| Iteration Count | 312 |
-| Best Metric | 146 |
+| Last Run | 2026-05-14T07:51:38Z |
+| Iteration Count | 313 |
+| Best Metric | 147 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -21,15 +21,15 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
 - ✅ Core/Stats/IO/Merge/Reshape/Window/GroupBy done (1–295)
-- ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312)
-- Next: pd.errors, pd.io.html read_html(), more DataFrame methods
+- ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313)
+- Next: pd.io.html read_html(), more DataFrame methods
 
 ---
 
@@ -52,11 +52,17 @@
 
 ## 🔭 Future Directions
 
-- `pd.errors` module, `pd.io.html` read_html(), `DataFrame.xs()` improvements
+- `pd.io.html` read_html(), `DataFrame.xs()` improvements
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 313 — 2026-05-14 07:51 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/25848596047)
+
+- **Status**: pending-ci | **Metric**: 147 (+1) | **Commit**: 7ba560d
+- **Change**: Add `pd.errors` module — full pandas exception/warning hierarchy (31 classes)
+- **Notes**: `src/errors.ts`. ValueError/KeyError/IndexError bases + ParserError, EmptyDataError, MergeError, OutOfBoundsDatetime, IntCastingNaNError, ChainedAssignmentError, etc. `errors` namespace export. 50+ tests, playground page.
 
 ### Iter 312 — 2026-05-13 19:27 UTC — [Run](https://github.com/githubnext/tsessebe/actions/runs/25821429313)
 
