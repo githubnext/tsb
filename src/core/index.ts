@@ -134,3 +134,20 @@ export {
 } from "./api_types.ts";
 export { astypeSeries, astype, castScalar } from "./astype.ts";
 export type { AstypeOptions, DataFrameAstypeOptions } from "./astype.ts";
+
+export {
+  ExtensionDtype,
+  ExtensionArray,
+  registerExtensionDtype,
+  constructExtensionDtypeFromString,
+  registerSeriesAccessor,
+  registerDataFrameAccessor,
+  registerIndexAccessor,
+  getRegisteredAccessors,
+  apiExtensions,
+} from "./extensions.ts";
+export type {
+  ApiExtensions,
+  ExtensionDtypeConstructor,
+  ExtensionArrayConstructor,
+} from "./extensions.ts";

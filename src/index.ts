@@ -715,3 +715,29 @@ export type {
 // pd.api namespace
 export { api, apiTypes } from "./core/pd_api.ts";
 export type { Api, ApiTypes } from "./core/pd_api.ts";
+// pd.api.extensions
+export {
+  ExtensionDtype,
+  ExtensionArray,
+  registerExtensionDtype,
+  constructExtensionDtypeFromString,
+  registerSeriesAccessor,
+  registerDataFrameAccessor,
+  registerIndexAccessor,
+  getRegisteredAccessors,
+  apiExtensions,
+} from "./core/extensions.ts";
+export type {
+  ApiExtensions,
+  ExtensionDtypeConstructor,
+  ExtensionArrayConstructor,
+} from "./core/extensions.ts";
+
+export { pdArray, PandasArray } from "./core/pd_array.ts";
+export {
+  toMarkdown,
+  seriesToMarkdown,
+  toLaTeX,
+  seriesToLaTeX,
+} from "./stats/format_table.ts";
+export type { ToMarkdownOptions, ToLaTeXOptions } from "./stats/format_table.ts";
