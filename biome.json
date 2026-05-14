@@ -13,6 +13,7 @@
       "*.d.ts",
       "playground/**/*.js",
       "playground/serve.ts",
+      "golden/snapshots/**",
       "benchmarks/**",
       ".autoloop/**"
     ]

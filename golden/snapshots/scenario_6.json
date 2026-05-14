@@ -1,0 +1,648 @@
+{
+  "numpyVersion": "2.1.3",
+  "pandasVersion": "2.2.3",
+  "scenario": "scenario_6",
+  "snapshotVersion": 1,
+  "steps": [
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "raw"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T10:30:00 ERROR [auth-service] Failed login for user=john@example.com ip=192.168.1.1 attempts=3"
+        ],
+        [
+          "2024-01-15T10:31:00 WARN [api-gateway] Rate limit approaching for user=jane@corp.io ip=10.0.0.5 attempts=1"
+        ],
+        [
+          "2024-01-15T10:32:00 ERROR [auth-service] Failed login for user=bob@test.org ip=192.168.1.1 attempts=5"
+        ],
+        [
+          "2024-01-15T10:33:00 INFO [data-pipeline] Batch processed records=15000 duration=45.2s status=ok"
+        ],
+        [
+          "2024-01-15T10:34:00 ERROR [api-gateway] Timeout connecting to upstream service=inventory latency=30.1s"
+        ],
+        [
+          "2024-01-15T10:35:00 WARN [auth-service] Account locked for user=bob@test.org ip=192.168.1.1 attempts=5"
+        ]
+      ],
+      "dtypes": {
+        "raw": "string"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify raw log DataFrame",
+      "shape": [
+        6,
+        1
+      ],
+      "step": 1
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "raw",
+          "timestamp",
+          "level",
+          "service",
+          "user",
+          "ip"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T10:30:00 ERROR [auth-service] Failed login for user=john@example.com ip=192.168.1.1 attempts=3",
+          "2024-01-15T10:30:00",
+          "ERROR",
+          "auth-service",
+          "john@example.com",
+          "192.168.1.1"
+        ],
+        [
+          "2024-01-15T10:31:00 WARN [api-gateway] Rate limit approaching for user=jane@corp.io ip=10.0.0.5 attempts=1",
+          "2024-01-15T10:31:00",
+          "WARN",
+          "api-gateway",
+          "jane@corp.io",
+          "10.0.0.5"
+        ],
+        [
+          "2024-01-15T10:32:00 ERROR [auth-service] Failed login for user=bob@test.org ip=192.168.1.1 attempts=5",
+          "2024-01-15T10:32:00",
+          "ERROR",
+          "auth-service",
+          "bob@test.org",
+          "192.168.1.1"
+        ],
+        [
+          "2024-01-15T10:33:00 INFO [data-pipeline] Batch processed records=15000 duration=45.2s status=ok",
+          "2024-01-15T10:33:00",
+          "INFO",
+          "data-pipeline",
+          {
+            "kind": "NaN"
+          },
+          {
+            "kind": "NaN"
+          }
+        ],
+        [
+          "2024-01-15T10:34:00 ERROR [api-gateway] Timeout connecting to upstream service=inventory latency=30.1s",
+          "2024-01-15T10:34:00",
+          "ERROR",
+          "api-gateway",
+          {
+            "kind": "NaN"
+          },
+          {
+            "kind": "NaN"
+          }
+        ],
+        [
+          "2024-01-15T10:35:00 WARN [auth-service] Account locked for user=bob@test.org ip=192.168.1.1 attempts=5",
+          "2024-01-15T10:35:00",
+          "WARN",
+          "auth-service",
+          "bob@test.org",
+          "192.168.1.1"
+        ]
+      ],
+      "dtypes": {
+        "ip": "string",
+        "level": "string",
+        "raw": "string",
+        "service": "string",
+        "timestamp": "datetime",
+        "user": "string"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify regex extraction into separate columns",
+      "shape": [
+        6,
+        6
+      ],
+      "step": 2
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "raw",
+          "timestamp",
+          "level",
+          "service",
+          "user",
+          "ip",
+          "domain",
+          "has_user"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T10:30:00 ERROR [auth-service] Failed login for user=john@example.com ip=192.168.1.1 attempts=3",
+          "2024-01-15T10:30:00",
+          "ERROR",
+          "auth-service",
+          "john@example.com",
+          "192.168.1.1",
+          "example.com",
+          true
+        ],
+        [
+          "2024-01-15T10:31:00 WARN [api-gateway] Rate limit approaching for user=jane@corp.io ip=10.0.0.5 attempts=1",
+          "2024-01-15T10:31:00",
+          "WARN",
+          "api-gateway",
+          "jane@corp.io",
+          "10.0.0.5",
+          "corp.io",
+          true
+        ],
+        [
+          "2024-01-15T10:32:00 ERROR [auth-service] Failed login for user=bob@test.org ip=192.168.1.1 attempts=5",
+          "2024-01-15T10:32:00",
+          "ERROR",
+          "auth-service",
+          "bob@test.org",
+          "192.168.1.1",
+          "test.org",
+          true
+        ],
+        [
+          "2024-01-15T10:33:00 INFO [data-pipeline] Batch processed records=15000 duration=45.2s status=ok",
+          "2024-01-15T10:33:00",
+          "INFO",
+          "data-pipeline",
+          {
+            "kind": "NaN"
+          },
+          {
+            "kind": "NaN"
+          },
+          {
+            "kind": "NaN"
+          },
+          false
+        ],
+        [
+          "2024-01-15T10:34:00 ERROR [api-gateway] Timeout connecting to upstream service=inventory latency=30.1s",
+          "2024-01-15T10:34:00",
+          "ERROR",
+          "api-gateway",
+          {
+            "kind": "NaN"
+          },
+          {
+            "kind": "NaN"
+          },
+          {
+            "kind": "NaN"
+          },
+          false
+        ],
+        [
+          "2024-01-15T10:35:00 WARN [auth-service] Account locked for user=bob@test.org ip=192.168.1.1 attempts=5",
+          "2024-01-15T10:35:00",
+          "WARN",
+          "auth-service",
+          "bob@test.org",
+          "192.168.1.1",
+          "test.org",
+          true
+        ]
+      ],
+      "dtypes": {
+        "domain": "string",
+        "has_user": "boolean",
+        "ip": "string",
+        "level": "string",
+        "raw": "string",
+        "service": "string",
+        "timestamp": "datetime",
+        "user": "string"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify string split + null detection",
+      "shape": [
+        6,
+        8
+      ],
+      "step": 3
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": "level",
+        "values": [
+          "ERROR",
+          "INFO",
+          "WARN"
+        ]
+      },
+      "data": [
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          2,
+          0,
+          1
+        ],
+        [
+          0,
+          1,
+          0
+        ]
+      ],
+      "dtypes": {
+        "ERROR": "integer",
+        "INFO": "integer",
+        "WARN": "integer"
+      },
+      "index": {
+        "dtype": "string",
+        "kind": "index",
+        "name": "service",
+        "values": [
+          "api-gateway",
+          "auth-service",
+          "data-pipeline"
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify value_counts + unstack produces service x level matrix",
+      "shape": [
+        3,
+        3
+      ],
+      "step": 4
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "item",
+          "tags",
+          "price"
+        ]
+      },
+      "data": [
+        [
+          "Widget",
+          "sale",
+          29.99
+        ],
+        [
+          "Widget",
+          "featured",
+          29.99
+        ],
+        [
+          "Widget",
+          "new",
+          29.99
+        ],
+        [
+          "Gadget",
+          "clearance",
+          14.99
+        ],
+        [
+          "Gadget",
+          "sale",
+          14.99
+        ],
+        [
+          "Doohickey",
+          "new",
+          49.99
+        ]
+      ],
+      "dtypes": {
+        "item": "string",
+        "price": "float",
+        "tags": "string"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          0,
+          0,
+          1,
+          1,
+          2
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify explode duplicates rows per tag",
+      "shape": [
+        6,
+        3
+      ],
+      "step": 5
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "num_items",
+          "avg_price",
+          "items"
+        ]
+      },
+      "data": [
+        [
+          1,
+          14.99,
+          [
+            "Gadget"
+          ]
+        ],
+        [
+          1,
+          29.99,
+          [
+            "Widget"
+          ]
+        ],
+        [
+          2,
+          39.99,
+          [
+            "Doohickey",
+            "Widget"
+          ]
+        ],
+        [
+          2,
+          22.49,
+          [
+            "Gadget",
+            "Widget"
+          ]
+        ]
+      ],
+      "dtypes": {
+        "avg_price": "float",
+        "items": "string",
+        "num_items": "integer"
+      },
+      "index": {
+        "dtype": "string",
+        "kind": "index",
+        "name": "tags",
+        "values": [
+          "clearance",
+          "featured",
+          "new",
+          "sale"
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify grouped stats including list aggregation",
+      "shape": [
+        4,
+        3
+      ],
+      "step": 6
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "raw",
+          "timestamp",
+          "level",
+          "service",
+          "user",
+          "ip",
+          "domain",
+          "has_user"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T10:30:00 ERROR [auth-service] Failed login for user=john@example.com ip=192.168.1.1 attempts=3",
+          "2024-01-15T10:30:00",
+          "ERROR",
+          "auth-service",
+          "john@example.com",
+          "192.168.1.1",
+          "example.com",
+          true
+        ],
+        [
+          "2024-01-15T10:32:00 ERROR [auth-service] Failed login for user=bob@test.org ip=192.168.1.1 attempts=5",
+          "2024-01-15T10:32:00",
+          "ERROR",
+          "auth-service",
+          "bob@test.org",
+          "192.168.1.1",
+          "test.org",
+          true
+        ]
+      ],
+      "dtypes": {
+        "domain": "string",
+        "has_user": "boolean",
+        "ip": "string",
+        "level": "string",
+        "raw": "string",
+        "service": "string",
+        "timestamp": "datetime",
+        "user": "string"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          2
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify chained boolean filter",
+      "shape": [
+        2,
+        8
+      ],
+      "step": 7
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "raw",
+          "timestamp",
+          "level",
+          "service",
+          "user",
+          "ip",
+          "domain",
+          "has_user"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T10:30:00 ERROR [auth-service] Failed login for user=john@example.com ip=192.168.1.1 attempts=3",
+          "2024-01-15T10:30:00",
+          "ERROR",
+          "auth-service",
+          "john@example.com",
+          "192.168.1.1",
+          "example.com",
+          true
+        ],
+        [
+          "2024-01-15T10:31:00 WARN [api-gateway] Rate limit approaching for user=jane@corp.io ip=10.0.0.5 attempts=1",
+          "2024-01-15T10:31:00",
+          "WARN",
+          "api-gateway",
+          "jane@corp.io",
+          "10.0.0.5",
+          "corp.io",
+          true
+        ],
+        [
+          "2024-01-15T10:32:00 ERROR [auth-service] Failed login for user=bob@test.org ip=192.168.1.1 attempts=5",
+          "2024-01-15T10:32:00",
+          "ERROR",
+          "auth-service",
+          "bob@test.org",
+          "192.168.1.1",
+          "test.org",
+          true
+        ],
+        [
+          "2024-01-15T10:34:00 ERROR [api-gateway] Timeout connecting to upstream service=inventory latency=30.1s",
+          "2024-01-15T10:34:00",
+          "ERROR",
+          "api-gateway",
+          {
+            "kind": "NaN"
+          },
+          {
+            "kind": "NaN"
+          },
+          {
+            "kind": "NaN"
+          },
+          false
+        ],
+        [
+          "2024-01-15T10:35:00 WARN [auth-service] Account locked for user=bob@test.org ip=192.168.1.1 attempts=5",
+          "2024-01-15T10:35:00",
+          "WARN",
+          "auth-service",
+          "bob@test.org",
+          "192.168.1.1",
+          "test.org",
+          true
+        ]
+      ],
+      "dtypes": {
+        "domain": "string",
+        "has_user": "boolean",
+        "ip": "string",
+        "level": "string",
+        "raw": "string",
+        "service": "string",
+        "timestamp": "datetime",
+        "user": "string"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          4,
+          5
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify query-based filtering matches equivalent boolean indexing",
+      "shape": [
+        5,
+        8
+      ],
+      "step": 8
+    }
+  ],
+  "title": "String accessor + explode + complex filtering"
+}

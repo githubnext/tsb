@@ -1,0 +1,817 @@
+{
+  "numpyVersion": "2.1.3",
+  "pandasVersion": "2.2.3",
+  "scenario": "scenario_1",
+  "snapshotVersion": 1,
+  "steps": [
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "date",
+          "store",
+          "product",
+          "quantity",
+          "unit_price"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T00:00:00",
+          "NYC",
+          "A",
+          10,
+          9.99
+        ],
+        [
+          "2024-01-15T00:00:00",
+          "LA",
+          "A",
+          15,
+          9.99
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "NYC",
+          "B",
+          8,
+          24.5
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "LA",
+          "B",
+          12,
+          24.5
+        ],
+        [
+          "2024-03-10T00:00:00",
+          "NYC",
+          "A",
+          20,
+          9.99
+        ],
+        [
+          "2024-03-10T00:00:00",
+          "LA",
+          "B",
+          5,
+          24.5
+        ],
+        [
+          "2024-01-15T00:00:00",
+          "NYC",
+          "B",
+          3,
+          24.5
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "NYC",
+          "A",
+          7,
+          9.99
+        ]
+      ],
+      "dtypes": {
+        "date": "datetime",
+        "product": "string",
+        "quantity": "integer",
+        "store": "string",
+        "unit_price": "float"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify sales DataFrame",
+      "shape": [
+        8,
+        5
+      ],
+      "step": 1
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "date",
+          "store",
+          "product",
+          "quantity",
+          "unit_price",
+          "revenue"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T00:00:00",
+          "NYC",
+          "A",
+          10,
+          9.99,
+          99.9
+        ],
+        [
+          "2024-01-15T00:00:00",
+          "LA",
+          "A",
+          15,
+          9.99,
+          149.85
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "NYC",
+          "B",
+          8,
+          24.5,
+          196.0
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "LA",
+          "B",
+          12,
+          24.5,
+          294.0
+        ],
+        [
+          "2024-03-10T00:00:00",
+          "NYC",
+          "A",
+          20,
+          9.99,
+          199.8
+        ],
+        [
+          "2024-03-10T00:00:00",
+          "LA",
+          "B",
+          5,
+          24.5,
+          122.5
+        ],
+        [
+          "2024-01-15T00:00:00",
+          "NYC",
+          "B",
+          3,
+          24.5,
+          73.5
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "NYC",
+          "A",
+          7,
+          9.99,
+          69.93
+        ]
+      ],
+      "dtypes": {
+        "date": "datetime",
+        "product": "string",
+        "quantity": "integer",
+        "revenue": "float",
+        "store": "string",
+        "unit_price": "float"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify revenue column added",
+      "shape": [
+        8,
+        6
+      ],
+      "step": 2
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "date",
+          "store",
+          "product",
+          "quantity",
+          "unit_price",
+          "revenue",
+          "stock",
+          "reorder_point"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T00:00:00",
+          "NYC",
+          "A",
+          10,
+          9.99,
+          99.9,
+          100,
+          20
+        ],
+        [
+          "2024-01-15T00:00:00",
+          "LA",
+          "A",
+          15,
+          9.99,
+          149.85,
+          80,
+          15
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "NYC",
+          "B",
+          8,
+          24.5,
+          196.0,
+          50,
+          10
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "LA",
+          "B",
+          12,
+          24.5,
+          294.0,
+          60,
+          12
+        ],
+        [
+          "2024-03-10T00:00:00",
+          "NYC",
+          "A",
+          20,
+          9.99,
+          199.8,
+          100,
+          20
+        ],
+        [
+          "2024-03-10T00:00:00",
+          "LA",
+          "B",
+          5,
+          24.5,
+          122.5,
+          60,
+          12
+        ],
+        [
+          "2024-01-15T00:00:00",
+          "NYC",
+          "B",
+          3,
+          24.5,
+          73.5,
+          50,
+          10
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "NYC",
+          "A",
+          7,
+          9.99,
+          69.93,
+          100,
+          20
+        ]
+      ],
+      "dtypes": {
+        "date": "datetime",
+        "product": "string",
+        "quantity": "integer",
+        "reorder_point": "integer",
+        "revenue": "float",
+        "stock": "integer",
+        "store": "string",
+        "unit_price": "float"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify left merge result",
+      "shape": [
+        8,
+        8
+      ],
+      "step": 3
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "date",
+          "store",
+          "product",
+          "quantity",
+          "unit_price",
+          "revenue",
+          "stock",
+          "reorder_point",
+          "returned_qty",
+          "net_quantity",
+          "net_revenue"
+        ]
+      },
+      "data": [
+        [
+          "2024-01-15T00:00:00",
+          "NYC",
+          "A",
+          10,
+          9.99,
+          99.9,
+          100,
+          20,
+          0.0,
+          10.0,
+          99.9
+        ],
+        [
+          "2024-01-15T00:00:00",
+          "LA",
+          "A",
+          15,
+          9.99,
+          149.85,
+          80,
+          15,
+          0.0,
+          15.0,
+          149.85
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "NYC",
+          "B",
+          8,
+          24.5,
+          196.0,
+          50,
+          10,
+          0.0,
+          8.0,
+          196.0
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "LA",
+          "B",
+          12,
+          24.5,
+          294.0,
+          60,
+          12,
+          0.0,
+          12.0,
+          294.0
+        ],
+        [
+          "2024-03-10T00:00:00",
+          "NYC",
+          "A",
+          20,
+          9.99,
+          199.8,
+          100,
+          20,
+          0.0,
+          20.0,
+          199.8
+        ],
+        [
+          "2024-03-10T00:00:00",
+          "LA",
+          "B",
+          5,
+          24.5,
+          122.5,
+          60,
+          12,
+          0.0,
+          5.0,
+          122.5
+        ],
+        [
+          "2024-01-15T00:00:00",
+          "NYC",
+          "B",
+          3,
+          24.5,
+          73.5,
+          50,
+          10,
+          0.0,
+          3.0,
+          73.5
+        ],
+        [
+          "2024-02-20T00:00:00",
+          "NYC",
+          "A",
+          7,
+          9.99,
+          69.93,
+          100,
+          20,
+          0.0,
+          7.0,
+          69.93
+        ]
+      ],
+      "dtypes": {
+        "date": "datetime",
+        "net_quantity": "float",
+        "net_revenue": "float",
+        "product": "string",
+        "quantity": "integer",
+        "reorder_point": "integer",
+        "returned_qty": "float",
+        "revenue": "float",
+        "stock": "integer",
+        "store": "string",
+        "unit_price": "float"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify second merge + computed columns",
+      "shape": [
+        8,
+        11
+      ],
+      "step": 4
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "store",
+          "product",
+          "total_qty",
+          "total_revenue",
+          "avg_price",
+          "num_transactions",
+          "max_single_sale",
+          "stock_remaining"
+        ]
+      },
+      "data": [
+        [
+          "LA",
+          "A",
+          15.0,
+          149.85,
+          9.99,
+          1,
+          15,
+          80
+        ],
+        [
+          "LA",
+          "B",
+          17.0,
+          416.5,
+          24.5,
+          2,
+          12,
+          60
+        ],
+        [
+          "NYC",
+          "A",
+          37.0,
+          369.63,
+          9.99,
+          3,
+          20,
+          100
+        ],
+        [
+          "NYC",
+          "B",
+          11.0,
+          269.5,
+          24.5,
+          2,
+          8,
+          50
+        ]
+      ],
+      "dtypes": {
+        "avg_price": "float",
+        "max_single_sale": "integer",
+        "num_transactions": "integer",
+        "product": "string",
+        "stock_remaining": "integer",
+        "store": "string",
+        "total_qty": "float",
+        "total_revenue": "float"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify grouped aggregation",
+      "shape": [
+        4,
+        8
+      ],
+      "step": 5
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "store",
+          "product",
+          "total_qty",
+          "total_revenue",
+          "avg_price",
+          "num_transactions",
+          "max_single_sale",
+          "stock_remaining",
+          "revenue_per_unit",
+          "stock_coverage_days",
+          "needs_reorder"
+        ]
+      },
+      "data": [
+        [
+          "LA",
+          "A",
+          15.0,
+          149.85,
+          9.99,
+          1,
+          15,
+          80,
+          9.99,
+          480.0,
+          false
+        ],
+        [
+          "LA",
+          "B",
+          17.0,
+          416.5,
+          24.5,
+          2,
+          12,
+          60,
+          24.5,
+          317.6,
+          true
+        ],
+        [
+          "NYC",
+          "A",
+          37.0,
+          369.63,
+          9.99,
+          3,
+          20,
+          100,
+          9.99,
+          243.2,
+          false
+        ],
+        [
+          "NYC",
+          "B",
+          11.0,
+          269.5,
+          24.5,
+          2,
+          8,
+          50,
+          24.5,
+          409.1,
+          true
+        ]
+      ],
+      "dtypes": {
+        "avg_price": "float",
+        "max_single_sale": "integer",
+        "needs_reorder": "boolean",
+        "num_transactions": "integer",
+        "product": "string",
+        "revenue_per_unit": "float",
+        "stock_coverage_days": "float",
+        "stock_remaining": "integer",
+        "store": "string",
+        "total_qty": "float",
+        "total_revenue": "float"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify derived metrics",
+      "shape": [
+        4,
+        11
+      ],
+      "step": 6
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "store",
+          "product",
+          "total_qty",
+          "total_revenue",
+          "avg_price",
+          "num_transactions",
+          "max_single_sale",
+          "stock_remaining",
+          "revenue_per_unit",
+          "stock_coverage_days",
+          "needs_reorder"
+        ]
+      },
+      "data": [
+        [
+          "LA",
+          "B",
+          17.0,
+          416.5,
+          24.5,
+          2,
+          12,
+          60,
+          24.5,
+          317.6,
+          true
+        ],
+        [
+          "LA",
+          "A",
+          15.0,
+          149.85,
+          9.99,
+          1,
+          15,
+          80,
+          9.99,
+          480.0,
+          false
+        ],
+        [
+          "NYC",
+          "A",
+          37.0,
+          369.63,
+          9.99,
+          3,
+          20,
+          100,
+          9.99,
+          243.2,
+          false
+        ],
+        [
+          "NYC",
+          "B",
+          11.0,
+          269.5,
+          24.5,
+          2,
+          8,
+          50,
+          24.5,
+          409.1,
+          true
+        ]
+      ],
+      "dtypes": {
+        "avg_price": "float",
+        "max_single_sale": "integer",
+        "needs_reorder": "boolean",
+        "num_transactions": "integer",
+        "product": "string",
+        "revenue_per_unit": "float",
+        "stock_coverage_days": "float",
+        "stock_remaining": "integer",
+        "store": "string",
+        "total_qty": "float",
+        "total_revenue": "float"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          1,
+          0,
+          2,
+          3
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify final sorted output",
+      "shape": [
+        4,
+        11
+      ],
+      "step": 7
+    }
+  ],
+  "title": "Multi-source merge with aggregation pipeline"
+}
