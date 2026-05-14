@@ -12,7 +12,7 @@ TSB is named after the [tsessebe](https://en.wikipedia.org/wiki/Common_tsessebe)
 
 ## Project conventions
 
-- **Package name:** `tsb` — all imports and usage use `tsb`, not `tsessebe`. `import { DataFrame } from 'tsb'`
+- **Package name:** `tsb`, e.g. `import { DataFrame } from 'tsb'`
 - **Runtime & tooling:** [Bun](https://bun.sh) for everything — runtime, bundler, test runner, package manager
 - **Language:** TypeScript in strictest mode — no `any`, no `as` casts, no `@ts-ignore`, no escape hatches
 - **Dependencies:** Zero for core library. External deps only where absolutely required for non-core tooling (e.g. Playwright, WASM toolchains).
