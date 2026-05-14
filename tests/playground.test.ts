@@ -66,6 +66,11 @@ describe("playground page conformance", () => {
     }
   });
 
+  it("links the benchmarks page from the landing page", () => {
+    const html = read("index.html");
+    expect(html).toContain('href="benchmarks.html"');
+  });
+
   for (const file of files) {
     describe(file, () => {
       const html = read(file);
