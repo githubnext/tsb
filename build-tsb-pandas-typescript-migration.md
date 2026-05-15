@@ -8,28 +8,28 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-14T07:51:38Z |
-| Iteration Count | 313 |
-| Best Metric | 147 |
+| Last Run | 2026-05-15T01:31:47Z |
+| Iteration Count | 314 |
+| Best Metric | 148 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | #302 |
+| PR | — |
 | Issue | #1 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
 - ✅ Core/Stats/IO/Merge/Reshape/Window/GroupBy done (1–295)
-- ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313)
-- Next: pd.io.html read_html(), more DataFrame methods
+- ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314)
+- Next: more DataFrame methods, DataFrame.xs(), additional io utilities
 
 ---
 
@@ -53,10 +53,17 @@
 ## 🔭 Future Directions
 
 - `pd.io.html` read_html(), `DataFrame.xs()` improvements
+- ✅ readHtml done (314) — zero-dep HTML table parser, full options, property tests
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 314 — 2026-05-15 01:31 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/25895292191)
+
+- **Status**: pending-ci | **Metric**: 148 (+1) | **Commit**: 95deeae
+- **Change**: Add `readHtml()` — pd.io.html port; zero-dep mini HTML parser returning DataFrames
+- **Notes**: `src/io/read_html.ts`. Options: header, indexCol, match, naValues, converters, thousands, decimal, skipRows, nrows, skipBlankLines. Entity decoding. Nested table support. 30+ tests + property tests. Playground page.
 
 ### Iter 313 — 2026-05-14 07:51 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/25848596047)
 
