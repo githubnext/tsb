@@ -174,9 +174,11 @@ describe("readHtml – filtering", () => {
       <tr><td></td></tr>
       <tr><td>2</td></tr>
     </table>`;
-    // With skipBlankLines=true (default) and naValues, the blank row is still
-    // present as null. skipBlankLines only drops rows where ALL cells are
-    // whitespace-only.
+    const [dfDefault] = readHtml(html);
+    expect(dfDefault!.shape[0]).toBe(2); // 1, 2
+    expect(dfDefault!.col("v").toArray()).toEqual([1, 2]);
+
+    // With skipBlankLines=false, the blank row is preserved and coerced to null.
     const [df] = readHtml(html, { skipBlankLines: false });
     expect(df!.shape[0]).toBe(3); // 1, null, 2
   });
