@@ -10,26 +10,26 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-14T19:31:43Z |
-| Iteration Count | 316 |
-| Best Metric | 661 |
+| Last Run | 2026-05-15T19:26:27Z |
+| Iteration Count | 317 |
+| Best Metric | 662 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #311 |
+| PR | — |
 | Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
 ## 📋 Program Info
 
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
-**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: #311
+**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: (new PR pending)
 
 ---
 
@@ -45,6 +45,7 @@
 - **groupby AggName**: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only.
 - **merge_asof**: `mergeAsof(left, right, { on, direction })` — DFs must be sorted.
 - **corrWith**: `corrWith(df, seriesOther)` — DF as first arg, returns Series per column.
+- **bun in sandbox**: `bun` may not be available in the sandbox — TS validation is skipped locally; CI gate on GitHub Actions validates TS benchmarks.
 
 ## 🚧 Foreclosed Avenues
 
@@ -61,6 +62,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 317 — 2026-05-15T19:26:27Z — [Run](https://github.com/githubnext/tsb/actions/runs/25936998176)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `pipe` benchmark pair (`pipeSeries`/`dataFramePipe` on 100k-row Series+DataFrame); also fixed 2 pre-existing broken Python benchmarks (`bench_str_extract_all.py`, `bench_str_extract_groups.py` had escaped docstring quotes)
+- **Metric**: 662 (previous best: 661, delta: +1) · **Commit**: f62eca8
+- **Notes**: `pipe.ts` exports were unbenchmarked; Python equivalents use `Series.pipe` and `DataFrame.pipe`. bun not in sandbox PATH so TS validity check skipped locally; CI gate validates.
 
 ### Iteration 316 — 2026-05-14T19:31:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/25880729267)
 
