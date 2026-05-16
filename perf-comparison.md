@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-15T19:26:27Z |
-| Iteration Count | 317 |
-| Best Metric | 662 |
+| Last Run | 2026-05-16T13:24:01Z |
+| Iteration Count | 318 |
+| Best Metric | 663 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -57,11 +57,19 @@
 
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
-- `timedelta_range`, `datetime_tz` (still uncovered)
+- `datetime_tz` variants still uncovered
+- `notna_boolean`, `add_sub_mul_div` (named series arithmetic) still uncovered
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 318 — 2026-05-16T13:24:01Z — [Run](https://github.com/githubnext/tsb/actions/runs/25963034091)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `timedelta_range` and `combine` benchmark pairs (`timedelta_range` with 3 usage patterns, `combineSeries`/`combineDataFrame` on 10k-row data)
+- **Metric**: 663 (previous best: 662, delta: +1) · **Commit**: 1ac9ac3
+- **Notes**: Both functions were exported from `src/index.ts` but had no dedicated benchmarks. bun not in sandbox PATH; CI gate on GitHub Actions validates.
 
 ### Iteration 317 — 2026-05-15T19:26:27Z — [Run](https://github.com/githubnext/tsb/actions/runs/25936998176)
 
