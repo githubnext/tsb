@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-17T01:31:52Z |
-| Iteration Count | 48 |
+| Last Run | 2026-05-17T19:22:18Z |
+| Iteration Count | 49 |
 | Best Metric | 20.663 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,10 +17,11 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci |
 
 ## 🧬 Population (summary)
 
+- **c049** (gen 49, pending-ci): Merge main again (8 more commits) to fix noMisplacedAssertion lint; c047 _svCache intact.
 - **c048** (gen 48, pending-ci): Merge main to fix pre-existing lint CI failures; c047 _svCache intact.
 - **c047** (gen 47, pending-ci): Per-instance `_svCache` 4-slot caches fully-constructed Series; calls 2–50 are O(1).
 - **c044** (gen 44, accepted): Cache sorted AoS+nanBuf. ✅ merged PR#303.
@@ -49,6 +50,12 @@
 - Island 4 hybrid: native sort n<1k, radix n≥1k.
 
 ## 📊 Iteration History
+
+### Iteration 49 — 2026-05-17 19:22 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26000315229)
+
+- **Status**: ⏳ Pending CI · CI fix attempt 2 for c047
+- **Change**: Merged origin/main (8 more commits) to fix `noMisplacedAssertion` lint error; biome.json now sets it to `"warn"`. c047 _svCache intact.
+- **Metric**: pending CI
 
 ### Iteration 48 — 2026-05-17 01:31 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/25978048477)
 
