@@ -449,6 +449,8 @@ Each run executes **one iteration for the single selected program**:
        # True divergence: branch has unique commits AND main has moved on.
        git checkout -B autoloop/{program-name} origin/autoloop/{program-name}
        git rebase origin/main
+       # If rebase conflicts occur, resolve them, run `git rebase --continue`,
+       # and repeat until the rebase completes.
        git push --force-with-lease origin autoloop/{program-name}
      else
        # Already at main (ahead=0, behind=0) or only ahead of main (ahead>0,
