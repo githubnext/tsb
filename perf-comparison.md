@@ -10,19 +10,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-17T07:46:03Z |
-| Iteration Count | 319 |
-| Best Metric | 664 |
+| Last Run | 2026-05-18T01:34:10Z |
+| Iteration Count | 320 |
+| Best Metric | 665 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | — |
+| PR | #324 |
 | Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -64,6 +64,13 @@
 
 ## 📊 Iteration History
 
+### Iteration 320 — 2026-05-18T01:34:10Z — [Run](https://github.com/githubnext/tsb/actions/runs/26008813008)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `toDictOriented` / `fromDictOriented` benchmark pair — 10k-row DataFrame, all orient variants (list, records, split, index, tight) plus `from_dict` with columns and index orients
+- **Metric**: 665 (previous best: 664, delta: +1) · **Commit**: 7851cfb
+- **Notes**: `to_from_dict.ts` exports were previously unbenchmarked. Python uses `df.to_dict(orient=...)` and `pd.DataFrame.from_dict(...)` for matching coverage.
+
 ### Iteration 319 — 2026-05-17T07:46:03Z — [Run](https://github.com/githubnext/tsb/actions/runs/25984977778)
 
 - **Status**: ✅ Accepted
@@ -85,30 +92,4 @@
 - **Metric**: 662 (previous best: 661, delta: +1) · **Commit**: f62eca8
 - **Notes**: `pipe.ts` exports were unbenchmarked; Python equivalents use `Series.pipe` and `DataFrame.pipe`. bun not in sandbox PATH so TS validity check skipped locally; CI gate validates.
 
-### Iteration 316 — 2026-05-14T19:31:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/25880729267)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `str_findall` benchmark pair: `strFindall` + `strFindFirst` + `strFindallCount` on 10k-element string Series
-- **Metric**: 661 (previous best: 660, delta: +1) · **Commit**: 0dd114e
-- **Notes**: `str_findall.ts` exports were uncovered; Python uses `str.findall`, `str.extract`, `str.count` as equivalents.
-
-### Iteration 315 — 2026-05-14T05:59:24Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25844508188)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `to_markdown` benchmark pair: `toMarkdown` + `toLaTeX` on a 1000-row DataFrame (3 columns: float, string, int)
-- **Metric**: 660 (previous best: 659, delta: +1) · **Commit**: 76f3e1e
-- **Notes**: `toMarkdown`/`toLaTeX` (from `stats/format_table.ts`) had no benchmark coverage; Python equivalents use `df.to_markdown()` and `df.to_latex()`. New PR created since #300 was merged.
-
-### Iteration 314 — 2026-05-13T13:02:48Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25800686638)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `indexers` and `scalar_extract` benchmark pairs
-- **Metric**: 659 (delta: +2) · **Commit**: 6ed3c7b
-
-### Iteration 313 — 2026-05-12T18:51:56Z — [Run](https://github.com/githubnext/tsessebe/actions/runs/25755262251)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `cat_accessor` and `hash_biject_array` benchmark pairs
-- **Metric**: 657 (delta: +2) · **Commit**: 5ae546a
-
-### Iters 1–313 — ✅ | Metrics 0→657: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.).
+### Iters 1–316 — ✅ | Metrics 0→661: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.). Recent additions: str_findall, to_markdown, indexers, scalar_extract, cat_accessor, hash_biject_array.
