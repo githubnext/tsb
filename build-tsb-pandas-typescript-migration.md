@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-17T13:23:35Z |
-| Iteration Count | 317 |
+| Last Run | 2026-05-18T08:16:48Z |
+| Iteration Count | 318 |
 | Best Metric | 149 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -21,15 +21,15 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
 - ✅ Core/Stats/IO/Merge/Reshape/Window/GroupBy done (1–295)
-- ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314), readXml/toXml (316), readTable (317)
-- Next: more IO utilities (to_excel, read_clipboard), more missing pandas API
+- ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314), readXml/toXml (316), readTable (317), caseWhen (318)
+- Next: more missing pandas API (pd.util, more Series/DataFrame methods)
 
 ---
 
@@ -58,6 +58,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 318 — 2026-05-18 08:16 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26021661493)
+
+- **Status**: pending-ci | **Metric**: 151 (+1) | **Commit**: 71a5ba4
+- **Change**: Add `caseWhen()` — pd.Series.case_when() port (pandas 2.2+); ordered CASE WHEN semantics
+- **Notes**: `src/stats/case_when.ts`. Conditions: boolean Series, array, or predicate; replacements: scalar, Series, or array. First match wins; unmatched rows keep original. 316-line test suite with unit + property-based tests. 9-example playground page.
 
 ### Iter 317 — 2026-05-17 13:23 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/25992061510)
 
