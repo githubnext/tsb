@@ -25,6 +25,7 @@ network:
 
 safe-outputs:
   push-to-pull-request-branch:
+    signed-commits: false
     target: "*"
     max: 3
     protected-files: allowed
@@ -516,20 +517,20 @@ A pre-flight step has already identified a PR that needs attention. Read the sel
 
 3. **Fix the issues** — always follow this sequence, in order. Each push is a separate `push-to-pull-request-branch` call:
 
-   ### Step 1 — Merge `main` first if the PR is behind (or has conflicts)
+   ### Step 1 — Rebase onto `main` first if the PR is behind (or has conflicts)
    If `selected.issues` contains `"merge_conflict"` **or** any `"behind_main: …"` entry, you must bring the branch up to date with `main` before doing anything else:
 
    - `git fetch origin main`
-   - `git merge origin/main` (or `origin/<base_branch>` if the base isn't `main`)
+   - `git rebase origin/main` (or `origin/<base_branch>` if the base isn't `main`)
    - Resolve any conflicts intelligently by understanding the intent of both sides. If the PR is from an autoloop branch, prefer the PR's changes for feature code and `main`'s changes for infrastructure/config.
-   - Run tests/lint/typecheck locally to make sure the merge is clean.
+   - Run tests/lint/typecheck locally to make sure the rebase is clean.
 
-   ### Step 2 — Push the merge as its own commit
-   - Push the merge commit using `push-to-pull-request-branch` **before doing anything else**.
-   - This is the *first* push of the run. It contains *only* the merge with `main` (plus any conflict resolutions). Do **not** mix CI-fix changes into this patch.
-   - Merging `main` often fixes CI on its own (the failure was just drift). After the push, re-check whether CI is still failing on the new HEAD.
+   ### Step 2 — Push the rebase as its own update
+   - Push the rebased branch using `push-to-pull-request-branch` **before doing anything else**.
+   - This is the *first* push of the run. It contains *only* the rebase onto `main` (plus any conflict resolutions). Do **not** mix CI-fix changes into this patch.
+   - Rebasing onto `main` often fixes CI on its own (the failure was just drift). After the push, re-check whether CI is still failing on the new HEAD.
 
-   ### Step 3 — Re-check CI after the merge
+   ### Step 3 — Re-check CI after the rebase
    - Look at the failing checks for the new HEAD SHA (the one you just pushed).
    - If everything is green or pending-but-likely-green, you're done — skip to step 5.
    - If checks are still failing, continue to step 4.
@@ -537,7 +538,7 @@ A pre-flight step has already identified a PR that needs attention. Read the sel
    ### Step 4 — Fix the failing checks (second push)
    - Read the failing check logs using GitHub tools.
    - Identify the root cause (test failures, lint errors, type errors, build failures).
-   - Fix the code on the (now-merged) PR branch.
+   - Fix the code on the (now-rebased) PR branch.
    - Run the relevant checks locally to verify the fix before pushing.
    - Push the fix using `push-to-pull-request-branch`. This is the *second* push of the run, and it contains *only* the CI fix — no merge commits.
 
