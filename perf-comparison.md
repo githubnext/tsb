@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-18T01:34:10Z |
-| Iteration Count | 320 |
-| Best Metric | 665 |
+| Last Run | 2026-05-18T19:26:22Z |
+| Iteration Count | 321 |
+| Best Metric | 666 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #324 |
@@ -22,14 +22,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | error, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
 ## 📋 Program Info
 
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
-**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: (new PR pending)
+**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: #324
 
 ---
 
@@ -64,6 +64,13 @@
 
 ## 📊 Iteration History
 
+### Iteration 321 — 2026-05-18T19:26:22Z — [Run](https://github.com/githubnext/tsb/actions/runs/26055399596)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `readHtml` benchmark pair — 1,000-row HTML table parsed 20 iterations by both tsb `readHtml` and `pd.read_html`; uses lxml backend for pandas
+- **Metric**: 666 (previous best: 665, delta: +1) · **Commit**: ce991ce
+- **Notes**: `src/io/read_html.ts` was exported but had no benchmark. Python uses `pd.read_html` with auto-installed lxml backend.
+
 ### Iteration 320 — 2026-05-18T01:34:10Z — [Run](https://github.com/githubnext/tsb/actions/runs/26008813008)
 
 - **Status**: ✅ Accepted
@@ -78,18 +85,6 @@
 - **Metric**: 664 (previous best: 663, delta: +1) · **Commit**: 2d75133
 - **Notes**: `pdArray` and `PandasArray` (from `src/core/pd_array.ts`) had no benchmark coverage. Python equivalent uses `pd.array()` with nullable dtypes (`Int64`, `Float64`, `string`).
 
-### Iteration 318 — 2026-05-16T13:24:01Z — [Run](https://github.com/githubnext/tsb/actions/runs/25963034091)
+### Iters 317–318 — ✅ | 662→663: `pipe` pair; `timedelta_range`+`combine` pairs.
 
-- **Status**: ✅ Accepted
-- **Change**: Added `timedelta_range` and `combine` benchmark pairs (`timedelta_range` with 3 usage patterns, `combineSeries`/`combineDataFrame` on 10k-row data)
-- **Metric**: 663 (previous best: 662, delta: +1) · **Commit**: 1ac9ac3
-- **Notes**: Both functions were exported from `src/index.ts` but had no dedicated benchmarks. bun not in sandbox PATH; CI gate on GitHub Actions validates.
-
-### Iteration 317 — 2026-05-15T19:26:27Z — [Run](https://github.com/githubnext/tsb/actions/runs/25936998176)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `pipe` benchmark pair (`pipeSeries`/`dataFramePipe` on 100k-row Series+DataFrame); also fixed 2 pre-existing broken Python benchmarks (`bench_str_extract_all.py`, `bench_str_extract_groups.py` had escaped docstring quotes)
-- **Metric**: 662 (previous best: 661, delta: +1) · **Commit**: f62eca8
-- **Notes**: `pipe.ts` exports were unbenchmarked; Python equivalents use `Series.pipe` and `DataFrame.pipe`. bun not in sandbox PATH so TS validity check skipped locally; CI gate validates.
-
-### Iters 1–316 — ✅ | Metrics 0→661: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.). Recent additions: str_findall, to_markdown, indexers, scalar_extract, cat_accessor, hash_biject_array.
+### Iters 1–316 — ✅ | Metrics 0→661: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.).
