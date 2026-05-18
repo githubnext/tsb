@@ -63,6 +63,7 @@ safe-outputs:
     recreate-ref: true
     max: 1
   push-to-pull-request-branch:
+    signed-commits: false
     target: "*"
     title-prefix: "[Autoloop"
     protected-files:
@@ -447,10 +448,11 @@ Each run executes **one iteration for the single selected program**:
      elif [ "$ahead" != "0" ] && [ "$behind" != "0" ]; then
        # True divergence: branch has unique commits AND main has moved on.
        git checkout -B autoloop/{program-name} origin/autoloop/{program-name}
-       git merge origin/main --no-edit -m "Merge main into autoloop/{program-name}"
+       git rebase origin/main
+       git push --force-with-lease origin autoloop/{program-name}
      else
        # Already at main (ahead=0, behind=0) or only ahead of main (ahead>0,
-       # behind=0). Nothing to merge — just check out the branch.
+       # behind=0). Nothing to rebase — just check out the branch.
        git checkout -B autoloop/{program-name} origin/autoloop/{program-name}
      fi
    else
@@ -465,8 +467,8 @@ Each run executes **one iteration for the single selected program**:
    |---|---|---|---|
    | 0 | 0 | checkout (nothing to do) | branch is exactly at main |
    | 0 | >0 | **fast-forward + force-push** | branch's commits already in main; merging would produce noisy merge commit |
-   | >0 | 0 | checkout (nothing to do) | unique work preserved; no upstream drift to merge |
-   | >0 | >0 | checkout + merge | true divergence |
+   | >0 | 0 | checkout (nothing to do) | unique work preserved; no upstream drift to rebase |
+   | >0 | >0 | checkout + rebase + force-push | true divergence; preserves a linear branch |
 
    Use `--force-with-lease` rather than `--force` so that if anyone else is simultaneously pushing to the branch, the update is rejected rather than overwriting their commits.
 2. Make the proposed changes to the target files only.
@@ -914,4 +916,3 @@ The `delta` is **signed by metric direction**: for `higher`-direction programs a
 
 > ❌ **Do NOT modify files outside the program's Target list.**
 > The Target section of the program file is the allowlist. Touching anything else (including the evaluation script or the program file itself) is forbidden.
-
