@@ -512,3 +512,5 @@ export {
   seriesToLaTeX,
 } from "./format_table.ts";
 export type { ToMarkdownOptions, ToLaTeXOptions } from "./format_table.ts";
+export { caseWhen } from "./case_when.ts";
+export type { CaseWhenBranch, CaseWhenPredicate } from "./case_when.ts";

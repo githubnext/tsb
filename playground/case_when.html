@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — case_when</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>case_when</h1>
+  <p class="subtitle">Conditional value selection using CASE WHEN semantics — mirrors <code>pandas.Series.case_when()</code> (pandas 2.2+).</p>
+
+  <div class="section">
+    <h2>1 — Basic grade classification</h2>
+    <p><code>caseWhen(series, caselist)</code> applies an ordered list of <code>[condition, replacement]</code> pairs. The first matching condition determines the output; if no condition matches the original value is kept.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen } from "tsb";
+
+const score = new Series({ data: [45, 72, 88, 95, 60] });
+const d = score.toArray();
+
+const grade = caseWhen(score, [
+  [d.map(v => v >= 90), "A"],
+  [d.map(v => v >= 75), "B"],
+  [d.map(v => v >= 60), "C"],
+  [d.map(v => v >= 45), "D"],
+]);
+
+console.log("grades:", grade.toArray());
+// → ["D", "C", "B", "A", "C"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2 — Using boolean Series as conditions</h2>
+    <p>Conditions can be boolean <code>Series</code> objects (e.g. from comparison operations).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen } from "tsb";
+
+const temp = new Series({ data: [-10, 0, 15, 30, 45] });
+const vals = temp.toArray();
+
+const category = caseWhen(temp, [
+  [new Series({ data: vals.map(v => v < 0) }), "freezing"],
+  [new Series({ data: vals.map(v => v < 10) }), "cold"],
+  [new Series({ data: vals.map(v => v < 25) }), "mild"],
+  [new Series({ data: vals.map(v => v < 35) }), "warm"],
+]);
+
+console.log("category:", category.toArray());
+// → ["freezing", "cold", "mild", "warm", 45]
+// Note: 45 has no matching condition, so the original value is preserved</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3 — Using predicate functions</h2>
+    <p>Conditions can be predicate functions <code>(value, index) =&gt; boolean</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen } from "tsb";
+
+const prices = new Series({ data: [5.99, 14.50, 29.99, 99.00, 199.99] });
+
+const tier = caseWhen(prices, [
+  [(v) => v < 10, "budget"],
+  [(v) => v < 30, "mid-range"],
+  [(v) => v < 100, "premium"],
+]);
+
+console.log("tiers:", tier.toArray());
+// → ["budget", "mid-range", "mid-range", "premium", 199.99]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>4 — Series as replacement values</h2>
+    <p>Replacements can be <code>Series</code> objects — the matching positional value is used.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen } from "tsb";
+
+const base = new Series({ data: [100, 200, 300, 400, 500] });
+const discounted = new Series({ data: [80, 160, 240, 320, 400] });
+const premium = new Series({ data: [120, 240, 360, 480, 600] });
+
+const vals = base.toArray();
+const result = caseWhen(base, [
+  [new Series({ data: vals.map(v => v <= 200) }), discounted],
+  [new Series({ data: vals.map(v => v >= 400) }), premium],
+]);
+
+console.log("adjusted prices:", result.toArray());
+// → [80, 160, 300, 480, 600]
+// ↑ cheap items discounted, expensive items premium, middle unchanged</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>5 — Unmatched rows keep original values</h2>
+    <p>Any row not matched by any condition retains its original value — there is no implicit "else" replacement.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen } from "tsb";
+
+const status = new Series({ data: ["pending", "active", "inactive", "banned", "pending"] });
+
+const label = caseWhen(status, [
+  [(v) => v === "active", "✅ Active"],
+  [(v) => v === "banned", "🚫 Banned"],
+]);
+
+console.log("labels:", label.toArray());
+// → ["pending", "✅ Active", "inactive", "🚫 Banned", "pending"]
+// ↑ "pending" and "inactive" were not matched → original values kept</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>6 — First matching condition wins</h2>
+    <p>When multiple conditions match the same row, the first one in <code>caselist</code> takes effect — just like <code>CASE WHEN … THEN … WHEN … THEN … END</code> in SQL.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen } from "tsb";
+
+const n = new Series({ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
+const vals = n.toArray();
+
+// FizzBuzz — classic example of ordered conditions
+const fizzBuzz = caseWhen(n, [
+  [vals.map(v => v % 15 === 0), "FizzBuzz"],  // must come first!
+  [vals.map(v => v % 3 === 0),  "Fizz"],
+  [vals.map(v => v % 5 === 0),  "Buzz"],
+]);
+
+console.log("FizzBuzz:", fizzBuzz.toArray());
+// → [1, 2, "Fizz", 4, "Buzz", "Fizz", 7, 8, "Fizz", "Buzz"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>7 — Positional index in predicate</h2>
+    <p>Predicate functions receive both the value and its <strong>positional index</strong> as the second argument.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen } from "tsb";
+
+const data = new Series({ data: [10, 20, 30, 40, 50] });
+
+// Mark every other row (by position) as "even"
+const marked = caseWhen(data, [
+  [(_v, i) => i % 2 === 0, "even-row"],
+]);
+
+console.log("marked:", marked.toArray());
+// → ["even-row", 20, "even-row", 40, "even-row"]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>8 — String Series classification</h2>
+    <p><code>caseWhen</code> works on any Series type — numbers, strings, booleans, or mixed.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen } from "tsb";
+
+const words = new Series({
+  data: ["cat", "elephant", "ox", "hippopotamus", "bee", "antelope"],
+});
+const vals = words.toArray();
+
+const sizeGroup = caseWhen(words, [
+  [vals.map(v => (v as string).length <= 3), "short"],
+  [vals.map(v => (v as string).length <= 6), "medium"],
+  [vals.map(v => (v as string).length <= 10), "long"],
+]);
+
+console.log("size groups:", sizeGroup.toArray());
+// → ["short", "medium", "short", "hippopotamus", "short", "long"]
+// Note: "hippopotamus" (12 chars) was not matched → original kept</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>9 — Comparison with where / mask</h2>
+    <p><code>caseWhen</code> generalises <code>whereSeries</code> to multiple branches. Use <code>whereSeries</code> for a single condition; use <code>caseWhen</code> for multi-branch logic.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, caseWhen, whereSeries } from "tsb";
+
+const values = new Series({ data: [-5, 0, 3, 7, 12] });
+const d = values.toArray();
+
+// whereSeries: single condition — two outcomes
+const wsResult = whereSeries(values, (v) => (v as number) >= 0, { other: 0 });
+console.log("where (clamp to 0):", wsResult.toArray());
+// → [0, 0, 3, 7, 12]
+
+// caseWhen: multiple conditions — four outcomes
+const cwResult = caseWhen(values, [
+  [(v) => (v as number) < 0, "negative"],
+  [(v) => (v as number) === 0, "zero"],
+  [(v) => (v as number) < 10, "small positive"],
+]);
+console.log("case_when:", cwResult.toArray());
+// → ["negative", "zero", "small positive", "small positive", 12]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
+</body>
+</html>
