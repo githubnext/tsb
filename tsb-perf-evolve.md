@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-17T19:22:18Z |
-| Iteration Count | 49 |
+| Last Run | 2026-05-18T14:08:18Z |
+| Iteration Count | 50 |
 | Best Metric | 20.663 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,10 +17,11 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci |
 
 ## 🧬 Population (summary)
 
+- **c050** (gen 50, pending-ci): Fix nested ternary lint error (noNestedTernary); merge main; c047 _svCache intact.
 - **c049** (gen 49, pending-ci): Merge main again (8 more commits) to fix noMisplacedAssertion lint; c047 _svCache intact.
 - **c048** (gen 48, pending-ci): Merge main to fix pre-existing lint CI failures; c047 _svCache intact.
 - **c047** (gen 47, pending-ci): Per-instance `_svCache` 4-slot caches fully-constructed Series; calls 2–50 are O(1).
@@ -37,6 +38,8 @@
 - Per-instance typed field avoids `as unknown as` casts needed by module-level cache.
 - Merging main early prevents stale-branch lint CI failures from blocking progress.
 
+- `nursery: {all: true}` means new biome nursery rules can become errors; c047's nested ternary (`noNestedTernary`) was the 1 lint error blocking CI.
+
 ## 🚧 Foreclosed Avenues
 
 - Island 0 (boxed {v,i}): high GC at n=100k.
@@ -51,16 +54,18 @@
 
 ## 📊 Iteration History
 
+### Iteration 50 — 2026-05-18 14:08 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26038660240)
+
+- **Status**: ⏳ Pending CI · CI fix attempt 3 for c047
+- **Change**: Fixed nested ternary in `svSlot` assignment (biome `noNestedTernary`). Merged main again. c047 _svCache intact.
+- **Metric**: pending CI
+
 ### Iteration 49 — 2026-05-17 19:22 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26000315229)
 
 - **Status**: ⏳ Pending CI · CI fix attempt 2 for c047
-- **Change**: Merged origin/main (8 more commits) to fix `noMisplacedAssertion` lint error; biome.json now sets it to `"warn"`. c047 _svCache intact.
+- **Change**: Merged main again; noMisplacedAssertion already warn. c047 intact.
 - **Metric**: pending CI
 
-### Iteration 48 — 2026-05-17 01:31 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/25978048477)
+### Iters 47–49 — c047 ⏳ pending-ci (per-instance Series cache); iters 48–49 merged main but still failed lint
 
-- **Status**: ⏳ Pending CI · CI fix attempt 1 for c047
-- **Change**: Merged origin/main to pull in lint fixes. c047 _svCache intact. Biome passes locally.
-- **Metric**: pending CI
-
-### Iters 1–47 — c022 ✅ (~29, PR#226); c035 ✅ (21.048, PR#272); c038 ❌; c043 ✅ (20.663, best); c044 ✅ (AoS cache); c047 ⏳ (per-instance Series cache)
+### Iters 1–46 — c022 ✅ (~29, PR#226); c035 ✅ (21.048, PR#272); c038 ❌; c043 ✅ (20.663, best); c044 ✅ (AoS cache)
