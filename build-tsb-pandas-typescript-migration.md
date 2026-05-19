@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-19T01:30:20Z |
-| Iteration Count | 319 |
-| Best Metric | 152 |
+| Last Run | 2026-05-19T19:29:15Z |
+| Iteration Count | 320 |
+| Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -21,7 +21,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
@@ -29,7 +29,8 @@
 
 - ✅ Core/Stats/IO/Merge/Reshape/Window/GroupBy done (1–295)
 - ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314), readXml/toXml (316), readTable (317), caseWhen (318), holiday calendars (319)
-- Next: more missing pandas API (pd.util, more Series/DataFrame methods)
+- ✅ reindex_like (reindexLikeSeries/reindexLikeDataFrame) + pd.unique (pdUnique) (320)
+- Next: more missing pandas API (Series.dt methods, pd.util, more top-level functions)
 
 ---
 
@@ -59,29 +60,13 @@
 
 ## 📊 Iteration History
 
-### Iter 319 — 2026-05-19 01:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26070572042)
+### Iteration 320 — 2026-05-19 19:29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26120171629)
 
-- **Status**: accepted | **Metric**: 152 (+1) | **Commit**: 58acec3
-- **Change**: Add Holiday Calendar (`pd.tseries.holiday`) — `Holiday`, `AbstractHolidayCalendar`, `USFederalHolidayCalendar`, observance functions, `nthWeekdayOffset`, `getCalendar`
-- **Notes**: `src/core/holiday.ts`. 11 US Federal Holidays with correct observance (nearest_workday for fixed dates, nth-weekday offsets for floating). Juneteenth from 2021. 9 observance functions. Full test suite (property tests confirm correct holiday counts per year). Playground page with 9 examples.
+- **Status**: ✅ Accepted | **Metric**: 153 (+1) | **Commit**: f9b9a05
+- **Change**: Add `reindexLikeSeries`/`reindexLikeDataFrame` + `pdUnique` (mirrors `pandas.reindex_like` / `pandas.unique`)
+- **Notes**: `reindex_like` wraps existing `reindex()`, supports ffill/bfill/nearest/fillValue. `pdUnique` preserves insertion order, handles NaN/null/mixed types. Property-based tests + playground pages.
 
-### Iter 318 — 2026-05-18 08:16 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26021661493)
-
-- **Status**: pending-ci | **Metric**: 151 (+1) | **Commit**: 71a5ba4
-- **Change**: Add `caseWhen()` — pd.Series.case_when() port (pandas 2.2+); ordered CASE WHEN semantics
-- **Notes**: `src/stats/case_when.ts`. Conditions: boolean Series, array, or predicate; replacements: scalar, Series, or array. First match wins; unmatched rows keep original. 316-line test suite with unit + property-based tests. 9-example playground page.
-
-### Iter 317 — 2026-05-17 13:23 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/25992061510)
-
-- **Status**: pending-ci | **Metric**: 150 (+1) | **Commit**: 46dcdc3
-- **Change**: Add `readTable()` — pd.read_table() port; thin wrapper around readCsv with sep='\t' default
-- **Notes**: `src/io/read_table.ts`. Full ReadCsvOptions forwarding (sep, indexCol, nRows, skipRows, dtype, naValues). 40+ tests + property-based round-trips. Playground page with 9 examples.
-
-### Iter 316 — 2026-05-16 19:21 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/25970646245)
-
-- **Status**: pending-ci | **Metric**: 149 (+1) | **Commit**: a529b25
-- **Change**: Add `readXml()` and `toXml()` — pd.read_xml() / DataFrame.to_xml() port; zero-dep XML tokenizer
-- **Notes**: `src/io/xml.ts`. rowTag auto-detect, attributes+elems, namespace prefix stripping, CDATA, entity encode/decode, usecols, nrows, indexCol, naValues, converters. toXml: rootName, rowName, attribs, xmlDeclaration, namespaces, indent, cdataCols. 50+ tests + property tests. Playground page with 9 examples.
+### Iters 316–319 — accepted/pending-ci (149→152): +readXml/toXml (316), +readTable (317), +caseWhen (318), +holiday calendars (319).
 
 ### Iters 311–315 — pending-ci (145→149): +pdArray (311), +toMarkdown/toLaTeX (312), +pd.errors (313), +readHtml (314), +readXml/toXml attempt (315, superseded by 316).
 
