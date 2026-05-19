@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-18T19:26:22Z |
-| Iteration Count | 321 |
-| Best Metric | 666 |
+| Last Run | 2026-05-19T13:49:11Z |
+| Iteration Count | 322 |
+| Best Metric | 667 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #324 |
@@ -58,11 +58,19 @@
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
 - `datetime_tz` variants still uncovered
-- `notna_boolean`, `add_sub_mul_div` (named series arithmetic) still uncovered
+- `notna_boolean` ✅ done
+- `add_sub_mul_div` (named series arithmetic) still uncovered
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 322 — 2026-05-19T13:49:11Z — [Run](https://github.com/githubnext/tsb/actions/runs/26101441657)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `notna_boolean` benchmark pair — 100k-element Series and DataFrame filtered via `keepTrue`, `keepFalse`, `filterBy`; Python equivalent uses boolean indexing with `s[mask]`, `s[~mask]`, `df[mask]`
+- **Metric**: 667 (previous best: 666, delta: +1) · **Commit**: 38cd8d5
+- **Notes**: `src/stats/notna_boolean.ts` (keepTrue/keepFalse/filterBy) had no benchmark. Both benchmarks use 50% true/false masks over 100k rows.
 
 ### Iteration 321 — 2026-05-18T19:26:22Z — [Run](https://github.com/githubnext/tsb/actions/runs/26055399596)
 
@@ -78,13 +86,6 @@
 - **Metric**: 665 (previous best: 664, delta: +1) · **Commit**: 7851cfb
 - **Notes**: `to_from_dict.ts` exports were previously unbenchmarked. Python uses `df.to_dict(orient=...)` and `pd.DataFrame.from_dict(...)` for matching coverage.
 
-### Iteration 319 — 2026-05-17T07:46:03Z — [Run](https://github.com/githubnext/tsb/actions/runs/25984977778)
+### Iters 319–321 — ✅ | 663→666: `pdArray` pair; `toDictOriented/fromDictOriented` pair; `readHtml` pair.
 
-- **Status**: ✅ Accepted
-- **Change**: Added `pdArray`/`PandasArray` benchmark pair — 10k-element arrays of int, float, string, and nullable int types; tests creation, `.at()`, `.toArray()`, `.length`
-- **Metric**: 664 (previous best: 663, delta: +1) · **Commit**: 2d75133
-- **Notes**: `pdArray` and `PandasArray` (from `src/core/pd_array.ts`) had no benchmark coverage. Python equivalent uses `pd.array()` with nullable dtypes (`Int64`, `Float64`, `string`).
-
-### Iters 317–318 — ✅ | 662→663: `pipe` pair; `timedelta_range`+`combine` pairs.
-
-### Iters 1–316 — ✅ | Metrics 0→661: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.).
+### Iters 1–318 — ✅ | Metrics 0→662: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.).
