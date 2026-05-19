@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-18T14:08:18Z |
-| Iteration Count | 50 |
+| Last Run | 2026-05-19T08:02:40Z |
+| Iteration Count | 51 |
 | Best Metric | 20.663 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,13 +17,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, pending-ci |
 
 ## 🧬 Population (summary)
 
-- **c050** (gen 50, pending-ci): Fix nested ternary lint error (noNestedTernary); merge main; c047 _svCache intact.
-- **c049** (gen 49, pending-ci): Merge main again (8 more commits) to fix noMisplacedAssertion lint; c047 _svCache intact.
-- **c048** (gen 48, pending-ci): Merge main to fix pre-existing lint CI failures; c047 _svCache intact.
+- **c051** (gen 51, pending-ci): Fix noNestedTernary lint: replace nested ternary with if-else chain in svSlot. Rebase on main. c047 _svCache intact.
+- **c050** (gen 50, stale): Fix nested ternary attempt; commit not persisted on branch (overwritten by rebase).
+- **c049** (gen 49, stale): Merge main attempt; not persisted.
+- **c048** (gen 48, stale): Merge main attempt; not persisted.
 - **c047** (gen 47, pending-ci): Per-instance `_svCache` 4-slot caches fully-constructed Series; calls 2–50 are O(1).
 - **c044** (gen 44, accepted): Cache sorted AoS+nanBuf. ✅ merged PR#303.
 - **c043** (gen 43, fitness 20.663, BEST): Stride counters; remove typeof NaN guard. ✅ accepted.
@@ -38,7 +39,8 @@
 - Per-instance typed field avoids `as unknown as` casts needed by module-level cache.
 - Merging main early prevents stale-branch lint CI failures from blocking progress.
 
-- `nursery: {all: true}` means new biome nursery rules can become errors; c047's nested ternary (`noNestedTernary`) was the 1 lint error blocking CI.
+- When fixing lint on rebased branch, use `if-else` chains instead of nested ternaries to avoid `noNestedTernary` nursery rule.
+- CI fix attempts 48-50 for c047 were lost because the agents recorded "pending-ci" without actually having their commits persist on the branch (only iter 47 commit + evergreen trigger CI commit existed).
 
 ## 🚧 Foreclosed Avenues
 
@@ -54,18 +56,12 @@
 
 ## 📊 Iteration History
 
-### Iteration 50 — 2026-05-18 14:08 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26038660240)
+### Iteration 51 — 2026-05-19 08:02 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26084326785)
 
-- **Status**: ⏳ Pending CI · CI fix attempt 3 for c047
-- **Change**: Fixed nested ternary in `svSlot` assignment (biome `noNestedTernary`). Merged main again. c047 _svCache intact.
+- **Status**: ⏳ Pending CI · CI fix attempt 4 for c047
+- **Change**: Rebase on main; replace nested ternary in `svSlot` with if-else chain (biome `noNestedTernary`).
 - **Metric**: pending CI
 
-### Iteration 49 — 2026-05-17 19:22 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26000315229)
-
-- **Status**: ⏳ Pending CI · CI fix attempt 2 for c047
-- **Change**: Merged main again; noMisplacedAssertion already warn. c047 intact.
-- **Metric**: pending CI
-
-### Iters 47–49 — c047 ⏳ pending-ci (per-instance Series cache); iters 48–49 merged main but still failed lint
+### Iters 47–50 — c047 pending-ci (per-instance _svCache); iters 48–50 CI fix attempts not persisted on branch
 
 ### Iters 1–46 — c022 ✅ (~29, PR#226); c035 ✅ (21.048, PR#272); c038 ❌; c043 ✅ (20.663, best); c044 ✅ (AoS cache)
