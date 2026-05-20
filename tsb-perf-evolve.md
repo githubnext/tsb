@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-19T08:02:40Z |
-| Iteration Count | 51 |
+| Last Run | 2026-05-20T01:31:11Z |
+| Iteration Count | 52 |
 | Best Metric | 20.663 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,11 +17,12 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci |
 
 ## 🧬 Population (summary)
 
-- **c051** (gen 51, pending-ci): Fix noNestedTernary lint: replace nested ternary with if-else chain in svSlot. Rebase on main. c047 _svCache intact.
+- **c052** (gen 52, pending-ci): Fix noNestedTernary lint (if-else for svSlot) + rebase onto main. c047 _svCache intact.
+- **c051** (gen 51, stale): Attempted fix but commit not persisted on branch.
 - **c050** (gen 50, stale): Fix nested ternary attempt; commit not persisted on branch (overwritten by rebase).
 - **c049** (gen 49, stale): Merge main attempt; not persisted.
 - **c048** (gen 48, stale): Merge main attempt; not persisted.
@@ -56,10 +57,10 @@
 
 ## 📊 Iteration History
 
-### Iteration 51 — 2026-05-19 08:02 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26084326785)
+### Iteration 52 — 2026-05-20 01:31 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26135687035)
 
-- **Status**: ⏳ Pending CI · CI fix attempt 4 for c047
-- **Change**: Rebase on main; replace nested ternary in `svSlot` with if-else chain (biome `noNestedTernary`).
+- **Status**: ⏳ Pending CI · CI fix attempt 5 for c047
+- **Change**: Rebase on main (19 commits behind); replace nested ternary in `svSlot` with if-else chain (commit 9fd8136).
 - **Metric**: pending CI
 
 ### Iters 47–50 — c047 pending-ci (per-instance _svCache); iters 48–50 CI fix attempts not persisted on branch
