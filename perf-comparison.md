@@ -10,12 +10,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-19T13:49:11Z |
-| Iteration Count | 322 |
-| Best Metric | 667 |
+| Last Run | 2026-05-20T08:02:10Z |
+| Iteration Count | 323 |
+| Best Metric | 668 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #324 |
+| PR | #328 |
 | Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
@@ -29,7 +29,7 @@
 ## 📋 Program Info
 
 **Goal**: Benchmark every tsb function vs pandas equivalent, one per iteration.
-**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: #324
+**Metric**: benchmarked_functions (higher is better) · **Issue**: #221 · **PR**: #328
 
 ---
 
@@ -59,11 +59,18 @@
 - Option-variant benchmarks (axis/limit/method parameters)
 - `datetime_tz` variants still uncovered
 - `notna_boolean` ✅ done
-- `add_sub_mul_div` (named series arithmetic) still uncovered
+- `add_sub_mul_div` ✅ done
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 323 — 2026-05-20T08:02:10Z — [Run](https://github.com/githubnext/tsb/actions/runs/26149504710)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `add_sub_mul_div` benchmark pair — 100k-element Series, 10 iterations of `seriesAdd/seriesSub/seriesMul/seriesDiv` (scalar + Series operands); Python equivalent uses `s.add/sub/mul/div`
+- **Metric**: 668 (previous best: 667, delta: +1) · **Commit**: 3338d21
+- **Notes**: `src/stats/add_sub_mul_div.ts` exports seriesAdd/seriesSub/seriesMul/seriesDiv etc. — none had benchmarks. Both benchmarks use 100k float arrays with Series-to-Series and scalar operations.
 
 ### Iteration 322 — 2026-05-19T13:49:11Z — [Run](https://github.com/githubnext/tsb/actions/runs/26101441657)
 
