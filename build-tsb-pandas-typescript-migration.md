@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-19T19:29:15Z |
-| Iteration Count | 320 |
-| Best Metric | 153 |
+| Last Run | 2026-05-20T13:45:00Z |
+| Iteration Count | 321 |
+| Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -21,7 +21,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, pending-ci |
+| Recent Statuses | accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted |
 
 ---
 
@@ -29,8 +29,8 @@
 
 - ✅ Core/Stats/IO/Merge/Reshape/Window/GroupBy done (1–295)
 - ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314), readXml/toXml (316), readTable (317), caseWhen (318), holiday calendars (319)
-- ✅ reindex_like (reindexLikeSeries/reindexLikeDataFrame) + pd.unique (pdUnique) (320)
-- Next: more missing pandas API (Series.dt methods, pd.util, more top-level functions)
+- ✅ reindex_like (320), fromDummies (321)
+- Next: more missing pandas API (dt.isocalendar(), Series.dt enhancements, pd.util, more top-level functions)
 
 ---
 
@@ -59,6 +59,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 321 — 2026-05-20 13:45 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26166552266)
+
+- **Status**: ✅ Accepted | **Metric**: 152 (+1 from actual 151) | **Commit**: f535222
+- **Change**: Add `fromDummies()` — reverse of `getDummies()`, mirrors `pandas.from_dummies()`
+- **Notes**: Supports `sep` for multi-column reconstruction, `defaultCategory`/`defaultCategoryMap` for all-zero rows. Round-trip property tests. State file best_metric corrected from stale 153 to actual 152.
 
 ### Iteration 320 — 2026-05-19 19:29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26120171629)
 
