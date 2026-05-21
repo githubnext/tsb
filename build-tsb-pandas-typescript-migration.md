@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-20T13:45:00Z |
-| Iteration Count | 321 |
-| Best Metric | 152 |
+| Last Run | 2026-05-21T08:06:42Z |
+| Iteration Count | 322 |
+| Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -21,7 +21,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted |
 
 ---
 
@@ -29,8 +29,8 @@
 
 - ✅ Core/Stats/IO/Merge/Reshape/Window/GroupBy done (1–295)
 - ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314), readXml/toXml (316), readTable (317), caseWhen (318), holiday calendars (319)
-- ✅ reindex_like (320), fromDummies (321)
-- Next: more missing pandas API (dt.isocalendar(), Series.dt enhancements, pd.util, more top-level functions)
+- ✅ reindex_like (320), fromDummies (321), dt.isocalendar() + betweenTime/atTime (322)
+- Next: more missing pandas API (pd.util, Series.xs() improvements, more dt enhancements)
 
 ---
 
@@ -41,7 +41,7 @@
 - **Imports**: `src/stats/*.ts` from `../core`, `../types.ts`. Tests from `../../src/index.ts`.
 - **MultiIndex**: `mi as unknown as Index<Label>`. `mi.at(i)` returns `readonly Label[]`.
 - **DataFrame**: Use `DataFrame.fromColumns({...})` + `{ index: [...] }`. No `new DataFrame({...})`.
-- **Circular deps**: `string_accessor.ts` cannot import `DataFrame`.
+- **Circular deps**: `string_accessor.ts` and `datetime_accessor.ts` cannot import `DataFrame`. Use standalone function pattern (e.g., `dtIsocalendar()` in `src/core/isocalendar.ts`) for methods returning DataFrames.
 
 ---
 
@@ -59,6 +59,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 322 — 2026-05-21 08:06 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26213612481)
+
+- **Status**: ✅ Accepted | **Metric**: 153 (+1) | **Commit**: 3e7d168
+- **Change**: Add `dtIsocalendar()` DataFrame output, `isocalendar_year/day` accessors, `betweenTime`/`atTime` time-of-day filtering
+- **Notes**: `isoCalendarTuple()` helper handles ISO year boundary (Dec 30 → ISO year+1). Standalone `dtIsocalendar(series)` avoids circular dep with DataFrame. `betweenTimeSeries/DataFrame` supports inclusive/exclusive endpoints and overnight wrap. Full property-based tests.
 
 ### Iteration 321 — 2026-05-20 13:45 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26166552266)
 
