@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-20T19:36:22Z |
-| Iteration Count | 53 |
+| Last Run | 2026-05-21T13:52:00Z |
+| Iteration Count | 54 |
 | Best Metric | 20.663 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,11 +17,12 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci |
 
 ## 🧬 Population (summary)
 
-- **c053** (gen 53, pending-ci): Fix noNestedTernary lint — if-else for svSlot; rebase onto current main. c047 _svCache intact. Commit fc22474.
+- **c054** (gen 54, pending-ci): Rebase branch + fix noNestedTernary lint (if-else for svSlot). Commit 28d0967 pushed to PR#321. c047 _svCache preserved.
+- **c053** (gen 53, stale): Rebase + lint fix attempt; commit fc22474 not persisted on remote branch.
 - **c052** (gen 52, stale): Fix attempt not persisted on branch (commit 9fd8136 not pushed).
 - **c051** (gen 51, stale): Attempted fix but commit not persisted on branch.
 - **c050** (gen 50, stale): Fix nested ternary attempt; commit not persisted on branch (overwritten by rebase).
@@ -58,10 +59,17 @@
 
 ## 📊 Iteration History
 
+### Iteration 54 — 2026-05-21 13:52 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26230173373)
+
+- **Status**: ⏳ Pending CI · CI fix attempt for c047 (rebase + lint fix, commit 28d0967)
+- **Operator**: Exploitation (fixing CI for existing c047 candidate)
+- **Change**: Rebased branch onto current main (21 commits behind); fix noNestedTernary lint in svSlot — replace nested ternary with if-else chain. Commit pushed to PR#321.
+- **Metric**: pending CI
+
 ### Iteration 53 — 2026-05-20 19:36 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26185357685)
 
-- **Status**: ⏳ Pending CI · CI fix attempt for c047 (rebase + lint fix, commit fc22474)
-- **Change**: Rebase branch onto current main (19 commits behind); fix noNestedTernary lint in svSlot with if-else chain. c047 per-instance _svCache preserved.
+- **Status**: ⚠️ Error — commit fc22474 not persisted on remote branch (push failed)
+- **Change**: Attempted rebase + lint fix but commit was not pushed to branch.
 - **Metric**: pending CI
 
 ### Iteration 52 — 2026-05-20 01:31 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26135687035)
