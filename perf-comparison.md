@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-20T08:02:10Z |
-| Iteration Count | 323 |
-| Best Metric | 668 |
+| Last Run | 2026-05-21T01:31:30Z |
+| Iteration Count | 324 |
+| Best Metric | 667 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -58,41 +58,20 @@
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
 - `datetime_tz` variants still uncovered
-- `notna_boolean` ✅ done
-- `add_sub_mul_div` ✅ done
+- `notna_boolean` src/stats/notna_boolean.ts — still needs benchmark
+- `add_sub_mul_div` src/stats/add_sub_mul_div.ts — still needs benchmark
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 323 — 2026-05-20T08:02:10Z — [Run](https://github.com/githubnext/tsb/actions/runs/26149504710)
+### Iteration 324 — 2026-05-21T01:31:30Z — [Run](https://github.com/githubnext/tsb/actions/runs/26200018415)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `add_sub_mul_div` benchmark pair — 100k-element Series, 10 iterations of `seriesAdd/seriesSub/seriesMul/seriesDiv` (scalar + Series operands); Python equivalent uses `s.add/sub/mul/div`
-- **Metric**: 668 (previous best: 667, delta: +1) · **Commit**: 3338d21
-- **Notes**: `src/stats/add_sub_mul_div.ts` exports seriesAdd/seriesSub/seriesMul/seriesDiv etc. — none had benchmarks. Both benchmarks use 100k float arrays with Series-to-Series and scalar operations.
+- **Change**: Added `to_json_normalize` benchmark pair — 10k-row DataFrame serialized via `toJsonDenormalize`, `toJsonRecords`, `toJsonSplit`; Python uses `df.to_dict(orient=records/split/index)`
+- **Metric**: 667 (previous best: 666, delta: +1) · **Commit**: e1b2869
+- **Notes**: Corrected state (phantom iters 322–323 had no commits on branch). `src/io/to_json_normalize.ts` write functions were unbenchmarked.
 
-### Iteration 322 — 2026-05-19T13:49:11Z — [Run](https://github.com/githubnext/tsb/actions/runs/26101441657)
+### Iters 321–323 — ✅ | 665→666: `readHtml` pair (iter 321 committed). Iters 322–323 recorded in state but commits not found on branch (phantom).
 
-- **Status**: ✅ Accepted
-- **Change**: Added `notna_boolean` benchmark pair — 100k-element Series and DataFrame filtered via `keepTrue`, `keepFalse`, `filterBy`; Python equivalent uses boolean indexing with `s[mask]`, `s[~mask]`, `df[mask]`
-- **Metric**: 667 (previous best: 666, delta: +1) · **Commit**: 38cd8d5
-- **Notes**: `src/stats/notna_boolean.ts` (keepTrue/keepFalse/filterBy) had no benchmark. Both benchmarks use 50% true/false masks over 100k rows.
-
-### Iteration 321 — 2026-05-18T19:26:22Z — [Run](https://github.com/githubnext/tsb/actions/runs/26055399596)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `readHtml` benchmark pair — 1,000-row HTML table parsed 20 iterations by both tsb `readHtml` and `pd.read_html`; uses lxml backend for pandas
-- **Metric**: 666 (previous best: 665, delta: +1) · **Commit**: ce991ce
-- **Notes**: `src/io/read_html.ts` was exported but had no benchmark. Python uses `pd.read_html` with auto-installed lxml backend.
-
-### Iteration 320 — 2026-05-18T01:34:10Z — [Run](https://github.com/githubnext/tsb/actions/runs/26008813008)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `toDictOriented` / `fromDictOriented` benchmark pair — 10k-row DataFrame, all orient variants (list, records, split, index, tight) plus `from_dict` with columns and index orients
-- **Metric**: 665 (previous best: 664, delta: +1) · **Commit**: 7851cfb
-- **Notes**: `to_from_dict.ts` exports were previously unbenchmarked. Python uses `df.to_dict(orient=...)` and `pd.DataFrame.from_dict(...)` for matching coverage.
-
-### Iters 319–321 — ✅ | 663→666: `pdArray` pair; `toDictOriented/fromDictOriented` pair; `readHtml` pair.
-
-### Iters 1–318 — ✅ | Metrics 0→662: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.).
+### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.).
