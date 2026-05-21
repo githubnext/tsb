@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-21T01:31:30Z |
-| Iteration Count | 324 |
-| Best Metric | 667 |
+| Last Run | 2026-05-21T19:29:17Z |
+| Iteration Count | 325 |
+| Best Metric | 668 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -58,12 +58,19 @@
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
 - `datetime_tz` variants still uncovered
-- `notna_boolean` src/stats/notna_boolean.ts — still needs benchmark
-- `add_sub_mul_div` src/stats/add_sub_mul_div.ts — still needs benchmark
+- `notna_boolean` src/stats/notna_boolean.ts — ✅ benchmarked in iter 325
+- `add_sub_mul_div` src/stats/add_sub_mul_div.ts — ✅ benchmarked in iter 325
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 325 — 2026-05-21T19:29:17Z — [Run](https://github.com/githubnext/tsb/actions/runs/26248245941)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `add_sub_mul_div` and `notna_boolean` benchmark pairs — element-wise Series/DataFrame arithmetic (add/sub/mul/div) and boolean-mask indexing (keepTrue/keepFalse/filterBy) on 100k rows
+- **Metric**: 668 (previous best: 667, delta: +1) · **Commit**: d82fc9d
+- **Notes**: Two previously listed Future Directions covered in one iteration; both Python and TS benchmarks validate cleanly.
 
 ### Iteration 324 — 2026-05-21T01:31:30Z — [Run](https://github.com/githubnext/tsb/actions/runs/26200018415)
 
