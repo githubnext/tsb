@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-21T19:29:17Z |
-| Iteration Count | 325 |
-| Best Metric | 668 |
+| Last Run | 2026-05-22T13:38:45Z |
+| Iteration Count | 326 |
+| Best Metric | 669 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -58,27 +58,23 @@
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
 - `datetime_tz` variants still uncovered
-- `notna_boolean` src/stats/notna_boolean.ts — ✅ benchmarked in iter 325
-- `add_sub_mul_div` src/stats/add_sub_mul_div.ts — ✅ benchmarked in iter 325
+- `notna_boolean` src/stats/notna_boolean.ts — ✅ benchmarked in iter 326
+- `to_json_normalize` (toJsonDenormalize/toJsonRecords/toJsonSplit) — ✅ benchmarked in iter 326
+- `window_extended` (rollingSem/rollingSkew/rollingKurt/rollingQuantile) — ✅ benchmarked in iter 326
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 325 — 2026-05-21T19:29:17Z — [Run](https://github.com/githubnext/tsb/actions/runs/26248245941)
+### Iteration 326 — 2026-05-22T13:38:45Z — [Run](https://github.com/githubnext/tsb/actions/runs/26291054120)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `add_sub_mul_div` and `notna_boolean` benchmark pairs — element-wise Series/DataFrame arithmetic (add/sub/mul/div) and boolean-mask indexing (keepTrue/keepFalse/filterBy) on 100k rows
-- **Metric**: 668 (previous best: 667, delta: +1) · **Commit**: d82fc9d
-- **Notes**: Two previously listed Future Directions covered in one iteration; both Python and TS benchmarks validate cleanly.
+- **Change**: Added `window_extended`, `notna_boolean`, and `to_json_normalize` benchmark pairs — rolling higher-order stats (sem/skew/kurt/quantile), boolean-mask indexing (keepTrue/keepFalse/filterBy), and JSON denormalize serialization on 100k/10k rows
+- **Metric**: 669 (previous best: 668, delta: +1) · **Commit**: 3d4ba02
+- **Notes**: Corrected state — iters 322–325 were phantom (commits recorded in state but not on branch). Actual branch count before this iter was 666 pairs. Adding 3 pairs brings count to 669, exceeding the inflated best of 668.
 
-### Iteration 324 — 2026-05-21T01:31:30Z — [Run](https://github.com/githubnext/tsb/actions/runs/26200018415)
+### Iters 324–325 — phantom state entries (commits recorded but not found on branch)
 
-- **Status**: ✅ Accepted
-- **Change**: Added `to_json_normalize` benchmark pair — 10k-row DataFrame serialized via `toJsonDenormalize`, `toJsonRecords`, `toJsonSplit`; Python uses `df.to_dict(orient=records/split/index)`
-- **Metric**: 667 (previous best: 666, delta: +1) · **Commit**: e1b2869
-- **Notes**: Corrected state (phantom iters 322–323 had no commits on branch). `src/io/to_json_normalize.ts` write functions were unbenchmarked.
+### Iters 321–323 — ✅ | 665→666: `readHtml` pair (iter 321 committed). Iters 322–323 phantom.
 
-### Iters 321–323 — ✅ | 665→666: `readHtml` pair (iter 321 committed). Iters 322–323 recorded in state but commits not found on branch (phantom).
-
-### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite across all tsb modules (Series, DataFrame, GroupBy, merge, reshape, window, stats, io, string/datetime accessors, categorical, etc.).
+### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
