@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-21T13:52:00Z |
-| Iteration Count | 54 |
+| Last Run | 2026-05-22T08:00:00Z |
+| Iteration Count | 55 |
 | Best Metric | 20.663 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,11 +17,12 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci |
 
 ## 🧬 Population (summary)
 
-- **c054** (gen 54, pending-ci): Rebase branch + fix noNestedTernary lint (if-else for svSlot). Commit 28d0967 pushed to PR#321. c047 _svCache preserved.
+- **c055** (gen 55, pending-ci): Rebased 19 commits behind; fix noNestedTernary lint (if-else for svSlot). Commit cdda523 pushed to PR#321. c047 _svCache preserved.
+- **c054** (gen 54, stale): Commit 28d0967 not actually on remote branch (push via old mechanism failed silently).
 - **c053** (gen 53, stale): Rebase + lint fix attempt; commit fc22474 not persisted on remote branch.
 - **c052** (gen 52, stale): Fix attempt not persisted on branch (commit 9fd8136 not pushed).
 - **c051** (gen 51, stale): Attempted fix but commit not persisted on branch.
@@ -58,6 +59,13 @@
 - Island 4 hybrid: native sort n<1k, radix n≥1k.
 
 ## 📊 Iteration History
+
+### Iteration 55 — 2026-05-22 08:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26275839987)
+
+- **Status**: ⏳ Pending CI · CI fix attempt for c047 (rebase + lint fix, commit cdda523)
+- **Operator**: Exploitation (fixing CI for existing c047 candidate)
+- **Change**: Rebased branch onto current main (was 19 commits behind); fix noNestedTernary lint in svSlot — replace nested ternary with if-else chain. Commit pushed to PR#321 via push_to_pull_request_branch.
+- **Metric**: pending CI
 
 ### Iteration 54 — 2026-05-21 13:52 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26230173373)
 
