@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-21T08:06:42Z |
-| Iteration Count | 322 |
-| Best Metric | 153 |
+| Last Run | 2026-05-22T01:43:00Z |
+| Iteration Count | 323 |
+| Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -21,16 +21,17 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
 - ✅ Core/Stats/IO/Merge/Reshape/Window/GroupBy done (1–295)
-- ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314), readXml/toXml (316), readTable (317), caseWhen (318), holiday calendars (319)
-- ✅ reindex_like (320), fromDummies (321), dt.isocalendar() + betweenTime/atTime (322)
-- Next: more missing pandas API (pd.util, Series.xs() improvements, more dt enhancements)
+- ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314), readXml/toXml (316), readTable (317), caseWhen (318)
+- ✅ Quarter/business-month/year offsets (323): QuarterEnd, QuarterBegin, BusinessMonthEnd, BusinessMonthBegin, BusinessYearEnd, BusinessYearBegin
+- **Note**: Iterations 319-322 commits were lost after branch rebase (ahead=6, behind=11). Best metric corrected from stale 153 to actual 152.
+- Next: more missing pandas.tseries.offsets, pd.util, Series/DataFrame enhancements
 
 ---
 
@@ -60,25 +61,13 @@
 
 ## 📊 Iteration History
 
-### Iteration 322 — 2026-05-21 08:06 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26213612481)
+### Iteration 323 — 2026-05-22 01:43 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26263087280)
 
-- **Status**: ✅ Accepted | **Metric**: 153 (+1) | **Commit**: 3e7d168
-- **Change**: Add `dtIsocalendar()` DataFrame output, `isocalendar_year/day` accessors, `betweenTime`/`atTime` time-of-day filtering
-- **Notes**: `isoCalendarTuple()` helper handles ISO year boundary (Dec 30 → ISO year+1). Standalone `dtIsocalendar(series)` avoids circular dep with DataFrame. `betweenTimeSeries/DataFrame` supports inclusive/exclusive endpoints and overnight wrap. Full property-based tests.
+- **Status**: ✅ Accepted | **Metric**: 152 (+1 from actual 151) | **Commit**: e0ea750
+- **Change**: Add QuarterEnd, QuarterBegin, BusinessMonthEnd/Begin, BusinessYearEnd/Begin in `src/core/quarter_offsets.ts`
+- **Notes**: best_metric corrected from stale 153→152 (iters 319-322 commits lost after branch rebase). 6 new pandas.tseries.offsets classes.
 
-### Iteration 321 — 2026-05-20 13:45 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26166552266)
-
-- **Status**: ✅ Accepted | **Metric**: 152 (+1 from actual 151) | **Commit**: f535222
-- **Change**: Add `fromDummies()` — reverse of `getDummies()`, mirrors `pandas.from_dummies()`
-- **Notes**: Supports `sep` for multi-column reconstruction, `defaultCategory`/`defaultCategoryMap` for all-zero rows. Round-trip property tests. State file best_metric corrected from stale 153 to actual 152.
-
-### Iteration 320 — 2026-05-19 19:29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26120171629)
-
-- **Status**: ✅ Accepted | **Metric**: 153 (+1) | **Commit**: f9b9a05
-- **Change**: Add `reindexLikeSeries`/`reindexLikeDataFrame` + `pdUnique` (mirrors `pandas.reindex_like` / `pandas.unique`)
-- **Notes**: `reindex_like` wraps existing `reindex()`, supports ffill/bfill/nearest/fillValue. `pdUnique` preserves insertion order, handles NaN/null/mixed types. Property-based tests + playground pages.
-
-### Iters 316–319 — accepted/pending-ci (149→152): +readXml/toXml (316), +readTable (317), +caseWhen (318), +holiday calendars (319).
+### Iters 316–322 — accepted/lost (149→152): +readXml/toXml (316), +readTable (317), +caseWhen (318), +holiday calendars/reindex_like/fromDummies/dt.isocalendar (319-322, commits lost after rebase).
 
 ### Iters 311–315 — pending-ci (145→149): +pdArray (311), +toMarkdown/toLaTeX (312), +pd.errors (313), +readHtml (314), +readXml/toXml attempt (315, superseded by 316).
 
