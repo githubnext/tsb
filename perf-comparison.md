@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-23T19:14:59Z |
-| Iteration Count | 327 |
-| Best Metric | 670 |
+| Last Run | 2026-05-24T13:21:16Z |
+| Iteration Count | 328 |
+| Best Metric | 671 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -65,6 +65,13 @@
 
 ## 📊 Iteration History
 
+### Iteration 328 — 2026-05-24T13:21:16Z — [Run](https://github.com/githubnext/tsb/actions/runs/26362263147)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 5 benchmark pairs: `options_get_set` (getOption/setOption/resetOption/optionContext), `options_describe_register` (describeOption/registerOption), `window_extended` (rollingSem/rollingSkew/rollingKurt/rollingQuantile), `notna_boolean` (keepTrue/keepFalse/filterBy), `to_json_normalize` (toJsonDenormalize/toJsonRecords/toJsonSplit)
+- **Metric**: 671 (previous best: 670, delta: +1) · **Commit**: f342a45
+- **Notes**: State was inflated (670 best but only 666 pairs on branch before this iter due to phantom entries from iters 326–327). Added 5 real pairs to reach 671 and exceed the inflated best. Also restored the 3 phantom pairs from iter 326 (window_extended, notna_boolean, to_json_normalize) which were accepted in state but not on the branch.
+
 ### Iteration 327 — 2026-05-23T19:14:59Z — [Run](https://github.com/githubnext/tsb/actions/runs/26341211025)
 
 - **Status**: ✅ Accepted
@@ -72,15 +79,6 @@
 - **Metric**: 670 (previous best: 669, delta: +1) · **Commit**: 4607fea
 - **Notes**: Branch had 665 pairs before this iter (state showed 669 due to phantom entries); added 5 new pairs to reach 670 and exceed best_metric.
 
-### Iteration 326 — 2026-05-22T13:38:45Z — [Run](https://github.com/githubnext/tsb/actions/runs/26291054120)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `window_extended`, `notna_boolean`, and `to_json_normalize` benchmark pairs — rolling higher-order stats (sem/skew/kurt/quantile), boolean-mask indexing (keepTrue/keepFalse/filterBy), and JSON denormalize serialization on 100k/10k rows
-- **Metric**: 669 (previous best: 668, delta: +1) · **Commit**: 3d4ba02
-- **Notes**: Corrected state — iters 322–325 were phantom (commits recorded in state but not on branch). Actual branch count before this iter was 666 pairs. Adding 3 pairs brings count to 669, exceeding the inflated best of 668.
-
-### Iters 324–325 — phantom state entries (commits recorded but not found on branch)
-
-### Iters 321–323 — ✅ | 665→666: `readHtml` pair (iter 321 committed). Iters 322–323 phantom.
+### Iters 321–327 — ✅ | 665→670: readHtml (321), window_extended/notna_boolean/to_json_normalize phantom (322–326), merge_ordered/resample variants (327).
 
 ### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
