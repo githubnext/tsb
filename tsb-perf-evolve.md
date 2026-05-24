@@ -4,8 +4,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-23T01:26:48Z |
-| Iteration Count | 56 |
+| Last Run | 2026-05-24T07:47:00Z |
+| Iteration Count | 57 |
 | Best Metric | 20.663 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -17,10 +17,11 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci |
 
 ## 🧬 Population (summary)
 
+- **c057** (gen 57, pending-ci): Rebase c047 onto main (was 19 behind); CI failures were lint issues in new test files from main. Push via safeoutputs.
 - **c056** (gen 56, pending-ci): Rebase + noNestedTernary lint fix via safeoutputs push. PR#321 updated.
 - **c047** (gen 47, pending-ci): Per-instance `_svCache` 4-slot caches fully-constructed Series; calls 2–50 are O(1).
 - **c044** (gen 44, accepted): Cache sorted AoS+nanBuf. ✅ merged PR#303.
@@ -50,6 +51,12 @@
 - Island 4 hybrid: native sort n<1k, radix n≥1k.
 
 ## 📊 Iteration History
+
+### Iteration 57 — 2026-05-24 07:47 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26355500590)
+
+- **Status**: ⏳ Pending CI · Rebase c047 onto main (19 commits behind)
+- **Change**: Rebased autoloop/tsb-perf-evolve onto origin/main; CI was failing due to lint errors in new `tests/xval/helpers.ts` (added to main, not yet in branch). Main CI is green.
+- **Metric**: pending CI
 
 ### Iteration 56 — 2026-05-23 01:26 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26319739600)
 
