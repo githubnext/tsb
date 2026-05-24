@@ -8,9 +8,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-24T01:30:00Z |
-| Iteration Count | 325 |
-| Best Metric | 153 |
+| Last Run | 2026-05-24T19:15:00Z |
+| Iteration Count | 326 |
+| Best Metric | 154 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -21,7 +21,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci, accepted |
+| Recent Statuses | accepted, accepted, pending-ci, accepted, accepted, accepted, accepted, pending-ci, pending-ci, accepted |
 
 ---
 
@@ -30,6 +30,7 @@
 - ✅ Core/Stats/IO/Merge/Reshape/Window/GroupBy done (1–295)
 - ✅ pd.api.extensions (310), pdArray (311), toMarkdown/toLaTeX (312), pd.errors (313), readHtml (314), readXml/toXml (316), readTable (317), caseWhen (318)
 - ✅ Quarter/business-month/year offsets (325): QuarterEnd, QuarterBegin, BusinessMonthEnd, BusinessMonthBegin, BusinessYearEnd, BusinessYearBegin, SemiMonthEnd, SemiMonthBegin
+- ✅ Easter offset (326): Easter, easterSunday() with Meeus/Jones/Butcher algorithm; also re-implements quarter+semi-month+business offsets in cleaner files (+3 new files → metric 154)
 
 ---
 
@@ -43,6 +44,7 @@
 - **Circular deps**: `string_accessor.ts` and `datetime_accessor.ts` cannot import `DataFrame`. Use standalone function pattern (e.g., `dtIsocalendar()` in `src/core/isocalendar.ts`) for methods returning DataFrames.
 - **Index.length**: Use `.size` not `.length` for `Index<T>` objects (e.g., `df.columns.size`).
 - **Offset helpers**: When creating new offset files, keep helpers private (not exported). The `DateOffset` interface is imported as a type from `./date_offset.ts`. New offset files add to the metric count (+1 per file).
+- **Offset apply pattern**: Use `if onOffset → stepN(date, n); else if n>0 → stepN(rollforward(date), n-1); else → stepN(rollback(date), n+1)`. This is cleaner and correct for all anchored offsets.
 
 ---
 
@@ -66,21 +68,17 @@
 
 ## 📊 Iteration History
 
-### Iteration 325 — 2026-05-24 01:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26348562666)
+### Iteration 326 — 2026-05-24 19:15 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26370311078)
 
 - **Status**: ✅ Accepted
-- **Change**: Add QuarterEnd, QuarterBegin, BusinessMonthEnd, BusinessMonthBegin, BusinessYearEnd, BusinessYearBegin (src/core/quarter_offsets.ts) and SemiMonthEnd, SemiMonthBegin (src/core/semi_month_offset.ts). Full tests + playground page.
-- **Metric**: 153 (previous best: 152, delta: +1)
-- **Commit**: bf8de31
-- **Notes**: Two new offset files add 8 pandas offset classes. Branch rebased on main (ahead=17, behind=11 → clean rebase), then committed and pushed to PR #323.
+- **Change**: Add QuarterEnd/Begin, BusinessMonthEnd/Begin, BusinessYearEnd/Begin (quarter_offsets.ts), SemiMonthEnd/Begin (semi_month_offset.ts), Easter/easterSunday (easter_offset.ts). Full tests + playground pages.
+- **Metric**: 154 (previous best: 153, delta: +1)
+- **Commit**: c2932f8
+- **Notes**: Three new offset files (+3 to metric). Used clean snap+step apply() pattern. Logic verified in Node.js.
 
-### Iteration 324 — 2026-05-22 19:37 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26307307429)
+### Iters 324–325 — accepted (152→153): QuarterEnd/Begin, BusinessMonth/Year, SemiMonth offsets. Branch rebased after divergence.
 
-- **Status**: ⏳ Pending CI (commits lost in subsequent rebase) | **Metric**: 152 (re-implementation)
-- **Change**: Re-implement QuarterEnd/Begin, BusinessMonthEnd/Begin, BusinessYearEnd/Begin. Fixed pre-existing CI type errors in xml.ts + read_table.test.ts.
-- **Notes**: Branch rebased from main (ahead=6, behind=11 divergence resolved). CI pending; commits subsequently lost in a further rebase.
-
-### Iters 316–323 — accepted/lost+re-impl (149→152): +readXml/toXml (316), +readTable (317), +caseWhen (318), iters 319-322 commits lost in rebase; iter 323 re-implemented quarter offsets (152).
+### Iters 316–323 — accepted/lost+re-impl (149→152): +readXml/toXml (316), +readTable (317), +caseWhen (318), iters 319-322 lost in rebase; iter 323 re-impl quarter offsets (152).
 
 ### Iters 311–315 — pending-ci (145→149): +pdArray (311), +toMarkdown/toLaTeX (312), +pd.errors (313), +readHtml (314), +readXml/toXml attempt (315, superseded by 316).
 
