@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-25T08:16:46Z |
-| Iteration Count | 329 |
-| Best Metric | 672 |
+| Last Run | 2026-05-26T01:28:15Z |
+| Iteration Count | 330 |
+| Best Metric | 673 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -64,6 +64,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 330 — 2026-05-26T01:28:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/26427055861)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 7 benchmark pairs: `notna_boolean` (keepTrue/keepFalse/filterBy), `window_extended` (rollingSem/rollingSkew/rollingKurt/rollingQuantile), `na_ops` (isna/notna/ffillSeries/bfillSeries/dataFrameFfill/dataFrameBfill), `reduce_ops` (nuniqueSeries/anySeries/allSeries/nunique), `rename_ops` (renameSeriesIndex/renameDataFrame/addPrefixDataFrame/addSuffixDataFrame), `math_ops` (absSeries/absDataFrame/roundSeries/roundDataFrame), `value_counts_full` (valueCountsBinned)
+- **Metric**: 673 (previous best: 672, delta: +1) · **Commit**: 05090de
+- **Notes**: Branch was at 666 pairs (state inflated to 672). Added 7 new pairs to reach 673 and exceed best_metric. CI passed.
 
 ### Iteration 329 — 2026-05-25T08:16:46Z — [Run](https://github.com/githubnext/tsb/actions/runs/26390671920)
 
