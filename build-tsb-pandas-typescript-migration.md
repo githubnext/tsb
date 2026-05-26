@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-25T13:55:00Z |
-| Iteration Count | 327 |
-| Best Metric | 155 |
+| Last Run | 2026-05-26T08:05:00Z |
+| Iteration Count | 328 |
+| Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,11 +19,11 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, accepted |
 
 ## 🎯 Current Priorities
 
-- Next: FY5253/FY5253Quarter (fiscal year offsets), CustomBusinessDay, more pd.io features
+- Next: CustomBusinessDay (custom holiday calendars), more pd.io features (read_feather, read_parquet)
 
 ## 📚 Lessons Learned
 
@@ -34,11 +34,16 @@
 
 ## 🔭 Future Directions
 
-- `pd.offsets.FY5253` / `FY5253Quarter` — fiscal year offsets
 - `pd.offsets.CustomBusinessDay` — custom holiday calendars
 - More `pd.io` features: read_feather, read_parquet
+- `pd.offsets.CustomBusinessMonthEnd/Begin` — business month with custom calendars
 
 ## 📊 Iteration History
+
+### Iteration 328 — 2026-05-26 — [Run](https://github.com/githubnext/tsb/actions/runs/26440139853)
+- **Status**: ✅ Accepted
+- **Change**: Add `offsets_extended.ts` with QuarterEnd/Begin, SemiMonthEnd/Begin, Easter, BusinessMonthEnd/Begin, BusinessYearEnd/Begin, FY5253, FY5253Quarter + tests + playground
+- **Metric**: 152 (prev: 151, delta: +1) — Commit: e4231d9
 
 ### Iteration 327 — 2026-05-25 — [Run](https://github.com/githubnext/tsb/actions/runs/26403893017)
 - **Status**: ✅ Accepted
