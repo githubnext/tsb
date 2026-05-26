@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-26T01:28:15Z |
-| Iteration Count | 330 |
-| Best Metric | 673 |
+| Last Run | 2026-05-26T19:32:58Z |
+| Iteration Count | 331 |
+| Best Metric | 678 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -58,41 +58,22 @@
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
 - `datetime_tz` variants still uncovered
-- `resample_apply` (custom agg fn) not yet benchmarked
+- `resample_apply` (custom agg fn) — ✅ now covered (`resample_agg`)
 - `FixedForwardWindowIndexer` with rolling (custom indexer + rolling.sum) not yet benchmarked
+- Period.contains / Period.diff variants not yet benchmarked
+- `registerExtensionDtype` / `ExtensionDtype` abstract subclassing not yet benchmarked
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 330 — 2026-05-26T01:28:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/26427055861)
+### Iteration 331 — 2026-05-26T19:32:58Z — [Run](https://github.com/githubnext/tsb/actions/runs/26470443561)
 
 - **Status**: ✅ Accepted
-- **Change**: Added 7 benchmark pairs: `notna_boolean` (keepTrue/keepFalse/filterBy), `window_extended` (rollingSem/rollingSkew/rollingKurt/rollingQuantile), `na_ops` (isna/notna/ffillSeries/bfillSeries/dataFrameFfill/dataFrameBfill), `reduce_ops` (nuniqueSeries/anySeries/allSeries/nunique), `rename_ops` (renameSeriesIndex/renameDataFrame/addPrefixDataFrame/addSuffixDataFrame), `math_ops` (absSeries/absDataFrame/roundSeries/roundDataFrame), `value_counts_full` (valueCountsBinned)
-- **Metric**: 673 (previous best: 672, delta: +1) · **Commit**: 05090de
-- **Notes**: Branch was at 666 pairs (state inflated to 672). Added 7 new pairs to reach 673 and exceed best_metric. CI passed.
+- **Change**: Added 5 benchmark pairs: `resample_dataframe` (DataFrame hourly resample sum/mean), `resample_agg` (SeriesResampler.agg with built-in + custom fn), `resample_ohlc` (Series ohlc 1h/1d), `period_todatetime` (PeriodIndex.toDatetimeStart/End for daily/monthly/quarterly), `extensions_register` (registerSeriesAccessor/registerDataFrameAccessor/registerIndexAccessor/getRegisteredAccessors)
+- **Metric**: 678 (previous best: 673, delta: +5) · **Commit**: 69ccd03
+- **Notes**: bun not available in sandbox; CI gate validates TS. All 5 new pairs cover previously unbenchmarked APIs.
 
-### Iteration 329 — 2026-05-25T08:16:46Z — [Run](https://github.com/githubnext/tsb/actions/runs/26390671920)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 6 benchmark pairs: `join_all` (join/joinAll/crossJoin), `to_json_normalize` (toJsonDenormalize/toJsonRecords/toJsonSplit/toJsonIndex), `options_get_set` (getOption/setOption/resetOption/describeOption/registerOption/optionContext), `first_last_valid_index` (firstValidIndex/lastValidIndex), `str_findall_expand` (strFindallExpand), `bool_item_series` (boolSeries/boolDataFrame/itemSeries)
-- **Metric**: 672 (previous best: 671, delta: +1) · **Commit**: 1240a65
-- **Notes**: Branch was at 666 pairs (state inflated to 671). Added 6 new pairs to reach 672. bun not available in sandbox; CI gate validates TS.
-
-### Iteration 328 — 2026-05-24T13:21:16Z — [Run](https://github.com/githubnext/tsb/actions/runs/26362263147)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 5 benchmark pairs: `options_get_set` (getOption/setOption/resetOption/optionContext), `options_describe_register` (describeOption/registerOption), `window_extended` (rollingSem/rollingSkew/rollingKurt/rollingQuantile), `notna_boolean` (keepTrue/keepFalse/filterBy), `to_json_normalize` (toJsonDenormalize/toJsonRecords/toJsonSplit)
-- **Metric**: 671 (previous best: 670, delta: +1) · **Commit**: f342a45
-- **Notes**: State was inflated (670 best but only 666 pairs on branch before this iter due to phantom entries from iters 326–327). Added 5 real pairs to reach 671 and exceed the inflated best. Also restored the 3 phantom pairs from iter 326 (window_extended, notna_boolean, to_json_normalize) which were accepted in state but not on the branch.
-
-### Iteration 327 — 2026-05-23T19:14:59Z — [Run](https://github.com/githubnext/tsb/actions/runs/26341211025)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 4 new benchmark pairs: `merge_ordered_fill` (ffill on ordered outer merge), `merge_ordered_by` (grouped ordered merge with left_by/right_by), `resample_dataframe` (DataFrame hourly sum on 100k rows), `resample_ohlc` (Series ohlc per hour on 100k rows)
-- **Metric**: 670 (previous best: 669, delta: +1) · **Commit**: 4607fea
-- **Notes**: Branch had 665 pairs before this iter (state showed 669 due to phantom entries); added 5 new pairs to reach 670 and exceed best_metric.
-
-### Iters 321–328 — ✅ | 665→671: readHtml (321), phantom entries (322–327), merge_ordered/resample/options variants (327–328).
+### Iters 321–330 — ✅ | 665→673: readHtml (321), phantom/restore (322–328), merge_ordered/resample/options/join/notna/window/na/reduce/rename/math/value_counts (327–330).
 
 ### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
