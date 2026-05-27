@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-26T19:32:58Z |
-| Iteration Count | 331 |
-| Best Metric | 678 |
+| Last Run | 2026-05-27T14:01:40Z |
+| Iteration Count | 332 |
+| Best Metric | 679 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -57,7 +57,7 @@
 
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
-- `datetime_tz` variants still uncovered
+- `datetime_tz` ✅ now covered
 - `resample_apply` (custom agg fn) — ✅ now covered (`resample_agg`)
 - `FixedForwardWindowIndexer` with rolling (custom indexer + rolling.sum) not yet benchmarked
 - Period.contains / Period.diff variants not yet benchmarked
@@ -66,6 +66,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 332 — 2026-05-27T14:01:40Z — [Run](https://github.com/githubnext/tsb/actions/runs/26515851312)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 6 benchmark pairs: `datetime_tz` (tz_localize/tz_convert), `to_json_denormalize` (toJsonDenormalize/toJsonRecords/toJsonSplit), `at_iat` (seriesAt/seriesIat/dataFrameAt/dataFrameIat), `elem_ops` (seriesAbs/seriesRound/dataFrameAbs/dataFrameRound), `sort_ops` (sortValuesSeries/sortIndexSeries/sortValuesDataFrame/sortIndexDataFrame), `series_table_format` (seriesToMarkdown/seriesToLaTeX)
+- **Metric**: 679 (previous best: 678, delta: +1)
+- **Notes**: Covered 6 previously unbenchmarked source modules. All Python benchmarks pass py_compile.
 
 ### Iteration 331 — 2026-05-26T19:32:58Z — [Run](https://github.com/githubnext/tsb/actions/runs/26470443561)
 
