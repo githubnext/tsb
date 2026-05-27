@@ -38,26 +38,19 @@ describe("cross-validation replay against tsb materialization", () => {
 function replayScenario(snapshot: ScenarioSnapshot): void {
   switch (snapshot.scenario) {
     case "scenario_1":
-      replayScenario1(snapshot);
-      return;
+      return replayScenario1(snapshot);
     case "scenario_2":
-      replayScenario2(snapshot);
-      return;
+      return replayScenario2(snapshot);
     case "scenario_3":
-      replayScenario3(snapshot);
-      return;
+      return replayScenario3(snapshot);
     case "scenario_4":
-      replayScenario4(snapshot);
-      return;
+      return replayScenario4(snapshot);
     case "scenario_5":
-      replayScenario5(snapshot);
-      return;
+      return replayScenario5(snapshot);
     case "scenario_6":
-      replayScenario6(snapshot);
-      return;
+      return replayScenario6(snapshot);
     case "scenario_7":
-      replayScenario7(snapshot);
-      return;
+      return replayScenario7(snapshot);
     default:
       throw new Error(`Unknown scenario: ${snapshot.scenario}`);
   }
