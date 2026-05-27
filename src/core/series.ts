@@ -225,8 +225,12 @@ export class Series<T extends Scalar = Scalar> {
    * returned directly, skipping the O(n) gather loop, inverse-transform, and
    * Object.freeze spreads entirely.
    */
-  private _svCache: [Series<T> | null, Series<T> | null, Series<T> | null, Series<T> | null] =
-    [null, null, null, null];
+  private _svCache: [Series<T> | null, Series<T> | null, Series<T> | null, Series<T> | null] = [
+    null,
+    null,
+    null,
+    null,
+  ];
 
   // ─── construction ─────────────────────────────────────────────────────────
 
