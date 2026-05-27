@@ -781,7 +781,12 @@ export class Series<T extends Scalar = Scalar> {
     // ── Level-2 per-instance cache: return the previously-constructed Series ──
     // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
     // and Object.freeze spreads on all repeat calls with the same parameters.
-    const svSlot = ascending ? (naPosition === "last" ? 0 : 1) : (naPosition === "last" ? 2 : 3);
+    let svSlot: 0 | 1 | 2 | 3;
+    if (ascending) {
+      svSlot = naPosition === "last" ? 0 : 1;
+    } else {
+      svSlot = naPosition === "last" ? 2 : 3;
+    }
     const svHit = this._svCache[svSlot];
     if (svHit !== null) return svHit;
 
