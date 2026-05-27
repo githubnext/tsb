@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-27T01:40:00Z |
-| Iteration Count | 329 |
+| Last Run | 2026-05-27T02:30:00Z |
+| Iteration Count | 330 |
 | Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,11 +19,11 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, accepted |
 
 ## 🎯 Current Priorities
 
-- Next: More `pd.io` features: read_feather, read_parquet
+- Next: read_parquet (after feather CI passes)
 
 ## 📚 Lessons Learned
 
@@ -33,13 +33,19 @@
 - **Offset pattern**: `if onOffset → stepN(date, n); else if n>0 → stepN(rollforward(date), n-1); else → stepN(rollback(date), n+1)`. Keep helpers private. Each new offset file adds +1 to metric.
 - **CustomBusinessDay**: Store options in constructor separately from the internal CDay instance so multiply/negate can clone without `as` casts.
 - **exactOptionalPropertyTypes**: When cloning options with optional fields, use explicit `if (field !== null/undefined) opts.field = field` pattern.
+- **Feather v1**: Hand-written FlatBuffer builder (backward-building). `offset()` = bytes written from end. Column values at 8-byte-aligned `PrimitiveArray.offset`; bitmap comes BEFORE values: `bitmap_pos = values_offset - round8(ceil(n/8))`. UTF8: `(n+1)*4` byte offsets + data packed. Use `Label[]` not `Scalar[]` as decode return type to avoid `as` casts.
 
 ## 🔭 Future Directions
 
-- More `pd.io` features: read_feather, read_parquet
+- read_parquet (Parquet binary format — column-oriented, uses Thrift + RLE encoding)
 - `pd.offsets.CustomBusinessHour` — business hour offset
 
 ## 📊 Iteration History
+
+### Iteration 330 — 2026-05-27 — [Run](https://github.com/githubnext/tsb/actions/runs/26534091460)
+- **Status**: ⏳ Pending CI
+- **Change**: Add `readFeather`/`toFeather` — Feather v1 binary I/O with hand-written FlatBuffer builder/reader, all numeric types + bool + UTF-8 + timestamp, null bitmap support, index serialization + 20+ tests + playground
+- **Metric**: 154 (expected, prev: 153, delta: +1) — Commit: 487c9f7
 
 ### Iteration 329 — 2026-05-27 — [Run](https://github.com/githubnext/tsb/actions/runs/26485288342)
 - **Status**: ✅ Accepted
@@ -54,4 +60,3 @@
 ### Iters 316–327 — ✅ (149→151): +readXml/toXml, readTable, caseWhen, quarter/semi/business/Easter offsets.
 ### Iters 273–315 — ✅ (130→149): +Grouper, lreshape, str ops, swapaxes, readFwf, unionCategoricals, info, extractAll, rows, monthName/dayName, itertuples, dropLevel, flags, hashPandasObject, pd.options, pd.api, interval_range, period_range, infer_freq, pd.api.extensions, pdArray, toMarkdown/toLaTeX, pd.errors, readHtml.
 ### Iters 1–272 — ✅ (0→130): full pandas core + stats + io + merge + reshape + window + groupby.
-
