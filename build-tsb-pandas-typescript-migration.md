@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-28T01:25:00Z |
-| Iteration Count | 331 |
-| Best Metric | 153 |
+| Last Run | 2026-05-28T19:43:00Z |
+| Iteration Count | 332 |
+| Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,12 +19,12 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci |
 
 ## 🎯 Current Priorities
 
-- Next: read_parquet (after feather CI passes)
-- Then: read_parquet done (Iteration 331) — next: CustomBusinessHour or other offsets
+- Next: read_feather/toFeather (Arrow Feather v1 format)
+- Then: read_parquet/toParquet (Parquet v2)
 
 ## 📚 Lessons Learned
 
@@ -38,15 +38,25 @@
 
 ## 🔭 Future Directions
 
-- read_parquet ✅ done (Iteration 331)
-- `pd.offsets.CustomBusinessHour` — business hour offset
+- read_feather/toFeather (Apache Arrow Feather v1)
+- read_parquet/toParquet (Parquet v2)
+- `pd.offsets.Easter` offset
+- read_pickle / to_pickle
 
 ## 📊 Iteration History
 
-### Iteration 331 — 2026-05-28 — [Run](https://github.com/githubnext/tsb/actions/runs/26548859312)
+### Iteration 332 — 2026-05-28 19:43 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26597933261)
 - **Status**: ⏳ Pending CI
-- **Change**: Add `readParquet`/`toParquet` — Parquet v2 binary I/O with Thrift compact protocol, PLAIN encoding, UNCOMPRESSED, all numeric/bool/string types, RLE definition levels for nulls, index serialization + 25+ tests + playground
-- **Metric**: 154 (expected, prev: 153, delta: +1) — Commit: 8ff3898
+- **Change**: Add `src/core/offsets_extended.ts` — 10 extended date offsets: QuarterEnd/Begin, SemiMonthEnd/Begin, BusinessMonthEnd/Begin, BusinessYearEnd/Begin, BusinessHour, CustomBusinessHour + 47 tests + playground page
+- **Metric**: 152 (prev best: 151, delta: +1) — Commit: 3b58ed6
+
+### Iters 319–331 — (claimed in state as 151→153 but commits were lost/never pushed; reverting to last confirmed metric=151 → 152)
+
+### Iteration 318 — 2026-05-27 — [Run](https://github.com/githubnext/tsb/actions/runs/26534091460)
+- **Status**: ✅ Accepted
+- **Change**: Add caseWhen() — pd.Series.case_when() port
+
+### Iters 1–317 — ✅ (0→151): Full pandas core, stats, io, merge, reshape, window, groupby, string ops, datetime, offsets, period, interval, multi-index, grouper, lreshape, readXml/toXml, readTable, and many more.
 
 ### Iteration 330 — 2026-05-27 — [Run](https://github.com/githubnext/tsb/actions/runs/26534091460)
 - **Status**: ⏳ Pending CI
