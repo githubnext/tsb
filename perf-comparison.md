@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-27T14:01:40Z |
-| Iteration Count | 332 |
-| Best Metric | 679 |
+| Last Run | 2026-05-28T14:08:55Z |
+| Iteration Count | 333 |
+| Best Metric | 678 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -41,7 +41,7 @@
 
 ## 📚 Lessons Learned
 
-- **Import paths**: Always `../../src/index.js` (not `.ts`) for all benchmark files.
+- **Import paths**: Always `../../src/index.ts` for all benchmark files (recent style; older files use `.js`).
 - **groupby AggName**: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only.
 - **merge_asof**: `mergeAsof(left, right, { on, direction })` — DFs must be sorted.
 - **corrWith**: `corrWith(df, seriesOther)` — DF as first arg, returns Series per column.
@@ -67,20 +67,14 @@
 
 ## 📊 Iteration History
 
-### Iteration 332 — 2026-05-27T14:01:40Z — [Run](https://github.com/githubnext/tsb/actions/runs/26515851312)
+### Iteration 333 — 2026-05-28T14:08:55Z — [Run](https://github.com/githubnext/tsb/actions/runs/26579823379)
 
 - **Status**: ✅ Accepted
-- **Change**: Added 6 benchmark pairs: `datetime_tz` (tz_localize/tz_convert), `to_json_denormalize` (toJsonDenormalize/toJsonRecords/toJsonSplit), `at_iat` (seriesAt/seriesIat/dataFrameAt/dataFrameIat), `elem_ops` (seriesAbs/seriesRound/dataFrameAbs/dataFrameRound), `sort_ops` (sortValuesSeries/sortIndexSeries/sortValuesDataFrame/sortIndexDataFrame), `series_table_format` (seriesToMarkdown/seriesToLaTeX)
-- **Metric**: 679 (previous best: 678, delta: +1)
-- **Notes**: Covered 6 previously unbenchmarked source modules. All Python benchmarks pass py_compile.
+- **Change**: Added 5 benchmark pairs: `add_sub_mul_div` (seriesAdd/Sub/Mul/Div + dataFrameAdd/Sub), `pow_mod` (seriesPow/Mod/FloorDiv + dataFramePow/Mod/FloorDiv), `shift_diff` (shiftSeries/diffSeries/dataFrameShift/Diff), `numeric_extended` (zscore/minMaxNormalize/digitize/histogram), `categorical_ops` (catSortByFreq/catFreqTable/catRecode)
+- **Metric**: 678 (previous best: 673 on branch, delta: +5)
+- **Commit**: 64def2e
+- **Notes**: State file iters 331/332 were not committed to branch (commits missing); actual branch baseline was 673. Added 5 new module-level pairs covering arithmetic, numeric normalization, and categorical ops.
 
-### Iteration 331 — 2026-05-26T19:32:58Z — [Run](https://github.com/githubnext/tsb/actions/runs/26470443561)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 5 benchmark pairs: `resample_dataframe` (DataFrame hourly resample sum/mean), `resample_agg` (SeriesResampler.agg with built-in + custom fn), `resample_ohlc` (Series ohlc 1h/1d), `period_todatetime` (PeriodIndex.toDatetimeStart/End for daily/monthly/quarterly), `extensions_register` (registerSeriesAccessor/registerDataFrameAccessor/registerIndexAccessor/getRegisteredAccessors)
-- **Metric**: 678 (previous best: 673, delta: +5) · **Commit**: 69ccd03
-- **Notes**: bun not available in sandbox; CI gate validates TS. All 5 new pairs cover previously unbenchmarked APIs.
-
-### Iters 321–330 — ✅ | 665→673: readHtml (321), phantom/restore (322–328), merge_ordered/resample/options/join/notna/window/na/reduce/rename/math/value_counts (327–330).
+### Iters 321–332 — ✅ | 665→673: readHtml (321), phantom/restore (322–328), merge_ordered/resample/options/join/notna/window/na/reduce/rename/math/value_counts (327–330), resample_dataframe/agg/ohlc/period_todatetime/extensions_register (331), datetime_tz/to_json/at_iat/elem_ops/sort_ops/series_table_format (332; note: commits for 331–332 not found on branch, actual branch metric was 673).
 
 ### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
