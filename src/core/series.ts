@@ -220,17 +220,15 @@ export class Series<T extends Scalar = Scalar> {
   readonly dtype: Dtype;
   readonly name: string | null;
   /**
-   * Per-instance cache for sortValues results.  Slots: 0=asc+last, 1=asc+first,
-   * 2=desc+last, 3=desc+first.  On a cache hit the fully-constructed Series is
-   * returned directly, skipping the O(n) gather loop, inverse-transform, and
-   * Object.freeze spreads entirely.
+   * Per-instance cache for sortValues results — four named properties for
+   * direct property access (avoids array-index overhead on the hot cache-hit
+   * path).  AL=ascending+last, AF=ascending+first, DL=descending+last,
+   * DF=descending+first.
    */
-  private _svCache: [Series<T> | null, Series<T> | null, Series<T> | null, Series<T> | null] = [
-    null,
-    null,
-    null,
-    null,
-  ];
+  private _svCacheAL: Series<T> | null = null;
+  private _svCacheAF: Series<T> | null = null;
+  private _svCacheDL: Series<T> | null = null;
+  private _svCacheDF: Series<T> | null = null;
 
   // ─── construction ─────────────────────────────────────────────────────────
 
@@ -782,17 +780,16 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Level-2 per-instance cache: return the previously-constructed Series ──
+    // ── Per-instance cache: named properties for direct access on the hot path ──
     // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
     // and Object.freeze spreads on all repeat calls with the same parameters.
-    let svSlot: 0 | 1 | 2 | 3;
     if (ascending) {
-      svSlot = naPosition === "last" ? 0 : 1;
+      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
+      if (hit !== null) return hit;
     } else {
-      svSlot = naPosition === "last" ? 2 : 3;
+      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
+      if (hit !== null) return hit;
     }
-    const svHit = this._svCache[svSlot];
-    if (svHit !== null) return svHit;
 
     const n = this._values.length;
     const vals = this._values;
@@ -1127,7 +1124,13 @@ export class Series<T extends Scalar = Scalar> {
       name: this.name,
     });
     // Save to per-instance cache so repeat calls are O(1).
-    this._svCache[svSlot] = result;
+    if (ascending) {
+      if (naPosition === "last") this._svCacheAL = result;
+      else this._svCacheAF = result;
+    } else {
+      if (naPosition === "last") this._svCacheDL = result;
+      else this._svCacheDF = result;
+    }
     return result;
   }
 
