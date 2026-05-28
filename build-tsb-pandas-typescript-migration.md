@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-27T02:30:00Z |
-| Iteration Count | 330 |
+| Last Run | 2026-05-28T01:25:00Z |
+| Iteration Count | 331 |
 | Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,11 +19,12 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, accepted |
+| Recent Statuses | pending-ci, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci, pending-ci |
 
 ## 🎯 Current Priorities
 
 - Next: read_parquet (after feather CI passes)
+- Then: read_parquet done (Iteration 331) — next: CustomBusinessHour or other offsets
 
 ## 📚 Lessons Learned
 
@@ -37,10 +38,15 @@
 
 ## 🔭 Future Directions
 
-- read_parquet (Parquet binary format — column-oriented, uses Thrift + RLE encoding)
+- read_parquet ✅ done (Iteration 331)
 - `pd.offsets.CustomBusinessHour` — business hour offset
 
 ## 📊 Iteration History
+
+### Iteration 331 — 2026-05-28 — [Run](https://github.com/githubnext/tsb/actions/runs/26548859312)
+- **Status**: ⏳ Pending CI
+- **Change**: Add `readParquet`/`toParquet` — Parquet v2 binary I/O with Thrift compact protocol, PLAIN encoding, UNCOMPRESSED, all numeric/bool/string types, RLE definition levels for nulls, index serialization + 25+ tests + playground
+- **Metric**: 154 (expected, prev: 153, delta: +1) — Commit: 8ff3898
 
 ### Iteration 330 — 2026-05-27 — [Run](https://github.com/githubnext/tsb/actions/runs/26534091460)
 - **Status**: ⏳ Pending CI
