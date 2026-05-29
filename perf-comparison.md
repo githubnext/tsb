@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-28T14:08:55Z |
-| Iteration Count | 333 |
+| Last Run | 2026-05-29T08:10:29Z |
+| Iteration Count | 334 |
 | Best Metric | 678 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -57,24 +57,26 @@
 
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
-- `datetime_tz` ✅ now covered
-- `resample_apply` (custom agg fn) — ✅ now covered (`resample_agg`)
-- `FixedForwardWindowIndexer` with rolling (custom indexer + rolling.sum) not yet benchmarked
+- `FixedForwardWindowIndexer` with rolling not yet benchmarked
 - Period.contains / Period.diff variants not yet benchmarked
-- `registerExtensionDtype` / `ExtensionDtype` abstract subclassing not yet benchmarked
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 333 — 2026-05-28T14:08:55Z — [Run](https://github.com/githubnext/tsb/actions/runs/26579823379)
+### Iteration 334 — 2026-05-29T08:10:29Z — [Run](https://github.com/githubnext/tsb/actions/runs/26625976669)
 
 - **Status**: ✅ Accepted
-- **Change**: Added 5 benchmark pairs: `add_sub_mul_div` (seriesAdd/Sub/Mul/Div + dataFrameAdd/Sub), `pow_mod` (seriesPow/Mod/FloorDiv + dataFramePow/Mod/FloorDiv), `shift_diff` (shiftSeries/diffSeries/dataFrameShift/Diff), `numeric_extended` (zscore/minMaxNormalize/digitize/histogram), `categorical_ops` (catSortByFreq/catFreqTable/catRecode)
+- **Change**: Added 5 benchmark pairs: `clip_with_bounds` (clipSeriesWithBounds/clipDataFrameWithBounds), `sort_ops_fn` (sortValuesSeries/sortIndexSeries/sortValuesDataFrame/sortIndexDataFrame), `cut_bins_to_frame` (cut+cutBinsToFrame/cutBinCounts/binEdges), `series_to_markdown` (seriesToMarkdown/seriesToLaTeX), `auto_corr` (autoCorr at multiple lags)
 - **Metric**: 678 (previous best: 673 on branch, delta: +5)
-- **Commit**: 64def2e
-- **Notes**: State file iters 331/332 were not committed to branch (commits missing); actual branch baseline was 673. Added 5 new module-level pairs covering arithmetic, numeric normalization, and categorical ops.
+- **Commit**: c9c4734
+- **Notes**: Branch was at 673 (state file had optimistic 678 from uncommitted iters). Added 5 new pairs covering clip bounds, sort ops API, cut bin summarization, Series markdown/LaTeX formatting, and autocorrelation.
 
-### Iters 321–332 — ✅ | 665→673: readHtml (321), phantom/restore (322–328), merge_ordered/resample/options/join/notna/window/na/reduce/rename/math/value_counts (327–330), resample_dataframe/agg/ohlc/period_todatetime/extensions_register (331), datetime_tz/to_json/at_iat/elem_ops/sort_ops/series_table_format (332; note: commits for 331–332 not found on branch, actual branch metric was 673).
+### Iteration 333 — [Run](https://github.com/githubnext/tsb/actions/runs/26579823379)
+
+- **Status**: ✅ Accepted | **Metric**: 678 (branch was at 673, delta: +5) | **Commit**: 64def2e
+- **Change**: add_sub_mul_div, pow_mod, shift_diff, numeric_extended, categorical_ops
+
+### Iters 321–333 — ✅ | 665→678: readHtml, phantom/restore, merge_ordered/resample/join/notna/window/na/reduce/rename/math/value_counts, resample_df/agg/ohlc/period/extensions, datetime_tz/to_json/at_iat/elem_ops/sort_ops/series_fmt, add_sub_mul_div/pow_mod/shift_diff/numeric_extended/categorical_ops.
 
 ### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
