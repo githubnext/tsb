@@ -781,15 +781,15 @@ export class Series<T extends Scalar = Scalar> {
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
     // ── Per-instance cache: named properties for direct access on the hot path ──
-    // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
-    // and Object.freeze spreads on all repeat calls with the same parameters.
+    // Flat nested-if form eliminates the `const hit` intermediate variable,
+    // reducing one register write per cache hit call.
     if (ascending) {
-      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
-      if (hit !== null) return hit;
-    } else {
-      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
-      if (hit !== null) return hit;
-    }
+      if (naPosition === "last") {
+        if (this._svCacheAL !== null) return this._svCacheAL;
+      } else if (this._svCacheAF !== null) return this._svCacheAF;
+    } else if (naPosition === "last") {
+      if (this._svCacheDL !== null) return this._svCacheDL;
+    } else if (this._svCacheDF !== null) return this._svCacheDF;
 
     const n = this._values.length;
     const vals = this._values;
