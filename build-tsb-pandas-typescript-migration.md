@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-28T19:43:00Z |
-| Iteration Count | 332 |
+| Last Run | 2026-05-29T00:00:00Z |
+| Iteration Count | 333 |
 | Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,12 +19,12 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci |
 
 ## 🎯 Current Priorities
 
-- Next: read_feather/toFeather (Arrow Feather v1 format)
-- Then: read_parquet/toParquet (Parquet v2)
+- Next: read_parquet/toParquet (Parquet v2)
+- Then: read_pickle / to_pickle
 
 ## 📚 Lessons Learned
 
@@ -38,12 +38,16 @@
 
 ## 🔭 Future Directions
 
-- read_feather/toFeather (Apache Arrow Feather v1)
 - read_parquet/toParquet (Parquet v2)
 - `pd.offsets.Easter` offset
 - read_pickle / to_pickle
 
 ## 📊 Iteration History
+
+### Iteration 333 — 2026-05-29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26641131826)
+- **Status**: ⏳ Pending CI
+- **Change**: Add `src/io/feather.ts` — `readFeather`/`toFeather` — Apache Arrow Feather v1 binary I/O. Hand-rolled FlatBuffer encoder/decoder. Supports float64/float32/int*/uint*/bool/utf8/timestamp. Arrow validity bitmap for nulls. Index via `__index_level_0__` convention. Column filter option. 48 tests + playground.
+- **Metric**: 152 (prev actual: 151, delta: +1) — Commit: 8719c4c
 
 ### Iteration 332 — 2026-05-28 19:43 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26597933261)
 - **Status**: ⏳ Pending CI
@@ -58,21 +62,4 @@
 
 ### Iters 1–317 — ✅ (0→151): Full pandas core, stats, io, merge, reshape, window, groupby, string ops, datetime, offsets, period, interval, multi-index, grouper, lreshape, readXml/toXml, readTable, and many more.
 
-### Iteration 330 — 2026-05-27 — [Run](https://github.com/githubnext/tsb/actions/runs/26534091460)
-- **Status**: ⏳ Pending CI
-- **Change**: Add `readFeather`/`toFeather` — Feather v1 binary I/O with hand-written FlatBuffer builder/reader, all numeric types + bool + UTF-8 + timestamp, null bitmap support, index serialization + 20+ tests + playground
-- **Metric**: 154 (expected, prev: 153, delta: +1) — Commit: 487c9f7
-
-### Iteration 329 — 2026-05-27 — [Run](https://github.com/githubnext/tsb/actions/runs/26485288342)
-- **Status**: ✅ Accepted
-- **Change**: Add `CustomBusinessDay` + `CustomBusinessMonthEnd/Begin` with `USFederalHolidayCalendar`, `AbstractHolidayCalendar` + tests + playground
-- **Metric**: 153 (prev: 152, delta: +1) — Commit: 0fda56b
-
-### Iteration 328 — 2026-05-26 — [Run](https://github.com/githubnext/tsb/actions/runs/26440139853)
-- **Status**: ✅ Accepted
-- **Change**: Add `offsets_extended.ts` with QuarterEnd/Begin, SemiMonthEnd/Begin, Easter, BusinessMonthEnd/Begin, BusinessYearEnd/Begin, FY5253, FY5253Quarter + tests + playground
-- **Metric**: 152 (prev: 151, delta: +1) — Commit: e4231d9
-
-### Iters 316–327 — ✅ (149→151): +readXml/toXml, readTable, caseWhen, quarter/semi/business/Easter offsets.
-### Iters 273–315 — ✅ (130→149): +Grouper, lreshape, str ops, swapaxes, readFwf, unionCategoricals, info, extractAll, rows, monthName/dayName, itertuples, dropLevel, flags, hashPandasObject, pd.options, pd.api, interval_range, period_range, infer_freq, pd.api.extensions, pdArray, toMarkdown/toLaTeX, pd.errors, readHtml.
-### Iters 1–272 — ✅ (0→130): full pandas core + stats + io + merge + reshape + window + groupby.
+### Iters 318–332 — (118-series commits; net metric: 151→152 confirmed at iter 333 start; several pending-ci or lost).
