@@ -780,16 +780,19 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: named properties for direct JIT-inlinable access ──
-    // Keeping this method body minimal lets JSC specialize and inline the hot
-    // cache-hit path; the full sort logic lives in _sortValuesCold below.
+    // ── Per-instance cache: ternary select for CMOV-friendly JIT output ──
+    // Using a ternary select (rather than nested-if) keeps the hot-path
+    // instruction count minimal: one branch on ascending, one CMOV-style
+    // select on naPosition, one null check, return. The full sort logic
+    // lives in _sortValuesCold so this function body stays small enough for
+    // JSC to inline the cache-hit path at every call site.
     if (ascending) {
-      if (naPosition === "last") {
-        if (this._svCacheAL !== null) return this._svCacheAL;
-      } else if (this._svCacheAF !== null) return this._svCacheAF;
-    } else if (naPosition === "last") {
-      if (this._svCacheDL !== null) return this._svCacheDL;
-    } else if (this._svCacheDF !== null) return this._svCacheDF;
+      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
+      if (hit !== null) return hit;
+    } else {
+      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
+      if (hit !== null) return hit;
+    }
     return this._sortValuesCold(ascending, naPosition);
   }
 
