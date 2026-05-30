@@ -780,9 +780,9 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: named properties for direct access on the hot path ──
-    // Flat nested-if form eliminates the `const hit` intermediate variable,
-    // reducing one register write per cache hit call.
+    // ── Per-instance cache: named properties for direct JIT-inlinable access ──
+    // Keeping this method body minimal lets JSC specialize and inline the hot
+    // cache-hit path; the full sort logic lives in _sortValuesCold below.
     if (ascending) {
       if (naPosition === "last") {
         if (this._svCacheAL !== null) return this._svCacheAL;
@@ -790,7 +790,11 @@ export class Series<T extends Scalar = Scalar> {
     } else if (naPosition === "last") {
       if (this._svCacheDL !== null) return this._svCacheDL;
     } else if (this._svCacheDF !== null) return this._svCacheDF;
+    return this._sortValuesCold(ascending, naPosition);
+  }
 
+  /** Cold-path sort: full radix/comparator sort + per-instance cache write. */
+  private _sortValuesCold(ascending: boolean, naPosition: "first" | "last"): Series<T> {
     const n = this._values.length;
     const vals = this._values;
 
