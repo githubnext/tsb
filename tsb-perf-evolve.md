@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-29T01:31:41Z |
-| Iteration Count | 64 |
+| Last Run | 2026-05-30T01:29:21Z |
+| Iteration Count | 65 |
 | Best Metric | 0.0000174 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -21,12 +21,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, pending-ci, accepted, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci |
 
 ---
 
 ## 🧬 Population (summary)
 
+- **c064** (gen 64, pending-ci): Extract cold sort path to `_sortValuesCold` — keeps `sortValues` as a ~10-line function for JIT specialization. Commit `3f63248`.
 - **c063** (gen 63, pending-ci): Flat nested-if cache — eliminates `const hit` intermediate variable on hot path. Commit `c8e1138`.
 - **c062** (gen 62, accepted, fitness 0.0000174, BEST): Named-property cache (_svCacheAL/AF/DL/DF) — CI confirmed: tsb 0.0000902ms vs pandas 5.19ms. Commit `4c01952`.
 - **c061** (gen 61, accepted, fitness 0.0000275): Rebased + lint fix; c047 per-instance cache intact. Commit `b0f9ad4`.
@@ -64,27 +65,18 @@
 
 ---
 
-### Iteration 63 — 2026-05-29 01:31 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26612540782)
+### Iteration 64 — 2026-05-30 01:29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26670672148)
 
 - **Status**: ⏳ Pending CI
-- **Operator**: Exploitation (c062 → c063)
-- **Change**: Flat nested-if cache check — eliminates `const hit` intermediate variable; direct property access in innermost branch, no ternary.
-- **Commit**: `c8e1138`
+- **Operator**: Exploitation (c063 → c064)
+- **Change**: Extracted full sort body into `private _sortValuesCold()`. `sortValues` is now ~10 lines (cache check + delegate). Hypothesis: smaller function body allows JSC to more aggressively specialize/inline the hot cache-hit path.
+- **Commit**: `3f63248`
 
-### Iteration 62 — 2026-05-28 08:11 UTC — ✅ Accepted (CI confirmed)
+### Iters 61–63 — accepted(61-62), pending-ci(63)
 
-- **Status**: ✅ Accepted
-- **Operator**: Exploitation (named-property cache)
-- **Change**: Named props `_svCacheAL/AF/DL/DF` replace `_svCache[4]` array; eliminates svSlot var + array-index on hot path.
-- **Metric**: 0.0000174 (prev best: 0.0000275, delta: -0.0000101; tsb 0.0000902ms vs pandas 5.19ms)
-- **Commit**: `4c01952`
-
-### Iteration 61 — 2026-05-27 08:12 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26499200394)
-
-- **Status**: ✅ Accepted (CI confirmed 2026-05-28)
-- **Change**: Rebase + `noNestedTernary` lint fix; c047 per-instance cache intact.
-- **Metric**: 0.0000275 (prev best: 20.663, delta: -20.663; tsb 0.000112ms vs pandas 4.080ms)
-- **Commit**: `b0f9ad4`
+- c061: Rebase + lint fix; per-instance cache intact. Metric 0.0000275. Commit `b0f9ad4`
+- c062: Named props `_svCacheAL/AF/DL/DF`. Metric 0.0000174 (BEST). Commit `4c01952`
+- c063: Flat nested-if cache check. Pending CI. Commit `c8e1138`
 
 ### Iters 47–60 — c047 pending-ci (per-instance _svCache); repeated rebase/lint fix attempts
 
