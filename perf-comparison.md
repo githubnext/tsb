@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-29T08:10:29Z |
-| Iteration Count | 334 |
-| Best Metric | 678 |
+| Last Run | 2026-05-30T07:44:15Z |
+| Iteration Count | 335 |
+| Best Metric | 676 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -64,6 +64,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 335 — 2026-05-30T07:44:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/26678361944)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 3 benchmark pairs: `join` (DataFrame.join), `join_all` (joinAll on 4 frames), `cross_join` (crossJoin Cartesian product)
+- **Metric**: 676 (branch count; state file had inflated 678, actual branch was 673, delta: +3)
+- **Commit**: e655688
+- **Notes**: `join`, `joinAll`, `crossJoin` were the only merge functions without benchmarks. Added realistic 1000-row left×right index-join, 4-frame joinAll, and 200×200 cross-join scenarios.
+
 ### Iteration 334 — 2026-05-29T08:10:29Z — [Run](https://github.com/githubnext/tsb/actions/runs/26625976669)
 
 - **Status**: ✅ Accepted
@@ -72,11 +80,6 @@
 - **Commit**: c9c4734
 - **Notes**: Branch was at 673 (state file had optimistic 678 from uncommitted iters). Added 5 new pairs covering clip bounds, sort ops API, cut bin summarization, Series markdown/LaTeX formatting, and autocorrelation.
 
-### Iteration 333 — [Run](https://github.com/githubnext/tsb/actions/runs/26579823379)
-
-- **Status**: ✅ Accepted | **Metric**: 678 (branch was at 673, delta: +5) | **Commit**: 64def2e
-- **Change**: add_sub_mul_div, pow_mod, shift_diff, numeric_extended, categorical_ops
-
-### Iters 321–333 — ✅ | 665→678: readHtml, phantom/restore, merge_ordered/resample/join/notna/window/na/reduce/rename/math/value_counts, resample_df/agg/ohlc/period/extensions, datetime_tz/to_json/at_iat/elem_ops/sort_ops/series_fmt, add_sub_mul_div/pow_mod/shift_diff/numeric_extended/categorical_ops.
+### Iters 321–334 — ✅ | 665→676: readHtml, phantom/restore, merge_ordered/resample/join/notna/window/na/reduce/rename/math/value_counts, resample_df/agg/ohlc/period/extensions, datetime_tz/to_json/at_iat/elem_ops/sort_ops/series_fmt, add_sub_mul_div/pow_mod/shift_diff/numeric_extended/categorical_ops, clip_with_bounds/sort_ops_fn/cut_bins_to_frame/series_to_markdown/auto_corr.
 
 ### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
