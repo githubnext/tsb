@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-30T07:44:15Z |
-| Iteration Count | 335 |
-| Best Metric | 676 |
+| Last Run | 2026-05-31T01:34:11Z |
+| Iteration Count | 336 |
+| Best Metric | 677 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -63,6 +63,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 336 — 2026-05-31T01:34:11Z — [Run](https://github.com/githubnext/tsb/actions/runs/26700065503)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 4 benchmark pairs: `elem_ops` (clip/abs/round on Series+DataFrame), `clip_with_bounds` (clipSeriesWithBounds/clipDataFrameWithBounds), `format_table` (toMarkdown/seriesToMarkdown/toLaTeX/seriesToLaTeX), `numeric_extended` (minMaxNormalize)
+- **Metric**: 677 (previous best: 673 actual on branch, delta: +4)
+- **Commit**: 5c647a2
+- **Notes**: State file had inflated best_metric of 676 from uncommitted iters 334-335; actual branch was at 673 after rebase. Added 4 genuinely missing benchmark pairs covering elem-wise ops, bounds clipping, table formatting, and min-max normalization.
 
 ### Iteration 335 — 2026-05-30T07:44:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/26678361944)
 
