@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-31T01:34:11Z |
-| Iteration Count | 336 |
-| Best Metric | 677 |
+| Last Run | 2026-05-31T19:15:00Z |
+| Iteration Count | 337 |
+| Best Metric | 674 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -63,6 +63,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 337 — 2026-05-31T19:15:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/26721921744)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `pd_api` benchmark pair (api.types predicates: isScalar, isNumericDtype, isListLike, isBoolDtype, isCategoricalDtype)
+- **Metric**: 674 (previous best: 673 on branch after rebase, delta: +1)
+- **Commit**: 9fee757
+- **Notes**: Branch was at 673 after rebase onto main (state file had inflated 677). Added pd_api as the one truly missing benchmark; notna_boolean and window_extended already existed on the branch.
 
 ### Iteration 336 — 2026-05-31T01:34:11Z — [Run](https://github.com/githubnext/tsb/actions/runs/26700065503)
 
