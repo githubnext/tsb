@@ -785,10 +785,14 @@ export class Series<T extends Scalar = Scalar> {
     // and Object.freeze spreads on all repeat calls with the same parameters.
     if (ascending) {
       const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
-      if (hit !== null) { return hit; }
+      if (hit !== null) {
+        return hit;
+      }
     } else {
       const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
-      if (hit !== null) { return hit; }
+      if (hit !== null) {
+        return hit;
+      }
     }
 
     const n = this._values.length;
@@ -1125,11 +1129,17 @@ export class Series<T extends Scalar = Scalar> {
     });
     // Save to per-instance cache so repeat calls are O(1).
     if (ascending) {
-      if (naPosition === "last") { this._svCacheAL = result; }
-      else { this._svCacheAF = result; }
+      if (naPosition === "last") {
+        this._svCacheAL = result;
+      } else {
+        this._svCacheAF = result;
+      }
     } else {
-      if (naPosition === "last") { this._svCacheDL = result; }
-      else { this._svCacheDF = result; }
+      if (naPosition === "last") {
+        this._svCacheDL = result;
+      } else {
+        this._svCacheDF = result;
+      }
     }
     return result;
   }
