@@ -780,12 +780,9 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: ternary select for CMOV-friendly JIT output ──
-    // Using a ternary select (rather than nested-if) keeps the hot-path
-    // instruction count minimal: one branch on ascending, one CMOV-style
-    // select on naPosition, one null check, return. The full sort logic
-    // lives in _sortValuesCold so this function body stays small enough for
-    // JSC to inline the cache-hit path at every call site.
+    // ── Per-instance cache: named properties for direct access on the hot path ──
+    // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
+    // and Object.freeze spreads on all repeat calls with the same parameters.
     if (ascending) {
       const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
       if (hit !== null) return hit;
@@ -793,11 +790,8 @@ export class Series<T extends Scalar = Scalar> {
       const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
       if (hit !== null) return hit;
     }
-    return this._sortValuesCold(ascending, naPosition);
-  }
 
-  /** Cold-path sort: full radix/comparator sort + per-instance cache write. */
-  private _sortValuesCold(ascending: boolean, naPosition: "first" | "last"): Series<T> {
+
     const n = this._values.length;
     const vals = this._values;
 
