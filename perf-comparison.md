@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-31T19:15:00Z |
-| Iteration Count | 337 |
-| Best Metric | 674 |
+| Last Run | 2026-06-01T14:51:01Z |
+| Iteration Count | 338 |
+| Best Metric | 675 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -63,6 +63,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 338 — 2026-06-01T14:51:01Z — [Run](https://github.com/githubnext/tsb/actions/runs/26762322128)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 2 benchmark pairs: `to_json_denormalize` (toJsonDenormalize/toJsonRecords/toJsonSplit/toJsonIndex) and `options_ops` (getOption/setOption/resetOption/optionContext/describeOption/registerOption)
+- **Metric**: 675 (previous best: 674, delta: +1)
+- **Commit**: 5c11363
+- **Notes**: Both functions were exported from src/index.ts but had no benchmark pairs. toJsonDenormalize reconstructs nested JSON from flat dotted-column DataFrames; options_ops covers the pandas-compatible options system.
 
 ### Iteration 337 — 2026-05-31T19:15:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/26721921744)
 
