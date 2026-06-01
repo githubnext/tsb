@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-05-31T07:58:52Z |
-| Iteration Count | 336 |
+| Last Run | 2026-06-01T01:37:17Z |
+| Iteration Count | 337 |
 | Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,12 +19,11 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted |
 
 ## 🎯 Current Priorities
 
-- Next: More date offsets (FY5253, FY5253Quarter, etc.)
-- Then: `pd.read_feather` / `to_feather` (if not already done)
+- Next: `pd.read_feather` / `to_feather` (Apache Arrow feather format) or more offsets (BusinessHour, CustomBusinessDay, etc.)
 
 ## 📚 Lessons Learned
 
@@ -37,15 +36,12 @@
 
 ## 🔭 Future Directions
 
-- More date offsets (FY5253, FY5253Quarter, etc.)
 - `pd.read_feather` / `to_feather` (Apache Arrow feather format)
+- More date offsets (BusinessHour, CustomBusinessDay, etc.)
 
 ## 📊 Iteration History
 
-### Iteration 336 — 2026-05-31 07:58 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26707090722)
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Add `src/io/orc.ts` — `readOrc`/`toOrc` — TSB ORC v1 binary columnar I/O with null/NA support, column subset, indexCol options. 50+ tests + playground page.
-- **Metric**: 152 (prev best: 151, delta: +1) — Commit: 32a568f
+### Iters 336–337 — ✅ (151→152): readOrc/toOrc (TSB ORC v1 binary I/O), fiscal date offsets (QuarterEnd/Begin, BusinessMonthEnd/Begin, FY5253, FY5253Quarter).
 
 ### Iters 334–335 — ✅ (151→153): readParquet/toParquet (Apache Parquet v2), readPickle/toPickle (TSB Pickle v1), Easter DateOffset.
 
