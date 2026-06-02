@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-01T14:51:01Z |
-| Iteration Count | 338 |
-| Best Metric | 675 |
+| Last Run | 2026-06-02T08:18:53Z |
+| Iteration Count | 339 |
+| Best Metric | 676 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -64,46 +64,13 @@
 
 ## 📊 Iteration History
 
-### Iteration 338 — 2026-06-01T14:51:01Z — [Run](https://github.com/githubnext/tsb/actions/runs/26762322128)
+### Iteration 339 — 2026-06-02T08:18:53Z — [Run](https://github.com/githubnext/tsb/actions/runs/26807426983)
 
 - **Status**: ✅ Accepted
-- **Change**: Added 2 benchmark pairs: `to_json_denormalize` (toJsonDenormalize/toJsonRecords/toJsonSplit/toJsonIndex) and `options_ops` (getOption/setOption/resetOption/optionContext/describeOption/registerOption)
-- **Metric**: 675 (previous best: 674, delta: +1)
-- **Commit**: 5c11363
-- **Notes**: Both functions were exported from src/index.ts but had no benchmark pairs. toJsonDenormalize reconstructs nested JSON from flat dotted-column DataFrames; options_ops covers the pandas-compatible options system.
+- **Change**: Added 3 benchmark pairs: `extensions` (api.extensions register/lookup), `window_indexers` (FixedForwardWindowIndexer/VariableOffsetWindowIndexer/applyIndexer), `pd_errors` (error class construction & catch)
+- **Metric**: 676 (previous best: 675, delta: +1)
+- **Commit**: 2e093de
 
-### Iteration 337 — 2026-05-31T19:15:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/26721921744)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `pd_api` benchmark pair (api.types predicates: isScalar, isNumericDtype, isListLike, isBoolDtype, isCategoricalDtype)
-- **Metric**: 674 (previous best: 673 on branch after rebase, delta: +1)
-- **Commit**: 9fee757
-- **Notes**: Branch was at 673 after rebase onto main (state file had inflated 677). Added pd_api as the one truly missing benchmark; notna_boolean and window_extended already existed on the branch.
-
-### Iteration 336 — 2026-05-31T01:34:11Z — [Run](https://github.com/githubnext/tsb/actions/runs/26700065503)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 4 benchmark pairs: `elem_ops` (clip/abs/round on Series+DataFrame), `clip_with_bounds` (clipSeriesWithBounds/clipDataFrameWithBounds), `format_table` (toMarkdown/seriesToMarkdown/toLaTeX/seriesToLaTeX), `numeric_extended` (minMaxNormalize)
-- **Metric**: 677 (previous best: 673 actual on branch, delta: +4)
-- **Commit**: 5c647a2
-- **Notes**: State file had inflated best_metric of 676 from uncommitted iters 334-335; actual branch was at 673 after rebase. Added 4 genuinely missing benchmark pairs covering elem-wise ops, bounds clipping, table formatting, and min-max normalization.
-
-### Iteration 335 — 2026-05-30T07:44:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/26678361944)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 3 benchmark pairs: `join` (DataFrame.join), `join_all` (joinAll on 4 frames), `cross_join` (crossJoin Cartesian product)
-- **Metric**: 676 (branch count; state file had inflated 678, actual branch was 673, delta: +3)
-- **Commit**: e655688
-- **Notes**: `join`, `joinAll`, `crossJoin` were the only merge functions without benchmarks. Added realistic 1000-row left×right index-join, 4-frame joinAll, and 200×200 cross-join scenarios.
-
-### Iteration 334 — 2026-05-29T08:10:29Z — [Run](https://github.com/githubnext/tsb/actions/runs/26625976669)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 5 benchmark pairs: `clip_with_bounds` (clipSeriesWithBounds/clipDataFrameWithBounds), `sort_ops_fn` (sortValuesSeries/sortIndexSeries/sortValuesDataFrame/sortIndexDataFrame), `cut_bins_to_frame` (cut+cutBinsToFrame/cutBinCounts/binEdges), `series_to_markdown` (seriesToMarkdown/seriesToLaTeX), `auto_corr` (autoCorr at multiple lags)
-- **Metric**: 678 (previous best: 673 on branch, delta: +5)
-- **Commit**: c9c4734
-- **Notes**: Branch was at 673 (state file had optimistic 678 from uncommitted iters). Added 5 new pairs covering clip bounds, sort ops API, cut bin summarization, Series markdown/LaTeX formatting, and autocorrelation.
-
-### Iters 321–334 — ✅ | 665→676: readHtml, phantom/restore, merge_ordered/resample/join/notna/window/na/reduce/rename/math/value_counts, resample_df/agg/ohlc/period/extensions, datetime_tz/to_json/at_iat/elem_ops/sort_ops/series_fmt, add_sub_mul_div/pow_mod/shift_diff/numeric_extended/categorical_ops, clip_with_bounds/sort_ops_fn/cut_bins_to_frame/series_to_markdown/auto_corr.
+### Iters 321–338 — ✅ | 665→675: readHtml, options_ops, to_json_denormalize, pd_api, elem_ops, clip_with_bounds, format_table, numeric_extended, join/joinAll/crossJoin, sort_ops, cut_bins, resample, merge_ordered, na_ops, rename_ops, math_ops, value_counts, notna_boolean, window_extended.
 
 ### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
