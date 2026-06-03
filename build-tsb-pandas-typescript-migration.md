@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-02T14:29:56Z |
-| Iteration Count | 339 |
-| Best Metric | 151 |
+| Last Run | 2026-06-03T14:30:00Z |
+| Iteration Count | 340 |
+| Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
 
 ---
 
@@ -35,8 +35,8 @@
 
 ## 🎯 Current Priorities
 
-- Next: Add new source files to increase metric — e.g. `pd.read_hdf` / `to_hdf` (HDF5-like binary format), `pd.read_stata` / `to_stata`, or additional io/format modules
-- Note: best_metric corrected to 151 — the 153 was from iters 334-338 on a branch that was rebased away (those files were never in main)
+- Next: Add new source files to increase metric — e.g. `pd.read_hdf` / `to_hdf` (HDF5-like binary format), additional io/format modules, new stats files
+- `pd.read_stata` / `to_stata` is now done (iter 340). Remove from list.
 
 ---
 
@@ -46,9 +46,10 @@
 - **Imports**: Stats from `../core`, `../types.ts`. Tests from `../../src/index.ts`.
 - **DataFrame**: Use `DataFrame.fromColumns({...})` + `{ index: [...] }`. `df.col(name)` to get column.
 - **Offset pattern**: `if onOffset → stepN(date, n); else if n>0 → stepN(rollforward(date), n-1); else → stepN(rollback(date), n+1)`.
-- **exactOptionalPropertyTypes**: Explicit `if (field !== null/undefined) opts.field = field` pattern for optional fields.
-- **Metric counts files**: The `pandas_features_ported` metric counts `src/**/*.ts` files (not index.ts) that export something. Adding classes to existing files does NOT increase the metric — new features need new files.
-- **Binary I/O**: Magic header + version + nRows/nCols + column headers (name, tag) + data with validity bitmaps. Use `.push()` not indexed assignment to avoid `noUncheckedIndexedAccess`. Use `new Array<T>(n).fill(value)` for null arrays.
+- **exactOptionalPropertyTypes**: `if (field !== null/undefined) opts.field = field` for optional fields.
+- **Metric counts files**: counts `src/**/*.ts` files (not index.ts) that export something. New features need new files — adding to existing files doesn't help.
+- **Binary I/O**: Use `.push()` not indexed assignment. `new Array<T>(n).fill(value)` for null arrays.
+- **Stata format**: Stata 118 little-endian. Data offset = varLabelOffset + nvar*81 + 20. Types: 65526=double, ≤2045=str#. Missing double = 8.98846567431e307.
 
 ---
 
@@ -60,25 +61,32 @@
 
 ## 🔭 Future Directions
 
-- `pd.read_hdf` / `to_hdf` (TSB HDF5-like binary format) — new src/io/hdf.ts file
-- `pd.read_stata` / `to_stata` — new src/io/stata.ts file
-- BusinessHour, CustomBusinessDay offsets (but need new file to count for metric)
-- `pd.eval()` / `DataFrame.eval()` — new src/stats/eval.ts
-- `pd.get_dummies()` — new src/stats/get_dummies.ts
-- `pd.factorize()` — new src/core/factorize.ts
+- `pd.read_hdf` / `to_hdf` — new src/io/hdf.ts
+- BusinessHour, CustomBusinessDay offsets (need new file for metric)
+- `pd.Flags` / `DataFrame.flags` — new src/core/flags.ts
+- `pd.api.interchange` — new src/core/interchange.ts
+- `pd.io.pytables` — new src/io/pytables.ts
 
 ---
 
 ## 📊 Iteration History
 
+### Iteration 340 — 2026-06-03 14:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26890816989)
+
+- **Status**: ✅ Accepted (pending CI)
+- **Change**: Added `src/io/stata.ts` — readStata/toStata implementing Stata DTA format 118
+- **Metric**: 152 (previous best: 151, delta: +1)
+- **Commit**: 5a1c803
+- **Notes**: Ports pandas.read_stata() and DataFrame.to_stata(). Supports double/int/str columns, missing values, nrows/usecols/indexCol, variable labels. Full test suite + playground.
+
 ### Iteration 339 — 2026-06-02 14:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26825584615)
 
-- **Status**: pending-ci (awaiting CI confirmation)
-- **Change**: Added 8 new offset classes to date_offset.ts: QuarterEnd, QuarterBegin, BusinessMonthEnd, BusinessMonthBegin, BusinessYearEnd, BusinessYearBegin, SemiMonthEnd, SemiMonthBegin
-- **Metric**: 151 (best: 151, delta: +0 — note: metric unchanged since these classes go into existing file)
+- **Status**: pending-ci
+- **Change**: Added 8 new offset classes to date_offset.ts
+- **Metric**: 151 (best: 151, delta: +0)
 - **Commit**: 8a1680b
-- **Notes**: Important pandas offset classes ported. Metric does not increase because metric counts files, not exports. Best_metric corrected from 153→151 since iters 334-338 were on a branch rebased away.
+- **Notes**: Metric unchanged since classes go into existing file. Best_metric corrected from 153→151.
 
-### Iters 316–318 — ✅ (148→151): readXml/toXml, readTable, caseWhen ported. Confirmed by CI on rebased branch.
+### Iters 316–318 — ✅ (148→151): readXml/toXml, readTable, caseWhen ported.
 
 ### Iters 1–315 — ✅ (0→148): Full pandas core, stats, io, merge, reshape, window, groupby, string ops, datetime, offsets, period, interval, multi-index, grouper, lreshape, and more.
