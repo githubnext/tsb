@@ -757,13 +757,14 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: flat 4-if chain reads property first, then validates
-    // naPosition — lets the JIT constant-fold the dominant (ascending=true,
-    // naPosition="last") case to a single property read and return.
-    if (ascending && this._svCacheAL !== null && naPosition === "last") return this._svCacheAL;
-    if (ascending && this._svCacheAF !== null && naPosition === "first") return this._svCacheAF;
-    if (!ascending && this._svCacheDL !== null && naPosition === "last") return this._svCacheDL;
-    if (!ascending && this._svCacheDF !== null && naPosition === "first") return this._svCacheDF;
+    // ── Per-instance cache: pre-compute naLast boolean so the hot-path ternary
+    // select uses bool ops (faster than string comparisons on subsequent checks)
+    // and the JIT can constant-fold naLast across the entire function body.
+    const naLast = naPosition === "last";
+    const hit = ascending
+      ? (naLast ? this._svCacheAL : this._svCacheAF)
+      : (naLast ? this._svCacheDL : this._svCacheDF);
+    if (hit !== null) return hit;
 
     const n = this._values.length;
     const vals = this._values;
@@ -941,7 +942,7 @@ export class Series<T extends Scalar = Scalar> {
     const perm = _permBuf;
     const outData = _outBuf as unknown as T[];
     let pos = 0;
-    if (naPosition === "first") {
+    if (!naLast) {
       for (let i = 0; i < nanCount; i++) {
         const idx = nanBuf[i]!;
         perm[pos] = idx;
@@ -1058,13 +1059,13 @@ export class Series<T extends Scalar = Scalar> {
     });
     // Save to per-instance cache so repeat calls are O(1).
     if (ascending) {
-      if (naPosition === "last") {
+      if (naLast) {
         this._svCacheAL = result;
       } else {
         this._svCacheAF = result;
       }
     } else {
-      if (naPosition === "last") {
+      if (naLast) {
         this._svCacheDL = result;
       } else {
         this._svCacheDF = result;
