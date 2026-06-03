@@ -764,7 +764,7 @@ export class Series<T extends Scalar = Scalar> {
     const hit = ascending
       ? (naLast ? this._svCacheAL : this._svCacheAF)
       : (naLast ? this._svCacheDL : this._svCacheDF);
-    if (hit !== null) return hit;
+    if (hit !== null) { return hit; }
 
     const n = this._values.length;
     const vals = this._values;
