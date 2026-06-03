@@ -757,23 +757,14 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: named properties for direct access on the hot path ──
-    // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
-    // and Object.freeze spreads on all repeat calls with the same parameters.
-    // The public method is kept tiny (~12 lines) so V8/Bun can inline it at all
-    // call sites, collapsing the hot (cache-hit) path to a single property read.
-    if (ascending) {
-      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
-      if (hit !== null) return hit;
-    } else {
-      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
-      if (hit !== null) return hit;
-    }
-    return this._sortValuesCold(ascending, naPosition);
-  }
+    // ── Per-instance cache: flat 4-if chain reads property first, then validates
+    // naPosition — lets the JIT constant-fold the dominant (ascending=true,
+    // naPosition="last") case to a single property read and return.
+    if (ascending && this._svCacheAL !== null && naPosition === "last") return this._svCacheAL;
+    if (ascending && this._svCacheAF !== null && naPosition === "first") return this._svCacheAF;
+    if (!ascending && this._svCacheDL !== null && naPosition === "last") return this._svCacheDL;
+    if (!ascending && this._svCacheDF !== null && naPosition === "first") return this._svCacheDF;
 
-  /** Cold path: full LSD radix sort, gather loop, cache store. Only called once per (ascending, naPosition) pair. */
-  private _sortValuesCold(ascending: boolean, naPosition: "first" | "last"): Series<T> {
     const n = this._values.length;
     const vals = this._values;
 
