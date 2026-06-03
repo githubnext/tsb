@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-02T08:18:53Z |
-| Iteration Count | 339 |
-| Best Metric | 676 |
+| Last Run | 2026-06-03T08:33:20Z |
+| Iteration Count | 340 |
+| Best Metric | 677 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -57,12 +57,18 @@
 
 - More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
-- `FixedForwardWindowIndexer` with rolling not yet benchmarked
 - Period.contains / Period.diff variants not yet benchmarked
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 340 — 2026-06-03T08:33:20Z — [Run](https://github.com/githubnext/tsb/actions/runs/26873183951)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 2 benchmark pairs: `abs_round` (absSeries/absDataFrame/roundSeries/roundDataFrame), `autocorr` (autoCorr at lags 1/5/10)
+- **Metric**: 677 (previous best: 676, delta: +1)
+- **Commit**: 69ec875
 
 ### Iteration 339 — 2026-06-02T08:18:53Z — [Run](https://github.com/githubnext/tsb/actions/runs/26807426983)
 
