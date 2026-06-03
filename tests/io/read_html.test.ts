@@ -233,13 +233,13 @@ describe("readHtml – HTML entities", () => {
   });
 
   test("decodes &#nn; decimal entities", () => {
-    const html = `<table><tr><th>k</th></tr><tr><td>&#65;</td></tr></table>`;
+    const html = "<table><tr><th>k</th></tr><tr><td>&#65;</td></tr></table>";
     const [df] = readHtml(html, { converters: false });
     expect(df!.col("k").toArray()[0]).toBe("A");
   });
 
   test("decodes &#xHH; hex entities", () => {
-    const html = `<table><tr><th>k</th></tr><tr><td>&#x42;</td></tr></table>`;
+    const html = "<table><tr><th>k</th></tr><tr><td>&#x42;</td></tr></table>";
     const [df] = readHtml(html, { converters: false });
     expect(df!.col("k").toArray()[0]).toBe("B");
   });
