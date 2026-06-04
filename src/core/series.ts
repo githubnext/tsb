@@ -724,31 +724,47 @@ export class Series<T extends Scalar = Scalar> {
 
   // ─── sorting ─────────────────────────────────────────────────────────────
 
-  /** Return a new Series sorted by values. */
-  sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: named properties for direct access on the hot path ──
-    // Eliminates the O(n) partition + gather + Object.freeze spreads on all repeat
-    // calls with the same parameters. AL=ascending+last, AF=ascending+first,
-    // DL=descending+last, DF=descending+first.
+  /** Retrieve a cached sortValues result, or null if not yet computed. */
+  private _svGetCache(ascending: boolean, naPosition: "first" | "last"): Series<T> | null {
     if (ascending) {
-      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
-      if (hit !== null) {
-        return hit;
-      }
-    } else {
-      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
-      if (hit !== null) {
-        return hit;
-      }
+      return naPosition === "last" ? this._svCacheAL : this._svCacheAF;
     }
+    return naPosition === "last" ? this._svCacheDL : this._svCacheDF;
+  }
 
-    // ── Cold path: comparison sort (runs once per unique ascending+naPosition) ──
-    // Using Array.prototype.sort keeps the function body compact so the JIT can
-    // inline and specialise the per-instance cache-hit path above.
-    const n = this._values.length;
+  /** Store a sortValues result in the appropriate named cache slot. */
+  private _svSetCache(ascending: boolean, naPosition: "first" | "last", result: Series<T>): void {
+    if (ascending) {
+      if (naPosition === "last") {
+        this._svCacheAL = result;
+      } else {
+        this._svCacheAF = result;
+      }
+    } else if (naPosition === "last") {
+      this._svCacheDL = result;
+    } else {
+      this._svCacheDF = result;
+    }
+  }
+
+  /** Ascending comparator for sortable values. */
+  private static _svCmpAsc(a: number | string | boolean, b: number | string | boolean): number {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+  }
+
+  /** Descending comparator for sortable values. */
+  private static _svCmpDesc(a: number | string | boolean, b: number | string | boolean): number {
+    if (a > b) return -1;
+    if (a < b) return 1;
+    return 0;
+  }
+
+  /** Cold path: partition, sort, and build the sorted Series. */
+  private _sortValuesColdPath(ascending: boolean, naPosition: "first" | "last"): Series<T> {
     const vals = this._values;
-
-    // Partition: separate NaN/null/undefined from finite/sortable values.
+    const n = vals.length;
     const finIdx: number[] = [];
     const nanIdx: number[] = [];
     for (let i = 0; i < n; i++) {
@@ -759,48 +775,25 @@ export class Series<T extends Scalar = Scalar> {
         finIdx.push(i);
       }
     }
-
-    // Sort finite indices by their corresponding values.
-    if (ascending) {
-      finIdx.sort((a, b) => {
-        const av = vals[a] as number | string | boolean;
-        const bv = vals[b] as number | string | boolean;
-        return av < bv ? -1 : av > bv ? 1 : 0;
-      });
-    } else {
-      finIdx.sort((a, b) => {
-        const av = vals[a] as number | string | boolean;
-        const bv = vals[b] as number | string | boolean;
-        return av > bv ? -1 : av < bv ? 1 : 0;
-      });
-    }
-
-    // Build output permutation: NaN slots go first or last per naPosition.
+    const cmp = ascending ? Series._svCmpAsc : Series._svCmpDesc;
+    finIdx.sort((a, b) => cmp(vals[a] as number | string | boolean, vals[b] as number | string | boolean));
     const perm = naPosition === "first" ? [...nanIdx, ...finIdx] : [...finIdx, ...nanIdx];
-    const outData = perm.map((i) => vals[i] as T);
-    const outIndex = this.index.take(perm);
-
-    const result = new Series<T>({
-      data: outData,
-      index: outIndex,
+    return new Series<T>({
+      data: perm.map((i) => vals[i] as T),
+      index: this.index.take(perm),
       dtype: this.dtype,
       name: this.name,
     });
+  }
 
-    // Save to per-instance cache so repeat calls are O(1).
-    if (ascending) {
-      if (naPosition === "last") {
-        this._svCacheAL = result;
-      } else {
-        this._svCacheAF = result;
-      }
-    } else {
-      if (naPosition === "last") {
-        this._svCacheDL = result;
-      } else {
-        this._svCacheDF = result;
-      }
-    }
+  /** Return a new Series sorted by values. */
+  sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
+    // ── Per-instance cache: named properties for direct access on the hot path ──
+    // AL=ascending+last, AF=ascending+first, DL=descending+last, DF=descending+first.
+    const hit = this._svGetCache(ascending, naPosition);
+    if (hit !== null) return hit;
+    const result = this._sortValuesColdPath(ascending, naPosition);
+    this._svSetCache(ascending, naPosition, result);
     return result;
   }
 
