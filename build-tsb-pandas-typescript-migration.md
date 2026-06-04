@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-03T14:30:00Z |
-| Iteration Count | 340 |
-| Best Metric | 152 |
+| Last Run | 2026-06-04T08:16:42Z |
+| Iteration Count | 341 |
+| Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, pending-ci |
 
 ---
 
@@ -36,7 +36,7 @@
 ## 🎯 Current Priorities
 
 - Next: Add new source files to increase metric — e.g. `pd.read_hdf` / `to_hdf` (HDF5-like binary format), additional io/format modules, new stats files
-- `pd.read_stata` / `to_stata` is now done (iter 340). Remove from list.
+- `pd.Flags` / `DataFrame.flags` done (iter 341). Remove from list.
 
 ---
 
@@ -63,13 +63,20 @@
 
 - `pd.read_hdf` / `to_hdf` — new src/io/hdf.ts
 - BusinessHour, CustomBusinessDay offsets (need new file for metric)
-- `pd.Flags` / `DataFrame.flags` — new src/core/flags.ts
 - `pd.api.interchange` — new src/core/interchange.ts
 - `pd.io.pytables` — new src/io/pytables.ts
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 341 — 2026-06-04 08:16 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26939643513)
+
+- **Status**: ✅ Accepted (pending CI)
+- **Change**: Added `src/core/flags.ts` — Flags class with WeakMap registry (allows_duplicate_labels, DuplicateLabelError, getFlags, setFlags, setFlag, copyFlags, raiseOnDuplicateLabels)
+- **Metric**: 153 (previous best: 152, delta: +1)
+- **Commit**: cdb82b0
+- **Notes**: Ports pandas.Flags / DataFrame.flags. Includes full unit + property-based tests and interactive playground page.
 
 ### Iteration 340 — 2026-06-03 14:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26890816989)
 
