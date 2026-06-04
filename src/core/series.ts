@@ -132,8 +132,6 @@ function pearsonCorrFromArrays(
 
 // ─── LSD radix sort buffers (module-level, grown lazily) ─────────────────────
 
-
-
 // ─── SeriesOptions ────────────────────────────────────────────────────────────
 
 /** Constructor options accepted by `Series`. */
@@ -776,7 +774,9 @@ export class Series<T extends Scalar = Scalar> {
       }
     }
     const cmp = ascending ? Series._svCmpAsc : Series._svCmpDesc;
-    finIdx.sort((a, b) => cmp(vals[a] as number | string | boolean, vals[b] as number | string | boolean));
+    finIdx.sort((a, b) =>
+      cmp(vals[a] as number | string | boolean, vals[b] as number | string | boolean),
+    );
     const perm = naPosition === "first" ? [...nanIdx, ...finIdx] : [...finIdx, ...nanIdx];
     return new Series<T>({
       data: perm.map((i) => vals[i] as T),
