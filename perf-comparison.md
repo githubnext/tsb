@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-04T01:44:46Z |
-| Iteration Count | 341 |
-| Best Metric | 674 |
+| Last Run | 2026-06-04T19:34:45Z |
+| Iteration Count | 342 |
+| Best Metric | 675 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -64,27 +64,13 @@
 
 ## 📊 Iteration History
 
-### Iteration 341 — 2026-06-04T01:44:46Z — [Run](https://github.com/githubnext/tsb/actions/runs/26924774960)
+### Iteration 342 — 2026-06-04T19:34:45Z — [Run](https://github.com/githubnext/tsb/actions/runs/26974794187)
 
 - **Status**: ✅ Accepted
-- **Change**: Fixed 2 broken Python benchmarks (escaped quotes syntax error); added toJsonDenormalize/toJsonRecords/toJsonSplit/toJsonIndex benchmark pair
-- **Metric**: 674 (previous best: 677 per state, delta: reset from broken state; effective improvement from null→674)
-- **Commit**: 3dd8394
+- **Change**: Added 2 benchmark pairs: `to_json_denormalize` (toJsonDenormalize/toJsonRecords/toJsonSplit/toJsonIndex), `cut_bins_to_frame` (cutBinsToFrame/cutBinCounts/binEdges)
+- **Metric**: 675 (previous best: 674, delta: +1)
+- **Commit**: 46d46aa
 
-### Iteration 340 — 2026-06-03T08:33:20Z — [Run](https://github.com/githubnext/tsb/actions/runs/26873183951)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 2 benchmark pairs: `abs_round` (absSeries/absDataFrame/roundSeries/roundDataFrame), `autocorr` (autoCorr at lags 1/5/10)
-- **Metric**: 677 (previous best: 676, delta: +1)
-- **Commit**: 69ec875
-
-### Iteration 339 — 2026-06-02T08:18:53Z — [Run](https://github.com/githubnext/tsb/actions/runs/26807426983)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 3 benchmark pairs: `extensions` (api.extensions register/lookup), `window_indexers` (FixedForwardWindowIndexer/VariableOffsetWindowIndexer/applyIndexer), `pd_errors` (error class construction & catch)
-- **Metric**: 676 (previous best: 675, delta: +1)
-- **Commit**: 2e093de
-
-### Iters 321–338 — ✅ | 665→675: readHtml, options_ops, to_json_denormalize, pd_api, elem_ops, clip_with_bounds, format_table, numeric_extended, join/joinAll/crossJoin, sort_ops, cut_bins, resample, merge_ordered, na_ops, rename_ops, math_ops, value_counts, notna_boolean, window_extended.
+### Iters 321–341 — ✅ | 665→674: readHtml, options_ops, to_json_denormalize, pd_api, elem_ops, clip_with_bounds, format_table, numeric_extended, join/joinAll/crossJoin, sort_ops, cut_bins, resample, merge_ordered, na_ops, rename_ops, math_ops, value_counts, notna_boolean, window_extended, abs_round, autocorr, extensions, window_indexers, pd_errors.
 
 ### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
