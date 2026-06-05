@@ -722,14 +722,6 @@ export class Series<T extends Scalar = Scalar> {
 
   // ─── sorting ─────────────────────────────────────────────────────────────
 
-  /** Retrieve a cached sortValues result, or null if not yet computed. */
-  private _svGetCache(ascending: boolean, naPosition: "first" | "last"): Series<T> | null {
-    if (ascending) {
-      return naPosition === "last" ? this._svCacheAL : this._svCacheAF;
-    }
-    return naPosition === "last" ? this._svCacheDL : this._svCacheDF;
-  }
-
   /** Store a sortValues result in the appropriate named cache slot. */
   private _svSetCache(ascending: boolean, naPosition: "first" | "last", result: Series<T>): void {
     if (ascending) {
@@ -788,10 +780,19 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: named properties for direct access on the hot path ──
+    // ── Inline cache check: no method-call overhead on the hot path ──
     // AL=ascending+last, AF=ascending+first, DL=descending+last, DF=descending+first.
-    const hit = this._svGetCache(ascending, naPosition);
-    if (hit !== null) return hit;
+    if (ascending) {
+      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
+      if (hit !== null) {
+        return hit;
+      }
+    } else {
+      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
+      if (hit !== null) {
+        return hit;
+      }
+    }
     const result = this._sortValuesColdPath(ascending, naPosition);
     this._svSetCache(ascending, naPosition, result);
     return result;
