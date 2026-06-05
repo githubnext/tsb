@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-04T08:16:42Z |
-| Iteration Count | 341 |
-| Best Metric | 153 |
+| Last Run | 2026-06-05T01:32:37Z |
+| Iteration Count | 342 |
+| Best Metric | 154 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci |
 
 ---
 
@@ -35,8 +35,8 @@
 
 ## 🎯 Current Priorities
 
-- Next: Add new source files to increase metric — e.g. `pd.read_hdf` / `to_hdf` (HDF5-like binary format), additional io/format modules, new stats files
-- `pd.Flags` / `DataFrame.flags` done (iter 341). Remove from list.
+- Next: Add new source files to increase metric — e.g. `pd.read_hdf` / `to_hdf` (HDF5-like binary format), `pd.io.pytables`, BusinessHour/CustomBusinessDay offset classes (new file)
+- `pd.Flags` (iter 341) and `pd.api.interchange` (iter 342) done.
 
 ---
 
@@ -50,6 +50,7 @@
 - **Metric counts files**: counts `src/**/*.ts` files (not index.ts) that export something. New features need new files — adding to existing files doesn't help.
 - **Binary I/O**: Use `.push()` not indexed assignment. `new Array<T>(n).fill(value)` for null arrays.
 - **Stata format**: Stata 118 little-endian. Data offset = varLabelOffset + nvar*81 + 20. Types: 65526=double, ≤2045=str#. Missing double = 8.98846567431e307.
+- **Interchange Protocol**: Float dtype inference: `[1.0]` → int64; use `[1.5]` for float64. Float nulls → NaN sentinel (kind=1); int/string nulls → byte mask (kind=4). `Series` constructor takes single options object `{ data, dtype, name }`. `DataFrameOptions` has no `dtypes` field.
 
 ---
 
@@ -63,12 +64,19 @@
 
 - `pd.read_hdf` / `to_hdf` — new src/io/hdf.ts
 - BusinessHour, CustomBusinessDay offsets (need new file for metric)
-- `pd.api.interchange` — new src/core/interchange.ts
 - `pd.io.pytables` — new src/io/pytables.ts
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 342 — 2026-06-05 01:32 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26989944591)
+
+- **Status**: ✅ Accepted (pending CI)
+- **Change**: Added `src/core/interchange.ts` — DataFrame Interchange Protocol (`pd.api.interchange`)
+- **Metric**: 154 (previous best: 153, delta: +1)
+- **Commit**: e718c22
+- **Notes**: Full interchange protocol: `getDataFrame()`, `fromDataFrame()`, `TsbColumnInterchange`, `TsbDataFrameInterchange`. Supports int, float, bool, string, datetime, categorical dtypes with proper null encoding (NaN sentinel for float, byte mask for int/string). Comprehensive tests + playground.
 
 ### Iteration 341 — 2026-06-04 08:16 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26939643513)
 
