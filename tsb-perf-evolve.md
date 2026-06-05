@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-04T13:51:00Z |
-| Iteration Count | 73 |
+| Last Run | 2026-06-05T08:14:01Z |
+| Iteration Count | 74 |
 | Best Metric | 0.00000649 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -21,30 +21,31 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci, accepted, pending-ci, rejected, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci, accepted, pending-ci |
 
 ---
 
 ## 🧬 Population (summary)
 
-- **c072** (gen 72, pending-ci): Comparison sort cold path; 80-line function body. Commit `c746969`.
-- **c071** (gen 71, rejected, fitness 0.0000149): Boolean naLast precomputation. 2.3x worse than best.
-- **c070** (gen 70, unknown-ci): Flat 4-if chain. CI was action_required.
-- **c067** (gen 68, accepted, fitness 0.00000649, BEST): Remove module-level cache. tsb 0.0533µs vs pandas 8.21ms.
-- **c062** (gen 62, accepted, fitness 0.0000174): Named-property per-instance cache.
-- **Iters 1–66**: c022 ✅ (LSD radix); c035/c043/c044/c047/c061 ✅; c063/c064/c065/c069 ❌ (nested-if/method-extract regressions).
+- **c073** (gen 73, pending-ci): Inline cache check in sortValues (no _svGetCache call). Commit `97a075d`.
+- **c072** (gen 72, pending-ci): Comparison sort cold path; ~80-line body. Commit `c746969`.
+- **c071** (gen 71, ❌ 0.0000149): Boolean naLast precomputation. 2.3x worse.
+- **c070** (gen 70, ⚠️ unknown-ci): Flat 4-if chain.
+- **c067** (gen 68, ✅ **0.00000649 BEST**): Removed module-level cache. tsb 0.053µs vs pandas 8.21ms.
+- **c062** (gen 62, ✅ 0.0000174): Named-property per-instance cache.
+- **Iters 1–66**: c022 ✅ LSD radix; c035/c043/c044/c061 ✅; c063/c064/c065/c069 ❌.
 
 ---
 
 ## 📚 Lessons Learned
 
-- LSD radix 8-pass (IEEE-754 transform) beats comparator sort for n=100k.
-- Module-level TypedArray buffers eliminate GC (pre-c067).
-- Per-instance Series cache makes all repeat calls O(1).
-- Use `if-else` chains instead of nested ternaries to avoid Biome `noNestedTernary`.
-- **Removing the module-level sort-result cache halved fitness (0.0000138→0.0000065). Simpler function body improves JIT inlining of the per-instance cache-hit path.**
-- **Extracting cold path to `_sortValuesCold` causes 20x regression.** Method call prevents JIT optimization of hot path.
-- **Boolean naLast precomputation before cache check causes 2.3x regression.** String comparison inside if-block is fine; hoisting it out adds unnecessary prologue overhead.
+- LSD radix (IEEE-754 transform) beats comparison sort for n=100k cold path.
+- Per-instance named-property cache makes repeat calls O(1); hot path is cache-hit only.
+- Removing module-level sort-result cache + keeping inline cache check → BEST fitness.
+- **Inline cache check in sortValues is critical** — extracting to a method (_svGetCache) adds overhead on the 53ns hot path.
+- Method extraction of cold path always regresses (c064/c065: 6.6x; c069: 20x).
+- Boolean naLast precomputation before cache check: 2.3x regression (c071).
+- Use `if-else` chains (not nested ternaries) to satisfy Biome `noNestedTernary`.
 
 ---
 
@@ -53,39 +54,44 @@
 - Boxed {v,i} pairs: high GC.
 - BigInt64 packed sort: ~5-10x slower.
 - Nested-if cache check: 7x regression (c063).
-- Method extraction of cold path: always regresses (c064/c065: 6.6x; c069: 20x).
-- Boolean naLast precomputation before cache check: 2.3x regression (c071).
+- Cold-path method extraction: always regresses.
+- Boolean naLast precomputation before cache check: 2.3x regression.
 
 ---
 
 ## 🔭 Future Directions
 
-- Try comparison sort cold path to see if smaller function body helps JIT (c072, pending CI).
-- If c072 helps: try removing even more code from cold path.
-- Cache outData to skip gather+inverse-transform for different naPosition.
+- If c073 accepted: try single compound condition for common ascending+last case (direct `this._svCacheAL` read with early-out).
+- If c073 rejected: investigate why inline check doesn't help vs c067 (possibly c072's cold path itself hurts warm-up JIT shape).
+- Cache outData to skip gather for different naPosition.
 
 ---
 
 ## 📊 Iteration History
 
+### Iteration 73 — 2026-06-05 08:14 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27003615171)
+
+- **Status**: ⏳ Pending CI
+- **Operator**: Crossover (c067 inline cache × c072 comparison cold path)
+- **Feature cell**: parallel-typed-arrays · comparison
+- **Change**: Remove `_svGetCache()` method; inline if-ascending/ternary-naPosition check in `sortValues()` — eliminates one function-call on hot path.
+- **Commit**: `97a075d`
+- **Notes**: c072 added `_svGetCache()` overhead on hot path; this restores c067-style inline check with c072's smaller cold path.
+
 ### Iteration 72 — 2026-06-04 13:51 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26955967270)
 
 - **Status**: ⏳ Pending CI
-- **Operator**: Exploration (Island 0 comparison sort cold path)
-- **Change**: Replace 290-line LSD radix sort with 40-line Array.prototype.sort. Remove 9 radix-sort module-level buffers. Hot path unchanged from c067.
-- **Metric**: pending CI
+- **Operator**: Exploration (Island 0)
+- **Change**: Replace LSD radix with `Array.prototype.sort` cold path; extract to `_sortValuesColdPath`; add `_svGetCache`/`_svSetCache` helpers.
 - **Commit**: `c746969`
-- **Notes**: Smaller function body (~80 vs ~330 lines) may help JIT inline/specialise hot path.
 
 ### Iteration 71 — 2026-06-03 20:02 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26909627448)
 
-- **Status**: ❌ Rejected (fitness 0.0000149, 2.3x worse than best)
-- **Operator**: Exploitation (c067/c070 → c071)
-- **Change**: Pre-compute `naLast = naPosition === "last"` boolean at function entry.
-- **Commit**: `6220ffb`
+- **Status**: ❌ Rejected (fitness 0.0000149, 2.3x worse)
+- **Change**: Pre-compute `naLast` boolean before cache check. Regression.
 
-### Iters 68–70 — c069 ❌ (0.000128, method extraction 20x regression); c067 ✅ (0.00000649 BEST, remove module-level cache); c070 ⏳ (flat 4-if chain, inconclusive CI).
+### Iters 68–70 — c069 ❌ (0.000128, method extraction); c067 ✅ (0.00000649 BEST); c070 ⏳ (inconclusive CI).
 
-### Iters 47–67 — c062 ✅ (0.0000174, named-property cache); c063/c064/c065/c066 ✅/❌ mix; c067 BEST.
+### Iters 47–67 — c062 ✅ (0.0000174); c063–c066 mix; c067 BEST.
 
-### Iters 1–46 — c022 ✅ (~29); c035 ✅ (21.048); c043 ✅ (20.663); c044 ✅ (AoS cache).
+### Iters 1–46 — c022 ✅ (~29); c035 ✅ (21.0); c043 ✅ (20.6); c044 ✅ (AoS cache).
