@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-04T19:34:45Z |
-| Iteration Count | 342 |
-| Best Metric | 675 |
+| Last Run | 2026-06-05T13:47:49Z |
+| Iteration Count | 343 |
+| Best Metric | 676 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -56,13 +56,19 @@
 
 ## 🔭 Future Directions
 
-- More string_accessor variants: startswith, endswith
 - Option-variant benchmarks (axis/limit/method parameters)
 - Period.contains / Period.diff variants not yet benchmarked
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 343 — 2026-06-05T13:47:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/27018606942)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `dataframe_at_iat` benchmark pair (dataFrameAt/dataFrameIat — scalar access by label/position); fixed docstring escaping in bench_str_extract_all.py and bench_str_extract_groups.py
+- **Metric**: 676 (previous best: 675, delta: +1)
+- **Commit**: efb6aed
 
 ### Iteration 342 — 2026-06-04T19:34:45Z — [Run](https://github.com/githubnext/tsb/actions/runs/26974794187)
 

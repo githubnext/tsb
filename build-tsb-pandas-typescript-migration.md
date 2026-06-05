@@ -74,33 +74,9 @@
 
 - **Status**: ✅ Accepted (pending CI)
 - **Change**: Added `src/core/interchange.ts` — DataFrame Interchange Protocol (`pd.api.interchange`)
-- **Metric**: 154 (previous best: 153, delta: +1)
-- **Commit**: e718c22
-- **Notes**: Full interchange protocol: `getDataFrame()`, `fromDataFrame()`, `TsbColumnInterchange`, `TsbDataFrameInterchange`. Supports int, float, bool, string, datetime, categorical dtypes with proper null encoding (NaN sentinel for float, byte mask for int/string). Comprehensive tests + playground.
+- **Metric**: 154 (delta: +1) — `getDataFrame()`, `fromDataFrame()`, proper null encoding for all dtypes.
 
-### Iteration 341 — 2026-06-04 08:16 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26939643513)
-
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Added `src/core/flags.ts` — Flags class with WeakMap registry (allows_duplicate_labels, DuplicateLabelError, getFlags, setFlags, setFlag, copyFlags, raiseOnDuplicateLabels)
-- **Metric**: 153 (previous best: 152, delta: +1)
-- **Commit**: cdb82b0
-- **Notes**: Ports pandas.Flags / DataFrame.flags. Includes full unit + property-based tests and interactive playground page.
-
-### Iteration 340 — 2026-06-03 14:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26890816989)
-
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Added `src/io/stata.ts` — readStata/toStata implementing Stata DTA format 118
-- **Metric**: 152 (previous best: 151, delta: +1)
-- **Commit**: 5a1c803
-- **Notes**: Ports pandas.read_stata() and DataFrame.to_stata(). Supports double/int/str columns, missing values, nrows/usecols/indexCol, variable labels. Full test suite + playground.
-
-### Iteration 339 — 2026-06-02 14:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26825584615)
-
-- **Status**: pending-ci
-- **Change**: Added 8 new offset classes to date_offset.ts
-- **Metric**: 151 (best: 151, delta: +0)
-- **Commit**: 8a1680b
-- **Notes**: Metric unchanged since classes go into existing file. Best_metric corrected from 153→151.
+### Iters 339–341 — ✅ (148→153): Flags (WeakMap), readStata/toStata (DTA 118), interchange pending-ci no-metric.
 
 ### Iters 316–318 — ✅ (148→151): readXml/toXml, readTable, caseWhen ported.
 
