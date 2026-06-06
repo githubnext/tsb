@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-05T13:47:49Z |
-| Iteration Count | 343 |
-| Best Metric | 676 |
+| Last Run | 2026-06-06T07:45:44Z |
+| Iteration Count | 344 |
+| Best Metric | 677 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -62,6 +62,14 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 344 — 2026-06-06T07:45:44Z — [Run](https://github.com/githubnext/tsb/actions/runs/27056549643)
+
+- **Status**: ✅ Accepted
+- **Change**: Added 2 benchmark pairs: `styler_extended` (Styler.barChart/highlightBetween/highlightNull/toHtml/toLatex) and `dataframe_at_iat` (dataFrameAt/dataFrameIat scalar access; re-added from iter 343 which was lost in rebase)
+- **Metric**: 677 (previous best: 676, delta: +1)
+- **Commit**: e954abd
+- **Notes**: Branch was rebased against origin/main (true divergence). iter 343 commit `efb6aed` was not on remote branch; re-added `dataframe_at_iat` benchmark plus new `styler_extended` for Styler advanced methods.
 
 ### Iteration 343 — 2026-06-05T13:47:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/27018606942)
 
