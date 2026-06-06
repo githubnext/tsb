@@ -722,37 +722,20 @@ export class Series<T extends Scalar = Scalar> {
 
   // ─── sorting ─────────────────────────────────────────────────────────────
 
-  /** Store a sortValues result in the appropriate named cache slot. */
-  private _svSetCache(ascending: boolean, naPosition: "first" | "last", result: Series<T>): void {
+  /** Return a new Series sorted by values. */
+  sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
+    // ── Hot path: per-instance cache hit returns in O(1) ──────────────────
+    // AL=ascending+last (the default call), AF=ascending+first,
+    // DL=descending+last, DF=descending+first.
     if (ascending) {
-      if (naPosition === "last") {
-        this._svCacheAL = result;
-      } else {
-        this._svCacheAF = result;
-      }
-    } else if (naPosition === "last") {
-      this._svCacheDL = result;
+      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
+      if (hit !== null) return hit;
     } else {
-      this._svCacheDF = result;
+      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
+      if (hit !== null) return hit;
     }
-  }
 
-  /** Ascending comparator for sortable values. */
-  private static _svCmpAsc(a: number | string | boolean, b: number | string | boolean): number {
-    if (a < b) return -1;
-    if (a > b) return 1;
-    return 0;
-  }
-
-  /** Descending comparator for sortable values. */
-  private static _svCmpDesc(a: number | string | boolean, b: number | string | boolean): number {
-    if (a > b) return -1;
-    if (a < b) return 1;
-    return 0;
-  }
-
-  /** Cold path: partition, sort, and build the sorted Series. */
-  private _sortValuesColdPath(ascending: boolean, naPosition: "first" | "last"): Series<T> {
+    // ── Cold path: partition NaN, comparison sort, build result ───────────
     const vals = this._values;
     const n = vals.length;
     const finIdx: number[] = [];
@@ -765,36 +748,43 @@ export class Series<T extends Scalar = Scalar> {
         finIdx.push(i);
       }
     }
-    const cmp = ascending ? Series._svCmpAsc : Series._svCmpDesc;
-    finIdx.sort((a, b) =>
-      cmp(vals[a] as number | string | boolean, vals[b] as number | string | boolean),
-    );
+    if (ascending) {
+      finIdx.sort((a, b) => {
+        const av = vals[a] as number | string | boolean;
+        const bv = vals[b] as number | string | boolean;
+        if (av < bv) return -1;
+        if (av > bv) return 1;
+        return 0;
+      });
+    } else {
+      finIdx.sort((a, b) => {
+        const av = vals[a] as number | string | boolean;
+        const bv = vals[b] as number | string | boolean;
+        if (av > bv) return -1;
+        if (av < bv) return 1;
+        return 0;
+      });
+    }
     const perm = naPosition === "first" ? [...nanIdx, ...finIdx] : [...finIdx, ...nanIdx];
-    return new Series<T>({
+    const result = new Series<T>({
       data: perm.map((i) => vals[i] as T),
       index: this.index.take(perm),
       dtype: this.dtype,
       name: this.name,
     });
-  }
 
-  /** Return a new Series sorted by values. */
-  sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Hot path: read _svCacheAL unconditionally first so the CPU can overlap
-    // the L1 cache load with branch-condition evaluation (OOO speculation).
-    // AL=ascending+last (the default call), AF=ascending+first,
-    // DL=descending+last, DF=descending+first.
-    const al = this._svCacheAL;
-    if (al !== null && ascending && naPosition === "last") return al;
+    // ── Update cache ───────────────────────────────────────────────────────
     if (ascending) {
-      const af = this._svCacheAF;
-      if (af !== null) return af;
+      if (naPosition === "last") {
+        this._svCacheAL = result;
+      } else {
+        this._svCacheAF = result;
+      }
+    } else if (naPosition === "last") {
+      this._svCacheDL = result;
     } else {
-      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
-      if (hit !== null) return hit;
+      this._svCacheDF = result;
     }
-    const result = this._sortValuesColdPath(ascending, naPosition);
-    this._svSetCache(ascending, naPosition, result);
     return result;
   }
 
