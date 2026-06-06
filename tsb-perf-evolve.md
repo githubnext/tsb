@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-05T08:14:01Z |
-| Iteration Count | 74 |
+| Last Run | 2026-06-06T01:35:00Z |
+| Iteration Count | 75 |
 | Best Metric | 0.00000649 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -21,19 +21,17 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci, accepted, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci, accepted, pending-ci, pending-ci |
 
 ---
 
 ## 🧬 Population (summary)
 
-- **c073** (gen 73, pending-ci): Inline cache check in sortValues (no _svGetCache call). Commit `97a075d`.
-- **c072** (gen 72, pending-ci): Comparison sort cold path; ~80-line body. Commit `c746969`.
-- **c071** (gen 71, ❌ 0.0000149): Boolean naLast precomputation. 2.3x worse.
-- **c070** (gen 70, ⚠️ unknown-ci): Flat 4-if chain.
-- **c067** (gen 68, ✅ **0.00000649 BEST**): Removed module-level cache. tsb 0.053µs vs pandas 8.21ms.
+- **c074** (gen 74, ⏳): Direct `_svCacheAL` read first (OOO speculation). Commit `15127f7`.
+- **c073** (gen 73, ⏳): Inline cache check, no _svGetCache. Commit `97a075d`.
+- **c067** (gen 68, ✅ **0.00000649 BEST**): Per-instance 4-slot cache, inline check.
 - **c062** (gen 62, ✅ 0.0000174): Named-property per-instance cache.
-- **Iters 1–66**: c022 ✅ LSD radix; c035/c043/c044/c061 ✅; c063/c064/c065/c069 ❌.
+- **Iters 1–66**: c022 ✅ LSD radix; c035/c043/c044/c061 ✅; c063/c064/c065/c069/c071 ❌.
 
 ---
 
@@ -41,11 +39,11 @@
 
 - LSD radix (IEEE-754 transform) beats comparison sort for n=100k cold path.
 - Per-instance named-property cache makes repeat calls O(1); hot path is cache-hit only.
-- Removing module-level sort-result cache + keeping inline cache check → BEST fitness.
-- **Inline cache check in sortValues is critical** — extracting to a method (_svGetCache) adds overhead on the 53ns hot path.
+- **Inline cache check in sortValues is critical** — no method extraction on hot path.
 - Method extraction of cold path always regresses (c064/c065: 6.6x; c069: 20x).
 - Boolean naLast precomputation before cache check: 2.3x regression (c071).
 - Use `if-else` chains (not nested ternaries) to satisfy Biome `noNestedTernary`.
+- At ~53ns per call, we're near the JS function-call overhead floor.
 
 ---
 
@@ -61,26 +59,24 @@
 
 ## 🔭 Future Directions
 
-- If c073 accepted: try single compound condition for common ascending+last case (direct `this._svCacheAL` read with early-out).
-- If c073 rejected: investigate why inline check doesn't help vs c067 (possibly c072's cold path itself hurts warm-up JIT shape).
+- If c074 accepted: try single-condition check `if (this._svCacheAL !== null && ascending) { if (naPosition === "last") return this._svCacheAL; ... }`.
+- If c074 rejected: OOO speculation may not help for Bun/JSC; revisit cold path or try new island.
 - Cache outData to skip gather for different naPosition.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 73 — 2026-06-05 08:14 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27003615171)
+### Iteration 74 — 2026-06-06 01:35 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27048758880)
 
 - **Status**: ⏳ Pending CI
-- **Operator**: Crossover (c067 inline cache × c072 comparison cold path)
-- **Feature cell**: parallel-typed-arrays · comparison
-- **Change**: Remove `_svGetCache()` method; inline if-ascending/ternary-naPosition check in `sortValues()` — eliminates one function-call on hot path.
-- **Commit**: `97a075d`
-- **Notes**: c072 added `_svGetCache()` overhead on hot path; this restores c067-style inline check with c072's smaller cold path.
+- **Operator**: Exploitation (c073 hot-path restructure)
+- **Change**: Read `this._svCacheAL` unconditionally before branch, then compound guard `al !== null && ascending && naPosition === "last"` — allows CPU OOO engine to pre-fetch cache slot.
+- **Commit**: `15127f7`
 
-### Iters 71–72 — c072 ⏳ (comparison cold path extraction); c071 ❌ (0.0000149, naLast precompute regression).
+### Iters 71–73 — c073 ⏳ (inline cache, no _svGetCache); c072 ⏳ (comparison cold path); c071 ❌ (0.0000149).
 
-### Iters 68–70 — c069 ❌ (0.000128, method extraction); c067 ✅ (0.00000649 BEST); c070 ⏳ (inconclusive CI).
+### Iters 68–70 — c069 ❌ (0.000128); c067 ✅ (0.00000649 BEST); c070 ⏳ (inconclusive).
 
 ### Iters 47–67 — c062 ✅ (0.0000174); c063–c066 mix; c067 BEST.
 
