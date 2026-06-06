@@ -780,18 +780,18 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Inline cache check: no method-call overhead on the hot path ──
-    // AL=ascending+last, AF=ascending+first, DL=descending+last, DF=descending+first.
+    // ── Hot path: read _svCacheAL unconditionally first so the CPU can overlap
+    // the L1 cache load with branch-condition evaluation (OOO speculation).
+    // AL=ascending+last (the default call), AF=ascending+first,
+    // DL=descending+last, DF=descending+first.
+    const al = this._svCacheAL;
+    if (al !== null && ascending && naPosition === "last") return al;
     if (ascending) {
-      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
-      if (hit !== null) {
-        return hit;
-      }
+      const af = this._svCacheAF;
+      if (af !== null) return af;
     } else {
       const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
-      if (hit !== null) {
-        return hit;
-      }
+      if (hit !== null) return hit;
     }
     const result = this._sortValuesColdPath(ascending, naPosition);
     this._svSetCache(ascending, naPosition, result);
