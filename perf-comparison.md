@@ -57,23 +57,15 @@
 ## 🔭 Future Directions
 
 - Option-variant benchmarks (axis/limit/method parameters)
-- Period.contains / Period.diff variants not yet benchmarked (now covered in period_arithmetic)
-- Styler.format / Styler.apply / Styler.applymap not yet benchmarked as standalone
+- Period.contains/diff and Styler.format/apply/applymap not yet benchmarked as standalone
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 345 — 2026-06-07T01:34:53Z — [Run](https://github.com/githubnext/tsb/actions/runs/27079290567)
+### Iteration 345 — 2026-06-07 — [Run](https://github.com/githubnext/tsb/actions/runs/27079290567)
 
-- **Status**: ✅ Accepted
-- **Change**: Added 3 benchmark pairs: `pd_options` (getOption/setOption/resetOption/describeOption/optionContext), `styler_extended` (barChart/highlightBetween/highlightNull/toHtml/toLatex), `dataframe_at_iat` (dataFrameAt/dataFrameIat scalar access); fixed docstring escaping in bench_str_extract_all.py and bench_str_extract_groups.py; rebased branch onto origin/main
-- **Metric**: 678 (previous best: 677, delta: +1)
-- **Commit**: 9571018
-- **Notes**: Branch rebased from iter 342 onto origin/main. Iters 343-344 content re-added (styler_extended, dataframe_at_iat) plus new pd_options pair.
+- **Status**: ✅ Accepted | pd_options, styler_extended, dataframe_at_iat; fixed docstring escaping; rebased
+- **Metric**: 678 (delta: +1) | Commit: 9571018
 
-### Iters 342–344 — ✅ | 675→677: to_json_denormalize, cut_bins_to_frame, dataframe_at_iat, styler_extended.
-
-### Iters 321–341 — ✅ | 665→674: readHtml, options_ops, to_json_denormalize, pd_api, elem_ops, clip_with_bounds, format_table, numeric_extended, join/joinAll/crossJoin, sort_ops, cut_bins, resample, merge_ordered, na_ops, rename_ops, math_ops, value_counts, notna_boolean, window_extended, abs_round, autocorr, extensions, window_indexers, pd_errors.
-
-### Iters 1–320 — ✅ | Metrics 0→665: Built out full benchmark suite.
+### Iters 1–344 — ✅ (0→677): Full benchmark suite covering all pandas functions.

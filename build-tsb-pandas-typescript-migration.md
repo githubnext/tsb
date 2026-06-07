@@ -70,32 +70,11 @@
 
 ## 📊 Iteration History
 
-### Iteration 345 — 2026-06-07 00:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27086847584)
+### Iteration 345 — 2026-06-07 — [Run](https://github.com/githubnext/tsb/actions/runs/27086847584)
 
-- **Status**: ⏳ Pending CI
-- **Change**: Added 6 new files — `src/core/flags.ts` (WeakMap DataFrame.flags registry), `src/io/clipboard.ts` (readClipboard/toClipboard TSV I/O), `src/io/pickle.ts` (readPickle/toPickle JSON serialization), `src/io/formats.ts` (formatFloat/formatInt/formatPercent/formatSci/GenericArrayFormatter), `src/core/interchange.ts` (DataFrame Interchange Protocol), `src/reshape/lreshape.ts` (group-melt wide-to-long)
+- **Status**: ⏳ Pending CI | Added 6 files: flags.ts, clipboard.ts, pickle.ts, formats.ts, interchange.ts, lreshape.ts
 - **Metric**: 157 (delta: +6 from branch base 151, beats stored best 156)
 
-### Iteration 344 — 2026-06-06 13:38 UTC
+### Iters 339–344 — ✅/⏳ (148→156): interchange, readStata/toStata, readXml, readTable, caseWhen, flags, clipboard, pytables, plot, sql, cut_bins, pickle, formats, lreshape.
 
-- **Status**: ⏳ Pending CI
-- **Change**: Added 5 new files — `src/core/flags.ts` (WeakMap flags registry), `src/io/clipboard.ts` (readClipboard/toClipboard), `src/io/pytables.ts` (HDFStore), `src/plot/plot.ts` (7 pandas.plotting functions), `src/io/sql.ts` (TableContext/readSql/toSql)
-- **Metric**: 156 (delta: +5 from branch base 151, beats stored best 155)
-
-### Iteration 343 — 2026-06-05 19:18 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27035393516)
-
-- **Status**: ⏳ Pending CI
-- **Change**: Added 4 new files — `src/core/flags.ts` (Flags/WeakMap registry), `src/core/business_offset.ts` (BusinessHour/CustomBusinessDay), `src/core/interchange.ts` (DataFrame Interchange Protocol), `src/io/hdf.ts` (TSH binary I/O)
-- **Metric**: 155 (delta: +4 from branch base 151, beats stored best 154)
-
-### Iteration 342 — 2026-06-05 01:32 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/26989944591)
-
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Added `src/core/interchange.ts` — DataFrame Interchange Protocol (`pd.api.interchange`)
-- **Metric**: 154 (delta: +1) — `getDataFrame()`, `fromDataFrame()`, proper null encoding for all dtypes.
-
-### Iters 339–341 — ✅ (148→153): Flags (WeakMap), readStata/toStata (DTA 118), interchange pending-ci no-metric.
-
-### Iters 316–318 — ✅ (148→151): readXml/toXml, readTable, caseWhen ported.
-
-### Iters 1–315 — ✅ (0→148): Full pandas core, stats, io, merge, reshape, window, groupby, string ops, datetime, offsets, period, interval, multi-index, grouper, lreshape, and more.
+### Iters 1–338 — ✅ (0→148): Full pandas core, stats, io, merge, reshape, window, groupby, string ops, datetime, offsets, period, interval, multi-index, grouper, and more.
