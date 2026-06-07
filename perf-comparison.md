@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-06T07:45:44Z |
-| Iteration Count | 344 |
-| Best Metric | 677 |
+| Last Run | 2026-06-07T01:34:53Z |
+| Iteration Count | 345 |
+| Best Metric | 678 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -57,33 +57,22 @@
 ## 🔭 Future Directions
 
 - Option-variant benchmarks (axis/limit/method parameters)
-- Period.contains / Period.diff variants not yet benchmarked
+- Period.contains / Period.diff variants not yet benchmarked (now covered in period_arithmetic)
+- Styler.format / Styler.apply / Styler.applymap not yet benchmarked as standalone
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 344 — 2026-06-06T07:45:44Z — [Run](https://github.com/githubnext/tsb/actions/runs/27056549643)
+### Iteration 345 — 2026-06-07T01:34:53Z — [Run](https://github.com/githubnext/tsb/actions/runs/27079290567)
 
 - **Status**: ✅ Accepted
-- **Change**: Added 2 benchmark pairs: `styler_extended` (Styler.barChart/highlightBetween/highlightNull/toHtml/toLatex) and `dataframe_at_iat` (dataFrameAt/dataFrameIat scalar access; re-added from iter 343 which was lost in rebase)
-- **Metric**: 677 (previous best: 676, delta: +1)
-- **Commit**: e954abd
-- **Notes**: Branch was rebased against origin/main (true divergence). iter 343 commit `efb6aed` was not on remote branch; re-added `dataframe_at_iat` benchmark plus new `styler_extended` for Styler advanced methods.
+- **Change**: Added 3 benchmark pairs: `pd_options` (getOption/setOption/resetOption/describeOption/optionContext), `styler_extended` (barChart/highlightBetween/highlightNull/toHtml/toLatex), `dataframe_at_iat` (dataFrameAt/dataFrameIat scalar access); fixed docstring escaping in bench_str_extract_all.py and bench_str_extract_groups.py; rebased branch onto origin/main
+- **Metric**: 678 (previous best: 677, delta: +1)
+- **Commit**: 9571018
+- **Notes**: Branch rebased from iter 342 onto origin/main. Iters 343-344 content re-added (styler_extended, dataframe_at_iat) plus new pd_options pair.
 
-### Iteration 343 — 2026-06-05T13:47:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/27018606942)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `dataframe_at_iat` benchmark pair (dataFrameAt/dataFrameIat — scalar access by label/position); fixed docstring escaping in bench_str_extract_all.py and bench_str_extract_groups.py
-- **Metric**: 676 (previous best: 675, delta: +1)
-- **Commit**: efb6aed
-
-### Iteration 342 — 2026-06-04T19:34:45Z — [Run](https://github.com/githubnext/tsb/actions/runs/26974794187)
-
-- **Status**: ✅ Accepted
-- **Change**: Added 2 benchmark pairs: `to_json_denormalize` (toJsonDenormalize/toJsonRecords/toJsonSplit/toJsonIndex), `cut_bins_to_frame` (cutBinsToFrame/cutBinCounts/binEdges)
-- **Metric**: 675 (previous best: 674, delta: +1)
-- **Commit**: 46d46aa
+### Iters 342–344 — ✅ | 675→677: to_json_denormalize, cut_bins_to_frame, dataframe_at_iat, styler_extended.
 
 ### Iters 321–341 — ✅ | 665→674: readHtml, options_ops, to_json_denormalize, pd_api, elem_ops, clip_with_bounds, format_table, numeric_extended, join/joinAll/crossJoin, sort_ops, cut_bins, resample, merge_ordered, na_ops, rename_ops, math_ops, value_counts, notna_boolean, window_extended, abs_round, autocorr, extensions, window_indexers, pd_errors.
 
