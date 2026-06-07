@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-06T13:38:00Z |
-| Iteration Count | 344 |
-| Best Metric | 156 |
+| Last Run | 2026-06-07T00:00:00Z |
+| Iteration Count | 345 |
+| Best Metric | 157 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted, pending-ci |
 
 ---
 
@@ -35,8 +35,7 @@
 
 ## 🎯 Current Priorities
 
-- Next: More new source files — `pd.api.types` helpers (new src/api/types.ts), `CategoricalAccessor` enhancements, `pd.testing` utilities, `pd.io.formats` additions
-- Flags, clipboard, pytables, plotting, sql all done in iter 344.
+- Next: More new source files — `pd.api.types` helpers (new src/api/types.ts), `pd.testing` utilities (src/testing/testing.ts), `src/core/business_offset.ts` (BusinessHour/CustomBusinessDay), `src/io/hdf.ts` (HDFStore/TSH binary)
 
 ---
 
@@ -63,12 +62,19 @@
 
 - `pd.api.types` helpers — new src/api/types.ts (is_integer_dtype, is_float_dtype, etc.)
 - `pd.testing` utilities — new src/testing/testing.ts (assert_frame_equal, assert_series_equal)
-- `CategoricalAccessor` enhancements — new methods on cat accessor
-- `pd.io.formats` — new src/io/formats.ts (format-related utilities)
+- `src/core/business_offset.ts` — BusinessHour, CustomBusinessDay offset types
+- `src/io/hdf.ts` — HDFStore/TSH binary I/O, HDF5-style storage
+- `src/io/sql.ts` — TableContext/readSql/toSql (SQLite-based)
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 345 — 2026-06-07 00:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27086847584)
+
+- **Status**: ⏳ Pending CI
+- **Change**: Added 6 new files — `src/core/flags.ts` (WeakMap DataFrame.flags registry), `src/io/clipboard.ts` (readClipboard/toClipboard TSV I/O), `src/io/pickle.ts` (readPickle/toPickle JSON serialization), `src/io/formats.ts` (formatFloat/formatInt/formatPercent/formatSci/GenericArrayFormatter), `src/core/interchange.ts` (DataFrame Interchange Protocol), `src/reshape/lreshape.ts` (group-melt wide-to-long)
+- **Metric**: 157 (delta: +6 from branch base 151, beats stored best 156)
 
 ### Iteration 344 — 2026-06-06 13:38 UTC
 
