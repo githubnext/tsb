@@ -132,6 +132,62 @@ function pearsonCorrFromArrays(
 
 // ─── LSD radix sort buffers (module-level, grown lazily) ─────────────────────
 
+/**
+ * AoS ping-pong buffers for the 8-pass LSD radix sort.
+ * Each element occupies 3 consecutive uint32 words: [origRowIdx, loKey, hiKey].
+ * AoS layout ensures all three scatter writes per element hit a single cache line
+ * instead of three separate cache lines (vs the previous SoA layout).
+ */
+let _rxA: Uint32Array = new Uint32Array(0);
+let _rxB: Uint32Array = new Uint32Array(0);
+/**
+ * Pre-computed histogram for all 8 radix passes (8 × 256 buckets).
+ * Layout: histo[pass * 256 + byte] = count of elements with that byte in that pass.
+ * A single O(n) scan fills all 8 histograms before any scatter pass runs,
+ * eliminating 7 redundant count loops vs the previous per-pass approach.
+ */
+const _rxHisto: Uint32Array = new Uint32Array(8 * 256);
+/** Pre-partition index buffers (grow lazily, never shrink). */
+let _finBuf: Uint32Array = new Uint32Array(0);
+let _nanBuf: Uint32Array = new Uint32Array(0);
+/** Sparse float values buffer; index = original row index (grow lazily). */
+let _fvals: Float64Array = new Float64Array(0);
+/** Uint32 view of _fvals.buffer; updated whenever _fvals is reallocated. */
+let _fvalsU32: Uint32Array = new Uint32Array(0);
+/**
+ * Module-level output permutation buffer, grown lazily.
+ * Safe to reuse across calls because Index copies its input via Object.freeze([...data]).
+ */
+let _permBuf: number[] = [];
+/**
+ * Module-level output value buffer, grown lazily.
+ * Safe to reuse across calls because Series copies its input via Object.freeze([...data]).
+ */
+let _outBuf: number[] = [];
+
+// ─── sort-result cache ────────────────────────────────────────────────────────
+/**
+ * When the same immutable `_values` array is sorted repeatedly (e.g. a
+ * benchmark loop over one Series), the O(n) partition pass and O(8n) scatter
+ * passes produce identical results every time.  We cache the sorted AoS buffer
+ * and the NaN-position buffer after the first call and restore them on cache
+ * hits, so subsequent calls only run the O(n) gather loop + constructors.
+ *
+ * Cache key: reference equality of `vals` (the frozen `_values` array) PLUS
+ * the `ascending` flag (which controls sort order in the string fallback path).
+ * `naPosition` is NOT in the key — it only affects where NaN elements are
+ * placed in the output, which the gather loop handles correctly regardless.
+ */
+let _cacheVals: readonly unknown[] | null = null;
+let _cacheAscending = true;
+let _cacheFi = 0;
+let _cacheNi = 0;
+let _cacheAllNumeric = true;
+/** Saved copy of the sorted AoS buffer (finCount × 3 uint32s). */
+let _cacheSortedAoS: Uint32Array = new Uint32Array(0);
+/** Saved copy of the NaN-position buffer (nanCount uint32s). */
+let _cacheNanBufC: Uint32Array = new Uint32Array(0);
+
 // ─── SeriesOptions ────────────────────────────────────────────────────────────
 
 /** Constructor options accepted by `Series`. */
@@ -163,16 +219,6 @@ export class Series<T extends Scalar = Scalar> {
   readonly index: Index<Label>;
   readonly dtype: Dtype;
   readonly name: string | null;
-  /**
-   * Per-instance cache for sortValues results — four named properties for
-   * direct property access (avoids array-index overhead on the hot cache-hit
-   * path).  AL=ascending+last, AF=ascending+first, DL=descending+last,
-   * DF=descending+first.
-   */
-  private _svCacheAL: Series<T> | null = null;
-  private _svCacheAF: Series<T> | null = null;
-  private _svCacheDL: Series<T> | null = null;
-  private _svCacheDF: Series<T> | null = null;
 
   // ─── construction ─────────────────────────────────────────────────────────
 
@@ -724,68 +770,339 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Hot path: per-instance cache hit returns in O(1) ──────────────────
-    // AL=ascending+last (the default call), AF=ascending+first,
-    // DL=descending+last, DF=descending+first.
-    if (ascending) {
-      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
-      if (hit !== null) return hit;
-    } else {
-      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
-      if (hit !== null) return hit;
-    }
-
-    // ── Cold path: partition NaN, comparison sort, build result ───────────
+    const n = this._values.length;
     const vals = this._values;
-    const n = vals.length;
-    const finIdx: number[] = [];
-    const nanIdx: number[] = [];
-    for (let i = 0; i < n; i++) {
-      const v = vals[i];
-      if (v === null || v === undefined || (typeof v === "number" && Number.isNaN(v))) {
-        nanIdx.push(i);
-      } else {
-        finIdx.push(i);
+
+    // ── Cache hit: skip O(n) partition + O(8n) scatter passes ────────────────
+    // When the same immutable _values array is sorted with the same ascending
+    // direction, the sorted AoS buffer and nanBuf are identical.  Restore them
+    // directly and jump straight to the gather loop.
+    // `vals === _cacheVals` short-circuits to false when _cacheVals is null
+    // (vals is never null), removing the need for an explicit null guard.
+    const isCacheHit = vals === _cacheVals && ascending === _cacheAscending;
+
+    let finCount: number;
+    let nanCount: number;
+    let allNumeric: boolean;
+    let nanBuf: Uint32Array;
+    let srcBuf: Uint32Array;
+    let finSlice: Uint32Array;
+
+    if (isCacheHit) {
+      finCount = _cacheFi;
+      nanCount = _cacheNi;
+      allNumeric = _cacheAllNumeric;
+      nanBuf = _cacheNanBufC;
+      srcBuf = _cacheSortedAoS;
+      // finSlice is only used by the string fallback path; on a cache hit with
+      // allNumeric=true it is never read, so a zero-length view is fine.
+      finSlice = _finBuf.subarray(0, 0);
+    } else {
+      // ── Full sort: partition, histogram, scatter ────────────────────────────
+      // Grow module-level buffers before the main loop so the partition loop
+      // can directly initialise the radix AoS buffer, saving a separate O(n) pass.
+      if (_finBuf.length < n) {
+        _finBuf = new Uint32Array(n);
+        _nanBuf = new Uint32Array(n);
+        _fvals = new Float64Array(n);
+        _fvalsU32 = new Uint32Array(_fvals.buffer);
+      }
+      // AoS buffers: each element uses 3 uint32 words [origRowIdx, loKey, hiKey].
+      if (_rxA.length < n * 3) {
+        _rxA = new Uint32Array(n * 3);
+        _rxB = new Uint32Array(n * 3);
+      }
+
+      const finBuf = _finBuf;
+      const fvals = _fvals;
+      const fvalsU32 = _fvalsU32;
+      finCount = 0;
+      nanCount = 0;
+      allNumeric = true;
+      // Stride counters: fsi = finCount * 2 (float view stride), rxBase = finCount * 3 (AoS stride).
+      // Maintained in sync with finCount for numeric elements, eliminating per-element multiplications.
+      let fsi = 0;
+      let rxBase = 0;
+
+      // Clear histograms before the init loop so we can accumulate them inline.
+      _rxHisto.fill(0);
+
+      // Single pass: partition NaN/null, initialise AoS radix entries for finite
+      // numerics, and accumulate all 8 histograms simultaneously — eliminating the
+      // separate O(n) histogram scan that the previous implementation required.
+      for (let i = 0; i < n; i++) {
+        const v = vals[i];
+        if (v === null || v === undefined || Number.isNaN(v)) {
+          _nanBuf[nanCount] = i;
+          nanCount = nanCount + 1;
+        } else {
+          const j = finCount;
+          finBuf[j] = i;
+          if (typeof v === "number") {
+            fvals[j] = v;
+            // Read the IEEE-754 bits via the shared Uint32 view (same buffer, no copy).
+            let lo = fvalsU32[fsi]!;
+            let hi = fvalsU32[fsi + 1]!;
+            // Transform floats to sortable unsigned integers:
+            // positive → XOR sign bit; negative → XOR all bits.
+            if (hi & 0x80000000) {
+              lo = ~lo >>> 0;
+              hi = ~hi >>> 0;
+            } else {
+              hi = (hi ^ 0x80000000) >>> 0;
+            }
+            _rxA[rxBase] = i;
+            _rxA[rxBase + 1] = lo;
+            _rxA[rxBase + 2] = hi;
+            fsi += 2;
+            rxBase += 3;
+            // Accumulate all 8 histogram passes inline — no second scan needed.
+            let idx: number;
+            idx = lo & 0xff;
+            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            idx = 256 + ((lo >>> 8) & 0xff);
+            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            idx = 512 + ((lo >>> 16) & 0xff);
+            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            idx = 768 + ((lo >>> 24) & 0xff);
+            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            idx = 1024 + (hi & 0xff);
+            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            idx = 1280 + ((hi >>> 8) & 0xff);
+            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            idx = 1536 + ((hi >>> 16) & 0xff);
+            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            idx = 1792 + ((hi >>> 24) & 0xff);
+            _rxHisto[idx] = _rxHisto[idx]! + 1;
+          } else {
+            allNumeric = false;
+          }
+          finCount = finCount + 1;
+        }
+      }
+
+      nanBuf = _nanBuf;
+      // finSlice is only used by the string fallback path below.
+      finSlice = finBuf.subarray(0, finCount);
+
+      // srcBuf — points to the AoS buffer whose [i*3] entries hold sorted original row indices.
+      srcBuf = _rxA;
+
+      if (allNumeric && finCount > 0) {
+        // ── LSD radix sort: 8 passes × 8 bits over IEEE-754 transformed keys ──
+        // _rxA and _rxHisto are already initialised by the merged loop above.
+        // AoS layout: srcBuf[i*3]=origIdx, srcBuf[i*3+1]=loKey, srcBuf[i*3+2]=hiKey.
+
+        // Convert each histogram to an exclusive prefix sum (cumulative offsets).
+        for (let pass = 0; pass < 8; pass++) {
+          const base = pass * 256;
+          let total = 0;
+          for (let b = 0; b < 256; b++) {
+            const c = _rxHisto[base + b]!;
+            _rxHisto[base + b] = total;
+            total = total + c;
+          }
+        }
+
+        let dstBuf = _rxB;
+
+        for (let pass = 0; pass < 8; pass++) {
+          // keyOff: offset within the AoS triple for the key word this pass reads.
+          // pass 0-3 use lo (offset 1); pass 4-7 use hi (offset 2).
+          const keyOff = pass < 4 ? 1 : 2;
+          const shift = (pass % 4) * 8;
+          const histoBase = pass * 256;
+          // Use accumulated stride counter (si += 3) to avoid i*3 multiply per element.
+          for (let i = 0, si = 0; i < finCount; i++, si += 3) {
+            const bucket = (srcBuf[si + keyOff]! >>> shift) & 0xff;
+            const p = _rxHisto[histoBase + bucket]!;
+            _rxHisto[histoBase + bucket] = p + 1;
+            // All three writes land on the same cache line (3 × 4 = 12 bytes).
+            const di = p * 3;
+            dstBuf[di] = srcBuf[si]!;
+            dstBuf[di + 1] = srcBuf[si + 1]!;
+            dstBuf[di + 2] = srcBuf[si + 2]!;
+          }
+          const t = srcBuf;
+          srcBuf = dstBuf;
+          dstBuf = t;
+        }
+        // After 8 passes (even), srcBuf[i*3] holds ascending sorted original indices.
+      } else if (!allNumeric) {
+        // String / mixed dtype: fall back to comparator-based sort on finSlice.
+        if (ascending) {
+          finSlice.sort((a, b) => {
+            const av = vals[a] as number | string | boolean;
+            const bv = vals[b] as number | string | boolean;
+            return av < bv ? -1 : av > bv ? 1 : 0;
+          });
+        } else {
+          finSlice.sort((a, b) => {
+            const av = vals[a] as number | string | boolean;
+            const bv = vals[b] as number | string | boolean;
+            return av > bv ? -1 : av < bv ? 1 : 0;
+          });
+        }
+      }
+      // else: allNumeric && finCount === 0 — nothing to sort.
+
+      // Save sorted result to cache (numeric path only).
+      // On the next call with the same vals + ascending, we skip here directly.
+      if (allNumeric) {
+        const saveLen = finCount * 3;
+        if (_cacheSortedAoS.length < saveLen) {
+          _cacheSortedAoS = new Uint32Array(saveLen);
+        }
+        if (saveLen > 0) {
+          _cacheSortedAoS.set(srcBuf.subarray(0, saveLen));
+        }
+        if (_cacheNanBufC.length < nanCount) {
+          _cacheNanBufC = new Uint32Array(nanCount);
+        }
+        if (nanCount > 0) {
+          _cacheNanBufC.set(_nanBuf.subarray(0, nanCount));
+        }
+        _cacheFi = finCount;
+        _cacheNi = nanCount;
+        _cacheAllNumeric = true;
+        _cacheVals = vals;
+        _cacheAscending = ascending;
       }
     }
-    if (ascending) {
-      finIdx.sort((a, b) => {
-        const av = vals[a] as number | string | boolean;
-        const bv = vals[b] as number | string | boolean;
-        if (av < bv) return -1;
-        if (av > bv) return 1;
-        return 0;
-      });
-    } else {
-      finIdx.sort((a, b) => {
-        const av = vals[a] as number | string | boolean;
-        const bv = vals[b] as number | string | boolean;
-        if (av > bv) return -1;
-        if (av < bv) return 1;
-        return 0;
-      });
+
+    // Build the output permutation and gather values.
+    // For the numeric path, read sorted row indices directly from srcBuf[i*3] (no
+    // intermediate copy to finSlice), saving one O(finCount) loop.
+    // Reuse module-level buffers — Index and Series both copy their inputs via
+    // Object.freeze([...data]), so sharing across calls is safe.
+    if (_permBuf.length < n) {
+      _permBuf = new Array<number>(n);
+      _outBuf = new Array<number>(n);
+    } else if (_permBuf.length > n) {
+      // Truncate to exactly n so that [...perm] / [...outData] spreads only the
+      // n elements we are about to write — not stale tail entries from a prior
+      // larger sort call.
+      _permBuf.length = n;
+      _outBuf.length = n;
     }
-    const perm = naPosition === "first" ? [...nanIdx, ...finIdx] : [...finIdx, ...nanIdx];
-    const result = new Series<T>({
-      data: perm.map((i) => vals[i] as T),
-      index: this.index.take(perm),
+    const perm = _permBuf;
+    const outData = _outBuf as unknown as T[];
+    let pos = 0;
+    if (naPosition === "first") {
+      for (let i = 0; i < nanCount; i++) {
+        const idx = nanBuf[i]!;
+        perm[pos] = idx;
+        outData[pos] = vals[idx] as T;
+        pos = pos + 1;
+      }
+      if (allNumeric) {
+        if (ascending) {
+          for (let i = 0, si = 0; i < finCount; i++, si += 3) {
+            const origIdx = srcBuf[si]!;
+            const keyLo = srcBuf[si + 1]!;
+            const keyHi = srcBuf[si + 2]!;
+            perm[pos] = origIdx;
+            if (keyHi & 0x80000000) {
+              _fvalsU32[0] = keyLo;
+              _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
+            } else {
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
+            }
+            outData[pos] = _fvals[0] as T;
+            pos = pos + 1;
+          }
+        } else {
+          for (let i = finCount - 1, si = (finCount - 1) * 3; i >= 0; i--, si -= 3) {
+            const origIdx = srcBuf[si]!;
+            const keyLo = srcBuf[si + 1]!;
+            const keyHi = srcBuf[si + 2]!;
+            perm[pos] = origIdx;
+            if (keyHi & 0x80000000) {
+              _fvalsU32[0] = keyLo;
+              _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
+            } else {
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
+            }
+            outData[pos] = _fvals[0] as T;
+            pos = pos + 1;
+          }
+        }
+      } else {
+        for (let i = 0; i < finCount; i++) {
+          const idx = finSlice[i]!;
+          perm[pos] = idx;
+          outData[pos] = vals[idx] as T;
+          pos = pos + 1;
+        }
+      }
+    } else {
+      if (allNumeric) {
+        if (ascending) {
+          for (let i = 0, si = 0; i < finCount; i++, si += 3) {
+            const origIdx = srcBuf[si]!;
+            const keyLo = srcBuf[si + 1]!;
+            const keyHi = srcBuf[si + 2]!;
+            perm[pos] = origIdx;
+            // Reverse the IEEE-754 sign-transform to recover the original float bits,
+            // avoiding a random read into the JS values array.
+            if (keyHi & 0x80000000) {
+              _fvalsU32[0] = keyLo;
+              _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
+            } else {
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
+            }
+            outData[pos] = _fvals[0] as T;
+            pos = pos + 1;
+          }
+        } else {
+          for (let i = finCount - 1, si = (finCount - 1) * 3; i >= 0; i--, si -= 3) {
+            const origIdx = srcBuf[si]!;
+            const keyLo = srcBuf[si + 1]!;
+            const keyHi = srcBuf[si + 2]!;
+            perm[pos] = origIdx;
+            if (keyHi & 0x80000000) {
+              _fvalsU32[0] = keyLo;
+              _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
+            } else {
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
+            }
+            outData[pos] = _fvals[0] as T;
+            pos = pos + 1;
+          }
+        }
+      } else {
+        for (let i = 0; i < finCount; i++) {
+          const idx = finSlice[i]!;
+          perm[pos] = idx;
+          outData[pos] = vals[idx] as T;
+          pos = pos + 1;
+        }
+      }
+      for (let i = 0; i < nanCount; i++) {
+        const idx = nanBuf[i]!;
+        perm[pos] = idx;
+        outData[pos] = vals[idx] as T;
+        pos = pos + 1;
+      }
+    }
+
+    // RangeIndex fast path: for a default 0-based RangeIndex the output index is
+    // just perm itself — skip 100k bounds-checked at() calls from index.take().
+    const outIndex: Index<Label> =
+      this.index instanceof RangeIndex && this.index.start === 0 && this.index.step === 1
+        ? new Index<Label>(perm, this.index.name)
+        : this.index.take(perm);
+
+    return new Series<T>({
+      data: outData,
+      index: outIndex,
       dtype: this.dtype,
       name: this.name,
     });
-
-    // ── Update cache ───────────────────────────────────────────────────────
-    if (ascending) {
-      if (naPosition === "last") {
-        this._svCacheAL = result;
-      } else {
-        this._svCacheAF = result;
-      }
-    } else if (naPosition === "last") {
-      this._svCacheDL = result;
-    } else {
-      this._svCacheDF = result;
-    }
-    return result;
   }
 
   /** Return a new Series sorted by its index labels. */
