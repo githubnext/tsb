@@ -783,13 +783,26 @@ export class Series<T extends Scalar = Scalar> {
     // ── Per-instance cache: named properties for direct access on the hot path ──
     // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
     // and Object.freeze spreads on all repeat calls with the same parameters.
-    if (ascending) {
-      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
+    // Flattened if/else-if chain (no ternary): each branch directly accesses one
+    // named cache slot, giving JSC's FTL compiler per-branch inline-cache
+    // specialisation opportunities and tighter DCE on the default hot path.
+    if (ascending && naPosition === "last") {
+      const hit = this._svCacheAL;
+      if (hit !== null) {
+        return hit;
+      }
+    } else if (ascending) {
+      const hit = this._svCacheAF;
+      if (hit !== null) {
+        return hit;
+      }
+    } else if (naPosition === "last") {
+      const hit = this._svCacheDL;
       if (hit !== null) {
         return hit;
       }
     } else {
-      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
+      const hit = this._svCacheDF;
       if (hit !== null) {
         return hit;
       }
