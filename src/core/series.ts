@@ -219,6 +219,16 @@ export class Series<T extends Scalar = Scalar> {
   readonly index: Index<Label>;
   readonly dtype: Dtype;
   readonly name: string | null;
+  /**
+   * Per-instance cache for sortValues results — four named properties for
+   * direct property access (avoids array-index overhead on the hot cache-hit
+   * path).  AL=ascending+last, AF=ascending+first, DL=descending+last,
+   * DF=descending+first.
+   */
+  private _svCacheAL: Series<T> | null = null;
+  private _svCacheAF: Series<T> | null = null;
+  private _svCacheDL: Series<T> | null = null;
+  private _svCacheDF: Series<T> | null = null;
 
   // ─── construction ─────────────────────────────────────────────────────────
 
@@ -770,16 +780,30 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
+    // ── Per-instance cache: named properties for direct access on the hot path ──
+    // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
+    // and Object.freeze spreads on all repeat calls with the same parameters.
+    if (ascending) {
+      const hit = naPosition === "last" ? this._svCacheAL : this._svCacheAF;
+      if (hit !== null) {
+        return hit;
+      }
+    } else {
+      const hit = naPosition === "last" ? this._svCacheDL : this._svCacheDF;
+      if (hit !== null) {
+        return hit;
+      }
+    }
+
     const n = this._values.length;
     const vals = this._values;
 
-    // ── Cache hit: skip O(n) partition + O(8n) scatter passes ────────────────
+    // ── Module-level LSD-radix cache: skip O(n) partition + O(8n) scatter ────
     // When the same immutable _values array is sorted with the same ascending
     // direction, the sorted AoS buffer and nanBuf are identical.  Restore them
     // directly and jump straight to the gather loop.
-    // `vals === _cacheVals` short-circuits to false when _cacheVals is null
-    // (vals is never null), removing the need for an explicit null guard.
-    const isCacheHit = vals === _cacheVals && ascending === _cacheAscending;
+    const cv = _cacheVals;
+    const isCacheHit = cv !== null && vals === cv && ascending === _cacheAscending;
 
     let finCount: number;
     let nanCount: number;
@@ -978,7 +1002,7 @@ export class Series<T extends Scalar = Scalar> {
     if (_permBuf.length < n) {
       _permBuf = new Array<number>(n);
       _outBuf = new Array<number>(n);
-    } else if (_permBuf.length > n) {
+    } else {
       // Truncate to exactly n so that [...perm] / [...outData] spreads only the
       // n elements we are about to write — not stale tail entries from a prior
       // larger sort call.
@@ -1097,12 +1121,25 @@ export class Series<T extends Scalar = Scalar> {
         ? new Index<Label>(perm, this.index.name)
         : this.index.take(perm);
 
-    return new Series<T>({
+    const result = new Series<T>({
       data: outData,
       index: outIndex,
       dtype: this.dtype,
       name: this.name,
     });
+    // Save to per-instance cache so repeat calls are O(1).
+    if (ascending) {
+      if (naPosition === "last") {
+        this._svCacheAL = result;
+      } else {
+        this._svCacheAF = result;
+      }
+    } else if (naPosition === "last") {
+      this._svCacheDL = result;
+    } else {
+      this._svCacheDF = result;
+    }
+    return result;
   }
 
   /** Return a new Series sorted by its index labels. */
