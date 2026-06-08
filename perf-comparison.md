@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-07T01:34:53Z |
-| Iteration Count | 345 |
-| Best Metric | 678 |
+| Last Run | 2026-06-09T00:00:00Z |
+| Iteration Count | 346 |
+| Best Metric | 676 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -57,15 +57,20 @@
 ## 🔭 Future Directions
 
 - Option-variant benchmarks (axis/limit/method parameters)
-- Period.contains/diff and Styler.format/apply/applymap not yet benchmarked as standalone
+- Period.contains/diff not yet benchmarked as standalone
 
 ---
 
 ## 📊 Iteration History
 
+### Iteration 346 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27125338527)
+
+- **Status**: ✅ Accepted | bench_styler_format_apply (Styler.format/apply/applymap); fixed 7 broken benchmarks (read_excel node:zlib, series_where, series_mask, dataframe_mask, dataframe_where, str_extract_all docstring, str_extract_groups docstring); corrected state (true baseline was 675, not 678)
+- **Metric**: 676 (delta: +1) | Commit: 5adab8d
+
 ### Iteration 345 — 2026-06-07 — [Run](https://github.com/githubnext/tsb/actions/runs/27079290567)
 
-- **Status**: ✅ Accepted | pd_options, styler_extended, dataframe_at_iat; fixed docstring escaping; rebased
-- **Metric**: 678 (delta: +1) | Commit: 9571018
+- **Status**: ❌ Error (state corrupted — commit never landed; best_metric corrected from 678→675 in iter 346)
+- **Metric**: null | Commit: n/a
 
-### Iters 1–344 — ✅ (0→677): Full benchmark suite covering all pandas functions.
+### Iters 1–344 — ✅ (0→675): Full benchmark suite covering all pandas functions.
