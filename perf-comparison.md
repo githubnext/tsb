@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-09T00:00:00Z |
-| Iteration Count | 346 |
-| Best Metric | 676 |
+| Last Run | 2026-06-09T19:34:58Z |
+| Iteration Count | 347 |
+| Best Metric | 677 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -58,10 +58,19 @@
 
 - Option-variant benchmarks (axis/limit/method parameters)
 - Period.contains/diff not yet benchmarked as standalone
+- joinAll (joining multiple DataFrames) not yet benchmarked
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 347 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27230659462)
+
+- **Status**: ✅ Accepted
+- **Change**: Add join and cross_join benchmark pairs (DataFrame.join index-based join; crossJoin Cartesian product)
+- **Metric**: 677 (previous best: 676, delta: +1)
+- **Commit**: 6c0ff39
+- **Notes**: Both join() and crossJoin() from src/merge/join.ts were previously uncovered; Python equivalents use DataFrame.join() and pd.merge(how="cross").
 
 ### Iteration 346 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27125338527)
 
