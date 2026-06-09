@@ -783,26 +783,17 @@ export class Series<T extends Scalar = Scalar> {
     // ── Per-instance cache: named properties for direct access on the hot path ──
     // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
     // and Object.freeze spreads on all repeat calls with the same parameters.
-    // Flattened if/else-if chain (no ternary): each branch directly accesses one
-    // named cache slot, giving JSC's FTL compiler per-branch inline-cache
-    // specialisation opportunities and tighter DCE on the default hot path.
-    if (ascending && naPosition === "last") {
-      const hit = this._svCacheAL;
-      if (hit !== null) {
-        return hit;
-      }
-    } else if (ascending) {
-      const hit = this._svCacheAF;
-      if (hit !== null) {
-        return hit;
-      }
-    } else if (naPosition === "last") {
-      const hit = this._svCacheDL;
+    // Pre-convert naPosition to a boolean so the hot-path ternary uses a boolean
+    // IC rather than a string-equality IC — JSC's FTL can specialise boolean
+    // branches more aggressively than string comparisons.
+    const naLast = naPosition === "last";
+    if (ascending) {
+      const hit = naLast ? this._svCacheAL : this._svCacheAF;
       if (hit !== null) {
         return hit;
       }
     } else {
-      const hit = this._svCacheDF;
+      const hit = naLast ? this._svCacheDL : this._svCacheDF;
       if (hit !== null) {
         return hit;
       }
@@ -1025,7 +1016,7 @@ export class Series<T extends Scalar = Scalar> {
     const perm = _permBuf;
     const outData = _outBuf as unknown as T[];
     let pos = 0;
-    if (naPosition === "first") {
+    if (!naLast) {
       for (let i = 0; i < nanCount; i++) {
         const idx = nanBuf[i]!;
         perm[pos] = idx;
@@ -1142,12 +1133,12 @@ export class Series<T extends Scalar = Scalar> {
     });
     // Save to per-instance cache so repeat calls are O(1).
     if (ascending) {
-      if (naPosition === "last") {
+      if (naLast) {
         this._svCacheAL = result;
       } else {
         this._svCacheAF = result;
       }
-    } else if (naPosition === "last") {
+    } else if (naLast) {
       this._svCacheDL = result;
     } else {
       this._svCacheDF = result;
