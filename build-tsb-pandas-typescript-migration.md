@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-09T00:00:00Z |
-| Iteration Count | 348 |
+| Last Run | 2026-06-09T14:08:56Z |
+| Iteration Count | 349 |
 | Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
 
 ---
 
@@ -35,7 +35,8 @@
 
 ## 🎯 Current Priorities
 
-- Next: New source files — `src/io/hdf.ts` (HDFStore/TSH binary), `src/io/sql.ts` (readSql/toSql SQLite-based)
+- Next: `src/io/hdf.ts` — HDFStore/TSH binary I/O (HDF5-style); after sql.ts/flags.ts land
+- Then: `src/core/styler.ts` — DataFrame styling/formatting (Styler class)
 
 ---
 
@@ -61,26 +62,19 @@
 ## 🔭 Future Directions
 
 - `src/io/hdf.ts` — HDFStore/TSH binary I/O, HDF5-style storage
-- `src/io/sql.ts` — TableContext/readSql/toSql (SQLite-based)
+- `src/core/styler.ts` — DataFrame Styler class (styling and display formatting)
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 348 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27177959517)
+### Iteration 349 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27210462455)
 
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Added `src/core/business_offset.ts` — `BusinessHour`, `CustomBusinessHour`, `CustomBusinessDay` offset classes with full test suite and playground. Also fixed pre-existing TypeScript errors in `src/io/xml.ts` (Label type guard) and `tests/io/read_table.test.ts` (.size, .select, exactOptionalPropertyTypes).
-- **Metric**: 152 (branch was at 151 after rebase; business_offset.ts restores to 152)
-- **Commits**: 5c56c7b (feature), 89edeb6 (type fixes)
+- **Status**: ⏳ Pending CI
+- **Change**: Added `src/io/sql.ts` (readSql, readSqlTable, readSqlQuery, toSql, openSqlite, SqlDriver) and `src/stats/flags.ts` (DataFrameFlags, DuplicateLabelError, dataFrameGetFlags, dataFrameSetFlags). Both were missing from branch after rebases. Also added tests, playground/sql.html, updated all index files.
+- **Metric**: Expected 153 (branch was at 151; +sql.ts +flags.ts = +2)
+- **Commit**: 327644b
 
-### Iteration 347 — 2026-06-08 — [Run](https://github.com/githubnext/tsb/actions/runs/27143720876)
-
-- **Status**: ✅ Accepted (pending CI)
-- **Change**: Added `src/stats/flags.ts` — `DataFrame.flags` / `set_flags()` with `DataFrameFlags`, `DuplicateLabelError`, `dataFrameGetFlags`, `dataFrameSetFlags`
-- **Metric**: 152 (branch was at 151 after rebase; lreshape.ts from iter 346 was lost; flags.ts restores to 152)
-- **Commit**: 63d9e8d
-
-### Iters 339–346 — ✅/⏳ (148→152): lreshape, interchange, readStata/toStata, readXml, readTable, caseWhen, flags, clipboard, pytables, plot, sql, cut_bins, pickle, formats. Branch rebased onto main; some files in pending-CI state.
+### Iters 339–348 — ✅/⏳ (148→152): business_offset, flags, lreshape, interchange, readStata/toStata, readXml, readTable, caseWhen, clipboard, pytables, plot, sql, cut_bins, pickle, formats. Branch rebased onto main multiple times; some files in pending-CI state.
 
 ### Iters 1–338 — ✅ (0→148): Full pandas core, stats, io, merge, reshape, window, groupby, string ops, datetime, offsets, period, interval, multi-index, grouper, and more.
