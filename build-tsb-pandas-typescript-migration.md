@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-09T14:08:56Z |
-| Iteration Count | 349 |
-| Best Metric | 152 |
+| Last Run | 2026-06-09T14:42:00Z |
+| Iteration Count | 350 |
+| Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,62 +19,50 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
-
----
-
-## 📋 Program Info
-
-**Goal**: Build tsb — a complete TypeScript port of pandas  
-**Metric**: pandas_features_ported (higher is better)  
-**Branch**: [`autoloop/build-tsb-pandas-typescript-migration`](../../tree/autoloop/build-tsb-pandas-typescript-migration)  
-**Pull Request**: #323  
-**Issue**: #1
+| Recent Statuses | pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: `src/io/hdf.ts` — HDFStore/TSH binary I/O (HDF5-style); after sql.ts/flags.ts land
-- Then: `src/core/styler.ts` — DataFrame styling/formatting (Styler class)
+- `src/io/hdf.ts` — HDFStore/TSH binary I/O (HDF5-style)
+- `src/core/styler.ts` — DataFrame Styler class
 
 ---
 
 ## 📚 Lessons Learned
 
-- **CI**: `arr[i]!` for noUncheckedIndexedAccess. `import type` for type-only. `Number.NaN` not `NaN`. `useBlockStatements` in Biome. `for...of` not `.forEach()`.
+- **CI**: `arr[i]!` noUncheckedIndexedAccess. `import type`. `Number.NaN`. `useBlockStatements`. `for...of`.
+- **Strict TS**: No `as`. `exactOptionalPropertyTypes`: guard before assign. `Index.size` not `.length`. `Index(Label[])` — filter `Scalar[]` with `(v): v is Label => v !== undefined`. `df.filter(bool[])` vs `df.select(string[])`. `Series.iat(i)` positional, `.at(label)` label.
+- **Metric**: counts `src/**/*.ts` (not index) with exports. Need new files.
 - **Imports**: Stats/types from `../core`/`../types.ts`. Tests from `../../src/index.ts`.
-- **DataFrame**: `DataFrame.fromColumns({...}, { index: [...] })`. `df.col(name)` to get column. `df.columns.values` is `readonly string[]` (no cast needed).
-- **Metric counts files**: counts `src/**/*.ts` (not index.ts) that export something. New features need new files.
-- **Strict TS**: No `as` casts. Build typed intermediates. `exactOptionalPropertyTypes`: `if (field != null) opts.field = field`. `Index` has `.size` not `.length`. `Index` constructor requires `Label[]` not `Scalar[]` — filter with type guard. `df.filter()` takes `boolean[]` mask; use `df.select()` for column names.
-- **Offset/time**: Offset pattern: check onOffset → stepN; else rollforward/rollback then step. BusinessHour: fractional UTC hours. HDF TSH format: magic `TSH\x01`, dtype codes 0–4.
-- **Stata**: DTA 118 little-endian. Data offset = varLabelOffset + nvar*81 + 20. Missing double = 8.988e307.
-- **Interchange**: Float dtype: use `[1.5]` for float64. Float nulls → NaN (kind=1); int/str nulls → byte mask (kind=4).
+- **DataFrame**: `fromColumns({}, {index})`. `df.col(name)`. `df.columns.values` is `readonly string[]`.
+- **Offsets**: onOffset→stepN; else rollforward/back then step. BusinessHour: fractional UTC.
+- **HDF**: TSH magic `TSH\x01`, dtype codes 0–4. Stata DTA 118 LE; data offset=varLabelOffset+nvar*81+20.
+- **Interchange**: Float `[1.5]` for float64. Float nulls→NaN (kind=1); int/str→byte mask (kind=4).
 
 ---
 
 ## 🚧 Foreclosed Avenues
 
-- Adding offset classes to existing `date_offset.ts` does not improve metric (metric counts files, not exports)
+- Offset classes added to existing file: no metric gain (counts files not exports)
 
 ---
 
 ## 🔭 Future Directions
 
-- `src/io/hdf.ts` — HDFStore/TSH binary I/O, HDF5-style storage
-- `src/core/styler.ts` — DataFrame Styler class (styling and display formatting)
+- `src/io/hdf.ts` — HDFStore/TSH binary I/O
+- `src/core/styler.ts` — Styler class
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 349 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27210462455)
-
+### Iteration 350 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27281435657)
 - **Status**: ⏳ Pending CI
-- **Change**: Added `src/io/sql.ts` (readSql, readSqlTable, readSqlQuery, toSql, openSqlite, SqlDriver) and `src/stats/flags.ts` (DataFrameFlags, DuplicateLabelError, dataFrameGetFlags, dataFrameSetFlags). Both were missing from branch after rebases. Also added tests, playground/sql.html, updated all index files.
-- **Metric**: Expected 153 (branch was at 151; +sql.ts +flags.ts = +2)
-- **Commit**: 327644b
+- **Change**: flags.ts (DataFrameFlags, DuplicateLabelError) + sql.ts (readSql, toSql, MemoryDatabase). Fixed xml.ts Scalar[]→Label[], read_table.test.ts `.length`→`.size` / `filter`→`select` / exactOptionalPropertyTypes.
+- **Metric**: Expected 153 (+1 vs best 152); commits a46bda3, 68f8fae
 
-### Iters 339–348 — ✅/⏳ (148→152): business_offset, flags, lreshape, interchange, readStata/toStata, readXml, readTable, caseWhen, clipboard, pytables, plot, sql, cut_bins, pickle, formats. Branch rebased onto main multiple times; some files in pending-CI state.
+### Iters 316–349 — ✅/⏳ (148→152): readXml, readTable, caseWhen, lreshape, interchange, readStata/toStata, clipboard, pytables, plot, sql, flags, cut_bins, pickle, formats. Multiple rebases.
 
-### Iters 1–338 — ✅ (0→148): Full pandas core, stats, io, merge, reshape, window, groupby, string ops, datetime, offsets, period, interval, multi-index, grouper, and more.
+### Iters 1–315 — ✅ (0→148): Full pandas core, stats, io, merge, reshape, window, groupby, datetime, offsets, period, interval, multi-index, and more.
