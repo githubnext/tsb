@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-09T14:42:00Z |
-| Iteration Count | 350 |
+| Last Run | 2026-06-10T19:44:00Z |
+| Iteration Count | 351 |
 | Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,14 +19,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
 - `src/io/hdf.ts` — HDFStore/TSH binary I/O (HDF5-style)
-- `src/core/styler.ts` — DataFrame Styler class
+- `src/io/sql.ts` — readSql / toSql (in-memory SQL)
 
 ---
 
@@ -40,6 +40,7 @@
 - **Offsets**: onOffset→stepN; else rollforward/back then step. BusinessHour: fractional UTC.
 - **HDF**: TSH magic `TSH\x01`, dtype codes 0–4. Stata DTA 118 LE; data offset=varLabelOffset+nvar*81+20.
 - **Interchange**: Float `[1.5]` for float64. Float nulls→NaN (kind=1); int/str→byte mask (kind=4).
+- **Errors**: Error classes shared between modules must live in `src/errors.ts` and be imported elsewhere (avoid duplicate exports across core/index and errors).
 
 ---
 
@@ -57,6 +58,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 351 — 2026-06-10 — [Run](https://github.com/githubnext/tsb/actions/runs/27301544484)
+- **Status**: ⏳ Pending CI
+- **Change**: Add `src/core/flags.ts` — `DataFrameFlags` class + `DuplicateLabelError` in errors.ts. Integrates `df.flags` / `ser.flags` on DataFrame and Series. Full tests + playground.
+- **Metric**: Expected 152 (delta +1 vs actual branch 151); commit 57f163b
 
 ### Iteration 350 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27281435657)
 - **Status**: ⏳ Pending CI
