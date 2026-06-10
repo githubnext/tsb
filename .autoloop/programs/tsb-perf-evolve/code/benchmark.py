@@ -20,7 +20,7 @@ import pandas as pd
 # Inlined from config.yaml (kept in sync with benchmark.ts).
 DATASET_SIZE = 100_000
 NAN_RATIO = 0.05
-WARMUP_ITERATIONS = 5
+WARMUP_ITERATIONS = 200
 MEASURED_ITERATIONS = 50
 RANDOM_SEED = 42
 
