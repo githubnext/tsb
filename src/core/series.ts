@@ -781,11 +781,9 @@ export class Series<T extends Scalar = Scalar> {
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
     // ── Per-instance cache: named properties for direct access on the hot path ──
-    // Eliminates the O(n) gather loop, inverse-transform, RangeIndex construction,
-    // and Object.freeze spreads on all repeat calls with the same parameters.
-    // Pre-convert naPosition to a boolean so the hot-path ternary uses a boolean
-    // IC rather than a string-equality IC — JSC's FTL can specialise boolean
-    // branches more aggressively than string comparisons.
+    // sortValues is intentionally kept small (cache hit check + single delegate call)
+    // so JSC/V8 can inline the entire method, reducing the hot path to a direct
+    // property load + null check with no branch misprediction overhead.
     const naLast = naPosition === "last";
     if (ascending) {
       const hit = naLast ? this._svCacheAL : this._svCacheAF;
@@ -798,7 +796,12 @@ export class Series<T extends Scalar = Scalar> {
         return hit;
       }
     }
+    return this._sortValuesFull(ascending, naLast);
+  }
 
+  /** Cold path for sortValues — full LSD-radix sort and per-instance cache write.
+   * Only called on cache miss (first call per ascending/naLast combination). */
+  private _sortValuesFull(ascending: boolean, naLast: boolean): Series<T> {
     const n = this._values.length;
     const vals = this._values;
 

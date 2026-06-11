@@ -17,6 +17,6 @@ archive_size: 10
 # Benchmark dataset shape. Both benchmark.ts and benchmark.py read this.
 dataset_size: 100000
 nan_ratio: 0.05
-warmup_iterations: 200
+warmup_iterations: 5
 measured_iterations: 50
 random_seed: 42

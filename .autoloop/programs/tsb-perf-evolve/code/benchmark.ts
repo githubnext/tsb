@@ -11,7 +11,7 @@ import { Series } from "../../../../src/index.ts";
 // (No YAML parser dependency to keep this benchmark hermetic.)
 const DATASET_SIZE = 100_000;
 const NAN_RATIO = 0.05;
-const WARMUP_ITERATIONS = 200;
+const WARMUP_ITERATIONS = 5;
 const MEASURED_ITERATIONS = 50;
 const RANDOM_SEED = 42;
 
