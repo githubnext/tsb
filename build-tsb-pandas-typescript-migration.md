@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-10T19:44:00Z |
-| Iteration Count | 351 |
+| Last Run | 2026-06-11T00:00:00Z |
+| Iteration Count | 352 |
 | Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,14 +19,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
 - `src/io/hdf.ts` — HDFStore/TSH binary I/O (HDF5-style)
-- `src/io/sql.ts` — readSql / toSql (in-memory SQL)
+- `src/core/styler.ts` — Styler class (DataFrame display styling)
 
 ---
 
@@ -58,6 +58,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 352 — 2026-06-11 — [Run](https://github.com/githubnext/tsb/actions/runs/27372743227)
+- **Status**: ⏳ Pending CI
+- **Change**: Add `src/core/flags.ts` (DataFrameFlags), `src/io/sql.ts` (createDatabase/toSql/readSql/readSqlTable), `src/io/pickle.ts` (toPickle/readPickle TSP binary). DuplicateLabelError in errors.ts. Full tests + playground pages.
+- **Metric**: Expected 154 (delta +3 vs actual branch 151, beats best 153); commit 0e849fc
 
 ### Iteration 351 — 2026-06-10 — [Run](https://github.com/githubnext/tsb/actions/runs/27301544484)
 - **Status**: ⏳ Pending CI
