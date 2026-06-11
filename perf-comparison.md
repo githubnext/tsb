@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-10T00:00:00Z |
-| Iteration Count | 348 |
-| Best Metric | 676 |
+| Last Run | 2026-06-11T08:25:03Z |
+| Iteration Count | 349 |
+| Best Metric | 677 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -59,11 +59,19 @@
 
 - Option-variant benchmarks (axis/limit/method parameters)
 - Period.contains/diff not yet benchmarked as standalone
-- join + cross_join benchmark pairs (from state iter 347, commits never landed — need re-do)
+- joinAll (multi-DataFrame join) benchmark pair
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 349 — 2026-06-11 — [Run](https://github.com/githubnext/tsb/actions/runs/27333877215)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `join` and `crossJoin` benchmark pairs (bench_join.ts/py, bench_cross_join.ts/py)
+- **Metric**: 677 (previous best: 675 on branch, delta: +2)
+- **Commit**: dbf147d
+- **Notes**: The state file claimed best_metric=676 but branch only had 675 benchmarks. Added join (label-based join with 3 how-variants on 10k rows) and crossJoin (200×200 Cartesian product). Python benchmarks compile cleanly; bun not available in sandbox so CI validates TS.
 
 ### Iteration 348 — 2026-06-10 — [Run](https://github.com/githubnext/tsb/actions/runs/27317985908)
 
