@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-11T00:00:00Z |
-| Iteration Count | 352 |
+| Last Run | 2026-06-12T01:39:17Z |
+| Iteration Count | 353 |
 | Best Metric | 153 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
@@ -41,6 +41,7 @@
 - **HDF**: TSH magic `TSH\x01`, dtype codes 0–4. Stata DTA 118 LE; data offset=varLabelOffset+nvar*81+20.
 - **Interchange**: Float `[1.5]` for float64. Float nulls→NaN (kind=1); int/str→byte mask (kind=4).
 - **Errors**: Error classes shared between modules must live in `src/errors.ts` and be imported elsewhere (avoid duplicate exports across core/index and errors).
+- **Flags/WeakMap**: Use `WeakMap<FlaggedObject, Flags>` with structural interface to avoid circular imports. No `as object` casts needed — interface types satisfy WeakKey. Optional `columns?` field: check `cols !== undefined` before access.
 
 ---
 
@@ -59,21 +60,13 @@
 
 ## 📊 Iteration History
 
-### Iteration 352 — 2026-06-11 — [Run](https://github.com/githubnext/tsb/actions/runs/27372743227)
+### Iteration 353 — 2026-06-12 — [Run](https://github.com/githubnext/tsb/actions/runs/27388838475)
 - **Status**: ⏳ Pending CI
-- **Change**: Add `src/core/flags.ts` (DataFrameFlags), `src/io/sql.ts` (createDatabase/toSql/readSql/readSqlTable), `src/io/pickle.ts` (toPickle/readPickle TSP binary). DuplicateLabelError in errors.ts. Full tests + playground pages.
-- **Metric**: Expected 154 (delta +3 vs actual branch 151, beats best 153); commit 0e849fc
+- **Change**: Add `src/core/flags.ts` — `Flags` class (allowsDuplicateLabels getter/setter, WeakMap registry, getFlags/initFlags/hasFlags/clearFlags/copyFlags). `DuplicateLabelError` in errors.ts. Full tests + playground.
+- **Metric**: Expected 152 (+1 vs actual branch 151); commit 6d905e7
 
-### Iteration 351 — 2026-06-10 — [Run](https://github.com/githubnext/tsb/actions/runs/27301544484)
-- **Status**: ⏳ Pending CI
-- **Change**: Add `src/core/flags.ts` — `DataFrameFlags` class + `DuplicateLabelError` in errors.ts. Integrates `df.flags` / `ser.flags` on DataFrame and Series. Full tests + playground.
-- **Metric**: Expected 152 (delta +1 vs actual branch 151); commit 57f163b
+### Iters 350–352 — ⏳ (151→?): flags.ts (3x attempts), sql.ts, pickle.ts — all pending CI, not confirmed landed.
 
-### Iteration 350 — 2026-06-09 — [Run](https://github.com/githubnext/tsb/actions/runs/27281435657)
-- **Status**: ⏳ Pending CI
-- **Change**: flags.ts (DataFrameFlags, DuplicateLabelError) + sql.ts (readSql, toSql, MemoryDatabase). Fixed xml.ts Scalar[]→Label[], read_table.test.ts `.length`→`.size` / `filter`→`select` / exactOptionalPropertyTypes.
-- **Metric**: Expected 153 (+1 vs best 152); commits a46bda3, 68f8fae
-
-### Iters 316–349 — ✅/⏳ (148→152): readXml, readTable, caseWhen, lreshape, interchange, readStata/toStata, clipboard, pytables, plot, sql, flags, cut_bins, pickle, formats. Multiple rebases.
+### Iters 316–349 — ✅/⏳ (148→151): readXml, readTable, caseWhen, lreshape, interchange, readStata/toStata, clipboard, pytables, plot, sql, flags, cut_bins, pickle, formats. Multiple rebases.
 
 ### Iters 1–315 — ✅ (0→148): Full pandas core, stats, io, merge, reshape, window, groupby, datetime, offsets, period, interval, multi-index, and more.
