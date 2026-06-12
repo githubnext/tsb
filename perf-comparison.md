@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-11T08:25:03Z |
-| Iteration Count | 349 |
-| Best Metric | 677 |
+| Last Run | 2026-06-12T08:17:29Z |
+| Iteration Count | 350 |
+| Best Metric | 676 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -59,11 +59,20 @@
 
 - Option-variant benchmarks (axis/limit/method parameters)
 - Period.contains/diff not yet benchmarked as standalone
-- joinAll (multi-DataFrame join) benchmark pair
+- crossJoin (Cartesian product join) benchmark pair
+- join (label-based two-DF join with multiple how-variants) benchmark pair
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 350 — 2026-06-12 — [Run](https://github.com/githubnext/tsb/actions/runs/27403640979)
+
+- **Status**: ✅ Accepted
+- **Change**: Add `joinAll` benchmark pair (bench_join_all.ts/py)
+- **Metric**: 676 (previous best: 675 on branch, delta: +1)
+- **Commit**: 2cee530
+- **Notes**: State file claimed best_metric=677 but branch only had 675 pairs after rebase. Added joinAll (multi-DataFrame label-based join, 5k rows, inner+left variants). Python compiles OK; bun not available in sandbox so CI validates TS.
 
 ### Iteration 349 — 2026-06-11 — [Run](https://github.com/githubnext/tsb/actions/runs/27333877215)
 
