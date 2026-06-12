@@ -781,10 +781,9 @@ export class Series<T extends Scalar = Scalar> {
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
     // ── Per-instance cache: named properties for direct access on the hot path ──
-    // sortValues is intentionally kept small (cache hit check + single delegate call)
-    // so JSC/V8 can inline the entire method, reducing the hot path to a direct
-    // property load + null check with no branch misprediction overhead.
-    const naLast = naPosition === "last";
+    // charCodeAt(0) !== 102: 'f'=102 means "first"; any other first-char is "last".
+    // Integer comparison stays monomorphic for JSC — avoids string-equality overhead.
+    const naLast = naPosition.charCodeAt(0) !== 102;
     if (ascending) {
       const hit = naLast ? this._svCacheAL : this._svCacheAF;
       if (hit !== null) {
@@ -796,12 +795,7 @@ export class Series<T extends Scalar = Scalar> {
         return hit;
       }
     }
-    return this._sortValuesFull(ascending, naLast);
-  }
-
-  /** Cold path for sortValues — full LSD-radix sort and per-instance cache write.
-   * Only called on cache miss (first call per ascending/naLast combination). */
-  private _sortValuesFull(ascending: boolean, naLast: boolean): Series<T> {
+    // ── Cold path: full LSD-radix sort and per-instance cache write ──────────
     const n = this._values.length;
     const vals = this._values;
 
