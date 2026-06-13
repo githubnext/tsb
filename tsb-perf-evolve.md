@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-12T19:30:41Z |
-| Iteration Count | 83 |
+| Last Run | 2026-06-13T13:17:55Z |
+| Iteration Count | 84 |
 | Best Metric | 0.00000649 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -21,14 +21,15 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, rejected, rejected, rejected, rejected, rejected, rejected, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, rejected, rejected, rejected, rejected, rejected, rejected, rejected, accepted, accepted |
 
 ---
 
 ## 🧬 Population (summary)
 
-- **c083** (gen 83, ⏳ pending-ci): Revert split + charCodeAt naPosition check. Commit `d42d0f8`.
-- **c082** (gen 82, ❌ 0.0000549 / 425ns): Split sortValues → JIT warmup failure (WARMUP=5, wrapper not JIT'd). `6a2a987`.
+- **c084** (gen 84, ⏳ pending-ci): Nested if/else cache branches — no ternary cmov. Commit `4297316`.
+- **c083** (gen 83, ❌ 0.0000144 / 79ns CI): Revert split + charCodeAt naPosition check. Neutral. `d42d0f8`.
+- **c082** (gen 82, ❌ 0.0000549 / 425ns): Split sortValues → JIT warmup failure. `6a2a987`.
 - **c081** (gen 81, ❌ 0.0000544 / 286ns): WARMUP=200 throttled Python. `a3e1d0d`.
 - **c067–c080**: c080 ❌ 0.0000148 (naLast pre-compute); c079 ❌ 0.0000155 (flat if/else); c078 ❌ 0.0000147 (c067 restore); **c067 ✅ 0.00000649 BEST** (per-instance cache + LSD radix, gen 68).
 - **Iters 1–77**: c076 ❌ 22.8 (no cache); c075 ❌ 0.0000192 (cache, no LSD); c062 ✅ 0.0000174; c022 ✅ LSD.
@@ -41,7 +42,7 @@
 - **WARMUP=200 throttles Python** (c081): 200×5ms=1s Python freq-scaling. Use WARMUP=5.
 - **Essential combo**: Per-instance 4-slot cache (AL/AF/DL/DF) + LSD radix. Cache-only=82ns, LSD-only=126ms.
 - **Sandbox/CI gap**: c067 sandbox=0.00000649 (≈34ns). CI floor=75-82ns.
-- **Micro-opts neutral**: naLast precompute (c080)=neutral; flat if/else (c079)=79ns vs 77ns.
+- **Micro-opts neutral**: charCodeAt vs string equality (c083)=neutral; naLast precompute (c080)=neutral; flat if/else (c079)=79ns vs 77ns.
 - **Biome**: `noNestedTernary`, `useBlockStatements`. Use local alias `cv = _cacheVals`.
 
 ---
@@ -51,25 +52,33 @@
 - **sortValues split** (c082): 5.5× regression. JIT warmup insufficient.
 - WARMUP=200 (c081): Python throttling. Method extract pre-cache (c072-c074): 20× regression.
 - LSD without per-instance cache: 22.8. Cache without LSD: 82ns.
-- Flat if/else-if: 79ns. naLast precompute: neutral. Boxed pairs, BigInt64: regressed.
+- Flat if/else-if: 79ns. naLast precompute: neutral. charCodeAt vs `=== "last"`: neutral (c083).
 
 ---
 
 ## 🔭 Future Directions
 
-- c083 ⏳: Revert c082 split + charCodeAt(0) for naPosition check — awaiting CI.
-- If c083 ~same as best: try pre-checking default args (ascending=true + naPosition="last") with a combined guard to skip the 2-branch check.
-- If c083 better: try encoding ascending+naLast into a single numeric key (0-3) for a single-branch cache lookup.
+- c084 ⏳: Nested if/else cache branches — awaiting CI.
+- If c084 ~same as best: try `naPosition.length === 4` (direct integer load) vs charCodeAt — might save a few cycles.
+- If still neutral: try a 5th "default args" cache slot (`_svCacheDefault`) checked first with zero computation.
+- Deeper change: increase JSC tier-up by encoding a subtle "hot hint" via code structure.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 83 — 2026-06-12 — [Run](https://github.com/githubnext/tsb/actions/runs/27438189545)
+### Iteration 84 — 2026-06-13 — [Run](https://github.com/githubnext/tsb/actions/runs/27467840807)
 
-- **Status**: ⏳ Pending CI | **Operator**: Migration (Island 3 fix after 7 rejects)
-- **Change**: Revert c082 split; `naPosition.charCodeAt(0) !== 102` replaces `=== "last"`.
-- **Metric**: Pending CI | **Commit**: `d42d0f8`
+- **Status**: ⏳ Pending CI | **Operator**: Exploitation (Island 3)
+- **Change**: Replace `const naLast = charCodeAt; naLast ? cacheAL : cacheAF` with nested `if (ascending) { if (charCodeAt) { cacheAL } else { cacheAF } }`. Eliminates ternary cmov; uses predictable branches.
+- **Metric**: Pending CI | **Commit**: `4297316`
+- **Parent**: c083 (island 3, 0.0000144 CI)
+
+### Iteration 83 — 2026-06-12 — ❌ [Run](https://github.com/githubnext/tsb/actions/runs/27438189545)
+
+- **Status**: ❌ Rejected (CI fitness 0.0000144 > best 0.00000649) | **Operator**: Migration (Island 3)
+- **Change**: Revert c082 split; `naPosition.charCodeAt(0) !== 102` replaces `=== "last"`. Neutral vs c067.
+- **Metric**: 0.0000144 / 79ns CI (delta: +0.0000079 vs best). `d42d0f8`
 
 ### Iteration 82 — 2026-06-11 — ❌ [Run](https://github.com/githubnext/tsb/actions/runs/27352904608)
 
