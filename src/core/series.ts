@@ -780,17 +780,29 @@ export class Series<T extends Scalar = Scalar> {
 
   /** Return a new Series sorted by values. */
   sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: named properties for direct access on the hot path ──
+    // ── Per-instance cache: check ascending first, then naLast inside each branch ──
+    // Nested branches instead of ternary selection let JSC use fully-predicted
+    // branches (0-cycle latency when taken) rather than a cmov (3-cycle latency).
     // charCodeAt(0) !== 102: 'f'=102 means "first"; any other first-char is "last".
-    // Integer comparison stays monomorphic for JSC — avoids string-equality overhead.
-    const naLast = naPosition.charCodeAt(0) !== 102;
     if (ascending) {
-      const hit = naLast ? this._svCacheAL : this._svCacheAF;
+      if (naPosition.charCodeAt(0) !== 102) {
+        const hit = this._svCacheAL;
+        if (hit !== null) {
+          return hit;
+        }
+      } else {
+        const hit = this._svCacheAF;
+        if (hit !== null) {
+          return hit;
+        }
+      }
+    } else if (naPosition.charCodeAt(0) !== 102) {
+      const hit = this._svCacheDL;
       if (hit !== null) {
         return hit;
       }
     } else {
-      const hit = naLast ? this._svCacheDL : this._svCacheDF;
+      const hit = this._svCacheDF;
       if (hit !== null) {
         return hit;
       }
@@ -1013,6 +1025,8 @@ export class Series<T extends Scalar = Scalar> {
     const perm = _permBuf;
     const outData = _outBuf as unknown as T[];
     let pos = 0;
+    // naLast computed here (cold path only — not hoisted to avoid overhead on hot path).
+    const naLast = naPosition.charCodeAt(0) !== 102;
     if (!naLast) {
       for (let i = 0; i < nanCount; i++) {
         const idx = nanBuf[i]!;
