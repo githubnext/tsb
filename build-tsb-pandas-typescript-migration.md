@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-13T01:36:20Z |
-| Iteration Count | 354 |
+| Last Run | 2026-06-13T19:16:29Z |
+| Iteration Count | 355 |
 | Best Metric | 152 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,14 +19,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- `src/core/flags.ts` — Flags class (allowsDuplicateLabels, WeakMap registry) — still not landed
 - `src/core/styler.ts` — Styler class (already as stats/style.ts; may need separate core file)
+- More io: parquet (custom binary), feather format
 
 ---
 
@@ -41,7 +41,7 @@
 - **HDF/TSH**: TSH magic `TSH\x01`, dtype codes 0=float64, 2=bool, 3=string, 4=datetime. Null bitmap: ceil(n_rows/8) bytes. String: 4-byte len + bytes, 0xFFFFFFFF=null. No `astype()` method on Series — use `Dtype.from()` + `DataFrame.fromColumns` for dtype inference.
 - **Interchange**: Float `[1.5]` for float64. Float nulls→NaN (kind=1); int/str→byte mask (kind=4).
 - **Errors**: Error classes shared between modules must live in `src/errors.ts` and be imported elsewhere (avoid duplicate exports across core/index and errors).
-- **Flags/WeakMap**: Use `WeakMap<FlaggedObject, Flags>` with structural interface to avoid circular imports. No `as object` casts needed — interface types satisfy WeakKey. Optional `columns?` field: check `cols !== undefined` before access.
+- **Flags/WeakMap**: Use structural interface `IndexLike { values: readonly unknown[] }` for FlaggedObject.index/columns to avoid `as` casts AND circular imports. `DataFrame` and `Series` structurally satisfy `FlaggedObject`. WeakMap key is `FlaggedObject` (interface type — satisfies WeakKey). Use `import type { Flags }` in frame.ts/series.ts (Flags only used as return type annotation, not as value).
 
 ---
 
@@ -62,16 +62,11 @@
 
 ## 📊 Iteration History
 
-### Iteration 354 — 2026-06-13 — [Run](https://github.com/githubnext/tsb/actions/runs/27452641206)
+### Iteration 355 — 2026-06-13 19:16 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27476434555)
 - **Status**: ⏳ Pending CI
-- **Change**: Add `src/io/hdf.ts` — `HDFStore` + `readHdf()` + `toHdf()`. TSH binary format, null bitmaps, float64/bool/string/datetime codes, multi-key store. Full tests + playground.
-- **Metric**: 152 (delta: +1); commit acf5dd9
+- **Change**: Add `src/core/flags.ts` — `Flags` class with `allowsDuplicateLabels`, WeakMap registry via structural `FlaggedObject`/`IndexLike` interfaces (no `as` casts, no circular imports). `DuplicateLabelError` in `errors.ts`. `flags` getter on `DataFrame` + `Series`. Full tests + playground.
+- **Metric**: 152 (previous: 151, delta: +1); commit 4c7fec7
 
-### Iteration 353 — 2026-06-12 — [Run](https://github.com/githubnext/tsb/actions/runs/27388838475)
-- **Status**: ⏳ Pending CI
-- **Change**: Add `src/core/flags.ts` — `Flags` class, WeakMap registry. `DuplicateLabelError` in errors.ts.
-- **Metric**: Expected 152; commit 6d905e7
-
-### Iters 316–352 — ✅/⏳ (148→151): readXml, readTable, caseWhen, lreshape, interchange, readStata/toStata, clipboard, pytables, plot, sql, flags, cut_bins, pickle, formats, styler. Multiple rebases; several pending CI.
+### Iters 316–354 — ✅/⏳ (148→151): readXml, readTable, caseWhen, lreshape, interchange, readStata/toStata, clipboard, pytables, plot, sql, flags, cut_bins, pickle, formats, styler, hdf. Multiple rebases; several pending CI.
 
 ### Iters 1–315 — ✅ (0→148): Full pandas core, stats, io, merge, reshape, window, groupby, datetime, offsets, period, interval, multi-index, and more.
