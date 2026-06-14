@@ -11,9 +11,9 @@
  * @module
  */
 
+import type { DataFrame } from "../core/index.ts";
 import { readCsv } from "./csv.ts";
 import type { ReadCsvOptions } from "./csv.ts";
-import type { DataFrame } from "../core/index.ts";
 
 // ─── public types ─────────────────────────────────────────────────────────────
 

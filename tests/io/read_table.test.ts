@@ -191,7 +191,7 @@ describe("readTable — edge cases", () => {
 
   it("handles a large file", () => {
     const rows = Array.from({ length: 1000 }, (_, i) => `${i}\t${i * 2}`);
-    const tsv = "idx\tval\n" + rows.join("\n");
+    const tsv = `idx\tval\n${rows.join("\n")}`;
     const df = readTable(tsv);
     expect(df.shape).toEqual([1000, 2]);
     expect(df.col("idx").values[999]).toBe(999);
@@ -206,7 +206,10 @@ describe("readTable — property-based", () => {
     fc.assert(
       fc.property(
         fc.array(
-          fc.record({ a: fc.integer({ min: -1000, max: 1000 }), b: fc.integer({ min: 0, max: 9999 }) }),
+          fc.record({
+            a: fc.integer({ min: -1000, max: 1000 }),
+            b: fc.integer({ min: 0, max: 9999 }),
+          }),
           { minLength: 1, maxLength: 50 },
         ),
         (rows) => {
@@ -235,7 +238,7 @@ describe("readTable — property-based", () => {
         (rows) => {
           const lines = ["x", ...rows.map((r) => String(r.x))];
           const tsv = lines.join("\n");
-          const dfTable = readTable(tsv, { sep: "\n" === "\n" ? "\t" : "," });
+          const dfTable = readTable(tsv, { sep: "\t" });
           const dfCsv = readCsv(tsv.replaceAll("\t", "\t"), { sep: "\t" });
           expect(dfTable.shape).toEqual(dfCsv.shape);
         },
@@ -270,7 +273,7 @@ describe("readTable — property-based", () => {
           { minLength: 1, maxLength: 40 },
         ),
         (rows) => {
-          const csv = "col1,col2\n" + rows.map((r) => `${r.col1},${r.col2}`).join("\n");
+          const csv = `col1,col2\n${rows.map((r) => `${r.col1},${r.col2}`).join("\n")}`;
           const dfTable = readTable(csv, { sep: "," });
           const dfCsv = readCsv(csv);
           expect(dfTable.shape).toEqual(dfCsv.shape);

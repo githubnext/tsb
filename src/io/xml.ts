@@ -22,7 +22,6 @@
 
 import { DataFrame } from "../core/frame.ts";
 import { Index } from "../core/index.ts";
-import { RangeIndex } from "../core/index.ts";
 import type { Label, Scalar } from "../types.ts";
 
 function isLabel(v: Scalar): v is Label {
@@ -232,13 +231,19 @@ function tokenize(xml: string): Token[] {
     }
     // opening tag
     const end = xml.indexOf(">", pos + 1);
-    if (end === -1) { pos = len; continue; }
+    if (end === -1) {
+      pos = len;
+      continue;
+    }
     const inner = xml.slice(pos + 1, end);
     const selfClose = inner.endsWith("/");
     const tagContent = selfClose ? inner.slice(0, -1) : inner;
     // parse tag name and attributes
     const match = /^([^\s/]+)([\s\S]*)$/.exec(tagContent.trim());
-    if (!match) { pos = end + 1; continue; }
+    if (!match) {
+      pos = end + 1;
+      continue;
+    }
     const [, rawName = "", attrStr = ""] = match;
     const attrs: Record<string, string> = {};
     // parse attributes: name="value" or name='value'
@@ -308,7 +313,10 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
     let best = "";
     let bestCount = 0;
     for (const [name, count] of childCounts) {
-      if (count > bestCount) { bestCount = count; best = name; }
+      if (count > bestCount) {
+        bestCount = count;
+        best = name;
+      }
     }
     resolvedRowTag = best || "row";
   }

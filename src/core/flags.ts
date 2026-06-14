@@ -136,9 +136,7 @@ export class Flags {
     const seen = new Set<unknown>();
     for (const label of values) {
       if (seen.has(label)) {
-        throw new DuplicateLabelError(
-          `Index has duplicate keys: [${String(label)}]`,
-        );
+        throw new DuplicateLabelError(`Index has duplicate keys: [${String(label)}]`);
       }
       seen.add(label);
     }

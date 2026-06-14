@@ -62,7 +62,7 @@ describe("readXml — basic parsing", () => {
   });
 
   test("returns empty DataFrame for no matching rows", () => {
-    const xml = `<data><other>x</other></data>`;
+    const xml = "<data><other>x</other></data>";
     const df = readXml(xml, { rowTag: "row" });
     expect(df.shape).toEqual([0, 0]);
   });
@@ -138,19 +138,19 @@ describe("readXml — options", () => {
 
 describe("readXml — entities and CDATA", () => {
   test("decodes named entities", () => {
-    const xml = `<data><row><v>a &amp; b &lt; c</v></row></data>`;
+    const xml = "<data><row><v>a &amp; b &lt; c</v></row></data>";
     const df = readXml(xml, { converters: false });
     expect(df.col("v").at(0)).toBe("a & b < c");
   });
 
   test("decodes numeric entities", () => {
-    const xml = `<data><row><v>&#65;&#x42;</v></row></data>`;
+    const xml = "<data><row><v>&#65;&#x42;</v></row></data>";
     const df = readXml(xml, { converters: false });
     expect(df.col("v").at(0)).toBe("AB");
   });
 
   test("CDATA section text is read as-is", () => {
-    const xml = `<data><row><v><![CDATA[hello & <world>]]></v></row></data>`;
+    const xml = "<data><row><v><![CDATA[hello & <world>]]></v></row></data>";
     const df = readXml(xml, { converters: false });
     expect(df.col("v").at(0)).toBe("hello & <world>");
   });
@@ -193,19 +193,19 @@ describe("readXml — namespaces", () => {
 
 describe("readXml — built-in NA values", () => {
   test("empty string becomes null", () => {
-    const xml = `<data><row><x></x></row></data>`;
+    const xml = "<data><row><x></x></row></data>";
     const df = readXml(xml);
     expect(df.col("x").at(0)).toBeNull();
   });
 
   test("NA string becomes null", () => {
-    const xml = `<data><row><x>NA</x></row></data>`;
+    const xml = "<data><row><x>NA</x></row></data>";
     const df = readXml(xml);
     expect(df.col("x").at(0)).toBeNull();
   });
 
   test("NaN string becomes null", () => {
-    const xml = `<data><row><x>NaN</x></row></data>`;
+    const xml = "<data><row><x>NaN</x></row></data>";
     const df = readXml(xml);
     expect(df.col("x").at(0)).toBeNull();
   });
@@ -343,14 +343,11 @@ describe("readXml / toXml — property tests", () => {
 
   test("toXml produces valid XML structure", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 0, max: 10 }),
-        (nRows) => {
-          const df = DataFrame.fromColumns({ x: Array.from({ length: nRows }, (_, i) => i) });
-          const xml = toXml(df);
-          return xml.includes("<data>") && xml.includes("</data>");
-        },
-      ),
+      fc.property(fc.integer({ min: 0, max: 10 }), (nRows) => {
+        const df = DataFrame.fromColumns({ x: Array.from({ length: nRows }, (_, i) => i) });
+        const xml = toXml(df);
+        return xml.includes("<data>") && xml.includes("</data>");
+      }),
       { numRuns: 50 },
     );
   });

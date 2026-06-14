@@ -71,15 +71,11 @@ function isBoolSeriesGuard(
   return v instanceof Series;
 }
 
-function isReplSeries(
-  v: Scalar | Series<Scalar> | readonly Scalar[],
-): v is Series<Scalar> {
+function isReplSeries(v: Scalar | Series<Scalar> | readonly Scalar[]): v is Series<Scalar> {
   return v instanceof Series;
 }
 
-function isReplArray(
-  v: Scalar | Series<Scalar> | readonly Scalar[],
-): v is readonly Scalar[] {
+function isReplArray(v: Scalar | Series<Scalar> | readonly Scalar[]): v is readonly Scalar[] {
   return Array.isArray(v);
 }
 

@@ -29,14 +29,8 @@
 
 import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
-import {
-  DataFrame,
-  DuplicateLabelError,
-  Flags,
-  Series,
-  getFlags,
-} from "../../src/index.ts";
 import { Index } from "../../src/core/base-index.ts";
+import { DataFrame, DuplicateLabelError, Flags, Series, getFlags } from "../../src/index.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -47,13 +41,8 @@ function makeDF(): DataFrame {
 function makeDFDupIndex(): DataFrame {
   // Build a DataFrame with duplicate row index labels [0, 1, 0]
   const base = makeDF();
-  const dupIndex = new Index<number>([0, 1, 0]) as unknown as Index<
-    string | number | boolean
-  >;
-  return new DataFrame(
-    new Map([["a", base.col("a")]]),
-    dupIndex,
-  );
+  const dupIndex = new Index<number>([0, 1, 0]) as unknown as Index<string | number | boolean>;
+  return new DataFrame(new Map([["a", base.col("a")]]), dupIndex);
 }
 
 function makeSeries(): Series<number> {
@@ -61,9 +50,7 @@ function makeSeries(): Series<number> {
 }
 
 function makeSeriesDupIndex(): Series<number> {
-  const dupIndex = new Index<number>([0, 1, 0]) as unknown as Index<
-    string | number | boolean
-  >;
+  const dupIndex = new Index<number>([0, 1, 0]) as unknown as Index<string | number | boolean>;
   return new Series<number>({ data: [10, 20, 30], index: dupIndex });
 }
 

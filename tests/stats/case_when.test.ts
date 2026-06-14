@@ -62,10 +62,10 @@ describe("caseWhen — basic", () => {
   it("grade classification — pandas docs example style", () => {
     const score = new Series<number>({ data: [45, 72, 88, 95, 60] });
     const d = score.toArray();
-    const ge90 = boolS(d.map(v => v >= 90));
-    const ge75 = boolS(d.map(v => v >= 75));
-    const ge60 = boolS(d.map(v => v >= 60));
-    const ge45 = boolS(d.map(v => v >= 45));
+    const ge90 = boolS(d.map((v) => v >= 90));
+    const ge75 = boolS(d.map((v) => v >= 75));
+    const ge60 = boolS(d.map((v) => v >= 60));
+    const ge45 = boolS(d.map((v) => v >= 45));
     const grade = caseWhen(score, [
       [ge90, "A"],
       [ge75, "B"],
@@ -77,16 +77,22 @@ describe("caseWhen — basic", () => {
 
   it("predicate function condition", () => {
     const ser = s([10, 20, 30, 40]);
-    const res = caseWhen(ser, [
-      [(v) => (v as number) > 25, "big"],
-    ]);
+    const res = caseWhen(ser, [[(v) => (v as number) > 25, "big"]]);
     expect(res.toArray()).toEqual([10, 20, "big", "big"]);
   });
 
   it("predicate receives positional index as second arg", () => {
     const ser = s([1, 2, 3, 4]);
     const indices: number[] = [];
-    caseWhen(ser, [[(_v, i) => { indices.push(i); return false; }, 0]]);
+    caseWhen(ser, [
+      [
+        (_v, i) => {
+          indices.push(i);
+          return false;
+        },
+        0,
+      ],
+    ]);
     expect(indices).toEqual([0, 1, 2, 3]);
   });
 
@@ -156,9 +162,9 @@ describe("caseWhen — basic", () => {
   it("three branches cover all rows", () => {
     const ser = new Series<number>({ data: [1, 5, 10, 15, 20] });
     const d = ser.toArray();
-    const lt5 = boolS(d.map(v => v < 5));
-    const lt10 = boolS(d.map(v => v < 10));
-    const lt20 = boolS(d.map(v => v < 20));
+    const lt5 = boolS(d.map((v) => v < 5));
+    const lt10 = boolS(d.map((v) => v < 10));
+    const lt20 = boolS(d.map((v) => v < 20));
     const res = caseWhen(ser, [
       [lt5, "low"],
       [lt10, "mid"],
@@ -219,7 +225,7 @@ describe("caseWhen — property tests", () => {
         fc.array(fc.integer({ min: -100, max: 100 }), { minLength: 0, maxLength: 20 }),
         (data) => {
           const ser = new Series<number>({ data: [...data] });
-          const cond = boolS(data.map(v => v > 0));
+          const cond = boolS(data.map((v) => v > 0));
           const res = caseWhen(ser, [[cond, 999]]);
           return res.length === data.length;
         },
@@ -254,7 +260,7 @@ describe("caseWhen — property tests", () => {
           const ser = new Series<number>({ data: [...data] });
           const allTrue = boolS(data.map(() => true));
           const res = caseWhen(ser, [[allTrue, scalar]]);
-          return res.toArray().every(v => v === scalar);
+          return res.toArray().every((v) => v === scalar);
         },
       ),
     );
@@ -262,35 +268,29 @@ describe("caseWhen — property tests", () => {
 
   it("all-false condition keeps original values", () => {
     fc.assert(
-      fc.property(
-        fc.array(fc.integer(), { minLength: 1, maxLength: 20 }),
-        (data) => {
-          const ser = new Series<number>({ data: [...data] });
-          const allFalse = boolS(data.map(() => false));
-          const res = caseWhen(ser, [[allFalse, 999]]);
-          const orig = ser.toArray();
-          const got = res.toArray();
-          for (let i = 0; i < orig.length; i++) {
-            if (orig[i] !== got[i]) return false;
-          }
-          return true;
-        },
-      ),
+      fc.property(fc.array(fc.integer(), { minLength: 1, maxLength: 20 }), (data) => {
+        const ser = new Series<number>({ data: [...data] });
+        const allFalse = boolS(data.map(() => false));
+        const res = caseWhen(ser, [[allFalse, 999]]);
+        const orig = ser.toArray();
+        const got = res.toArray();
+        for (let i = 0; i < orig.length; i++) {
+          if (orig[i] !== got[i]) return false;
+        }
+        return true;
+      }),
     );
   });
 
   it("index is preserved", () => {
     fc.assert(
-      fc.property(
-        fc.array(fc.integer(), { minLength: 1, maxLength: 15 }),
-        (data) => {
-          const index = data.map((_, i) => `key_${i}`);
-          const ser = new Series<number>({ data: [...data], index: [...index] });
-          const cond = boolS(data.map(v => v > 0));
-          const res = caseWhen(ser, [[cond, 0]]);
-          return JSON.stringify(res.index.toArray()) === JSON.stringify(index);
-        },
-      ),
+      fc.property(fc.array(fc.integer(), { minLength: 1, maxLength: 15 }), (data) => {
+        const index = data.map((_, i) => `key_${i}`);
+        const ser = new Series<number>({ data: [...data], index: [...index] });
+        const cond = boolS(data.map((v) => v > 0));
+        const res = caseWhen(ser, [[cond, 0]]);
+        return JSON.stringify(res.index.toArray()) === JSON.stringify(index);
+      }),
     );
   });
 
@@ -300,7 +300,7 @@ describe("caseWhen — property tests", () => {
         fc.array(fc.integer({ min: -50, max: 50 }), { minLength: 1, maxLength: 20 }),
         (data) => {
           const ser = new Series<number>({ data: [...data] });
-          const bools = data.map(v => v > 0);
+          const bools = data.map((v) => v > 0);
           const res1 = caseWhen(ser, [[boolS(bools), -1]]);
           const res2 = caseWhen(ser, [[(v) => (v as number) > 0, -1]]);
           const a1 = res1.toArray();
