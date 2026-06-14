@@ -144,6 +144,7 @@ function isNaRaw(raw: string, naSet: ReadonlySet<string>): boolean {
 /** Infer the most specific dtype for a column from its raw string values. */
 function inferColumnDtype(raws: readonly string[], naSet: ReadonlySet<string>): DtypeName {
   const nonNa = raws.filter((r) => !isNaRaw(r, naSet));
+  const hasNa = nonNa.length < raws.length;
   if (nonNa.length === 0) {
     return "object";
   }
@@ -153,18 +154,23 @@ function inferColumnDtype(raws: readonly string[], naSet: ReadonlySet<string>): 
   }
   const allInt = nonNa.every((r) => RE_INT.test(r));
   if (allInt) {
-    return "int64";
+    // Upgrade to float64 when NAs are present so NaN can represent missing values.
+    return hasNa ? "float64" : "int64";
   }
   const allFloat = nonNa.every((r) => RE_FLOAT.test(r));
   if (allFloat) {
     return "float64";
   }
-  return "string";
+  return "object";
 }
 
 /** Parse a raw string to a Scalar for an inferred dtype. */
 function parseInferred(raw: string, dtype: DtypeName, naSet: ReadonlySet<string>): Scalar {
   if (isNaRaw(raw, naSet)) {
+    // Numeric columns use NaN so callers can detect missing values via Number.isNaN().
+    if (dtype === "float64" || dtype === "int64") {
+      return Number.NaN;
+    }
     return null;
   }
   if (dtype === "bool") {

@@ -43,7 +43,7 @@ describe("readCsv — basic parsing", () => {
 
   it("infers string dtype for mixed content", () => {
     const df = readCsv("name\nalice\nbob");
-    expect(df.col("name").dtype.name).toBe("string");
+    expect(df.col("name").dtype.name).toBe("object");
     expect([...df.col("name").values]).toEqual(["alice", "bob"]);
   });
 
@@ -86,20 +86,20 @@ describe("readCsv — basic parsing", () => {
 // ─── readCsv: NA handling ─────────────────────────────────────────────────────
 
 describe("readCsv — NA handling", () => {
-  it("treats empty fields as null", () => {
+  it("treats empty fields as NaN for numeric columns", () => {
     const df = readCsv("a,b\n1,\n,3");
-    expect(df.col("a").values[1]).toBeNull();
-    expect(df.col("b").values[0]).toBeNull();
+    expect(Number.isNaN(df.col("a").values[1] as number)).toBe(true);
+    expect(Number.isNaN(df.col("b").values[0] as number)).toBe(true);
   });
 
-  it("treats 'NA' as null", () => {
+  it("treats 'NA' as NaN for numeric columns", () => {
     const df = readCsv("x\n1\nNA\n3");
-    expect(df.col("x").values[1]).toBeNull();
+    expect(Number.isNaN(df.col("x").values[1] as number)).toBe(true);
   });
 
-  it("treats 'NaN' as null", () => {
+  it("treats 'NaN' as NaN for float columns", () => {
     const df = readCsv("x\n1.0\nNaN\n3.0");
-    expect(df.col("x").values[1]).toBeNull();
+    expect(Number.isNaN(df.col("x").values[1] as number)).toBe(true);
   });
 
   it("treats 'null' and 'None' as null", () => {
@@ -108,9 +108,9 @@ describe("readCsv — NA handling", () => {
     expect(df.col("x").values[1]).toBeNull();
   });
 
-  it("treats custom naValues as null", () => {
+  it("treats custom naValues as NaN for numeric columns", () => {
     const df = readCsv("x\n1\nMISSING\n3", { naValues: ["MISSING"] });
-    expect(df.col("x").values[1]).toBeNull();
+    expect(Number.isNaN(df.col("x").values[1] as number)).toBe(true);
   });
 
   it("all-NA column gets object dtype", () => {

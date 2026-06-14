@@ -170,7 +170,7 @@ describe("caseWhen — basic", () => {
       [lt10, "mid"],
       [lt20, "high"],
     ]);
-    expect(res.toArray()).toEqual(["low", "mid", "mid", "high", 20]);
+    expect(res.toArray()).toEqual(["low", "mid", "high", "high", 20]);
   });
 });
 

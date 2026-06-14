@@ -171,7 +171,24 @@ function localName(qname: string): string {
   return colon === -1 ? qname : qname.slice(colon + 1);
 }
 
-// ─── minimal XML tokenizer ────────────────────────────────────────────────────
+// ─── sanitize column name for use as an XML element/attribute name ────────────
+
+/**
+ * Convert a column name to a valid XML Name token.
+ *
+ * XML Name start character: letter or `_` (colon excluded for simplicity).
+ * XML Name character: letter, digit, `.`, `-`, `_`.
+ * Any invalid character is replaced with `_`.
+ */
+function toXmlName(name: string): string {
+  if (name.length === 0) {
+    return "_empty";
+  }
+  const sanitized = name.replace(/[^A-Za-z0-9._-]/g, "_");
+  // If the first character is a digit or hyphen/dot it's an invalid start char.
+  return /^[A-Za-z_]/.test(sanitized) ? sanitized : `_${sanitized}`;
+}
+
 
 type Token =
   | { kind: "open"; name: string; attrs: Record<string, string>; selfClose: boolean }
@@ -480,7 +497,7 @@ export function toXml(df: DataFrame, options: ToXmlOptions = {}): string {
     if (attribs) {
       // emit as attributes on the row element
       const attrStr = columns
-        .map((c, j) => `${c}="${encodeEntities(rowValues[j] ?? "")}"`)
+        .map((c, j) => `${toXmlName(c)}="${encodeEntities(rowValues[j] ?? "")}"`)
         .join(" ");
       lines.push(`${ind}<${rowName} ${attrStr}/>`);
     } else {
@@ -488,10 +505,11 @@ export function toXml(df: DataFrame, options: ToXmlOptions = {}): string {
       const childLines: string[] = [];
       for (let j = 0; j < columns.length; j++) {
         const col = columns[j] ?? "";
+        const tag = toXmlName(col);
         const raw = rowValues[j] ?? "";
         const isCdata = cdataCols.includes(col);
         const content = isCdata ? `<![CDATA[${raw}]]>` : encodeEntities(raw);
-        childLines.push(`${ind}${ind}<${col}>${content}</${col}>`);
+        childLines.push(`${ind}${ind}<${tag}>${content}</${tag}>`);
       }
       if (childLines.length === 0) {
         lines.push(`${ind}<${rowName}/>`);
