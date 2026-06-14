@@ -189,7 +189,6 @@ function toXmlName(name: string): string {
   return /^[A-Za-z_]/.test(sanitized) ? sanitized : `_${sanitized}`;
 }
 
-
 type Token =
   | { kind: "open"; name: string; attrs: Record<string, string>; selfClose: boolean }
   | { kind: "close"; name: string }
