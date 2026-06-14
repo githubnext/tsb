@@ -40,6 +40,7 @@
     }
     .back { margin-bottom: 2rem; display: inline-block; }
     .subtitle { margin-bottom: 1.5rem; }
+
     #playground-loading {
       position: fixed; inset: 0;
       background: rgba(13, 17, 23, 0.92);
@@ -48,266 +49,252 @@
       z-index: 1000; gap: 1rem;
     }
     .spinner {
-      width: 2rem; height: 2rem;
+      width: 40px; height: 40px;
       border: 3px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
     .section {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
     }
-    pre {
-      font-family: var(--font-mono);
-      font-size: 0.875rem;
-      background: #0d1117;
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
       border: 1px solid var(--border);
-      border-radius: 0.4rem;
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
       padding: 1rem;
-      overflow-x: auto;
-      margin-bottom: 1rem;
-    }
-    .output-label { font-size: 0.8rem; color: #8b949e; margin-bottom: 0.3rem; }
-    .output {
       font-family: var(--font-mono);
-      font-size: 0.875rem;
-      background: #0d1117;
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
       border: 1px solid var(--border);
-      border-radius: 0.4rem;
+      border-radius: 0 0 0.5rem 0.5rem;
       padding: 0.75rem 1rem;
-      min-height: 2.5rem;
-      white-space: pre-wrap;
-      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
     }
-    .output.error { color: var(--red); }
-    button {
-      background: var(--accent);
-      color: #0d1117;
-      border: none;
-      border-radius: 0.4rem;
-      padding: 0.5rem 1.25rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-right: 0.5rem;
-      margin-bottom: 0.5rem;
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
     }
-    button:hover { opacity: 0.85; }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
-<div id="playground-loading">
-  <div class="spinner"></div>
-  <div style="color: #8b949e">Loading tsb…</div>
-</div>
 
-<a class="back" href="index.html">← Back to index</a>
-<h1>Flags</h1>
-<p class="subtitle">
-  Metadata flags for <code>DataFrame</code> and <code>Series</code>.
-  Mirrors <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.flags.html" target="_blank">
-  <code>pandas.DataFrame.flags</code></a>.
-</p>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
 
-<!-- ── Section 1: Default flags ───────────────────────────────────────── -->
-<div class="section">
-  <h2>1 · Default flags</h2>
-  <p>
-    Every <code>DataFrame</code> and <code>Series</code> exposes a
-    <code>flags</code> getter that returns a <code>Flags</code> object.
-    By default, <code>allowsDuplicateLabels</code> is <code>true</code>.
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Flags: metadata for DataFrame and Series</h1>
+  <p class="subtitle">
+    Mirrors <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.flags.html" target="_blank">
+    <code>pandas.DataFrame.flags</code></a> — controls duplicate-label behaviour.
   </p>
-  <pre>
+
+  <!-- ── 1. Default flags ───────────────────────────────────────────── -->
+  <div class="section">
+    <h2>1 · Default flags</h2>
+    <p>
+      Every <code>DataFrame</code> and <code>Series</code> exposes a
+      <code>flags</code> getter returning a <code>Flags</code> object.
+      By default, <code>allowsDuplicateLabels</code> is <code>true</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, Series } from "tsb";
+
 const df = DataFrame.fromColumns({ a: [1, 2, 3], b: ["x", "y", "z"] });
 console.log(df.flags.allowsDuplicateLabels); // true
-console.log(df.flags.toString());            // &lt;Flags(allows_duplicate_labels=true)&gt;
+console.log(df.flags.toString());            // <Flags(allows_duplicate_labels=true)>
 
 const s = new Series({ data: [10, 20, 30] });
-console.log(s.flags.allowsDuplicateLabels);  // true
-  </pre>
-  <button onclick="runSection1()">▶ Run</button>
-  <div class="output-label">Output</div>
-  <div class="output" id="out1"></div>
-</div>
+console.log(s.flags.allowsDuplicateLabels);  // true</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── Section 2: Setting flags ───────────────────────────────────────── -->
-<div class="section">
-  <h2>2 · Setting flags</h2>
-  <p>
-    You can mutate <code>allowsDuplicateLabels</code> directly.
-    Mutations are shared across all <code>Flags</code> references to the
-    same object.
-  </p>
-  <pre>
+  <!-- ── 2. Setting flags ───────────────────────────────────────────── -->
+  <div class="section">
+    <h2>2 · Setting flags</h2>
+    <p>
+      Mutate <code>allowsDuplicateLabels</code> directly on the
+      <code>Flags</code> object. The change is shared across all
+      <code>Flags</code> wrappers for the same underlying object.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame } from "tsb";
+
 const df = DataFrame.fromColumns({ a: [1, 2, 3] });
 df.flags.allowsDuplicateLabels = false;
 console.log(df.flags.allowsDuplicateLabels); // false
 
-// Re-reading df.flags gives the same state:
+// Re-reading df.flags gives the same state (shared via WeakMap)
 const f2 = df.flags;
 console.log(f2.allowsDuplicateLabels);       // false
 
-// Reset:
+// Reset to default
 df.flags.allowsDuplicateLabels = true;
-console.log(df.flags.allowsDuplicateLabels); // true
-  </pre>
-  <button onclick="runSection2()">▶ Run</button>
-  <div class="output-label">Output</div>
-  <div class="output" id="out2"></div>
-</div>
+console.log(df.flags.allowsDuplicateLabels); // true</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── Section 3: DuplicateLabelError ────────────────────────────────── -->
-<div class="section">
-  <h2>3 · DuplicateLabelError</h2>
-  <p>
-    When <code>allowsDuplicateLabels</code> is set to <code>false</code>
-    on an object with duplicate index labels, a
-    <code>DuplicateLabelError</code> is thrown immediately.
-  </p>
-  <pre>
-import { Index } from "tsb";
+  <!-- ── 3. DuplicateLabelError ─────────────────────────────────────── -->
+  <div class="section">
+    <h2>3 · DuplicateLabelError</h2>
+    <p>
+      Setting <code>allowsDuplicateLabels = false</code> on an object with
+      duplicate index labels immediately throws a
+      <code>DuplicateLabelError</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, Index } from "tsb";
 
 // Build a DataFrame with duplicate row index labels [0, 1, 0]
-const baseDF = DataFrame.fromColumns({ a: [1, 2, 3] });
+const base = DataFrame.fromColumns({ a: [1, 2, 3] });
 const dupIndex = new Index([0, 1, 0]);
-const df = new DataFrame(new Map([["a", baseDF.col("a")]]), dupIndex);
+const df = new DataFrame(new Map([["a", base.col("a")]]), dupIndex);
 
 try {
   df.flags.allowsDuplicateLabels = false; // throws!
   console.log("No error (unexpected)");
 } catch (e) {
-  console.log(`Caught: ${e.constructor.name}: ${e.message}`);
-}
-  </pre>
-  <button onclick="runSection3()">▶ Run</button>
-  <div class="output-label">Output</div>
-  <div class="output" id="out3"></div>
-</div>
+  console.log(`Caught: ${(e as Error).constructor.name}: ${(e as Error).message}`);
+}</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<!-- ── Section 4: copy() and raiseOnDuplicates() ─────────────────────── -->
-<div class="section">
-  <h2>4 · copy() and raiseOnDuplicates()</h2>
-  <p>
-    <code>Flags.copy()</code> returns a new <code>Flags</code> wrapper
-    that shares state with the original. <code>raiseOnDuplicates()</code>
-    checks for duplicates only when <code>allowsDuplicateLabels</code>
-    is <code>false</code>.
-  </p>
-  <pre>
+  <!-- ── 4. copy() and raiseOnDuplicates() ──────────────────────────── -->
+  <div class="section">
+    <h2>4 · copy() and raiseOnDuplicates()</h2>
+    <p>
+      <code>Flags.copy()</code> returns a new wrapper sharing the same state.
+      <code>raiseOnDuplicates()</code> validates only when
+      <code>allowsDuplicateLabels</code> is <code>false</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame } from "tsb";
+
 const df = DataFrame.fromColumns({ a: [1, 2, 3] });
 const f = df.flags;
 f.allowsDuplicateLabels = false;
 
 const copy = f.copy();
-console.log(copy.allowsDuplicateLabels);  // false (shared state)
+console.log(copy.allowsDuplicateLabels); // false (shared state)
 
-// raiseOnDuplicates on a clean df → no throw
+// raiseOnDuplicates on a clean DataFrame → no throw
 copy.raiseOnDuplicates();
 console.log("raiseOnDuplicates() passed (no dups)");
 
-// Restore
+// Restore via either reference
 df.flags.allowsDuplicateLabels = true;
-console.log(copy.allowsDuplicateLabels);  // true (shared state)
-  </pre>
-  <button onclick="runSection4()">▶ Run</button>
-  <div class="output-label">Output</div>
-  <div class="output" id="out4"></div>
-</div>
+console.log(copy.allowsDuplicateLabels); // true (shared state)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-<script type="module">
-  import { DataFrame, DuplicateLabelError, Flags, Series, getFlags } from "./dist/index.js";
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-  const loading = document.getElementById("playground-loading");
-
-  function setOutput(id, text, isError = false) {
-    const el = document.getElementById(id);
-    el.textContent = text;
-    el.className = isError ? "output error" : "output";
-  }
-
-  // Expose helpers to window scope for button handlers
-  window.tsb = { DataFrame, DuplicateLabelError, Flags, Series, getFlags };
-
-  loading.style.display = "none";
-
-  window.runSection1 = function () {
-    try {
-      const { DataFrame, Series } = window.tsb;
-      const df = DataFrame.fromColumns({ a: [1, 2, 3], b: ["x", "y", "z"] });
-      const lines = [
-        `df.flags.allowsDuplicateLabels = ${df.flags.allowsDuplicateLabels}`,
-        `df.flags.toString()             = "${df.flags.toString()}"`,
-        ``,
-        `const s = new Series({ data: [10, 20, 30] })`,
-        `s.flags.allowsDuplicateLabels   = ${new Series({ data: [10, 20, 30] }).flags.allowsDuplicateLabels}`,
-      ];
-      setOutput("out1", lines.join("\n"));
-    } catch (e) {
-      setOutput("out1", String(e), true);
-    }
-  };
-
-  window.runSection2 = function () {
-    try {
-      const { DataFrame } = window.tsb;
-      const df = DataFrame.fromColumns({ a: [1, 2, 3] });
-      const lines = [];
-      df.flags.allowsDuplicateLabels = false;
-      lines.push(`After set false: df.flags.allowsDuplicateLabels = ${df.flags.allowsDuplicateLabels}`);
-      const f2 = df.flags;
-      lines.push(`f2.allowsDuplicateLabels = ${f2.allowsDuplicateLabels}`);
-      df.flags.allowsDuplicateLabels = true;
-      lines.push(`After reset: df.flags.allowsDuplicateLabels = ${df.flags.allowsDuplicateLabels}`);
-      setOutput("out2", lines.join("\n"));
-    } catch (e) {
-      setOutput("out2", String(e), true);
-    }
-  };
-
-  window.runSection3 = function () {
-    try {
-      const { DataFrame, DuplicateLabelError } = window.tsb;
-      const { Index } = await import("./dist/index.js");
-      const baseDF = DataFrame.fromColumns({ a: [1, 2, 3] });
-      const dupIndex = new Index([0, 1, 0]);
-      const df = new DataFrame(new Map([["a", baseDF.col("a")]]), dupIndex);
-      try {
-        df.flags.allowsDuplicateLabels = false;
-        setOutput("out3", "No error (unexpected)");
-      } catch (e) {
-        setOutput(
-          "out3",
-          `Caught: ${e.constructor.name}: ${e.message}`,
-        );
-      }
-    } catch (e) {
-      setOutput("out3", String(e), true);
-    }
-  };
-
-  window.runSection4 = function () {
-    try {
-      const { DataFrame } = window.tsb;
-      const df = DataFrame.fromColumns({ a: [1, 2, 3] });
-      const f = df.flags;
-      f.allowsDuplicateLabels = false;
-      const copy = f.copy();
-      const lines = [];
-      lines.push(`copy.allowsDuplicateLabels after set false = ${copy.allowsDuplicateLabels}`);
-      copy.raiseOnDuplicates();
-      lines.push(`raiseOnDuplicates() passed (no dups)`);
-      df.flags.allowsDuplicateLabels = true;
-      lines.push(`copy.allowsDuplicateLabels after reset = ${copy.allowsDuplicateLabels}`);
-      setOutput("out4", lines.join("\n"));
-    } catch (e) {
-      setOutput("out4", String(e), true);
-    }
-  };
-</script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>

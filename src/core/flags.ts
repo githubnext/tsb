@@ -45,7 +45,7 @@ interface IndexLike {
  * Structural interface satisfied by both `DataFrame` and `Series`.
  * Used as the WeakMap key so flags.ts never imports the concrete classes.
  */
-export interface FlaggedObject extends WeakKey {
+export interface FlaggedObject {
   /** Row index of the object. */
   readonly index: IndexLike;
 }
@@ -166,7 +166,7 @@ export class Flags {
   }
 
   /** Human-readable representation mirroring pandas' `repr(df.flags)`. */
-  override toString(): string {
+  toString(): string {
     return `<Flags(allows_duplicate_labels=${this.allowsDuplicateLabels})>`;
   }
 }

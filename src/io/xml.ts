@@ -23,7 +23,17 @@
 import { DataFrame } from "../core/frame.ts";
 import { Index } from "../core/index.ts";
 import { RangeIndex } from "../core/index.ts";
-import type { Scalar } from "../types.ts";
+import type { Label, Scalar } from "../types.ts";
+
+function isLabel(v: Scalar): v is Label {
+  return (
+    v === null ||
+    typeof v === "number" ||
+    typeof v === "string" ||
+    typeof v === "boolean" ||
+    v instanceof Date
+  );
+}
 
 // ─── public types ─────────────────────────────────────────────────────────────
 
@@ -399,7 +409,7 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
     for (const c of dataColNames) {
       dataColData[c] = colData[c] ?? [];
     }
-    const idx = new Index(idxData);
+    const idx = new Index(idxData.filter(isLabel));
     return DataFrame.fromColumns(dataColData, { index: idx });
   }
 

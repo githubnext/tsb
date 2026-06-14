@@ -131,7 +131,7 @@ describe("readTable — ReadCsvOptions forwarding", () => {
     const df = readTable(tsv, { header: null });
     expect(df.shape).toEqual([2, 3]);
     // Columns are auto-assigned (0, 1, 2)
-    expect(df.columns.length).toBe(3);
+    expect(df.columns.size).toBe(3);
   });
 
   it("respects dtype option", () => {
@@ -169,7 +169,7 @@ describe("readTable vs readCsv — default separator difference", () => {
     const csv = "a,b\n1,2\n3,4";
     const df = readTable(csv);
     // The whole "a,b" is one column name
-    expect(df.columns.length).toBe(1);
+    expect(df.columns.size).toBe(1);
   });
 });
 
@@ -250,7 +250,7 @@ describe("readTable — property-based", () => {
         (vals) => {
           const lines = ["v", ...vals.map(String)];
           const text = lines.join("\n");
-          const dfTable = readTable(text, { sep: "\n" === "\n" ? undefined : "," });
+          const dfTable = readTable(text);
           // Default sep=\t, and our data has no tabs, so single col
           // Just check shape is valid
           expect(dfTable.shape[0]).toBe(vals.length);
@@ -295,7 +295,7 @@ describe("readTable — DataFrame integration", () => {
   it("can chain DataFrame methods after readTable", () => {
     const tsv = "a\tb\tc\n1\t2\t3\n4\t5\t6\n7\t8\t9";
     const df = readTable(tsv);
-    const filtered = df.filter(["a", "c"]);
+    const filtered = df.select(["a", "c"]);
     expect(filtered.shape).toEqual([3, 2]);
     expect([...filtered.columns.values]).toEqual(["a", "c"]);
   });
