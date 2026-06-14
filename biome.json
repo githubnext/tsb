@@ -97,6 +97,9 @@
           },
           "complexity": {
             "useLiteralKeys": "off"
+          },
+          "suspicious": {
+            "noMisplacedAssertion": "off"
           }
         }
       }
