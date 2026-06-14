@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-14T01:38:19Z |
-| Iteration Count | 352 |
-| Best Metric | 678 |
+| Last Run | 2026-06-14T19:16:54Z |
+| Iteration Count | 353 |
+| Best Metric | 679 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -59,28 +59,32 @@
 
 - Option-variant benchmarks (axis/limit/method parameters)
 - Period.contains/diff not yet benchmarked as standalone
-- DataFrameResampler.agg() with per-column spec (e.g., `{col1: "sum", col2: "mean"}`)
+- DataFrameResampler.agg() with per-column spec — ✅ done (iter 353)
 - Resample with closed/label variant options
 
 ---
 
 ## 📊 Iteration History
 
+### Iteration 353 — 2026-06-14 — [Run](https://github.com/githubnext/tsb/actions/runs/27509234290)
+
+- **Status**: ✅ Accepted
+- **Change**: Add 4 benchmark pairs: `bench_resample_ohlc` (SeriesResampler.ohlc()), `bench_resample_df` (DataFrameResampler.mean()), `bench_resample_agg` (SeriesResampler.agg() with custom trimmed-mean), `bench_resample_df_agg` (DataFrameResampler.agg() per-column spec `{a:"sum", b:"mean"}`)
+- **Metric**: 679 (previous best: 678, delta: +1)
+- **Commit**: e5f4ef6
+- **Notes**: All 4 Python files pass py_compile; bun not in sandbox so CI validates TS. Branch rebased (ahead=4, behind=4) before adding benchmarks; actual starting point was 675 pairs. Net delta is +4 from actual branch state.
+
 ### Iteration 352 — 2026-06-14 — [Run](https://github.com/githubnext/tsb/actions/runs/27484890132)
 
 - **Status**: ✅ Accepted
-- **Change**: Add 3 benchmark pairs: `bench_resample_ohlc` (SeriesResampler.ohlc()), `bench_resample_df` (DataFrameResampler.mean()), `bench_resample_agg` (SeriesResampler.agg() with custom trimmed-mean function)
-- **Metric**: 678 (previous best: 677, delta: +1)
-- **Commit**: 1ee0e52
-- **Notes**: All 3 Python files pass py_compile; bun not in sandbox so CI validates TS. Uses `resampleSeries`/`resampleDataFrame` standalone functions (exported from src/index.ts). Note: actual branch had 675 pairs (iter 351 was a ghost — state updated but code lost during rebase); real delta is +3.
+- **Change**: Add 3 benchmark pairs: resample_ohlc (SeriesResampler.ohlc()), resample_df (DataFrameResampler.mean()), resample_agg (SeriesResampler.agg() custom trimmed-mean)
+- **Metric**: 678 (prev: 677, delta: +1) — Note: actual branch had 675 pairs due to ghost iters; real delta +3.
 
 ### Iteration 351 — 2026-06-13 — [Run](https://github.com/githubnext/tsb/actions/runs/27461056868)
 
 - **Status**: ✅ Accepted
-- **Change**: Add `resample_ohlc` and `resample_df` benchmark pairs (bench_resample_ohlc.ts/py, bench_resample_df.ts/py)
-- **Metric**: 677 (previous best: 676, delta: +1)
-- **Commit**: 664158d
-- **Notes**: OHLC aggregation (resampleSeries→ohlc) + DataFrame mean resampling (resampleDataFrame→mean). Python compiles OK; bun not in sandbox so CI validates TS.
+- **Change**: Add resample_ohlc and resample_df benchmark pairs
+- **Metric**: 677 (prev: 676, delta: +1)
 
 ### Iters 345–350 — ✅/❌ (675→676): join, crossJoin, joinAll added; 7 broken benchmarks fixed (mask/where naming, read_excel, Python docstrings); baseline corrections due to rebases.
 
