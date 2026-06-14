@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-13T08:02:34Z |
-| Iteration Count | 351 |
-| Best Metric | 677 |
+| Last Run | 2026-06-14T01:38:19Z |
+| Iteration Count | 352 |
+| Best Metric | 678 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -59,13 +59,20 @@
 
 - Option-variant benchmarks (axis/limit/method parameters)
 - Period.contains/diff not yet benchmarked as standalone
-- crossJoin (Cartesian product join) benchmark pair
-- join (label-based two-DF join with multiple how-variants) benchmark pair
-- resample agg() with per-column spec (DataFrameResampler.agg({col: "sum", ...}))
+- DataFrameResampler.agg() with per-column spec (e.g., `{col1: "sum", col2: "mean"}`)
+- Resample with closed/label variant options
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 352 — 2026-06-14 — [Run](https://github.com/githubnext/tsb/actions/runs/27484890132)
+
+- **Status**: ✅ Accepted
+- **Change**: Add 3 benchmark pairs: `bench_resample_ohlc` (SeriesResampler.ohlc()), `bench_resample_df` (DataFrameResampler.mean()), `bench_resample_agg` (SeriesResampler.agg() with custom trimmed-mean function)
+- **Metric**: 678 (previous best: 677, delta: +1)
+- **Commit**: 1ee0e52
+- **Notes**: All 3 Python files pass py_compile; bun not in sandbox so CI validates TS. Uses `resampleSeries`/`resampleDataFrame` standalone functions (exported from src/index.ts). Note: actual branch had 675 pairs (iter 351 was a ghost — state updated but code lost during rebase); real delta is +3.
 
 ### Iteration 351 — 2026-06-13 — [Run](https://github.com/githubnext/tsb/actions/runs/27461056868)
 
