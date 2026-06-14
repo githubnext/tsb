@@ -86,6 +86,19 @@ export class EmptyDataError extends Error {
   }
 }
 
+/**
+ * Raised when an operation would produce (or encounters) duplicate labels
+ * on an object where `flags.allowsDuplicateLabels` is `false`.
+ *
+ * Equivalent to `pandas.errors.DuplicateLabelError`.
+ */
+export class DuplicateLabelError extends ValueError {
+  override readonly name = "DuplicateLabelError";
+  constructor(message = "Index has duplicates") {
+    super(message);
+  }
+}
+
 /** Raised when casting to integer would lose data due to NaN values. */
 export class IntCastingNaNError extends Error {
   override readonly name = "IntCastingNaNError";
@@ -233,6 +246,7 @@ export const errors = {
   DatabaseError,
   DataError,
   DtypeWarning,
+  DuplicateLabelError,
   EmptyDataError,
   IntCastingNaNError,
   InvalidColumnName,

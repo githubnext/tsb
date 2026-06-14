@@ -787,5 +787,8 @@ export {
   IndexError,
 } from "./errors.ts";
 export type { PandasError } from "./errors.ts";
+export { DuplicateLabelError } from "./errors.ts";
 export { caseWhen } from "./stats/index.ts";
 export type { CaseWhenBranch, CaseWhenPredicate } from "./stats/index.ts";
+export { Flags, getFlags } from "./core/index.ts";
+export type { FlaggedObject } from "./core/index.ts";

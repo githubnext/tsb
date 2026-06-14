@@ -21,6 +21,8 @@ import type { CatSeriesLike } from "./cat_accessor.ts";
 import { DatetimeAccessor } from "./datetime_accessor.ts";
 import type { DatetimeSeriesLike } from "./datetime_accessor.ts";
 import { Dtype } from "./dtype.ts";
+import { getFlags } from "./flags.ts";
+import type { Flags } from "./flags.ts";
 import { RangeIndex } from "./range-index.ts";
 import { StringAccessor } from "./string_accessor.ts";
 import type { StringSeriesLike } from "./string_accessor.ts";
@@ -284,6 +286,21 @@ export class Series<T extends Scalar = Scalar> {
 
   get empty(): boolean {
     return this._values.length === 0;
+  }
+
+  /**
+   * Metadata flags for this Series.
+   *
+   * Controls behaviour such as whether duplicate labels are allowed.
+   *
+   * @example
+   * ```ts
+   * s.flags.allowsDuplicateLabels;       // true (default)
+   * s.flags.allowsDuplicateLabels = false;
+   * ```
+   */
+  get flags(): Flags {
+    return getFlags(this);
   }
 
   /** Snapshot of the underlying values as a plain array. */

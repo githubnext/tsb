@@ -151,3 +151,6 @@ export type {
   ExtensionDtypeConstructor,
   ExtensionArrayConstructor,
 } from "./extensions.ts";
+
+export { Flags, getFlags } from "./flags.ts";
+export type { FlaggedObject } from "./flags.ts";
