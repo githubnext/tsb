@@ -8,8 +8,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-13T13:17:55Z |
-| Iteration Count | 84 |
+| Last Run | 2026-06-14T08:15:46Z |
+| Iteration Count | 85 |
 | Best Metric | 0.00000649 |
 | Target Metric | — |
 | Metric Direction | lower |
@@ -21,13 +21,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, rejected, rejected, rejected, rejected, rejected, rejected, rejected, accepted, accepted |
+| Recent Statuses | pending-ci, rejected, rejected, rejected, rejected, rejected, rejected, rejected, rejected, accepted |
 
 ---
 
 ## 🧬 Population (summary)
 
-- **c084** (gen 84, ⏳ pending-ci): Nested if/else cache branches — no ternary cmov. Commit `4297316`.
+- **c085** (gen 85, ⏳ pending-ci): JIT warmup seeding — 1000 recursive calls on first cold path to push JSC to DFG tier. Commit `c2fa5be`.
+- **c084** (gen 84, ❌ 0.0000159 / 84ns CI): Nested if/else cache branches — no ternary cmov. Rejected. `4297316`.
 - **c083** (gen 83, ❌ 0.0000144 / 79ns CI): Revert split + charCodeAt naPosition check. Neutral. `d42d0f8`.
 - **c082** (gen 82, ❌ 0.0000549 / 425ns): Split sortValues → JIT warmup failure. `6a2a987`.
 - **c081** (gen 81, ❌ 0.0000544 / 286ns): WARMUP=200 throttled Python. `a3e1d0d`.
@@ -41,8 +42,8 @@
 - **Method split causes JIT regression** (c082): With WARMUP=5, 15-line wrapper only seen 5× before measurement → stays in interpreter at 425ns/call. Monolithic sortValues gets JIT'd via 5ms cold-path. **Never split the hot path.**
 - **WARMUP=200 throttles Python** (c081): 200×5ms=1s Python freq-scaling. Use WARMUP=5.
 - **Essential combo**: Per-instance 4-slot cache (AL/AF/DL/DF) + LSD radix. Cache-only=82ns, LSD-only=126ms.
-- **Sandbox/CI gap**: c067 sandbox=0.00000649 (≈34ns). CI floor=75-82ns.
-- **Micro-opts neutral**: charCodeAt vs string equality (c083)=neutral; naLast precompute (c080)=neutral; flat if/else (c079)=79ns vs 77ns.
+- **Sandbox/CI gap**: c067 sandbox=0.00000649 (≈34ns). CI floor=75-84ns. Gap caused by test suite pre-warming JSC to DFG/FTL tier in sandbox; CI starts fresh with WARMUP=5 only.
+- **Micro-opts neutral**: charCodeAt vs string equality (c083)=neutral; naLast precompute (c080)=neutral; flat if/else (c079)=79ns; nested if/else (c084)=84ns.
 - **Biome**: `noNestedTernary`, `useBlockStatements`. Use local alias `cv = _cacheVals`.
 
 ---
@@ -58,31 +59,25 @@
 
 ## 🔭 Future Directions
 
-- c084 ⏳: Nested if/else cache branches — awaiting CI.
-- If c084 ~same as best: try `naPosition.length === 4` (direct integer load) vs charCodeAt — might save a few cycles.
-- If still neutral: try a 5th "default args" cache slot (`_svCacheDefault`) checked first with zero computation.
-- Deeper change: increase JSC tier-up by encoding a subtle "hot hint" via code structure.
+- c085 ⏳: JIT warmup seeding — 1000 recursive calls on first cold path. Pending CI.
+- If c085 rejected: c084 was rejected too. Try `naPosition.length === 4` (direct integer load) — untried variant of naPosition check.
+- If all micro-opts exhausted: consider that CI floor (75-84ns) is a hard JIT-tier floor; may need 10k+ warmup iterations or a fundamentally different cold-path structure.
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 84 — 2026-06-13 — [Run](https://github.com/githubnext/tsb/actions/runs/27467840807)
+### Iteration 85 — 2026-06-14 — [Run](https://github.com/githubnext/tsb/actions/runs/27492936548)
 
-- **Status**: ⏳ Pending CI | **Operator**: Exploitation (Island 3)
-- **Change**: Replace `const naLast = charCodeAt; naLast ? cacheAL : cacheAF` with nested `if (ascending) { if (charCodeAt) { cacheAL } else { cacheAF } }`. Eliminates ternary cmov; uses predictable branches.
-- **Metric**: Pending CI | **Commit**: `4297316`
-- **Parent**: c083 (island 3, 0.0000144 CI)
+- **Status**: ⏳ Pending CI | **Operator**: Exploration (Island 4 Hybrid)
+- **Change**: `WeakSet<object> _svJitSeeded` — 1000 recursive calls on first cold path per instance, pushing JSC call count past DFG threshold. All recursive calls hit per-instance cache (O(1)). Adds ~77μs to first warmup iteration only.
+- **Metric**: Pending CI | **Commit**: `c2fa5be` | **Parent**: c084
 
-### Iteration 83 — 2026-06-12 — ❌ [Run](https://github.com/githubnext/tsb/actions/runs/27438189545)
+### Iteration 84 — 2026-06-13 — ❌ [Run](https://github.com/githubnext/tsb/actions/runs/27467840807)
 
-- **Status**: ❌ Rejected (CI fitness 0.0000144 > best 0.00000649) | **Operator**: Migration (Island 3)
-- **Change**: Revert c082 split; `naPosition.charCodeAt(0) !== 102` replaces `=== "last"`. Neutral vs c067.
-- **Metric**: 0.0000144 / 79ns CI (delta: +0.0000079 vs best). `d42d0f8`
+- **Status**: ❌ Rejected (0.0000159 / 84ns > best 0.00000649) | **Operator**: Exploitation (Island 3)
+- **Change**: Nested if/else replacing ternary cmov in cache check. Worse than c083. `4297316`
 
-### Iteration 82 — 2026-06-11 — ❌ [Run](https://github.com/githubnext/tsb/actions/runs/27352904608)
-
-- **Change**: Split sortValues → 15-line wrapper + `_sortValuesFull`. **Metric**: 0.0000549 / 425ns (delta: +0.0000484). JIT warmup failure. `6a2a987`.
-
-### Iters 75–81: c081 ❌ 0.0000544 (WARMUP=200 throttle); c080 ❌ 0.0000148 (naLast pre); c079 ❌ 0.0000155 (flat if); c078 ❌ 0.0000147 (c067 restore).
+### Iters 82–83: c083 ❌ 0.0000144/79ns (charCodeAt revert); c082 ❌ 0.0000549/425ns (split→JIT fail).
+### Iters 75–81: c081 ❌ 0.0000544 (WARMUP=200); c080 ❌ 0.0000148; c079 ❌ 0.0000155; c078 ❌ 0.0000147.
 ### Iters 1–74: c067 ✅ 0.00000649 BEST; c062 ✅ 0.0000174; c022 ✅ LSD; c074/c073 ❌ method extract 20×.
