@@ -119,8 +119,7 @@ export function lreshape(
     const list = groups[key] as readonly string[];
     if (list.length !== k) {
       throw new Error(
-        `lreshape: all group lists must have the same length, but ` +
-          `"${firstKey}" has length ${k} and "${key}" has length ${list.length}`,
+        `lreshape: all group lists must have the same length, but "${firstKey}" has length ${k} and "${key}" has length ${list.length}`,
       );
     }
   }

@@ -125,7 +125,11 @@ describe("lreshape", () => {
 
   describe("edge cases", () => {
     it("returns empty DataFrame for empty source", () => {
-      const df = DataFrame.fromColumns({ id: [] as Scalar[], v1: [] as Scalar[], v2: [] as Scalar[] });
+      const df = DataFrame.fromColumns({
+        id: [] as Scalar[],
+        v1: [] as Scalar[],
+        v2: [] as Scalar[],
+      });
       const result = lreshape(df, { v: ["v1", "v2"] });
       expect(result.shape[0]).toBe(0);
       expect(result.columns.values).toEqual(["id", "v"]);
@@ -143,16 +147,12 @@ describe("lreshape", () => {
         v2: [3, 4],
         w1: [5, 6],
       });
-      expect(() => lreshape(df, { v: ["v1", "v2"], w: ["w1"] })).toThrow(
-        /same length/,
-      );
+      expect(() => lreshape(df, { v: ["v1", "v2"], w: ["w1"] })).toThrow(/same length/);
     });
 
     it("throws when a referenced column does not exist", () => {
       const df = DataFrame.fromColumns({ a: [1, 2] });
-      expect(() => lreshape(df, { x: ["a", "MISSING"] })).toThrow(
-        /not found/,
-      );
+      expect(() => lreshape(df, { x: ["a", "MISSING"] })).toThrow(/not found/);
     });
 
     it("result always has a RangeIndex", () => {
@@ -182,9 +182,7 @@ describe("lreshape", () => {
       const result = lreshape(df, { score: ["score1", "score2", "score3"] });
       expect(result.shape[0]).toBe(6);
       expect(colValues(result, "score")).toEqual([80, 70, 85, 75, 90, 80]);
-      expect(colValues(result, "name")).toEqual([
-        "Alice", "Bob", "Alice", "Bob", "Alice", "Bob",
-      ]);
+      expect(colValues(result, "name")).toEqual(["Alice", "Bob", "Alice", "Bob", "Alice", "Bob"]);
     });
   });
 
@@ -193,20 +191,22 @@ describe("lreshape", () => {
       fc.assert(
         fc.property(
           // Generate a small DataFrame with 1-4 id cols and 2-4 value cols
-          fc.nat({ max: 4 }).chain((nId) =>
-            fc.nat({ max: 3 }).chain((k) =>
-              fc.integer({ min: 1, max: 8 }).map((nRows) => {
-                const data: Record<string, Scalar[]> = {};
-                for (let i = 0; i < nId; i++) {
-                  data[`id${i}`] = Array.from({ length: nRows }, (_, j) => j + i);
-                }
-                for (let vi = 0; vi < k + 1; vi++) {
-                  data[`v${vi}`] = Array.from({ length: nRows }, (_, j) => j * 10 + vi);
-                }
-                return { data, nId, k: k + 1, nRows };
-              }),
+          fc
+            .nat({ max: 4 })
+            .chain((nId) =>
+              fc.nat({ max: 3 }).chain((k) =>
+                fc.integer({ min: 1, max: 8 }).map((nRows) => {
+                  const data: Record<string, Scalar[]> = {};
+                  for (let i = 0; i < nId; i++) {
+                    data[`id${i}`] = Array.from({ length: nRows }, (_, j) => j + i);
+                  }
+                  for (let vi = 0; vi < k + 1; vi++) {
+                    data[`v${vi}`] = Array.from({ length: nRows }, (_, j) => j * 10 + vi);
+                  }
+                  return { data, nId, k: k + 1, nRows };
+                }),
+              ),
             ),
-          ),
           ({ data, nId, k, nRows }) => {
             const df = DataFrame.fromColumns(data);
             const groups: Record<string, string[]> = { v: [] };
@@ -224,9 +224,9 @@ describe("lreshape", () => {
     it("id column values are repeated k times each row (dropna=false)", () => {
       fc.assert(
         fc.property(
-          fc.integer({ min: 1, max: 5 }).chain((nRows) =>
-            fc.integer({ min: 2, max: 4 }).map((k) => ({ nRows, k })),
-          ),
+          fc
+            .integer({ min: 1, max: 5 })
+            .chain((nRows) => fc.integer({ min: 2, max: 4 }).map((k) => ({ nRows, k }))),
           ({ nRows, k }) => {
             const ids = Array.from({ length: nRows }, (_, i) => i + 1);
             const data: Record<string, Scalar[]> = { id: ids };
