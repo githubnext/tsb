@@ -66,6 +66,20 @@ export { readXml, toXml } from "./io/index.ts";
 export type { ReadXmlOptions, ToXmlOptions } from "./io/index.ts";
 export { readTable } from "./io/index.ts";
 export type { ReadTableOptions } from "./io/index.ts";
+export { readSql, readSqlQuery, readSqlTable, toSql } from "./io/index.ts";
+export { TableExistsError, TableNotFoundError } from "./io/index.ts";
+export type {
+  SqlValue,
+  SqlRow,
+  SqlResult,
+  SqlConnection,
+  IfExistsStrategy,
+  ReadSqlBaseOptions,
+  ReadSqlQueryOptions,
+  ReadSqlTableOptions,
+  ReadSqlOptions,
+  ToSqlOptions,
+} from "./io/index.ts";
 export { pearsonCorr, dataFrameCorr, dataFrameCov } from "./stats/index.ts";
 export type { CorrMethod, CorrOptions, CovOptions } from "./stats/index.ts";
 export { Rolling } from "./window/index.ts";

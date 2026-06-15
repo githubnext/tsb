@@ -28,6 +28,21 @@ export type { ReadXmlOptions, ToXmlOptions } from "./xml.ts";
 export { readTable } from "./read_table.ts";
 export type { ReadTableOptions } from "./read_table.ts";
 
+export { readSql, readSqlQuery, readSqlTable, toSql } from "./sql.ts";
+export { TableExistsError, TableNotFoundError } from "./sql.ts";
+export type {
+  SqlValue,
+  SqlRow,
+  SqlResult,
+  SqlConnection,
+  IfExistsStrategy,
+  ReadSqlBaseOptions,
+  ReadSqlQueryOptions,
+  ReadSqlTableOptions,
+  ReadSqlOptions,
+  ToSqlOptions,
+} from "./sql.ts";
+
 // readExcel / xlsxSheetNames use node:zlib and cannot be bundled for the
 // browser.  Import them directly from "tsb/io/read_excel" when running in
 // Node / Bun.

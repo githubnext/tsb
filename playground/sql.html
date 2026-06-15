@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb – SQL I/O playground</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { color: #2563eb; }
+    h2 { color: #1e40af; margin-top: 2rem; }
+    textarea { width: 100%; font-family: monospace; font-size: 13px; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px; box-sizing: border-box; }
+    pre { background: #f1f5f9; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+    button { background: #2563eb; color: white; border: none; border-radius: 6px; padding: 8px 18px; cursor: pointer; font-size: 14px; margin-right: 8px; }
+    button:hover { background: #1d4ed8; }
+    .output { margin-top: 1rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+    th, td { border: 1px solid #d1d5db; padding: 6px 12px; text-align: left; font-size: 13px; }
+    th { background: #f1f5f9; font-weight: 600; }
+    .note { background: #fef9c3; border: 1px solid #fde047; border-radius: 6px; padding: 0.75rem 1rem; margin-top: 1rem; font-size: 13px; }
+    .section { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .section > div { flex: 1; min-width: 260px; }
+    select { font-size: 13px; padding: 4px 8px; border-radius: 4px; border: 1px solid #d1d5db; }
+    input[type=text] { font-size: 13px; padding: 4px 8px; border-radius: 4px; border: 1px solid #d1d5db; width: 180px; }
+  </style>
+</head>
+<body>
+  <h1>🐼 tsb – SQL I/O</h1>
+  <p>
+    <code>readSql</code> / <code>readSqlQuery</code> / <code>readSqlTable</code> and <code>toSql</code>
+    mirror <a href="https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html" target="_blank"><code>pandas.read_sql()</code></a>
+    and <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_sql.html" target="_blank"><code>DataFrame.to_sql()</code></a>.
+  </p>
+  <p>
+    Because <strong>tsb</strong> has zero runtime dependencies, it does not bundle a database driver.
+    Instead you pass a <code>SqlConnection</code> adapter.  This playground ships a tiny
+    <em>in-memory</em> adapter so you can explore the API right in the browser.
+  </p>
+
+  <div class="note">
+    💡 The in-memory adapter supports <code>SELECT * FROM "table"</code>,
+    <code>INSERT INTO "table" (…) VALUES (…)</code>, <code>DROP TABLE IF EXISTS "table"</code>,
+    and the optional <code>listTables()</code> / <code>insert()</code> methods.
+  </div>
+
+  <h2>Step 1 — Seed data into the in-memory database</h2>
+  <p>Edit the JSON below then click <strong>Seed table</strong>.</p>
+  <div class="section">
+    <div>
+      <label>Table name: <input type="text" id="seed-table" value="employees" /></label>
+      <br /><br />
+      <textarea id="seed-data" rows="10">[
+  { "id": 1, "name": "Alice",   "dept": "Engineering", "salary": 95000 },
+  { "id": 2, "name": "Bob",     "dept": "Marketing",   "salary": 72000 },
+  { "id": 3, "name": "Carol",   "dept": "Engineering", "salary": 105000 },
+  { "id": 4, "name": "Dave",    "dept": "HR",          "salary": 68000 },
+  { "id": 5, "name": "Eve",     "dept": "Engineering", "salary": 88000 }
+]</textarea>
+      <br /><br />
+      <button onclick="seedTable()">💾 Seed table</button>
+    </div>
+    <div id="seed-output" class="output"></div>
+  </div>
+
+  <h2>Step 2 — Read back with readSql / readSqlQuery / readSqlTable</h2>
+  <div class="section">
+    <div>
+      <label>SQL or table name:</label>
+      <br />
+      <textarea id="sql-input" rows="4">SELECT id, name, salary FROM "employees"</textarea>
+      <br />
+      <label>indexCol: <input type="text" id="index-col" placeholder="none" /></label>
+      &nbsp;
+      <label>parseDates (comma-sep): <input type="text" id="parse-dates" placeholder="none" /></label>
+      <br /><br />
+      <button onclick="runRead()">▶ readSql</button>
+    </div>
+    <div id="read-output" class="output"></div>
+  </div>
+
+  <h2>Step 3 — Write back with toSql</h2>
+  <div class="section">
+    <div>
+      <label>Destination table: <input type="text" id="write-table" value="staging" /></label>
+      &nbsp;
+      <label>ifExists:
+        <select id="if-exists">
+          <option value="fail">fail</option>
+          <option value="replace" selected>replace</option>
+          <option value="append">append</option>
+        </select>
+      </label>
+      &nbsp;
+      <label><input type="checkbox" id="write-index" /> include index column</label>
+      <br /><br />
+      <button onclick="runWrite()">▶ toSql</button>
+    </div>
+    <div id="write-output" class="output"></div>
+  </div>
+
+  <h2>Code Examples</h2>
+  <pre><code>import {
+  readSql, readSqlQuery, readSqlTable, toSql,
+} from "tsb";
+import type { SqlConnection, SqlResult, SqlValue } from "tsb";
+
+// ── Implement a SqlConnection adapter for your DB driver ────────────────────
+
+// Example: wrapping better-sqlite3
+import Database from "better-sqlite3";
+
+class BetterSqlite3Adapter implements SqlConnection {
+  constructor(private readonly db: Database.Database) {}
+
+  query(sql: string, params?: readonly SqlValue[]): SqlResult {
+    const stmt = this.db.prepare(sql);
+    const rows = stmt.all(...(params ?? []));
+    const columns = rows.length &gt; 0 ? Object.keys(rows[0]) : [];
+    return { columns, rows };
+  }
+
+  listTables(): string[] {
+    return (this.db.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table'",
+    ).all() as { name: string }[]).map((r) =&gt; r.name);
+  }
+}
+
+const db = new BetterSqlite3Adapter(new Database("mydb.sqlite"));
+
+// ── readSqlQuery: run a SELECT and get a DataFrame ──────────────────────────
+const df = readSqlQuery(
+  "SELECT id, name, salary FROM employees WHERE dept = ?",
+  db,
+  { params: ["Engineering"], indexCol: "id" },
+);
+df.shape;          // [3, 2]
+df.col("salary").mean();  // average Engineering salary
+
+// ── readSqlTable: load an entire table ──────────────────────────────────────
+const allEmps = readSqlTable("employees", db, {
+  columns: ["id", "name", "dept"],
+});
+
+// ── readSql: auto-detect query vs table name ────────────────────────────────
+const byQuery = readSql("SELECT * FROM employees", db);  // query
+const byTable = readSql("employees", db);                // table name
+
+// ── toSql: write a DataFrame back ───────────────────────────────────────────
+import { toSql } from "tsb";
+
+const n = toSql(df, "high_earners", db, {
+  ifExists: "replace",
+  index: false,
+});
+console.log(`Wrote ${n} rows`);
+</code></pre>
+
+  <script type="module">
+    // ── in-memory adapter ──────────────────────────────────────────────────────
+    class MemAdapter {
+      constructor() {
+        this._tables = new Map();
+        this._schemas = new Map();
+      }
+
+      seed(name, rows) {
+        this._tables.set(name, rows.map(r => ({...r})));
+        if (rows.length > 0) this._schemas.set(name, Object.keys(rows[0]));
+      }
+
+      query(sql) {
+        const t = sql.trim();
+        // DROP
+        const drop = /^DROP TABLE IF EXISTS "(.+)"$/i.exec(t);
+        if (drop) {
+          this._tables.delete(drop[1]);
+          this._schemas.delete(drop[1]);
+          return { columns: [], rows: [] };
+        }
+        // INSERT
+        const ins = /^INSERT INTO "(.+)" \((.+)\) VALUES \((.+)\)$/i.exec(t);
+        if (ins) {
+          const [, name, rawCols, rawVals] = ins;
+          const cols = rawCols.split(',').map(c => c.trim().replace(/^"|"$/g,''));
+          const vals = this._parseValues(rawVals);
+          const row = {};
+          cols.forEach((c, i) => { row[c] = vals[i] ?? null; });
+          const arr = this._tables.get(name) || [];
+          arr.push(row);
+          this._tables.set(name, arr);
+          if (!this._schemas.has(name)) this._schemas.set(name, cols);
+          return { columns: [], rows: [] };
+        }
+        // SELECT
+        const sel = /^SELECT\s+(.+?)\s+FROM\s+"([^"]+)"(?:\s*$)/i.exec(t);
+        if (sel) {
+          const [, selectPart, name] = sel;
+          const rows = this._tables.get(name) || [];
+          const allCols = this._schemas.get(name) ||
+            (rows.length > 0 ? Object.keys(rows[0]) : []);
+          const wantedCols = selectPart.trim() === '*'
+            ? allCols
+            : selectPart.split(',').map(c => c.trim().replace(/^"|"$/g,''));
+          return {
+            columns: wantedCols,
+            rows: rows.map(r => {
+              const out = {};
+              wantedCols.forEach(c => { out[c] = r[c] ?? null; });
+              return out;
+            }),
+          };
+        }
+        return { columns: [], rows: [] };
+      }
+
+      listTables() { return [...this._tables.keys()]; }
+
+      insert(tableName, rows, columns, ifExists) {
+        const existing = this._tables.get(tableName);
+        if (existing) {
+          if (ifExists === 'fail') throw new Error(`Table "${tableName}" already exists.`);
+          if (ifExists === 'replace') { this._tables.delete(tableName); this._schemas.delete(tableName); }
+        }
+        const arr = this._tables.get(tableName) || [];
+        rows.forEach(r => arr.push({...r}));
+        this._tables.set(tableName, arr);
+        this._schemas.set(tableName, [...columns]);
+        return rows.length;
+      }
+
+      _parseValues(raw) {
+        const vals = [];
+        let i = 0;
+        while (i < raw.length) {
+          while (raw[i] === ' ') i++;
+          if (i >= raw.length) break;
+          if (raw.slice(i,i+4) === 'NULL') { vals.push(null); i += 4; }
+          else if (raw[i] === "'") {
+            i++; let s = '';
+            while (i < raw.length) {
+              if (raw[i] === "'") {
+                if (raw[i+1] === "'") { s += "'"; i += 2; }
+                else { i++; break; }
+              } else { s += raw[i]; i++; }
+            }
+            vals.push(s);
+          } else {
+            let n = '';
+            while (i < raw.length && raw[i] !== ',' && raw[i] !== ' ') { n += raw[i]; i++; }
+            vals.push(isNaN(Number(n)) ? n : Number(n));
+          }
+          while (raw[i] === ' ') i++;
+          if (raw[i] === ',') i++;
+        }
+        return vals;
+      }
+    }
+
+    // global adapter instance and current DataFrame
+    const db = new MemAdapter();
+    let currentDf = null;
+
+    // ── helpers to render a DataFrame as HTML table ────────────────────────────
+    function renderDf(df) {
+      if (!df || df.shape[0] === 0) return '<em>(empty DataFrame)</em>';
+      const cols = [...df.columns.values];
+      let html = '<table><thead><tr><th>(index)</th>';
+      cols.forEach(c => { html += `<th>${c}</th>`; });
+      html += '</tr></thead><tbody>';
+      const idxVals = [...df.index.values];
+      for (let i = 0; i < df.shape[0]; i++) {
+        html += `<tr><td>${idxVals[i]}</td>`;
+        cols.forEach(c => {
+          const v = df.col(c).values[i];
+          html += `<td>${v === null || v === undefined ? '<em>null</em>' : v}</td>`;
+        });
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      return html;
+    }
+
+    // ── Step 1: seed ───────────────────────────────────────────────────────────
+    window.seedTable = function() {
+      const name = document.getElementById('seed-table').value.trim();
+      let rows;
+      try { rows = JSON.parse(document.getElementById('seed-data').value); }
+      catch (e) {
+        document.getElementById('seed-output').innerHTML =
+          `<span style="color:red">JSON parse error: ${e.message}</span>`;
+        return;
+      }
+      db.seed(name, rows);
+      document.getElementById('seed-output').innerHTML =
+        `<strong>✅ Seeded "${name}" with ${rows.length} rows.</strong>
+         <br>Tables: ${db.listTables().map(t => `<code>${t}</code>`).join(', ')}`;
+    };
+
+    // ── Step 2: read ──────────────────────────────────────────────────────────
+    window.runRead = async function() {
+      const { readSql } = await import('/src/index.ts').catch(async () => {
+        // Fallback: try loading the built bundle or show a message
+        return {};
+      });
+      const sqlOrTable = document.getElementById('sql-input').value.trim();
+      const indexCol = document.getElementById('index-col').value.trim() || null;
+      const parseDatesStr = document.getElementById('parse-dates').value.trim();
+      const parseDates = parseDatesStr ? parseDatesStr.split(',').map(s => s.trim()) : undefined;
+
+      const el = document.getElementById('read-output');
+      if (typeof readSql !== 'function') {
+        el.innerHTML = '<em>Module not available in static playground — see code examples above. ' +
+          'Run <code>bun run dev</code> locally to try the live demo.</em>';
+        return;
+      }
+      try {
+        const opts = {};
+        if (indexCol) opts.indexCol = indexCol;
+        if (parseDates) opts.parseDates = parseDates;
+        currentDf = readSql(sqlOrTable, db, opts);
+        el.innerHTML = `<strong>Shape: ${currentDf.shape[0]} × ${currentDf.shape[1]}</strong>` +
+          renderDf(currentDf);
+      } catch (e) {
+        el.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+      }
+    };
+
+    // ── Step 3: write ─────────────────────────────────────────────────────────
+    window.runWrite = async function() {
+      const { toSql } = await import('/src/index.ts').catch(() => ({}));
+      const el = document.getElementById('write-output');
+      if (typeof toSql !== 'function') {
+        el.innerHTML = '<em>Module not available in static playground — see code examples above.</em>';
+        return;
+      }
+      if (!currentDf) {
+        el.innerHTML = '<em>Run Step 2 first to load a DataFrame.</em>';
+        return;
+      }
+      const destTable = document.getElementById('write-table').value.trim();
+      const ifExists = document.getElementById('if-exists').value;
+      const includeIndex = document.getElementById('write-index').checked;
+      try {
+        const n = toSql(currentDf, destTable, db, {
+          ifExists,
+          index: includeIndex,
+        });
+        el.innerHTML = `<strong>✅ Wrote ${n} rows to "${destTable}".</strong>
+          <br>Tables: ${db.listTables().map(t => `<code>${t}</code>`).join(', ')}`;
+      } catch (e) {
+        el.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+      }
+    };
+
+    // Auto-seed on load
+    document.addEventListener('DOMContentLoaded', () => {
+      window.seedTable();
+    });
+  </script>
+</body>
+</html>
