@@ -1556,7 +1556,7 @@ function isIndexLike(v: unknown): v is Index<Label> {
 // Total overhead: ~1 ms at import time (Baseline-tier cache-hit calls).
 const _jitPrimeSeries = new Series<number>({
   data: [5.0, 3.0, 1.0, 4.0, 2.0],
-  dtype: "float64",
+  dtype: Dtype.float64,
 });
 for (let _jitPrimeIdx = 0; _jitPrimeIdx < 100_000; _jitPrimeIdx++) {
   _jitPrimeSeries.sortValues();
