@@ -6,14 +6,14 @@
  */
 import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
-import {
-  DataFrame,
-  readSql,
-  readSqlQuery,
-  readSqlTable,
-  toSql,
+import { DataFrame, readSql, readSqlQuery, readSqlTable, toSql } from "../../src/index.ts";
+import type {
+  IfExistsStrategy,
+  SqlConnection,
+  SqlResult,
+  SqlRow,
+  SqlValue,
 } from "../../src/index.ts";
-import type { IfExistsStrategy, SqlConnection, SqlResult, SqlRow, SqlValue } from "../../src/index.ts";
 import { TableExistsError, TableNotFoundError } from "../../src/index.ts";
 
 // ─── MockAdapter ──────────────────────────────────────────────────────────────
@@ -34,7 +34,10 @@ class MockAdapter implements SqlConnection {
 
   /** Seed a table with pre-existing data. */
   seed(name: string, rows: SqlRow[]): void {
-    this.tables.set(name, rows.map((r) => ({ ...r })));
+    this.tables.set(
+      name,
+      rows.map((r) => ({ ...r })),
+    );
     if (rows.length > 0) {
       const first = rows[0];
       if (first !== undefined) {
@@ -58,8 +61,7 @@ class MockAdapter implements SqlConnection {
     }
 
     // INSERT INTO "<name>" (col, …) VALUES (val, …)
-    const insertMatch =
-      /^INSERT INTO "(.+)" \((.+)\) VALUES \((.+)\)$/i.exec(trimmed);
+    const insertMatch = /^INSERT INTO "(.+)" \((.+)\) VALUES \((.+)\)$/i.exec(trimmed);
     if (insertMatch !== null) {
       const [, rawName, rawCols, rawVals] = insertMatch;
       if (rawName !== undefined && rawCols !== undefined && rawVals !== undefined) {
@@ -87,8 +89,7 @@ class MockAdapter implements SqlConnection {
     }
 
     // SELECT … FROM "<name>"
-    const selectMatch =
-      /^SELECT\s+(.+?)\s+FROM\s+"([^"]+)"(?:\s*$)/i.exec(trimmed);
+    const selectMatch = /^SELECT\s+(.+?)\s+FROM\s+"([^"]+)"(?:\s*$)/i.exec(trimmed);
     if (selectMatch !== null) {
       const [, selectCols, rawName] = selectMatch;
       if (rawName !== undefined && selectCols !== undefined) {
@@ -194,7 +195,7 @@ function parseValueList(raw: string): SqlValue[] {
       i++; // skip closing quote
       const bytes = new Uint8Array(hex.length / 2);
       for (let b = 0; b < bytes.length; b++) {
-        bytes[b] = parseInt(hex.slice(b * 2, b * 2 + 2), 16);
+        bytes[b] = Number.parseInt(hex.slice(b * 2, b * 2 + 2), 16);
       }
       values.push(bytes);
     } else {
@@ -383,9 +384,7 @@ describe("toSql — basic", () => {
     const db = new MockAdapter();
     db.seed("t", [{ x: 1 }]);
     const df = DataFrame.fromColumns({ x: [2] });
-    expect(() => toSql(df, "t", db, { ifExists: "fail" })).toThrow(
-      TableExistsError,
-    );
+    expect(() => toSql(df, "t", db, { ifExists: "fail" })).toThrow(TableExistsError);
   });
 
   it("ifExists: replace overwrites data", () => {

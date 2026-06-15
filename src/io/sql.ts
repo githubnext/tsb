@@ -340,10 +340,7 @@ function resultToDataFrame(result: SqlResult, options: ReadSqlBaseOptions): Data
     }
   }
 
-  const rowIndex =
-    idxColName !== null
-      ? new Index(indexVals, idxColName)
-      : undefined;
+  const rowIndex = idxColName !== null ? new Index(indexVals, idxColName) : undefined;
 
   return DataFrame.fromColumns(
     columnData as Record<string, readonly Scalar[]>,
@@ -357,19 +354,14 @@ function quoteIdent(name: string): string {
 }
 
 /** Build a SELECT statement for {@link readSqlTable}. */
-function buildSelectQuery(
-  tableName: string,
-  options: ReadSqlTableOptions,
-): string {
+function buildSelectQuery(tableName: string, options: ReadSqlTableOptions): string {
   const { schema, columns } = options;
 
   const qualifiedTable =
     schema !== undefined ? `${quoteIdent(schema)}.${quoteIdent(tableName)}` : quoteIdent(tableName);
 
   const colList =
-    columns !== undefined && columns.length > 0
-      ? columns.map(quoteIdent).join(", ")
-      : "*";
+    columns !== undefined && columns.length > 0 ? columns.map(quoteIdent).join(", ") : "*";
 
   return `SELECT ${colList} FROM ${qualifiedTable}`;
 }
@@ -512,12 +504,7 @@ export function toSql(
   conn: SqlConnection,
   options: ToSqlOptions = {},
 ): number {
-  const {
-    ifExists = "fail",
-    index = true,
-    indexLabel = null,
-    chunksize,
-  } = options;
+  const { ifExists = "fail", index = true, indexLabel = null, chunksize } = options;
 
   // Build ordered column list.
   const dataCols = [...df.columns.values] as string[];
