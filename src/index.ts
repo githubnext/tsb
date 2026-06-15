@@ -121,6 +121,8 @@ export { wideToLong } from "./reshape/index.ts";
 export type { WideToLongOptions } from "./reshape/index.ts";
 export { pivotTableFull } from "./reshape/index.ts";
 export type { PivotTableFullOptions } from "./reshape/index.ts";
+export { lreshape } from "./reshape/index.ts";
+export type { LreshapeGroups, LreshapeOptions } from "./reshape/index.ts";
 export { MultiIndex } from "./core/index.ts";
 export type { MultiIndexOptions } from "./core/index.ts";
 export { rankSeries, rankDataFrame } from "./stats/index.ts";
