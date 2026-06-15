@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-14T19:16:54Z |
-| Iteration Count | 353 |
-| Best Metric | 679 |
+| Last Run | 2026-06-15T14:54:23Z |
+| Iteration Count | 354 |
+| Best Metric | 680 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -60,11 +60,20 @@
 - Option-variant benchmarks (axis/limit/method parameters)
 - Period.contains/diff not yet benchmarked as standalone
 - DataFrameResampler.agg() with per-column spec — ✅ done (iter 353)
-- Resample with closed/label variant options
+- Resample with closed/label variant options — ✅ done (iter 354, bench_resample_label)
+- DataFrameResampler.std/var/first/last — ✅ done (iter 354)
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 354 — 2026-06-15 — [Run](https://github.com/githubnext/tsb/actions/runs/27554717808)
+
+- **Status**: ✅ Accepted
+- **Change**: Add 5 resample benchmark pairs: `bench_resample_label` (SeriesResampler with label="right" option), `bench_resample_df_std` (DataFrameResampler.std()), `bench_resample_df_first_last` (DataFrameResampler.first()+last()), `bench_resample_quarterly` (SeriesResampler with "QS" frequency), `bench_resample_df_var` (DataFrameResampler.var())
+- **Metric**: 680 (previous best: 679, delta: +1)
+- **Commit**: ea54d42
+- **Notes**: Branch was ahead=4,behind=4; rebased successfully before adding. Actual count went from 675→680 (+5 real pairs). State metric corrected: prior "ghost" iters inflated count; actual improvement is +5.
 
 ### Iteration 353 — 2026-06-14 — [Run](https://github.com/githubnext/tsb/actions/runs/27509234290)
 
