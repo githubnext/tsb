@@ -342,7 +342,7 @@ function resultToDataFrame(result: SqlResult, options: ReadSqlBaseOptions): Data
 
   const rowIndex =
     idxColName !== null
-      ? new Index(indexVals, { name: idxColName })
+      ? new Index(indexVals, idxColName)
       : undefined;
 
   return DataFrame.fromColumns(
