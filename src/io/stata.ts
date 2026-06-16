@@ -121,7 +121,7 @@ function isMissF64(view: DataView, pos: number, le: boolean): boolean {
 // ─── Text Codecs ──────────────────────────────────────────────────────────────
 
 const ENC = new TextEncoder();
-const LATIN1 = new TextDecoder("latin-1");
+const LATIN1 = new TextDecoder("latin1");
 const UTF8D = new TextDecoder("utf-8");
 
 // ─── BinReader ────────────────────────────────────────────────────────────────
@@ -236,9 +236,7 @@ class BinReader {
     for (let i = 0; i < tb.length; i++) {
       if ((this.u8[this.pos + i] ?? -1) !== (tb[i] ?? 0)) {
         const got = LATIN1.decode(this.u8.subarray(this.pos, this.pos + tb.length));
-        throw new Error(
-          `Stata DTA: expected "${tag}", got "${got}" at offset ${this.pos}`,
-        );
+        throw new Error(`Stata DTA: expected "${tag}", got "${got}" at offset ${this.pos}`);
       }
     }
     this.pos += tb.length;
@@ -503,10 +501,7 @@ function parseOldFormat(u8: Uint8Array, version: number): DtaData {
   return { cols, rows, lblNames, varLabels, valueLabels };
 }
 
-function parseOldValueLabels(
-  r: BinReader,
-  version: number,
-): Map<string, Map<number, string>> {
+function parseOldValueLabels(r: BinReader, version: number): Map<string, Map<number, string>> {
   const result = new Map<string, Map<number, string>>();
   const lblSize = version > 113 ? 33 : 10;
 
@@ -711,10 +706,7 @@ function parseNewFormat(u8: Uint8Array, version: number): DtaData {
   return { cols, rows, lblNames, varLabels, valueLabels };
 }
 
-function parseNewValueLabels(
-  r: BinReader,
-  version: number,
-): Map<string, Map<number, string>> {
+function parseNewValueLabels(r: BinReader, version: number): Map<string, Map<number, string>> {
   const result = new Map<string, Map<number, string>>();
   const lblSize = version >= 119 ? 129 : 33;
 
@@ -964,20 +956,7 @@ export function toStata(df: DataFrame, options: ToStataOptions = {}): Uint8Array
 
   // Format timestamp: "dd Mon YYYY HH:MM" (always 17 bytes)
   const now = new Date();
-  const mos = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
+  const mos = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const tsStr = [
     String(now.getUTCDate()).padStart(2, " "),
     mos[now.getUTCMonth()] ?? "Jan",
@@ -1094,8 +1073,7 @@ export function toStata(df: DataFrame, options: ToStataOptions = {}): Uint8Array
       const v = (colArrays[ci] ?? [])[ri] ?? null;
       if (t <= 2045) {
         // str: write bytes then null-pad to field length
-        const s =
-          typeof v === "string" ? v : v !== null && v !== undefined ? String(v) : "";
+        const s = typeof v === "string" ? v : v !== null && v !== undefined ? String(v) : "";
         const sb = ENC.encode(s);
         const n = Math.min(sb.length, t);
         for (let j = 0; j < n; j++) w.writeU8(sb[j] ?? 0);
