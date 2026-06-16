@@ -68,6 +68,8 @@ export { readTable } from "./io/index.ts";
 export type { ReadTableOptions } from "./io/index.ts";
 export { readSql, readSqlQuery, readSqlTable, toSql } from "./io/index.ts";
 export { TableExistsError, TableNotFoundError } from "./io/index.ts";
+export { readStata, toStata } from "./io/index.ts";
+export type { ReadStataOptions, ToStataOptions } from "./io/index.ts";
 export type {
   SqlValue,
   SqlRow,

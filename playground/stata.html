@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — readStata &amp; toStata</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    #playground-loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      font-size: 1.1rem;
+      color: var(--accent);
+      gap: 1rem;
+    }
+    .spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h2 { color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+    label { display: block; font-size: 0.875rem; color: #8b949e; margin-bottom: 0.3rem; margin-top: 0.8rem; }
+    label:first-of-type { margin-top: 0; }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      padding: 0.4rem 0.6rem;
+    }
+    textarea { resize: vertical; min-height: 120px; }
+    .row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+    .row .field { flex: 1; min-width: 200px; }
+    button {
+      background: var(--accent);
+      color: #0d1117;
+      font-weight: 600;
+      border: none;
+      border-radius: 0.3rem;
+      padding: 0.45rem 1rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+    }
+    button:hover { opacity: 0.85; }
+    .run-btn { display: inline-flex; gap: 0.4rem; align-items: center; }
+    pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 0.75rem 1rem;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top: 0.75rem;
+    }
+    .ok { color: var(--green); }
+    .err { color: var(--red); }
+    .note { font-size: 0.8rem; color: #8b949e; margin-top: 0.5rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      margin-top: 0.75rem;
+    }
+    th {
+      background: rgba(88,166,255,0.12);
+      color: var(--accent);
+      text-align: left;
+      padding: 0.3rem 0.6rem;
+      border: 1px solid var(--border);
+    }
+    td {
+      padding: 0.3rem 0.6rem;
+      border: 1px solid var(--border);
+      color: #cdd9e5;
+    }
+    td.null { color: #8b949e; font-style: italic; }
+    .byte-count {
+      font-size: 0.78rem;
+      color: #8b949e;
+      margin-top: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    Loading tsb (WebAssembly)…
+  </div>
+
+  <a href="index.html" class="back">← Back to index</a>
+  <h1>readStata &amp; toStata</h1>
+  <p>
+    Stata DTA file I/O. <code>toStata(df)</code> serializes a DataFrame to a binary
+    Stata DTA v118 buffer. <code>readStata(buf, options)</code> parses the buffer back
+    into a DataFrame. Missing values are represented as <code>null</code>.
+  </p>
+
+  <!-- ── Step 1: Build a DataFrame ─────────────────────────────────────────── -->
+  <div class="section">
+    <h2>Step 1 — Build a DataFrame and write to Stata</h2>
+    <p>Enter column data as JSON arrays. Each row in the arrays becomes a row in the file.</p>
+    <div id="col-editor">
+      <div class="row">
+        <div class="field">
+          <label>Column name</label>
+          <input type="text" class="col-name" value="id" />
+        </div>
+        <div class="field">
+          <label>Values (JSON array)</label>
+          <input type="text" class="col-vals" value="[1, 2, 3, 4, 5]" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Column name</label>
+          <input type="text" class="col-name" value="name" />
+        </div>
+        <div class="field">
+          <label>Values (JSON array)</label>
+          <input type="text" class="col-vals" value='["Alice", "Bob", null, "Dana", "Eve"]' />
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Column name</label>
+          <input type="text" class="col-name" value="score" />
+        </div>
+        <div class="field">
+          <label>Values (JSON array)</label>
+          <input type="text" class="col-vals" value="[9.5, 7.0, null, 8.25, 6.0]" />
+        </div>
+      </div>
+    </div>
+    <button id="add-col-btn" style="background:var(--surface);color:var(--accent);border:1px solid var(--accent)">+ Add column</button>
+
+    <div class="row" style="margin-top:1rem">
+      <div class="field">
+        <label>Data label (optional, max 80 chars)</label>
+        <input type="text" id="data-label" value="Sample survey data" />
+      </div>
+      <div class="field">
+        <label>Write row index?</label>
+        <select id="write-index">
+          <option value="false">No</option>
+          <option value="true">Yes (adds _index column)</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="write-btn" class="run-btn">▶ toStata(df)</button>
+    <div class="byte-count" id="byte-count"></div>
+    <pre id="write-output"></pre>
+  </div>
+
+  <!-- ── Step 2: Read back ─────────────────────────────────────────────────── -->
+  <div class="section">
+    <h2>Step 2 — Read the DTA buffer back with readStata</h2>
+    <p>Uses the buffer produced in Step 1. Adjust the options below.</p>
+
+    <div class="row">
+      <div class="field">
+        <label>nRows (blank = all)</label>
+        <input type="number" id="n-rows" placeholder="all" min="0" />
+      </div>
+      <div class="field">
+        <label>usecols (comma-separated, blank = all)</label>
+        <input type="text" id="use-cols" placeholder="e.g. id, score" />
+      </div>
+      <div class="field">
+        <label>indexCol (column name or blank)</label>
+        <input type="text" id="index-col" placeholder="e.g. id" />
+      </div>
+      <div class="field">
+        <label>convertCategoricals</label>
+        <select id="convert-cat">
+          <option value="false">false</option>
+          <option value="true">true</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="read-btn" class="run-btn">▶ readStata(buf, options)</button>
+    <div id="read-result"></div>
+  </div>
+
+  <!-- ── Step 3: API reference ─────────────────────────────────────────────── -->
+  <div class="section">
+    <h2>API Reference</h2>
+    <pre style="margin-top:0">import { readStata, toStata } from "tsb";
+
+// Read a Stata DTA file (supports v114/115 and v117/118/119)
+const df = readStata(buffer, {
+  indexCol: "id",        // column name or 0-based index to use as row index
+  nRows: 100,            // maximum number of rows to return
+  usecols: ["a", "b"],   // only these columns
+  convertCategoricals: true, // replace numeric codes with value labels
+});
+
+// Write a DataFrame to Stata DTA v118 binary
+const buf = toStata(df, {
+  dataLabel: "My dataset",    // dataset label (max 80 chars)
+  writeIndex: false,          // include row index as "_index" column
+  variableLabels: {           // per-column labels (max 80 chars)
+    age: "Age in years",
+  },
+});</pre>
+
+    <h2 style="margin-top:1.5rem">Type Mapping</h2>
+    <table>
+      <thead><tr><th>JavaScript type</th><th>Stata type written</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>number</code></td><td><code>double</code> (float64)</td><td>Full IEEE 754 precision</td></tr>
+        <tr><td><code>boolean</code></td><td><code>byte</code> (int8)</td><td><code>true</code>→1, <code>false</code>→0</td></tr>
+        <tr><td><code>string</code></td><td><code>str</code> (fixed-width)</td><td>Width = max string byte length; strings &gt;2045 bytes truncated</td></tr>
+        <tr><td><code>null</code></td><td>Stata missing (<code>.</code>)</td><td>Sentinel value for each type</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script type="module">
+    // ── Minimal tsb loader (loads from CDN via esm.sh in playground) ──────────
+    // In production, import from "tsb" package directly.
+    // Here we use the local build.
+
+    const loading = document.getElementById("playground-loading");
+
+    let tsb;
+    try {
+      // Try local build first
+      tsb = await import("../src/index.ts").catch(() => null);
+      if (!tsb) tsb = await import("tsb");
+    } catch {
+      loading.innerHTML = `<span class="err">Failed to load tsb. Run this page via the dev server.</span>`;
+      throw new Error("Could not load tsb module");
+    }
+    loading.style.display = "none";
+
+    const { DataFrame, readStata, toStata } = tsb;
+
+    let currentBuf = null;
+
+    // ── Add column ─────────────────────────────────────────────────────────
+    document.getElementById("add-col-btn").addEventListener("click", () => {
+      const editor = document.getElementById("col-editor");
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div class="field">
+          <label>Column name</label>
+          <input type="text" class="col-name" value="col${editor.querySelectorAll(".col-name").length + 1}" />
+        </div>
+        <div class="field">
+          <label>Values (JSON array)</label>
+          <input type="text" class="col-vals" value="[1, 2, 3, 4, 5]" />
+        </div>`;
+      editor.appendChild(row);
+    });
+
+    // ── toStata ─────────────────────────────────────────────────────────────
+    document.getElementById("write-btn").addEventListener("click", () => {
+      const out = document.getElementById("write-output");
+      const byteCount = document.getElementById("byte-count");
+      try {
+        const names = [...document.querySelectorAll(".col-name")].map(el => el.value.trim());
+        const valsRaw = [...document.querySelectorAll(".col-vals")].map(el => el.value.trim());
+        const cols = {};
+        for (let i = 0; i < names.length; i++) {
+          if (!names[i]) continue;
+          cols[names[i]] = JSON.parse(valsRaw[i]);
+        }
+        const df = DataFrame.fromColumns(cols);
+        const writeIndex = document.getElementById("write-index").value === "true";
+        const dataLabel = document.getElementById("data-label").value;
+        currentBuf = toStata(df, { dataLabel, writeIndex });
+
+        byteCount.textContent = `Buffer size: ${currentBuf.length.toLocaleString()} bytes`;
+        out.className = "ok";
+        out.textContent = [
+          `DataFrame shape: ${df.shape[0]} rows × ${df.shape[1]} columns`,
+          `Columns: [${[...df.columns.values].join(", ")}]`,
+          ``,
+          `toStata() returned a ${currentBuf.length}-byte Uint8Array.`,
+          `DTA version: 118 (little-endian, new XML-tagged format)`,
+          ``,
+          `First 80 bytes (hex):`,
+          Array.from(currentBuf.subarray(0, 80))
+            .map(b => b.toString(16).padStart(2, "0"))
+            .join(" "),
+        ].join("\n");
+      } catch (e) {
+        out.className = "err";
+        out.textContent = String(e);
+        currentBuf = null;
+        byteCount.textContent = "";
+      }
+    });
+
+    // ── readStata ────────────────────────────────────────────────────────────
+    document.getElementById("read-btn").addEventListener("click", () => {
+      const container = document.getElementById("read-result");
+      if (!currentBuf) {
+        container.innerHTML = `<pre class="err">Run Step 1 first to produce a buffer.</pre>`;
+        return;
+      }
+      try {
+        const nRowsRaw = document.getElementById("n-rows").value.trim();
+        const useColsRaw = document.getElementById("use-cols").value.trim();
+        const indexColRaw = document.getElementById("index-col").value.trim();
+        const convertCat = document.getElementById("convert-cat").value === "true";
+
+        const opts = {};
+        if (nRowsRaw !== "") opts.nRows = parseInt(nRowsRaw, 10);
+        if (useColsRaw !== "") opts.usecols = useColsRaw.split(",").map(s => s.trim()).filter(Boolean);
+        if (indexColRaw !== "") opts.indexCol = indexColRaw;
+        if (convertCat) opts.convertCategoricals = true;
+
+        const df = readStata(currentBuf, opts);
+        const [nrow, ncol] = df.shape;
+        const cols = [...df.columns.values];
+
+        // Build HTML table
+        let html = `<pre class="ok">readStata() → DataFrame (${nrow} rows × ${ncol} columns)</pre>`;
+        html += `<table><thead><tr><th>index</th>`;
+        for (const c of cols) html += `<th>${esc(String(c))}</th>`;
+        html += `</tr></thead><tbody>`;
+
+        const idxArr = df.index.toArray();
+        const colData = cols.map(c => [...df.col(c).values]);
+
+        const dispRows = Math.min(nrow, 100);
+        for (let i = 0; i < dispRows; i++) {
+          html += `<tr><td>${esc(String(idxArr[i] ?? i))}</td>`;
+          for (let ci = 0; ci < cols.length; ci++) {
+            const v = colData[ci][i];
+            if (v === null || v === undefined) {
+              html += `<td class="null">null</td>`;
+            } else {
+              html += `<td>${esc(String(v))}</td>`;
+            }
+          }
+          html += `</tr>`;
+        }
+        if (nrow > 100) {
+          html += `<tr><td colspan="${cols.length + 1}" style="text-align:center;color:#8b949e">… ${nrow - 100} more rows …</td></tr>`;
+        }
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = `<pre class="err">${esc(String(e))}</pre>`;
+      }
+    });
+
+    function esc(s) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>

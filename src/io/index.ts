@@ -30,6 +30,9 @@ export type { ReadTableOptions } from "./read_table.ts";
 
 export { readSql, readSqlQuery, readSqlTable, toSql } from "./sql.ts";
 export { TableExistsError, TableNotFoundError } from "./sql.ts";
+
+export { readStata, toStata } from "./stata.ts";
+export type { ReadStataOptions, ToStataOptions } from "./stata.ts";
 export type {
   SqlValue,
   SqlRow,
