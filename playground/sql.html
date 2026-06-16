@@ -290,7 +290,8 @@ conn.executemany("INSERT INTO employees VALUES (?,?,?,?)", [
 ])
 conn.commit()
 
-df = pd.read_sql_table("employees", conn, columns=["name", "dept", "salary"])
+# read_sql_table requires SQLAlchemy; with raw sqlite3 use read_sql_query
+df = pd.read_sql_query("SELECT name, dept, salary FROM employees", conn)
 print("shape:", df.shape)
 print("columns:", list(df.columns))
 print("names:", list(df["name"]))</textarea>
@@ -346,8 +347,10 @@ conn.executemany("INSERT INTO employees VALUES (?,?,?,?)", [
 ])
 conn.commit()
 
-by_query = pd.read_sql("SELECT * FROM employees", conn)
-by_table = pd.read_sql("employees", conn)
+# pandas read_sql with a SQL string works with raw sqlite3
+by_query = pd.read_sql_query("SELECT * FROM employees", conn)
+# read_sql with a table name requires SQLAlchemy; use read_sql_query for raw sqlite3
+by_table = pd.read_sql_query("SELECT * FROM employees", conn)
 print("byQuery shape:", by_query.shape)
 print("byTable shape:", by_table.shape)</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
