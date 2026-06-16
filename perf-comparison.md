@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-16T01:44:44Z |
-| Iteration Count | 355 |
-| Best Metric | 683 |
+| Last Run | 2026-06-16T14:31:51Z |
+| Iteration Count | 356 |
+| Best Metric | 685 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -23,6 +23,8 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+
+<!-- Note: Iterations 343–355 were accepted on wrong suffix branches due to earlier tooling bug. Canonical branch was at 675 (iteration 342). Iteration 356 restores canonical branch to 685. -->
 
 ---
 
@@ -64,10 +66,19 @@
 
 ## 📊 Iteration History
 
-### Iteration 355 — 2026-06-16 — [Run](https://github.com/githubnext/tsb/actions/runs/27588373544)
+### Iteration 356 — 2026-06-16 14:31 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27624921642)
 - **Status**: ✅ Accepted
+- **Change**: Add 10 benchmark pairs: series_markdown_latex, resample_ohlc, resample_series_agg, resample_df, resample_df_agg, resample_quarterly, to_markdown_options, to_latex_options, resample_series_size_min_max, resample_df_std_var
+- **Metric**: 685 (prev canonical: 675, delta: +10; note: state claimed 683 from suffix branches)
+- **Commit**: 3997934
+- **Notes**: Restored canonical branch from 675 to 685. Previous iterations 343-355 were pushed to wrong suffix branches (autoloop/perf-comparison-XXXX), not the canonical branch. All new TS benchmarks use `../../src/index.ts` import. Python benchmarks validated with py_compile.
+
+### Iters 345–355 — ✅ (canonical 675, suffix branches claimed 683): These were pushed to wrong branches due to tooling issue.
+
+### Iteration 355 — 2026-06-16 — [Run](https://github.com/githubnext/tsb/actions/runs/27588373544)
+- **Status**: ✅ Accepted (suffix branch — not on canonical)
 - **Change**: Add 8 benchmark pairs: autocorr, series_markdown_latex, resample_ohlc/df/series_sum/df_sum/df_agg/quarterly
-- **Metric**: 683 (prev: 680, delta: +3); commit becb6f3
+- **Metric**: 683 (prev: 680, delta: +3); commit becb6f3 (on suffix branch only)
 
 ### Iters 345–354 — ✅ (675→680): resample variants, join/crossJoin, mask/where fixes.
 
