@@ -60,6 +60,7 @@ const NON_PLAYGROUND_PAGES = new Set<string>([
   "read_html.html",
   "read_table.html",
   "sql.html",
+  "stata.html",
 ]);
 
 const PORT = 3399;

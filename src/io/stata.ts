@@ -864,7 +864,7 @@ export function readStata(
     // New format: starts with "<stata_dta>"
     const header100 = LATIN1.decode(u8.subarray(0, Math.min(100, u8.length)));
     const m = /<release>(\d+)<\/release>/.exec(header100);
-    const version = m?.[1] !== undefined ? parseInt(m[1], 10) : 118;
+    const version = m?.[1] !== undefined ? Number.parseInt(m[1], 10) : 118;
     parsed = parseNewFormat(u8, version);
   } else {
     // Old binary format: first byte is the version number
