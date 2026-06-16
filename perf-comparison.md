@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-15T14:54:23Z |
-| Iteration Count | 354 |
-| Best Metric | 680 |
+| Last Run | 2026-06-16T01:44:44Z |
+| Iteration Count | 355 |
+| Best Metric | 683 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -48,6 +48,7 @@
 - **Python docstrings**: Escaped quotes (`\"\"\"`) fail `py_compile` — use real triple-quotes.
 - **bun build browser**: `node:zlib` polyfill lacks `inflateRawSync`; `bench_read_excel.ts` must be self-contained (inline ZIP/XML, no zlib).
 - **Function naming**: mask/where are operation-first: `maskSeries`, `maskDataFrame`, `whereSeries`, `whereDataFrame`.
+- **Resample API**: Use `resampleSeries(s, "freq")` and `resampleDataFrame(df, "freq")` — Series/DataFrame do NOT have a `.resample()` method. The old bench_resample.ts uses `"tsb"` package import which bypasses type-check in bun build.
 
 ## 🚧 Foreclosed Avenues
 
@@ -59,13 +60,23 @@
 
 - Option-variant benchmarks (axis/limit/method parameters)
 - Period.contains/diff not yet benchmarked as standalone
-- DataFrameResampler.agg() with per-column spec — ✅ done (iter 353)
-- Resample with closed/label variant options — ✅ done (iter 354, bench_resample_label)
-- DataFrameResampler.std/var/first/last — ✅ done (iter 354)
+- `autoCorr` — ✅ done (iter 355)
+- `seriesToMarkdown` / `seriesToLaTeX` (Series versions) — ✅ done (iter 355)
+- `resampleSeries.ohlc()`, `.sum()`, `.count()`, `.std()` — ✅ done (iter 355)
+- `resampleDataFrame.mean()`, `.sum()`, `.count()`, `.agg(per-col)` — ✅ done (iter 355)
+- `resampleSeries` quarterly ("QS") — ✅ done (iter 355)
 
 ---
 
 ## 📊 Iteration History
+
+### Iteration 355 — 2026-06-16 — [Run](https://github.com/githubnext/tsb/actions/runs/27588373544)
+
+- **Status**: ✅ Accepted
+- **Change**: Add 8 benchmark pairs: `bench_autocorr` (autoCorr with lags 1/10/100), `bench_series_markdown_latex` (seriesToMarkdown + seriesToLaTeX on Series), `bench_resample_ohlc` (SeriesResampler.ohlc()), `bench_resample_df` (DataFrameResampler.mean()), `bench_resample_series_sum` (SeriesResampler.sum/count/std), `bench_resample_df_sum` (DataFrameResampler.sum/count), `bench_resample_df_agg` (DataFrameResampler.agg per-column), `bench_resample_quarterly` (SeriesResampler "QS" daily→quarterly)
+- **Metric**: 683 (previous best: 680, delta: +3)
+- **Commit**: becb6f3
+- **Notes**: Branch rebased (ahead=4, behind=4); actual start was 675 pairs. Re-added lost resample benchmarks (iters 351-354 were ghost iters lost in rebase). Used `resampleSeries`/`resampleDataFrame` standalone functions — discovered Series/DataFrame have no `.resample()` method. All Python files pass py_compile; TS uses correct exported symbols.
 
 ### Iteration 354 — 2026-06-15 — [Run](https://github.com/githubnext/tsb/actions/runs/27554717808)
 
