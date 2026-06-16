@@ -110,12 +110,18 @@ const MISS_F64_HI32 = 0x7fe00000;
 // ─── Missing Value Helpers ────────────────────────────────────────────────────
 
 function isMissF32(view: DataView, pos: number, le: boolean): boolean {
-  return view.getUint32(pos, le) >= MISS_F32_BITS;
+  const bits = view.getUint32(pos, le);
+  // Stata float missing values have sign=0 and bits >= 0x7f000000.
+  // Negative floats have bit 31 set (bits >= 0x80000000) and must not be treated as missing.
+  return bits >= MISS_F32_BITS && bits < 0x80000000;
 }
 
 function isMissF64(view: DataView, pos: number, le: boolean): boolean {
   const hiOff = le ? pos + 4 : pos;
-  return view.getUint32(hiOff, le) >= MISS_F64_HI;
+  const hi = view.getUint32(hiOff, le);
+  // Stata double missing values have sign=0 and high bits >= 0x7fe00000.
+  // Negative doubles have bit 31 set (hi >= 0x80000000) and must not be treated as missing.
+  return hi >= MISS_F64_HI && hi < 0x80000000;
 }
 
 // ─── Text Codecs ──────────────────────────────────────────────────────────────

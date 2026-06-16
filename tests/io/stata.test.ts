@@ -32,13 +32,13 @@ describe("toStata — output format", () => {
 
   it("contains <release>118</release>", () => {
     const df = DataFrame.fromColumns({ a: [1, 2] });
-    const text = new TextDecoder("latin-1").decode(toStata(df).subarray(0, 200));
+    const text = new TextDecoder("latin1").decode(toStata(df).subarray(0, 200));
     expect(text).toContain("<release>118</release>");
   });
 
   it("contains little-endian byteorder marker", () => {
     const df = DataFrame.fromColumns({ a: [1] });
-    const text = new TextDecoder("latin-1").decode(toStata(df).subarray(0, 300));
+    const text = new TextDecoder("latin1").decode(toStata(df).subarray(0, 300));
     expect(text).toContain("<byteorder>LSF</byteorder>");
   });
 });
@@ -217,14 +217,14 @@ describe("toStata — options", () => {
   it("dataLabel is embedded in the file (new format has length prefix)", () => {
     const df = DataFrame.fromColumns({ x: [1] });
     const buf = toStata(df, { dataLabel: "My Dataset" });
-    const text = new TextDecoder("latin-1").decode(buf);
+    const text = new TextDecoder("latin1").decode(buf);
     expect(text).toContain("My Dataset");
   });
 
   it("variableLabels are embedded for each named column", () => {
     const df = DataFrame.fromColumns({ age: [25] });
     const buf = toStata(df, { variableLabels: { age: "Age in years" } });
-    const text = new TextDecoder("latin-1").decode(buf);
+    const text = new TextDecoder("latin1").decode(buf);
     expect(text).toContain("Age in years");
   });
 });
@@ -300,9 +300,14 @@ describe("readStata ∘ toStata — property-based", () => {
   });
 
   it("round-trip preserves non-null finite doubles", () => {
+    // Stata stores doubles with |value| < 2^1023 as non-missing.
+    // Values >= 2^1023 share the Stata missing-value bit pattern and round-trip to null.
+    const stataDoubleRange = fc
+      .double({ noNaN: true, noDefaultInfinity: true })
+      .filter((n) => Math.abs(n) < 2 ** 1023);
     fc.assert(
       fc.property(
-        fc.array(fc.double({ noNaN: true, noDefaultInfinity: true }), {
+        fc.array(stataDoubleRange, {
           minLength: 1,
           maxLength: 30,
         }),
