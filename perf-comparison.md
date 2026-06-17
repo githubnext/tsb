@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-16T14:31:51Z |
-| Iteration Count | 356 |
+| Last Run | 2026-06-17T01:40:43Z |
+| Iteration Count | 357 |
 | Best Metric | 685 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -23,8 +23,6 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
-
-<!-- Note: Iterations 343–355 were accepted on wrong suffix branches due to earlier tooling bug. Canonical branch was at 675 (iteration 342). Iteration 356 restores canonical branch to 685. -->
 
 ---
 
@@ -51,6 +49,9 @@
 - **bun build browser**: `node:zlib` polyfill lacks `inflateRawSync`; `bench_read_excel.ts` must be self-contained (inline ZIP/XML, no zlib).
 - **Function naming**: mask/where are operation-first: `maskSeries`, `maskDataFrame`, `whereSeries`, `whereDataFrame`.
 - **Resample API**: Use `resampleSeries(s, "freq")` and `resampleDataFrame(df, "freq")` — Series/DataFrame do NOT have a `.resample()` method. The old bench_resample.ts uses `"tsb"` package import which bypasses type-check in bun build.
+- **Resample frequencies**: Use base frequencies "H", "D", "MS", "QS", "YS" — NOT "1h" (numeric prefix not supported by binGroupKey switch).
+- **Series constructor**: Use `new Series({ data: Array.from(arr), index: idx })` — NOT `new Series(arr, { index })`. The constructor takes a single SeriesOptions object.
+- **seriesToMarkdown/seriesToLaTeX**: Exported from `../../src/index.ts` (format_table.ts). Accepts `Series<Scalar>` and `ToMarkdownOptions`/`ToLaTeXOptions`.
 
 ## 🚧 Foreclosed Avenues
 
@@ -66,12 +67,18 @@
 
 ## 📊 Iteration History
 
+### Iteration 357 — 2026-06-17 01:40 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27659958413)
+- **Status**: ✅ Accepted
+- **Change**: Add 10 benchmark pairs: resample_ohlc, resample_series_agg, resample_df, resample_df_agg, resample_quarterly, series_markdown_latex, to_markdown_options, to_latex_options, resample_series_size_min_max, resample_df_std_var
+- **Metric**: 685 (canonical branch: 675→685, delta: +10)
+- **Commit**: 81ff7c0
+- **Notes**: Rebased canonical branch (ahead=4/behind=5 divergence), then added 10 new resample and markdown/latex benchmark pairs. All use `../../src/index.ts` import. Uses `resampleSeries`/`resampleDataFrame` function API with "H"/"MS"/"QS" frequency strings. Python files validated with py_compile.
+
 ### Iteration 356 — 2026-06-16 14:31 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27624921642)
 - **Status**: ✅ Accepted
 - **Change**: Add 10 benchmark pairs: series_markdown_latex, resample_ohlc, resample_series_agg, resample_df, resample_df_agg, resample_quarterly, to_markdown_options, to_latex_options, resample_series_size_min_max, resample_df_std_var
 - **Metric**: 685 (prev canonical: 675, delta: +10; note: state claimed 683 from suffix branches)
-- **Commit**: 3997934
-- **Notes**: Restored canonical branch from 675 to 685. Previous iterations 343-355 were pushed to wrong suffix branches (autoloop/perf-comparison-XXXX), not the canonical branch. All new TS benchmarks use `../../src/index.ts` import. Python benchmarks validated with py_compile.
+- **Commit**: 3997934 (on suffix branch — not on canonical; canonical corrected in iter 357)
 
 ### Iters 345–355 — ✅ (canonical 675, suffix branches claimed 683): These were pushed to wrong branches due to tooling issue.
 
