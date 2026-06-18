@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-17T19:34:57Z |
-| Iteration Count | 358 |
-| Best Metric | 686 |
+| Last Run | 2026-06-18T01:55:00Z |
+| Iteration Count | 359 |
+| Best Metric | 680 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -45,13 +45,14 @@
 - **groupby AggName**: "sum"|"mean"|"min"|"max"|"count"|"std"|"first"|"last"|"size" only.
 - **merge_asof**: `mergeAsof(left, right, { on, direction })` — DFs must be sorted.
 - **corrWith**: `corrWith(df, seriesOther)` — DF as first arg, returns Series per column.
-- **Python docstrings**: Escaped quotes (`\"\"\"`) fail `py_compile` — use real triple-quotes. Two pre-existing broken files (`bench_str_extract_all.py`, `bench_str_extract_groups.py`) fixed in iter 358.
-- **bun build browser**: `node:zlib` polyfill lacks `inflateRawSync`; `bench_read_excel.ts` must be self-contained (inline ZIP/XML, no zlib).
+- **Python docstrings**: Escaped quotes (`\"\"\"`) fail `py_compile` — use real triple-quotes.
+- **bun build browser**: `node:zlib` polyfill lacks `inflateRawSync`; `bench_read_excel.ts` must be self-contained.
 - **Function naming**: mask/where are operation-first: `maskSeries`, `maskDataFrame`, `whereSeries`, `whereDataFrame`.
-- **Resample API**: Use `resampleSeries(s, "freq")` and `resampleDataFrame(df, "freq")` — Series/DataFrame do NOT have a `.resample()` method. The old bench_resample.ts uses `"tsb"` package import which bypasses type-check in bun build.
-- **Resample frequencies**: Use base frequencies "H", "D", "MS", "QS", "YS" — NOT "1h" (numeric prefix not supported by binGroupKey switch).
-- **Series constructor**: Use `new Series({ data: Array.from(arr), index: idx })` — NOT `new Series(arr, { index })`. The constructor takes a single SeriesOptions object.
-- **seriesToMarkdown/seriesToLaTeX**: Exported from `../../src/index.ts` (format_table.ts). Accepts `Series<Scalar>` and `ToMarkdownOptions`/`ToLaTeXOptions`.
+- **Resample API**: Use `resampleSeries(s, "freq")` and `resampleDataFrame(df, "freq")` — Series/DataFrame do NOT have a `.resample()` method.
+- **Resample frequencies**: Use base frequencies "H", "D", "MS", "QS", "YS" — NOT "1h".
+- **Series constructor**: Use `new Series({ data: Array.from(arr), index: idx })` — NOT `new Series(arr, { index })`.
+- **Nullable Series data**: Use `Scalar[]` type and `new Series<Scalar>({ data })` when mixing numbers and nulls — avoids TypeScript generic incompatibility with function signatures expecting `Series<Scalar>`.
+- **State file accuracy**: Prior iters 343–358 claimed acceptance but commits were never pushed to branch; actual metric corrected to 675 in iter 359 (real baseline) → 680 (+5).
 
 ## 🚧 Foreclosed Avenues
 
@@ -67,12 +68,12 @@
 
 ## 📊 Iteration History
 
-### Iteration 358 — 2026-06-17 19:34 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27714531890)
+### Iteration 359 — 2026-06-18 01:55 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27731053478)
 - **Status**: ✅ Accepted
-- **Change**: Add 11 pairs: sort_values/df/multi/na, add_prefix_suffix/series, set_axis, series_to_frame, first_valid_index, series_markdown, to_latex; fix 2 broken Python docstrings
-- **Metric**: 686 (prev: 685, delta: +1; canonical 675→686)
-- **Commit**: 6d8b925
+- **Change**: Add 5 pairs: add_prefix_suffix_series, set_axis, series_to_frame, first_last_valid_index, options_system. Corrected state best_metric from 686 (stale/phantom) to 675→680.
+- **Metric**: 680 (prev: 675 actual, delta: +5; state corrected from phantom 686)
+- **Commit**: 424a089
 
-### Iters 345–357 — ✅ (675→685): resample/markdown/latex variants; suffix branch issues resolved in 357. Canonical was 675 until iter 358.
+### Iters 343–358 — ⚠️ State phantom (675 branch, 686 claimed): commits never landed on branch; state corrected in iter 359.
 
-### Iters 1–344 — ✅ (0→675): Full benchmark suite covering all pandas functions.
+### Iters 1–342 — ✅ (0→675): Full benchmark suite covering all pandas functions.
