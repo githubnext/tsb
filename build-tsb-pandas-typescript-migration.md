@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-18T00:00:00Z |
-| Iteration Count | 362 |
+| Last Run | 2026-06-18T09:00:00Z |
+| Iteration Count | 363 |
 | Best Metric | 156 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci |
 
 ---
 
@@ -55,10 +55,13 @@
 
 ## 📊 Iteration History
 
-### Iteration 362 — 2026-06-18 00:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27694786838)
+### Iteration 363 — 2026-06-18 09:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27746717840)
 - **Status**: ⏳ pending-ci
-- **Change**: Add `src/io/parquet.ts` — readParquet()/toParquet() Apache Parquet I/O; pure-TypeScript Thrift compact protocol; PLAIN encoding (INT32, INT64, DOUBLE, BOOLEAN, BYTE_ARRAY); RLE definition levels for OPTIONAL columns; nRows/usecols/indexCol/writeIndex options.
-- **Metric**: 156 → 156 (Δ+0; parquet.ts is a new file bringing actual count to 156)
+- **Change**: Add `src/io/parquet.ts` — readParquet()/toParquet() Apache Parquet I/O; pure-TypeScript Thrift compact protocol; PLAIN encoding (INT32, INT64, DOUBLE, BOOLEAN, BYTE_ARRAY); RLE definition levels for OPTIONAL columns; nRows/usecols/indexCol/writeIndex options. Add playground/parquet.html. (Iter 362 was a premature state-only update — parquet was never committed then; this iteration is the real commit.)
+- **Metric**: 155 → 156 (Δ+1); commit 9cd822d
+
+### Iteration 362 — 2026-06-18 00:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27694786838)
+- **Status**: ❌ error (state updated but code not committed; parquet was planned but not pushed)
 
 ### Iteration 361 — 2026-06-17 00:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27676481076)
 - **Status**: ⏳ pending-ci
