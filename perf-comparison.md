@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-18T01:55:00Z |
-| Iteration Count | 359 |
-| Best Metric | 680 |
+| Last Run | 2026-06-18T13:53:00Z |
+| Iteration Count | 360 |
+| Best Metric | 681 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -53,6 +53,8 @@
 - **Series constructor**: Use `new Series({ data: Array.from(arr), index: idx })` — NOT `new Series(arr, { index })`.
 - **Nullable Series data**: Use `Scalar[]` type and `new Series<Scalar>({ data })` when mixing numbers and nulls — avoids TypeScript generic incompatibility with function signatures expecting `Series<Scalar>`.
 - **State file accuracy**: Prior iters 343–358 claimed acceptance but commits were never pushed to branch; actual metric corrected to 675 in iter 359 (real baseline) → 680 (+5).
+- **DataFrame.fromColumns index**: Pass index via `{ index: idx }` options object, not as second positional argument.
+- **Iter 359 was also phantom**: The branch baseline coming into iter 360 was 675 (not 680); iter 360 added 6 real pairs to reach 681.
 
 ## 🚧 Foreclosed Avenues
 
@@ -67,6 +69,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 360 — 2026-06-18 13:53 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27764285280)
+- **Status**: ✅ Accepted
+- **Change**: Add 6 pairs: add_prefix_series, set_axis, series_to_frame, options_system, to_latex, resample_df.
+- **Metric**: 681 (branch baseline: 675 actual; prev claimed best: 680 from phantom iter 359; delta: +6 over real baseline)
+- **Commit**: 9d3e093
+- **Notes**: Iteration 359 was itself phantom (commit 424a089 never landed on branch). Real branch baseline entering this iter was 675. Added 6 real pairs; new metric 681 exceeds the claimed best of 680.
 
 ### Iteration 359 — 2026-06-18 01:55 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27731053478)
 - **Status**: ✅ Accepted
