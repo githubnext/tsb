@@ -70,6 +70,8 @@ export { readSql, readSqlQuery, readSqlTable, toSql } from "./io/index.ts";
 export { TableExistsError, TableNotFoundError } from "./io/index.ts";
 export { readStata, toStata } from "./io/index.ts";
 export type { ReadStataOptions, ToStataOptions } from "./io/index.ts";
+export { readParquet, toParquet } from "./io/index.ts";
+export type { ReadParquetOptions, ToParquetOptions } from "./io/index.ts";
 export type {
   SqlValue,
   SqlRow,

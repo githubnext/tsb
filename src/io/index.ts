@@ -33,6 +33,8 @@ export { TableExistsError, TableNotFoundError } from "./sql.ts";
 
 export { readStata, toStata } from "./stata.ts";
 export type { ReadStataOptions, ToStataOptions } from "./stata.ts";
+export { readParquet, toParquet } from "./parquet.ts";
+export type { ReadParquetOptions, ToParquetOptions } from "./parquet.ts";
 export type {
   SqlValue,
   SqlRow,
