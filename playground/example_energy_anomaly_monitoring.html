@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Energy Anomaly Monitoring — Examples</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p  { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 1.25rem; display: inline-block; }
+    .scenario {
+      background: rgba(88, 166, 255, 0.06);
+      border-left: 3px solid var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 0 0.4rem 0.4rem 0;
+      margin: 1rem 0 1.5rem;
+      color: #c9d1d9;
+    }
+    .scenario strong { color: var(--accent); }
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128; border: 1px solid var(--border);
+      border-bottom: none; border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border); border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem; font-size: 0.8rem;
+      cursor: pointer; font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+    footer {
+      text-align: center; padding: 2rem 0;
+      color: #8b949e; font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="examples.html">← Back to examples</a>
+  <h1>⚡ Energy Anomaly Monitoring</h1>
+  <div class="scenario"><strong>Scenario:</strong> A facilities analytics team monitors smart-meter readings across several buildings, normalizes consumption by size and weather, and turns unusual spikes into maintenance tickets.</div>
+  <p>Skills you'll use: <code>merge</code>, derived intensity metrics, rolling baselines, filters, <code>nlargestDataFrame</code>, <code>groupby().agg()</code>, and pivot-table alert summaries.</p>
+
+  <div class="section">
+    <h2>1 · Enrich smart-meter readings</h2>
+    <p>Join telemetry with building metadata and normalize energy use by floor area and occupancy.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, merge } from "tsb";
+
+const readings = DataFrame.fromRecords([
+  { hour: "08:00", building_id: "B01", meter: "main", kwh: 72, outdoor_c: 19, occupancy: 118 },
+  { hour: "08:00", building_id: "B02", meter: "main", kwh: 54, outdoor_c: 18, occupancy: 76 },
+  { hour: "08:00", building_id: "B03", meter: "main", kwh: 91, outdoor_c: 22, occupancy: 140 },
+  { hour: "09:00", building_id: "B01", meter: "main", kwh: 78, outdoor_c: 21, occupancy: 132 },
+  { hour: "09:00", building_id: "B02", meter: "main", kwh: 58, outdoor_c: 20, occupancy: 82 },
+  { hour: "09:00", building_id: "B03", meter: "main", kwh: 116, outdoor_c: 24, occupancy: 148 },
+  { hour: "10:00", building_id: "B01", meter: "main", kwh: 84, outdoor_c: 22, occupancy: 138 },
+  { hour: "10:00", building_id: "B02", meter: "main", kwh: 61, outdoor_c: 22, occupancy: 89 },
+  { hour: "10:00", building_id: "B03", meter: "main", kwh: 143, outdoor_c: 26, occupancy: 151 },
+]);
+const buildings = DataFrame.fromRecords([
+  { building_id: "B01", campus: "North", sqft: 42000, system: "mixed-use" },
+  { building_id: "B02", campus: "North", sqft: 28000, system: "office" },
+  { building_id: "B03", campus: "South", sqft: 51000, system: "lab" },
+]);
+
+const enriched = merge(readings, buildings, { on: "building_id", how: "left" }).assign({
+  kwh_per_ksqft: (df) =&gt; df.col("kwh").div(df.col("sqft")).mul(1000),
+  occupant_kwh: (df) =&gt; df.col("kwh").div(df.col("occupancy")),
+  weather_adjusted_kwh: (df) =&gt; df.col("kwh").sub(df.col("outdoor_c").sub(18).mul(1.5)),
+});
+console.log(enriched.select(["hour", "building_id", "campus", "kwh", "kwh_per_ksqft", "occupant_kwh", "weather_adjusted_kwh"]).toString());
+
+const campusSummary = enriched
+  .groupby("campus")
+  .agg({ kwh: "sum", kwh_per_ksqft: "mean", occupant_kwh: "mean" }, false)
+  .sortValues("kwh", false);
+console.log("\nCampus intensity summary:");
+console.log(campusSummary.toString());</textarea>
+      <textarea class="playground-python" style="display:none">import pandas as pd
+
+readings = pd.DataFrame([
+    {"hour": "08:00", "building_id": "B01", "meter": "main", "kwh": 72, "outdoor_c": 19, "occupancy": 118},
+    {"hour": "08:00", "building_id": "B02", "meter": "main", "kwh": 54, "outdoor_c": 18, "occupancy": 76},
+    {"hour": "08:00", "building_id": "B03", "meter": "main", "kwh": 91, "outdoor_c": 22, "occupancy": 140},
+    {"hour": "09:00", "building_id": "B01", "meter": "main", "kwh": 78, "outdoor_c": 21, "occupancy": 132},
+    {"hour": "09:00", "building_id": "B02", "meter": "main", "kwh": 58, "outdoor_c": 20, "occupancy": 82},
+    {"hour": "09:00", "building_id": "B03", "meter": "main", "kwh": 116, "outdoor_c": 24, "occupancy": 148},
+    {"hour": "10:00", "building_id": "B01", "meter": "main", "kwh": 84, "outdoor_c": 22, "occupancy": 138},
+    {"hour": "10:00", "building_id": "B02", "meter": "main", "kwh": 61, "outdoor_c": 22, "occupancy": 89},
+    {"hour": "10:00", "building_id": "B03", "meter": "main", "kwh": 143, "outdoor_c": 26, "occupancy": 151},
+])
+buildings = pd.DataFrame([
+    {"building_id": "B01", "campus": "North", "sqft": 42000, "system": "mixed-use"},
+    {"building_id": "B02", "campus": "North", "sqft": 28000, "system": "office"},
+    {"building_id": "B03", "campus": "South", "sqft": 51000, "system": "lab"},
+])
+enriched = readings.merge(buildings, on="building_id", how="left")
+enriched["kwh_per_ksqft"] = enriched["kwh"] / enriched["sqft"] * 1000
+enriched["occupant_kwh"] = enriched["kwh"] / enriched["occupancy"]
+enriched["weather_adjusted_kwh"] = enriched["kwh"] - (enriched["outdoor_c"] - 18) * 1.5
+print(enriched[["hour", "building_id", "campus", "kwh", "kwh_per_ksqft", "occupant_kwh", "weather_adjusted_kwh"]])
+print(enriched.groupby("campus", as_index=False).agg({"kwh": "sum", "kwh_per_ksqft": "mean", "occupant_kwh": "mean"}).sort_values("kwh", ascending=False))</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2 · Flag spikes against a rolling baseline</h2>
+    <p>Use recent same-building history as a simple expected-consumption baseline.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, nlargestDataFrame, pivotTableFull } from "tsb";
+
+const rows = [
+  { hour: "08:00", building_id: "B01", kwh: 72 },
+  { hour: "08:00", building_id: "B02", kwh: 54 },
+  { hour: "08:00", building_id: "B03", kwh: 91 },
+  { hour: "09:00", building_id: "B01", kwh: 78 },
+  { hour: "09:00", building_id: "B02", kwh: 58 },
+  { hour: "09:00", building_id: "B03", kwh: 116 },
+  { hour: "10:00", building_id: "B01", kwh: 84 },
+  { hour: "10:00", building_id: "B02", kwh: 61 },
+  { hour: "10:00", building_id: "B03", kwh: 143 },
+  { hour: "11:00", building_id: "B01", kwh: 88 },
+  { hour: "11:00", building_id: "B02", kwh: 63 },
+  { hour: "11:00", building_id: "B03", kwh: 181 },
+];
+function round1(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+const baseline = rows.map((row, index) =&gt; {
+  const history = rows.slice(0, index).filter((item) =&gt; item.building_id === row.building_id).slice(-3);
+  if (history.length === 0) return row.kwh;
+  return history.reduce((sum, item) =&gt; sum + item.kwh, 0) / history.length;
+});
+const anomalyPct = rows.map((row, index) =&gt; {
+  const expected = baseline[index] ?? row.kwh;
+  return round1(((row.kwh - expected) / expected) * 100);
+});
+const severity = anomalyPct.map((pct) =&gt; {
+  if (pct &gt;= 25) return "critical";
+  if (pct &gt;= 15) return "watch";
+  return "normal";
+});
+const alertFlag = severity.map((level) =&gt; level === "normal" ? 0 : 1);
+const flagged = DataFrame.fromRecords(rows).assign({
+  baseline_kwh: baseline.map(round1),
+  anomaly_pct: anomalyPct,
+  severity,
+  alert_flag: alertFlag,
+});
+
+console.log(flagged.toString());
+
+const alerts = flagged.filter(flagged.col("anomaly_pct").ge(15));
+console.log("\nAlert queue:");
+console.log(nlargestDataFrame(alerts, 5, { columns: "anomaly_pct" }).select(["hour", "building_id", "kwh", "baseline_kwh", "anomaly_pct", "severity"]).toString());
+
+const heatmap = pivotTableFull(flagged, {
+  index: "building_id",
+  columns: "severity",
+  values: "alert_flag",
+  aggfunc: "sum",
+  fill_value: 0,
+  margins: true,
+});
+console.log("\nAlert counts by building:");
+console.log(heatmap.toString());</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+import pandas as pd
+
+rows = pd.DataFrame([
+    {"hour": "08:00", "building_id": "B01", "kwh": 72},
+    {"hour": "08:00", "building_id": "B02", "kwh": 54},
+    {"hour": "08:00", "building_id": "B03", "kwh": 91},
+    {"hour": "09:00", "building_id": "B01", "kwh": 78},
+    {"hour": "09:00", "building_id": "B02", "kwh": 58},
+    {"hour": "09:00", "building_id": "B03", "kwh": 116},
+    {"hour": "10:00", "building_id": "B01", "kwh": 84},
+    {"hour": "10:00", "building_id": "B02", "kwh": 61},
+    {"hour": "10:00", "building_id": "B03", "kwh": 143},
+    {"hour": "11:00", "building_id": "B01", "kwh": 88},
+    {"hour": "11:00", "building_id": "B02", "kwh": 63},
+    {"hour": "11:00", "building_id": "B03", "kwh": 181},
+])
+rows["baseline_kwh"] = (
+    rows.groupby("building_id")["kwh"]
+    .transform(lambda s: s.shift(1).rolling(3, min_periods=1).mean())
+    .fillna(rows["kwh"])
+    .round(1)
+)
+rows["anomaly_pct"] = ((rows["kwh"] - rows["baseline_kwh"]) / rows["baseline_kwh"] * 100).round(1)
+rows["severity"] = np.select(
+    [rows["anomaly_pct"] &gt;= 25, rows["anomaly_pct"] &gt;= 15],
+    ["critical", "watch"],
+    default="normal",
+)
+rows["alert_flag"] = np.where(rows["severity"] == "normal", 0, 1)
+print(rows)
+alerts = rows[rows["anomaly_pct"] &gt;= 15]
+print(alerts.nlargest(5, "anomaly_pct")[["hour", "building_id", "kwh", "baseline_kwh", "anomaly_pct", "severity"]])
+print(pd.pivot_table(rows, index="building_id", columns="severity", values="alert_flag", aggfunc="sum", fill_value=0, margins=True))</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3 · Convert alerts into maintenance economics</h2>
+    <p>Join alert records to tariff and building context, then estimate savings opportunity.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, merge, nlargestDataFrame, pivotTableFull } from "tsb";
+
+const tickets = DataFrame.fromRecords([
+  { ticket_id: "m301", building_id: "B03", system: "chiller", severity: "critical", excess_kwh: 55, status: "open" },
+  { ticket_id: "m302", building_id: "B03", system: "ventilation", severity: "watch", excess_kwh: 27, status: "open" },
+  { ticket_id: "m303", building_id: "B01", system: "lighting", severity: "watch", excess_kwh: 14, status: "scheduled" },
+  { ticket_id: "m304", building_id: "B02", system: "plug load", severity: "watch", excess_kwh: 9, status: "scheduled" },
+  { ticket_id: "m305", building_id: "B03", system: "chiller", severity: "critical", excess_kwh: 38, status: "open" },
+  { ticket_id: "m306", building_id: "B01", system: "air handling", severity: "normal", excess_kwh: 6, status: "monitor" },
+]);
+const buildingContext = DataFrame.fromRecords([
+  { building_id: "B01", campus: "North", rate_per_kwh: 0.18 },
+  { building_id: "B02", campus: "North", rate_per_kwh: 0.18 },
+  { building_id: "B03", campus: "South", rate_per_kwh: 0.24 },
+]);
+
+const enriched = merge(tickets, buildingContext, { on: "building_id", how: "left" }).assign({
+  estimated_cost: (df) =&gt; df.col("excess_kwh").mul(df.col("rate_per_kwh")),
+});
+console.log(enriched.select(["ticket_id", "building_id", "campus", "system", "severity", "excess_kwh", "estimated_cost", "status"]).toString());
+
+const systemSummary = enriched
+  .groupby("system")
+  .agg({ excess_kwh: "sum", estimated_cost: "sum" }, false)
+  .sortValues("estimated_cost", false);
+console.log("\nSavings opportunity by system:");
+console.log(systemSummary.toString());
+
+const costByStatus = pivotTableFull(enriched, {
+  index: "system",
+  columns: "status",
+  values: "estimated_cost",
+  aggfunc: "sum",
+  fill_value: 0,
+  margins: true,
+});
+console.log("\nEstimated cost by system/status:");
+console.log(costByStatus.toString());
+
+console.log("\nTickets to dispatch first:");
+console.log(nlargestDataFrame(enriched, 3, { columns: "estimated_cost" }).select(["ticket_id", "building_id", "system", "estimated_cost", "status"]).toString());</textarea>
+      <textarea class="playground-python" style="display:none">import pandas as pd
+
+tickets = pd.DataFrame([
+    {"ticket_id": "m301", "building_id": "B03", "system": "chiller", "severity": "critical", "excess_kwh": 55, "status": "open"},
+    {"ticket_id": "m302", "building_id": "B03", "system": "ventilation", "severity": "watch", "excess_kwh": 27, "status": "open"},
+    {"ticket_id": "m303", "building_id": "B01", "system": "lighting", "severity": "watch", "excess_kwh": 14, "status": "scheduled"},
+    {"ticket_id": "m304", "building_id": "B02", "system": "plug load", "severity": "watch", "excess_kwh": 9, "status": "scheduled"},
+    {"ticket_id": "m305", "building_id": "B03", "system": "chiller", "severity": "critical", "excess_kwh": 38, "status": "open"},
+    {"ticket_id": "m306", "building_id": "B01", "system": "air handling", "severity": "normal", "excess_kwh": 6, "status": "monitor"},
+])
+building_context = pd.DataFrame([
+    {"building_id": "B01", "campus": "North", "rate_per_kwh": 0.18},
+    {"building_id": "B02", "campus": "North", "rate_per_kwh": 0.18},
+    {"building_id": "B03", "campus": "South", "rate_per_kwh": 0.24},
+])
+enriched = tickets.merge(building_context, on="building_id", how="left")
+enriched["estimated_cost"] = enriched["excess_kwh"] * enriched["rate_per_kwh"]
+print(enriched[["ticket_id", "building_id", "campus", "system", "severity", "excess_kwh", "estimated_cost", "status"]])
+print(enriched.groupby("system", as_index=False).agg({"excess_kwh": "sum", "estimated_cost": "sum"}).sort_values("estimated_cost", ascending=False))
+print(pd.pivot_table(enriched, index="system", columns="status", values="estimated_cost", aggfunc="sum", fill_value=0, margins=True))
+print(enriched.nlargest(3, "estimated_cost")[["ticket_id", "building_id", "system", "estimated_cost", "status"]])</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="examples.html">All examples</a> ·
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
+</html>
