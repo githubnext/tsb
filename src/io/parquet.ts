@@ -157,13 +157,13 @@ class ThriftReader {
    * Decode a struct, calling `handler(fieldId, type)` for each field.
    * Handler returns `true` to skip remaining fields.
    */
-  readStruct(handler: (fieldId: number, type: number) => boolean | void): void {
+  readStruct(handler: (fieldId: number, type: number) => boolean | undefined): void {
     let prevFieldId = 0;
     for (;;) {
       const header = this.buf[this.pos++] ?? 0;
       if (header === T_STOP) break;
       let type = header & 0x0f;
-      let delta = (header >> 4) & 0x0f;
+      const delta = (header >> 4) & 0x0f;
       let fieldId: number;
       if (delta !== 0) {
         fieldId = prevFieldId + delta;
@@ -586,11 +586,11 @@ function decodeFileMetaData(buf: Uint8Array, offset: number): FileMetaData {
 function decodeDefLevels(buf: Uint8Array, pos: number, numValues: number): boolean[] {
   const view = new DataView(buf.buffer, buf.byteOffset + pos, 4);
   const byteLen = view.getUint32(0, true);
-  pos += 4;
+  const dataStart = pos + 4;
 
   const defIsPresent: boolean[] = [];
-  let i = pos;
-  const end = pos + byteLen;
+  let i = dataStart;
+  const end = dataStart + byteLen;
 
   while (i < end && defIsPresent.length < numValues) {
     // Read varint header
@@ -681,7 +681,10 @@ function decodeColumnData(
         const bigVal = dv.getBigInt64(pos, true);
         pos += 8;
         // Return as number if within safe integer range, bigint otherwise
-        if (bigVal >= BigInt(Number.MIN_SAFE_INTEGER) && bigVal <= BigInt(Number.MAX_SAFE_INTEGER)) {
+        if (
+          bigVal >= BigInt(Number.MIN_SAFE_INTEGER) &&
+          bigVal <= BigInt(Number.MAX_SAFE_INTEGER)
+        ) {
           val = Number(bigVal);
         } else {
           val = bigVal;
@@ -882,7 +885,11 @@ function encodeDefLevels(defLevels: readonly boolean[]): Uint8Array {
   while (i < defLevels.length) {
     const val = defLevels[i] ?? false;
     let runLen = 1;
-    while (i + runLen < defLevels.length && (defLevels[i + runLen] ?? false) === val && runLen < 0x7fffffff) {
+    while (
+      i + runLen < defLevels.length &&
+      (defLevels[i + runLen] ?? false) === val &&
+      runLen < 0x7fffffff
+    ) {
       runLen++;
     }
     i += runLen;
@@ -933,9 +940,18 @@ function determinePhysType(values: readonly Scalar[]): number {
 
   for (const v of values) {
     if (v === null || v === undefined) continue;
-    if (typeof v === "boolean") { hasBool = true; continue; }
-    if (typeof v === "string") { hasStr = true; continue; }
-    if (typeof v === "bigint") { hasBigInt = true; continue; }
+    if (typeof v === "boolean") {
+      hasBool = true;
+      continue;
+    }
+    if (typeof v === "string") {
+      hasStr = true;
+      continue;
+    }
+    if (typeof v === "bigint") {
+      hasBigInt = true;
+      continue;
+    }
     if (typeof v === "number") {
       if (!Number.isInteger(v) || !Number.isFinite(v)) {
         hasFloat = true;
@@ -945,7 +961,9 @@ function determinePhysType(values: readonly Scalar[]): number {
       continue;
     }
     // Date, etc. → store as int64 (ms epoch)
-    if (v instanceof Date) { hasBigInt = true; continue; }
+    if (v instanceof Date) {
+      hasBigInt = true;
+    }
   }
 
   if (hasStr) return PHYS_BYTE_ARRAY;
@@ -1040,12 +1058,7 @@ function encodeColumnPage(
  */
 export function readParquet(data: Uint8Array, options: ReadParquetOptions = {}): DataFrame {
   // Validate magic bytes
-  if (
-    data[0] !== 0x50 ||
-    data[1] !== 0x41 ||
-    data[2] !== 0x52 ||
-    data[3] !== 0x31
-  ) {
+  if (data[0] !== 0x50 || data[1] !== 0x41 || data[2] !== 0x52 || data[3] !== 0x31) {
     throw new Error("Not a Parquet file: missing PAR1 magic bytes at start");
   }
   const endMagic = data.subarray(data.length - 4);
@@ -1059,11 +1072,7 @@ export function readParquet(data: Uint8Array, options: ReadParquetOptions = {}):
   }
 
   // Read footer size (4 bytes LE before end magic)
-  const footerSizeView = new DataView(
-    data.buffer,
-    data.byteOffset + data.length - 8,
-    4,
-  );
+  const footerSizeView = new DataView(data.buffer, data.byteOffset + data.length - 8, 4);
   const footerSize = footerSizeView.getUint32(0, true);
   const footerOffset = data.length - 8 - footerSize;
 
@@ -1139,7 +1148,13 @@ export function readParquet(data: Uint8Array, options: ReadParquetOptions = {}):
     const idxVals = resultData[idxName] ?? [];
     const labels = idxVals.map((v): Label => {
       if (v === null || v === undefined) return null;
-      if (typeof v === "number" || typeof v === "string" || typeof v === "boolean" || v instanceof Date) return v;
+      if (
+        typeof v === "number" ||
+        typeof v === "string" ||
+        typeof v === "boolean" ||
+        v instanceof Date
+      )
+        return v;
       if (typeof v === "bigint") return Number(v);
       return null;
     });
@@ -1241,7 +1256,13 @@ export function toParquet(df: DataFrame, options: ToParquetOptions = {}): Uint8A
 
   // Build schema: root message + leaf columns
   const schema: SchemaElement[] = [
-    { type: null, typeLength: 0, repetitionType: REP_REQUIRED, name: "schema", numChildren: colNames.length },
+    {
+      type: null,
+      typeLength: 0,
+      repetitionType: REP_REQUIRED,
+      name: "schema",
+      numChildren: colNames.length,
+    },
   ];
   for (let ci = 0; ci < colNames.length; ci++) {
     schema.push({

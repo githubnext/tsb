@@ -257,14 +257,11 @@ describe("readParquet ∘ toParquet — property tests", () => {
 
   it("round-trips arbitrary boolean arrays", () => {
     fc.assert(
-      fc.property(
-        fc.array(fc.boolean(), { minLength: 1, maxLength: 20 }),
-        (bools) => {
-          const df = DataFrame.fromColumns({ b: bools });
-          const rt = roundTrip(df);
-          expect(rt.col("b").toArray()).toEqual(bools);
-        },
-      ),
+      fc.property(fc.array(fc.boolean(), { minLength: 1, maxLength: 20 }), (bools) => {
+        const df = DataFrame.fromColumns({ b: bools });
+        const rt = roundTrip(df);
+        expect(rt.col("b").toArray()).toEqual(bools);
+      }),
       { numRuns: 20 },
     );
   });
