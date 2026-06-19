@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-18T19:38:00Z |
-| Iteration Count | 364 |
-| Best Metric | 156 |
+| Last Run | 2026-06-19T08:40:00Z |
+| Iteration Count | 365 |
+| Best Metric | 157 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io: HDF5 (read_hdf/to_hdf), to_excel (write XLSX), read_fwf ✅ done
+- More io: HDF5 (read_hdf/to_hdf), read_fwf ✅ done, to_excel ✅ done
 
 ---
 
@@ -49,17 +49,22 @@
 
 ## 🔭 Future Directions
 
-- `to_excel` (write XLSX) — complement existing readExcel
+- HDF5 (`read_hdf`/`to_hdf`) — next major IO format
 - `src/stats/` module expansions
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 364 — 2026-06-18 19:38 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27784523734)
+### Iteration 365 — 2026-06-19 08:40 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27815130329)
 - **Status**: ⏳ pending-ci
-- **Change**: Add `src/io/read_fwf.ts` — `readFwf()` mirroring `pandas.read_fwf()`; whitespace-gap auto-inference; colspecs/widths; header/names/indexCol/skipRows/nRows/naValues/comment. Playground fwf.html.
-- **Metric**: 156 → 157 (Δ+1); commit e198ae9
+- **Change**: Add `src/io/to_excel.ts` — `toExcel()` mirroring `pandas.DataFrame.to_excel()`; pure-TS ZIP+DEFLATE writer, shared string table, numeric/bool/string cells, index option, sheetName, naRep. Playground to_excel.html.
+- **Metric**: 156 → 157 (Δ+1); commit cfdc094
+
+### Iteration 364 — 2026-06-18 19:38 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27784523734)
+- **Status**: ⏳ pending-ci (commit e198ae9 not confirmed on branch)
+- **Change**: Attempted read_fwf.ts — not landed on branch; superseded by iter 365.
+- **Metric**: 156 (unchanged)
 
 ### Iters 316–363 — ✅/⏳ (148→156): feather, parquet, stata, xml, readTable, caseWhen, flags, sql, lreshape.
 
