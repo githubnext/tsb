@@ -25,6 +25,7 @@ network:
 
 safe-outputs:
   push-to-pull-request-branch:
+    signed-commits: false
     target: "*"
     max: 3
     protected-files: allowed
@@ -520,12 +521,12 @@ A pre-flight step has already identified a PR that needs attention. Read the sel
    If `selected.issues` contains `"merge_conflict"` **or** any `"behind_main: …"` entry, you must bring the branch up to date with `main` before doing anything else:
 
    - `git fetch origin main`
-   - `git merge origin/main` (or `origin/<base_branch>` if the base isn't `main`)
+   - `git merge --no-ff origin/main` (or `origin/<base_branch>` if the base isn't `main`)
    - Resolve any conflicts intelligently by understanding the intent of both sides. If the PR is from an autoloop branch, prefer the PR's changes for feature code and `main`'s changes for infrastructure/config.
    - Run tests/lint/typecheck locally to make sure the merge is clean.
 
-   ### Step 2 — Push the merge as its own commit
-   - Push the merge commit using `push-to-pull-request-branch` **before doing anything else**.
+   ### Step 2 — Push the merge as its own update
+   - Push the merged branch using `push-to-pull-request-branch` **before doing anything else**.
    - This is the *first* push of the run. It contains *only* the merge with `main` (plus any conflict resolutions). Do **not** mix CI-fix changes into this patch.
    - Merging `main` often fixes CI on its own (the failure was just drift). After the push, re-check whether CI is still failing on the new HEAD.
 
@@ -569,6 +570,7 @@ A pre-flight step has already identified a PR that needs attention. Read the sel
 - **Be surgical**: make the minimum changes needed to fix the issue. Do not refactor, improve, or add features.
 - **Don't break things**: always run tests/lint/typecheck locally before pushing.
 - **Always merge `main` first, as its own push.** If the PR branch is behind `main` (or has merge conflicts), the *first* `push-to-pull-request-branch` call of the run must contain only the merge commit (and any conflict resolutions). Do **NOT** include a merge of `main` inside a CI-fix patch — that's a separate, second push. Mixing the two causes patch conflicts when the remote PR branch hasn't been merged yet.
+- **Never rebase PR branches.** Do not run `git rebase`, `git pull --rebase`, or any history-rewriting command. Evergreen updates branches with merge commits so the safe-output push remains a fast-forward update.
 - **One concern per push**: the merge push contains only the merge; the fix push contains only the fix. Never combine them.
 - **Give up gracefully**: if you cannot fix the issue after investigating, update the attempt counter and leave a comment explaining what went wrong. Do not force-push or make destructive changes.
 - **One PR per run**: only fix the selected PR. Do not touch other PRs.

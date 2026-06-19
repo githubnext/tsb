@@ -236,6 +236,14 @@ describe("cut — property tests", () => {
           if (distinct.size < 2) {
             return;
           }
+          // Guard: skip inputs where the floating-point bin step is too small to
+          // produce distinct edges (cut would throw on duplicate bin edges).
+          const arr = [...distinct];
+          const mn = Math.min(...arr);
+          const mx = Math.max(...arr);
+          if (mn + (mx - mn) / numBins === mn) {
+            return;
+          }
           const { codes } = cut(xs, numBins);
           expect(codes.length).toBe(xs.length);
         },

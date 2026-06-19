@@ -88,46 +88,35 @@ function classifyScalar(v: Scalar): "date" | "bigint" | "float" | "int" | "strin
 }
 
 function inferDtype(data: readonly Scalar[]): DtypeName {
-  let hasFloat = false;
-  let hasInt = false;
-  let hasString = false;
-  let hasBool = false;
-  let hasDate = false;
-  let hasBigInt = false;
-
+  const kinds = new Set<"date" | "bigint" | "float" | "int" | "string" | "bool">();
   for (const v of data) {
     const kind = classifyScalar(v);
-    if (kind === "date") {
-      hasDate = true;
-    } else if (kind === "bigint") {
-      hasBigInt = true;
-    } else if (kind === "float") {
-      hasFloat = true;
-    } else if (kind === "int") {
-      hasInt = true;
-    } else if (kind === "string") {
-      hasString = true;
-    } else if (kind === "bool") {
-      hasBool = true;
+    if (kind !== null) {
+      kinds.add(kind);
     }
   }
+  return resolveDtype(kinds);
+}
 
-  if (hasDate) {
+function resolveDtype(
+  kinds: ReadonlySet<"date" | "bigint" | "float" | "int" | "string" | "bool">,
+): DtypeName {
+  if (kinds.has("date")) {
     return "datetime";
   }
-  if (hasBigInt) {
+  if (kinds.has("bigint")) {
     return "int64";
   }
-  if (hasFloat) {
+  if (kinds.has("float")) {
     return "float64";
   }
-  if (hasInt && !hasString && !hasBool) {
+  if (kinds.has("int") && !kinds.has("string") && !kinds.has("bool")) {
     return "int64";
   }
-  if (hasBool && !hasInt && !hasFloat && !hasString) {
+  if (kinds.has("bool") && !kinds.has("int") && !kinds.has("float") && !kinds.has("string")) {
     return "bool";
   }
-  if (hasString) {
+  if (kinds.has("string")) {
     return "string";
   }
   return "object";

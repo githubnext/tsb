@@ -40,6 +40,9 @@ const REAL_WORLD_EXAMPLE_PAGES = [
   "example_marketplace_fraud.html",
   "example_inventory_replenishment.html",
   "example_marketing_attribution.html",
+  "example_subscription_revenue_waterfall.html",
+  "example_fulfillment_sla.html",
+  "example_energy_anomaly_monitoring.html",
 ] as const;
 
 function listPlaygroundHtmlFiles(): string[] {
