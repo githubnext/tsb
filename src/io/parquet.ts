@@ -155,9 +155,9 @@ class ThriftReader {
 
   /**
    * Decode a struct, calling `handler(fieldId, type)` for each field.
-   * Handler returns `true` to skip remaining fields.
+   * Unknown fields should call `skipValue(type)` inside the handler.
    */
-  readStruct(handler: (fieldId: number, type: number) => boolean | undefined): void {
+  readStruct(handler: (fieldId: number, type: number) => void): void {
     let prevFieldId = 0;
     for (;;) {
       const header = this.buf[this.pos++] ?? 0;
@@ -173,7 +173,7 @@ class ThriftReader {
         fieldId = Number(this.readZigzag());
       }
       prevFieldId = fieldId;
-      if (handler(fieldId, type) === true) break;
+      handler(fieldId, type);
     }
   }
 
