@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-19T08:40:00Z |
-| Iteration Count | 365 |
+| Last Run | 2026-06-19T19:58:35Z |
+| Iteration Count | 366 |
 | Best Metric | 157 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
@@ -32,6 +32,7 @@
 ## 📚 Lessons Learned
 
 - **CI/TS**: `noUncheckedIndexedAccess` → `arr[i] ?? fallback`; `str.charAt(i)` not `str[i]`. `import type`. Error classes → `src/errors.ts`. `exactOptionalPropertyTypes`. `Index.size`. `Series.iat(i)`.
+- **Biome/TS conflict**: Biome `noConfusingVoidType` bans `boolean | void` unions; TypeScript won't accept `boolean | undefined` for callbacks that return void. Fix: use `void` as sole return type (not union) and remove early-exit logic.
 - **Metric**: counts `src/**/*.ts` (not index) with exports. `df.col(name)`. `df.columns.values` = `readonly string[]`.
 - **IO**: SQL adapter pattern. Binary I/O: `BinReader`/`BinWriter`; patch map offsets post-write. `Label[]` ⊂ `Scalar[]`.
 - **Parquet**: Thrift compact: zigzag varints, delta field headers, `(count<<4)|elemType` list heads. PLAIN LE. RLE def levels: 4-byte LE prefix. FLOAT(4) vs DOUBLE(5).
@@ -55,6 +56,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 366 — 2026-06-19 19:58 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27844317021)
+- **Status**: ⏳ pending-ci
+- **Change**: Add `src/io/fwf.ts` — `readFwf()` mirroring `pandas.read_fwf()`; auto-infers column widths from whitespace gaps, supports `colspecs`/`widths`, `header`, `names`, `indexCol`, `dtype`, `naValues`, `skipRows`, `nRows`, `inferNrows`. Also fixes `parquet.ts` TS2345: readStruct handler type changed to `() => void` to satisfy both TypeScript and Biome (avoids `noConfusingVoidType` union).
+- **Metric**: 156 → 157 (Δ+1); commits 13cb227 + 740c141
 
 ### Iteration 365 — 2026-06-19 08:40 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27815130329)
 - **Status**: ⏳ pending-ci
