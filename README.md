@@ -4,7 +4,7 @@
 
 A TypeScript port of [pandas](https://github.com/pandas-dev/pandas), built from first principles using [Autoloop](https://github.com/githubnext/autoloop) — an automated research and experimentation platform that runs iterative optimization loops on [GitHub Agentic Workflows](https://github.github.com/gh-aw/).
 
-🎮 **[Try the interactive playground →](https://githubnext.github.io/tsessebe/)**
+🎮 **[Try the interactive playground →](https://githubnext.github.io/tsb/)**
 
 TSB is named after the [tsessebe](https://en.wikipedia.org/wiki/Common_tsessebe) (*tseh-SEH-bee* · IPA /tsɛˈsɛbi/) —  a southern African antelope.
 

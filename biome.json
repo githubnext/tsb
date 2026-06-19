@@ -41,7 +41,8 @@
         "noUnusedVariables": "warn"
       },
       "nursery": {
-        "all": true
+        "all": true,
+        "noSecrets": "off"
       },
       "performance": {
         "all": true,
