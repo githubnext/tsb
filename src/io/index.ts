@@ -35,6 +35,8 @@ export { readStata, toStata } from "./stata.ts";
 export type { ReadStataOptions, ToStataOptions } from "./stata.ts";
 export { readParquet, toParquet } from "./parquet.ts";
 export type { ReadParquetOptions, ToParquetOptions } from "./parquet.ts";
+export { readFwf } from "./fwf.ts";
+export type { ReadFwfOptions, ColSpec } from "./fwf.ts";
 export type {
   SqlValue,
   SqlRow,
