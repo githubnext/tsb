@@ -39,25 +39,25 @@ function replayScenario(snapshot: ScenarioSnapshot): void {
   switch (snapshot.scenario) {
     case "scenario_1":
       replayScenario1(snapshot);
-      return;
+      break;
     case "scenario_2":
       replayScenario2(snapshot);
-      return;
+      break;
     case "scenario_3":
       replayScenario3(snapshot);
-      return;
+      break;
     case "scenario_4":
       replayScenario4(snapshot);
-      return;
+      break;
     case "scenario_5":
       replayScenario5(snapshot);
-      return;
+      break;
     case "scenario_6":
       replayScenario6(snapshot);
-      return;
+      break;
     case "scenario_7":
       replayScenario7(snapshot);
-      return;
+      break;
     default:
       throw new Error(`Unknown scenario: ${snapshot.scenario}`);
   }

@@ -391,7 +391,7 @@ describe("Styler.setCaption", () => {
 describe("Styler.hide", () => {
   test("hide index removes index column", () => {
     const df = makeNumericDf();
-    const html = dataFrameStyle(df).hide(0).toHtml();
+    const html = dataFrameStyle(df).hide(0).toHtml("x");
     expect(html).not.toContain("r0");
     expect(html).not.toContain("r1");
   });
