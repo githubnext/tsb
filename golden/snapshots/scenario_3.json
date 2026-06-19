@@ -1,0 +1,1112 @@
+{
+  "numpyVersion": "2.1.3",
+  "pandasVersion": "2.2.3",
+  "scenario": "scenario_3",
+  "snapshotVersion": 1,
+  "steps": [
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "student",
+          "subject",
+          "semester",
+          "score",
+          "max_possible",
+          "pct"
+        ]
+      },
+      "data": [
+        [
+          "Alice",
+          "Math",
+          "Fall",
+          92,
+          100,
+          92.0
+        ],
+        [
+          "Alice",
+          "Science",
+          "Fall",
+          88,
+          100,
+          88.0
+        ],
+        [
+          "Alice",
+          "Math",
+          "Spring",
+          95,
+          100,
+          95.0
+        ],
+        [
+          "Alice",
+          "Science",
+          "Spring",
+          91,
+          100,
+          91.0
+        ],
+        [
+          "Bob",
+          "Math",
+          "Fall",
+          78,
+          100,
+          78.0
+        ],
+        [
+          "Bob",
+          "Science",
+          "Fall",
+          85,
+          100,
+          85.0
+        ],
+        [
+          "Bob",
+          "Math",
+          "Spring",
+          82,
+          100,
+          82.0
+        ],
+        [
+          "Bob",
+          "Science",
+          "Spring",
+          79,
+          100,
+          79.0
+        ],
+        [
+          "Carol",
+          "Math",
+          "Fall",
+          96,
+          100,
+          96.0
+        ],
+        [
+          "Carol",
+          "Science",
+          "Fall",
+          93,
+          100,
+          93.0
+        ],
+        [
+          "Carol",
+          "Math",
+          "Spring",
+          98,
+          100,
+          98.0
+        ],
+        [
+          "Carol",
+          "Science",
+          "Spring",
+          95,
+          100,
+          95.0
+        ]
+      ],
+      "dtypes": {
+        "max_possible": "integer",
+        "pct": "float",
+        "score": "integer",
+        "semester": "string",
+        "student": "string",
+        "subject": "string"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify percentage computation",
+      "shape": [
+        12,
+        6
+      ],
+      "step": 1
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "multiindex",
+        "kind": "multiindex",
+        "names": [
+          null,
+          "subject",
+          "semester"
+        ],
+        "values": [
+          [
+            "pct",
+            "Math",
+            "Fall"
+          ],
+          [
+            "pct",
+            "Math",
+            "Spring"
+          ],
+          [
+            "pct",
+            "Science",
+            "Fall"
+          ],
+          [
+            "pct",
+            "Science",
+            "Spring"
+          ],
+          [
+            "score",
+            "Math",
+            "Fall"
+          ],
+          [
+            "score",
+            "Math",
+            "Spring"
+          ],
+          [
+            "score",
+            "Science",
+            "Fall"
+          ],
+          [
+            "score",
+            "Science",
+            "Spring"
+          ]
+        ]
+      },
+      "data": [
+        [
+          92.0,
+          95.0,
+          88.0,
+          91.0,
+          92.0,
+          95.0,
+          88.0,
+          91.0
+        ],
+        [
+          78.0,
+          82.0,
+          85.0,
+          79.0,
+          78.0,
+          82.0,
+          85.0,
+          79.0
+        ],
+        [
+          96.0,
+          98.0,
+          93.0,
+          95.0,
+          96.0,
+          98.0,
+          93.0,
+          95.0
+        ]
+      ],
+      "dtypes": {
+        "['pct', 'Math', 'Fall']": "float",
+        "['pct', 'Math', 'Spring']": "float",
+        "['pct', 'Science', 'Fall']": "float",
+        "['pct', 'Science', 'Spring']": "float",
+        "['score', 'Math', 'Fall']": "float",
+        "['score', 'Math', 'Spring']": "float",
+        "['score', 'Science', 'Fall']": "float",
+        "['score', 'Science', 'Spring']": "float"
+      },
+      "index": {
+        "dtype": "string",
+        "kind": "index",
+        "name": "student",
+        "values": [
+          "Alice",
+          "Bob",
+          "Carol"
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify pivot_table creates correct MultiIndex columns",
+      "shape": [
+        3,
+        8
+      ],
+      "step": 2
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "multiindex",
+        "kind": "multiindex",
+        "names": [
+          null,
+          "subject"
+        ],
+        "values": [
+          [
+            "pct",
+            "Math"
+          ],
+          [
+            "pct",
+            "Science"
+          ],
+          [
+            "score",
+            "Math"
+          ],
+          [
+            "score",
+            "Science"
+          ]
+        ]
+      },
+      "data": [
+        [
+          92.0,
+          88.0,
+          92.0,
+          88.0
+        ],
+        [
+          95.0,
+          91.0,
+          95.0,
+          91.0
+        ],
+        [
+          78.0,
+          85.0,
+          78.0,
+          85.0
+        ],
+        [
+          82.0,
+          79.0,
+          82.0,
+          79.0
+        ],
+        [
+          96.0,
+          93.0,
+          96.0,
+          93.0
+        ],
+        [
+          98.0,
+          95.0,
+          98.0,
+          95.0
+        ]
+      ],
+      "dtypes": {
+        "['pct', 'Math']": "float",
+        "['pct', 'Science']": "float",
+        "['score', 'Math']": "float",
+        "['score', 'Science']": "float"
+      },
+      "index": {
+        "dtype": "multiindex",
+        "kind": "multiindex",
+        "names": [
+          "student",
+          "semester"
+        ],
+        "values": [
+          [
+            "Alice",
+            "Fall"
+          ],
+          [
+            "Alice",
+            "Spring"
+          ],
+          [
+            "Bob",
+            "Fall"
+          ],
+          [
+            "Bob",
+            "Spring"
+          ],
+          [
+            "Carol",
+            "Fall"
+          ],
+          [
+            "Carol",
+            "Spring"
+          ]
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify stack moves semester to row index",
+      "shape": [
+        6,
+        4
+      ],
+      "step": 3
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "multiindex",
+        "kind": "multiindex",
+        "names": [
+          null,
+          "subject",
+          "student"
+        ],
+        "values": [
+          [
+            "pct",
+            "Math",
+            "Alice"
+          ],
+          [
+            "pct",
+            "Math",
+            "Bob"
+          ],
+          [
+            "pct",
+            "Math",
+            "Carol"
+          ],
+          [
+            "pct",
+            "Science",
+            "Alice"
+          ],
+          [
+            "pct",
+            "Science",
+            "Bob"
+          ],
+          [
+            "pct",
+            "Science",
+            "Carol"
+          ],
+          [
+            "score",
+            "Math",
+            "Alice"
+          ],
+          [
+            "score",
+            "Math",
+            "Bob"
+          ],
+          [
+            "score",
+            "Math",
+            "Carol"
+          ],
+          [
+            "score",
+            "Science",
+            "Alice"
+          ],
+          [
+            "score",
+            "Science",
+            "Bob"
+          ],
+          [
+            "score",
+            "Science",
+            "Carol"
+          ]
+        ]
+      },
+      "data": [
+        [
+          92.0,
+          78.0,
+          96.0,
+          88.0,
+          85.0,
+          93.0,
+          92.0,
+          78.0,
+          96.0,
+          88.0,
+          85.0,
+          93.0
+        ],
+        [
+          95.0,
+          82.0,
+          98.0,
+          91.0,
+          79.0,
+          95.0,
+          95.0,
+          82.0,
+          98.0,
+          91.0,
+          79.0,
+          95.0
+        ]
+      ],
+      "dtypes": {
+        "['pct', 'Math', 'Alice']": "float",
+        "['pct', 'Math', 'Bob']": "float",
+        "['pct', 'Math', 'Carol']": "float",
+        "['pct', 'Science', 'Alice']": "float",
+        "['pct', 'Science', 'Bob']": "float",
+        "['pct', 'Science', 'Carol']": "float",
+        "['score', 'Math', 'Alice']": "float",
+        "['score', 'Math', 'Bob']": "float",
+        "['score', 'Math', 'Carol']": "float",
+        "['score', 'Science', 'Alice']": "float",
+        "['score', 'Science', 'Bob']": "float",
+        "['score', 'Science', 'Carol']": "float"
+      },
+      "index": {
+        "dtype": "string",
+        "kind": "index",
+        "name": "semester",
+        "values": [
+          "Fall",
+          "Spring"
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify unstack moves student back to columns",
+      "shape": [
+        2,
+        12
+      ],
+      "step": 4
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "student",
+          "subject",
+          "semester",
+          "metric",
+          "value"
+        ]
+      },
+      "data": [
+        [
+          "Alice",
+          "Math",
+          "Fall",
+          "score",
+          92.0
+        ],
+        [
+          "Alice",
+          "Science",
+          "Fall",
+          "score",
+          88.0
+        ],
+        [
+          "Alice",
+          "Math",
+          "Spring",
+          "score",
+          95.0
+        ],
+        [
+          "Alice",
+          "Science",
+          "Spring",
+          "score",
+          91.0
+        ],
+        [
+          "Bob",
+          "Math",
+          "Fall",
+          "score",
+          78.0
+        ],
+        [
+          "Bob",
+          "Science",
+          "Fall",
+          "score",
+          85.0
+        ],
+        [
+          "Bob",
+          "Math",
+          "Spring",
+          "score",
+          82.0
+        ],
+        [
+          "Bob",
+          "Science",
+          "Spring",
+          "score",
+          79.0
+        ],
+        [
+          "Carol",
+          "Math",
+          "Fall",
+          "score",
+          96.0
+        ],
+        [
+          "Carol",
+          "Science",
+          "Fall",
+          "score",
+          93.0
+        ],
+        [
+          "Carol",
+          "Math",
+          "Spring",
+          "score",
+          98.0
+        ],
+        [
+          "Carol",
+          "Science",
+          "Spring",
+          "score",
+          95.0
+        ],
+        [
+          "Alice",
+          "Math",
+          "Fall",
+          "pct",
+          92.0
+        ],
+        [
+          "Alice",
+          "Science",
+          "Fall",
+          "pct",
+          88.0
+        ],
+        [
+          "Alice",
+          "Math",
+          "Spring",
+          "pct",
+          95.0
+        ],
+        [
+          "Alice",
+          "Science",
+          "Spring",
+          "pct",
+          91.0
+        ],
+        [
+          "Bob",
+          "Math",
+          "Fall",
+          "pct",
+          78.0
+        ],
+        [
+          "Bob",
+          "Science",
+          "Fall",
+          "pct",
+          85.0
+        ],
+        [
+          "Bob",
+          "Math",
+          "Spring",
+          "pct",
+          82.0
+        ],
+        [
+          "Bob",
+          "Science",
+          "Spring",
+          "pct",
+          79.0
+        ],
+        [
+          "Carol",
+          "Math",
+          "Fall",
+          "pct",
+          96.0
+        ],
+        [
+          "Carol",
+          "Science",
+          "Fall",
+          "pct",
+          93.0
+        ],
+        [
+          "Carol",
+          "Math",
+          "Spring",
+          "pct",
+          98.0
+        ],
+        [
+          "Carol",
+          "Science",
+          "Spring",
+          "pct",
+          95.0
+        ]
+      ],
+      "dtypes": {
+        "metric": "string",
+        "semester": "string",
+        "student": "string",
+        "subject": "string",
+        "value": "float"
+      },
+      "index": {
+        "dtype": "integer",
+        "kind": "index",
+        "name": null,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify melt produces long format",
+      "shape": [
+        24,
+        5
+      ],
+      "step": 5
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "multiindex",
+        "kind": "multiindex",
+        "names": [
+          "subject",
+          "metric"
+        ],
+        "values": [
+          [
+            "Math",
+            "pct"
+          ],
+          [
+            "Math",
+            "score"
+          ],
+          [
+            "Science",
+            "pct"
+          ],
+          [
+            "Science",
+            "score"
+          ]
+        ]
+      },
+      "data": [
+        [
+          92.0,
+          92.0,
+          88.0,
+          88.0
+        ],
+        [
+          95.0,
+          95.0,
+          91.0,
+          91.0
+        ],
+        [
+          78.0,
+          78.0,
+          85.0,
+          85.0
+        ],
+        [
+          82.0,
+          82.0,
+          79.0,
+          79.0
+        ],
+        [
+          96.0,
+          96.0,
+          93.0,
+          93.0
+        ],
+        [
+          98.0,
+          98.0,
+          95.0,
+          95.0
+        ]
+      ],
+      "dtypes": {
+        "['Math', 'pct']": "float",
+        "['Math', 'score']": "float",
+        "['Science', 'pct']": "float",
+        "['Science', 'score']": "float"
+      },
+      "index": {
+        "dtype": "multiindex",
+        "kind": "multiindex",
+        "names": [
+          "student",
+          "semester"
+        ],
+        "values": [
+          [
+            "Alice",
+            "Fall"
+          ],
+          [
+            "Alice",
+            "Spring"
+          ],
+          [
+            "Bob",
+            "Fall"
+          ],
+          [
+            "Bob",
+            "Spring"
+          ],
+          [
+            "Carol",
+            "Fall"
+          ],
+          [
+            "Carol",
+            "Spring"
+          ]
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify round-trip reshape",
+      "shape": [
+        6,
+        4
+      ],
+      "step": 6
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "product_A",
+          "product_B"
+        ]
+      },
+      "data": [
+        [
+          90,
+          170
+        ],
+        [
+          100,
+          200
+        ],
+        [
+          120,
+          190
+        ],
+        [
+          150,
+          180
+        ],
+        [
+          110,
+          200
+        ],
+        [
+          130,
+          220
+        ],
+        [
+          160,
+          230
+        ],
+        [
+          180,
+          250
+        ]
+      ],
+      "dtypes": {
+        "product_A": "integer",
+        "product_B": "integer"
+      },
+      "index": {
+        "dtype": "multiindex",
+        "kind": "multiindex",
+        "names": [
+          "quarter",
+          "city"
+        ],
+        "values": [
+          [
+            "Q1",
+            "LA"
+          ],
+          [
+            "Q1",
+            "NYC"
+          ],
+          [
+            "Q2",
+            "LA"
+          ],
+          [
+            "Q2",
+            "NYC"
+          ],
+          [
+            "Q3",
+            "LA"
+          ],
+          [
+            "Q3",
+            "NYC"
+          ],
+          [
+            "Q4",
+            "LA"
+          ],
+          [
+            "Q4",
+            "NYC"
+          ]
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify MultiIndex operations (swaplevel)",
+      "shape": [
+        8,
+        2
+      ],
+      "step": 7
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "product_A",
+          "product_B"
+        ]
+      },
+      "data": [
+        [
+          100,
+          200
+        ],
+        [
+          150,
+          180
+        ],
+        [
+          130,
+          220
+        ],
+        [
+          180,
+          250
+        ]
+      ],
+      "dtypes": {
+        "product_A": "integer",
+        "product_B": "integer"
+      },
+      "index": {
+        "dtype": "string",
+        "kind": "index",
+        "name": "quarter",
+        "values": [
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify MultiIndex operations (xs)",
+      "shape": [
+        4,
+        2
+      ],
+      "step": 8
+    },
+    {
+      "categoricals": {},
+      "columns": {
+        "dtype": "string",
+        "kind": "index",
+        "name": null,
+        "values": [
+          "product_A",
+          "product_B"
+        ]
+      },
+      "data": [
+        [
+          17.857142857142858,
+          23.52941176470588
+        ],
+        [
+          26.785714285714285,
+          21.176470588235293
+        ],
+        [
+          23.214285714285715,
+          25.882352941176475
+        ],
+        [
+          32.142857142857146,
+          29.411764705882355
+        ],
+        [
+          18.75,
+          21.518987341772153
+        ],
+        [
+          25.0,
+          24.050632911392405
+        ],
+        [
+          22.916666666666664,
+          25.31645569620253
+        ],
+        [
+          33.33333333333333,
+          29.11392405063291
+        ]
+      ],
+      "dtypes": {
+        "product_A": "float",
+        "product_B": "float"
+      },
+      "index": {
+        "dtype": "multiindex",
+        "kind": "multiindex",
+        "names": [
+          "city",
+          "quarter"
+        ],
+        "values": [
+          [
+            "NYC",
+            "Q1"
+          ],
+          [
+            "NYC",
+            "Q2"
+          ],
+          [
+            "NYC",
+            "Q3"
+          ],
+          [
+            "NYC",
+            "Q4"
+          ],
+          [
+            "LA",
+            "Q1"
+          ],
+          [
+            "LA",
+            "Q2"
+          ],
+          [
+            "LA",
+            "Q3"
+          ],
+          [
+            "LA",
+            "Q4"
+          ]
+        ]
+      },
+      "kind": "dataframe",
+      "operation": "verify groupby + transform on MultiIndex produces quarterly percentages",
+      "shape": [
+        8,
+        2
+      ],
+      "step": 9
+    }
+  ],
+  "title": "Reshaping with MultiIndex gymnastics"
+}

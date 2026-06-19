@@ -32,6 +32,8 @@ const NON_PLAYGROUND_PAGES = new Set<string>([
   "examples.html",
   // The extensions page is a static reference page — no interactive code blocks.
   "extensions.html",
+  // read_html is a standalone tutorial page, not a runtime-backed code-cell playground.
+  "read_html.html",
 ]);
 
 const REAL_WORLD_EXAMPLE_PAGES = [
@@ -64,6 +66,11 @@ describe("playground page conformance", () => {
       expect(html).toContain(`href="${file}"`);
       expect(files).toContain(file);
     }
+  });
+
+  it("links the benchmarks page from the landing page", () => {
+    const html = read("index.html");
+    expect(html).toContain('href="benchmarks.html"');
   });
 
   for (const file of files) {

@@ -13,6 +13,7 @@
       "*.d.ts",
       "playground/**/*.js",
       "playground/serve.ts",
+      "golden/snapshots/**",
       "benchmarks/**",
       ".autoloop/**"
     ]
@@ -40,7 +41,8 @@
         "noUnusedVariables": "warn"
       },
       "nursery": {
-        "all": true
+        "all": true,
+        "noSecrets": "off"
       },
       "performance": {
         "all": true,

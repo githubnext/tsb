@@ -25,6 +25,7 @@ network:
 
 safe-outputs:
   push-to-pull-request-branch:
+    signed-commits: false
     target: "*"
     max: 3
     protected-files: allowed
@@ -524,8 +525,8 @@ A pre-flight step has already identified a PR that needs attention. Read the sel
    - Resolve any conflicts intelligently by understanding the intent of both sides. If the PR is from an autoloop branch, prefer the PR's changes for feature code and `main`'s changes for infrastructure/config.
    - Run tests/lint/typecheck locally to make sure the merge is clean.
 
-   ### Step 2 — Push the merge as its own commit
-   - Push the merge commit using `push-to-pull-request-branch` **before doing anything else**.
+   ### Step 2 — Push the merge as its own update
+   - Push the merged branch using `push-to-pull-request-branch` **before doing anything else**.
    - This is the *first* push of the run. It contains *only* the merge with `main` (plus any conflict resolutions). Do **not** mix CI-fix changes into this patch.
    - Merging `main` often fixes CI on its own (the failure was just drift). After the push, re-check whether CI is still failing on the new HEAD.
 

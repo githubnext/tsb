@@ -60,6 +60,8 @@ export { jsonNormalize } from "./io/index.ts";
 export type { JsonNormalizeOptions, JsonPath } from "./io/index.ts";
 export { toJsonDenormalize, toJsonRecords, toJsonSplit, toJsonIndex } from "./io/index.ts";
 export type { JsonDenormalizeOptions, JsonSplitOptions, JsonSplitResult } from "./io/index.ts";
+export { readHtml } from "./io/index.ts";
+export type { ReadHtmlOptions } from "./io/index.ts";
 export { pearsonCorr, dataFrameCorr, dataFrameCov } from "./stats/index.ts";
 export type { CorrMethod, CorrOptions, CovOptions } from "./stats/index.ts";
 export { Rolling } from "./window/index.ts";
@@ -741,3 +743,43 @@ export {
   seriesToLaTeX,
 } from "./stats/format_table.ts";
 export type { ToMarkdownOptions, ToLaTeXOptions } from "./stats/format_table.ts";
+
+// pd.errors — pandas-compatible error and warning classes
+export {
+  errors,
+  AbstractMethodError,
+  AccessorRegistrationWarning,
+  AttributeConflictWarning,
+  CSSWarning,
+  ChainedAssignmentError,
+  DatabaseError,
+  DataError,
+  DtypeWarning,
+  EmptyDataError,
+  IntCastingNaNError,
+  InvalidColumnName,
+  InvalidComparison,
+  InvalidIndexError,
+  InvalidUseOfBooleanIndex,
+  InvalidVersion,
+  LossySetitemError,
+  MergeError,
+  NullFrequencyError,
+  NumbaUtilError,
+  OptionError,
+  OutOfBoundsDatetime,
+  OutOfBoundsTimedelta,
+  ParserError,
+  ParserWarning,
+  PerformanceWarning,
+  PossibleDataLossError,
+  PossiblePrecisionLoss,
+  SpecificationError,
+  UnsortedIndexError,
+  UnsupportedFunctionCall,
+  ValueLabelTypeMismatch,
+  ValueError,
+  KeyError,
+  IndexError,
+} from "./errors.ts";
+export type { PandasError } from "./errors.ts";

@@ -65,39 +65,60 @@ export class PandasArray {
 
 // ─── dtype inference ──────────────────────────────────────────────────────────
 
-function inferDtype(data: readonly Scalar[]): DtypeName {
-  let hasFloat = false;
-  let hasInt = false;
-  let hasString = false;
-  let hasBool = false;
-  let hasDate = false;
-  let hasBigInt = false;
+function classifyScalar(v: Scalar): "date" | "bigint" | "float" | "int" | "string" | "bool" | null {
+  if (v === null || v === undefined) {
+    return null;
+  }
+  if (v instanceof Date) {
+    return "date";
+  }
+  if (typeof v === "bigint") {
+    return "bigint";
+  }
+  if (typeof v === "number") {
+    return Number.isInteger(v) ? "int" : "float";
+  }
+  if (typeof v === "string") {
+    return "string";
+  }
+  if (typeof v === "boolean") {
+    return "bool";
+  }
+  return null;
+}
 
+function inferDtype(data: readonly Scalar[]): DtypeName {
+  const kinds = new Set<"date" | "bigint" | "float" | "int" | "string" | "bool">();
   for (const v of data) {
-    if (v === null || v === undefined) continue;
-    if (typeof v === "boolean") {
-      hasBool = true;
-    } else if (typeof v === "bigint") {
-      hasBigInt = true;
-    } else if (typeof v === "number") {
-      if (Number.isInteger(v)) {
-        hasInt = true;
-      } else {
-        hasFloat = true;
-      }
-    } else if (typeof v === "string") {
-      hasString = true;
-    } else if (v instanceof Date) {
-      hasDate = true;
+    const kind = classifyScalar(v);
+    if (kind !== null) {
+      kinds.add(kind);
     }
   }
+  return resolveDtype(kinds);
+}
 
-  if (hasDate) return "datetime";
-  if (hasBigInt) return "int64";
-  if (hasFloat) return "float64";
-  if (hasInt && !hasString && !hasBool) return "int64";
-  if (hasBool && !hasInt && !hasFloat && !hasString) return "bool";
-  if (hasString) return "string";
+function resolveDtype(
+  kinds: ReadonlySet<"date" | "bigint" | "float" | "int" | "string" | "bool">,
+): DtypeName {
+  if (kinds.has("date")) {
+    return "datetime";
+  }
+  if (kinds.has("bigint")) {
+    return "int64";
+  }
+  if (kinds.has("float")) {
+    return "float64";
+  }
+  if (kinds.has("int") && !kinds.has("string") && !kinds.has("bool")) {
+    return "int64";
+  }
+  if (kinds.has("bool") && !kinds.has("int") && !kinds.has("float") && !kinds.has("string")) {
+    return "bool";
+  }
+  if (kinds.has("string")) {
+    return "string";
+  }
   return "object";
 }
 
