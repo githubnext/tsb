@@ -137,7 +137,7 @@
 <body>
   <div id="playground-loading">
     <div class="spinner"></div>
-    <span>Loading tsb runtime…</span>
+    <div id="playground-status">Initializing playground…</div>
   </div>
 
   <a class="back" href="index.html">← Back to roadmap</a>
@@ -355,91 +355,7 @@ console.log("col19 sample:", rt.col("col19").toArray().slice(0, 5));</textarea>
     tsb — TypeScript port of pandas
   </footer>
 
-  <script type="module">
-    import * as Babel from "https://esm.sh/@babel/standalone@7";
-
-    const CDN_BASE = "https://esm.sh";
-    const ESM_PACKAGES = {
-      "tsb": `${CDN_BASE}/tsb`,
-    };
-
-    async function loadTsb() {
-      const mod = await import(`${CDN_BASE}/tsb`);
-      return mod;
-    }
-
-    function transformCode(src) {
-      const replaced = src.replace(
-        /from\s+["']tsb["']/g,
-        `from "${CDN_BASE}/tsb"`,
-      );
-      const result = Babel.transform(replaced, {
-        filename: "playground.ts",
-        presets: [["typescript", { allExtensions: true }]],
-      });
-      return result.code ?? "";
-    }
-
-    async function runBlock(editorEl, outputEl, runBtn) {
-      outputEl.className = "playground-output";
-      outputEl.textContent = "⏳ Running…";
-
-      const logs = [];
-      const origLog = console.log;
-      console.log = (...args) => {
-        logs.push(args.map(a => typeof a === "object" ? JSON.stringify(a, null, 0) : String(a)).join(" "));
-        origLog(...args);
-      };
-
-      try {
-        const code = transformCode(editorEl.value);
-        const blob = new Blob([code], { type: "text/javascript" });
-        const url = URL.createObjectURL(blob);
-        await import(url);
-        URL.revokeObjectURL(url);
-        outputEl.textContent = logs.join("\n") || "(no output)";
-      } catch (err) {
-        outputEl.className = "playground-output error";
-        outputEl.textContent = "❌ " + (err.message ?? String(err));
-      } finally {
-        console.log = origLog;
-        runBtn.disabled = false;
-        runBtn.textContent = "▶ Run";
-      }
-    }
-
-    async function init() {
-      try {
-        await loadTsb();
-      } catch (_) { /* ok — imports work lazily */ }
-
-      document.getElementById("playground-loading").style.display = "none";
-
-      const blocks = document.querySelectorAll(".playground-block");
-      blocks.forEach((block) => {
-        const editor = block.querySelector(".playground-editor");
-        const output = block.querySelector(".playground-output");
-        const runBtn = block.querySelector(".playground-run");
-        const resetBtn = block.querySelector(".playground-reset");
-
-        const original = editor.value;
-
-        runBtn.disabled = false;
-        runBtn.addEventListener("click", () => {
-          runBtn.disabled = true;
-          runBtn.textContent = "⏳";
-          runBlock(editor, output, runBtn);
-        });
-
-        resetBtn.addEventListener("click", () => {
-          editor.value = original;
-          output.className = "playground-output";
-          output.textContent = "Click ▶ Run to execute";
-        });
-      });
-    }
-
-    init();
-  </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>
+
