@@ -978,7 +978,8 @@ function encodeColumnPage(
     for (let i = 0; i < present.length; i++) {
       const v = present[i];
       if (v !== null && v !== undefined && v !== false) {
-        boolBuf[Math.floor(i / 8)] |= 1 << (i % 8);
+        const byteIndex = Math.floor(i / 8);
+        boolBuf[byteIndex] = (boolBuf[byteIndex] ?? 0) | (1 << (i % 8));
       }
     }
     parts.push(boolBuf);
