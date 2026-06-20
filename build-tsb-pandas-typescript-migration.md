@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-20T08:22:53Z |
-| Iteration Count | 367 |
-| Best Metric | 158 |
+| Last Run | 2026-06-20T09:15:00Z |
+| Iteration Count | 368 |
+| Best Metric | 159 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,26 +19,24 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io: HDF5 (read_hdf/to_hdf) — next target; to_excel ✅ done, read_fwf ✅ done
+- More io: HDF5 (read_hdf/to_hdf) — next target; Arrow/Feather ✅ done, to_excel ✅ done
 
 ---
 
 ## 📚 Lessons Learned
 
-- **CI/TS**: `noUncheckedIndexedAccess` → `arr[i] ?? fallback`; `str.charAt(i)` not `str[i]`. `import type`. Error classes → `src/errors.ts`. `exactOptionalPropertyTypes`. `Index.size`. `Series.iat(i)`.
-- **Biome/TS conflict**: Biome `noConfusingVoidType` bans `boolean | void` unions; TypeScript won't accept `boolean | undefined` for callbacks that return void. Fix: use `void` as sole return type (not union) and remove early-exit logic.
-- **Metric**: counts `src/**/*.ts` (not index) with exports. `df.col(name)`. `df.columns.values` = `readonly string[]`.
-- **IO**: SQL adapter pattern. Binary I/O: `BinReader`/`BinWriter`; patch map offsets post-write. `Label[]` ⊂ `Scalar[]`.
-- **Parquet**: Thrift compact: zigzag varints, delta field headers, `(count<<4)|elemType` list heads. PLAIN LE. RLE def levels: 4-byte LE prefix. FLOAT(4) vs DOUBLE(5).
-- **Arrow/Feather**: FlatBuffer backward builder. Arrow IPC: `ARROW1`+2pad+schema+recordbatch+footer+i32LE+`ARROW1`. Empty validity=no nulls.
-- **Stata**: DTA v118 XML-tagged. 14×uint64 map; patch after all sections. Missing sentinels by type.
-- **XLSX/ZIP**: CRC32 pure-TS; `deflateRawSync` from `node:zlib` (biome-ignore lint/correctness/noNodejsModules). OOXML = 7 XML parts; worksheet path always `sheet1.xml` (readExcel resolves via rId1 in workbook.xml.rels). SST for strings/non-finite; numeric/bool cells direct. `noUncheckedIndexedAccess`: `?? 0` on all array reads.
+- **TS**: `noUncheckedIndexedAccess` → `arr[i] ?? fallback`; `str.charAt(i)`. Error classes → `src/errors.ts`. `exactOptionalPropertyTypes`. Dtype field = `itemsize` (lowercase). `biome-ignore lint/correctness/noNodejsModules` for node:zlib.
+- **Metric**: counts `src/**/*.ts` with exports. `df.col(name)`. `df.columns.values` = `readonly string[]`. Use `DataFrame.fromColumns()` pattern (no direct Series import needed).
+- **Parquet**: Thrift compact: zigzag varints, delta headers, `(count<<4)|elemType` list heads. PLAIN LE. RLE def levels: 4-byte LE prefix.
+- **Arrow/Feather**: FlatBuffer backward builder. Arrow IPC: `ARROW1`+8pad+schema+recordbatch+footer+i32LE+`ARROW1`. Block.metaDataLength = 8 + paddedMetaSize. FieldNode={length:i64,null_count:i64}; Buffer={offset:i64,length:i64}; Block=24 bytes. Empty validity = no nulls.
+- **Stata**: DTA v118. 14×uint64 map; patch after sections.
+- **XLSX/ZIP**: CRC32 pure-TS; `deflateRawSync` node:zlib. OOXML=7 XML parts. SST for strings. `?? 0` on all array reads.
 
 ---
 
@@ -48,22 +46,14 @@
 
 ---
 
-## 🔭 Future Directions
-
-- HDF5 (`read_hdf`/`to_hdf`) — next major IO format; significant effort required (custom HDF5 parser)
-- `src/stats/` module expansions
-
----
-
 ## 📊 Iteration History
 
-### Iteration 367 — 2026-06-20 08:22 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27865008837)
-- **Status**: ✅ accepted
-- **Change**: Add `src/io/to_excel.ts` — `toExcel()` mirroring `pandas.DataFrame.to_excel()`; pure-TS CRC32+ZIP writer (DEFLATE via node:zlib), OOXML (7 XML parts), SST, all scalar types, index/header/naRep/columns/startRow/startCol options. Commit 853611b.
-- **Metric**: 157 → 158 (Δ+1)
+### Iteration 368 — 2026-06-20 09:15 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27881185025)
+- **Status**: ⏳ pending-ci
+- **Change**: Add `src/io/feather.ts` — `readFeather()`/`toFeather()` Apache Arrow IPC (Feather v2); pure-TS FlatBuffer backward builder + reader, Schema/RecordBatch/Footer, validity bitmaps, Int64/Float64/Bool/Utf8. Commit 91f9607.
+- **Metric**: 158 → 159 (Δ+1)
 
-### Iters 316–366 — ✅/⏳ (148→157): fwf, to_excel (iter 365 didn't land), feather, parquet, stata, xml, readTable, caseWhen, flags, sql, lreshape.
+### Iteration 367 — 2026-06-20 08:22 UTC — accepted
+- **Change**: Add `src/io/to_excel.ts` — `toExcel()` pure-TS ZIP+OOXML. 157→158.
 
-### Iters 1–315 — ✅ (0→148): Core, stats, io, merge, reshape, window, groupby, datetime, multi-index.
-
-
+### Iters 1–366 — ✅ (0→157): Core, stats, io, merge, reshape, window, groupby, datetime, multi-index, sql, xml, stata, parquet, fwf, excel, feather.
