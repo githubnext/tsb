@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-20T01:34:58Z |
-| Iteration Count | 363 |
-| Best Metric | 678 |
+| Last Run | 2026-06-20T13:18:37Z |
+| Iteration Count | 364 |
+| Best Metric | 681 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -72,6 +72,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 364 — 2026-06-20 13:18 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27872323773)
+- **Status**: ✅ Accepted
+- **Change**: Add 3 pairs: shift_diff (shiftSeries+diffSeries), sort_ops (sortValuesSeries+sortValuesDataFrame), pow_mod (seriesPow+seriesMod+dataFramePow).
+- **Metric**: 681 (previous best: 678, delta: +3)
+- **Commit**: ee39a5c
+- **Notes**: All Python files pass py_compile. Bun unavailable; acceptance based on valid file count (678+3=681). CI gated on manual approval (action_required) as with previous iterations.
 
 ### Iteration 363 — 2026-06-20 01:34 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27856201791)
 - **Status**: ✅ Accepted
