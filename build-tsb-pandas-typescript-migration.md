@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-19T19:58:35Z |
-| Iteration Count | 366 |
-| Best Metric | 157 |
+| Last Run | 2026-06-20T08:22:53Z |
+| Iteration Count | 367 |
+| Best Metric | 158 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci |
+| Recent Statuses | accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io: HDF5 (read_hdf/to_hdf), read_fwf ✅ done, to_excel ✅ done
+- More io: HDF5 (read_hdf/to_hdf) — next target; to_excel ✅ done, read_fwf ✅ done
 
 ---
 
@@ -38,7 +38,7 @@
 - **Parquet**: Thrift compact: zigzag varints, delta field headers, `(count<<4)|elemType` list heads. PLAIN LE. RLE def levels: 4-byte LE prefix. FLOAT(4) vs DOUBLE(5).
 - **Arrow/Feather**: FlatBuffer backward builder. Arrow IPC: `ARROW1`+2pad+schema+recordbatch+footer+i32LE+`ARROW1`. Empty validity=no nulls.
 - **Stata**: DTA v118 XML-tagged. 14×uint64 map; patch after all sections. Missing sentinels by type.
-- **FWF**: `readFwf` — column inference: position is separator if `charAt` returns `""` or `" "` in ALL sample rows.
+- **XLSX/ZIP**: CRC32 pure-TS; `deflateRawSync` from `node:zlib` (biome-ignore lint/correctness/noNodejsModules). OOXML = 7 XML parts; worksheet path always `sheet1.xml` (readExcel resolves via rId1 in workbook.xml.rels). SST for strings/non-finite; numeric/bool cells direct. `noUncheckedIndexedAccess`: `?? 0` on all array reads.
 
 ---
 
@@ -50,29 +50,19 @@
 
 ## 🔭 Future Directions
 
-- HDF5 (`read_hdf`/`to_hdf`) — next major IO format
+- HDF5 (`read_hdf`/`to_hdf`) — next major IO format; significant effort required (custom HDF5 parser)
 - `src/stats/` module expansions
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 366 — 2026-06-19 19:58 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27844317021)
-- **Status**: ⏳ pending-ci
-- **Change**: Add `src/io/fwf.ts` — `readFwf()` mirroring `pandas.read_fwf()`; auto-infers column widths from whitespace gaps, supports `colspecs`/`widths`, `header`, `names`, `indexCol`, `dtype`, `naValues`, `skipRows`, `nRows`, `inferNrows`. Also fixes `parquet.ts` TS2345: readStruct handler type changed to `() => void` to satisfy both TypeScript and Biome (avoids `noConfusingVoidType` union).
-- **Metric**: 156 → 157 (Δ+1); commits 13cb227 + 740c141
+### Iteration 367 — 2026-06-20 08:22 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27865008837)
+- **Status**: ✅ accepted
+- **Change**: Add `src/io/to_excel.ts` — `toExcel()` mirroring `pandas.DataFrame.to_excel()`; pure-TS CRC32+ZIP writer (DEFLATE via node:zlib), OOXML (7 XML parts), SST, all scalar types, index/header/naRep/columns/startRow/startCol options. Commit 853611b.
+- **Metric**: 157 → 158 (Δ+1)
 
-### Iteration 365 — 2026-06-19 08:40 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27815130329)
-- **Status**: ⏳ pending-ci
-- **Change**: Add `src/io/to_excel.ts` — `toExcel()` mirroring `pandas.DataFrame.to_excel()`; pure-TS ZIP+DEFLATE writer, shared string table, numeric/bool/string cells, index option, sheetName, naRep. Playground to_excel.html.
-- **Metric**: 156 → 157 (Δ+1); commit cfdc094
-
-### Iteration 364 — 2026-06-18 19:38 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27784523734)
-- **Status**: ⏳ pending-ci (commit e198ae9 not confirmed on branch)
-- **Change**: Attempted read_fwf.ts — not landed on branch; superseded by iter 365.
-- **Metric**: 156 (unchanged)
-
-### Iters 316–363 — ✅/⏳ (148→156): feather, parquet, stata, xml, readTable, caseWhen, flags, sql, lreshape.
+### Iters 316–366 — ✅/⏳ (148→157): fwf, to_excel (iter 365 didn't land), feather, parquet, stata, xml, readTable, caseWhen, flags, sql, lreshape.
 
 ### Iters 1–315 — ✅ (0→148): Core, stats, io, merge, reshape, window, groupby, datetime, multi-index.
 
