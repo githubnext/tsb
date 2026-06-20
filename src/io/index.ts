@@ -53,3 +53,5 @@ export type {
 // readExcel / xlsxSheetNames use node:zlib and cannot be bundled for the
 // browser.  Import them directly from "tsb/io/read_excel" when running in
 // Node / Bun.
+export { toExcel } from "./to_excel.ts";
+export type { ToExcelOptions } from "./to_excel.ts";

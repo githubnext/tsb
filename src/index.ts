@@ -74,6 +74,8 @@ export { readParquet, toParquet } from "./io/index.ts";
 export type { ReadParquetOptions, ToParquetOptions } from "./io/index.ts";
 export { readFwf } from "./io/index.ts";
 export type { ReadFwfOptions, ColSpec } from "./io/index.ts";
+export { toExcel } from "./io/index.ts";
+export type { ToExcelOptions } from "./io/index.ts";
 export type {
   SqlValue,
   SqlRow,
