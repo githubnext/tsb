@@ -49,7 +49,7 @@ export interface ToHdfOptions {
 const HDF5_SIG = new Uint8Array([0x89, 0x48, 0x44, 0x46, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 /** Undefined address sentinel (all bits set). */
-const UNDEF = 0xffffffff_ffffffff_n;
+const UNDEF = 0xffffffff_ffffffffn;
 
 /** B-tree leaf-node K parameter. Each SNOD holds 2*K entries (max 8 for K=4). */
 const K = 4;
