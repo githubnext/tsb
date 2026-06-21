@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-21T08:19:38Z |
-| Iteration Count | 365 |
-| Best Metric | 684 |
+| Last Run | 2026-06-21T19:17:01Z |
+| Iteration Count | 366 |
+| Best Metric | 687 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -23,6 +23,8 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+
+
 
 ---
 
@@ -72,6 +74,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 366 — 2026-06-21 19:17 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27914714903)
+- **Status**: ✅ Accepted
+- **Change**: Add 3 pairs: convert_dtypes (convertDtypesSeries/DataFrame), series_format_table (seriesToMarkdown/toLaTeX), str_findall_expand (strFindallExpand vs pandas str.extract).
+- **Metric**: 687 (previous best: 684, delta: +3)
+- **Commit**: 3e8fd76
+- **Notes**: Python files pass py_compile. Bun unavailable in sandbox; acceptance based on file count (684+3=687).
 
 ### Iteration 365 — 2026-06-21 08:19 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27898423525)
 - **Status**: ✅ Accepted
