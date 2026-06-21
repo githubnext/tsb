@@ -37,6 +37,8 @@ export { readParquet, toParquet } from "./parquet.ts";
 export type { ReadParquetOptions, ToParquetOptions } from "./parquet.ts";
 export { readFeather, toFeather } from "./feather.ts";
 export type { ReadFeatherOptions, ToFeatherOptions } from "./feather.ts";
+export { readHdf, toHdf } from "./hdf.ts";
+export type { ReadHdfOptions, ToHdfOptions } from "./hdf.ts";
 export { readFwf } from "./fwf.ts";
 export type { ReadFwfOptions, ColSpec } from "./fwf.ts";
 export type {
