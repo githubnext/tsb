@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-20T13:18:37Z |
-| Iteration Count | 364 |
-| Best Metric | 681 |
+| Last Run | 2026-06-21T08:19:38Z |
+| Iteration Count | 365 |
+| Best Metric | 684 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -73,22 +73,14 @@
 
 ## 📊 Iteration History
 
-### Iteration 364 — 2026-06-20 13:18 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27872323773)
+### Iteration 365 — 2026-06-21 08:19 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27898423525)
 - **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: shift_diff (shiftSeries+diffSeries), sort_ops (sortValuesSeries+sortValuesDataFrame), pow_mod (seriesPow+seriesMod+dataFramePow).
-- **Metric**: 681 (previous best: 678, delta: +3)
-- **Commit**: ee39a5c
-- **Notes**: All Python files pass py_compile. Bun unavailable; acceptance based on valid file count (678+3=681). CI gated on manual approval (action_required) as with previous iterations.
+- **Change**: Add 3 pairs: at_iat (seriesAt+seriesIat+dataFrameAt+dataFrameIat), filter_series, truncate_df.
+- **Metric**: 684 (previous best: 681, delta: +3)
+- **Commit**: ba4082e
+- **Notes**: Python files pass py_compile. Bun unavailable; acceptance based on file count (681+3=684).
 
-### Iteration 363 — 2026-06-20 01:34 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27856201791)
-- **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: merge_asof, cross_join, join_all.
-- **Metric**: 678 (previous best: 675 real baseline; delta: +3)
-- **Commit**: 74dd849
-- **Notes**: All three functions were exported but unbenchmarked. Python files pass py_compile. Bun unavailable; acceptance based on valid file count (675+3=678).
-
-### Iteration 362 — 2026-06-19 13:56 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27829900141)
-- **Status**: ⚠️ Phantom — commit a51e5bf never existed on canonical branch.
+### Iters 362–364 — ✅ (675→681): 363: merge_asof/cross_join/join_all (+3); 364: shift_diff/sort_ops/pow_mod (+3); 362: phantom.
 
 ### Iters 343–361 — ⚠️ All phantom: commits never landed on canonical branch; real baseline was 675 throughout.
 
