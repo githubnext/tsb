@@ -820,3 +820,51 @@ export { caseWhen } from "./stats/index.ts";
 export type { CaseWhenBranch, CaseWhenPredicate } from "./stats/index.ts";
 export { Flags, getFlags } from "./core/index.ts";
 export type { FlaggedObject } from "./core/index.ts";
+
+// pd.arrays — nullable typed extension arrays (also exported individually)
+export type {
+  FillValue,
+  IntegerDtypeName,
+  FloatingDtypeName,
+} from "./core/index.ts";
+
+import {
+  MaskedArray,
+  IntegerArray,
+  FloatingArray,
+  BooleanArray,
+  StringArray,
+  DatetimeArray,
+  TimedeltaArray,
+} from "./core/index.ts";
+export {
+  MaskedArray,
+  IntegerArray,
+  FloatingArray,
+  BooleanArray,
+  StringArray,
+  DatetimeArray,
+  TimedeltaArray,
+};
+
+/**
+ * `pd.arrays` namespace — mirrors `pandas.arrays`.
+ *
+ * Provides nullable typed extension arrays for integers, floats, booleans,
+ * strings, datetimes, and timedeltas.
+ *
+ * @example
+ * ```ts
+ * import { arrays } from "tsb";
+ * const a = arrays.IntegerArray.from([1, null, 3], "Int32");
+ * a.toArray(); // [1, null, 3]
+ * ```
+ */
+export const arrays = {
+  IntegerArray,
+  FloatingArray,
+  BooleanArray,
+  StringArray,
+  DatetimeArray,
+  TimedeltaArray,
+} as const;

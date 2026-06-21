@@ -154,3 +154,19 @@ export type {
 
 export { Flags, getFlags } from "./flags.ts";
 export type { FlaggedObject } from "./flags.ts";
+
+// pd.arrays — nullable typed extension arrays
+export {
+  MaskedArray,
+  IntegerArray,
+  FloatingArray,
+  BooleanArray,
+  StringArray,
+  DatetimeArray,
+  TimedeltaArray,
+} from "./arrays/index.ts";
+export type {
+  FillValue,
+  IntegerDtypeName,
+  FloatingDtypeName,
+} from "./arrays/index.ts";

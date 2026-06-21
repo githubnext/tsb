@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — pd.arrays: Nullable Typed Extension Arrays</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { color: var(--text); margin: 2rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { color: var(--accent); margin: 1.5rem 0 0.5rem; font-size: 1rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    .subtitle { color: #8b949e; font-size: 1.1rem; margin-bottom: 2rem; }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    code { font-family: var(--font-mono); font-size: 0.9rem; }
+    .badge {
+      display: inline-block;
+      background: var(--green);
+      color: #000;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    .tip {
+      background: #1c2128;
+      border-left: 3px solid var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 0 4px 4px 0;
+      margin: 1rem 0;
+      color: #8b949e;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th { background: var(--surface); padding: 0.5rem 1rem; text-align: left; color: var(--accent); border: 1px solid var(--border); }
+    td { padding: 0.5rem 1rem; border: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div><a href="index.html">← tsb playground</a></div>
+  <br />
+  <h1>🔢 pd.arrays — Nullable Typed Extension Arrays</h1>
+  <p class="subtitle">Mirrors <code>pandas.arrays</code>: nullable integers, floats, booleans, strings, datetimes, timedeltas.</p>
+  <span class="badge">✅ Complete</span>
+
+  <h2>Overview</h2>
+  <p>
+    The <code>pd.arrays</code> namespace provides typed extension arrays with first-class support
+    for missing values (NA). Each array type stores values and a boolean mask separately — when
+    <code>mask[i] = true</code> the element at position <code>i</code> is NA (missing).
+  </p>
+  <p>
+    These arrays mirror the pandas nullable array types introduced in pandas 1.0+. They differ from
+    plain JavaScript arrays in that <code>null</code> / <code>undefined</code> are never stored in
+    the data buffer — missing values are tracked by a separate mask, enabling efficient aggregate
+    operations that skip NA values.
+  </p>
+
+  <h2>Quick Start</h2>
+  <pre><code>import {
+  arrays,
+  IntegerArray,
+  FloatingArray,
+  BooleanArray,
+  StringArray,
+  DatetimeArray,
+  TimedeltaArray,
+} from "tsb";
+
+// Nullable integer array
+const ints = arrays.IntegerArray.from([1, 2, null, 4, 5], "Int32");
+ints.dtype;              // "Int32"
+ints.toArray();          // [1, 2, null, 4, 5]
+ints.sum();              // 12
+ints.fillna(0).toArray(); // [1, 2, 0, 4, 5]
+
+// Nullable float array
+const floats = arrays.FloatingArray.from([1.5, NaN, 3.0]);
+floats.mean();           // 2.25  (NaN treated as NA)
+
+// Nullable boolean — three-valued logic
+const bools = arrays.BooleanArray.from([true, null, false]);
+bools.any();             // true
+bools.all();             // false
+
+// Nullable string array
+const strs = arrays.StringArray.from(["hello", null, "world"]);
+strs.upper().toArray();  // ["HELLO", null, "WORLD"]
+strs.len().toArray();    // [5, null, 5]</code></pre>
+
+  <h2>Array Types</h2>
+
+  <table>
+    <tr>
+      <th>Class</th>
+      <th>pandas equivalent</th>
+      <th>Dtypes</th>
+      <th>NA behaviour</th>
+    </tr>
+    <tr>
+      <td><code>IntegerArray</code></td>
+      <td><code>pandas.arrays.IntegerArray</code></td>
+      <td><code>Int8</code>, <code>Int16</code>, <code>Int32</code>, <code>Int64</code>, <code>UInt8</code>, <code>UInt16</code>, <code>UInt32</code>, <code>UInt64</code></td>
+      <td><code>null</code> / <code>undefined</code> → NA</td>
+    </tr>
+    <tr>
+      <td><code>FloatingArray</code></td>
+      <td><code>pandas.arrays.FloatingArray</code></td>
+      <td><code>Float32</code>, <code>Float64</code></td>
+      <td><code>null</code>, <code>undefined</code>, <code>NaN</code> → NA</td>
+    </tr>
+    <tr>
+      <td><code>BooleanArray</code></td>
+      <td><code>pandas.arrays.BooleanArray</code></td>
+      <td><code>"boolean"</code></td>
+      <td>Kleene 3-valued logic</td>
+    </tr>
+    <tr>
+      <td><code>StringArray</code></td>
+      <td><code>pandas.arrays.StringArray</code></td>
+      <td><code>"string"</code></td>
+      <td><code>null</code> / <code>undefined</code> → NA</td>
+    </tr>
+    <tr>
+      <td><code>DatetimeArray</code></td>
+      <td><code>pandas.arrays.DatetimeArray</code></td>
+      <td><code>"datetime64[ns]"</code></td>
+      <td>NA preserved through all ops</td>
+    </tr>
+    <tr>
+      <td><code>TimedeltaArray</code></td>
+      <td><code>pandas.arrays.TimedeltaArray</code></td>
+      <td><code>"timedelta64[ns]"</code></td>
+      <td>NA preserved through all ops</td>
+    </tr>
+  </table>
+
+  <h2>IntegerArray</h2>
+  <pre><code>import { IntegerArray } from "tsb";
+
+// Construction
+const a = IntegerArray.from([1, 2, null, 4], "Int32");
+a.dtype;          // "Int32"
+a.size;           // 4
+a.at(2);          // null  (NA)
+a.isna();         // [false, false, true, false]
+
+// Arithmetic (NA propagates)
+a.add(10).toArray();    // [11, 12, null, 14]
+a.mul(2).toArray();     // [2, 4, null, 8]
+a.floordiv(2).toArray(); // [0, 1, null, 2]
+
+// Reductions
+a.sum();          // 7
+a.mean();         // 7/3 ≈ 2.33
+a.min();          // 1
+a.max();          // 4
+a.count();        // 3
+
+// Fill and drop NA
+a.fillna(0).toArray();  // [1, 2, 0, 4]
+a.dropna();             // [1, 2, 4]
+
+// Type conversion
+a.astype("Int64");</code></pre>
+
+  <h2>FloatingArray</h2>
+  <pre><code>import { FloatingArray } from "tsb";
+
+const f = FloatingArray.from([1.0, 2.5, NaN, 4.5]);
+// NaN is treated as NA
+f.toArray();      // [1.0, 2.5, null, 4.5]
+
+// Statistics
+f.sum();          // 8.0
+f.mean();         // 8.0 / 3 ≈ 2.67
+f.std();          // sample standard deviation (ddof=1)
+f.min();          // 1.0
+f.max();          // 4.5
+
+// Arithmetic
+f.add(f).toArray();  // [2.0, 5.0, null, 9.0]
+f.pow(2).toArray();  // [1.0, 6.25, null, 20.25]</code></pre>
+
+  <h2>BooleanArray — Three-Valued Logic</h2>
+  <pre><code>import { BooleanArray } from "tsb";
+
+const b = BooleanArray.from([true, null, false]);
+b.any();          // true
+b.all();          // false
+b.sum();          // 1  (count of true elements)
+
+// Kleene logic:  false AND NA → false,  true AND NA → NA
+const x = BooleanArray.from([true,  false, null, true ]);
+const y = BooleanArray.from([true,  null,  true, false]);
+x.and(y).toArray(); // [true, false, null, false]
+x.or(y).toArray();  // [true, null,  true, false]  — note: false OR NA = NA
+x.not().toArray();  // [false, null,  true, false]</code></pre>
+
+  <h2>StringArray</h2>
+  <pre><code>import { StringArray } from "tsb";
+
+const s = StringArray.from(["  Hello  ", null, "world"]);
+
+s.strip().toArray();       // ["Hello", null, "world"]
+s.upper().toArray();       // ["  HELLO  ", null, "WORLD"]
+s.lower().toArray();       // ["  hello  ", null, "world"]
+s.replace("o", "0").toArray(); // ["  Hell0  ", null, "w0rld"]
+
+// Pattern matching → BooleanArray
+s.strip().contains("Hello").toArray();   // [true, null, false]
+s.strip().startswith("H").toArray();     // [true, null, false]
+s.strip().endswith("d").toArray();       // [false, null, true]
+
+// Lengths → IntegerArray
+s.strip().len().toArray();   // [5, null, 5]
+
+// Concatenation
+const a = StringArray.from(["foo", "bar"]);
+const b = StringArray.from(["baz", "qux"]);
+a.cat("-", b).toArray(); // ["foo-baz", "bar-qux"]</code></pre>
+
+  <h2>DatetimeArray</h2>
+  <pre><code>import { DatetimeArray, Timestamp } from "tsb";
+
+const dts = DatetimeArray.from([
+  "2024-01-15T10:30:00Z",
+  null,
+  "2024-06-21T00:00:00Z",
+]);
+dts.dtype;   // "datetime64[ns]"
+dts.year;    // [2024, null, 2024]
+dts.month;   // [1, null, 6]
+dts.day;     // [15, null, 21]
+dts.hour;    // [10, null, 0]
+
+// Min / max
+dts.min(); // Timestamp("2024-01-15T10:30:00Z")
+dts.max(); // Timestamp("2024-06-21T00:00:00Z")
+
+// Fill NA
+const fill = new Timestamp("2000-01-01");
+dts.fillna(fill).toArray();  // no nulls
+
+// Millisecond timestamps
+dts.asMs();  // [number, null, number]</code></pre>
+
+  <h2>TimedeltaArray</h2>
+  <pre><code>import { TimedeltaArray, Timedelta } from "tsb";
+
+const tds = TimedeltaArray.from([
+  Timedelta.fromComponents({ days: 1 }),
+  null,
+  86_400_000 * 2,         // 2 days in ms
+  "P3DT6H",               // ISO 8601 duration
+]);
+tds.dtype;     // "timedelta64[ns]"
+tds.days;      // [1, null, 2, 3]
+tds.hours;     // [0, null, 0, 6]
+tds.totalSeconds; // [86400, null, 172800, 291600]
+
+// Arithmetic
+const extra = Timedelta.fromComponents({ hours: 12 });
+tds.add(extra).days; // [1, null, 2, 3] (hours += 12)
+tds.mul(2).totalDays; // [2, null, 4, 7]
+
+// Reductions
+tds.sum()?.totalDays;  // 6.25  (1 + 2 + 3.25)
+tds.min();             // Timedelta(1 day)
+tds.max();             // Timedelta(3 days 6 hours)</code></pre>
+
+  <h2>Shared API (all array types)</h2>
+  <pre><code>// Every array type exposes the same base interface:
+
+a.size;               // number of elements (including NA)
+a.dtype;              // dtype string
+a.at(i);              // element at index i, or null (supports negative)
+a.isna();             // boolean[] — true where NA
+a.notna();            // boolean[] — true where not NA
+a.hasNa();            // boolean — true if any NA
+a.toArray();          // (T | null)[] — plain JS array with nulls
+a.dropna();           // T[] — non-NA values only
+a.fillna(value);      // new array with NA replaced by value
+[...a];               // iterable over (T | null) elements</code></pre>
+
+  <div class="tip">
+    <strong>💡 pandas.array() analogue</strong><br>
+    tsb also exports <code>pdArray(values, dtype)</code> — a universal factory that returns a
+    <code>PandasArray</code>. The typed arrays here provide more specific operations (arithmetic,
+    string methods, etc.) and should be preferred when the element type is known.
+  </div>
+
+  <h2>Design Notes</h2>
+  <p>
+    All nullable arrays store a parallel <code>_mask: boolean[]</code> where <code>true</code>
+    means NA. The data buffer <code>_data: T[]</code> always has a sentinel value at masked
+    positions (typically 0, <code>false</code>, or <code>""</code>) — these values are never
+    exposed through the public API.
+  </p>
+  <p>
+    Integer arithmetic truncates toward zero. Float32 values are rounded with
+    <code>Math.fround</code>. Integer arrays validate bounds on construction. All operations that
+    return a new array preserve the dtype of the input unless <code>astype()</code> is called.
+  </p>
+</body>
+</html>
