@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-21T19:17:01Z |
-| Iteration Count | 366 |
-| Best Metric | 687 |
+| Last Run | 2026-06-22T05:30:00Z |
+| Iteration Count | 367 |
+| Best Metric | 690 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -75,21 +75,12 @@
 
 ## 📊 Iteration History
 
-### Iteration 366 — 2026-06-21 19:17 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27914714903)
+### Iteration 367 — 2026-06-22 05:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27961138526)
 - **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: convert_dtypes (convertDtypesSeries/DataFrame), series_format_table (seriesToMarkdown/toLaTeX), str_findall_expand (strFindallExpand vs pandas str.extract).
-- **Metric**: 687 (previous best: 684, delta: +3)
-- **Commit**: 3e8fd76
-- **Notes**: Python files pass py_compile. Bun unavailable in sandbox; acceptance based on file count (684+3=687).
+- **Change**: Add 3 pairs: numeric_ops_log2_exp (seriesLog2/Log10/Exp/Sign + DataFrame variants), dataframe_transform_named (dataFrameTransform with "mean"/"cumsum"/["sum","mean"]), series_compare_pair (seriesNe/Gt/Le/Eq Series-to-Series).
+- **Metric**: 690 (previous best: 687, delta: +3)
 
-### Iteration 365 — 2026-06-21 08:19 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27898423525)
-- **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: at_iat (seriesAt+seriesIat+dataFrameAt+dataFrameIat), filter_series, truncate_df.
-- **Metric**: 684 (previous best: 681, delta: +3)
-- **Commit**: ba4082e
-- **Notes**: Python files pass py_compile. Bun unavailable; acceptance based on file count (681+3=684).
-
-### Iters 362–364 — ✅ (675→681): 363: merge_asof/cross_join/join_all (+3); 364: shift_diff/sort_ops/pow_mod (+3); 362: phantom.
+### Iters 363–366 — ✅ (675→690): 363: merge_asof/cross_join/join_all (+3); 364: shift_diff/sort_ops/pow_mod (+3); 365: at_iat/filter_series/truncate_df (+3); 366: convert_dtypes/series_format_table/str_findall_expand (+3).
 
 ### Iters 343–361 — ⚠️ All phantom: commits never landed on canonical branch; real baseline was 675 throughout.
 
