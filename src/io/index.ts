@@ -59,3 +59,6 @@ export type {
 // Node / Bun.
 export { toExcel } from "./to_excel.ts";
 export type { ToExcelOptions } from "./to_excel.ts";
+
+export { readSas } from "./read_sas.ts";
+export type { ReadSasOptions } from "./read_sas.ts";

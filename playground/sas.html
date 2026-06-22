@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb — readSas (SAS XPORT reader)</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav>
+      <a href="index.html">← tsb playground</a>
+    </nav>
+
+    <h1><code>readSas</code> — SAS XPORT reader</h1>
+    <p>
+      <code>readSas(data)</code> reads a SAS XPORT v5 (<code>.xpt</code>) file and returns a
+      <code>DataFrame</code>. SAS XPORT is a portable format widely used by the US FDA and CDC for
+      data submissions.
+    </p>
+
+    <h2>Supported features</h2>
+    <ul>
+      <li>SAS XPORT Version 5 (<code>.xpt</code> files)</li>
+      <li>Numeric variables (IBM 370 hex double-precision floating point)</li>
+      <li>Character variables (fixed-width ASCII strings)</li>
+      <li>Missing numeric values → <code>null</code></li>
+      <li>Optional index column via <code>options.index</code></li>
+    </ul>
+
+    <h2>Basic usage</h2>
+    <pre><code>import { readSas } from "tsb";
+import { readFileSync } from "node:fs";
+
+// Load from disk
+const buf = new Uint8Array(readFileSync("data.xpt").buffer);
+const df = readSas(buf);
+df.head();
+
+// With index column
+const df2 = readSas(buf, { index: "SUBJID" });
+</code></pre>
+
+    <h2>Options</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Type</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>index</code></td>
+          <td><code>string | null</code></td>
+          <td><code>null</code></td>
+          <td>Column to use as the DataFrame index. <code>null</code> = default integer index.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>IBM 370 floating-point</h2>
+    <p>
+      SAS XPORT stores numeric values as IBM System/370 hexadecimal double-precision floating-point
+      numbers. This is <em>different</em> from IEEE 754 (which JavaScript and most modern systems
+      use). <code>readSas</code> automatically converts IBM 370 doubles to IEEE 754.
+    </p>
+    <pre><code>// IBM 370 double format:
+// Byte 0: [sign (1 bit)][exponent (7 bits, excess-64, base-16)]
+// Bytes 1–7: [56-bit mantissa (hexadecimal fraction)]
+// value = (-1)^sign × 16^(exp−64) × mantissa / 2^56
+</code></pre>
+
+    <h2>Missing values</h2>
+    <p>
+      SAS encodes missing numeric values using a special first-byte: <code>0x2e</code>
+      (<code>'.'</code>) for the standard missing value, and <code>0x41–0x5A</code>
+      (<code>A–Z</code>) for special missings. <code>readSas</code> maps all of these to
+      <code>null</code>.
+    </p>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="csv.html"><code>readCsv</code></a></li>
+      <li><a href="json.html"><code>readJson</code></a></li>
+      <li><a href="stata.html"><code>readStata</code></a></li>
+      <li><a href="parquet.html"><code>readParquet</code></a></li>
+    </ul>
+  </body>
+</html>

@@ -48,3 +48,14 @@ export {
   USThanksgivingDay,
   USChristmasDay,
 } from "./us_holidays.ts";
+
+export {
+  QuarterEnd,
+  QuarterBegin,
+  BMonthEnd,
+  BMonthBegin,
+  BYearEnd,
+  BYearBegin,
+} from "./offsets.ts";
+
+export { toOffset, inferFreq, FREQ_ALIASES } from "./frequencies.ts";

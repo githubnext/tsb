@@ -907,3 +907,20 @@ export type {
   HolidayOptions,
   HolidayCalendarOptions,
 } from "./tseries/index.ts";
+
+// pd.tseries.offsets — extended date offset classes
+export {
+  QuarterEnd,
+  QuarterBegin,
+  BMonthEnd,
+  BMonthBegin,
+  BYearEnd,
+  BYearBegin,
+} from "./tseries/offsets.ts";
+
+// pd.tseries.frequencies — frequency string utilities
+export { toOffset, inferFreq, FREQ_ALIASES } from "./tseries/frequencies.ts";
+
+// io.read_sas — SAS XPORT reader
+export { readSas } from "./io/read_sas.ts";
+export type { ReadSasOptions } from "./io/read_sas.ts";
