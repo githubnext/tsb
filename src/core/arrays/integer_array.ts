@@ -163,7 +163,9 @@ export class IntegerArray extends MaskedArray<number> {
     let hasNonNa = false;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       total += this._data[i] as number;
@@ -178,7 +180,9 @@ export class IntegerArray extends MaskedArray<number> {
     let count = 0;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       total += this._data[i] as number;
@@ -192,11 +196,15 @@ export class IntegerArray extends MaskedArray<number> {
     let result: number | null = null;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       const v = this._data[i] as number;
-      if (result === null || v < result) result = v;
+      if (result === null || v < result) {
+        result = v;
+      }
     }
     return result;
   }
@@ -206,11 +214,15 @@ export class IntegerArray extends MaskedArray<number> {
     let result: number | null = null;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       const v = this._data[i] as number;
-      if (result === null || v > result) result = v;
+      if (result === null || v > result) {
+        result = v;
+      }
     }
     return result;
   }
@@ -315,7 +327,9 @@ export class IntegerArray extends MaskedArray<number> {
       throw new TypeError(`IntegerArray.astype: unknown dtype "${dtype}"`);
     }
     const data = this._data.map((v, i) => {
-      if (this._mask[i]) return 0;
+      if (this._mask[i]) {
+        return 0;
+      }
       checkBounds(v, dtype);
       return v;
     });

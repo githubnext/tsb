@@ -103,7 +103,9 @@ export class FloatingArray extends MaskedArray<number> {
     let hasNonNa = false;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       total += this._data[i] as number;
@@ -118,7 +120,9 @@ export class FloatingArray extends MaskedArray<number> {
     let count = 0;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       total += this._data[i] as number;
@@ -132,11 +136,15 @@ export class FloatingArray extends MaskedArray<number> {
     let result: number | null = null;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       const v = this._data[i] as number;
-      if (result === null || v < result) result = v;
+      if (result === null || v < result) {
+        result = v;
+      }
     }
     return result;
   }
@@ -146,11 +154,15 @@ export class FloatingArray extends MaskedArray<number> {
     let result: number | null = null;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       const v = this._data[i] as number;
-      if (result === null || v > result) result = v;
+      if (result === null || v > result) {
+        result = v;
+      }
     }
     return result;
   }
@@ -163,11 +175,15 @@ export class FloatingArray extends MaskedArray<number> {
   /** Standard deviation of non-NA elements (sample, ddof=1). */
   std(skipna = true, ddof = 1): number | null {
     const m = this.mean(skipna);
-    if (m === null) return null;
+    if (m === null) {
+      return null;
+    }
     let sumSq = 0;
     let count = 0;
     for (let i = 0; i < this._data.length; i++) {
-      if (this._mask[i]) continue;
+      if (this._mask[i]) {
+        continue;
+      }
       const d = (this._data[i] as number) - m;
       sumSq += d * d;
       count++;
@@ -264,7 +280,9 @@ export class FloatingArray extends MaskedArray<number> {
       throw new TypeError(`FloatingArray.astype: unknown dtype "${dtype}"`);
     }
     const data = this._data.map((v, i) => {
-      if (this._mask[i]) return 0;
+      if (this._mask[i]) {
+        return 0;
+      }
       return dtype === "Float32" ? Math.fround(v) : v;
     });
     return FloatingArray._fromRaw(data, this._mask.slice(), dtype);

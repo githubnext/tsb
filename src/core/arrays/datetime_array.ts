@@ -121,8 +121,12 @@ export class DatetimeArray {
    */
   at(i: number): Timestamp | null {
     const idx = i < 0 ? this._data.length + i : i;
-    if (idx < 0 || idx >= this._data.length) return null;
-    if (this._mask[idx]) return null;
+    if (idx < 0 || idx >= this._data.length) {
+      return null;
+    }
+    if (this._mask[idx]) {
+      return null;
+    }
     return this._data[idx] ?? null;
   }
 
@@ -217,9 +221,13 @@ export class DatetimeArray {
   min(): Timestamp | null {
     let result: Timestamp | null = null;
     for (let i = 0; i < this._data.length; i++) {
-      if (this._mask[i]) continue;
+      if (this._mask[i]) {
+        continue;
+      }
       const v = this._data[i] as Timestamp;
-      if (result === null || v._utcMs < result._utcMs) result = v;
+      if (result === null || v._utcMs < result._utcMs) {
+        result = v;
+      }
     }
     return result;
   }
@@ -228,9 +236,13 @@ export class DatetimeArray {
   max(): Timestamp | null {
     let result: Timestamp | null = null;
     for (let i = 0; i < this._data.length; i++) {
-      if (this._mask[i]) continue;
+      if (this._mask[i]) {
+        continue;
+      }
       const v = this._data[i] as Timestamp;
-      if (result === null || v._utcMs > result._utcMs) result = v;
+      if (result === null || v._utcMs > result._utcMs) {
+        result = v;
+      }
     }
     return result;
   }
@@ -243,7 +255,9 @@ export class DatetimeArray {
     const mask = this._mask;
     return {
       next() {
-        if (i >= data.length) return { value: null, done: true };
+        if (i >= data.length) {
+          return { value: null, done: true };
+        }
         const value = mask[i] ? null : (data[i] ?? null);
         i++;
         return { value, done: false };

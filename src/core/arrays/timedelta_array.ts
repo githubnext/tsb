@@ -112,8 +112,12 @@ export class TimedeltaArray {
    */
   at(i: number): Timedelta | null {
     const idx = i < 0 ? this._data.length + i : i;
-    if (idx < 0 || idx >= this._data.length) return null;
-    if (this._mask[idx]) return null;
+    if (idx < 0 || idx >= this._data.length) {
+      return null;
+    }
+    if (this._mask[idx]) {
+      return null;
+    }
     return this._data[idx] ?? null;
   }
 
@@ -257,7 +261,9 @@ export class TimedeltaArray {
     let hasNonNa = false;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
       total += (this._data[i] as Timedelta).totalMilliseconds;
@@ -270,9 +276,13 @@ export class TimedeltaArray {
   min(): Timedelta | null {
     let result: Timedelta | null = null;
     for (let i = 0; i < this._data.length; i++) {
-      if (this._mask[i]) continue;
+      if (this._mask[i]) {
+        continue;
+      }
       const v = this._data[i] as Timedelta;
-      if (result === null || v.totalMilliseconds < result.totalMilliseconds) result = v;
+      if (result === null || v.totalMilliseconds < result.totalMilliseconds) {
+        result = v;
+      }
     }
     return result;
   }
@@ -281,9 +291,13 @@ export class TimedeltaArray {
   max(): Timedelta | null {
     let result: Timedelta | null = null;
     for (let i = 0; i < this._data.length; i++) {
-      if (this._mask[i]) continue;
+      if (this._mask[i]) {
+        continue;
+      }
       const v = this._data[i] as Timedelta;
-      if (result === null || v.totalMilliseconds > result.totalMilliseconds) result = v;
+      if (result === null || v.totalMilliseconds > result.totalMilliseconds) {
+        result = v;
+      }
     }
     return result;
   }
@@ -305,7 +319,9 @@ export class TimedeltaArray {
     const mask = this._mask;
     return {
       next() {
-        if (i >= data.length) return { value: null, done: true };
+        if (i >= data.length) {
+          return { value: null, done: true };
+        }
         const value = mask[i] ? null : (data[i] ?? null);
         i++;
         return { value, done: false };

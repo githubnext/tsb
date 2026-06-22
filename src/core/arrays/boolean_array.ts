@@ -79,10 +79,14 @@ export class BooleanArray extends MaskedArray<boolean> {
   any(skipna = true): boolean | null {
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
-      if (this._data[i]) return true;
+      if (this._data[i]) {
+        return true;
+      }
     }
     return false;
   }
@@ -94,10 +98,14 @@ export class BooleanArray extends MaskedArray<boolean> {
   all(skipna = true): boolean | null {
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
-      if (!this._data[i]) return false;
+      if (!this._data[i]) {
+        return false;
+      }
     }
     return true;
   }
@@ -107,10 +115,14 @@ export class BooleanArray extends MaskedArray<boolean> {
     let count = 0;
     for (let i = 0; i < this._data.length; i++) {
       if (this._mask[i]) {
-        if (!skipna) return null;
+        if (!skipna) {
+          return null;
+        }
         continue;
       }
-      if (this._data[i]) count++;
+      if (this._data[i]) {
+        count++;
+      }
     }
     return count;
   }
@@ -137,15 +149,15 @@ export class BooleanArray extends MaskedArray<boolean> {
       const bm = other._mask[i] === true;
       const av = this._data[i] === true;
       const bv = other._data[i] === true;
-      if (!am && !bm) {
+      if (!(am || bm)) {
         // Both known
         data.push(av && bv);
         mask.push(false);
-      } else if (!am && !av) {
+      } else if (!(am || av)) {
         // a is false → false AND anything = false
         data.push(false);
         mask.push(false);
-      } else if (!bm && !bv) {
+      } else if (!(bm || bv)) {
         // b is false → anything AND false = false
         data.push(false);
         mask.push(false);
@@ -178,7 +190,7 @@ export class BooleanArray extends MaskedArray<boolean> {
       const bm = other._mask[i] === true;
       const av = this._data[i] === true;
       const bv = other._data[i] === true;
-      if (!am && !bm) {
+      if (!(am || bm)) {
         // Both known
         data.push(av || bv);
         mask.push(false);

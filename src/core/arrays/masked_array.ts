@@ -69,8 +69,12 @@ export abstract class MaskedArray<T extends Scalar> {
    */
   at(i: number): T | null {
     const idx = i < 0 ? this._data.length + i : i;
-    if (idx < 0 || idx >= this._data.length) return null;
-    if (this._mask[idx]) return null;
+    if (idx < 0 || idx >= this._data.length) {
+      return null;
+    }
+    if (this._mask[idx]) {
+      return null;
+    }
     return this._data[idx] ?? null;
   }
 
@@ -156,7 +160,9 @@ export abstract class MaskedArray<T extends Scalar> {
   dropna(): T[] {
     const out: T[] = [];
     for (let i = 0; i < this._data.length; i++) {
-      if (!this._mask[i]) out.push(this._data[i] as T);
+      if (!this._mask[i]) {
+        out.push(this._data[i] as T);
+      }
     }
     return out;
   }
@@ -169,7 +175,9 @@ export abstract class MaskedArray<T extends Scalar> {
     const mask = this._mask;
     return {
       next() {
-        if (i >= data.length) return { value: null, done: true };
+        if (i >= data.length) {
+          return { value: null, done: true };
+        }
         const value = mask[i] ? null : (data[i] ?? null);
         i++;
         return { value, done: false };

@@ -95,7 +95,9 @@ export const SU = (n: number): WeekdayOffset => ({ weekday: 6, n });
  * - `n === 0`: return `base` unchanged.
  */
 function applyWeekdayOffset(base: Date, { weekday, n }: WeekdayOffset): Date {
-  if (n === 0) return base;
+  if (n === 0) {
+    return base;
+  }
   const baseDow = pdDow(base);
   if (n > 0) {
     const daysToFirst = (weekday - baseDow + 7) % 7;
@@ -119,8 +121,12 @@ export type ObservanceFn = (date: Date) => Date;
  */
 export function nearestWorkday(date: Date): Date {
   const dow = pdDow(date);
-  if (dow === DOW_SAT) return addDays(date, -1);
-  if (dow === DOW_SUN) return addDays(date, 1);
+  if (dow === DOW_SAT) {
+    return addDays(date, -1);
+  }
+  if (dow === DOW_SUN) {
+    return addDays(date, 1);
+  }
   return date;
 }
 
@@ -128,7 +134,9 @@ export function nearestWorkday(date: Date): Date {
  * `sunday_to_monday`: Sunday → next Monday; other days unchanged.
  */
 export function sundayToMonday(date: Date): Date {
-  if (pdDow(date) === DOW_SUN) return addDays(date, 1);
+  if (pdDow(date) === DOW_SUN) {
+    return addDays(date, 1);
+  }
   return date;
 }
 
@@ -137,7 +145,9 @@ export function sundayToMonday(date: Date): Date {
  */
 export function nextMonday(date: Date): Date {
   const dow = pdDow(date);
-  if (dow === DOW_MON) return date;
+  if (dow === DOW_MON) {
+    return date;
+  }
   return addDays(date, (7 - dow) % 7);
 }
 
@@ -147,8 +157,12 @@ export function nextMonday(date: Date): Date {
  */
 export function nextMondayOrTuesday(date: Date): Date {
   const dow = pdDow(date);
-  if (dow === DOW_SAT) return addDays(date, 3);
-  if (dow === DOW_SUN) return addDays(date, 1);
+  if (dow === DOW_SAT) {
+    return addDays(date, 3);
+  }
+  if (dow === DOW_SUN) {
+    return addDays(date, 1);
+  }
   return date;
 }
 
@@ -168,8 +182,12 @@ export function previousFriday(date: Date): Date {
  */
 export function previousWorkday(date: Date): Date {
   const dow = pdDow(date);
-  if (dow === DOW_SAT) return addDays(date, -1);
-  if (dow === DOW_SUN) return addDays(date, -2);
+  if (dow === DOW_SAT) {
+    return addDays(date, -1);
+  }
+  if (dow === DOW_SUN) {
+    return addDays(date, -2);
+  }
   return date;
 }
 
@@ -304,11 +322,17 @@ export class Holiday {
       }
 
       // Check validity range
-      if (this.startDate != null && date < this.startDate) continue;
-      if (this.endDate != null && date > this.endDate) continue;
+      if (this.startDate != null && date < this.startDate) {
+        continue;
+      }
+      if (this.endDate != null && date > this.endDate) {
+        continue;
+      }
 
       // Check day-of-week filter
-      if (this.daysOfWeek != null && !this.daysOfWeek.includes(pdDow(date))) continue;
+      if (this.daysOfWeek != null && !this.daysOfWeek.includes(pdDow(date))) {
+        continue;
+      }
 
       // Check within query range
       if (date >= rangeStart && date <= rangeEnd) {
