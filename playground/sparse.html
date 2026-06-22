@@ -177,27 +177,53 @@
   </div>
 
   <h2>Quick Start</h2>
-  <pre><code>import { SparseArray, SparseDtype } from "tsb";
+  <div class="playground-block">
+    <div class="playground-header">
+      <span class="playground-label">TypeScript</span>
+      <div class="playground-actions">
+        <button class="playground-run" disabled>▶ Run</button>
+        <button class="playground-reset">↺ Reset</button>
+      </div>
+    </div>
+    <textarea class="playground-editor" spellcheck="false">import { SparseArray, SparseDtype } from "tsb";
 
 // Most values are 0 — sparse storage is efficient
 const arr = SparseArray.fromDense([1, 0, 0, 0, 2, 0, 0, 3], 0);
-
-arr.length;      // 8
-arr.npoints;     // 3   (only three non-zero values stored)
-arr.density;     // 0.375
-arr.sp_values;   // [1, 2, 3]
-arr.sp_index;    // [0, 4, 7]
-arr.toDense();   // [1, 0, 0, 0, 2, 0, 0, 3]
+console.log("length:", arr.length);        // 8
+console.log("npoints:", arr.npoints);      // 3 (only three non-zero values stored)
+console.log("density:", arr.density);      // 0.375
+console.log("sp_values:", arr.sp_values);  // [1, 2, 3]
+console.log("sp_index:", arr.sp_index);    // [0, 4, 7]
+console.log("toDense:", arr.toDense());    // [1, 0, 0, 0, 2, 0, 0, 3]
 
 // NaN fill (the pandas default — suitable for gap-filled sensor data)
 const gaps = SparseArray.fromDense([1.2, NaN, NaN, NaN, NaN, 5.6]);
-gaps.density;    // 0.333
-gaps.sum();      // 6.8    (NaN positions are skipped)
-gaps.mean();     // 3.4    (mean of non-NaN)
+console.log("gap density:", gaps.density); // 0.333
+console.log("gap sum:", gaps.sum());       // 6.8  (NaN positions are skipped)
+console.log("gap mean:", gaps.mean());     // 3.4  (mean of non-NaN)
 
 // SparseDtype
 const dt = new SparseDtype("float64", 0);
-dt.name;         // "Sparse[float64, 0]"</code></pre>
+console.log("dtype name:", dt.name);       // "Sparse[float64, 0]"</textarea>
+    <textarea class="playground-python" style="display:none">import pandas as pd
+
+# Most values are 0 — sparse storage is efficient
+arr = pd.arrays.SparseArray([1, 0, 0, 0, 2, 0, 0, 3], fill_value=0)
+print("length:", len(arr))
+print("npoints:", arr.sp_index.npoints)
+print("density:", arr.density)
+
+# NaN fill (the pandas default)
+gaps = pd.arrays.SparseArray([1.2, float("nan"), float("nan"), float("nan"), float("nan"), 5.6])
+print("gap density:", gaps.density)
+print("gap sum:", gaps.to_dense().sum())
+
+# SparseDtype
+dt = pd.SparseDtype("float64", fill_value=0)
+print("dtype name:", dt.name)</textarea>
+    <div class="playground-output">Click ▶ Run to execute</div>
+    <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+  </div>
 
   <h2>Interactive Demo</h2>
   <p>Enter a comma-separated list of numbers and choose a fill value to see how SparseArray stores your data.</p>
@@ -251,40 +277,106 @@ dt.name;         // "Sparse[float64, 0]"</code></pre>
   <h2>Use Cases</h2>
 
   <h3>Sensor data with gaps</h3>
-  <pre><code>// Temperature readings — many missing (NaN) due to sensor faults
+  <div class="playground-block">
+    <div class="playground-header">
+      <span class="playground-label">TypeScript</span>
+      <div class="playground-actions">
+        <button class="playground-run" disabled>▶ Run</button>
+        <button class="playground-reset">↺ Reset</button>
+      </div>
+    </div>
+    <textarea class="playground-editor" spellcheck="false">import { SparseArray } from "tsb";
+
+// Temperature readings — many missing (NaN) due to sensor faults
 const readings = SparseArray.fromDense([
   22.1, NaN, NaN, NaN, NaN, NaN, 23.4, NaN, NaN, 21.9
 ]);
-console.log(readings.density);  // 0.3 — only 30% have real readings
-console.log(readings.mean());   // 22.47 — average of valid readings
-console.log(readings.fillna(readings.mean()).toDense());
-// Fills gaps with the mean</code></pre>
+console.log("density:", readings.density);              // 0.3 — only 30% have real readings
+console.log("mean:", readings.mean().toFixed(2));        // 22.47 — average of valid readings
+console.log("filled:", readings.fillna(readings.mean()).toDense());</textarea>
+    <textarea class="playground-python" style="display:none">import pandas as pd
+import numpy as np
+
+readings = pd.arrays.SparseArray([
+  22.1, np.nan, np.nan, np.nan, np.nan, np.nan, 23.4, np.nan, np.nan, 21.9
+])
+print("density:", readings.density)
+arr = readings.to_dense()
+mean_val = arr.dropna().mean() if hasattr(arr, "dropna") else arr[~np.isnan(arr)].mean()
+print("mean:", round(mean_val, 2))</textarea>
+    <div class="playground-output">Click ▶ Run to execute</div>
+    <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+  </div>
 
   <h3>Feature matrix (recommendation systems)</h3>
-  <pre><code>// User × Item rating matrix — most users haven't rated most items
+  <div class="playground-block">
+    <div class="playground-header">
+      <span class="playground-label">TypeScript</span>
+      <div class="playground-actions">
+        <button class="playground-run" disabled>▶ Run</button>
+        <button class="playground-reset">↺ Reset</button>
+      </div>
+    </div>
+    <textarea class="playground-editor" spellcheck="false">import { SparseArray } from "tsb";
+
+// User × Item rating matrix — most users haven't rated most items
 const user1Ratings = SparseArray.fromDense(
   [0,0,0,4,0,0,0,0,5,0,0,0,0,3,0,0,0,0,0,0],
   0  // fill with 0 (= "not rated")
 );
-console.log(user1Ratings.density);   // 0.15  — 85% sparse
-console.log(user1Ratings.npoints);   // 3     — only 3 items rated
-console.log(user1Ratings.sum());     // 12    — total rating points</code></pre>
+console.log("density:", user1Ratings.density);   // 0.15  — 85% sparse
+console.log("npoints:", user1Ratings.npoints);   // 3     — only 3 items rated
+console.log("sum:", user1Ratings.sum());         // 12    — total rating points</textarea>
+    <textarea class="playground-python" style="display:none">import pandas as pd
+
+user1_ratings = pd.arrays.SparseArray(
+  [0,0,0,4,0,0,0,0,5,0,0,0,0,3,0,0,0,0,0,0],
+  fill_value=0
+)
+print("density:", user1_ratings.density)
+print("npoints:", user1_ratings.sp_index.npoints)
+print("sum:", sum(v for v in user1_ratings.to_dense() if v != 0))</textarea>
+    <div class="playground-output">Click ▶ Run to execute</div>
+    <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+  </div>
 
   <h3>Sparse boolean flags</h3>
-  <pre><code>// Which of 1000 products have a discount applied (most don't)
+  <div class="playground-block">
+    <div class="playground-header">
+      <span class="playground-label">TypeScript</span>
+      <div class="playground-actions">
+        <button class="playground-run" disabled>▶ Run</button>
+        <button class="playground-reset">↺ Reset</button>
+      </div>
+    </div>
+    <textarea class="playground-editor" spellcheck="false">import { SparseArray } from "tsb";
+
+// Which of 1000 products have a discount applied (most don't)
 const hasDiscount = SparseArray.fromDense(
   Array.from({ length: 1000 }, (_, i) => (i % 50 === 0 ? 1 : 0)),
   0
 );
-console.log(hasDiscount.npoints);   // 20
-console.log(hasDiscount.density);   // 0.02  — only 2% have discounts</code></pre>
+console.log("npoints:", hasDiscount.npoints);   // 20
+console.log("density:", hasDiscount.density);   // 0.02  — only 2% have discounts</textarea>
+    <textarea class="playground-python" style="display:none">import pandas as pd
 
-  <script type="module">
-    import { SparseArray, SparseDtype } from "./playground-runtime.js";
-    window.SparseArray = SparseArray;
-    window.SparseDtype = SparseDtype;
+has_discount = pd.arrays.SparseArray(
+  [1 if i % 50 == 0 else 0 for i in range(1000)],
+  fill_value=0
+)
+print("npoints:", has_discount.sp_index.npoints)
+print("density:", has_discount.density)</textarea>
+    <div class="playground-output">Click ▶ Run to execute</div>
+    <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+  </div>
 
+  <script>
     window.runDemo = function() {
+      const SparseArray = window.__tsb && window.__tsb.SparseArray;
+      if (!SparseArray) {
+        alert("tsb runtime not yet loaded — please wait a moment and try again.");
+        return;
+      }
       const raw = document.getElementById("denseInput").value;
       const fillRaw = document.getElementById("fillInput").value;
       const output = document.getElementById("demoOutput");
@@ -350,9 +442,7 @@ max:  ${arr.max()}
 min:  ${arr.min()}</div>
       `;
     };
-
-    // Run on load
-    window.runDemo();
   </script>
+  <script type="module" src="playground-runtime.js"></script>
 </body>
 </html>
