@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — SparseArray &amp; SparseDtype</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { color: var(--text); margin: 2rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { color: var(--accent); margin: 1.5rem 0 0.5rem; font-size: 1rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    .subtitle { color: #8b949e; font-size: 1.1rem; margin-bottom: 2rem; }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    code { font-family: var(--font-mono); font-size: 0.9rem; }
+    .badge {
+      display: inline-block;
+      background: var(--green);
+      color: #000;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    .tip {
+      background: #1c2128;
+      border-left: 3px solid var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 0 4px 4px 0;
+      margin: 1rem 0;
+      color: #8b949e;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th { background: var(--surface); padding: 0.5rem 1rem; text-align: left; color: var(--accent); border: 1px solid var(--border); }
+    td { padding: 0.5rem 1rem; border: 1px solid var(--border); }
+    .sparse-bar {
+      display: flex;
+      gap: 2px;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+    .sparse-cell {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+    .sparse-cell.fill { background: #1c2128; color: #484f58; border: 1px dashed var(--border); }
+    .sparse-cell.stored { background: #1f4f36; color: var(--green); border: 1px solid var(--green); font-weight: 600; }
+    .stat-row { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      flex: 1;
+      min-width: 120px;
+    }
+    .stat-label { font-size: 0.75rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-value { font-size: 1.5rem; color: var(--accent); font-family: var(--font-mono); font-weight: 700; margin-top: 0.25rem; }
+    .density-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      margin: 0.5rem 0;
+      overflow: hidden;
+    }
+    .density-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    input[type="text"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      width: 100%;
+      font-size: 0.9rem;
+    }
+    input[type="number"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      width: 120px;
+      font-size: 0.9rem;
+    }
+    button {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    button:hover { opacity: 0.85; }
+    label { color: #8b949e; font-size: 0.9rem; display: block; margin-top: 0.75rem; margin-bottom: 0.25rem; }
+    .output {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      min-height: 60px;
+    }
+    .output.error { border-color: var(--red); color: var(--red); }
+  </style>
+</head>
+<body>
+  <div><a href="index.html">← tsb playground</a></div>
+  <br />
+  <h1>🕳️ SparseArray &amp; SparseDtype</h1>
+  <p class="subtitle">Memory-efficient storage for arrays where most values share a common fill value. Mirrors <code>pandas.arrays.SparseArray</code> and <code>pandas.SparseDtype</code>.</p>
+  <span class="badge">✅ Complete</span>
+
+  <h2>Overview</h2>
+  <p>
+    A <strong>SparseArray</strong> stores only the <em>non-fill</em> values and their positions.
+    When most elements share a common value — zeros in a sparse matrix, NaN in sensor data with
+    many gaps, or false in a boolean feature array — sparse storage dramatically reduces memory use.
+  </p>
+  <p>
+    The <strong>fill_value</strong> is the implicit value for all positions not explicitly stored.
+    Common choices are <code>0</code> (numeric zero), <code>NaN</code> (missing values), or
+    <code>false</code> (boolean). By default tsb uses <code>NaN</code> (matching pandas behaviour).
+  </p>
+
+  <div class="tip">
+    💡 <strong>When to use SparseArray</strong>: when density &lt; ~0.25 (fewer than 25% of values
+    are non-fill). Below that threshold, sparse storage saves memory and the bookkeeping overhead
+    is worth it.
+  </div>
+
+  <h2>Quick Start</h2>
+  <pre><code>import { SparseArray, SparseDtype } from "tsb";
+
+// Most values are 0 — sparse storage is efficient
+const arr = SparseArray.fromDense([1, 0, 0, 0, 2, 0, 0, 3], 0);
+
+arr.length;      // 8
+arr.npoints;     // 3   (only three non-zero values stored)
+arr.density;     // 0.375
+arr.sp_values;   // [1, 2, 3]
+arr.sp_index;    // [0, 4, 7]
+arr.toDense();   // [1, 0, 0, 0, 2, 0, 0, 3]
+
+// NaN fill (the pandas default — suitable for gap-filled sensor data)
+const gaps = SparseArray.fromDense([1.2, NaN, NaN, NaN, NaN, 5.6]);
+gaps.density;    // 0.333
+gaps.sum();      // 6.8    (NaN positions are skipped)
+gaps.mean();     // 3.4    (mean of non-NaN)
+
+// SparseDtype
+const dt = new SparseDtype("float64", 0);
+dt.name;         // "Sparse[float64, 0]"</code></pre>
+
+  <h2>Interactive Demo</h2>
+  <p>Enter a comma-separated list of numbers and choose a fill value to see how SparseArray stores your data.</p>
+
+  <label>Dense data (comma-separated, use "nan" for NaN):</label>
+  <input type="text" id="denseInput" value="1, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0" />
+  <label>Fill value:</label>
+  <input type="number" id="fillInput" value="0" step="any" />
+  <button onclick="runDemo()">Build SparseArray</button>
+
+  <div id="demoOutput" style="margin-top: 1rem;"></div>
+
+  <h2>API Reference</h2>
+
+  <h3>SparseArray.fromDense(data, fill_value?, subtype?)</h3>
+  <p>Create a SparseArray from a dense array. Values equal to <code>fill_value</code> are not stored.</p>
+
+  <h3>SparseArray.fromSparse(length, indices, values, fill_value?, subtype?)</h3>
+  <p>Create a SparseArray directly from COO (Coordinate) sparse components.</p>
+
+  <h3>Properties</h3>
+  <table>
+    <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+    <tr><td><code>length</code></td><td><code>number</code></td><td>Total logical length (including fill positions)</td></tr>
+    <tr><td><code>npoints</code></td><td><code>number</code></td><td>Number of explicitly stored (non-fill) values</td></tr>
+    <tr><td><code>density</code></td><td><code>number</code></td><td>Fraction stored: npoints / length (0–1)</td></tr>
+    <tr><td><code>fill_value</code></td><td><code>number</code></td><td>Implicit value for positions not stored</td></tr>
+    <tr><td><code>sp_values</code></td><td><code>number[]</code></td><td>Array of stored (non-fill) values</td></tr>
+    <tr><td><code>sp_index</code></td><td><code>number[]</code></td><td>Positions (0-based) of stored values</td></tr>
+    <tr><td><code>dtype</code></td><td><code>SparseDtype</code></td><td>Describes element type and fill value</td></tr>
+  </table>
+
+  <h3>Methods</h3>
+  <table>
+    <tr><th>Method</th><th>Description</th></tr>
+    <tr><td><code>at(i)</code></td><td>Value at index i (fill_value for fill positions)</td></tr>
+    <tr><td><code>toDense()</code></td><td>Convert to a regular number[] array</td></tr>
+    <tr><td><code>toCoo()</code></td><td>Return {indices, values} COO representation</td></tr>
+    <tr><td><code>fillna(value)</code></td><td>Replace NaN values; returns new SparseArray</td></tr>
+    <tr><td><code>withFillValue(v)</code></td><td>Change fill value; returns new SparseArray</td></tr>
+    <tr><td><code>slice(start, end?)</code></td><td>Slice to [start, end); returns new SparseArray</td></tr>
+    <tr><td><code>add(scalar)</code></td><td>Add a scalar to all values; returns new SparseArray</td></tr>
+    <tr><td><code>mul(scalar)</code></td><td>Multiply by a scalar; returns new SparseArray</td></tr>
+    <tr><td><code>sum()</code></td><td>Sum of all values (NaN-skipped)</td></tr>
+    <tr><td><code>mean()</code></td><td>Mean of all non-NaN values</td></tr>
+    <tr><td><code>max()</code></td><td>Maximum value (NaN-ignored)</td></tr>
+    <tr><td><code>min()</code></td><td>Minimum value (NaN-ignored)</td></tr>
+    <tr><td><code>std(ddof?)</code></td><td>Standard deviation (default ddof=1)</td></tr>
+  </table>
+
+  <h2>Use Cases</h2>
+
+  <h3>Sensor data with gaps</h3>
+  <pre><code>// Temperature readings — many missing (NaN) due to sensor faults
+const readings = SparseArray.fromDense([
+  22.1, NaN, NaN, NaN, NaN, NaN, 23.4, NaN, NaN, 21.9
+]);
+console.log(readings.density);  // 0.3 — only 30% have real readings
+console.log(readings.mean());   // 22.47 — average of valid readings
+console.log(readings.fillna(readings.mean()).toDense());
+// Fills gaps with the mean</code></pre>
+
+  <h3>Feature matrix (recommendation systems)</h3>
+  <pre><code>// User × Item rating matrix — most users haven't rated most items
+const user1Ratings = SparseArray.fromDense(
+  [0,0,0,4,0,0,0,0,5,0,0,0,0,3,0,0,0,0,0,0],
+  0  // fill with 0 (= "not rated")
+);
+console.log(user1Ratings.density);   // 0.15  — 85% sparse
+console.log(user1Ratings.npoints);   // 3     — only 3 items rated
+console.log(user1Ratings.sum());     // 12    — total rating points</code></pre>
+
+  <h3>Sparse boolean flags</h3>
+  <pre><code>// Which of 1000 products have a discount applied (most don't)
+const hasDiscount = SparseArray.fromDense(
+  Array.from({ length: 1000 }, (_, i) => (i % 50 === 0 ? 1 : 0)),
+  0
+);
+console.log(hasDiscount.npoints);   // 20
+console.log(hasDiscount.density);   // 0.02  — only 2% have discounts</code></pre>
+
+  <script type="module">
+    import { SparseArray, SparseDtype } from "./playground-runtime.js";
+    window.SparseArray = SparseArray;
+    window.SparseDtype = SparseDtype;
+
+    window.runDemo = function() {
+      const raw = document.getElementById("denseInput").value;
+      const fillRaw = document.getElementById("fillInput").value;
+      const output = document.getElementById("demoOutput");
+
+      const fill = parseFloat(fillRaw);
+      const data = raw.split(",").map(s => {
+        const t = s.trim().toLowerCase();
+        return (t === "nan" || t === "") ? NaN : parseFloat(t);
+      });
+
+      if (data.some(isNaN) && fill === 0) {
+        // NaN values that aren't fill
+      }
+
+      const arr = SparseArray.fromDense(data, fill);
+      const density = arr.density;
+      const pct = (density * 100).toFixed(1);
+
+      let cells = "";
+      for (let i = 0; i < arr.length; i++) {
+        const v = arr.at(i);
+        const isStored = arr.sp_index.includes(i);
+        const display = isNaN(v) ? "NaN" : String(v);
+        cells += `<div class="sparse-cell ${isStored ? "stored" : "fill"}" title="index ${i}">${display}</div>`;
+      }
+
+      const memSaved = ((1 - density) * 100).toFixed(1);
+
+      output.innerHTML = `
+        <div class="sparse-bar">${cells}</div>
+        <p style="font-size:0.8rem;color:#8b949e">
+          🟩 Stored (non-fill) &nbsp;&nbsp; ⬛ Fill positions (not stored in memory)
+        </p>
+        <div class="stat-row">
+          <div class="stat-box">
+            <div class="stat-label">Length</div>
+            <div class="stat-value">${arr.length}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Stored (npoints)</div>
+            <div class="stat-value">${arr.npoints}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Fill positions</div>
+            <div class="stat-value">${arr.length - arr.npoints}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Density</div>
+            <div class="stat-value">${pct}%</div>
+          </div>
+        </div>
+        <div class="density-bar"><div class="density-fill" style="width:${pct}%"></div></div>
+        <p style="font-size:0.85rem;color:#8b949e">
+          🗜️ ${memSaved}% of positions use implicit fill_value — zero memory for those slots.
+        </p>
+        <div class="output">sp_values: [${arr.sp_values.join(", ")}]
+sp_index:  [${arr.sp_index.join(", ")}]
+fill_value: ${arr.fill_value}
+dtype: ${arr.dtype}
+sum:  ${arr.sum()}
+mean: ${arr.mean().toFixed(4)}
+max:  ${arr.max()}
+min:  ${arr.min()}</div>
+      `;
+    };
+
+    // Run on load
+    window.runDemo();
+  </script>
+</body>
+</html>

@@ -924,3 +924,7 @@ export { toOffset, inferFreq, FREQ_ALIASES } from "./tseries/frequencies.ts";
 // io.read_sas — SAS XPORT reader
 export { readSas } from "./io/read_sas.ts";
 export type { ReadSasOptions } from "./io/read_sas.ts";
+
+// pd.arrays.SparseArray / pd.SparseDtype — sparse storage for arrays
+// with many repeated (fill) values
+export { SparseArray, SparseDtype } from "./core/sparse.ts";

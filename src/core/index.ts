@@ -170,3 +170,4 @@ export type {
   IntegerDtypeName,
   FloatingDtypeName,
 } from "./arrays/index.ts";
+export { SparseArray, SparseDtype } from "./sparse.ts";
