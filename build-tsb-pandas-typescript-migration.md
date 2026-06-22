@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-21T17:30:00Z |
-| Iteration Count | 371 |
+| Last Run | 2026-06-22T03:00:00Z |
+| Iteration Count | 372 |
 | Best Metric | 171 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted, accepted |
 
 ---
 
@@ -37,7 +37,8 @@
 - **Metric**: counts `src/**/*.ts` with exports (not index.ts). `df.col(name)`. `df.columns.values` = `readonly string[]`.
 - **Parquet**: Thrift compact: zigzag varints. PLAIN LE. RLE def levels: 4-byte LE prefix.
 - **Arrow/Feather**: FlatBuffer backward builder. Arrow IPC blocks: metaDataLength = 8+paddedMeta; FieldNode/Buffer i64 pairs; Block=24B.
-- **pd.arrays**: `export+import` duplicate — use `import` then `export`. `mask.push(this._mask[i] === true)`. `Timedelta.fromMilliseconds(ms)`. Protected fields accessible same-class.
+- **IBM 370 floats**: Missing = byte0 `0x2e`/`A-Z`. `mantissa = 16^(exp-64) × mantissaInt / 2^56`. Use BigInt in encoder.
+- **toOffset/inferFreq**: Multiplier prefix, week anchor, null for unknown/empty.
 
 ---
 
@@ -49,15 +50,15 @@
 
 ## 📊 Iteration History
 
-### Iteration 371 — 2026-06-21 17:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27924367245)
+### Iteration 372 — 2026-06-22 03:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27940628202)
 - **Status**: ⏳ pending-ci
-- **Change**: Add `pandas.tseries.holiday` — `AbstractHolidayCalendar`, `Holiday`, `USFederalHolidayCalendar` with all 11 US federal holidays. WeekdayOffset type for floating holidays (MLK Day, Presidents Day, Memorial Day, Labor Day, Columbus Day, Thanksgiving). 6 observance functions. Holiday registry. Fix Biome `useBlockStatements`+`useSimplifiedLogicExpression` errors in pd.arrays files. Commits bb36f1e+8f9d3f1.
-- **Metric**: 167 → 171 (Δ+4)
+- **Change**: Add `tseries/offsets` (QuarterEnd, QuarterBegin, BMonthEnd, BMonthBegin, BYearEnd, BYearBegin), `tseries/frequencies` (toOffset, inferFreq, FREQ_ALIASES), `io/read_sas` (SAS XPORT v5: IBM 370 float conversion, namestr parsing). Tests + playground/sas.html. Commit ce77f54.
+- **Metric**: 169 → 172 (Δ+3, pending CI confirmation)
 
-### Iteration 370 — 2026-06-21 13:43 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27905740764)
-- **Status**: ⏳ pending-ci
-- **Change**: Add `pd.arrays` namespace — 7 new files: `src/core/arrays/{masked_array,integer_array,floating_array,boolean_array,string_array,datetime_array,timedelta_array}.ts`. MaskedArray abstract base + 6 concrete nullable types. Kleene 3-valued logic in BooleanArray. Fix pre-existing hdf.ts BigInt separator error. Commits 79843b1+9236dc8.
-- **Metric**: 160 → 167 (Δ+7)
+### Iters 370–372 — ⏳ pending-ci
+- 370: `pd.arrays` — 7 MaskedArray types (masked/int/float/bool/string/datetime/timedelta). 160→167.
+- 371: `tseries/holiday` — AbstractHolidayCalendar + USFederalHolidayCalendar (11 holidays, WeekdayOffset, 6 observance fns). 167→171.
+- 372: `tseries/offsets` (QE/QB/BME/BMB/BYE/BYS), `tseries/frequencies` (toOffset/inferFreq/FREQ_ALIASES), `io/read_sas` (XPORT v5, IBM 370). 169→172.
 
 ### Iters 367–369 — accepted/pending-ci
 - 367: `src/io/to_excel.ts` — `toExcel()` pure-TS ZIP+OOXML. 157→158.
