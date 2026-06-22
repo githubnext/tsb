@@ -404,7 +404,7 @@ text = """id   name     val
 4    Dave     400
 5    Eve      500"""
 
-df = pd.read_fwf(io.StringIO(text), index_col="id", skiprows=2, nrows=3)
+df = pd.read_fwf(io.StringIO(text), index_col="id", skiprows=[1], nrows=3)
 print("shape:", df.shape)
 print("index:", list(df.index))
 print("names:", list(df["name"]))

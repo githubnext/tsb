@@ -24,8 +24,6 @@
  *
  * @module
  */
-// biome-ignore lint/correctness/noNodejsModules: ZIP DEFLATE requires node:zlib
-import { deflateRawSync } from "node:zlib";
 import { DataFrame } from "../core/frame.ts";
 import type { Scalar } from "../types.ts";
 
@@ -119,13 +117,11 @@ function buildZip(
 ): Uint8Array {
   const entries: ZipEntry[] = files.map((f) => {
     const nameBytes = ZIP_ENC.encode(f.name);
-    const comp = deflateRawSync(f.data, { level: 6 });
-    const useDeflate = comp.length < f.data.length;
     return {
       nameBytes,
       raw: f.data,
-      compressed: useDeflate ? comp : f.data,
-      method: useDeflate ? 8 : 0,
+      compressed: f.data,
+      method: 0,
       crc: crc32(f.data),
       localOffset: 0,
     };

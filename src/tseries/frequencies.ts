@@ -128,7 +128,7 @@ const WEEK_ANCHOR_MAP: ReadonlyMap<string, number> = new Map([
   ["SUN", 6],
 ]);
 
-const ALIAS_FACTORIES: ReadonlyMap<string, OffsetFactory> = new Map([
+const ALIAS_FACTORIES: ReadonlyMap<string, OffsetFactory> = new Map<string, OffsetFactory>([
   ["D", (n) => new Day(n)],
   ["B", (n) => new BusinessDay(n)],
   ["W", (n) => new Week(n)],
