@@ -868,3 +868,42 @@ export const arrays = {
   DatetimeArray,
   TimedeltaArray,
 } as const;
+
+// pd.tseries — holiday calendars and observance helpers
+export {
+  Holiday,
+  AbstractHolidayCalendar,
+  USFederalHolidayCalendar,
+  USNewYearsDay,
+  USMartinLutherKingJrDay,
+  USPresidentsDay,
+  USMemorialDay,
+  USJuneteenth,
+  USIndependenceDay,
+  USLaborDay,
+  USColumbusDay,
+  USVeteransDay,
+  USThanksgivingDay,
+  USChristmasDay,
+  get_calendar,
+  register_calendar,
+  nearestWorkday,
+  sundayToMonday,
+  nextMonday,
+  nextMondayOrTuesday,
+  previousFriday,
+  previousWorkday,
+  MO,
+  TU,
+  WE,
+  TH,
+  FR,
+  SA,
+  SU,
+} from "./tseries/index.ts";
+export type {
+  WeekdayOffset,
+  ObservanceFn,
+  HolidayOptions,
+  HolidayCalendarOptions,
+} from "./tseries/index.ts";

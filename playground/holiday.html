@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Holiday Calendars (pandas.tseries.holiday)</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d2e;
+      --border: #2e3148;
+      --accent: #6c8ebf;
+      --green: #4caf7d;
+      --red: #e57373;
+      --yellow: #ffd54f;
+      --text: #e0e4f0;
+      --muted: #7a809a;
+      --code-bg: #12141f;
+      --radius: 8px;
+      --font-mono: "Fira Code", "Cascadia Code", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header { margin-bottom: 2rem; }
+    header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.4rem; }
+    header p { color: var(--muted); font-size: 0.95rem; }
+
+    .back { display: inline-block; color: var(--accent); text-decoration: none; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .back:hover { text-decoration: underline; }
+
+    h2 { font-size: 1.2rem; font-weight: 600; margin: 2rem 0 0.75rem; color: var(--accent); }
+    h3 { font-size: 1rem; font-weight: 600; margin: 1.2rem 0 0.5rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .editor-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+    @media (max-width: 640px) { .editor-row { grid-template-columns: 1fr; } }
+
+    textarea {
+      width: 100%;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 0.75rem;
+      resize: vertical;
+      min-height: 180px;
+    }
+    textarea:focus { outline: 1px solid var(--accent); }
+
+    .label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
+
+    button {
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.5rem 1.1rem;
+    }
+    button:hover { opacity: 0.88; }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      overflow: auto;
+      padding: 0.9rem;
+      white-space: pre-wrap;
+    }
+
+    .tag {
+      display: inline-block;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      margin-right: 0.3rem;
+    }
+    .tag-new { background: #1a3a1a; color: var(--green); }
+    .tag-api { background: #1a2a3a; color: var(--accent); }
+
+    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: var(--surface); color: var(--muted); font-weight: 600; }
+    tr:nth-child(even) td { background: #14172a; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-weekend { background: #3a1a1a; color: var(--red); }
+    .badge-holiday { background: #1a3a1a; color: var(--green); }
+    .badge-workday { background: #1a1a2a; color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="index.html">← Back to playground</a>
+
+    <header>
+      <h1>🗓️ Holiday Calendars</h1>
+      <p>
+        <span class="tag tag-new">New</span>
+        <span class="tag tag-api">pandas.tseries.holiday</span>
+        Holiday calendars, observance rules, and US Federal holidays — all from scratch.
+      </p>
+    </header>
+
+    <!-- Section 1: US Federal Holidays -->
+    <h2>1. US Federal Holiday Calendar</h2>
+    <div class="card">
+      <p class="label">Query year range:</p>
+      <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+        <label style="font-size:0.85rem;">Start year:
+          <input id="startYear" type="number" value="2024" min="2000" max="2050"
+            style="width:80px;margin-left:0.4rem;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:0.25rem 0.5rem;" />
+        </label>
+        <label style="font-size:0.85rem;">End year:
+          <input id="endYear" type="number" value="2025" min="2000" max="2050"
+            style="width:80px;margin-left:0.4rem;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:0.25rem 0.5rem;" />
+        </label>
+        <button onclick="runUSFederal()">Run</button>
+      </div>
+      <pre id="usFederalOutput"></pre>
+    </div>
+
+    <!-- Section 2: Custom Holiday Calendar -->
+    <h2>2. Custom Holiday Calendar</h2>
+    <div class="card">
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem;">
+        Build a calendar from arbitrary holiday rules using the
+        <code>Holiday</code> class and observance functions.
+      </p>
+      <div class="editor-row">
+        <div>
+          <p class="label">Code</p>
+          <textarea id="customCode">// Create a custom holiday calendar
+const { myHols } = (() => {
+  const rules = [
+    new Holiday("New Year", { month: 1, day: 1, observance: nearestWorkday }),
+    new Holiday("Spring Bank Holiday", { month: 5, day: 25, offset: MO(1) }),
+    new Holiday("Christmas", { month: 12, day: 25, observance: nearestWorkday }),
+    new Holiday("Boxing Day", { month: 12, day: 26, observance: nextMondayOrTuesday }),
+  ];
+
+  class UKCalendar extends AbstractHolidayCalendar {
+    name = "UK_Mini";
+    rules = rules;
+  }
+
+  const cal = new UKCalendar();
+  const idx = cal.holidays("2024-01-01", "2024-12-31");
+  return { myHols: idx };
+})();
+
+// Print the holiday dates
+myHols.values.map(d => d.toISOString().slice(0,10))</textarea>
+        </div>
+        <div>
+          <p class="label">Output</p>
+          <pre id="customOutput" style="min-height:180px;">(click Run)</pre>
+        </div>
+      </div>
+      <button onclick="runCustom()">Run</button>
+    </div>
+
+    <!-- Section 3: Observance Functions -->
+    <h2>3. Observance Functions</h2>
+    <div class="card">
+      <p class="label">See how observance functions shift weekend holidays:</p>
+      <div id="observanceTable"></div>
+    </div>
+
+    <!-- Section 4: Weekday Offsets -->
+    <h2>4. Floating Holidays with Weekday Offsets</h2>
+    <div class="card">
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem;">
+        <code>MO(n)</code>, <code>TH(n)</code> etc. find the <em>n</em>-th occurrence
+        of a weekday on/after the base date — powering "last Monday of May" rules.
+      </p>
+      <div class="editor-row">
+        <div>
+          <p class="label">Code</p>
+          <textarea id="offsetCode">// Floating holiday examples for 2024
+const examples = [
+  { name: "MLK Day",       rule: new Holiday("MLK Day",       { month: 1,  day: 1,  offset: MO(3) }) },
+  { name: "Presidents",    rule: new Holiday("Presidents",    { month: 2,  day: 1,  offset: MO(3) }) },
+  { name: "Memorial Day",  rule: new Holiday("Memorial Day",  { month: 5,  day: 25, offset: MO(1) }) },
+  { name: "Labor Day",     rule: new Holiday("Labor Day",     { month: 9,  day: 1,  offset: MO(1) }) },
+  { name: "Columbus Day",  rule: new Holiday("Columbus Day",  { month: 10, day: 1,  offset: MO(2) }) },
+  { name: "Thanksgiving",  rule: new Holiday("Thanksgiving",  { month: 11, day: 1,  offset: TH(4) }) },
+];
+
+examples.map(({ name, rule }) => {
+  const dates = rule.dates(new Date("2024-01-01"), new Date("2024-12-31"));
+  return name + ": " + (dates[0]?.toISOString().slice(0,10) ?? "—");
+})</textarea>
+        </div>
+        <div>
+          <p class="label">Output</p>
+          <pre id="offsetOutput" style="min-height:180px;">(click Run)</pre>
+        </div>
+      </div>
+      <button onclick="runOffset()">Run</button>
+    </div>
+
+    <!-- Section 5: Calendar Registry -->
+    <h2>5. Calendar Registry</h2>
+    <div class="card">
+      <div class="editor-row">
+        <div>
+          <p class="label">Code</p>
+          <textarea id="registryCode">// Look up a calendar by name
+const cal = get_calendar("USFederalHolidayCalendar");
+const idx = cal?.holidays("2024-07-01", "2024-12-31");
+"Found: " + cal?.name + "\nHolidays Jul–Dec 2024:\n" +
+  (idx?.values.map(d => "  " + d.toISOString().slice(0,10)).join("\n") ?? "")</textarea>
+        </div>
+        <div>
+          <p class="label">Output</p>
+          <pre id="registryOutput" style="min-height:120px;">(click Run)</pre>
+        </div>
+      </div>
+      <button onclick="runRegistry()">Run</button>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import tsb from CDN (replace with your build output in production)
+    // For playground, we inline the key functions from tsb's tseries module
+    // by re-implementing them in pure JS for the demo.
+
+    // ─── Mini tsb tseries implementation for playground ──────────────────────
+
+    const MS_PER_DAY = 86_400_000;
+
+    function pdDow(d) {
+      const js = d.getUTCDay();
+      return js === 0 ? 6 : js - 1;
+    }
+
+    function addDays(d, n) { return new Date(d.getTime() + n * MS_PER_DAY); }
+
+    function nearestWorkday(d) {
+      const dow = pdDow(d);
+      if (dow === 5) return addDays(d, -1);
+      if (dow === 6) return addDays(d, 1);
+      return d;
+    }
+
+    function sundayToMonday(d) {
+      return pdDow(d) === 6 ? addDays(d, 1) : d;
+    }
+
+    function nextMondayOrTuesday(d) {
+      const dow = pdDow(d);
+      if (dow === 5) return addDays(d, 3);
+      if (dow === 6) return addDays(d, 1);
+      return d;
+    }
+
+    function previousFriday(d) {
+      const dow = pdDow(d);
+      return addDays(d, -(((dow - 4) + 7) % 7));
+    }
+
+    function previousWorkday(d) {
+      const dow = pdDow(d);
+      if (dow === 5) return addDays(d, -1);
+      if (dow === 6) return addDays(d, -2);
+      return d;
+    }
+
+    function nextMonday(d) {
+      const dow = pdDow(d);
+      return dow === 0 ? d : addDays(d, (7 - dow) % 7);
+    }
+
+    function MO(n) { return { weekday: 0, n }; }
+    function TH(n) { return { weekday: 3, n }; }
+
+    function applyOffset(base, { weekday, n }) {
+      if (n === 0) return base;
+      const baseDow = pdDow(base);
+      if (n > 0) {
+        const daysToFirst = (weekday - baseDow + 7) % 7;
+        return addDays(addDays(base, daysToFirst), (n - 1) * 7);
+      }
+      const daysBack = (baseDow - weekday + 7) % 7;
+      return addDays(addDays(base, -daysBack), (n + 1) * 7);
+    }
+
+    class Holiday {
+      constructor(name, opts) {
+        this.name = name;
+        this.month = opts.month;
+        this.day = opts.day;
+        this.year = opts.year ?? null;
+        this.offset = opts.offset ?? null;
+        this.observance = opts.observance ?? null;
+        this.startDate = opts.startDate ?? null;
+        this.endDate = opts.endDate ?? null;
+      }
+
+      dates(start, end) {
+        const sy = start.getUTCFullYear(), ey = end.getUTCFullYear();
+        const years = this.year != null
+          ? (this.year >= sy && this.year <= ey ? [this.year] : [])
+          : Array.from({ length: ey - sy + 3 }, (_, i) => sy - 1 + i);
+        const result = [];
+        for (const y of years) {
+          let d = new Date(Date.UTC(y, this.month - 1, this.day));
+          if (this.offset) d = applyOffset(d, this.offset);
+          if (this.observance) d = this.observance(d);
+          if (this.startDate && d < this.startDate) continue;
+          if (this.endDate && d > this.endDate) continue;
+          if (d >= start && d <= end) result.push(d);
+        }
+        return result;
+      }
+    }
+
+    class AbstractHolidayCalendar {
+      holidays(start, end) {
+        const s = typeof start === 'string' ? new Date(start) : start;
+        const e = typeof end === 'string' ? new Date(end) : end;
+        const sUTC = new Date(Date.UTC(s.getUTCFullYear(), s.getUTCMonth(), s.getUTCDate()));
+        const eUTC = new Date(Date.UTC(e.getUTCFullYear(), e.getUTCMonth(), e.getUTCDate()));
+        const all = [], seen = new Set();
+        for (const rule of this.rules) {
+          for (const d of rule.dates(sUTC, eUTC)) {
+            const t = d.getTime();
+            if (!seen.has(t)) { seen.add(t); all.push(d); }
+          }
+        }
+        all.sort((a, b) => a - b);
+        return { values: all, size: all.length };
+      }
+    }
+
+    class USFederalHolidayCalendar extends AbstractHolidayCalendar {
+      constructor() {
+        super();
+        this.name = "USFederalHolidayCalendar";
+        this.rules = [
+          new Holiday("New Year's Day",                 { month: 1,  day: 1,  observance: nearestWorkday }),
+          new Holiday("Martin Luther King Jr. Day",     { month: 1,  day: 1,  offset: MO(3) }),
+          new Holiday("Presidents' Day",                { month: 2,  day: 1,  offset: MO(3) }),
+          new Holiday("Memorial Day",                   { month: 5,  day: 25, offset: MO(1) }),
+          new Holiday("Juneteenth",                     { month: 6,  day: 19, observance: nearestWorkday, startDate: new Date(Date.UTC(2021,5,19)) }),
+          new Holiday("Independence Day",               { month: 7,  day: 4,  observance: nearestWorkday }),
+          new Holiday("Labor Day",                      { month: 9,  day: 1,  offset: MO(1) }),
+          new Holiday("Columbus Day",                   { month: 10, day: 1,  offset: MO(2) }),
+          new Holiday("Veterans Day",                   { month: 11, day: 11, observance: nearestWorkday }),
+          new Holiday("Thanksgiving Day",               { month: 11, day: 1,  offset: TH(4) }),
+          new Holiday("Christmas Day",                  { month: 12, day: 25, observance: nearestWorkday }),
+        ];
+      }
+    }
+
+    const _registry = new Map();
+    function register_calendar(name, factory) { _registry.set(name, factory); }
+    function get_calendar(name) { const f = _registry.get(name); return f ? f() : null; }
+
+    register_calendar("USFederalHolidayCalendar", () => new USFederalHolidayCalendar());
+
+    // ─── Expose to page ───────────────────────────────────────────────────────
+    const tsb = {
+      Holiday, AbstractHolidayCalendar, USFederalHolidayCalendar,
+      MO, TH,
+      nearestWorkday, sundayToMonday, nextMonday, nextMondayOrTuesday,
+      previousFriday, previousWorkday,
+      get_calendar, register_calendar,
+    };
+
+    const DOW_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    function fmt(d) {
+      return d.toISOString().slice(0, 10);
+    }
+
+    function dowName(d) {
+      return DOW_NAMES[pdDow(d)] ?? "?";
+    }
+
+    // ─── US Federal Calendar ──────────────────────────────────────────────────
+    window.runUSFederal = function() {
+      const sy = parseInt(document.getElementById("startYear").value) || 2024;
+      const ey = parseInt(document.getElementById("endYear").value) || 2025;
+      const cal = new USFederalHolidayCalendar();
+      const idx = cal.holidays(`${sy}-01-01`, `${ey}-12-31`);
+
+      let out = `US Federal Holidays ${sy}–${ey} (${idx.size} total)\n`;
+      out += "─".repeat(50) + "\n";
+      for (const d of idx.values) {
+        const dow = dowName(d);
+        const dow0 = pdDow(d);
+        const obs = dow0 >= 5 ? " ⚠️ (should be weekday?)" : "";
+        out += `  ${fmt(d)}  ${dow}${obs}\n`;
+      }
+      document.getElementById("usFederalOutput").textContent = out;
+    };
+
+    // ─── Observance table ─────────────────────────────────────────────────────
+    function buildObservanceTable() {
+      const fns = [
+        { name: "nearestWorkday",     fn: nearestWorkday },
+        { name: "sundayToMonday",     fn: sundayToMonday },
+        { name: "nextMonday",         fn: nextMonday },
+        { name: "nextMondayOrTuesday",fn: nextMondayOrTuesday },
+        { name: "previousFriday",     fn: previousFriday },
+        { name: "previousWorkday",    fn: previousWorkday },
+      ];
+      // Use specific example dates: Sat, Sun, Mon, Fri
+      const testDates = [
+        new Date(Date.UTC(2024, 0, 6)),  // Saturday
+        new Date(Date.UTC(2024, 0, 7)),  // Sunday
+        new Date(Date.UTC(2024, 0, 8)),  // Monday
+        new Date(Date.UTC(2024, 0, 12)), // Friday
+      ];
+      let html = '<table><thead><tr><th>Input</th>';
+      for (const { name } of fns) html += `<th>${name}</th>`;
+      html += '</tr></thead><tbody>';
+      for (const d of testDates) {
+        const dow0 = pdDow(d);
+        const isWeekend = dow0 >= 5;
+        const badge = isWeekend
+          ? `<span class="badge badge-weekend">${dowName(d)}</span>`
+          : `<span class="badge badge-workday">${dowName(d)}</span>`;
+        html += `<tr><td>${fmt(d)} ${badge}</td>`;
+        for (const { fn } of fns) {
+          const r = fn(d);
+          const rd = pdDow(r);
+          const cls = rd >= 5 ? "badge-weekend" : "badge-workday";
+          html += `<td><span class="badge ${cls}">${fmt(r)} (${dowName(r)})</span></td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      document.getElementById("observanceTable").innerHTML = html;
+    }
+    buildObservanceTable();
+
+    // ─── Sandbox evaluator ────────────────────────────────────────────────────
+    function sandboxEval(code, outputId) {
+      const out = document.getElementById(outputId);
+      try {
+        const fn = new Function(
+          ...Object.keys(tsb),
+          `"use strict"; return (${code})`,
+        );
+        const result = fn(...Object.values(tsb));
+        if (Array.isArray(result)) {
+          out.textContent = result.join("\n");
+        } else if (result == null) {
+          out.textContent = "(null)";
+        } else {
+          out.textContent = String(result);
+        }
+      } catch (err) {
+        out.textContent = "Error: " + err.message;
+      }
+    }
+
+    window.runCustom = () => sandboxEval(document.getElementById("customCode").value, "customOutput");
+    window.runOffset = () => sandboxEval(document.getElementById("offsetCode").value, "offsetOutput");
+    window.runRegistry = () => sandboxEval(document.getElementById("registryCode").value, "registryOutput");
+
+    // Auto-run all on load
+    window.runUSFederal();
+    window.runCustom();
+    window.runOffset();
+    window.runRegistry();
+  </script>
+</body>
+</html>
