@@ -58,8 +58,8 @@ describe("linregress", () => {
   });
 
   it("accepts Series input", () => {
-    const sx = new Series([1, 2, 3, 4, 5]);
-    const sy = new Series([2, 4, 5, 4, 5]);
+    const sx = new Series({ data: [1, 2, 3, 4, 5] });
+    const sy = new Series({ data: [2, 4, 5, 4, 5] });
     const r = linregress(sx, sy);
     expect(CLOSE(r.slope, 0.6, 1e-4)).toBe(true);
   });
@@ -143,7 +143,7 @@ describe("polyfit", () => {
   });
 
   it("accepts Series input", () => {
-    const coefs = polyfit(new Series([0, 1, 2, 3, 4]), new Series([0, 1, 4, 9, 16]), 2);
+    const coefs = polyfit(new Series({ data: [0, 1, 2, 3, 4] }), new Series({ data: [0, 1, 4, 9, 16] }), 2);
     expect(CLOSE(coefs[0] as number, 1, 1e-4)).toBe(true);
   });
 
@@ -195,7 +195,7 @@ describe("polyval", () => {
   });
 
   it("Series input", () => {
-    const vals = polyval([2, 1], new Series([0, 1, 2, 3]));
+    const vals = polyval([2, 1], new Series({ data: [0, 1, 2, 3] }));
     expect(vals).toEqual([1, 3, 5, 7]);
   });
 
@@ -327,7 +327,7 @@ describe("OLS", () => {
   });
 
   it("DataFrame X works", () => {
-    const df = new DataFrame({ x: new Series([1, 2, 3, 4, 5]) });
+    const df = DataFrame.fromColumns({ x: [1, 2, 3, 4, 5] });
     const y = [2, 4, 5, 4, 5];
     const result = new OLS().fit(df, y);
     expect(CLOSE(result.params[0] as number, 0.6, 1e-4)).toBe(true);
