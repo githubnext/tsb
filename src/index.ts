@@ -928,3 +928,29 @@ export type { ReadSasOptions } from "./io/read_sas.ts";
 // pd.arrays.SparseArray / pd.SparseDtype — sparse storage for arrays
 // with many repeated (fill) values
 export { SparseArray, SparseDtype } from "./core/sparse.ts";
+
+// scipy-style hypothesis tests — ttest, chi2, ANOVA, KS, Mann-Whitney, etc.
+export {
+  ttest1samp,
+  ttestInd,
+  ttestRel,
+  chi2Contingency,
+  fOneway,
+  jarqueBera,
+  pearsonr,
+  spearmanr,
+  mannWhitneyU,
+  kstest,
+} from "./stats/hypothesis_tests.ts";
+export type {
+  HTestResult,
+  PearsonrResult,
+  SpearmanrResult,
+  Alternative,
+  Ttest1sampOptions,
+  TtestIndOptions,
+  MannWhitneyUOptions,
+  KstestOptions,
+  Chi2ContingencyResult,
+  CdfFn,
+} from "./stats/hypothesis_tests.ts";

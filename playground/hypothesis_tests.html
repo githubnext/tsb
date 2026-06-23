@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Hypothesis Tests (scipy-style)</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      min-height: 2.5rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #e6edf3;
+    }
+    .playground-hint {
+      font-size: 0.75rem;
+      color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Hypothesis Tests (scipy-style)</h1>
+  <p class="subtitle">
+    <a href="index.html">← tsb playground</a> ·
+    t-tests, chi-square, ANOVA, normality, correlation, Mann-Whitney U, Kolmogorov-Smirnov
+  </p>
+
+  <!-- ── 1. One-sample t-test ─────────────────────────────────────────── -->
+  <div class="section">
+    <h2>1 · One-sample t-test — <code>ttest1samp</code></h2>
+    <p>
+      Test whether the mean of a sample equals a hypothesised population mean.
+      Returns <code>{ statistic, pvalue }</code>. Mirrors
+      <code>scipy.stats.ttest_1samp(a, popmean)</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Does the sample mean differ significantly from 2.0?
+const res = ttest1samp([2.1, 2.5, 2.3, 2.7, 2.4], 2.0);
+console.log(`t = ${res.statistic.toFixed(4)}`);
+console.log(`p = ${res.pvalue.toFixed(4)}`);
+console.log(res.pvalue < 0.05 ? "Reject H₀ at α=0.05" : "Fail to reject H₀");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 2. One-sided t-test ─────────────────────────────────────────── -->
+  <div class="section">
+    <h2>2 · One-sided t-test — <code>alternative</code> option</h2>
+    <p>
+      Use <code>alternative: "greater"</code> or <code>"less"</code> for
+      one-tailed tests.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const data = [2.1, 2.5, 2.3, 2.7, 2.4];
+const two  = ttest1samp(data, 2.0, { alternative: "two-sided" });
+const gt   = ttest1samp(data, 2.0, { alternative: "greater" });
+const lt   = ttest1samp(data, 2.0, { alternative: "less" });
+console.log("two-sided p:", two.pvalue.toFixed(4));
+console.log("greater   p:", gt.pvalue.toFixed(4));  // half of two-sided
+console.log("less      p:", lt.pvalue.toFixed(4));  // ~1 (no evidence for less)</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 3. Independent two-sample t-test ─────────────────────────────── -->
+  <div class="section">
+    <h2>3 · Independent t-test — <code>ttestInd</code> (Welch's)</h2>
+    <p>
+      Compare means of two independent groups. Defaults to Welch's t-test
+      (unequal variances). Mirrors <code>scipy.stats.ttest_ind</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const control   = [2.1, 2.4, 2.3, 2.2, 2.5];
+const treatment  = [3.0, 3.2, 2.9, 3.1, 3.3];
+const welch   = ttestInd(control, treatment);
+const student = ttestInd(control, treatment, { equalVar: true });
+console.log("Welch  t:", welch.statistic.toFixed(4), "p:", welch.pvalue.toFixed(4));
+console.log("Student t:", student.statistic.toFixed(4), "p:", student.pvalue.toFixed(4));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 4. Paired t-test ────────────────────────────────────────────── -->
+  <div class="section">
+    <h2>4 · Paired t-test — <code>ttestRel</code></h2>
+    <p>
+      Compare measurements on the same subjects before and after an
+      intervention. Mirrors <code>scipy.stats.ttest_rel(a, b)</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const before = [72, 80, 65, 78, 90, 70, 85];
+const after  = [68, 75, 60, 72, 83, 65, 78]; // clear reduction
+const res = ttestRel(before, after);
+console.log(`t = ${res.statistic.toFixed(4)}, p = ${res.pvalue.toFixed(6)}`);
+console.log(res.pvalue < 0.01 ? "Significant reduction (α=0.01)" : "Not significant");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 5. Chi-square test ─────────────────────────────────────────── -->
+  <div class="section">
+    <h2>5 · Chi-square test for independence — <code>chi2Contingency</code></h2>
+    <p>
+      Test whether two categorical variables are independent using a
+      contingency table. Mirrors <code>scipy.stats.chi2_contingency</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Observed: rows = gender (M/F), cols = preference (A/B/C)
+const observed = [
+  [30, 10, 20],   // Male
+  [15, 25, 10],   // Female
+];
+const res = chi2Contingency(observed);
+console.log(`χ² = ${res.statistic.toFixed(4)}`);
+console.log(`dof = ${res.dof}`);
+console.log(`p = ${res.pvalue.toFixed(4)}`);
+console.log("Expected:\n" + res.expected.map(row =>
+  row.map(v => v.toFixed(1)).join("  ")
+).join("\n"));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 6. One-way ANOVA ───────────────────────────────────────────── -->
+  <div class="section">
+    <h2>6 · One-way ANOVA — <code>fOneway</code></h2>
+    <p>
+      Test whether two or more groups have equal population means.
+      F = between-group variance / within-group variance.
+      Mirrors <code>scipy.stats.f_oneway(*groups)</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Three fertilizer treatments on crop yield
+const groupA = [4.1, 4.3, 4.0, 4.2];
+const groupB = [5.5, 5.7, 5.3, 5.6];
+const groupC = [4.8, 5.0, 4.9, 5.1];
+const res = fOneway(groupA, groupB, groupC);
+console.log(`F = ${res.statistic.toFixed(4)}, p = ${res.pvalue.toFixed(4)}`);
+console.log(res.pvalue < 0.05 ? "Significant difference between groups" : "No significant difference");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 7. Jarque-Bera normality test ─────────────────────────────── -->
+  <div class="section">
+    <h2>7 · Jarque-Bera normality test — <code>jarqueBera</code></h2>
+    <p>
+      Test H₀: data is normally distributed, using sample skewness and
+      kurtosis. JB ~ χ²(2) under H₀.
+      Mirrors <code>scipy.stats.jarque_bera(data)</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Approximately normal data
+const normal = [-1.5, -0.8, -0.4, 0.1, 0.2, 0.4, 0.7, 1.2, 1.8, 2.0];
+const jbNormal = jarqueBera(normal);
+console.log("Normal-ish: JB =", jbNormal.statistic.toFixed(4), "p =", jbNormal.pvalue.toFixed(4));
+
+// Heavily right-skewed data
+const skewed = [1, 1, 1, 1, 1, 2, 3, 5, 10, 100];
+const jbSkew = jarqueBera(skewed);
+console.log("Skewed:     JB =", jbSkew.statistic.toFixed(4), "p =", jbSkew.pvalue.toFixed(4));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 8. Pearson r ────────────────────────────────────────────────── -->
+  <div class="section">
+    <h2>8 · Pearson correlation — <code>pearsonr</code></h2>
+    <p>
+      Compute the Pearson product-moment correlation coefficient and its
+      p-value (H₀: r = 0). Mirrors <code>scipy.stats.pearsonr(x, y)</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const height = [160, 165, 170, 175, 180, 185, 190];
+const weight = [ 55,  60,  65,  72,  78,  85,  92];
+const res = pearsonr(height, weight);
+console.log(`r = ${res.correlation.toFixed(4)}`);
+console.log(`p = ${res.pvalue.toFixed(4)}`);
+console.log(res.correlation > 0.9 ? "Strong positive correlation" : "");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 9. Spearman rho ────────────────────────────────────────────── -->
+  <div class="section">
+    <h2>9 · Spearman rank correlation — <code>spearmanr</code></h2>
+    <p>
+      Non-parametric rank-based correlation. Robust to outliers and
+      non-normal data. Mirrors <code>scipy.stats.spearmanr(x, y)</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Spearman is robust to the extreme outlier in x[4]
+const x = [1, 2, 3, 4, 1000];
+const y = [2, 3, 4, 5,   6];
+const pr = pearsonr(x, y);
+const sr = spearmanr(x, y);
+console.log("Pearson  r:", pr.correlation.toFixed(4), "p:", pr.pvalue.toFixed(4));
+console.log("Spearman ρ:", sr.correlation.toFixed(4), "p:", sr.pvalue.toFixed(4));
+// Spearman shows the true monotone relationship more clearly</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 10. Mann-Whitney U ─────────────────────────────────────────── -->
+  <div class="section">
+    <h2>10 · Mann-Whitney U test — <code>mannWhitneyU</code></h2>
+    <p>
+      Non-parametric alternative to the independent t-test. Tests whether
+      one population tends to have larger values than another.
+      Mirrors <code>scipy.stats.mannwhitneyu</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">const groupA = [1, 2, 3, 4, 5];
+const groupB = [4, 5, 6, 7, 8];
+const res = mannWhitneyU(groupA, groupB);
+console.log(`U = ${res.statistic}, p = ${res.pvalue.toFixed(4)}`);
+console.log(res.pvalue < 0.05 ? "Groups differ significantly" : "No significant difference");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 11. Kolmogorov-Smirnov test ────────────────────────────────── -->
+  <div class="section">
+    <h2>11 · Kolmogorov-Smirnov test — <code>kstest</code></h2>
+    <p>
+      Test whether data follows a specified distribution (e.g. normal,
+      uniform). D = max|F_n(x) − F(x)|.
+      Mirrors <code>scipy.stats.kstest(data, cdf)</code>.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">// Uniform CDF — test whether data comes from Uniform[0,1]
+const uniformData = [0.1, 0.25, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95];
+const res = kstest(uniformData, x => x);  // Uniform[0,1] CDF = x
+console.log(`D = ${res.statistic.toFixed(4)}, p = ${res.pvalue.toFixed(4)}`);
+
+// Clearly non-uniform data (all values near 0.5)
+const clustered = [0.48, 0.49, 0.50, 0.51, 0.52, 0.50, 0.49, 0.51];
+const res2 = kstest(clustered, x => x);
+console.log(`D = ${res2.statistic.toFixed(4)}, p = ${res2.pvalue.toFixed(4)}`);</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
+</body>
+</html>

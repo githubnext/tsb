@@ -514,3 +514,27 @@ export {
 export type { ToMarkdownOptions, ToLaTeXOptions } from "./format_table.ts";
 export { caseWhen } from "./case_when.ts";
 export type { CaseWhenBranch, CaseWhenPredicate } from "./case_when.ts";
+export {
+  ttest1samp,
+  ttestInd,
+  ttestRel,
+  chi2Contingency,
+  fOneway,
+  jarqueBera,
+  pearsonr,
+  spearmanr,
+  mannWhitneyU,
+  kstest,
+} from "./hypothesis_tests.ts";
+export type {
+  HTestResult,
+  PearsonrResult,
+  SpearmanrResult,
+  Alternative,
+  Ttest1sampOptions,
+  TtestIndOptions,
+  MannWhitneyUOptions,
+  KstestOptions,
+  Chi2ContingencyResult,
+  CdfFn,
+} from "./hypothesis_tests.ts";
