@@ -954,3 +954,11 @@ export type {
   Chi2ContingencyResult,
   CdfFn,
 } from "./stats/hypothesis_tests.ts";
+
+// linear/polynomial/OLS regression — linregress, polyfit, polyval, OLS
+export { linregress, polyfit, polyval, OLS } from "./stats/regression.ts";
+export type {
+  LinregressResult,
+  OLSResult,
+  OLSOptions,
+} from "./stats/regression.ts";
