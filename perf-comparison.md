@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-22T17:30:00Z |
-| Iteration Count | 368 |
-| Best Metric | 693 |
+| Last Run | 2026-06-23T08:03:37Z |
+| Iteration Count | 369 |
+| Best Metric | 696 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -73,6 +73,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 369 — 2026-06-23 08:03 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28011453562)
+- **Status**: ✅ Accepted
+- **Change**: Add 3 pairs: series_to_markdown (seriesToMarkdown + seriesToLaTeX), dataframe_compare_pair (dataFrameEq/Ne/Gt/Le df-vs-df), resample_dataframe (resampleDataFrame .mean/.sum/.min).
+- **Metric**: 696 (previous best: 693, delta: +3)
 
 ### Iteration 368 — 2026-06-22 17:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27995840443)
 - **Status**: ✅ Accepted
