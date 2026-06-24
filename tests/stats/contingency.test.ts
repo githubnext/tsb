@@ -356,7 +356,7 @@ describe("association", () => {
     ];
     for (const method of ["cramer", "phi", "contingency", "tschuprow"] as const) {
       const v = association(obs, method);
-      expect(CLOSE(v, 0, 1e-9)).toBe(true, `${method} should be 0 for independent table`);
+      expect(CLOSE(v, 0, 1e-9), `${method} should be 0 for independent table`).toBe(true);
     }
   });
 
