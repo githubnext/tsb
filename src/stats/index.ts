@@ -538,3 +538,11 @@ export type {
   Chi2ContingencyResult,
   CdfFn,
 } from "./hypothesis_tests.ts";
+export { expectedFreq, relativeRisk, oddsRatio, association } from "./contingency.ts";
+export type {
+  ContingencyTable,
+  AssociationMethod,
+  ConfidenceInterval,
+  RelativeRiskResult,
+  OddsRatioResult,
+} from "./contingency.ts";

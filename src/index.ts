@@ -962,3 +962,13 @@ export type {
   OLSResult,
   OLSOptions,
 } from "./stats/regression.ts";
+
+// contingency table analysis — expectedFreq, relativeRisk, oddsRatio, association
+export { expectedFreq, relativeRisk, oddsRatio, association } from "./stats/contingency.ts";
+export type {
+  ContingencyTable,
+  AssociationMethod,
+  ConfidenceInterval,
+  RelativeRiskResult,
+  OddsRatioResult,
+} from "./stats/contingency.ts";

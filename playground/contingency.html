@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contingency Table Analysis — tsb playground</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --surface: #161b22;
+        --border: #30363d;
+        --accent: #58a6ff;
+        --green: #3fb950;
+        --red: #f85149;
+        --text: #c9d1d9;
+        --muted: #8b949e;
+        --code-bg: #1c2128;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        padding: 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      h1 { color: var(--accent); margin-bottom: 0.5rem; }
+      h2 { color: var(--green); margin: 2rem 0 0.75rem; font-size: 1.1rem; }
+      p, li { color: var(--text); margin-bottom: 0.5rem; }
+      ul { padding-left: 1.5rem; }
+      code {
+        background: var(--code-bg);
+        padding: 0.1em 0.4em;
+        border-radius: 4px;
+        font-family: "Fira Code", "Cascadia Code", monospace;
+        font-size: 0.88em;
+        color: #e6edf3;
+      }
+      .cell {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+      .cell label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      textarea {
+        width: 100%;
+        background: var(--code-bg);
+        color: #e6edf3;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.75rem;
+        font-family: "Fira Code", monospace;
+        font-size: 0.88rem;
+        resize: vertical;
+        min-height: 90px;
+      }
+      textarea:focus { outline: none; border-color: var(--accent); }
+      button {
+        background: var(--accent);
+        color: #0d1117;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1.25rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.75rem;
+      }
+      button:hover { opacity: 0.85; }
+      .output {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.75rem;
+        font-family: "Fira Code", monospace;
+        font-size: 0.85rem;
+        white-space: pre-wrap;
+        min-height: 40px;
+        margin-top: 0.75rem;
+        color: #e6edf3;
+      }
+      .ok { color: var(--green); }
+      .err { color: var(--red); }
+      nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+      nav { margin-bottom: 1.5rem; }
+      .badge {
+        display: inline-block;
+        background: var(--green);
+        color: #0d1117;
+        border-radius: 4px;
+        padding: 0.1em 0.5em;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+      }
+      table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+      th, td {
+        border: 1px solid var(--border);
+        padding: 0.4rem 0.75rem;
+        text-align: center;
+        font-size: 0.85rem;
+      }
+      th { background: var(--surface); color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <nav><a href="index.html">← Back to tsb playground</a></nav>
+
+    <h1>📊 Contingency Table Analysis <span class="badge">scipy.stats.contingency</span></h1>
+    <p>
+      Association and effect-size measures for contingency tables, mirroring
+      <code>scipy.stats.contingency</code>. Implemented from scratch with no external
+      dependencies.
+    </p>
+    <ul>
+      <li><code>expectedFreq(observed)</code> — expected frequencies under independence</li>
+      <li><code>relativeRisk(observed)</code> — relative risk (risk ratio) with CI</li>
+      <li><code>oddsRatio(observed)</code> — odds ratio with CI (Woolf method)</li>
+      <li><code>association(observed, method)</code> — Cramér's V, phi, contingency C, Tschuprow's T</li>
+    </ul>
+
+    <!-- ─── Expected frequencies ─────────────────────────────────────────── -->
+    <h2>1 · Expected Frequencies</h2>
+    <p>
+      Under independence, each cell's expected count is<br />
+      <code>E[i,j] = rowTotal[i] × colTotal[j] / grandTotal</code>.
+    </p>
+    <div class="cell">
+      <label>Observed table (edit freely)</label>
+      <textarea id="ef-input">[[10, 10], [15, 15], [5, 10]]</textarea>
+      <button onclick="runExpectedFreq()">Run</button>
+      <div class="output" id="ef-out">Press Run to see expected frequencies.</div>
+    </div>
+
+    <!-- ─── Relative Risk ─────────────────────────────────────────────────── -->
+    <h2>2 · Relative Risk (Risk Ratio)</h2>
+    <p>
+      For a 2×2 table <code>[[a, b], [c, d]]</code>:<br />
+      RR = (a / (a+b)) / (c / (c+d))
+    </p>
+    <div class="cell">
+      <label>2×2 contingency table</label>
+      <textarea id="rr-input">[[90, 9910], [30, 9970]]</textarea>
+      <button onclick="runRelativeRisk()">Run</button>
+      <div class="output" id="rr-out">Press Run to compute relative risk.</div>
+    </div>
+
+    <!-- ─── Odds Ratio ────────────────────────────────────────────────────── -->
+    <h2>3 · Odds Ratio</h2>
+    <p>
+      For a 2×2 table <code>[[a, b], [c, d]]</code>:<br />
+      OR = (a × d) / (b × c)
+    </p>
+    <div class="cell">
+      <label>2×2 contingency table</label>
+      <textarea id="or-input">[[20, 80], [10, 90]]</textarea>
+      <button onclick="runOddsRatio()">Run</button>
+      <div class="output" id="or-out">Press Run to compute odds ratio.</div>
+    </div>
+
+    <!-- ─── Association ───────────────────────────────────────────────────── -->
+    <h2>4 · Association Strength</h2>
+    <p>
+      Measures of association derived from the chi-square statistic. All return
+      values in [0, 1] (phi may exceed 1 for tables larger than 2×2).
+    </p>
+    <div class="cell">
+      <label>Contingency table (any size)</label>
+      <textarea id="assoc-input">[[10, 2], [3, 8]]</textarea>
+      <button onclick="runAssociation()">Run all methods</button>
+      <div class="output" id="assoc-out">Press Run to compare association measures.</div>
+    </div>
+
+    <!-- ─── Real-world example ────────────────────────────────────────────── -->
+    <h2>5 · Real-World Example: Clinical Trial</h2>
+    <p>
+      A drug trial: 200 patients treated (40 recovered), 200 control (25 recovered).
+    </p>
+    <div class="cell">
+      <textarea id="trial-input">[[40, 160], [25, 175]]</textarea>
+      <button onclick="runTrial()">Analyse</button>
+      <div class="output" id="trial-out">Press Analyse for full summary.</div>
+    </div>
+
+    <script type="module">
+      // ── import from built package ──────────────────────────────────────────
+      import {
+        expectedFreq,
+        relativeRisk,
+        oddsRatio,
+        association,
+      } from "https://esm.sh/tsb@0.1.0" // placeholder; replace with local build
+
+      // Expose helpers to onclick handlers
+      window._tsb = { expectedFreq, relativeRisk, oddsRatio, association };
+    </script>
+
+    <script>
+      // ── inline fallback implementation (no import needed in playground) ───
+      // Mirrors the real tsb implementation for interactive demos.
+
+      function expectedFreq(obs) {
+        const rows = obs.length;
+        if (rows === 0) return [];
+        const cols = obs[0].length;
+        const rowTotals = obs.map(r => r.reduce((s,v)=>s+v,0));
+        const colTotals = Array.from({length:cols},(_,c)=>obs.reduce((s,r)=>s+r[c],0));
+        const grand = rowTotals.reduce((s,v)=>s+v,0);
+        if (grand === 0) return Array.from({length:rows},()=>Array.from({length:cols},()=>0));
+        return Array.from({length:rows},(_,r)=>
+          Array.from({length:cols},(_,c)=>(rowTotals[r]*colTotals[c])/grand));
+      }
+
+      function normalQuantile(p) {
+        if (p<=0) return -Infinity;
+        if (p>=1) return Infinity;
+        const a=[-3.969683028665376e1,2.209460984245205e2,-2.759285104469687e2,
+                  1.38357751867269e2,-3.066479806614716e1,2.506628277459239];
+        const b=[-5.447609879822406e1,1.615858368580409e2,-1.556989798598866e2,
+                  6.680131188771972e1,-1.328068155288572e1];
+        const c=[-7.784894002430293e-3,-3.223964580411365e-1,-2.400758277161838,
+                  -2.549732539343734,4.374664141464968,2.938163982698783];
+        const d=[7.784695709041462e-3,3.224671290700398e-1,2.445134137142996,3.754408661907416];
+        const pLow=0.02425, pHigh=1-pLow;
+        if (pLow<=p && p<=pHigh){
+          const q=p-0.5,r=q*q;
+          return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/
+                 ((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1;
+        }
+        if (p<pLow){
+          const q=Math.sqrt(-2*Math.log(p));
+          return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/
+                 ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+        }
+        const q=Math.sqrt(-2*Math.log(1-p));
+        return -((((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/
+               ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1));
+      }
+
+      function relativeRisk(obs) {
+        if (obs.length!==2||obs[0].length!==2||obs[1].length!==2)
+          throw new Error("requires 2×2 table");
+        const [a,b]=obs[0],[c,d]=obs[1];
+        const n1=a+b,n2=c+d;
+        const p1=n1>0?a/n1:NaN, p2=n2>0?c/n2:NaN;
+        const rr=p2>0?p1/p2:(p1===0?1:Infinity);
+        return {
+          relativeRisk: rr,
+          confidenceInterval(cl=0.95){
+            const z=normalQuantile(1-(1-cl)/2);
+            if(!(a>0)||!(c>0)||!n1||!n2) return {low:NaN,high:NaN};
+            const se=Math.sqrt(b/(a*n1)+d/(c*n2));
+            const ln=Math.log(rr);
+            return {low:Math.exp(ln-z*se),high:Math.exp(ln+z*se)};
+          }
+        };
+      }
+
+      function chi2Stat(obs) {
+        const rows=obs.length,cols=obs[0].length;
+        const rt=obs.map(r=>r.reduce((s,v)=>s+v,0));
+        const ct=Array.from({length:cols},(_,c)=>obs.reduce((s,r)=>s+r[c],0));
+        const n=rt.reduce((s,v)=>s+v,0);
+        if(!n) return 0;
+        let stat=0;
+        for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+          const e=rt[r]*ct[c]/n;
+          if(e>0) stat+=(obs[r][c]-e)**2/e;
+        }
+        return stat;
+      }
+
+      function oddsRatio(obs) {
+        if (obs.length!==2||obs[0].length!==2||obs[1].length!==2)
+          throw new Error("requires 2×2 table");
+        const [a,b]=obs[0],[c,d]=obs[1];
+        const stat=(b===0||c===0)?(a>0&&d>0?Infinity:NaN):(a*d)/(b*c);
+        return {
+          statistic:stat,
+          confidenceInterval(cl=0.95){
+            const z=normalQuantile(1-(1-cl)/2);
+            if(!(a>0)||!(b>0)||!(c>0)||!(d>0)) return {low:NaN,high:NaN};
+            const se=Math.sqrt(1/a+1/b+1/c+1/d),ln=Math.log(stat);
+            return {low:Math.exp(ln-z*se),high:Math.exp(ln+z*se)};
+          }
+        };
+      }
+
+      function association(obs, method='cramer') {
+        const rows=obs.length,cols=obs[0].length;
+        const chi2=chi2Stat(obs),n=obs.flat().reduce((s,v)=>s+v,0);
+        if(!(n>0)||!isFinite(chi2)) return NaN;
+        if(method==='phi') return Math.sqrt(chi2/n);
+        if(method==='contingency') return Math.sqrt(chi2/(chi2+n));
+        if(method==='tschuprow'){
+          const den=Math.sqrt((rows-1)*(cols-1));
+          return den>0?Math.sqrt(chi2/(n*den)):NaN;
+        }
+        const m=Math.min(rows-1,cols-1);
+        return m>0?Math.sqrt(chi2/(n*m)):NaN;
+      }
+
+      function fmt(x, dec=4) {
+        if (isNaN(x)) return "NaN";
+        if (!isFinite(x)) return x>0?"Infinity":"-Infinity";
+        return x.toFixed(dec);
+      }
+
+      window.runExpectedFreq = function() {
+        const el = document.getElementById('ef-out');
+        try {
+          const obs = JSON.parse(document.getElementById('ef-input').value);
+          const E = expectedFreq(obs);
+          let out = "Expected frequencies:\n";
+          E.forEach((row,i)=>{
+            out += `  row ${i}: [${row.map(v=>fmt(v,4)).join(', ')}]\n`;
+          });
+          out += `\nGrand total (observed): ${obs.flat().reduce((s,v)=>s+v,0)}\n`;
+          out += `Grand total (expected):  ${E.flat().reduce((s,v)=>s+v,0).toFixed(6)}`;
+          el.textContent = out;
+          el.className = 'output ok';
+        } catch(e) { el.textContent = "Error: "+e.message; el.className = 'output err'; }
+      };
+
+      window.runRelativeRisk = function() {
+        const el = document.getElementById('rr-out');
+        try {
+          const obs = JSON.parse(document.getElementById('rr-input').value);
+          const r = relativeRisk(obs);
+          const ci95 = r.confidenceInterval(0.95);
+          const ci99 = r.confidenceInterval(0.99);
+          const [[a,b],[c,d]] = obs;
+          let out = `Relative Risk (RR) = ${fmt(r.relativeRisk)}\n`;
+          out += `\n  Risk in row 0: ${a} / ${a+b} = ${fmt(a/(a+b))}\n`;
+          out += `  Risk in row 1: ${c} / ${c+d} = ${fmt(c/(c+d))}\n`;
+          out += `\n95% CI: [${fmt(ci95.low)}, ${fmt(ci95.high)}]\n`;
+          out += `99% CI: [${fmt(ci99.low)}, ${fmt(ci99.high)}]`;
+          el.textContent = out;
+          el.className = 'output ok';
+        } catch(e) { el.textContent = "Error: "+e.message; el.className = 'output err'; }
+      };
+
+      window.runOddsRatio = function() {
+        const el = document.getElementById('or-out');
+        try {
+          const obs = JSON.parse(document.getElementById('or-input').value);
+          const or = oddsRatio(obs);
+          const ci95 = or.confidenceInterval(0.95);
+          const ci99 = or.confidenceInterval(0.99);
+          const [[a,b],[c,d]] = obs;
+          let out = `Odds Ratio (OR) = (${a}×${d}) / (${b}×${c}) = ${fmt(or.statistic)}\n`;
+          out += `\n95% CI: [${fmt(ci95.low)}, ${fmt(ci95.high)}]\n`;
+          out += `99% CI: [${fmt(ci99.low)}, ${fmt(ci99.high)}]`;
+          el.textContent = out;
+          el.className = 'output ok';
+        } catch(e) { el.textContent = "Error: "+e.message; el.className = 'output err'; }
+      };
+
+      window.runAssociation = function() {
+        const el = document.getElementById('assoc-out');
+        try {
+          const obs = JSON.parse(document.getElementById('assoc-input').value);
+          const methods = ['cramer','phi','contingency','tschuprow'];
+          let out = "Association measures:\n\n";
+          for (const m of methods) {
+            const v = association(obs, m);
+            out += `  ${m.padEnd(14)} = ${fmt(v)}\n`;
+          }
+          const rows = obs.length, cols = obs[0].length;
+          out += `\nTable shape: ${rows}×${cols}`;
+          out += `\nNote: phi > 1 is possible for tables larger than 2×2.`;
+          out += `\nCramér's V is the most general measure.`;
+          el.textContent = out;
+          el.className = 'output ok';
+        } catch(e) { el.textContent = "Error: "+e.message; el.className = 'output err'; }
+      };
+
+      window.runTrial = function() {
+        const el = document.getElementById('trial-out');
+        try {
+          const obs = JSON.parse(document.getElementById('trial-input').value);
+          const rr = relativeRisk(obs);
+          const or = oddsRatio(obs);
+          const ci_rr = rr.confidenceInterval(0.95);
+          const ci_or = or.confidenceInterval(0.95);
+          const E = expectedFreq(obs);
+          const chi2 = chi2Stat(obs);
+          const v = association(obs, 'cramer');
+          const [[a,b],[c,d]] = obs;
+          let out = "=== Clinical Trial Analysis ===\n\n";
+          out += `Group       Events  Non-events  Total   Risk\n`;
+          out += `Treatment   ${String(a).padStart(6)}  ${String(b).padStart(10)}  ${String(a+b).padStart(5)}   ${fmt(a/(a+b))}\n`;
+          out += `Control     ${String(c).padStart(6)}  ${String(d).padStart(10)}  ${String(c+d).padStart(5)}   ${fmt(c/(c+d))}\n`;
+          out += `\n--- Effect Sizes ---\n`;
+          out += `Relative Risk (RR): ${fmt(rr.relativeRisk)}\n`;
+          out += `  95% CI: [${fmt(ci_rr.low)}, ${fmt(ci_rr.high)}]\n`;
+          out += `Odds Ratio (OR):    ${fmt(or.statistic)}\n`;
+          out += `  95% CI: [${fmt(ci_or.low)}, ${fmt(ci_or.high)}]\n`;
+          out += `\n--- Chi-square Test ---\n`;
+          out += `χ² statistic: ${fmt(chi2)}\n`;
+          out += `Cramér's V:   ${fmt(v)}\n`;
+          out += `\n--- Expected Frequencies (under H₀) ---\n`;
+          E.forEach((row,i)=>{
+            out += `  row ${i}: [${row.map(v=>fmt(v,2)).join(', ')}]\n`;
+          });
+          el.textContent = out;
+          el.className = 'output ok';
+        } catch(e) { el.textContent = "Error: "+e.message; el.className = 'output err'; }
+      };
+    </script>
+  </body>
+</html>
