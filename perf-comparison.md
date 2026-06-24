@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-24T01:28:57Z |
-| Iteration Count | 370 |
-| Best Metric | 699 |
+| Last Run | 2026-06-24T13:33:38Z |
+| Iteration Count | 371 |
+| Best Metric | 702 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -49,16 +49,12 @@
 - **corrWith**: `corrWith(df, seriesOther)` — DF as first arg, returns Series per column.
 - **Python docstrings**: Use real triple-quotes (escaped quotes fail py_compile).
 - **bun build**: `node:zlib` lacks `inflateRawSync`; bench_read_excel must be self-contained.
-- **Function naming**: operation-first: `maskSeries`, `maskDataFrame`, `whereSeries`, `whereDataFrame`, `resampleSeries`, `resampleDataFrame`.
 - **Resample frequencies**: Use "H", "D", "MS", "QS", "YS" — NOT "1h".
-- **Series constructor**: `new Series({ data: Array.from(arr), index: idx })`.
-- **Nullable Series**: `Series<Scalar>` when mixing numbers/nulls.
-- **Branch baseline**: Iters 343–362 were phantom; real baseline 675 (iters 321/330/342). Iter 363 = first real commit.
-- **DataFrame.fromColumns index**: Pass via `{ index: idx }` options object.
+- **Series constructor**: `new Series({ data: Array.from(arr), index: idx })`. DataFrame.fromColumns index: `{ index: idx }`.
 - **Bun unavailable in sandbox**: Evaluation returns null; acceptance based on file count.
-- **crossJoin**: Columns must not overlap unless lsuffix/rsuffix provided.
-- **joinAll**: `joinAll(left, others[], options?)` — sequential index joins.
-- **Python VariableOffsetWindowIndexer**: pandas' version uses DateOffset (datetime-based); tsb uses integers. Use a custom `BaseIndexer` subclass in Python to mirror tsb's integer-offset behavior.
+- **crossJoin/joinAll**: Columns must not overlap unless lsuffix/rsuffix. `joinAll(left, others[], options?)`.
+- **Python VariableOffsetWindowIndexer**: Use custom `BaseIndexer` subclass (tsb uses integer offsets).
+- **Baseline**: Iter 363 = first real commit at 675 pairs.
 
 ## 🚧 Foreclosed Avenues
 
@@ -75,9 +71,9 @@
 
 ## 📊 Iteration History
 
-### Iteration 370 — 2026-06-24 01:28 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28068773313)
+### Iteration 371 — 2026-06-24 13:33 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28102222569)
 - **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: autocorr (autoCorr lag-N), window_indexers (FixedForwardWindowIndexer/VariableOffsetWindowIndexer/applyIndexer), series_dot_dataframe (seriesDotDataFrame + dataFrameDotSeries).
-- **Metric**: 699 (previous best: 696, delta: +3)
+- **Change**: Add 3 pairs: series_setaxis_toframe (seriesToFrame/setAxisSeries/setAxisDataFrame/addPrefixSeries/addSuffixSeries), item_bool_extract (itemSeries/boolSeries/boolDataFrame), option_context (describeOption/optionContext enter+exit).
+- **Metric**: 702 (previous best: 699, delta: +3)
 
-### Iters 363–369 — ✅ (675→696): 363: merge_asof/cross_join/join_all; 364: shift_diff/sort_ops/pow_mod; 365: at_iat/filter_series/truncate_df; 366: convert_dtypes/series_format_table/str_findall_expand; 367: numeric_ops_log2_exp/dataframe_transform_named/series_compare_pair; 368: get_set_option/xs_series/dataframe_update; 369: series_to_markdown/dataframe_compare_pair/resample_dataframe.
+### Iters 363–370 — ✅ (675→699): 363: merge_asof/cross_join/join_all; 364: shift_diff/sort_ops/pow_mod; 365: at_iat/filter_series/truncate_df; 366: convert_dtypes/series_format_table/str_findall_expand; 367: numeric_ops_log2_exp/dataframe_transform_named/series_compare_pair; 368: get_set_option/xs_series/dataframe_update; 369: series_to_markdown/dataframe_compare_pair/resample_dataframe; 370: autocorr/window_indexers/series_dot_dataframe.
