@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-23T08:03:37Z |
-| Iteration Count | 369 |
-| Best Metric | 696 |
+| Last Run | 2026-06-24T01:28:57Z |
+| Iteration Count | 370 |
+| Best Metric | 699 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -58,6 +58,7 @@
 - **Bun unavailable in sandbox**: Evaluation returns null; acceptance based on file count.
 - **crossJoin**: Columns must not overlap unless lsuffix/rsuffix provided.
 - **joinAll**: `joinAll(left, others[], options?)` — sequential index joins.
+- **Python VariableOffsetWindowIndexer**: pandas' version uses DateOffset (datetime-based); tsb uses integers. Use a custom `BaseIndexer` subclass in Python to mirror tsb's integer-offset behavior.
 
 ## 🚧 Foreclosed Avenues
 
@@ -74,19 +75,9 @@
 
 ## 📊 Iteration History
 
-### Iteration 369 — 2026-06-23 08:03 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28011453562)
+### Iteration 370 — 2026-06-24 01:28 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28068773313)
 - **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: series_to_markdown (seriesToMarkdown + seriesToLaTeX), dataframe_compare_pair (dataFrameEq/Ne/Gt/Le df-vs-df), resample_dataframe (resampleDataFrame .mean/.sum/.min).
-- **Metric**: 696 (previous best: 693, delta: +3)
+- **Change**: Add 3 pairs: autocorr (autoCorr lag-N), window_indexers (FixedForwardWindowIndexer/VariableOffsetWindowIndexer/applyIndexer), series_dot_dataframe (seriesDotDataFrame + dataFrameDotSeries).
+- **Metric**: 699 (previous best: 696, delta: +3)
 
-### Iteration 368 — 2026-06-22 17:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27995840443)
-- **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: get_set_option (getOption/setOption/resetOption), xs_series (xsSeries flat + MultiIndex), dataframe_update (dataFrameUpdate).
-- **Metric**: 693 (previous best: 690, delta: +3)
-
-### Iteration 367 — 2026-06-22 05:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/27961138526)
-- **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: numeric_ops_log2_exp (seriesLog2/Log10/Exp/Sign + DataFrame variants), dataframe_transform_named (dataFrameTransform with "mean"/"cumsum"/["sum","mean"]), series_compare_pair (seriesNe/Gt/Le/Eq Series-to-Series).
-- **Metric**: 690 (previous best: 687, delta: +3)
-
-### Iters 363–367 — ✅ (675→690): 363: merge_asof/cross_join/join_all; 364: shift_diff/sort_ops/pow_mod; 365: at_iat/filter_series/truncate_df; 366: convert_dtypes/series_format_table/str_findall_expand; 367: numeric_ops_log2_exp/dataframe_transform_named/series_compare_pair.
+### Iters 363–369 — ✅ (675→696): 363: merge_asof/cross_join/join_all; 364: shift_diff/sort_ops/pow_mod; 365: at_iat/filter_series/truncate_df; 366: convert_dtypes/series_format_table/str_findall_expand; 367: numeric_ops_log2_exp/dataframe_transform_named/series_compare_pair; 368: get_set_option/xs_series/dataframe_update; 369: series_to_markdown/dataframe_compare_pair/resample_dataframe.
