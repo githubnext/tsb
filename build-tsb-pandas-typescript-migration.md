@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-23T16:00:00Z |
-| Iteration Count | 375 |
-| Best Metric | 175 |
+| Last Run | 2026-06-24T08:00:00Z |
+| Iteration Count | 376 |
+| Best Metric | 176 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, pending-ci, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io/stats features; next: more stats modules (e.g. regression, contingency), more io formats
+- More io/stats features; next: more io formats (read_orc, to_markdown, to_latex), or more stats (bootstrap, multivariate)
 
 ---
 
@@ -41,6 +41,7 @@
 - **toOffset/inferFreq**: Multiplier prefix, week anchor, null for unknown/empty.
 - **HypothesisTests**: math primitives from scratch (erf, logGamma, regIncGamma, regIncBeta). t-dist SF via `regIncBeta(df/(df+t²), df/2, 0.5)`. pearsonr: n<2→NaN, n=2→valid r but NaN p. MannWhitney: always use U1 for direction (not U2 for "less").
 - **Regression**: `linregress` reuses math from HypothesisTests (logGamma/regIncBeta). SE(slope) = sqrt(MSE/Sxx). OLS appends intercept column last (index k). stderr assertion = sqrt(0.08) not 0.30551.
+- **Contingency**: `useNumberNamespace` error → use `Number.POSITIVE_INFINITY` not bare `Infinity`. `useSimplifiedLogicExpression` = warning (OK). Log-normal CI for RR: SE(ln RR) = sqrt(b/(a·n1) + d/(c·n2)). Woolf CI for OR: SE(ln OR) = sqrt(1/a+1/b+1/c+1/d).
 
 ---
 
@@ -51,6 +52,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 376 — 2026-06-24 08:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28084024731)
+- **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
+- **Change**: Add `src/stats/contingency.ts` — `expectedFreq`, `relativeRisk` (log-normal CI), `oddsRatio` (Woolf CI), `association` (Cramér's V, phi, Pearson's C, Tschuprow's T). Mirrors scipy.stats.contingency. Tests + playground/contingency.html. Commit 067f896.
+- **Metric**: 175 → 176 (Δ+1)
 
 ### Iteration 375 — 2026-06-23 16:00 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28051418185)
 - **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
