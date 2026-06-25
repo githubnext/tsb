@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-24T13:33:38Z |
-| Iteration Count | 371 |
-| Best Metric | 702 |
+| Last Run | 2026-06-25T01:48:30Z |
+| Iteration Count | 372 |
+| Best Metric | 705 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -70,6 +70,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 372 — 2026-06-25 01:48 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28140816423)
+- **Status**: ✅ Accepted
+- **Change**: Add 3 pairs: to_latex (toLaTeX/seriesToLaTeX), styler_format (Styler format/apply/applymap/toHtml), styler_highlight_adv (Styler highlightNull/highlightBetween/textGradient/barChart/toLatex).
+- **Metric**: 705 (previous best: 702, delta: +3)
 
 ### Iteration 371 — 2026-06-24 13:33 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28102222569)
 - **Status**: ✅ Accepted
