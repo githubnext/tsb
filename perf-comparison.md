@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-25T01:48:30Z |
-| Iteration Count | 372 |
-| Best Metric | 705 |
+| Last Run | 2026-06-25T13:32:48Z |
+| Iteration Count | 373 |
+| Best Metric | 708 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -71,14 +71,9 @@
 
 ## 📊 Iteration History
 
-### Iteration 372 — 2026-06-25 01:48 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28140816423)
+### Iteration 373 — 2026-06-25 13:32 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28173787476)
 - **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: to_latex (toLaTeX/seriesToLaTeX), styler_format (Styler format/apply/applymap/toHtml), styler_highlight_adv (Styler highlightNull/highlightBetween/textGradient/barChart/toLatex).
-- **Metric**: 705 (previous best: 702, delta: +3)
+- **Change**: Add 3 pairs: styler_table_props (setProperties/setTableStyles/setTableAttributes/hide/setPrecision/setNaRep/clearStyles), errors (pd.errors namespace), extensions (ExtensionDtype/ExtensionArray/accessor registration).
+- **Metric**: 708 (previous best: 705, delta: +3)
 
-### Iteration 371 — 2026-06-24 13:33 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28102222569)
-- **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: series_setaxis_toframe (seriesToFrame/setAxisSeries/setAxisDataFrame/addPrefixSeries/addSuffixSeries), item_bool_extract (itemSeries/boolSeries/boolDataFrame), option_context (describeOption/optionContext enter+exit).
-- **Metric**: 702 (previous best: 699, delta: +3)
-
-### Iters 363–370 — ✅ (675→699): 363: merge_asof/cross_join/join_all; 364: shift_diff/sort_ops/pow_mod; 365: at_iat/filter_series/truncate_df; 366: convert_dtypes/series_format_table/str_findall_expand; 367: numeric_ops_log2_exp/dataframe_transform_named/series_compare_pair; 368: get_set_option/xs_series/dataframe_update; 369: series_to_markdown/dataframe_compare_pair/resample_dataframe; 370: autocorr/window_indexers/series_dot_dataframe.
+### Iters 363–372 — ✅ (675→705): 363: merge_asof/cross_join/join_all; 364: shift_diff/sort_ops/pow_mod; 365: at_iat/filter_series/truncate_df; 366: convert_dtypes/series_format_table/str_findall_expand; 367: numeric_ops_log2_exp/dataframe_transform_named/series_compare_pair; 368: get_set_option/xs_series/dataframe_update; 369: series_to_markdown/dataframe_compare_pair/resample_dataframe; 370: autocorr/window_indexers/series_dot_dataframe; 371: series_setaxis_toframe/item_bool_extract/option_context; 372: to_latex/styler_format/styler_highlight_adv.
