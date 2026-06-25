@@ -12,14 +12,16 @@ import { bootstrap, bootstrap1 } from "../../src/index.ts";
 
 function mean(xs: readonly number[]): number {
   let s = 0;
-  for (const x of xs) s += x;
+  for (const x of xs) {
+    s += x;
+  }
   return s / xs.length;
 }
 
 function median(xs: readonly number[]): number {
   const s = [...xs].sort((a, b) => a - b);
   const mid = Math.floor(s.length / 2);
-  return s.length % 2 === 0 ? ((s[mid - 1]! + s[mid]!) / 2) : s[mid]!;
+  return s.length % 2 === 0 ? (s[mid - 1]! + s[mid]!) / 2 : s[mid]!;
 }
 
 function stdDev(xs: readonly number[]): number {
@@ -81,8 +83,13 @@ describe("bootstrap — percentile method", () => {
   });
 
   it("95% CI is wider than 90% CI", () => {
-    const r95 = bootstrap1(data, mean, { n: 2000, seed: 7, method: "percentile", confidence: 0.95 });
-    const r90 = bootstrap1(data, mean, { n: 2000, seed: 7, method: "percentile", confidence: 0.90 });
+    const r95 = bootstrap1(data, mean, {
+      n: 2000,
+      seed: 7,
+      method: "percentile",
+      confidence: 0.95,
+    });
+    const r90 = bootstrap1(data, mean, { n: 2000, seed: 7, method: "percentile", confidence: 0.9 });
     const width95 = r95.confidenceInterval.high - r95.confidenceInterval.low;
     const width90 = r90.confidenceInterval.high - r90.confidenceInterval.low;
     expect(width95).toBeGreaterThan(width90);
@@ -149,11 +156,7 @@ describe("bootstrap — two-sample", () => {
 
   it("mean difference CI contains true difference", () => {
     const trueDiff = mean(a) - mean(b); // 14 - 10 = 4
-    const result = bootstrap(
-      [a, b],
-      (xs, ys) => mean(xs) - mean(ys),
-      { n: 2000, seed: 88 },
-    );
+    const result = bootstrap([a, b], (xs, ys) => mean(xs) - mean(ys), { n: 2000, seed: 88 });
     const { low, high } = result.confidenceInterval;
     expect(low).toBeLessThan(trueDiff);
     expect(high).toBeGreaterThan(trueDiff);
@@ -238,7 +241,9 @@ describe("bootstrap — property-based", () => {
     fc.assert(
       fc.property(
         fc.array(fc.float({ min: -100, max: 100, noNaN: true }), { minLength: 2, maxLength: 20 }),
-        fc.integer({ min: 1, max: 3 }).map((x) => (["percentile", "basic", "bca"] as const)[x - 1]!),
+        fc
+          .integer({ min: 1, max: 3 })
+          .map((x) => (["percentile", "basic", "bca"] as const)[x - 1]!),
         fc.integer({ min: 0, max: 99999 }),
         (data, method, seed) => {
           const result = bootstrap1(data, mean, { n: 200, seed, method });

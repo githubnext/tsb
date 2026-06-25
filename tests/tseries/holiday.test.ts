@@ -13,31 +13,31 @@
 import { describe, expect, test } from "bun:test";
 import fc from "fast-check";
 import {
-  Holiday,
   AbstractHolidayCalendar,
-  USFederalHolidayCalendar,
-  USNewYearsDay,
-  USMartinLutherKingJrDay,
-  USPresidentsDay,
-  USMemorialDay,
-  USJuneteenth,
-  USIndependenceDay,
-  USLaborDay,
-  USColumbusDay,
-  USVeteransDay,
-  USThanksgivingDay,
+  FR,
+  Holiday,
+  MO,
+  TH,
   USChristmasDay,
+  USColumbusDay,
+  USFederalHolidayCalendar,
+  USIndependenceDay,
+  USJuneteenth,
+  USLaborDay,
+  USMartinLutherKingJrDay,
+  USMemorialDay,
+  USNewYearsDay,
+  USPresidentsDay,
+  USThanksgivingDay,
+  USVeteransDay,
   get_calendar,
-  register_calendar,
   nearestWorkday,
-  sundayToMonday,
   nextMonday,
   nextMondayOrTuesday,
   previousFriday,
   previousWorkday,
-  MO,
-  TH,
-  FR,
+  register_calendar,
+  sundayToMonday,
 } from "tsb";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -282,17 +282,17 @@ describe("USFederalHolidayCalendar", () => {
 
   // Verify each 2024 holiday's observed date
   const expected2024: [string, string][] = [
-    ["New Year's Day", "2024-01-01"],    // Monday
+    ["New Year's Day", "2024-01-01"], // Monday
     ["Martin Luther King Jr. Day", "2024-01-15"], // 3rd Monday
-    ["Presidents' Day", "2024-02-19"],  // 3rd Monday
-    ["Memorial Day", "2024-05-27"],     // last Monday
+    ["Presidents' Day", "2024-02-19"], // 3rd Monday
+    ["Memorial Day", "2024-05-27"], // last Monday
     ["Juneteenth National Independence Day", "2024-06-19"], // Wednesday
     ["Independence Day", "2024-07-04"], // Thursday
-    ["Labor Day", "2024-09-02"],        // 1st Monday
-    ["Columbus Day", "2024-10-14"],     // 2nd Monday
-    ["Veterans Day", "2024-11-11"],     // Monday
+    ["Labor Day", "2024-09-02"], // 1st Monday
+    ["Columbus Day", "2024-10-14"], // 2nd Monday
+    ["Veterans Day", "2024-11-11"], // Monday
     ["Thanksgiving Day", "2024-11-28"], // 4th Thursday
-    ["Christmas Day", "2024-12-25"],    // Wednesday
+    ["Christmas Day", "2024-12-25"], // Wednesday
   ];
 
   for (const [name, date] of expected2024) {
@@ -322,17 +322,13 @@ describe("USFederalHolidayCalendar", () => {
 
   test("Juneteenth not present before 2021", () => {
     const idx = cal.holidays("2020-01-01", "2020-12-31");
-    const juneteenth = idx.values.some(
-      (d) => d.getUTCMonth() === 5 && d.getUTCDate() === 19,
-    );
+    const juneteenth = idx.values.some((d) => d.getUTCMonth() === 5 && d.getUTCDate() === 19);
     expect(juneteenth).toBe(false);
   });
 
   test("Juneteenth present in 2024", () => {
     const idx = cal.holidays("2024-01-01", "2024-12-31");
-    const juneteenth = idx.values.some(
-      (d) => fmt(d) === "2024-06-19",
-    );
+    const juneteenth = idx.values.some((d) => fmt(d) === "2024-06-19");
     expect(juneteenth).toBe(true);
   });
 
@@ -370,9 +366,7 @@ describe("get_calendar / register_calendar", () => {
   test("register_calendar then get_calendar retrieves it", () => {
     class MinimalCalendar extends AbstractHolidayCalendar {
       readonly name = "TestHolidayCalendar_holiday_test";
-      readonly rules: readonly Holiday[] = [
-        new Holiday("Test Holiday", { month: 7, day: 4 }),
-      ];
+      readonly rules: readonly Holiday[] = [new Holiday("Test Holiday", { month: 7, day: 4 })];
     }
 
     register_calendar("TestHolidayCalendar_holiday_test", () => new MinimalCalendar());
@@ -482,7 +476,9 @@ describe("Property-based: USFederalHolidayCalendar results sorted", () => {
           for (let i = 1; i < vals.length; i++) {
             const a = vals[i - 1];
             const b = vals[i];
-            if (a != null && b != null && a.getTime() > b.getTime()) return false;
+            if (a != null && b != null && a.getTime() > b.getTime()) {
+              return false;
+            }
           }
           return true;
         },

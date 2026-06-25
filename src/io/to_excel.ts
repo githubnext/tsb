@@ -24,7 +24,7 @@
  *
  * @module
  */
-import { DataFrame } from "../core/frame.ts";
+import type { DataFrame } from "../core/frame.ts";
 import type { Scalar } from "../types.ts";
 
 // ─── Public Types ─────────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ const CRC32_TABLE: Uint32Array = (() => {
   for (let i = 0; i < 256; i++) {
     let c = i;
     for (let k = 0; k < 8; k++) {
-      c = (c & 1) !== 0 ? (0xedb88320 ^ (c >>> 1)) : c >>> 1;
+      c = (c & 1) !== 0 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
     }
     t[i] = c;
   }
@@ -251,95 +251,67 @@ const PKG_NS = "http://schemas.openxmlformats.org/package/2006";
 const OD_NS = "http://schemas.openxmlformats.org/officeDocument/2006";
 
 function buildContentTypes(): string {
-  return (
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
-    `<Types xmlns="${PKG_NS}/content-types">` +
-    `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
-    `<Default Extension="xml" ContentType="application/xml"/>` +
-    `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>` +
-    `<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>` +
-    `<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>` +
-    `<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>` +
-    `</Types>`
-  );
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="${PKG_NS}/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;
 }
 
 function buildRootRels(): string {
-  return (
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
-    `<Relationships xmlns="${PKG_NS}/relationships">` +
-    `<Relationship Id="rId1" Type="${OD_NS}/relationships/officeDocument" Target="xl/workbook.xml"/>` +
-    `</Relationships>`
-  );
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${PKG_NS}/relationships"><Relationship Id="rId1" Type="${OD_NS}/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
 }
 
 function buildWorkbook(sheetName: string): string {
-  return (
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
-    `<workbook xmlns="${XLSX_NS}" xmlns:r="${OD_NS}/relationships">` +
-    `<bookViews><workbookView/></bookViews>` +
-    `<sheets>` +
-    `<sheet name="${xmlEsc(sheetName)}" sheetId="1" r:id="rId1"/>` +
-    `</sheets>` +
-    `</workbook>`
-  );
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${XLSX_NS}" xmlns:r="${OD_NS}/relationships"><bookViews><workbookView/></bookViews><sheets><sheet name="${xmlEsc(sheetName)}" sheetId="1" r:id="rId1"/></sheets></workbook>`;
 }
 
 function buildWorkbookRels(): string {
-  return (
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
-    `<Relationships xmlns="${PKG_NS}/relationships">` +
-    `<Relationship Id="rId1" Type="${OD_NS}/relationships/worksheet" Target="worksheets/sheet1.xml"/>` +
-    `<Relationship Id="rId2" Type="${OD_NS}/relationships/sharedStrings" Target="sharedStrings.xml"/>` +
-    `<Relationship Id="rId3" Type="${OD_NS}/relationships/styles" Target="styles.xml"/>` +
-    `</Relationships>`
-  );
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${PKG_NS}/relationships"><Relationship Id="rId1" Type="${OD_NS}/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${OD_NS}/relationships/sharedStrings" Target="sharedStrings.xml"/><Relationship Id="rId3" Type="${OD_NS}/relationships/styles" Target="styles.xml"/></Relationships>`;
 }
 
 function buildStyles(): string {
-  return (
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
-    `<styleSheet xmlns="${XLSX_NS}">` +
-    `<fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>` +
-    `<fills count="2">` +
-    `<fill><patternFill patternType="none"/></fill>` +
-    `<fill><patternFill patternType="gray125"/></fill>` +
-    `</fills>` +
-    `<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>` +
-    `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
-    `<cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs>` +
-    `</styleSheet>`
-  );
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${XLSX_NS}"><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs></styleSheet>`;
 }
 
 function buildSst(strings: readonly string[]): string {
   const n = strings.length;
-  let xml =
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
-    `<sst xmlns="${XLSX_NS}" count="${n}" uniqueCount="${n}">`;
+  let xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><sst xmlns="${XLSX_NS}" count="${n}" uniqueCount="${n}">`;
   for (const s of strings) {
     xml += `<si><t xml:space="preserve">${xmlEsc(s)}</t></si>`;
   }
-  xml += `</sst>`;
+  xml += "</sst>";
   return xml;
 }
 
 /** Convert a scalar value to the string that goes in the SST or a cell <v>. */
 function scalarToString(v: Scalar): string {
-  if (v === null || v === undefined) return "";
-  if (typeof v === "string") return v;
-  if (typeof v === "number") return String(v);
-  if (typeof v === "boolean") return v ? "true" : "false";
-  if (typeof v === "bigint") return String(v);
-  if (v instanceof Date) return v.toISOString();
+  if (v === null || v === undefined) {
+    return "";
+  }
+  if (typeof v === "string") {
+    return v;
+  }
+  if (typeof v === "number") {
+    return String(v);
+  }
+  if (typeof v === "boolean") {
+    return v ? "true" : "false";
+  }
+  if (typeof v === "bigint") {
+    return String(v);
+  }
+  if (v instanceof Date) {
+    return v.toISOString();
+  }
   // TimedeltaLike
   return `${v.totalMs}ms`;
 }
 
 /** Determine whether a scalar is missing (null, undefined, NaN). */
 function isMissing(v: Scalar): boolean {
-  if (v === null || v === undefined) return true;
-  if (typeof v === "number" && Number.isNaN(v)) return true;
+  if (v === null || v === undefined) {
+    return true;
+  }
+  if (typeof v === "number" && Number.isNaN(v)) {
+    return true;
+  }
   return false;
 }
 
@@ -349,7 +321,7 @@ function isNumeric(v: Scalar): v is number {
 }
 
 function buildSheet(
-  rows: ReadonlyArray<ReadonlyArray<Scalar>>,
+  rows: readonly (readonly Scalar[])[],
   sstMap: ReadonlyMap<string, number>,
   naRep: string,
   startRow: number,
@@ -374,7 +346,9 @@ function buildSheet(
 
   for (let ri = 0; ri < rows.length; ri++) {
     const row = rows[ri];
-    if (row === undefined) continue;
+    if (row === undefined) {
+      continue;
+    }
     const excelRow = startRow + ri + 1;
     parts.push(`<row r="${excelRow}">`);
 
@@ -452,9 +426,7 @@ export function toExcel(df: DataFrame, options?: ToExcelOptions): Uint8Array {
   const nRows = df.index.size;
 
   // Pre-fetch column arrays to avoid repeated lookups
-  const colData: ReadonlyArray<ReadonlyArray<Scalar>> = requestedCols.map((c) =>
-    df.col(c).toArray(),
-  );
+  const colData: readonly (readonly Scalar[])[] = requestedCols.map((c) => df.col(c).toArray());
 
   // ─── Build Shared String Table ─────────────────────────────────────────────
 
@@ -469,12 +441,18 @@ export function toExcel(df: DataFrame, options?: ToExcelOptions): Uint8Array {
   };
 
   // naRep always needs an SST entry (used for missing cells)
-  if (naRep !== "") addStr(naRep);
+  if (naRep !== "") {
+    addStr(naRep);
+  }
 
   // Header row strings
   if (writeHeader) {
-    if (writeIndex) addStr(""); // corner cell (empty)
-    for (const c of requestedCols) addStr(c);
+    if (writeIndex) {
+      addStr(""); // corner cell (empty)
+    }
+    for (const c of requestedCols) {
+      addStr(c);
+    }
   }
 
   // Index value strings
@@ -493,7 +471,9 @@ export function toExcel(df: DataFrame, options?: ToExcelOptions): Uint8Array {
   // Data cell strings
   for (let ci = 0; ci < colData.length; ci++) {
     const col = colData[ci];
-    if (col === undefined) continue;
+    if (col === undefined) {
+      continue;
+    }
     for (let ri = 0; ri < nRows; ri++) {
       const v = col[ri];
       if (v === undefined || isMissing(v)) {
@@ -517,19 +497,23 @@ export function toExcel(df: DataFrame, options?: ToExcelOptions): Uint8Array {
   // rows[r][c] = Scalar value (or undefined = missing)
   const nDataCols = (writeIndex ? 1 : 0) + requestedCols.length;
   const nDataRows = (writeHeader ? 1 : 0) + nRows;
-  const sheetRows: Array<Array<Scalar>> = [];
+  const sheetRows: Scalar[][] = [];
 
   // Header row
   if (writeHeader) {
-    const hdr: Array<Scalar> = [];
-    if (writeIndex) hdr.push(""); // empty corner
-    for (const c of requestedCols) hdr.push(c);
+    const hdr: Scalar[] = [];
+    if (writeIndex) {
+      hdr.push(""); // empty corner
+    }
+    for (const c of requestedCols) {
+      hdr.push(c);
+    }
     sheetRows.push(hdr);
   }
 
   // Data rows
   for (let ri = 0; ri < nRows; ri++) {
-    const row: Array<Scalar> = [];
+    const row: Scalar[] = [];
     if (writeIndex) {
       const iv = indexVals[ri];
       row.push(iv !== undefined ? iv : null);

@@ -69,7 +69,7 @@ export class FloatingArray extends MaskedArray<number> {
     const data: number[] = [];
     const mask: boolean[] = [];
     for (const v of values) {
-      if (v === null || v === undefined || (typeof v === "number" && isNaN(v))) {
+      if (v === null || v === undefined || (typeof v === "number" && Number.isNaN(v))) {
         data.push(0);
         mask.push(true);
       } else {
@@ -81,11 +81,7 @@ export class FloatingArray extends MaskedArray<number> {
   }
 
   /** @internal */
-  static _fromRaw(
-    data: number[],
-    mask: boolean[],
-    dtype: FloatingDtypeName,
-  ): FloatingArray {
+  static _fromRaw(data: number[], mask: boolean[], dtype: FloatingDtypeName): FloatingArray {
     return new FloatingArray(data, mask, dtype);
   }
 
@@ -243,9 +239,7 @@ export class FloatingArray extends MaskedArray<number> {
       return [data, mask];
     }
     if (other.size !== this.size) {
-      throw new RangeError(
-        `FloatingArray: operand size mismatch (${this.size} vs ${other.size})`,
-      );
+      throw new RangeError(`FloatingArray: operand size mismatch (${this.size} vs ${other.size})`);
     }
     const data: number[] = [];
     const mask: boolean[] = [];

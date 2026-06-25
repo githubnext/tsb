@@ -115,7 +115,7 @@ type ResolvedBranch = {
  */
 export function caseWhen<T extends Scalar = Scalar>(
   series: Series<T>,
-  caselist: ReadonlyArray<CaseWhenBranch>,
+  caselist: readonly CaseWhenBranch[],
 ): Series<Scalar> {
   const n = series.length;
   const srcValues = series.toArray();

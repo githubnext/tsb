@@ -306,7 +306,7 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
   const naSet = new Set([...DEFAULT_NA, ...extraNa]);
 
   const tokens = tokenize(text);
-  const rows: Array<Record<string, string | null>> = [];
+  const rows: Record<string, string | null>[] = [];
 
   // Discover rowTag from first repeating child of root if not specified
   let resolvedRowTag = rowTag;
@@ -320,7 +320,9 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
           const n = localName(tok.name);
           childCounts.set(n, (childCounts.get(n) ?? 0) + 1);
         }
-        if (tok.selfClose && depth === 2) depth--;
+        if (tok.selfClose && depth === 2) {
+          depth--;
+        }
       } else if (tok.kind === "close") {
         depth--;
       }
@@ -360,7 +362,9 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
           inRow = false;
           rows.push({ ...currentRow });
           rowCount++;
-          if (nrows !== undefined && rowCount >= nrows) break;
+          if (nrows !== undefined && rowCount >= nrows) {
+            break;
+          }
         }
       } else if (inRow && elems) {
         currentElem = localName(tok.name);
@@ -371,7 +375,9 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
           currentElem = "";
         }
       }
-      if (tok.selfClose) depth--;
+      if (tok.selfClose) {
+        depth--;
+      }
     } else if (tok.kind === "text") {
       if (inRow && currentElem) {
         currentText += tok.text;
@@ -386,7 +392,9 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
         inRow = false;
         rows.push({ ...currentRow });
         rowCount++;
-        if (nrows !== undefined && rowCount >= nrows) break;
+        if (nrows !== undefined && rowCount >= nrows) {
+          break;
+        }
       }
       depth--;
     }
@@ -399,20 +407,28 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
   // Collect all column names in order of first appearance
   const colSet = new Set<string>();
   for (const row of rows) {
-    for (const k of Object.keys(row)) colSet.add(k);
+    for (const k of Object.keys(row)) {
+      colSet.add(k);
+    }
   }
   let cols = [...colSet];
-  if (usecols) cols = cols.filter((c) => usecols.includes(c));
+  if (usecols) {
+    cols = cols.filter((c) => usecols.includes(c));
+  }
 
   // Build column arrays
   const colData: Record<string, Scalar[]> = {};
   for (const col of cols) {
     colData[col] = rows.map((row) => {
       const raw = row[col] ?? null;
-      if (raw === null || naSet.has(raw)) return null;
+      if (raw === null || naSet.has(raw)) {
+        return null;
+      }
       if (converters) {
         const n = Number(raw);
-        if (!Number.isNaN(n) && raw.trim() !== "") return n;
+        if (!Number.isNaN(n) && raw.trim() !== "") {
+          return n;
+        }
       }
       return raw;
     });

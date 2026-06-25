@@ -435,7 +435,9 @@ describe("SparseArray property tests", () => {
           const arr = SparseArray.fromDense(data, 0);
           const dense = arr.toDense();
           const expected = dense[rawIdx];
-          if (expected === undefined) return;
+          if (expected === undefined) {
+            return;
+          }
           expect(arr.at(rawIdx)).toBe(expected);
         },
       ),

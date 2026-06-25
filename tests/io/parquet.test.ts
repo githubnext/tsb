@@ -141,7 +141,9 @@ describe("readParquet ∘ toParquet — multi-column round-trip", () => {
 
   it("round-trips many columns", () => {
     const data: Record<string, number[]> = {};
-    for (let i = 0; i < 10; i++) data[`col${i}`] = [i, i * 2, i * 3];
+    for (let i = 0; i < 10; i++) {
+      data[`col${i}`] = [i, i * 2, i * 3];
+    }
     const df = DataFrame.fromColumns(data);
     const rt = roundTrip(df);
     expect(rt.shape).toEqual([3, 10]);

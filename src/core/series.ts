@@ -893,7 +893,7 @@ export class Series<T extends Scalar = Scalar> {
         const v = vals[i];
         if (v === null || v === undefined || Number.isNaN(v)) {
           _nanBuf[nanCount] = i;
-          nanCount = nanCount + 1;
+          nanCount += 1;
         } else {
           const j = finCount;
           finBuf[j] = i;
@@ -936,7 +936,7 @@ export class Series<T extends Scalar = Scalar> {
           } else {
             allNumeric = false;
           }
-          finCount = finCount + 1;
+          finCount += 1;
         }
       }
 
@@ -959,7 +959,7 @@ export class Series<T extends Scalar = Scalar> {
           for (let b = 0; b < 256; b++) {
             const c = _rxHisto[base + b]!;
             _rxHisto[base + b] = total;
-            total = total + c;
+            total += c;
           }
         }
 
@@ -1049,56 +1049,7 @@ export class Series<T extends Scalar = Scalar> {
     let pos = 0;
     // naLast computed here (cold path only — not hoisted to avoid overhead on hot path).
     const naLast = naPosition.length === 4; // "last" has 4 chars, "first" has 5
-    if (!naLast) {
-      for (let i = 0; i < nanCount; i++) {
-        const idx = nanBuf[i]!;
-        perm[pos] = idx;
-        outData[pos] = vals[idx] as T;
-        pos = pos + 1;
-      }
-      if (allNumeric) {
-        if (ascending) {
-          for (let i = 0, si = 0; i < finCount; i++, si += 3) {
-            const origIdx = srcBuf[si]!;
-            const keyLo = srcBuf[si + 1]!;
-            const keyHi = srcBuf[si + 2]!;
-            perm[pos] = origIdx;
-            if (keyHi & 0x80000000) {
-              _fvalsU32[0] = keyLo;
-              _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
-            } else {
-              _fvalsU32[0] = ~keyLo >>> 0;
-              _fvalsU32[1] = ~keyHi >>> 0;
-            }
-            outData[pos] = _fvals[0] as T;
-            pos = pos + 1;
-          }
-        } else {
-          for (let i = finCount - 1, si = (finCount - 1) * 3; i >= 0; i--, si -= 3) {
-            const origIdx = srcBuf[si]!;
-            const keyLo = srcBuf[si + 1]!;
-            const keyHi = srcBuf[si + 2]!;
-            perm[pos] = origIdx;
-            if (keyHi & 0x80000000) {
-              _fvalsU32[0] = keyLo;
-              _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
-            } else {
-              _fvalsU32[0] = ~keyLo >>> 0;
-              _fvalsU32[1] = ~keyHi >>> 0;
-            }
-            outData[pos] = _fvals[0] as T;
-            pos = pos + 1;
-          }
-        }
-      } else {
-        for (let i = 0; i < finCount; i++) {
-          const idx = finSlice[i]!;
-          perm[pos] = idx;
-          outData[pos] = vals[idx] as T;
-          pos = pos + 1;
-        }
-      }
-    } else {
+    if (naLast) {
       if (allNumeric) {
         if (ascending) {
           for (let i = 0, si = 0; i < finCount; i++, si += 3) {
@@ -1116,7 +1067,7 @@ export class Series<T extends Scalar = Scalar> {
               _fvalsU32[1] = ~keyHi >>> 0;
             }
             outData[pos] = _fvals[0] as T;
-            pos = pos + 1;
+            pos += 1;
           }
         } else {
           for (let i = finCount - 1, si = (finCount - 1) * 3; i >= 0; i--, si -= 3) {
@@ -1132,7 +1083,7 @@ export class Series<T extends Scalar = Scalar> {
               _fvalsU32[1] = ~keyHi >>> 0;
             }
             outData[pos] = _fvals[0] as T;
-            pos = pos + 1;
+            pos += 1;
           }
         }
       } else {
@@ -1140,14 +1091,63 @@ export class Series<T extends Scalar = Scalar> {
           const idx = finSlice[i]!;
           perm[pos] = idx;
           outData[pos] = vals[idx] as T;
-          pos = pos + 1;
+          pos += 1;
         }
       }
       for (let i = 0; i < nanCount; i++) {
         const idx = nanBuf[i]!;
         perm[pos] = idx;
         outData[pos] = vals[idx] as T;
-        pos = pos + 1;
+        pos += 1;
+      }
+    } else {
+      for (let i = 0; i < nanCount; i++) {
+        const idx = nanBuf[i]!;
+        perm[pos] = idx;
+        outData[pos] = vals[idx] as T;
+        pos += 1;
+      }
+      if (allNumeric) {
+        if (ascending) {
+          for (let i = 0, si = 0; i < finCount; i++, si += 3) {
+            const origIdx = srcBuf[si]!;
+            const keyLo = srcBuf[si + 1]!;
+            const keyHi = srcBuf[si + 2]!;
+            perm[pos] = origIdx;
+            if (keyHi & 0x80000000) {
+              _fvalsU32[0] = keyLo;
+              _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
+            } else {
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
+            }
+            outData[pos] = _fvals[0] as T;
+            pos += 1;
+          }
+        } else {
+          for (let i = finCount - 1, si = (finCount - 1) * 3; i >= 0; i--, si -= 3) {
+            const origIdx = srcBuf[si]!;
+            const keyLo = srcBuf[si + 1]!;
+            const keyHi = srcBuf[si + 2]!;
+            perm[pos] = origIdx;
+            if (keyHi & 0x80000000) {
+              _fvalsU32[0] = keyLo;
+              _fvalsU32[1] = (keyHi ^ 0x80000000) >>> 0;
+            } else {
+              _fvalsU32[0] = ~keyLo >>> 0;
+              _fvalsU32[1] = ~keyHi >>> 0;
+            }
+            outData[pos] = _fvals[0] as T;
+            pos += 1;
+          }
+        }
+      } else {
+        for (let i = 0; i < finCount; i++) {
+          const idx = finSlice[i]!;
+          perm[pos] = idx;
+          outData[pos] = vals[idx] as T;
+          pos += 1;
+        }
       }
     }
 
@@ -1559,9 +1559,7 @@ function isIndexLike(v: unknown): v is Index<Label> {
   }
   const rec = v as Record<string, unknown>;
   return (
-    typeof rec["size"] === "number" &&
-    typeof rec["at"] === "function" &&
-    typeof rec["getLoc"] === "function"
+    typeof rec.size === "number" && typeof rec.at === "function" && typeof rec.getLoc === "function"
   );
 }
 

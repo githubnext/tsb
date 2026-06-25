@@ -180,7 +180,9 @@ class FbBuilder {
   /** Offset vector (uoffset_t[] preceded by u32 count). */
   createOffsetVector(absIdxs: number[]): number {
     this.align(4);
-    for (let i = absIdxs.length - 1; i >= 0; i--) this.writeUOffset(absIdxs[i]!);
+    for (let i = absIdxs.length - 1; i >= 0; i--) {
+      this.writeUOffset(absIdxs[i]!);
+    }
     return this.writeI32(absIdxs.length);
   }
 
@@ -266,31 +268,38 @@ class FbBuilder {
 
     for (let i = maxIndex; i >= 0; i--) {
       const field = present.find((f) => f.index === i);
-      if (field === undefined) continue;
+      if (field === undefined) {
+        continue;
+      }
       let abs: number;
       let sz: number;
       switch (field.kind) {
         case "bool":
-        case "u8":
+        case "u8": {
           abs = this.writeU8(field.kind === "bool" ? (field.value ? 1 : 0) : field.value);
           sz = 1;
           break;
-        case "i16":
+        }
+        case "i16": {
           abs = this.writeI16(field.value);
           sz = 2;
           break;
-        case "i32":
+        }
+        case "i32": {
           abs = this.writeI32(field.value);
           sz = 4;
           break;
-        case "i64":
+        }
+        case "i64": {
           abs = this.writeI64(field.value);
           sz = 8;
           break;
-        case "offset":
+        }
+        case "offset": {
           abs = this.writeUOffset(field.target);
           sz = 4;
           break;
+        }
         default:
           continue;
       }
@@ -314,7 +323,9 @@ class FbBuilder {
     const vtableSize = (numFields + 2) * 2;
 
     // Write vtable (backward: field[numFields-1] … field[0], objectSize, vtableSize)
-    for (let i = numFields - 1; i >= 0; i--) this.writeU16(fieldOffsets[i] ?? 0);
+    for (let i = numFields - 1; i >= 0; i--) {
+      this.writeU16(fieldOffsets[i] ?? 0);
+    }
     this.writeU16(objectSize);
     this.writeU16(vtableSize);
     const vtableAbsIdx = this.head;
@@ -352,7 +363,9 @@ class FbTable {
 
   private fieldOff(idx: number): number {
     const vOff = 4 + idx * 2;
-    if (vOff + 2 > this.vtableBytes) return 0;
+    if (vOff + 2 > this.vtableBytes) {
+      return 0;
+    }
     return this.view.getUint16(this.vtablePos + vOff, true);
   }
 
@@ -383,7 +396,9 @@ class FbTable {
 
   readString(idx: number): string | undefined {
     const off = this.fieldOff(idx);
-    if (off === 0) return undefined;
+    if (off === 0) {
+      return undefined;
+    }
     const fieldPos = this.tablePos + off;
     const uoff = this.view.getUint32(fieldPos, true);
     const strPos = fieldPos + uoff;
@@ -395,34 +410,46 @@ class FbTable {
 
   readSubTable(idx: number): FbTable | undefined {
     const off = this.fieldOff(idx);
-    if (off === 0) return undefined;
+    if (off === 0) {
+      return undefined;
+    }
     const fieldPos = this.tablePos + off;
     return new FbTable(this.view, fieldPos + this.view.getUint32(fieldPos, true));
   }
 
   readVectorCount(idx: number): number {
     const off = this.fieldOff(idx);
-    if (off === 0) return 0;
+    if (off === 0) {
+      return 0;
+    }
     const fieldPos = this.tablePos + off;
     return this.view.getUint32(fieldPos + this.view.getUint32(fieldPos, true), true);
   }
 
   readVectorTable(idx: number, i: number): FbTable | undefined {
     const off = this.fieldOff(idx);
-    if (off === 0) return undefined;
+    if (off === 0) {
+      return undefined;
+    }
     const fieldPos = this.tablePos + off;
     const vecPos = fieldPos + this.view.getUint32(fieldPos, true);
-    if (i >= this.view.getUint32(vecPos, true)) return undefined;
+    if (i >= this.view.getUint32(vecPos, true)) {
+      return undefined;
+    }
     const elemPos = vecPos + 4 + i * 4;
     return new FbTable(this.view, elemPos + this.view.getUint32(elemPos, true));
   }
 
   readVectorString(idx: number, i: number): string | undefined {
     const off = this.fieldOff(idx);
-    if (off === 0) return undefined;
+    if (off === 0) {
+      return undefined;
+    }
     const fieldPos = this.tablePos + off;
     const vecPos = fieldPos + this.view.getUint32(fieldPos, true);
-    if (i >= this.view.getUint32(vecPos, true)) return undefined;
+    if (i >= this.view.getUint32(vecPos, true)) {
+      return undefined;
+    }
     const elemPos = vecPos + 4 + i * 4;
     const strPos = elemPos + this.view.getUint32(elemPos, true);
     const len = this.view.getUint32(strPos, true);
@@ -437,10 +464,14 @@ class FbTable {
    */
   readStruct16(vecIdx: number, i: number): { a: bigint; b: bigint } | undefined {
     const off = this.fieldOff(vecIdx);
-    if (off === 0) return undefined;
+    if (off === 0) {
+      return undefined;
+    }
     const fieldPos = this.tablePos + off;
     const vecPos = fieldPos + this.view.getUint32(fieldPos, true);
-    if (i >= this.view.getUint32(vecPos, true)) return undefined;
+    if (i >= this.view.getUint32(vecPos, true)) {
+      return undefined;
+    }
     const elemPos = vecPos + 4 + i * 16;
     return {
       a: this.view.getBigInt64(elemPos, true),
@@ -451,12 +482,19 @@ class FbTable {
   /**
    * Read one Block struct (24 bytes: {offset:i64, metaDataLength:i32, _pad:i32, bodyLength:i64}).
    */
-  readBlock(vecIdx: number, i: number): { offset: bigint; metaDataLength: number; bodyLength: bigint } | undefined {
+  readBlock(
+    vecIdx: number,
+    i: number,
+  ): { offset: bigint; metaDataLength: number; bodyLength: bigint } | undefined {
     const off = this.fieldOff(vecIdx);
-    if (off === 0) return undefined;
+    if (off === 0) {
+      return undefined;
+    }
     const fieldPos = this.tablePos + off;
     const vecPos = fieldPos + this.view.getUint32(fieldPos, true);
-    if (i >= this.view.getUint32(vecPos, true)) return undefined;
+    if (i >= this.view.getUint32(vecPos, true)) {
+      return undefined;
+    }
     const ep = vecPos + 4 + i * 24;
     return {
       offset: this.view.getBigInt64(ep, true),
@@ -479,25 +517,29 @@ function buildSchema(b: FbBuilder, cols: ReadonlyArray<{ name: string; type: Col
     let typeCode: number;
     let typeAbs: number;
     switch (type.kind) {
-      case "int":
+      case "int": {
         typeCode = TYPE_INT;
         typeAbs = b.buildTable([
           { kind: "i32", index: 0, value: type.bitWidth },
           { kind: "bool", index: 1, value: type.isSigned },
         ]);
         break;
-      case "float":
+      }
+      case "float": {
         typeCode = TYPE_FLOAT;
         typeAbs = b.buildTable([{ kind: "i16", index: 0, value: type.precision }]);
         break;
-      case "bool":
+      }
+      case "bool": {
         typeCode = TYPE_BOOL;
         typeAbs = b.buildTable([]);
         break;
-      case "utf8":
+      }
+      case "utf8": {
         typeCode = TYPE_UTF8;
         typeAbs = b.buildTable([]);
         break;
+      }
     }
     // Field: 0=name, 1=nullable, 2=type_type, 3=type
     return b.buildTable([
@@ -581,7 +623,9 @@ function encodeValidity(values: readonly (Scalar | null)[]): Uint8Array | null {
       break;
     }
   }
-  if (!anyNull) return null;
+  if (!anyNull) {
+    return null;
+  }
   const bitmap = new Uint8Array(Math.ceil(values.length / 8));
   for (let i = 0; i < values.length; i++) {
     if (values[i] !== null && values[i] !== undefined) {
@@ -594,7 +638,11 @@ function encodeValidity(values: readonly (Scalar | null)[]): Uint8Array | null {
 /** Count nulls in a value array. */
 function countNulls(values: readonly (Scalar | null)[]): number {
   let n = 0;
-  for (const v of values) if (v === null || v === undefined) n++;
+  for (const v of values) {
+    if (v === null || v === undefined) {
+      n++;
+    }
+  }
   return n;
 }
 
@@ -619,7 +667,7 @@ function encodeFloat64s(values: readonly (Scalar | null)[]): Uint8Array {
   const dv = new DataView(buf.buffer);
   for (let i = 0; i < values.length; i++) {
     const v = values[i];
-    dv.setFloat64(i * 8, v === null || v === undefined ? NaN : Number(v), true);
+    dv.setFloat64(i * 8, v === null || v === undefined ? Number.NaN : Number(v), true);
   }
   return buf;
 }
@@ -629,7 +677,7 @@ function encodeFloat32s(values: readonly (Scalar | null)[]): Uint8Array {
   const dv = new DataView(buf.buffer);
   for (let i = 0; i < values.length; i++) {
     const v = values[i];
-    dv.setFloat32(i * 4, v === null || v === undefined ? NaN : Number(v), true);
+    dv.setFloat32(i * 4, v === null || v === undefined ? Number.NaN : Number(v), true);
   }
   return buf;
 }
@@ -645,7 +693,10 @@ function encodeBools(values: readonly (Scalar | null)[]): Uint8Array {
   return buf;
 }
 
-function encodeStrings(values: readonly (Scalar | null)[]): { offsets: Uint8Array; data: Uint8Array } {
+function encodeStrings(values: readonly (Scalar | null)[]): {
+  offsets: Uint8Array;
+  data: Uint8Array;
+} {
   const enc = new TextEncoder();
   const encoded: Uint8Array[] = [];
   let totalBytes = 0;
@@ -665,7 +716,7 @@ function encodeStrings(values: readonly (Scalar | null)[]): { offsets: Uint8Arra
   for (let i = 0; i < encoded.length; i++) {
     ov.setInt32(i * 4, pos, true);
     data.set(encoded[i]!, pos);
-    pos += encoded[i]!.length;
+    pos += encoded[i]?.length;
   }
   ov.setInt32(values.length * 4, pos, true);
   return { offsets, data };
@@ -722,8 +773,7 @@ function decodeFloat(
   const dv = new DataView(body.buffer, body.byteOffset + bodyOff);
   const out: Scalar[] = new Array(count);
   for (let i = 0; i < count; i++) {
-    out[i] =
-      precision === PREC_SINGLE ? dv.getFloat32(i * 4, true) : dv.getFloat64(i * 8, true);
+    out[i] = precision === PREC_SINGLE ? dv.getFloat32(i * 4, true) : dv.getFloat64(i * 8, true);
   }
   return out;
 }
@@ -768,14 +818,24 @@ function appendMessage(out: number[], metadata: Uint8Array, body: Uint8Array | n
   const hdrDv = new DataView(hdr.buffer);
   hdrDv.setInt32(0, CONTINUATION_I32, true);
   hdrDv.setInt32(4, paddedMetaLen, true);
-  for (const b of hdr) out.push(b);
+  for (const b of hdr) {
+    out.push(b);
+  }
 
   // FlatBuffer bytes + zero padding
-  for (const b of metadata) out.push(b);
-  for (let i = metadata.length; i < paddedMetaLen; i++) out.push(0);
+  for (const b of metadata) {
+    out.push(b);
+  }
+  for (let i = metadata.length; i < paddedMetaLen; i++) {
+    out.push(0);
+  }
 
   // Optional body (already padded by caller)
-  if (body) for (const b of body) out.push(b);
+  if (body) {
+    for (const b of body) {
+      out.push(b);
+    }
+  }
 
   return startPos;
 }
@@ -820,20 +880,35 @@ export function toFeather(df: DataFrame, options: ToFeatherOptions = {}): Uint8A
       let hasBool = false;
       let hasStr = false;
       for (const v of values) {
-        if (v === null || v === undefined) continue;
-        if (typeof v === "boolean") { hasBool = true; break; }
-        if (typeof v === "string") { hasStr = true; break; }
-        if (typeof v === "number" && !Number.isInteger(v)) isFloat = true;
+        if (v === null || v === undefined) {
+          continue;
+        }
+        if (typeof v === "boolean") {
+          hasBool = true;
+          break;
+        }
+        if (typeof v === "string") {
+          hasStr = true;
+          break;
+        }
+        if (typeof v === "number" && !Number.isInteger(v)) {
+          isFloat = true;
+        }
       }
-      if (hasStr) type = { kind: "utf8" };
-      else if (hasBool) type = { kind: "bool" };
-      else if (isFloat) type = { kind: "float", precision: PREC_DOUBLE };
-      else type = { kind: "int", bitWidth: 64, isSigned: true };
+      if (hasStr) {
+        type = { kind: "utf8" };
+      } else if (hasBool) {
+        type = { kind: "bool" };
+      } else if (isFloat) {
+        type = { kind: "float", precision: PREC_DOUBLE };
+      } else {
+        type = { kind: "int", bitWidth: 64, isSigned: true };
+      }
     }
     cols.push({ name, type, values });
   }
 
-  const numRows = cols.length > 0 ? cols[0]!.values.length : df.index.size;
+  const numRows = cols.length > 0 ? cols[0]?.values.length : df.index.size;
   const schemaCols = cols.map((c) => ({ name: c.name, type: c.type }));
 
   // Encode all column buffers into a single body array
@@ -846,7 +921,9 @@ export function toFeather(df: DataFrame, options: ToFeatherOptions = {}): Uint8A
     bufferInfos.push({ offset: bodyOffset, length: BigInt(buf.length) });
     bodyParts.push(buf);
     const padded = padTo8(buf.length);
-    if (padded > buf.length) bodyParts.push(new Uint8Array(padded - buf.length));
+    if (padded > buf.length) {
+      bodyParts.push(new Uint8Array(padded - buf.length));
+    }
     bodyOffset += BigInt(padded);
   }
 
@@ -865,7 +942,9 @@ export function toFeather(df: DataFrame, options: ToFeatherOptions = {}): Uint8A
         pushBodyBuf(encodeInt64s(values));
         break;
       case "float":
-        pushBodyBuf(type.precision === PREC_SINGLE ? encodeFloat32s(values) : encodeFloat64s(values));
+        pushBodyBuf(
+          type.precision === PREC_SINGLE ? encodeFloat32s(values) : encodeFloat64s(values),
+        );
         break;
       case "bool":
         pushBodyBuf(encodeBools(values));
@@ -881,14 +960,21 @@ export function toFeather(df: DataFrame, options: ToFeatherOptions = {}): Uint8A
 
   // Assemble body
   let totalBodyLen = 0;
-  for (const p of bodyParts) totalBodyLen += p.length;
+  for (const p of bodyParts) {
+    totalBodyLen += p.length;
+  }
   const body = new Uint8Array(totalBodyLen);
   let bpos = 0;
-  for (const p of bodyParts) { body.set(p, bpos); bpos += p.length; }
+  for (const p of bodyParts) {
+    body.set(p, bpos);
+    bpos += p.length;
+  }
 
   // Build messages and file
   const out: number[] = [];
-  for (const b of MAGIC) out.push(b);
+  for (const b of MAGIC) {
+    out.push(b);
+  }
 
   // Schema message (no body)
   appendMessage(out, buildSchemaMessage(schemaCols), null);
@@ -902,17 +988,21 @@ export function toFeather(df: DataFrame, options: ToFeatherOptions = {}): Uint8A
   const rbMetaLen = 8 + rbPaddedMeta; // 4-byte continuation + 4-byte size + padded FlatBuffer
 
   // Footer
-  const blocks = [
-    { offset: BigInt(rbStart), metaDataLength: rbMetaLen, bodyLength: bodyOffset },
-  ];
+  const blocks = [{ offset: BigInt(rbStart), metaDataLength: rbMetaLen, bodyLength: bodyOffset }];
   const footer = buildFooter(schemaCols, blocks);
-  for (const b of footer) out.push(b);
+  for (const b of footer) {
+    out.push(b);
+  }
 
   // Footer size (int32 LE) + trailing magic
   const fsizeBuf = new Uint8Array(4);
   new DataView(fsizeBuf.buffer).setInt32(0, footer.length, true);
-  for (const b of fsizeBuf) out.push(b);
-  for (const b of MAGIC) out.push(b);
+  for (const b of fsizeBuf) {
+    out.push(b);
+  }
+  for (const b of MAGIC) {
+    out.push(b);
+  }
 
   return new Uint8Array(out);
 }
@@ -943,14 +1033,18 @@ export function readFeather(data: Uint8Array, options: ReadFeatherOptions = {}):
 
   // Parse schema from footer
   const schemaFb = footerFb.readSubTable(1);
-  if (!schemaFb) throw new Error("readFeather: missing schema in footer");
+  if (!schemaFb) {
+    throw new Error("readFeather: missing schema in footer");
+  }
 
   const numFields = schemaFb.readVectorCount(1);
   type ParsedField = { name: string; typeCode: number; sub: FbTable | undefined };
   const parsedFields: ParsedField[] = [];
   for (let i = 0; i < numFields; i++) {
     const ft = schemaFb.readVectorTable(1, i);
-    if (!ft) continue;
+    if (!ft) {
+      continue;
+    }
     parsedFields.push({
       name: ft.readString(0) ?? `col_${i}`,
       typeCode: ft.readU8(2) ?? 0,
@@ -960,13 +1054,17 @@ export function readFeather(data: Uint8Array, options: ReadFeatherOptions = {}):
 
   // Count record batch blocks
   let blockCount = 0;
-  while (footerFb.readBlock(3, blockCount) !== undefined) blockCount++;
+  while (footerFb.readBlock(3, blockCount) !== undefined) {
+    blockCount++;
+  }
 
   if (blockCount === 0) {
     // Empty file
     const empty: Record<string, readonly Scalar[]> = {};
     for (const f of parsedFields) {
-      if (usecols !== null && !usecols.includes(f.name)) continue;
+      if (usecols !== null && !usecols.includes(f.name)) {
+        continue;
+      }
       empty[f.name] = [];
     }
     return DataFrame.fromColumns(empty);
@@ -988,7 +1086,9 @@ export function readFeather(data: Uint8Array, options: ReadFeatherOptions = {}):
     throw new Error("readFeather: expected RecordBatch message");
   }
   const rbFb = msgFb.readSubTable(2);
-  if (!rbFb) throw new Error("readFeather: missing RecordBatch in message");
+  if (!rbFb) {
+    throw new Error("readFeather: missing RecordBatch in message");
+  }
 
   const numRows = Number(rbFb.readI64(0) ?? 0n);
   const bodyStart = blockOffset + 8 + paddedMetaLen;
@@ -997,19 +1097,18 @@ export function readFeather(data: Uint8Array, options: ReadFeatherOptions = {}):
   // Decode each column
   const resultData: Record<string, Scalar[]> = {};
   let bufIdx = 0;
-  let nodeIdx = 0;
+  let _nodeIdx = 0;
 
   for (const field of parsedFields) {
-    const numBufs =
-      field.typeCode === TYPE_UTF8 || field.typeCode === TYPE_LARGE_UTF8 ? 3 : 2;
+    const numBufs = field.typeCode === TYPE_UTF8 || field.typeCode === TYPE_LARGE_UTF8 ? 3 : 2;
 
     if (usecols !== null && !usecols.includes(field.name)) {
       bufIdx += numBufs;
-      nodeIdx++;
+      _nodeIdx++;
       continue;
     }
 
-    nodeIdx++;
+    _nodeIdx++;
 
     // Validity buffer
     const validBufInfo = rbFb.readStruct16(2, bufIdx);
@@ -1054,15 +1153,18 @@ export function readFeather(data: Uint8Array, options: ReadFeatherOptions = {}):
         values = decodeUtf8(body, Number(oBuf.a), Number(dBuf.a), numRows);
         break;
       }
-      default:
+      default: {
         bufIdx++;
         values = new Array<Scalar>(numRows).fill(null);
+      }
     }
 
     // Apply validity mask (null = 0 bit in validity bitmap)
     if (validMask !== null) {
       for (let i = 0; i < numRows; i++) {
-        if (!validMask[i]) values[i] = null;
+        if (!validMask[i]) {
+          values[i] = null;
+        }
       }
     }
 
@@ -1078,7 +1180,9 @@ export function readFeather(data: Uint8Array, options: ReadFeatherOptions = {}):
   }
 
   const cols: Record<string, readonly Scalar[]> = {};
-  for (const [k, v] of Object.entries(resultData)) cols[k] = v;
+  for (const [k, v] of Object.entries(resultData)) {
+    cols[k] = v;
+  }
 
   return DataFrame.fromColumns(cols, index !== undefined ? { index } : undefined);
 }

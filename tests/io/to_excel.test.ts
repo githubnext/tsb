@@ -42,12 +42,7 @@ describe("toExcel — output format", () => {
     // Scan backwards for EOCD
     let found = false;
     for (let i = buf.length - 22; i >= 0; i--) {
-      if (
-        buf[i] === 0x50 &&
-        buf[i + 1] === 0x4b &&
-        buf[i + 2] === 0x05 &&
-        buf[i + 3] === 0x06
-      ) {
+      if (buf[i] === 0x50 && buf[i + 1] === 0x4b && buf[i + 2] === 0x05 && buf[i + 3] === 0x06) {
         found = true;
         break;
       }
@@ -91,7 +86,9 @@ describe("toExcel round-trip — numbers", () => {
   });
 
   it("handles Infinity and -Infinity as strings", () => {
-    const df = DataFrame.fromColumns({ x: [Infinity, -Infinity, 1] });
+    const df = DataFrame.fromColumns({
+      x: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, 1],
+    });
     const rt = roundTrip(df, { index: false });
     // Non-finite numbers are written as SST strings
     const vals = [...rt.col("x").values];

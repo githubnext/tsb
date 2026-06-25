@@ -292,9 +292,13 @@ class BinWriter {
   }
 
   private grow(need: number): void {
-    if (this._pos + need <= this.buf.length) return;
+    if (this._pos + need <= this.buf.length) {
+      return;
+    }
     let next = this.buf.length * 2;
-    while (this._pos + need > next) next *= 2;
+    while (this._pos + need > next) {
+      next *= 2;
+    }
     const nb = new Uint8Array(next);
     nb.set(this.buf.subarray(0, this._pos));
     this.buf = nb;
@@ -389,8 +393,12 @@ class BinWriter {
     this.grow(fieldLen);
     const b = ENC.encode(s);
     const n = Math.min(b.length, fieldLen);
-    for (let i = 0; i < n; i++) this.view.setUint8(this._pos + i, b[i] ?? 0);
-    for (let i = n; i < fieldLen; i++) this.view.setUint8(this._pos + i, 0);
+    for (let i = 0; i < n; i++) {
+      this.view.setUint8(this._pos + i, b[i] ?? 0);
+    }
+    for (let i = n; i < fieldLen; i++) {
+      this.view.setUint8(this._pos + i, 0);
+    }
     this._pos += fieldLen;
   }
 
@@ -415,12 +423,16 @@ function parseOldFormat(u8: Uint8Array, version: number): DtaData {
 
   // typlist: 1 byte per column
   const stataTypes: number[] = [];
-  for (let i = 0; i < nvar; i++) stataTypes.push(r.readU8());
+  for (let i = 0; i < nvar; i++) {
+    stataTypes.push(r.readU8());
+  }
 
   // varlist
   const colSize = version > 113 ? 33 : 10;
   const names: string[] = [];
-  for (let i = 0; i < nvar; i++) names.push(r.readCStr(colSize));
+  for (let i = 0; i < nvar; i++) {
+    names.push(r.readCStr(colSize));
+  }
 
   // srtlist (skip)
   r.skip((nvar + 1) * 2);
@@ -432,16 +444,22 @@ function parseOldFormat(u8: Uint8Array, version: number): DtaData {
   // lbllist (value label names)
   const lblSize = version > 113 ? 33 : 10;
   const lblNames: string[] = [];
-  for (let i = 0; i < nvar; i++) lblNames.push(r.readCStr(lblSize));
+  for (let i = 0; i < nvar; i++) {
+    lblNames.push(r.readCStr(lblSize));
+  }
 
   // variable_labels
   const varLabels: string[] = [];
-  for (let i = 0; i < nvar; i++) varLabels.push(r.readCStr(81));
+  for (let i = 0; i < nvar; i++) {
+    varLabels.push(r.readCStr(81));
+  }
 
   // characteristics: skip until end marker (type == 0)
   while (r.pos + 2 < u8.length) {
     const chType = r.readU16();
-    if (chType === 0) break;
+    if (chType === 0) {
+      break;
+    }
     r.skip(colSize); // varname
     r.skip(colSize); // charname
     const len = r.readU32();
@@ -516,23 +534,35 @@ function parseOldValueLabels(r: BinReader, version: number): Map<string, Map<num
     r.skip(3); // padding
     const n = r.readU32();
     const txtlen = r.readU32();
-    if (labname.length === 0 || n === 0 || txtlen === 0) break;
-    if (r.pos + n * 8 + txtlen > r.u8.length) break;
+    if (labname.length === 0 || n === 0 || txtlen === 0) {
+      break;
+    }
+    if (r.pos + n * 8 + txtlen > r.u8.length) {
+      break;
+    }
 
     const offsets: number[] = [];
-    for (let i = 0; i < n; i++) offsets.push(r.readU32());
+    for (let i = 0; i < n; i++) {
+      offsets.push(r.readU32());
+    }
     const values: number[] = [];
-    for (let i = 0; i < n; i++) values.push(r.readI32());
+    for (let i = 0; i < n; i++) {
+      values.push(r.readI32());
+    }
     const txt = r.readBytes(txtlen);
 
     const map = new Map<number, string>();
     for (let i = 0; i < n; i++) {
       const off = offsets[i] ?? 0;
       let end = off;
-      while (end < txt.length && (txt[end] ?? 0) !== 0) end++;
+      while (end < txt.length && (txt[end] ?? 0) !== 0) {
+        end++;
+      }
       const label = LATIN1.decode(txt.subarray(off, end));
       const val = values[i];
-      if (val !== undefined) map.set(val, label);
+      if (val !== undefined) {
+        map.set(val, label);
+      }
     }
     result.set(labname, map);
   }
@@ -572,41 +602,59 @@ function parseNewFormat(u8: Uint8Array, version: number): DtaData {
   // Map: 14 × uint64 file offsets
   r.expectTag("<map>");
   const mapOff: number[] = [];
-  for (let i = 0; i < 14; i++) mapOff.push(r.readU64());
+  for (let i = 0; i < 14; i++) {
+    mapOff.push(r.readU64());
+  }
   r.expectTag("</map>");
 
   // variable_types
   const seekVT = mapOff[2] ?? 0;
-  if (seekVT > 0) r.seek(seekVT);
+  if (seekVT > 0) {
+    r.seek(seekVT);
+  }
   r.expectTag("<variable_types>");
   const varCodes: number[] = [];
-  for (let i = 0; i < nvar; i++) varCodes.push(r.readU16());
+  for (let i = 0; i < nvar; i++) {
+    varCodes.push(r.readU16());
+  }
   r.expectTag("</variable_types>");
 
   // varnames
   const seekVN = mapOff[3] ?? 0;
-  if (seekVN > 0) r.seek(seekVN);
+  if (seekVN > 0) {
+    r.seek(seekVN);
+  }
   r.expectTag("<varnames>");
   const varNameLen = version >= 119 ? 129 : 33;
   const names: string[] = [];
-  for (let i = 0; i < nvar; i++) names.push(r.readCStr(varNameLen));
+  for (let i = 0; i < nvar; i++) {
+    names.push(r.readCStr(varNameLen));
+  }
   r.expectTag("</varnames>");
 
   // value_label_names (skip sortlist and formats)
   const seekVLN = mapOff[6] ?? 0;
-  if (seekVLN > 0) r.seek(seekVLN);
+  if (seekVLN > 0) {
+    r.seek(seekVLN);
+  }
   r.expectTag("<value_label_names>");
   const vlNameLen = version >= 119 ? 129 : 33;
   const lblNames: string[] = [];
-  for (let i = 0; i < nvar; i++) lblNames.push(r.readCStr(vlNameLen));
+  for (let i = 0; i < nvar; i++) {
+    lblNames.push(r.readCStr(vlNameLen));
+  }
   r.expectTag("</value_label_names>");
 
   // variable_labels
   const seekVL = mapOff[7] ?? 0;
-  if (seekVL > 0) r.seek(seekVL);
+  if (seekVL > 0) {
+    r.seek(seekVL);
+  }
   r.expectTag("<variable_labels>");
   const varLabels: string[] = [];
-  for (let i = 0; i < nvar; i++) varLabels.push(r.readCStr(81));
+  for (let i = 0; i < nvar; i++) {
+    varLabels.push(r.readCStr(81));
+  }
   r.expectTag("</variable_labels>");
 
   // Build column descriptors
@@ -640,7 +688,9 @@ function parseNewFormat(u8: Uint8Array, version: number): DtaData {
     r.seek(seekST);
     r.expectTag("<strls>");
     while (r.pos + 3 <= r.u8.length) {
-      if ((r.u8[r.pos] ?? 0) === 0x3c) break; // '<' = start of </strls>
+      if ((r.u8[r.pos] ?? 0) === 0x3c) {
+        break; // '<' = start of </strls>
+      }
       // Check for "GSO" magic
       if (
         (r.u8[r.pos] ?? 0) !== 0x47 ||
@@ -658,7 +708,9 @@ function parseNewFormat(u8: Uint8Array, version: number): DtaData {
       if (t === 130) {
         // string: null-terminated UTF-8
         let end = 0;
-        while (end < data.length && (data[end] ?? 0) !== 0) end++;
+        while (end < data.length && (data[end] ?? 0) !== 0) {
+          end++;
+        }
         strlMap.set(`${gsoV},${gsoO}`, UTF8D.decode(data.subarray(0, end)));
       }
     }
@@ -667,7 +719,9 @@ function parseNewFormat(u8: Uint8Array, version: number): DtaData {
 
   // Read data section
   const seekDA = mapOff[9] ?? 0;
-  if (seekDA > 0) r.seek(seekDA);
+  if (seekDA > 0) {
+    r.seek(seekDA);
+  }
   r.expectTag("<data>");
   const dv = r.dataView;
   const rows: Scalar[][] = [];
@@ -707,7 +761,9 @@ function parseNewFormat(u8: Uint8Array, version: number): DtaData {
 
   // Value labels
   const seekVA = mapOff[11] ?? 0;
-  if (seekVA > 0) r.seek(seekVA);
+  if (seekVA > 0) {
+    r.seek(seekVA);
+  }
   const valueLabels = parseNewValueLabels(r, version);
   return { cols, rows, lblNames, varLabels, valueLabels };
 }
@@ -718,7 +774,9 @@ function parseNewValueLabels(r: BinReader, version: number): Map<string, Map<num
 
   r.expectTag("<value_labels>");
   while (r.pos + 5 < r.u8.length) {
-    if ((r.u8[r.pos] ?? 0) === 0x3c && (r.u8[r.pos + 1] ?? 0) === 0x2f) break; // "</"
+    if ((r.u8[r.pos] ?? 0) === 0x3c && (r.u8[r.pos + 1] ?? 0) === 0x2f) {
+      break; // "</"
+    }
     r.expectTag("<lbl>");
     r.readU32(); // total byte length (informational)
     const labname = r.readCStr(lblSize);
@@ -726,9 +784,13 @@ function parseNewValueLabels(r: BinReader, version: number): Map<string, Map<num
     const n = r.readU32();
     const txtlen = r.readU32();
     const offsets: number[] = [];
-    for (let i = 0; i < n; i++) offsets.push(r.readU32());
+    for (let i = 0; i < n; i++) {
+      offsets.push(r.readU32());
+    }
     const values: number[] = [];
-    for (let i = 0; i < n; i++) values.push(r.readI32());
+    for (let i = 0; i < n; i++) {
+      values.push(r.readI32());
+    }
     const txt = r.readBytes(txtlen);
     r.expectTag("</lbl>");
 
@@ -737,10 +799,14 @@ function parseNewValueLabels(r: BinReader, version: number): Map<string, Map<num
       for (let i = 0; i < n; i++) {
         const off = offsets[i] ?? 0;
         let end = off;
-        while (end < txt.length && (txt[end] ?? 0) !== 0) end++;
+        while (end < txt.length && (txt[end] ?? 0) !== 0) {
+          end++;
+        }
         const label = UTF8D.decode(txt.subarray(off, end));
         const val = values[i];
-        if (val !== undefined) map.set(val, label);
+        if (val !== undefined) {
+          map.set(val, label);
+        }
       }
       result.set(labname, map);
     }
@@ -776,7 +842,9 @@ function buildDataFrame(data: DtaData, opts: ReadStataOptions): DataFrame {
   const arrays: Scalar[][] = activeIdx.map(() => []);
   for (let ri = 0; ri < limit; ri++) {
     const row = rows[ri];
-    if (row === undefined) continue;
+    if (row === undefined) {
+      continue;
+    }
     for (let ci = 0; ci < activeIdx.length; ci++) {
       const colIdx = activeIdx[ci] ?? 0;
       (arrays[ci] ?? []).push(row[colIdx] ?? null);
@@ -788,16 +856,24 @@ function buildDataFrame(data: DtaData, opts: ReadStataOptions): DataFrame {
     for (let ci = 0; ci < activeIdx.length; ci++) {
       const colIdx = activeIdx[ci] ?? 0;
       const lblName = lblNames[colIdx] ?? "";
-      if (lblName.length === 0) continue;
+      if (lblName.length === 0) {
+        continue;
+      }
       const lblMap = valueLabels.get(lblName);
-      if (lblMap === undefined) continue;
+      if (lblMap === undefined) {
+        continue;
+      }
       const arr = arrays[ci];
-      if (arr === undefined) continue;
+      if (arr === undefined) {
+        continue;
+      }
       for (let ri = 0; ri < arr.length; ri++) {
         const v = arr[ri];
         if (typeof v === "number") {
           const label = lblMap.get(v);
-          if (label !== undefined) arr[ri] = label;
+          if (label !== undefined) {
+            arr[ri] = label;
+          }
         }
       }
     }
@@ -816,14 +892,18 @@ function buildDataFrame(data: DtaData, opts: ReadStataOptions): DataFrame {
     idxName = indexCol;
   } else if (typeof indexCol === "number") {
     const mapped = activeIdx[indexCol];
-    if (mapped !== undefined) idxName = cols[mapped]?.name ?? null;
+    if (mapped !== undefined) {
+      idxName = cols[mapped]?.name ?? null;
+    }
   }
 
   if (idxName !== null && idxName in colData) {
     const idxData = (colData[idxName] ?? []).filter(isLabel);
     const rest: Record<string, Scalar[]> = {};
     for (const [k, v] of Object.entries(colData)) {
-      if (k !== idxName) rest[k] = v;
+      if (k !== idxName) {
+        rest[k] = v;
+      }
     }
     return DataFrame.fromColumns(rest, { index: new Index(idxData) });
   }
@@ -853,7 +933,9 @@ export function readStata(
   options: ReadStataOptions = {},
 ): DataFrame {
   const u8 = data instanceof Uint8Array ? data : new Uint8Array(data);
-  if (u8.length < 4) throw new Error("Stata DTA: buffer too small");
+  if (u8.length < 4) {
+    throw new Error("Stata DTA: buffer too small");
+  }
 
   let parsed: DtaData;
   const firstByte = u8[0] ?? 0;
@@ -926,13 +1008,17 @@ export function toStata(df: DataFrame, options: ToStataOptions = {}): Uint8Array
     let allBoolOrNum = true;
     let allBool = true;
     for (const v of arr) {
-      if (v === null || v === undefined) continue;
+      if (v === null || v === undefined) {
+        continue;
+      }
       if (typeof v === "string") {
         hasStr = true;
         allBoolOrNum = false;
         allBool = false;
         const len = ENC.encode(v).length;
-        if (len > maxStrLen) maxStrLen = len;
+        if (len > maxStrLen) {
+          maxStrLen = len;
+        }
       } else if (typeof v !== "boolean") {
         allBool = false;
       }
@@ -947,13 +1033,19 @@ export function toStata(df: DataFrame, options: ToStataOptions = {}): Uint8Array
   }
 
   // Compute row width
-  let rowWidth = 0;
+  let _rowWidth = 0;
   for (const t of stataTypes) {
-    if (t <= 2045) rowWidth += t;
-    else if (t === TC_BYTE) rowWidth += 1;
-    else if (t === TC_INT) rowWidth += 2;
-    else if (t === TC_LONG || t === TC_FLOAT) rowWidth += 4;
-    else rowWidth += 8; // TC_DOUBLE
+    if (t <= 2045) {
+      _rowWidth += t;
+    } else if (t === TC_BYTE) {
+      _rowWidth += 1;
+    } else if (t === TC_INT) {
+      _rowWidth += 2;
+    } else if (t === TC_LONG || t === TC_FLOAT) {
+      _rowWidth += 4;
+    } else {
+      _rowWidth += 8; // TC_DOUBLE
+    }
   }
 
   // Encode data label (UTF-8, max 80 bytes)
@@ -1014,19 +1106,25 @@ export function toStata(df: DataFrame, options: ToStataOptions = {}): Uint8Array
   // ── <variable_types> ──
   sectionOffs[2] = w.pos;
   w.writeAscii("<variable_types>");
-  for (const t of stataTypes) w.writeU16(t);
+  for (const t of stataTypes) {
+    w.writeU16(t);
+  }
   w.writeAscii("</variable_types>");
 
   // ── <varnames> ──
   sectionOffs[3] = w.pos;
   w.writeAscii("<varnames>");
-  for (const name of colNames) w.writeFixed(name.slice(0, 32), 33);
+  for (const name of colNames) {
+    w.writeFixed(name.slice(0, 32), 33);
+  }
   w.writeAscii("</varnames>");
 
   // ── <sortlist> ──
   sectionOffs[4] = w.pos;
   w.writeAscii("<sortlist>");
-  for (let i = 0; i <= nvar; i++) w.writeU16(0);
+  for (let i = 0; i <= nvar; i++) {
+    w.writeU16(0);
+  }
   w.writeAscii("</sortlist>");
 
   // ── <formats> ──
@@ -1053,7 +1151,9 @@ export function toStata(df: DataFrame, options: ToStataOptions = {}): Uint8Array
   // ── <value_label_names> ──
   sectionOffs[6] = w.pos;
   w.writeAscii("<value_label_names>");
-  for (let i = 0; i < nvar; i++) w.writeFixed("", 33);
+  for (let i = 0; i < nvar; i++) {
+    w.writeFixed("", 33);
+  }
   w.writeAscii("</value_label_names>");
 
   // ── <variable_labels> ──
@@ -1082,8 +1182,12 @@ export function toStata(df: DataFrame, options: ToStataOptions = {}): Uint8Array
         const s = typeof v === "string" ? v : v !== null && v !== undefined ? String(v) : "";
         const sb = ENC.encode(s);
         const n = Math.min(sb.length, t);
-        for (let j = 0; j < n; j++) w.writeU8(sb[j] ?? 0);
-        for (let j = n; j < t; j++) w.writeU8(0);
+        for (let j = 0; j < n; j++) {
+          w.writeU8(sb[j] ?? 0);
+        }
+        for (let j = n; j < t; j++) {
+          w.writeU8(0);
+        }
       } else if (t === TC_BYTE) {
         if (v === null || v === undefined) {
           w.writeI8(MISS_BYTE);

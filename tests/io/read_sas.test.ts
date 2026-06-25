@@ -49,9 +49,7 @@ function ibmEncode(val: number): Uint8Array {
 
 // ─── XPORT builder ────────────────────────────────────────────────────────────
 
-type VarDef =
-  | { type: "num"; name: string }
-  | { type: "char"; name: string; len: number };
+type VarDef = { type: "num"; name: string } | { type: "char"; name: string; len: number };
 
 /**
  * Build a minimal but valid SAS XPORT v5 file in memory.
@@ -241,11 +239,11 @@ describe("readSas — numeric variables", () => {
   });
 
   test("IBM floating point: value 3.14159 round-trips within tolerance", () => {
-    const buf = buildXpt([{ type: "num", name: "PI" }], [{ PI: 3.14159 }]);
+    const buf = buildXpt([{ type: "num", name: "PI" }], [{ PI: Math.PI }]);
     const df = readSas(buf);
     const val = df.col("PI").values[0];
     expect(typeof val).toBe("number");
-    expect(Math.abs((val as number) - 3.14159)).toBeLessThan(0.001);
+    expect(Math.abs((val as number) - Math.PI)).toBeLessThan(0.001);
   });
 
   test("missing numeric values become null", () => {

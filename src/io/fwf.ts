@@ -115,7 +115,9 @@ function splitLines(text: string): string[] {
 function buildNaSet(naValues: readonly string[] | undefined): Set<string> {
   const s: Set<string> = new Set(DEFAULT_NA_STRINGS);
   if (naValues !== undefined) {
-    for (const v of naValues) s.add(v);
+    for (const v of naValues) {
+      s.add(v);
+    }
   }
   return s;
 }
@@ -130,10 +132,14 @@ function buildNaSet(naValues: readonly string[] | undefined): Set<string> {
  * Columns are the maximal runs of consecutive non-separator positions.
  */
 function inferColspecs(sampleLines: readonly string[]): ColSpec[] {
-  if (sampleLines.length === 0) return [];
+  if (sampleLines.length === 0) {
+    return [];
+  }
 
   const maxLen = sampleLines.reduce((m, l) => Math.max(m, l.length), 0);
-  if (maxLen === 0) return [];
+  if (maxLen === 0) {
+    return [];
+  }
 
   // isSep[i] = true when all sample rows have a space (or are shorter) at i.
   const isSep: boolean[] = Array.from({ length: maxLen }, () => true);
@@ -152,7 +158,7 @@ function inferColspecs(sampleLines: readonly string[]): ColSpec[] {
   let colStart = 0;
   for (let i = 0; i < maxLen; i++) {
     const sep = isSep[i] ?? true;
-    if (!inCol && !sep) {
+    if (!(inCol || sep)) {
       inCol = true;
       colStart = i;
     } else if (inCol && sep) {
@@ -207,11 +213,19 @@ function isNaRaw(raw: string, naSet: ReadonlySet<string>): boolean {
 function inferColumnDtype(raws: readonly string[], naSet: ReadonlySet<string>): DtypeName {
   const nonNa = raws.filter((r) => !isNaRaw(r, naSet));
   const hasNa = nonNa.length < raws.length;
-  if (nonNa.length === 0) return "object";
+  if (nonNa.length === 0) {
+    return "object";
+  }
 
-  if (nonNa.every((r) => RE_BOOL_TRUE.test(r) || RE_BOOL_FALSE.test(r))) return "bool";
-  if (nonNa.every((r) => RE_INT.test(r))) return hasNa ? "float64" : "int64";
-  if (nonNa.every((r) => RE_FLOAT.test(r))) return "float64";
+  if (nonNa.every((r) => RE_BOOL_TRUE.test(r) || RE_BOOL_FALSE.test(r))) {
+    return "bool";
+  }
+  if (nonNa.every((r) => RE_INT.test(r))) {
+    return hasNa ? "float64" : "int64";
+  }
+  if (nonNa.every((r) => RE_FLOAT.test(r))) {
+    return "float64";
+  }
   return "object";
 }
 
@@ -220,15 +234,23 @@ function parseInferred(raw: string, dtype: DtypeName, naSet: ReadonlySet<string>
   if (isNaRaw(raw, naSet)) {
     return dtype === "float64" || dtype === "int64" ? Number.NaN : null;
   }
-  if (dtype === "bool") return RE_BOOL_TRUE.test(raw);
-  if (dtype === "int64") return Number.parseInt(raw, 10);
-  if (dtype === "float64") return Number.parseFloat(raw);
+  if (dtype === "bool") {
+    return RE_BOOL_TRUE.test(raw);
+  }
+  if (dtype === "int64") {
+    return Number.parseInt(raw, 10);
+  }
+  if (dtype === "float64") {
+    return Number.parseFloat(raw);
+  }
   return raw;
 }
 
 /** Parse a raw string to a Scalar when a specific dtype is forced. */
 function parseForced(raw: string, dtypeName: DtypeName, naSet: ReadonlySet<string>): Scalar {
-  if (isNaRaw(raw, naSet)) return null;
+  if (isNaRaw(raw, naSet)) {
+    return null;
+  }
   if (dtypeName.startsWith("int") || dtypeName.startsWith("uint")) {
     const n = Number(raw);
     return Number.isNaN(n) ? null : Math.trunc(n);
@@ -238,8 +260,12 @@ function parseForced(raw: string, dtypeName: DtypeName, naSet: ReadonlySet<strin
     return Number.isNaN(n) ? null : n;
   }
   if (dtypeName === "bool") {
-    if (RE_BOOL_TRUE.test(raw)) return true;
-    if (RE_BOOL_FALSE.test(raw)) return false;
+    if (RE_BOOL_TRUE.test(raw)) {
+      return true;
+    }
+    if (RE_BOOL_FALSE.test(raw)) {
+      return false;
+    }
     return null;
   }
   return raw;
@@ -262,10 +288,7 @@ function buildSeries(
 // ─── column assembly ──────────────────────────────────────────────────────────
 
 /** Transpose a row-major matrix into a column-major map of raw strings. */
-function transposeRows(
-  rows: readonly (readonly string[])[],
-  numCols: number,
-): readonly string[][] {
+function transposeRows(rows: readonly (readonly string[])[], numCols: number): readonly string[][] {
   return Array.from({ length: numCols }, (_, ci) =>
     rows.map((r) => {
       const v = r[ci];
@@ -276,8 +299,12 @@ function transposeRows(
 
 /** True when the column at position `ci` with name `name` should be the index. */
 function isIndexCol(name: string, ci: number, indexCol: string | number | null): boolean {
-  if (indexCol === null) return false;
-  if (typeof indexCol === "string") return indexCol === name;
+  if (indexCol === null) {
+    return false;
+  }
+  if (typeof indexCol === "string") {
+    return indexCol === name;
+  }
   return indexCol === ci;
 }
 

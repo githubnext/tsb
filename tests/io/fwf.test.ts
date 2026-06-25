@@ -17,11 +17,7 @@ import { readFwf } from "../../src/index.ts";
 
 describe("readFwf — column-spec inference", () => {
   it("infers columns from a simple fixed-width table", () => {
-    const text = [
-      "id  name     score",
-      "1   Alice    95.5 ",
-      "2   Bob      87.0 ",
-    ].join("\n");
+    const text = ["id  name     score", "1   Alice    95.5 ", "2   Bob      87.0 "].join("\n");
     const df = readFwf(text);
     expect(df.shape).toEqual([2, 3]);
     expect([...df.columns.values]).toEqual(["id", "name", "score"]);
@@ -331,12 +327,9 @@ describe("readFwf — property-based (widths round-trip)", () => {
 describe("readFwf — pandas parity", () => {
   /** Reproduces the standard pandas read_fwf docstring example. */
   it("matches pandas example: employee table", () => {
-    const text = [
-      "col1 col2  col3",
-      "   1 0.236    a",
-      "   2  3.24    b",
-      "   3  4.56    c",
-    ].join("\n");
+    const text = ["col1 col2  col3", "   1 0.236    a", "   2  3.24    b", "   3  4.56    c"].join(
+      "\n",
+    );
     const df = readFwf(text);
     expect([...df.col("col1").values]).toEqual([1, 2, 3]);
     expect([...df.col("col3").values]).toEqual(["a", "b", "c"]);
@@ -346,11 +339,7 @@ describe("readFwf — pandas parity", () => {
   });
 
   it("reads a US Census fixed-width-like layout", () => {
-    const text = [
-      "State  Pop    Abbr",
-      "Texas  29145  TX  ",
-      "Oregon  4237  OR  ",
-    ].join("\n");
+    const text = ["State  Pop    Abbr", "Texas  29145  TX  ", "Oregon  4237  OR  "].join("\n");
     const df = readFwf(text);
     expect([...df.col("State").values]).toEqual(["Texas", "Oregon"]);
     expect([...df.col("Abbr").values]).toEqual(["TX", "OR"]);

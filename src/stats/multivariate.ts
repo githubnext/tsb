@@ -147,8 +147,9 @@ export function covMatrix(X: Matrix): MutableMatrix {
   }
 
   // Column means
-  const mean: number[] = Array.from({ length: p }, (_, j) =>
-    X.reduce((s, row) => s + (row[j] ?? 0), 0) / n,
+  const mean: number[] = Array.from(
+    { length: p },
+    (_, j) => X.reduce((s, row) => s + (row[j] ?? 0), 0) / n,
   );
 
   // Centred data
@@ -453,8 +454,9 @@ export class PCA {
     }
 
     // Column means
-    const mean: number[] = Array.from({ length: p }, (_, j) =>
-      X.reduce((s, row) => s + (row[j] ?? 0), 0) / n,
+    const mean: number[] = Array.from(
+      { length: p },
+      (_, j) => X.reduce((s, row) => s + (row[j] ?? 0), 0) / n,
     );
 
     // Centred data

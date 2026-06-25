@@ -53,13 +53,17 @@ describe("StringArray", () => {
   describe("upper() / lower()", () => {
     it("uppercases non-NA", () => {
       expect(StringArray.from(["hello", null, "WORLD"]).upper().toArray()).toEqual([
-        "HELLO", null, "WORLD",
+        "HELLO",
+        null,
+        "WORLD",
       ]);
     });
 
     it("lowercases non-NA", () => {
       expect(StringArray.from(["Hello", null, "WORLD"]).lower().toArray()).toEqual([
-        "hello", null, "world",
+        "hello",
+        null,
+        "world",
       ]);
     });
   });
@@ -104,16 +108,16 @@ describe("StringArray", () => {
 
   describe("replace()", () => {
     it("replaces occurrences", () => {
-      expect(
-        StringArray.from(["aaba", null]).replace("a", "x").toArray(),
-      ).toEqual(["xxbx", null]);
+      expect(StringArray.from(["aaba", null]).replace("a", "x").toArray()).toEqual(["xxbx", null]);
     });
   });
 
   describe("zfill()", () => {
     it("zero-pads strings", () => {
       expect(StringArray.from(["42", null, "5"]).zfill(4).toArray()).toEqual([
-        "0042", null, "0005",
+        "0042",
+        null,
+        "0005",
       ]);
     });
   });

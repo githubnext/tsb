@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { Timedelta } from "../../../src/core/timedelta.ts";
 import { TimedeltaArray } from "../../../src/core/arrays/timedelta_array.ts";
+import { Timedelta } from "../../../src/core/timedelta.ts";
 
 const td1 = Timedelta.fromComponents({ days: 1 });
 const td2 = Timedelta.fromComponents({ hours: 6 });

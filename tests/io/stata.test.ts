@@ -318,7 +318,9 @@ describe("readStata ∘ toStata — property-based", () => {
           for (let i = 0; i < nums.length; i++) {
             const n = nums[i];
             const o = out[i];
-            if (n === undefined || o === undefined) continue;
+            if (n === undefined || o === undefined) {
+              continue;
+            }
             expect(o).toBeCloseTo(n, 10);
           }
         },

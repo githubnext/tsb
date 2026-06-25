@@ -248,7 +248,7 @@ export function relativeRisk(observed: ContingencyTable): RelativeRiskResult {
     confidenceInterval: (confidenceLevel = 0.95): ConfidenceInterval => {
       const alpha = 1 - confidenceLevel;
       const z = normalQuantile(1 - alpha / 2);
-      if (!(a > 0) || !(c > 0) || !(n1 > 0) || !(n2 > 0)) {
+      if (!(a > 0 && c > 0 && n1 > 0 && n2 > 0)) {
         return { low: Number.NaN, high: Number.NaN };
       }
       const seLnRR = Math.sqrt(b / (a * n1) + d / (c * n2));
@@ -309,7 +309,7 @@ export function oddsRatio(observed: ContingencyTable): OddsRatioResult {
     confidenceInterval: (confidenceLevel = 0.95): ConfidenceInterval => {
       const alpha = 1 - confidenceLevel;
       const z = normalQuantile(1 - alpha / 2);
-      if (!(a > 0) || !(b > 0) || !(c > 0) || !(d > 0)) {
+      if (!(a > 0 && b > 0 && c > 0 && d > 0)) {
         return { low: Number.NaN, high: Number.NaN };
       }
       const se = Math.sqrt(1 / a + 1 / b + 1 / c + 1 / d);
@@ -367,7 +367,7 @@ export function association(
   const result = chi2Contingency(observed);
   const chi2 = result.statistic;
   const n = observed.reduce((s, row) => s + row.reduce((rs, v) => rs + v, 0), 0);
-  if (!(n > 0) || !Number.isFinite(chi2)) {
+  if (!(n > 0 && Number.isFinite(chi2))) {
     return Number.NaN;
   }
   if (method === "phi") {

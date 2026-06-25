@@ -116,7 +116,7 @@ function ibmToDouble(buf: Uint8Array, offset: number): number {
 
   // mantissa is a 56-bit integer representing the fraction mantissa/2^56
   // value = sign × 16^exp × mantissa / 2^56
-  return sign * mantissa * Math.pow(16, exp) * Math.pow(2, -56);
+  return sign * mantissa * 16 ** exp * 2 ** -56;
 }
 
 // ─── Text helpers ─────────────────────────────────────────────────────────────
@@ -241,12 +241,8 @@ export function readSas(data: Uint8Array | string, options?: ReadSasOptions): Da
 
   // The namestr header encodes nvar in the 16 chars starting at position 48.
   // Example: "...000000003000000000000000000000  " where 3 is nvar (6-digit right-padded).
-  const nvarStr = decodeAscii(
-    buf,
-    namestrHdrOffset + HEADER_MAGIC_NAMESTR.length,
-    6,
-  ).trim();
-  const nvar = nvarStr === "" ? 0 : parseInt(nvarStr, 10);
+  const nvarStr = decodeAscii(buf, namestrHdrOffset + HEADER_MAGIC_NAMESTR.length, 6).trim();
+  const nvar = nvarStr === "" ? 0 : Number.parseInt(nvarStr, 10);
   if (!Number.isFinite(nvar) || nvar < 0) {
     throw new Error(`readSas: invalid variable count in namestr header: "${nvarStr}"`);
   }

@@ -73,9 +73,7 @@ const BOUNDS: Record<IntegerDtypeName, readonly [number, number]> = {
 function checkBounds(value: number, dtype: IntegerDtypeName): void {
   const [lo, hi] = BOUNDS[dtype];
   if (value < lo || value > hi) {
-    throw new RangeError(
-      `IntegerArray(${dtype}): value ${value} out of bounds [${lo}, ${hi}]`,
-    );
+    throw new RangeError(`IntegerArray(${dtype}): value ${value} out of bounds [${lo}, ${hi}]`);
   }
 }
 
@@ -138,11 +136,7 @@ export class IntegerArray extends MaskedArray<number> {
    *
    * @internal
    */
-  static _fromRaw(
-    data: number[],
-    mask: boolean[],
-    dtype: IntegerDtypeName,
-  ): IntegerArray {
+  static _fromRaw(data: number[], mask: boolean[], dtype: IntegerDtypeName): IntegerArray {
     return new IntegerArray(data, mask, dtype);
   }
 
@@ -290,9 +284,7 @@ export class IntegerArray extends MaskedArray<number> {
       return [data, mask];
     }
     if (other.size !== this.size) {
-      throw new RangeError(
-        `IntegerArray: operand size mismatch (${this.size} vs ${other.size})`,
-      );
+      throw new RangeError(`IntegerArray: operand size mismatch (${this.size} vs ${other.size})`);
     }
     const data: number[] = [];
     const mask: boolean[] = [];

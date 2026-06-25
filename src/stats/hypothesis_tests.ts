@@ -109,8 +109,7 @@ function erf(x: number): number {
   const t = 1.0 / (1.0 + 0.3275911 * ax);
   const poly =
     t *
-    (0.254829592 +
-      t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+    (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
   return sign * (1.0 - poly * Math.exp(-(ax * ax)));
 }
 
@@ -128,14 +127,8 @@ function normalSF(x: number): number {
 
 /** Lanczos approximation coefficients (g=7). */
 const LG_C: readonly number[] = [
-  0.99999999999980993,
-  676.5203681218851,
-  -1259.1392167224028,
-  771.32342877765313,
-  -176.61502916214059,
-  12.507343278686905,
-  -0.13857109526572012,
-  9.9843695780195716e-6,
+  0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+  -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
   1.5056327351493116e-7,
 ];
 
@@ -245,7 +238,7 @@ function regIncBeta(x: number, a: number, b: number): number {
   const front = Math.exp(a * Math.log(x) + b * Math.log(1.0 - x) - lbeta) / a;
   // Lentz's CF
   let c = 1.0;
-  let d = 1.0 - (a + b) * x / (a + 1.0);
+  let d = 1.0 - ((a + b) * x) / (a + 1.0);
   if (Math.abs(d) < FPMIN) {
     d = FPMIN;
   }
@@ -254,7 +247,7 @@ function regIncBeta(x: number, a: number, b: number): number {
   for (let m = 1; m <= BETA_MAX_ITER; m++) {
     // Even step
     const m2 = 2 * m;
-    let aa = m * (b - m) * x / ((a + m2 - 1) * (a + m2));
+    let aa = (m * (b - m) * x) / ((a + m2 - 1) * (a + m2));
     d = 1.0 + aa * d;
     if (Math.abs(d) < FPMIN) {
       d = FPMIN;
@@ -266,7 +259,7 @@ function regIncBeta(x: number, a: number, b: number): number {
     d = 1.0 / d;
     h *= d * c;
     // Odd step
-    aa = -(a + m) * (a + b + m) * x / ((a + m2) * (a + m2 + 1));
+    aa = (-(a + m) * (a + b + m) * x) / ((a + m2) * (a + m2 + 1));
     d = 1.0 + aa * d;
     if (Math.abs(d) < FPMIN) {
       d = FPMIN;
@@ -467,7 +460,7 @@ export function ttest1samp(
   }
   const m = mean(xs);
   const se = Math.sqrt(sampleVar(xs) / n);
-  const statistic = se === 0 ? (m === popmean ? 0 : Infinity) : (m - popmean) / se;
+  const statistic = se === 0 ? (m === popmean ? 0 : Number.POSITIVE_INFINITY) : (m - popmean) / se;
   const pvalue = tPValue(statistic, n - 1, alt);
   return { statistic, pvalue };
 }
@@ -519,7 +512,7 @@ export function ttestInd(
     const se = Math.sqrt(s1n + s2n);
     statistic = se === 0 ? 0 : (m1 - m2) / se;
     // Welch-Satterthwaite degrees of freedom
-    df = (s1n + s2n) * (s1n + s2n) / (s1n * s1n / (n1 - 1) + s2n * s2n / (n2 - 1));
+    df = ((s1n + s2n) * (s1n + s2n)) / ((s1n * s1n) / (n1 - 1) + (s2n * s2n) / (n2 - 1));
   }
 
   const pvalue = tPValue(statistic, df, alt);
@@ -555,7 +548,7 @@ export function ttestRel(
   }
   const m = mean(diffs);
   const se = Math.sqrt(sampleVar(diffs) / n);
-  const statistic = se === 0 ? (m === 0 ? 0 : Infinity) : m / se;
+  const statistic = se === 0 ? (m === 0 ? 0 : Number.POSITIVE_INFINITY) : m / se;
   const pvalue = tPValue(statistic, n - 1, alt);
   return { statistic, pvalue };
 }
@@ -575,9 +568,7 @@ export function ttestRel(
  * const result = chi2Contingency([[10, 10], [15, 15], [5, 10]]);
  * ```
  */
-export function chi2Contingency(
-  observed: readonly (readonly number[])[],
-): Chi2ContingencyResult {
+export function chi2Contingency(observed: readonly (readonly number[])[]): Chi2ContingencyResult {
   const rows = observed.length;
   if (rows === 0) {
     return { statistic: Number.NaN, pvalue: Number.NaN, dof: 0, expected: [] };
@@ -599,8 +590,9 @@ export function chi2Contingency(
     return { statistic: Number.NaN, pvalue: Number.NaN, dof: 0, expected: [] };
   }
   const expected: number[][] = Array.from({ length: rows }, (_, r) =>
-    Array.from({ length: cols }, (__, c) =>
-      ((rowTotals[r] as number) * (colTotals[c] as number)) / grand,
+    Array.from(
+      { length: cols },
+      (__, c) => ((rowTotals[r] as number) * (colTotals[c] as number)) / grand,
     ),
   );
   let statistic = 0;
@@ -609,7 +601,7 @@ export function chi2Contingency(
       const o = (observed[r] as readonly number[])[c] as number;
       const e = (expected[r] as number[])[c] as number;
       if (e > 0) {
-        statistic += (o - e) * (o - e) / e;
+        statistic += ((o - e) * (o - e)) / e;
       }
     }
   }
@@ -645,7 +637,7 @@ export function fOneway(...groups: (readonly number[] | Series)[]): HTestResult 
   if (N <= k) {
     return { statistic: Number.NaN, pvalue: Number.NaN };
   }
-  const grandMean = arrays.flatMap((a) => a).reduce((s, v) => s + v, 0) / N;
+  const grandMean = arrays.flat().reduce((s, v) => s + v, 0) / N;
 
   // Between-group sum of squares
   let ssBetween = 0;
@@ -669,7 +661,7 @@ export function fOneway(...groups: (readonly number[] | Series)[]): HTestResult 
   }
   const msBetween = ssBetween / dfBetween;
   const msWithin = dfWithin > 0 ? ssWithin / dfWithin : 0;
-  const statistic = msWithin === 0 ? Infinity : msBetween / msWithin;
+  const statistic = msWithin === 0 ? Number.POSITIVE_INFINITY : msBetween / msWithin;
   const pvalue = fDistSF(statistic, dfBetween, dfWithin);
   return { statistic, pvalue };
 }
@@ -710,9 +702,9 @@ export function jarqueBera(data: readonly number[] | Series): HTestResult {
   if (m2 === 0) {
     return { statistic: Number.NaN, pvalue: Number.NaN };
   }
-  const skewness = m3 / Math.pow(m2, 1.5);
+  const skewness = m3 / m2 ** 1.5;
   const kurtosis = m4 / (m2 * m2);
-  const statistic = (n / 6) * (skewness * skewness + (kurtosis - 3) * (kurtosis - 3) / 4);
+  const statistic = (n / 6) * (skewness * skewness + ((kurtosis - 3) * (kurtosis - 3)) / 4);
   const pvalue = chi2SF(statistic, 2);
   return { statistic, pvalue };
 }
@@ -836,12 +828,12 @@ export function mannWhitneyU(
   for (let i = 0; i < n1; i++) {
     r1 += ranks[i] as number;
   }
-  const u1 = r1 - n1 * (n1 + 1) / 2;
+  const u1 = r1 - (n1 * (n1 + 1)) / 2;
   const u2 = n1 * n2 - u1;
   const statistic = Math.min(u1, u2);
 
-  const muU = n1 * n2 / 2;
-  const sigmaU = Math.sqrt(n1 * n2 * (n1 + n2 + 1) / 12);
+  const muU = (n1 * n2) / 2;
+  const sigmaU = Math.sqrt((n1 * n2 * (n1 + n2 + 1)) / 12);
   if (sigmaU === 0) {
     return { statistic, pvalue: 1 };
   }

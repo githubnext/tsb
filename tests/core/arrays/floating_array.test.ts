@@ -24,7 +24,7 @@ describe("FloatingArray", () => {
     });
 
     it("treats NaN as NA", () => {
-      const a = FloatingArray.from([1.0, NaN, 3.0]);
+      const a = FloatingArray.from([1.0, Number.NaN, 3.0]);
       expect(a.toArray()).toEqual([1.0, null, 3.0]);
     });
 

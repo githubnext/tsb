@@ -14,7 +14,7 @@ import { PCA, covMatrix, invertMatrix, mahalanobis } from "../../src/stats/multi
 const CLOSE = (a: number, b: number, tol = 1e-6) =>
   Math.abs(a - b) <= tol || (Math.abs(b) > 1e-10 && Math.abs(a - b) / Math.abs(b) <= tol);
 
-const matEq = (A: readonly (readonly number[])[], B: readonly (readonly number[])[], tol = 1e-6) =>
+const _matEq = (A: readonly (readonly number[])[], B: readonly (readonly number[])[], tol = 1e-6) =>
   A.every((row, i) => row.every((v, j) => CLOSE(v, (B[i] ?? [])[j] ?? 0, tol)));
 
 // ─── invertMatrix ────────────────────────────────────────────────────────────
@@ -90,7 +90,9 @@ describe("invertMatrix", () => {
           Array.from({ length: n }, (_, j) => (i === j ? n + 1 : Math.sin(i * 7 + j * 3))),
         );
         const inv = invertMatrix(A);
-        if (!inv) return true; // very unlikely with DD matrix
+        if (!inv) {
+          return true; // very unlikely with DD matrix
+        }
         // Check A * inv ≈ I
         for (let i = 0; i < n; i++) {
           for (let j = 0; j < n; j++) {
@@ -98,7 +100,9 @@ describe("invertMatrix", () => {
             for (let k = 0; k < n; k++) {
               sum += ((A[i] ?? [])[k] ?? 0) * ((inv[k] ?? [])[j] ?? 0);
             }
-            if (!CLOSE(sum, i === j ? 1 : 0, 1e-8)) return false;
+            if (!CLOSE(sum, i === j ? 1 : 0, 1e-8)) {
+              return false;
+            }
           }
         }
         return true;
@@ -288,7 +292,7 @@ describe("PCA", () => {
     expect(r.nFeatures).toBe(2);
     expect(r.nSamples).toBe(10);
     // First PC should explain > 90% of variance
-    expect((r.explainedVarianceRatio[0] ?? 0)).toBeGreaterThan(0.9);
+    expect(r.explainedVarianceRatio[0] ?? 0).toBeGreaterThan(0.9);
   });
 
   it("sum of ratios ≈ 1 when keeping all components", () => {
@@ -302,7 +306,7 @@ describe("PCA", () => {
     const pca = new PCA();
     const r = pca.fit(X2d);
     for (let i = 1; i < r.cumulativeExplainedVarianceRatio.length; i++) {
-      expect((r.cumulativeExplainedVarianceRatio[i] ?? 0)).toBeGreaterThanOrEqual(
+      expect(r.cumulativeExplainedVarianceRatio[i] ?? 0).toBeGreaterThanOrEqual(
         (r.cumulativeExplainedVarianceRatio[i - 1] ?? 0) - 1e-10,
       );
     }
@@ -379,9 +383,7 @@ describe("PCA", () => {
     // Should keep at least 1 component
     expect(r.nComponents).toBeGreaterThanOrEqual(1);
     // Cumulative EVR of final component >= 0.95
-    expect(
-      (r.cumulativeExplainedVarianceRatio[r.nComponents - 1] ?? 0),
-    ).toBeGreaterThanOrEqual(0.94);
+    expect(r.cumulativeExplainedVarianceRatio[r.nComponents - 1] ?? 0).toBeGreaterThanOrEqual(0.94);
   });
 
   it("perfect 1D data → 1 PC explains 100%", () => {
@@ -390,8 +392,8 @@ describe("PCA", () => {
     const pca = new PCA({ n_components: 2 });
     const r = pca.fit(X);
     // First eigenvalue should dominate; second ~ 0
-    expect((r.explainedVarianceRatio[0] ?? 0)).toBeGreaterThan(0.999);
-    expect((r.explainedVariance[1] ?? 0)).toBeLessThan(1e-6);
+    expect(r.explainedVarianceRatio[0] ?? 0).toBeGreaterThan(0.999);
+    expect(r.explainedVariance[1] ?? 0).toBeLessThan(1e-6);
   });
 
   it("mean-centered scores have mean ≈ 0", () => {
@@ -399,7 +401,7 @@ describe("PCA", () => {
     const r = pca.fit(X2d);
     const Z = r.transform(X2d);
     for (let j = 0; j < 2; j++) {
-      const mu = Z.reduce((s, row) => s + ((row[j] ?? 0)), 0) / Z.length;
+      const mu = Z.reduce((s, row) => s + (row[j] ?? 0), 0) / Z.length;
       expect(CLOSE(mu, 0, 1e-6)).toBe(true);
     }
   });
@@ -410,7 +412,7 @@ describe("PCA", () => {
     const Z = r.transform(X2d);
     const n = Z.length;
     for (let j = 0; j < 2; j++) {
-      const mu = Z.reduce((s, row) => s + ((row[j] ?? 0)), 0) / n;
+      const mu = Z.reduce((s, row) => s + (row[j] ?? 0), 0) / n;
       const variance = Z.reduce((s, row) => s + ((row[j] ?? 0) - mu) ** 2, 0) / (n - 1);
       expect(CLOSE(variance, 1, 0.05)).toBe(true);
     }

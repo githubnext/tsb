@@ -111,7 +111,9 @@ class ThriftReader {
     for (;;) {
       const byte = this.buf[this.pos++] ?? 0;
       result |= BigInt(byte & 0x7f) << shift;
-      if ((byte & 0x80) === 0) break;
+      if ((byte & 0x80) === 0) {
+        break;
+      }
       shift += 7n;
     }
     return result;
@@ -161,7 +163,9 @@ class ThriftReader {
     let prevFieldId = 0;
     for (;;) {
       const header = this.buf[this.pos++] ?? 0;
-      if (header === T_STOP) break;
+      if (header === T_STOP) {
+        break;
+      }
       let type = header & 0x0f;
       const delta = (header >> 4) & 0x0f;
       let fieldId: number;
@@ -211,7 +215,9 @@ class ThriftReader {
           count = (header >> 4) & 0x0f;
           elemType = header & 0x0f;
         }
-        for (let i = 0; i < count; i++) this.skipValue(elemType);
+        for (let i = 0; i < count; i++) {
+          this.skipValue(elemType);
+        }
         break;
       }
       case T_STRUCT:
@@ -423,7 +429,9 @@ function decodeRowGroup(r: ThriftReader): RowGroup {
   r.readStruct((fid, ftype) => {
     if (fid === 1 && ftype === T_LIST) {
       const { count } = r.readListHeader();
-      for (let i = 0; i < count; i++) columns.push(decodeColumnChunk(r));
+      for (let i = 0; i < count; i++) {
+        columns.push(decodeColumnChunk(r));
+      }
     } else if (fid === 2 && ftype === T_I64) {
       totalByteSize = r.readI64();
     } else if (fid === 3 && ftype === T_I64) {
@@ -476,11 +484,15 @@ function decodeColMeta(r: ThriftReader): ColMeta {
     } else if (fid === 2 && ftype === T_LIST) {
       // encodings (list<Encoding>) — skip
       const { count, elemType } = r.readListHeader();
-      for (let i = 0; i < count; i++) r.skipValue(elemType);
+      for (let i = 0; i < count; i++) {
+        r.skipValue(elemType);
+      }
     } else if (fid === 3 && ftype === T_LIST) {
       // path_in_schema
       const { count } = r.readListHeader();
-      for (let i = 0; i < count; i++) pathInSchema.push(r.readString());
+      for (let i = 0; i < count; i++) {
+        pathInSchema.push(r.readString());
+      }
     } else if (fid === 4 && ftype === T_I32) {
       codec = r.readI32();
     } else if (fid === 5 && ftype === T_I64) {
@@ -514,7 +526,7 @@ function decodePageHeader(r: ThriftReader): PageHeader {
   let numValues = 0;
   let dataEncoding = ENC_PLAIN;
   let defLevelEncoding = ENC_RLE;
-  let repLevelEncoding = ENC_RLE;
+  let _repLevelEncoding = ENC_RLE;
 
   r.readStruct((fid, ftype) => {
     if (fid === 1 && ftype === T_I32) {
@@ -533,7 +545,7 @@ function decodePageHeader(r: ThriftReader): PageHeader {
         } else if (fid2 === 3 && ftype2 === T_I32) {
           defLevelEncoding = r.readI32();
         } else if (fid2 === 4 && ftype2 === T_I32) {
-          repLevelEncoding = r.readI32();
+          _repLevelEncoding = r.readI32();
         } else {
           r.skipValue(ftype2);
         }
@@ -561,12 +573,16 @@ function decodeFileMetaData(buf: Uint8Array, offset: number): FileMetaData {
       version = r.readI32();
     } else if (fid === 2 && ftype === T_LIST) {
       const { count } = r.readListHeader();
-      for (let i = 0; i < count; i++) schema.push(decodeSchemaElement(r));
+      for (let i = 0; i < count; i++) {
+        schema.push(decodeSchemaElement(r));
+      }
     } else if (fid === 3 && ftype === T_I64) {
       numRows = r.readI64();
     } else if (fid === 4 && ftype === T_LIST) {
       const { count } = r.readListHeader();
-      for (let i = 0; i < count; i++) rowGroups.push(decodeRowGroup(r));
+      for (let i = 0; i < count; i++) {
+        rowGroups.push(decodeRowGroup(r));
+      }
     } else {
       r.skipValue(ftype);
     }
@@ -599,7 +615,9 @@ function decodeDefLevels(buf: Uint8Array, pos: number, numValues: number): boole
     while (i < end) {
       const byte = buf[i++] ?? 0;
       header |= BigInt(byte & 0x7f) << shift;
-      if ((byte & 0x80) === 0) break;
+      if ((byte & 0x80) === 0) {
+        break;
+      }
       shift += 7n;
     }
     const isRle = (header & 1n) === 0n;
@@ -706,7 +724,9 @@ function decodeColumnData(
     }
 
     // Ensure we advance past the page even if it had different byte alignment
-    if (pos < pageEnd) pos = pageEnd;
+    if (pos < pageEnd) {
+      pos = pageEnd;
+    }
   }
 
   return values;
@@ -747,7 +767,11 @@ function decodeBooleanColumn(
     // Count present values for bit-packing
     let presentCount = 0;
     if (defLevels !== null) {
-      for (const d of defLevels) if (d) presentCount++;
+      for (const d of defLevels) {
+        if (d) {
+          presentCount++;
+        }
+      }
     } else {
       presentCount = ph.numValues;
     }
@@ -765,10 +789,10 @@ function decodeBooleanColumn(
     let boolIdx = 0;
     for (let i = 0; i < ph.numValues && rowsFilled < nRows; i++) {
       const isPresent = defLevels === null ? true : (defLevels[i] ?? true);
-      if (!isPresent) {
-        values[rowsFilled++] = null;
-      } else {
+      if (isPresent) {
         values[rowsFilled++] = boolVals[boolIdx++] ?? false;
+      } else {
+        values[rowsFilled++] = null;
       }
     }
 
@@ -808,7 +832,9 @@ function encodeColMeta(w: ThriftWriter, m: ColMeta): void {
   // path_in_schema (field 3)
   w.writeFieldHeader(3, T_LIST);
   w.writeListHeader(m.pathInSchema.length, T_BINARY);
-  for (const p of m.pathInSchema) w.writeString(p);
+  for (const p of m.pathInSchema) {
+    w.writeString(p);
+  }
   // codec (field 4)
   w.writeFieldHeader(4, T_I32);
   w.writeI32(CODEC_UNCOMPRESSED);
@@ -840,7 +866,9 @@ function encodeRowGroup(w: ThriftWriter, rg: RowGroup): void {
   w.beginStruct();
   w.writeFieldHeader(1, T_LIST);
   w.writeListHeader(rg.columns.length, T_STRUCT);
-  for (const cc of rg.columns) encodeColumnChunk(w, cc);
+  for (const cc of rg.columns) {
+    encodeColumnChunk(w, cc);
+  }
   w.writeFieldHeader(2, T_I64);
   w.writeI64(rg.totalByteSize);
   w.writeFieldHeader(3, T_I64);
@@ -939,7 +967,9 @@ function determinePhysType(values: readonly Scalar[]): number {
   let hasFloat = false;
 
   for (const v of values) {
-    if (v === null || v === undefined) continue;
+    if (v === null || v === undefined) {
+      continue;
+    }
     if (typeof v === "boolean") {
       hasBool = true;
       continue;
@@ -953,7 +983,7 @@ function determinePhysType(values: readonly Scalar[]): number {
       continue;
     }
     if (typeof v === "number") {
-      if (!Number.isInteger(v) || !Number.isFinite(v)) {
+      if (!(Number.isInteger(v) && Number.isFinite(v))) {
         hasFloat = true;
       } else if (Math.abs(v) > 2147483647) {
         hasBigInt = true; // too large for INT32, use INT64
@@ -966,10 +996,18 @@ function determinePhysType(values: readonly Scalar[]): number {
     }
   }
 
-  if (hasStr) return PHYS_BYTE_ARRAY;
-  if (hasBool && !hasFloat && !hasBigInt) return PHYS_BOOLEAN;
-  if (hasBigInt) return PHYS_INT64;
-  if (hasFloat) return PHYS_DOUBLE;
+  if (hasStr) {
+    return PHYS_BYTE_ARRAY;
+  }
+  if (hasBool && !hasFloat && !hasBigInt) {
+    return PHYS_BOOLEAN;
+  }
+  if (hasBigInt) {
+    return PHYS_INT64;
+  }
+  if (hasFloat) {
+    return PHYS_DOUBLE;
+  }
   return PHYS_INT32;
 }
 
@@ -1015,9 +1053,13 @@ function encodeColumnPage(
     for (let i = 0; i < present.length; i++) {
       const v = present[i];
       let bigV = 0n;
-      if (typeof v === "bigint") bigV = v;
-      else if (typeof v === "number") bigV = BigInt(Math.trunc(v));
-      else if (v instanceof Date) bigV = BigInt(v.getTime());
+      if (typeof v === "bigint") {
+        bigV = v;
+      } else if (typeof v === "number") {
+        bigV = BigInt(Math.trunc(v));
+      } else if (v instanceof Date) {
+        bigV = BigInt(v.getTime());
+      }
       dv.setBigInt64(i * 8, bigV, true);
     }
     parts.push(dataBuf);
@@ -1092,7 +1134,7 @@ export function readParquet(data: Uint8Array, options: ReadParquetOptions = {}):
     const rg0 = meta.rowGroups[0];
     if (rg0 !== undefined) {
       for (const cc of rg0.columns) {
-        const name = cc.meta.pathInSchema[cc.meta.pathInSchema.length - 1] ?? "";
+        const name = cc.meta.pathInSchema.at(-1) ?? "";
         allNames.push(name);
       }
     }
@@ -1109,14 +1151,18 @@ export function readParquet(data: Uint8Array, options: ReadParquetOptions = {}):
 
   // Collect all data per column across row groups
   const columnData: Map<string, Scalar[]> = new Map();
-  for (const name of selectedNames) columnData.set(name, []);
+  for (const name of selectedNames) {
+    columnData.set(name, []);
+  }
 
   for (const rg of meta.rowGroups) {
     const rgRows = Number(rg.numRows);
 
     for (const cc of rg.columns) {
-      const colName = cc.meta.pathInSchema[cc.meta.pathInSchema.length - 1] ?? "";
-      if (!selectedNames.includes(colName)) continue;
+      const colName = cc.meta.pathInSchema.at(-1) ?? "";
+      if (!selectedNames.includes(colName)) {
+        continue;
+      }
 
       const repType = leafSchema.get(colName) ?? REP_REQUIRED;
       const isOptional = repType === REP_OPTIONAL;
@@ -1130,7 +1176,9 @@ export function readParquet(data: Uint8Array, options: ReadParquetOptions = {}):
 
       const existing = columnData.get(colName);
       if (existing !== undefined) {
-        for (const v of colValues) existing.push(v);
+        for (const v of colValues) {
+          existing.push(v);
+        }
       }
     }
   }
@@ -1147,15 +1195,20 @@ export function readParquet(data: Uint8Array, options: ReadParquetOptions = {}):
     const idxName = typeof indexCol === "number" ? (selectedNames[indexCol] ?? "") : indexCol;
     const idxVals = resultData[idxName] ?? [];
     const labels = idxVals.map((v): Label => {
-      if (v === null || v === undefined) return null;
+      if (v === null || v === undefined) {
+        return null;
+      }
       if (
         typeof v === "number" ||
         typeof v === "string" ||
         typeof v === "boolean" ||
         v instanceof Date
-      )
+      ) {
         return v;
-      if (typeof v === "bigint") return Number(v);
+      }
+      if (typeof v === "bigint") {
+        return Number(v);
+      }
       return null;
     });
     index = new Index(labels);
@@ -1287,7 +1340,9 @@ export function toParquet(df: DataFrame, options: ToParquetOptions = {}): Uint8A
   fw.writeI32(2); // version 2
   fw.writeFieldHeader(2, T_LIST);
   fw.writeListHeader(schema.length, T_STRUCT);
-  for (const el of schema) encodeSchemaElement(fw, el);
+  for (const el of schema) {
+    encodeSchemaElement(fw, el);
+  }
   fw.writeFieldHeader(3, T_I64);
   fw.writeI64(BigInt(nRows));
   fw.writeFieldHeader(4, T_LIST);

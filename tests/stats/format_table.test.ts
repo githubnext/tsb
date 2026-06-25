@@ -202,7 +202,7 @@ describe("toLaTeX", () => {
   });
 
   it("floatFormat rounds numbers", () => {
-    const df = DataFrame.fromColumns({ v: [3.14159] });
+    const df = DataFrame.fromColumns({ v: [Math.PI] });
     const tex = toLaTeX(df, { floatFormat: 2 });
     expect(tex).toContain("3.14");
     expect(tex).not.toContain("3.14159");

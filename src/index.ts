@@ -829,12 +829,12 @@ export type {
 } from "./core/index.ts";
 
 import {
-  MaskedArray,
-  IntegerArray,
-  FloatingArray,
   BooleanArray,
-  StringArray,
   DatetimeArray,
+  FloatingArray,
+  IntegerArray,
+  MaskedArray,
+  StringArray,
   TimedeltaArray,
 } from "./core/index.ts";
 export {

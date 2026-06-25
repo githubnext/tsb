@@ -294,7 +294,9 @@ function resultToDataFrame(result: SqlResult, options: ReadSqlBaseOptions): Data
   const columnData: Record<string, Scalar[]> = {};
 
   for (const col of result.columns) {
-    if (col === idxColName) continue;
+    if (col === idxColName) {
+      continue;
+    }
     dataColumns.push(col);
     columnData[col] = [];
   }
@@ -556,24 +558,48 @@ export function toSql(
 
 /** Convert a {@link Label} to a {@link SqlValue}. */
 function labelToSqlValue(label: Label): SqlValue {
-  if (label === null) return null;
-  if (typeof label === "boolean") return label;
-  if (typeof label === "number") return label;
-  if (typeof label === "string") return label;
-  if (label instanceof Date) return label.toISOString();
+  if (label === null) {
+    return null;
+  }
+  if (typeof label === "boolean") {
+    return label;
+  }
+  if (typeof label === "number") {
+    return label;
+  }
+  if (typeof label === "string") {
+    return label;
+  }
+  if (label instanceof Date) {
+    return label.toISOString();
+  }
   return String(label);
 }
 
 /** Convert a tsb {@link Scalar} to a {@link SqlValue}. */
 function scalarToSqlValue(s: Scalar): SqlValue {
-  if (s === null || s === undefined) return null;
-  if (typeof s === "boolean") return s;
-  if (typeof s === "number") return s;
-  if (typeof s === "string") return s;
-  if (typeof s === "bigint") return Number(s);
-  if (s instanceof Date) return s.toISOString();
+  if (s === null || s === undefined) {
+    return null;
+  }
+  if (typeof s === "boolean") {
+    return s;
+  }
+  if (typeof s === "number") {
+    return s;
+  }
+  if (typeof s === "string") {
+    return s;
+  }
+  if (typeof s === "bigint") {
+    return Number(s);
+  }
+  if (s instanceof Date) {
+    return s.toISOString();
+  }
   // TimedeltaLike — store as total milliseconds
-  if (typeof s === "object" && "totalMs" in s) return s.totalMs;
+  if (typeof s === "object" && "totalMs" in s) {
+    return s.totalMs;
+  }
   return null;
 }
 
@@ -587,14 +613,24 @@ function escapeSqlString(s: string): string {
 
 /** Format a {@link SqlValue} as a SQL literal for the fallback path. */
 function sqlLiteral(v: SqlValue): string {
-  if (v === null) return "NULL";
-  if (typeof v === "boolean") return v ? "1" : "0";
+  if (v === null) {
+    return "NULL";
+  }
+  if (typeof v === "boolean") {
+    return v ? "1" : "0";
+  }
   if (typeof v === "number") {
-    if (Number.isNaN(v)) return "NULL";
-    if (!Number.isFinite(v)) return "NULL";
+    if (Number.isNaN(v)) {
+      return "NULL";
+    }
+    if (!Number.isFinite(v)) {
+      return "NULL";
+    }
     return String(v);
   }
-  if (typeof v === "string") return `'${escapeSqlString(v)}'`;
+  if (typeof v === "string") {
+    return `'${escapeSqlString(v)}'`;
+  }
   // Uint8Array (blob): represent as hex literal (SQLite: X'…')
   return `X'${Buffer.from(v).toString("hex")}'`;
 }
@@ -612,7 +648,9 @@ function insertViaQuery(
   chunksize: number | undefined,
   conn: SqlConnection,
 ): number {
-  if (rows.length === 0) return 0;
+  if (rows.length === 0) {
+    return 0;
+  }
 
   const quotedTable = quoteIdent(tableName);
   const colList = columns.map(quoteIdent).join(", ");
@@ -643,7 +681,9 @@ function insertViaQuery(
 
     for (let i = start; i < end; i++) {
       const row = rows[i];
-      if (row === undefined) continue;
+      if (row === undefined) {
+        continue;
+      }
       const valList = columns.map((col) => sqlLiteral(row[col] ?? null)).join(", ");
       conn.query(`INSERT INTO ${quotedTable} (${colList}) VALUES (${valList})`);
       written += 1;

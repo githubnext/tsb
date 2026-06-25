@@ -37,8 +37,8 @@ describe("readHtml – basic", () => {
     const t2 = simpleTable(["y"], [["20"]]);
     const dfs = readHtml(t1 + t2);
     expect(dfs.length).toBe(2);
-    expect(dfs[0]!.columns.toArray()).toEqual(["x"]);
-    expect(dfs[1]!.columns.toArray()).toEqual(["y"]);
+    expect(dfs[0]?.columns.toArray()).toEqual(["x"]);
+    expect(dfs[1]?.columns.toArray()).toEqual(["y"]);
   });
 
   test("returns empty array when no tables found", () => {
@@ -49,13 +49,13 @@ describe("readHtml – basic", () => {
   test("handles empty table (no rows)", () => {
     const dfs = readHtml("<table></table>");
     expect(dfs.length).toBe(1);
-    expect(dfs[0]!.shape[0]).toBe(0);
+    expect(dfs[0]?.shape[0]).toBe(0);
   });
 
   test("values are numeric by default", () => {
     const html = simpleTable(["n"], [["42"], ["3.14"]]);
     const [df] = readHtml(html);
-    const vals = df!.col("n").toArray();
+    const vals = df?.col("n").toArray();
     expect(vals[0]).toBe(42);
     expect(vals[1]).toBeCloseTo(3.14);
   });
@@ -63,8 +63,8 @@ describe("readHtml – basic", () => {
   test("header=null uses integer column names", () => {
     const html = "<table><tr><td>a</td><td>b</td></tr><tr><td>1</td><td>2</td></tr></table>";
     const [df] = readHtml(html, { header: null });
-    expect(df!.columns.toArray()).toEqual(["0", "1"]);
-    expect(df!.shape[0]).toBe(2);
+    expect(df?.columns.toArray()).toEqual(["0", "1"]);
+    expect(df?.shape[0]).toBe(2);
   });
 });
 
@@ -77,8 +77,8 @@ describe("readHtml – header", () => {
       <tr><td>Alice</td><td>30</td></tr>
     </table>`;
     const [df] = readHtml(html, { header: 0 });
-    expect(df!.columns.toArray()).toEqual(["Name", "Age"]);
-    expect(df!.shape[0]).toBe(1);
+    expect(df?.columns.toArray()).toEqual(["Name", "Age"]);
+    expect(df?.shape[0]).toBe(1);
   });
 
   test("deduplicates duplicate column names", () => {
@@ -87,7 +87,7 @@ describe("readHtml – header", () => {
       <tr><td>1</td><td>2</td><td>3</td></tr>
     </table>`;
     const [df] = readHtml(html);
-    const cols = df!.columns.toArray();
+    const cols = df?.columns.toArray();
     expect(cols[0]).toBe("x");
     expect(cols[1]).toBe("x.1");
     expect(cols[2]).toBe("y");
@@ -100,14 +100,14 @@ describe("readHtml – NA values", () => {
   test("empty string becomes null", () => {
     const html = simpleTable(["v"], [[""], ["1"]]);
     const [df] = readHtml(html, { skipBlankLines: false });
-    expect(df!.col("v").toArray()[0]).toBeNull();
-    expect(df!.col("v").toArray()[1]).toBe(1);
+    expect(df?.col("v").toArray()[0]).toBeNull();
+    expect(df?.col("v").toArray()[1]).toBe(1);
   });
 
   test("NA / NaN / None become null", () => {
     const html = simpleTable(["v"], [["NA"], ["NaN"], ["None"]]);
     const [df] = readHtml(html);
-    for (const v of df!.col("v").toArray()) {
+    for (const v of df?.col("v").toArray() ?? []) {
       expect(v).toBeNull();
     }
   });
@@ -115,8 +115,8 @@ describe("readHtml – NA values", () => {
   test("custom naValues", () => {
     const html = simpleTable(["v"], [["MISSING"], ["5"]]);
     const [df] = readHtml(html, { naValues: ["MISSING"] });
-    expect(df!.col("v").toArray()[0]).toBeNull();
-    expect(df!.col("v").toArray()[1]).toBe(5);
+    expect(df?.col("v").toArray()[0]).toBeNull();
+    expect(df?.col("v").toArray()[1]).toBe(5);
   });
 });
 
@@ -126,19 +126,19 @@ describe("readHtml – converters", () => {
   test("converters=false keeps strings", () => {
     const html = simpleTable(["n"], [["42"]]);
     const [df] = readHtml(html, { converters: false });
-    expect(df!.col("n").toArray()[0]).toBe("42");
+    expect(df?.col("n").toArray()[0]).toBe("42");
   });
 
   test("thousands separator", () => {
     const html = simpleTable(["n"], [["1,000,000"]]);
     const [df] = readHtml(html, { thousands: "," });
-    expect(df!.col("n").toArray()[0]).toBe(1_000_000);
+    expect(df?.col("n").toArray()[0]).toBe(1_000_000);
   });
 
   test("decimal separator", () => {
     const html = simpleTable(["n"], [["3,14"]]);
     const [df] = readHtml(html, { decimal: "," });
-    expect(df!.col("n").toArray()[0] as number).toBeCloseTo(3.14);
+    expect(df?.col("n").toArray()[0] as number).toBeCloseTo(3.14);
   });
 });
 
@@ -151,20 +151,20 @@ describe("readHtml – filtering", () => {
     const t2 = simpleTable(["c"], [["3"]]);
     const dfs = readHtml(t0 + t1 + t2, { match: [1] });
     expect(dfs.length).toBe(1);
-    expect(dfs[0]!.columns.toArray()).toEqual(["b"]);
+    expect(dfs[0]?.columns.toArray()).toEqual(["b"]);
   });
 
   test("skipRows", () => {
     const html = simpleTable(["v"], [["0"], ["1"], ["2"], ["3"]]);
     const [df] = readHtml(html, { skipRows: [0, 2] });
-    expect(df!.shape[0]).toBe(2);
-    expect(df!.col("v").toArray()).toEqual([1, 3]);
+    expect(df?.shape[0]).toBe(2);
+    expect(df?.col("v").toArray()).toEqual([1, 3]);
   });
 
   test("nrows limits rows", () => {
     const html = simpleTable(["v"], [["1"], ["2"], ["3"]]);
     const [df] = readHtml(html, { nrows: 2 });
-    expect(df!.shape[0]).toBe(2);
+    expect(df?.shape[0]).toBe(2);
   });
 
   test("skipBlankLines removes empty rows", () => {
@@ -175,12 +175,12 @@ describe("readHtml – filtering", () => {
       <tr><td>2</td></tr>
     </table>`;
     const [dfDefault] = readHtml(html);
-    expect(dfDefault!.shape[0]).toBe(2); // 1, 2
-    expect(dfDefault!.col("v").toArray()).toEqual([1, 2]);
+    expect(dfDefault?.shape[0]).toBe(2); // 1, 2
+    expect(dfDefault?.col("v").toArray()).toEqual([1, 2]);
 
     // With skipBlankLines=false, the blank row is preserved and coerced to null.
     const [df] = readHtml(html, { skipBlankLines: false });
-    expect(df!.shape[0]).toBe(3); // 1, null, 2
+    expect(df?.shape[0]).toBe(3); // 1, null, 2
   });
 });
 
@@ -197,9 +197,9 @@ describe("readHtml – indexCol", () => {
     );
     const [df] = readHtml(html, { indexCol: "id" });
     // "id" column removed from columns
-    expect(df!.columns.toArray()).toEqual(["val"]);
+    expect(df?.columns.toArray()).toEqual(["val"]);
     // index contains "a", "b"
-    expect(df!.index.toArray()).toEqual(["a", "b"]);
+    expect(df?.index.toArray()).toEqual(["a", "b"]);
   });
 
   test("sets column by integer position as index", () => {
@@ -211,7 +211,7 @@ describe("readHtml – indexCol", () => {
       ],
     );
     const [df] = readHtml(html, { indexCol: 0 });
-    expect(df!.columns.toArray()).toEqual(["val"]);
+    expect(df?.columns.toArray()).toEqual(["val"]);
   });
 });
 
@@ -226,7 +226,7 @@ describe("readHtml – HTML entities", () => {
       <tr><td>hello&nbsp;world</td></tr>
     </table>`;
     const [df] = readHtml(html, { converters: false });
-    const vals = df!.col("k").toArray();
+    const vals = df?.col("k").toArray();
     expect(vals[0]).toBe("a & b");
     expect(vals[1]).toBe("5 < 10");
     expect(vals[2]).toBe("hello world");
@@ -235,13 +235,13 @@ describe("readHtml – HTML entities", () => {
   test("decodes &#nn; decimal entities", () => {
     const html = "<table><tr><th>k</th></tr><tr><td>&#65;</td></tr></table>";
     const [df] = readHtml(html, { converters: false });
-    expect(df!.col("k").toArray()[0]).toBe("A");
+    expect(df?.col("k").toArray()[0]).toBe("A");
   });
 
   test("decodes &#xHH; hex entities", () => {
     const html = "<table><tr><th>k</th></tr><tr><td>&#x42;</td></tr></table>";
     const [df] = readHtml(html, { converters: false });
-    expect(df!.col("k").toArray()[0]).toBe("B");
+    expect(df?.col("k").toArray()[0]).toBe("B");
   });
 });
 
@@ -254,8 +254,8 @@ describe("readHtml – structure variants", () => {
       <tr><td>1</td><td>2</td></tr>
     </table>`;
     const [df] = readHtml(html);
-    expect(df!.columns.toArray()).toEqual(["x", "y"]);
-    expect(df!.shape[0]).toBe(1);
+    expect(df?.columns.toArray()).toEqual(["x", "y"]);
+    expect(df?.shape[0]).toBe(1);
   });
 
   test("table with tfoot", () => {
@@ -265,7 +265,7 @@ describe("readHtml – structure variants", () => {
       <tfoot><tr><td>Total</td></tr></tfoot>
     </table>`;
     const [df] = readHtml(html, { converters: false });
-    const vals = df!.col("a").toArray();
+    const vals = df?.col("a").toArray();
     expect(vals).toContain("1");
     expect(vals).toContain("Total");
   });
@@ -276,8 +276,8 @@ describe("readHtml – structure variants", () => {
       <tr><td id="c1">Alice</td></tr>
     </table>`;
     const [df] = readHtml(html, { converters: false });
-    expect(df!.columns.toArray()).toEqual(["Name"]);
-    expect(df!.col("Name").toArray()[0]).toBe("Alice");
+    expect(df?.columns.toArray()).toEqual(["Name"]);
+    expect(df?.col("Name").toArray()[0]).toBe("Alice");
   });
 
   test("nested tables are counted separately", () => {
@@ -305,17 +305,19 @@ describe("readHtml – property tests", () => {
           ),
         ),
         (rows) => {
-          const ncols = rows[0]!.length;
+          const ncols = rows[0]?.length;
           const headers = Array.from({ length: ncols }, (_, i) => `col${i}`);
           const strRows = rows.map((r) => r.map(String));
           const html = simpleTable(headers, strRows);
           const [df] = readHtml(html);
           const flatIn = rows.flat();
           const flatOut = (df?.toRecords() ?? []).flatMap((record) =>
-            rows[0]!.map((_, ci) => Number(record[headers[ci]!])),
+            rows[0]?.map((_, ci) => Number(record[headers[ci]!])),
           );
           // same length
-          if (flatIn.length !== flatOut.length) return false;
+          if (flatIn.length !== flatOut.length) {
+            return false;
+          }
           return flatIn.every((v, i) => flatOut[i] === v);
         },
       ),
@@ -356,18 +358,18 @@ describe("readHtml – realistic HTML", () => {
 
   test("parses Wikipedia-style table from full HTML doc", () => {
     const [df] = readHtml(wikipedia);
-    expect(df!.columns.toArray()).toEqual(["Country", "Population (M)", "GDP (B USD)"]);
-    expect(df!.shape).toEqual([3, 3]);
+    expect(df?.columns.toArray()).toEqual(["Country", "Population (M)", "GDP (B USD)"]);
+    expect(df?.shape).toEqual([3, 3]);
   });
 
   test("Country column is strings", () => {
     const [df] = readHtml(wikipedia);
-    const countries = df!.col("Country").toArray();
+    const countries = df?.col("Country").toArray();
     expect(countries).toEqual(["USA", "China", "Germany"]);
   });
 
   test("numeric columns are numbers", () => {
     const [df] = readHtml(wikipedia);
-    expect(df!.col("Population (M)").toArray()[0]).toBe(331);
+    expect(df?.col("Population (M)").toArray()[0]).toBe(331);
   });
 });

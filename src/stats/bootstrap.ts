@@ -35,8 +35,7 @@ function erf(x: number): number {
   const t = 1.0 / (1.0 + 0.3275911 * ax);
   const poly =
     t *
-    (0.254829592 +
-      t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+    (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
   return sign * (1.0 - poly * Math.exp(-(ax * ax)));
 }
 
@@ -50,9 +49,15 @@ function normalCdf(x: number): number {
  * approximation.  Maximum absolute error < 1.15×10⁻⁹.
  */
 function normalPpf(p: number): number {
-  if (p <= 0) { return -Infinity; }
-  if (p >= 1) { return Infinity; }
-  if (p === 0.5) { return 0; }
+  if (p <= 0) {
+    return Number.NEGATIVE_INFINITY;
+  }
+  if (p >= 1) {
+    return Number.POSITIVE_INFINITY;
+  }
+  if (p === 0.5) {
+    return 0;
+  }
 
   // Rational approximation coefficients (Peter Acklam, 2010)
   const a0 = -3.969683028665376e1;
@@ -108,7 +113,9 @@ function normalPpf(p: number): number {
 function makeRng(seed: number): () => number {
   // Seed must be non-zero; mix with a constant to spread entropy.
   let s = BigInt(Math.round(seed)) ^ 0x6d2b79f5n;
-  if (s === 0n) { s = 1n; }
+  if (s === 0n) {
+    s = 1n;
+  }
   return () => {
     s ^= s >> 12n;
     s ^= s << 25n;
@@ -180,7 +187,9 @@ export interface BootstrapOptions {
 /** Compute mean of xs. */
 function mean(xs: readonly number[]): number {
   let s = 0;
-  for (const x of xs) s += x;
+  for (const x of xs) {
+    s += x;
+  }
   return s / xs.length;
 }
 
@@ -188,7 +197,9 @@ function mean(xs: readonly number[]): number {
 function std(xs: readonly number[]): number {
   const m = mean(xs);
   let s = 0;
-  for (const x of xs) s += (x - m) ** 2;
+  for (const x of xs) {
+    s += (x - m) ** 2;
+  }
   return Math.sqrt(s / xs.length);
 }
 
@@ -204,9 +215,15 @@ function resample(data: readonly number[], n: number, rng: () => number): number
  * interpolation, matching numpy's default method).
  */
 function quantileSorted(sorted: readonly number[], p: number): number {
-  if (sorted.length === 0) { return NaN; }
-  if (p <= 0) { return sorted[0] ?? NaN; }
-  if (p >= 1) { return sorted[sorted.length - 1] ?? NaN; }
+  if (sorted.length === 0) {
+    return Number.NaN;
+  }
+  if (p <= 0) {
+    return sorted[0] ?? Number.NaN;
+  }
+  if (p >= 1) {
+    return sorted.at(-1) ?? Number.NaN;
+  }
   const idx = p * (sorted.length - 1);
   const lo = Math.floor(idx);
   const hi = lo + 1;
@@ -234,7 +251,9 @@ function bcaAcceleration(data: readonly number[], statFn: StatFn1): number {
     num += d ** 3;
     den += d ** 2;
   }
-  if (den === 0) { return 0; }
+  if (den === 0) {
+    return 0;
+  }
   return num / (6 * den ** 1.5);
 }
 
@@ -259,7 +278,9 @@ function bcaAlphas(
   const adj = (z: number): number => {
     const num = z0 + z;
     const denom = 1 - a * num;
-    if (denom === 0) { return z0 < 0 ? -Infinity : Infinity; }
+    if (denom === 0) {
+      return z0 < 0 ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+    }
     return z0 + num / denom;
   };
 
@@ -319,7 +340,9 @@ export function bootstrap(
   if (confidence <= 0 || confidence >= 1) {
     throw new RangeError(`confidence must be in (0, 1); got ${confidence}`);
   }
-  if (n < 1) { throw new RangeError(`n must be ≥ 1; got ${n}`); }
+  if (n < 1) {
+    throw new RangeError(`n must be ≥ 1; got ${n}`);
+  }
   const alpha = 1 - confidence;
   const rng = makeRng(seed);
   const data0 = samples[0] ?? [];
@@ -366,7 +389,11 @@ function bootstrapOne(
     high = quantileSorted(sorted, alpha2);
   }
 
-  return { confidenceInterval: { low, high }, bootDistribution: bootDist, standardError: std(bootDist) };
+  return {
+    confidenceInterval: { low, high },
+    bootDistribution: bootDist,
+    standardError: std(bootDist),
+  };
 }
 
 function bootstrapTwo(
@@ -401,7 +428,11 @@ function bootstrapTwo(
     high = 2 * theta - qLo;
   }
 
-  return { confidenceInterval: { low, high }, bootDistribution: bootDist, standardError: std(bootDist) };
+  return {
+    confidenceInterval: { low, high },
+    bootDistribution: bootDist,
+    standardError: std(bootDist),
+  };
 }
 
 /**

@@ -115,14 +115,8 @@ export interface OLSOptions {
 
 /** Lanczos approximation coefficients (g=7, 9-term). */
 const LG_C: readonly number[] = [
-  0.99999999999980993,
-  676.5203681218851,
-  -1259.1392167224028,
-  771.32342877765313,
-  -176.61502916214059,
-  12.507343278686905,
-  -0.13857109526572012,
-  9.9843695780195716e-6,
+  0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+  -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
   1.5056327351493116e-7,
 ];
 
@@ -168,7 +162,7 @@ function regIncBeta(x: number, a: number, b: number): number {
   const lbeta = logGamma(a) + logGamma(b) - logGamma(a + b);
   const front = Math.exp(a * Math.log(x) + b * Math.log(1.0 - x) - lbeta) / a;
   let c = 1.0;
-  let d = 1.0 - (a + b) * x / (a + 1.0);
+  let d = 1.0 - ((a + b) * x) / (a + 1.0);
   if (Math.abs(d) < FPMIN) {
     d = FPMIN;
   }
@@ -176,7 +170,7 @@ function regIncBeta(x: number, a: number, b: number): number {
   let h = d;
   for (let m = 1; m <= BETA_MAX_ITER; m++) {
     const m2 = 2 * m;
-    let aa = m * (b - m) * x / ((a + m2 - 1) * (a + m2));
+    let aa = (m * (b - m) * x) / ((a + m2 - 1) * (a + m2));
     d = 1.0 + aa * d;
     if (Math.abs(d) < FPMIN) {
       d = FPMIN;
@@ -187,7 +181,7 @@ function regIncBeta(x: number, a: number, b: number): number {
     }
     d = 1.0 / d;
     h *= d * c;
-    aa = -(a + m) * (a + b + m) * x / ((a + m2) * (a + m2 + 1));
+    aa = (-(a + m) * (a + b + m) * x) / ((a + m2) * (a + m2 + 1));
     d = 1.0 + aa * d;
     if (Math.abs(d) < FPMIN) {
       d = FPMIN;
@@ -258,10 +252,7 @@ function transpose(A: readonly (readonly number[])[]): number[][] {
 }
 
 /** Matrix multiply A (m×k) × B (k×n) → m×n. */
-function matMul(
-  A: readonly (readonly number[])[],
-  B: readonly (readonly number[])[],
-): number[][] {
+function matMul(A: readonly (readonly number[])[], B: readonly (readonly number[])[]): number[][] {
   const m = A.length;
   const k = B.length;
   const n = B[0]?.length ?? 0;
@@ -275,7 +266,7 @@ function matMul(
     for (let j = 0; j < n; j++) {
       let s = 0;
       for (let p = 0; p < k; p++) {
-        s += (rowA[p] ?? 0) * ((B[p]?.[j]) ?? 0);
+        s += (rowA[p] ?? 0) * (B[p]?.[j] ?? 0);
       }
       outRow[j] = s;
     }
@@ -418,9 +409,9 @@ export function linregress(
     syy += yi * yi;
   }
 
-  const ssxx = sxx - sx * sx / n;
-  const ssyy = syy - sy * sy / n;
-  const ssxy = sxy - sx * sy / n;
+  const ssxx = sxx - (sx * sx) / n;
+  const ssyy = syy - (sy * sy) / n;
+  const ssxy = sxy - (sx * sy) / n;
 
   if (Math.abs(ssxx) < 1e-14) {
     return {
@@ -449,12 +440,10 @@ export function linregress(
   const mse = df > 0 ? sResid / df : 0;
 
   const stderr = mse > 0 ? Math.sqrt(mse / ssxx) : 0;
-  const intercept_stderr =
-    mse > 0 ? Math.sqrt(mse * (1 / n + (sx / n) ** 2 / ssxx)) : 0;
+  const intercept_stderr = mse > 0 ? Math.sqrt(mse * (1 / n + (sx / n) ** 2 / ssxx)) : 0;
 
-  const tStat = stderr > 0 ? slope / stderr : (slope === 0 ? 0 : Infinity);
-  const pvalue =
-    df > 0 ? Math.min(1, 2 * tDistSF(Math.abs(tStat), df)) : Number.NaN;
+  const tStat = stderr > 0 ? slope / stderr : slope === 0 ? 0 : Number.POSITIVE_INFINITY;
+  const pvalue = df > 0 ? Math.min(1, 2 * tDistSF(Math.abs(tStat), df)) : Number.NaN;
 
   return {
     slope,
@@ -501,9 +490,7 @@ export function polyfit(
     throw new RangeError(`deg must be ≥ 0, got ${deg}`);
   }
   if (n < d + 1) {
-    throw new RangeError(
-      `polyfit requires at least deg+1=${d + 1} points, got ${n}`,
-    );
+    throw new RangeError(`polyfit requires at least deg+1=${d + 1} points, got ${n}`);
   }
 
   // Build Vandermonde matrix V[i][j] = x[i]^(deg-j) for j in [0..deg]
@@ -547,10 +534,7 @@ export function polyfit(
  * ```
  */
 export function polyval(coefs: readonly number[], x: number): number;
-export function polyval(
-  coefs: readonly number[],
-  x: readonly number[] | Series,
-): number[];
+export function polyval(coefs: readonly number[], x: readonly number[] | Series): number[];
 export function polyval(
   coefs: readonly number[],
   x: number | readonly number[] | Series,
@@ -624,10 +608,7 @@ export class OLS {
       colNames = ["x1"];
     } else {
       rawX = (X as readonly (readonly number[])[]).map((row) => [...row]);
-      colNames = Array.from(
-        { length: rawX[0]?.length ?? 0 },
-        (_, i) => `x${i + 1}`,
-      );
+      colNames = Array.from({ length: rawX[0]?.length ?? 0 }, (_, i) => `x${i + 1}`);
     }
 
     const ys = toNumbers(y);
@@ -637,21 +618,15 @@ export class OLS {
         `X and y must have the same number of observations: X has ${rawX.length} rows, y has ${n}`,
       );
     }
-    const k = rawX[0]?.length ?? 0;
+    const _k = rawX[0]?.length ?? 0;
 
     // Build design matrix: optionally append intercept column (value 1)
-    const designNames: string[] = this._addIntercept
-      ? [...colNames, "const"]
-      : [...colNames];
-    const design: number[][] = rawX.map((row) =>
-      this._addIntercept ? [...row, 1] : [...row],
-    );
+    const designNames: string[] = this._addIntercept ? [...colNames, "const"] : [...colNames];
+    const design: number[][] = rawX.map((row) => (this._addIntercept ? [...row, 1] : [...row]));
     const p = design[0]?.length ?? 0;
 
     if (n < p) {
-      throw new RangeError(
-        `OLS requires at least ${p} observations for ${p} parameters, got ${n}`,
-      );
+      throw new RangeError(`OLS requires at least ${p} observations for ${p} parameters, got ${n}`);
     }
 
     // Normal equations: (X'X) β = X'y
@@ -664,9 +639,7 @@ export class OLS {
     const params = solveLinear(XtX, XtY);
 
     // Fitted values and residuals
-    const fitted = design.map((row) =>
-      row.reduce((s, xi, j) => s + xi * (params[j] ?? 0), 0),
-    );
+    const fitted = design.map((row) => row.reduce((s, xi, j) => s + xi * (params[j] ?? 0), 0));
     const residuals = ys.map((yi, i) => yi - (fitted[i] ?? 0));
     const ssr = residuals.reduce((s, e) => s + e * e, 0);
     const yMean = ys.reduce((s, v) => s + v, 0) / n;
@@ -689,31 +662,22 @@ export class OLS {
       if (se > 0) {
         return b / se;
       }
-      return b === 0 ? 0 : Infinity;
+      return b === 0 ? 0 : Number.POSITIVE_INFINITY;
     });
     const pvalues = tvalues.map((t) =>
-      dfResid > 0
-        ? Math.min(1, 2 * tDistSF(Math.abs(t), dfResid))
-        : Number.NaN,
+      dfResid > 0 ? Math.min(1, 2 * tDistSF(Math.abs(t), dfResid)) : Number.NaN,
     );
 
     const rsquared = tss > 0 ? 1 - ssr / tss : 0;
-    const rsquaredAdj =
-      dfResid > 0 && tss > 0
-        ? 1 - (ssr / dfResid) / (tss / (n - 1))
-        : rsquared;
+    const rsquaredAdj = dfResid > 0 && tss > 0 ? 1 - ssr / dfResid / (tss / (n - 1)) : rsquared;
 
     const msModel = dfModel > 0 ? ess / dfModel : 0;
-    const fvalue = mseResid > 0 ? msModel / mseResid : Infinity;
-    const fPvalue =
-      dfModel > 0 && dfResid > 0
-        ? fDistSF(fvalue, dfModel, dfResid)
-        : Number.NaN;
+    const fvalue = mseResid > 0 ? msModel / mseResid : Number.POSITIVE_INFINITY;
+    const fPvalue = dfModel > 0 && dfResid > 0 ? fDistSF(fvalue, dfModel, dfResid) : Number.NaN;
 
     // Log-likelihood (normal errors: σ² = mseResid)
     const sigma2 = mseResid > 0 ? mseResid : 1;
-    const llf =
-      -n / 2 * Math.log(2 * Math.PI) - n / 2 * Math.log(sigma2) - ssr / (2 * sigma2);
+    const llf = (-n / 2) * Math.log(2 * Math.PI) - (n / 2) * Math.log(sigma2) - ssr / (2 * sigma2);
     // k-params includes all coefficients + 1 for σ²
     const kParams = p + 1;
     const aic = 2 * kParams - 2 * llf;

@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { Timestamp } from "../../../src/core/timestamp.ts";
 import { DatetimeArray } from "../../../src/core/arrays/datetime_array.ts";
+import { Timestamp } from "../../../src/core/timestamp.ts";
 
 const ts1 = new Timestamp("2024-01-15T10:00:00Z");
 const ts2 = new Timestamp("2024-03-20T14:30:00Z");

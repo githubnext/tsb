@@ -219,9 +219,15 @@ export function seriesToMarkdown(s: Series<Scalar>, options: ToMarkdownOptions =
   const separators: string[] = widths.map((w, ci) => {
     const isIndexCol = index && ci === 0;
     const align = isIndexCol ? "none" : colAlign;
-    if (align === "left") return `:${"-".repeat(Math.max(w - 1, 3))}`;
-    if (align === "right") return `${"-".repeat(Math.max(w - 1, 3))}:`;
-    if (align === "center") return `:${"-".repeat(Math.max(w - 2, 3))}:`;
+    if (align === "left") {
+      return `:${"-".repeat(Math.max(w - 1, 3))}`;
+    }
+    if (align === "right") {
+      return `${"-".repeat(Math.max(w - 1, 3))}:`;
+    }
+    if (align === "center") {
+      return `:${"-".repeat(Math.max(w - 2, 3))}:`;
+    }
     return "-".repeat(w);
   });
 

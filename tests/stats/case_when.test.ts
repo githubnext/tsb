@@ -243,7 +243,9 @@ describe("caseWhen — property tests", () => {
           const orig = ser.toArray();
           const got = res.toArray();
           for (let i = 0; i < orig.length; i++) {
-            if (orig[i] !== got[i]) return false;
+            if (orig[i] !== got[i]) {
+              return false;
+            }
           }
           return true;
         },
@@ -275,7 +277,9 @@ describe("caseWhen — property tests", () => {
         const orig = ser.toArray();
         const got = res.toArray();
         for (let i = 0; i < orig.length; i++) {
-          if (orig[i] !== got[i]) return false;
+          if (orig[i] !== got[i]) {
+            return false;
+          }
         }
         return true;
       }),
@@ -306,7 +310,9 @@ describe("caseWhen — property tests", () => {
           const a1 = res1.toArray();
           const a2 = res2.toArray();
           for (let i = 0; i < a1.length; i++) {
-            if (a1[i] !== a2[i]) return false;
+            if (a1[i] !== a2[i]) {
+              return false;
+            }
           }
           return true;
         },

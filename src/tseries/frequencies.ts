@@ -27,26 +27,26 @@
  */
 
 import {
+  BusinessDay,
   Day,
   Hour,
-  Minute,
-  Second,
   Milli,
-  Week,
-  MonthEnd,
+  Minute,
   MonthBegin,
-  YearEnd,
+  MonthEnd,
+  Second,
+  Week,
   YearBegin,
-  BusinessDay,
+  YearEnd,
 } from "../core/date_offset.ts";
 import type { DateOffset } from "../core/date_offset.ts";
 import {
-  QuarterEnd,
-  QuarterBegin,
-  BMonthEnd,
   BMonthBegin,
-  BYearEnd,
+  BMonthEnd,
   BYearBegin,
+  BYearEnd,
+  QuarterBegin,
+  QuarterEnd,
 } from "./offsets.ts";
 
 // ─── Frequency alias table ────────────────────────────────────────────────────
@@ -201,7 +201,7 @@ export function toOffset(freq: string | null | undefined): DateOffset | null {
 
   const nStr = match[1] ?? "";
   const alias = match[2] ?? "";
-  const n = nStr === "" || nStr === "-" ? (nStr === "-" ? -1 : 1) : parseInt(nStr, 10);
+  const n = nStr === "" || nStr === "-" ? (nStr === "-" ? -1 : 1) : Number.parseInt(nStr, 10);
 
   // Handle anchored week frequencies: "W-MON", "W-TUE", …
   if (alias.startsWith("W-")) {
@@ -330,7 +330,7 @@ export function inferFreq(dates: readonly Date[]): string | null {
   // These have variable diffs (different month lengths) but regular structure.
 
   if (_allMonthEnd(dates)) {
-    const months = _countMonthsBetween(dates[0], dates[dates.length - 1]);
+    const months = _countMonthsBetween(dates[0], dates.at(-1));
     const steps = months / (dates.length - 1);
     if (Number.isInteger(steps)) {
       return steps === 1 ? "ME" : `${steps}ME`;
@@ -338,7 +338,7 @@ export function inferFreq(dates: readonly Date[]): string | null {
   }
 
   if (_allMonthBegin(dates)) {
-    const months = _countMonthsBetween(dates[0], dates[dates.length - 1]);
+    const months = _countMonthsBetween(dates[0], dates.at(-1));
     const steps = months / (dates.length - 1);
     if (Number.isInteger(steps)) {
       return steps === 1 ? "MS" : `${steps}MS`;
@@ -456,7 +456,7 @@ function _allBusinessDay(dates: readonly Date[]): boolean {
     }
   }
   // Verify last date is also a business day.
-  const last = dates[dates.length - 1];
+  const last = dates.at(-1);
   if (last === undefined) {
     return false;
   }

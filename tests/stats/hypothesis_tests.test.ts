@@ -38,7 +38,8 @@ function erf(x: number): number {
   const ax = Math.abs(x);
   const t = 1 / (1 + 0.3275911 * ax);
   const poly =
-    t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+    t *
+    (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
   return sign * (1 - poly * Math.exp(-(ax * ax)));
 }
 
@@ -88,7 +89,10 @@ describe("ttest1samp", () => {
   it("property: p-value ∈ [0, 1] for any numeric array", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 2, maxLength: 30 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 2,
+          maxLength: 30,
+        }),
         fc.float({ noNaN: true, noDefaultInfinity: true }),
         (data, popmean) => {
           const { pvalue } = ttest1samp(data, popmean);
@@ -135,8 +139,14 @@ describe("ttestInd", () => {
   it("property: p-value ∈ [0, 1]", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 2, maxLength: 20 }),
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 2, maxLength: 20 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 2,
+          maxLength: 20,
+        }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 2,
+          maxLength: 20,
+        }),
         (a, b) => {
           const { pvalue } = ttestInd(a, b);
           return Number.isNaN(pvalue) || (pvalue >= 0 && pvalue <= 1);
@@ -273,8 +283,14 @@ describe("fOneway", () => {
   it("property: F ≥ 0 and p ∈ [0, 1]", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 2, maxLength: 15 }),
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 2, maxLength: 15 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 2,
+          maxLength: 15,
+        }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 2,
+          maxLength: 15,
+        }),
         (a, b) => {
           const { statistic, pvalue } = fOneway(a, b);
           const okF = Number.isNaN(statistic) || statistic >= 0;
@@ -318,7 +334,10 @@ describe("jarqueBera", () => {
   it("property: JB ≥ 0", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 4, maxLength: 50 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 4,
+          maxLength: 50,
+        }),
         (data) => {
           const { statistic } = jarqueBera(data);
           return Number.isNaN(statistic) || statistic >= 0;

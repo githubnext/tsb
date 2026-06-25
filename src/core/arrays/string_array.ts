@@ -18,9 +18,9 @@
  * @module
  */
 
-import { MaskedArray } from "./masked_array.ts";
 import { BooleanArray } from "./boolean_array.ts";
 import { IntegerArray } from "./integer_array.ts";
+import { MaskedArray } from "./masked_array.ts";
 
 // ─── StringArray ──────────────────────────────────────────────────────────────
 
@@ -30,11 +30,6 @@ import { IntegerArray } from "./integer_array.ts";
  * Use {@link StringArray.from} to create instances.
  */
 export class StringArray extends MaskedArray<string> {
-  /** @internal */
-  constructor(data: string[], mask: boolean[]) {
-    super(data, mask);
-  }
-
   // ─── Factory ───────────────────────────────────────────────────────────────
 
   /**
@@ -201,9 +196,7 @@ export class StringArray extends MaskedArray<string> {
    */
   cat(sep: string, other: StringArray): StringArray {
     if (other.size !== this.size) {
-      throw new RangeError(
-        `StringArray.cat: size mismatch (${this.size} vs ${other.size})`,
-      );
+      throw new RangeError(`StringArray.cat: size mismatch (${this.size} vs ${other.size})`);
     }
     const data: string[] = [];
     const mask: boolean[] = [];

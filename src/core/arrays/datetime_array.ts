@@ -90,11 +90,7 @@ export class DatetimeArray {
   }
 
   /** @internal */
-  static _fromRaw(
-    data: Timestamp[],
-    mask: boolean[],
-    tz: string | null = null,
-  ): DatetimeArray {
+  static _fromRaw(data: Timestamp[], mask: boolean[], tz: string | null = null): DatetimeArray {
     return new DatetimeArray(data, mask, tz);
   }
 

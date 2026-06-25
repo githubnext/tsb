@@ -203,13 +203,9 @@ class GeoAccessor {
   }
 }
 
-class PlotAccessor {
-  constructor(private readonly _obj: unknown) {}
-}
+class PlotAccessor {}
 
-class IdxAccessor {
-  constructor(private readonly _obj: unknown) {}
-}
+class IdxAccessor {}
 
 describe("registerSeriesAccessor / getRegisteredAccessors", () => {
   test("register and retrieve series accessor", () => {

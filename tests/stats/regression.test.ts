@@ -7,13 +7,8 @@
  */
 import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
-import {
-  OLS,
-  linregress,
-  polyfit,
-  polyval,
-} from "../../src/stats/regression.ts";
 import { DataFrame, Series } from "../../src/index.ts";
+import { OLS, linregress, polyfit, polyval } from "../../src/stats/regression.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -143,7 +138,11 @@ describe("polyfit", () => {
   });
 
   it("accepts Series input", () => {
-    const coefs = polyfit(new Series({ data: [0, 1, 2, 3, 4] }), new Series({ data: [0, 1, 4, 9, 16] }), 2);
+    const coefs = polyfit(
+      new Series({ data: [0, 1, 2, 3, 4] }),
+      new Series({ data: [0, 1, 4, 9, 16] }),
+      2,
+    );
     expect(CLOSE(coefs[0] as number, 1, 1e-4)).toBe(true);
   });
 
@@ -217,7 +216,10 @@ describe("OLS", () => {
     const x = [1, 2, 3, 4, 5];
     const y = [2, 4, 5, 4, 5];
     const model = new OLS();
-    const result = model.fit(x.map((v) => [v]), y);
+    const result = model.fit(
+      x.map((v) => [v]),
+      y,
+    );
     const lr = linregress(x, y);
     // params = [slope, intercept] (intercept last)
     expect(CLOSE(result.params[0] as number, lr.slope, 1e-4)).toBe(true);
@@ -234,8 +236,14 @@ describe("OLS", () => {
 
   it("multiple regression: y = 2x₁ + 3x₂ + 1", () => {
     const X = [
-      [1, 0], [2, 1], [3, 2], [4, 3], [5, 4],
-      [6, 5], [7, 6], [8, 7],
+      [1, 0],
+      [2, 1],
+      [3, 2],
+      [4, 3],
+      [5, 4],
+      [6, 5],
+      [7, 6],
+      [8, 7],
     ];
     const y = X.map(([a, b]) => 2 * (a as number) + 3 * (b as number) + 1);
     const result = new OLS().fit(X, y);
@@ -267,7 +275,7 @@ describe("OLS", () => {
 
   it("paramNames includes 'const' when addIntercept=true", () => {
     const result = new OLS().fit([[1], [2], [3]], [1, 2, 3]);
-    expect(result.paramNames[result.paramNames.length - 1]).toBe("const");
+    expect(result.paramNames.at(-1)).toBe("const");
   });
 
   it("nobs equals number of observations", () => {
@@ -336,7 +344,14 @@ describe("OLS", () => {
   });
 
   it("adjusted R² ≤ R² for multiple regressors", () => {
-    const X = [[1, 0], [2, 1], [3, 0], [4, 1], [5, 0], [6, 1]];
+    const X = [
+      [1, 0],
+      [2, 1],
+      [3, 0],
+      [4, 1],
+      [5, 0],
+      [6, 1],
+    ];
     const y = [2, 3, 4, 5, 6, 7];
     const result = new OLS().fit(X, y);
     expect(result.rsquared_adj).toBeLessThanOrEqual(result.rsquared + 1e-9);
@@ -372,9 +387,14 @@ describe("property tests", () => {
           const n = Math.min(x.length, y.length);
           const xs = x.slice(0, n);
           const ys = y.slice(0, n);
-          if (n < 2) return true;
+          if (n < 2) {
+            return true;
+          }
           const lr = linregress(xs, ys);
-          const ols = new OLS().fit(xs.map((v) => [v]), ys);
+          const ols = new OLS().fit(
+            xs.map((v) => [v]),
+            ys,
+          );
           // R² from OLS ≈ r² from linregress
           return CLOSE(ols.rsquared, lr.rvalue ** 2, 0.01);
         },
@@ -394,7 +414,9 @@ describe("property tests", () => {
           const ys = y.slice(0, n);
           // Need distinct x values for polyfit(1) to be well-defined
           const hasDistinctX = new Set(xs).size >= 2;
-          if (!hasDistinctX) return true;
+          if (!hasDistinctX) {
+            return true;
+          }
           try {
             const coefs = polyfit(xs, ys, 1);
             const fitted = polyval(coefs, xs);
@@ -419,7 +441,9 @@ describe("property tests", () => {
           const xs = x.slice(0, n);
           const ys = y.slice(0, n);
           const r = linregress(xs, ys);
-          if (!Number.isFinite(r.slope) || !Number.isFinite(r.rvalue)) return true;
+          if (!(Number.isFinite(r.slope) && Number.isFinite(r.rvalue))) {
+            return true;
+          }
           // slope and rvalue should have the same sign (or both be 0)
           return Math.sign(r.slope) === Math.sign(r.rvalue) || Math.abs(r.slope) < 1e-10;
         },
@@ -437,9 +461,14 @@ describe("property tests", () => {
           const n = Math.min(x.length, y.length);
           const xs = x.slice(0, n);
           const ys = y.slice(0, n);
-          if (n < 3) return true;
+          if (n < 3) {
+            return true;
+          }
           try {
-            const result = new OLS().fit(xs.map((v) => [v]), ys);
+            const result = new OLS().fit(
+              xs.map((v) => [v]),
+              ys,
+            );
             return CLOSE(result.ssr + result.ess, result.tss, 1e-4);
           } catch {
             return true;

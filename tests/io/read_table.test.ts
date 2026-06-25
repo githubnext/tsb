@@ -218,8 +218,8 @@ describe("readTable — property-based", () => {
           const df = readTable(tsv);
           expect(df.shape).toEqual([rows.length, 2]);
           for (let i = 0; i < rows.length; i++) {
-            expect(df.col("a").values[i]).toBe(rows[i]!.a);
-            expect(df.col("b").values[i]).toBe(rows[i]!.b);
+            expect(df.col("a").values[i]).toBe(rows[i]?.a);
+            expect(df.col("b").values[i]).toBe(rows[i]?.b);
           }
         },
       ),

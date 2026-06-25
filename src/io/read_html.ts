@@ -216,16 +216,24 @@ function coerceValue(
   thousands: string | null,
   decimal: string,
 ): Scalar {
-  if (naValues.has(raw)) return null;
-  if (!tryNumber) return raw;
+  if (naValues.has(raw)) {
+    return null;
+  }
+  if (!tryNumber) {
+    return raw;
+  }
 
   // Remove thousands separator
   let s = thousands ? raw.split(thousands).join("") : raw;
   // Replace decimal separator
-  if (decimal !== ".") s = s.replace(decimal, ".");
+  if (decimal !== ".") {
+    s = s.replace(decimal, ".");
+  }
 
   const n = Number(s);
-  if (!Number.isNaN(n) && s.trim() !== "") return n;
+  if (!Number.isNaN(n) && s.trim() !== "") {
+    return n;
+  }
   return raw;
 }
 
@@ -272,7 +280,9 @@ export function readHtml(html: string, opts: ReadHtmlOptions = {}): DataFrame[] 
   const result: DataFrame[] = [];
 
   for (let ti = 0; ti < tables.length; ti++) {
-    if (match !== undefined && !match.includes(ti)) continue;
+    if (match !== undefined && !match.includes(ti)) {
+      continue;
+    }
 
     const rawRows = parseTableHtml(tables[ti] ?? "");
 
@@ -329,7 +339,7 @@ export function readHtml(html: string, opts: ReadHtmlOptions = {}): DataFrame[] 
     for (const row of bodyRows) {
       for (let ci = 0; ci < ncols; ci++) {
         const raw = row[ci] ?? "";
-        colArrays[ci]!.push(coerceValue(raw, naSet, converters, thousands, decimal));
+        colArrays[ci]?.push(coerceValue(raw, naSet, converters, thousands, decimal));
       }
     }
 

@@ -29,11 +29,6 @@ import { MaskedArray } from "./masked_array.ts";
  * Use {@link BooleanArray.from} to create instances.
  */
 export class BooleanArray extends MaskedArray<boolean> {
-  /** @internal */
-  constructor(data: boolean[], mask: boolean[]) {
-    super(data, mask);
-  }
-
   // ─── Factory ───────────────────────────────────────────────────────────────
 
   /**
@@ -138,9 +133,7 @@ export class BooleanArray extends MaskedArray<boolean> {
    */
   and(other: BooleanArray): BooleanArray {
     if (other.size !== this.size) {
-      throw new RangeError(
-        `BooleanArray: operand size mismatch (${this.size} vs ${other.size})`,
-      );
+      throw new RangeError(`BooleanArray: operand size mismatch (${this.size} vs ${other.size})`);
     }
     const data: boolean[] = [];
     const mask: boolean[] = [];
@@ -157,14 +150,14 @@ export class BooleanArray extends MaskedArray<boolean> {
         // a is false → false AND anything = false
         data.push(false);
         mask.push(false);
-      } else if (!(bm || bv)) {
-        // b is false → anything AND false = false
-        data.push(false);
-        mask.push(false);
-      } else {
+      } else if (bm || bv) {
         // Result is NA
         data.push(false);
         mask.push(true);
+      } else {
+        // b is false → anything AND false = false
+        data.push(false);
+        mask.push(false);
       }
     }
     return BooleanArray._fromRaw(data, mask);
@@ -179,9 +172,7 @@ export class BooleanArray extends MaskedArray<boolean> {
    */
   or(other: BooleanArray): BooleanArray {
     if (other.size !== this.size) {
-      throw new RangeError(
-        `BooleanArray: operand size mismatch (${this.size} vs ${other.size})`,
-      );
+      throw new RangeError(`BooleanArray: operand size mismatch (${this.size} vs ${other.size})`);
     }
     const data: boolean[] = [];
     const mask: boolean[] = [];

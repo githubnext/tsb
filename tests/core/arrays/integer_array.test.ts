@@ -31,8 +31,14 @@ describe("IntegerArray", () => {
 
     it("supports all integer dtypes", () => {
       for (const dtype of [
-        "Int8", "Int16", "Int32", "Int64",
-        "UInt8", "UInt16", "UInt32", "UInt64",
+        "Int8",
+        "Int16",
+        "Int32",
+        "Int64",
+        "UInt8",
+        "UInt16",
+        "UInt32",
+        "UInt64",
       ] as const) {
         const a = IntegerArray.from([1, 2, 3], dtype);
         expect(a.dtype).toBe(dtype);

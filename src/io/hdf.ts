@@ -68,7 +68,19 @@ const DT_STRING = 5; // fixed-length string
 
 // ─── Internal types ───────────────────────────────────────────────────────────
 
-type ColKind = "f64" | "f32" | "i64" | "i32" | "i16" | "i8" | "u64" | "u32" | "u16" | "u8" | "bool" | "str";
+type ColKind =
+  | "f64"
+  | "f32"
+  | "i64"
+  | "i32"
+  | "i16"
+  | "i8"
+  | "u64"
+  | "u32"
+  | "u16"
+  | "u8"
+  | "bool"
+  | "str";
 
 interface ColInfo {
   readonly name: string;
@@ -104,9 +116,13 @@ class BufWriter {
 
   private _grow(need: number): void {
     const required = this._pos + need;
-    if (required <= this._buf.length) return;
+    if (required <= this._buf.length) {
+      return;
+    }
     let size = this._buf.length;
-    while (size < required) size *= 2;
+    while (size < required) {
+      size *= 2;
+    }
     const next = new Uint8Array(size);
     next.set(this._buf.subarray(0, this._pos));
     this._buf = next;
@@ -163,7 +179,9 @@ class BufWriter {
   /** Pad to an 8-byte boundary. */
   align8(): void {
     const rem = this._pos % 8;
-    if (rem !== 0) this.zeros(8 - rem);
+    if (rem !== 0) {
+      this.zeros(8 - rem);
+    }
   }
 
   build(): Uint8Array {
@@ -184,50 +202,61 @@ function inferColInfo(df: DataFrame, name: string): ColInfo {
   let maxStrLen = 0;
 
   switch (dtName) {
-    case "float64":
+    case "float64": {
       kind = "f64";
       elemSize = 8;
       break;
-    case "float32":
+    }
+    case "float32": {
       kind = "f32";
       elemSize = 4;
       break;
-    case "int64":
+    }
+    case "int64": {
       kind = "i64";
       elemSize = 8;
       break;
-    case "int32":
+    }
+    case "int32": {
       kind = "i32";
       elemSize = 4;
       break;
-    case "int16":
+    }
+    case "int16": {
       kind = "i16";
       elemSize = 2;
       break;
-    case "int8":
+    }
+    case "int8": {
       kind = "i8";
       elemSize = 1;
       break;
-    case "uint64":
+    }
+    case "uint64": {
       kind = "u64";
       elemSize = 8;
       break;
-    case "uint32":
+    }
+    case "uint32": {
       kind = "u32";
       elemSize = 4;
       break;
-    case "uint16":
+    }
+    case "uint16": {
       kind = "u16";
       elemSize = 2;
       break;
-    case "uint8":
+    }
+    case "uint8": {
       kind = "u8";
       elemSize = 1;
       break;
-    case "bool":
+    }
+    case "bool": {
       kind = "bool";
       elemSize = 1;
       break;
+    }
     default: {
       // string / object → fixed-length UTF-8
       kind = "str";
@@ -235,10 +264,14 @@ function inferColInfo(df: DataFrame, name: string): ColInfo {
       for (const v of vals) {
         const s = v == null ? "" : String(v);
         const len = enc.encode(s).length;
-        if (len > maxStrLen) maxStrLen = len;
+        if (len > maxStrLen) {
+          maxStrLen = len;
+        }
       }
       // Ensure at least 1 byte so element size >= 1
-      if (maxStrLen === 0) maxStrLen = 1;
+      if (maxStrLen === 0) {
+        maxStrLen = 1;
+      }
       elemSize = maxStrLen;
       break;
     }
@@ -261,9 +294,13 @@ function buildHeapData(names: readonly string[]): Uint8Array {
   }
   let total = parts.reduce((s, p) => s + p.length, 0);
   // Pad to 8-byte boundary (minimum 8)
-  if (total < 8) total = 8;
+  if (total < 8) {
+    total = 8;
+  }
   const rem = total % 8;
-  if (rem !== 0) total += 8 - rem;
+  if (rem !== 0) {
+    total += 8 - rem;
+  }
   const out = new Uint8Array(total);
   let off = 0;
   for (const p of parts) {
@@ -279,10 +316,14 @@ function heapOffset(heapData: Uint8Array, name: string): bigint {
   const target = enc.encode(name);
   outer: for (let i = 0; i < heapData.length - target.length; i++) {
     for (let j = 0; j < target.length; j++) {
-      if (heapData[i + j] !== target[j]) continue outer;
+      if (heapData[i + j] !== target[j]) {
+        continue outer;
+      }
     }
     // Check null terminator after match
-    if (heapData[i + target.length] === 0) return BigInt(i);
+    if (heapData[i + target.length] === 0) {
+      return BigInt(i);
+    }
   }
   return 0n;
 }
@@ -304,12 +345,19 @@ function writeSuperblock(
   w.bytes(HDF5_SIG);
   // Superblock version = 0 (1), free-space version = 0 (1),
   // root-group-entry version = 0 (1), reserved (1)
-  w.u8(0); w.u8(0); w.u8(0); w.u8(0);
+  w.u8(0);
+  w.u8(0);
+  w.u8(0);
+  w.u8(0);
   // Shared-header-msg version = 0 (1), size-of-offsets = 8 (1),
   // size-of-lengths = 8 (1), reserved (1)
-  w.u8(0); w.u8(8); w.u8(8); w.u8(0);
+  w.u8(0);
+  w.u8(8);
+  w.u8(8);
+  w.u8(0);
   // Group leaf K (2), group internal K (2)
-  w.u16(K); w.u16(16);
+  w.u16(K);
+  w.u16(16);
   // File consistency flags (4)
   w.u32(0);
   // Base address (8)
@@ -355,7 +403,9 @@ function writeGroupObjHdr(w: BufWriter, btreeAddr: bigint, heapAddr: bigint): nu
   w.u16(MSG_SYMBOL_TABLE);
   w.u16(16); // message data size
   w.u8(0); // flags
-  w.u8(0); w.u8(0); w.u8(0); // reserved
+  w.u8(0);
+  w.u8(0);
+  w.u8(0); // reserved
   // Message data: btree_addr (8), heap_addr (8)
   w.u64(btreeAddr);
   w.u64(heapAddr);
@@ -371,9 +421,14 @@ function writeGroupObjHdr(w: BufWriter, btreeAddr: bigint, heapAddr: bigint): nu
 function writeLocalHeap(w: BufWriter, heapData: Uint8Array, heapDataAddr: bigint): void {
   // Local Heap header (32 bytes):
   // signature "HEAP" (4), version (1), reserved (3), data_size (8), free_list (8), data_addr (8)
-  w.u8(0x48); w.u8(0x45); w.u8(0x41); w.u8(0x50); // "HEAP"
+  w.u8(0x48);
+  w.u8(0x45);
+  w.u8(0x41);
+  w.u8(0x50); // "HEAP"
   w.u8(0); // version
-  w.u8(0); w.u8(0); w.u8(0); // reserved
+  w.u8(0);
+  w.u8(0);
+  w.u8(0); // reserved
   w.u64(BigInt(heapData.length)); // data segment size
   w.u64(UNDEF); // free list = UNDEF (no free space)
   w.u64(heapDataAddr); // address of data segment
@@ -392,7 +447,10 @@ function writeLocalHeapData(w: BufWriter, heapData: Uint8Array): void {
 function writeBtreeLeaf(w: BufWriter, snodAddrs: readonly bigint[], keys: readonly bigint[]): void {
   // "TREE" signature (4), node type = 0 (1), node level = 0 (1),
   // number of entries (2), left sibling (8), right sibling (8)
-  w.u8(0x54); w.u8(0x52); w.u8(0x45); w.u8(0x45); // "TREE"
+  w.u8(0x54);
+  w.u8(0x52);
+  w.u8(0x45);
+  w.u8(0x45); // "TREE"
   w.u8(0); // node type = 0 (group)
   w.u8(0); // node level = 0 (leaf)
   w.u16(snodAddrs.length); // number of active entries
@@ -414,7 +472,10 @@ function writeBtreeLeaf(w: BufWriter, snodAddrs: readonly bigint[], keys: readon
  */
 function writeSnod(w: BufWriter, entries: readonly SnodEntry[]): void {
   // "SNOD" signature (4), version (1), reserved (1), num_entries (2)
-  w.u8(0x53); w.u8(0x4e); w.u8(0x4f); w.u8(0x44); // "SNOD"
+  w.u8(0x53);
+  w.u8(0x4e);
+  w.u8(0x4f);
+  w.u8(0x44); // "SNOD"
   w.u8(1); // version = 1
   w.u8(0); // reserved
   w.u16(entries.length); // number of active entries
@@ -423,7 +484,10 @@ function writeSnod(w: BufWriter, entries: readonly SnodEntry[]): void {
   for (let i = 0; i < SNOD_ENTRIES; i++) {
     if (i < entries.length) {
       const e = entries[i];
-      if (e === undefined) { w.zeros(40); continue; }
+      if (e === undefined) {
+        w.zeros(40);
+        continue;
+      }
       w.u64(e.nameOff); // link name offset in heap (8)
       w.u64(e.oHdrAddr); // object header address (8)
       w.u32(e.cacheType); // cache type (4)
@@ -452,17 +516,24 @@ function writeDatatypeData(w: BufWriter, info: ColInfo): number {
     // Class 1 (float), version 1: 24 bytes
     // Byte 0: (1<<4)|1 = 0x11
     // Byte 1: 0x20 = IEEE implied MSB normalization, little-endian
-    w.u8(0x11); w.u8(0x20); w.u8(0x00); w.u8(0x00);
+    w.u8(0x11);
+    w.u8(0x20);
+    w.u8(0x00);
+    w.u8(0x00);
     w.u32(info.elemSize); // element size
     if (kind === "f64") {
       // IEEE 754 double: exponent at bit 52 (11 bits), mantissa at bit 0 (52 bits), bias=1023
-      w.u16(52); w.u16(0); // exponent_offset=52, mantissa_offset=0
-      w.u8(11); w.u8(52); // exponent_bits=11, mantissa_bits=52
+      w.u16(52);
+      w.u16(0); // exponent_offset=52, mantissa_offset=0
+      w.u8(11);
+      w.u8(52); // exponent_bits=11, mantissa_bits=52
       w.u32(1023); // exponent bias
     } else {
       // IEEE 754 single: exponent at bit 23 (8 bits), mantissa at bit 0 (23 bits), bias=127
-      w.u16(23); w.u16(0); // exponent_offset=23, mantissa_offset=0
-      w.u8(8); w.u8(23); // exponent_bits=8, mantissa_bits=23
+      w.u16(23);
+      w.u16(0); // exponent_offset=23, mantissa_offset=0
+      w.u8(8);
+      w.u8(23); // exponent_bits=8, mantissa_bits=23
       w.u32(127); // exponent bias
     }
     w.zeros(6); // padding to 24 bytes (8 header + 10 props + 6 pad = 24)
@@ -473,7 +544,10 @@ function writeDatatypeData(w: BufWriter, info: ColInfo): number {
     // Class 5 (string), version 1: 8 bytes
     // Byte 0: (1<<4)|5 = 0x15
     // Byte 1: padding=1 (null-padded) in bits 0-3, charset=1 (UTF-8) in bits 4-7 → 0x11
-    w.u8(0x15); w.u8(0x11); w.u8(0x00); w.u8(0x00);
+    w.u8(0x15);
+    w.u8(0x11);
+    w.u8(0x00);
+    w.u8(0x00);
     w.u32(info.elemSize); // element size = max string length
     return 8;
   }
@@ -483,7 +557,10 @@ function writeDatatypeData(w: BufWriter, info: ColInfo): number {
   const signed = kind === "i64" || kind === "i32" || kind === "i16" || kind === "i8";
   // Byte 1: bit6=signed, bit0=LE → 0x40 for signed, 0x00 for unsigned
   const bf0 = signed ? 0x40 : 0x00;
-  w.u8(0x10); w.u8(bf0); w.u8(0x00); w.u8(0x00);
+  w.u8(0x10);
+  w.u8(bf0);
+  w.u8(0x00);
+  w.u8(0x00);
   w.u32(info.elemSize); // element size in bytes
   // Properties: bit_offset (2 bytes = 0), num_bits (2 bytes = elemSize*8)
   w.u16(0); // bit offset = 0
@@ -493,12 +570,7 @@ function writeDatatypeData(w: BufWriter, info: ColInfo): number {
 }
 
 /** Write an HDF5 v1 Object Header for a dataset column. */
-function writeDatasetObjHdr(
-  w: BufWriter,
-  info: ColInfo,
-  nRows: number,
-  dataAddr: bigint,
-): void {
+function writeDatasetObjHdr(w: BufWriter, info: ColInfo, nRows: number, dataAddr: bigint): void {
   // Compute type data size
   const tempW = new BufWriter(64);
   const typDataSize = writeDatatypeData(tempW, info);
@@ -509,10 +581,11 @@ function writeDatasetObjHdr(
   // 1. Datatype message: 8 + typDataSize bytes
   // 2. Dataspace message: 8 + 24 = 32 bytes
   // 3. Data Layout message: 8 + 24 = 32 bytes
-  const hdrDataSize = (8 + typDataSize) + 32 + 32;
+  const hdrDataSize = 8 + typDataSize + 32 + 32;
 
   // Object Header Prefix (16 bytes):
-  w.u8(1); w.u8(0); // version, reserved
+  w.u8(1);
+  w.u8(0); // version, reserved
   w.u16(3); // 3 messages
   w.u32(1); // ref count
   w.u32(hdrDataSize); // header data size
@@ -522,7 +595,9 @@ function writeDatasetObjHdr(
   w.u16(MSG_DATATYPE);
   w.u16(typDataSize); // message data size
   w.u8(1); // flags: "constant" (bit 0)
-  w.u8(0); w.u8(0); w.u8(0); // reserved
+  w.u8(0);
+  w.u8(0);
+  w.u8(0); // reserved
   writeDatatypeData(w, info);
 
   // --- Dataspace message (Simple, 1D, with max dims) ---
@@ -530,7 +605,9 @@ function writeDatasetObjHdr(
   w.u16(MSG_DATASPACE);
   w.u16(24); // message data size
   w.u8(0); // flags
-  w.u8(0); w.u8(0); w.u8(0); // reserved
+  w.u8(0);
+  w.u8(0);
+  w.u8(0); // reserved
   w.u8(1); // version = 1
   w.u8(1); // rank = 1 (1D)
   w.u8(1); // flags = 0x01 (max dimensions present)
@@ -544,7 +621,9 @@ function writeDatasetObjHdr(
   w.u16(MSG_DATA_LAYOUT);
   w.u16(24); // message data size
   w.u8(0); // flags
-  w.u8(0); w.u8(0); w.u8(0); // reserved
+  w.u8(0);
+  w.u8(0);
+  w.u8(0); // reserved
   w.u8(1); // version = 1
   w.u8(1); // layout class = 1 (contiguous)
   w.zeros(6); // reserved
@@ -560,12 +639,13 @@ function encodeColData(w: BufWriter, series: { values: readonly unknown[] }, inf
   for (const raw of vals) {
     switch (info.kind) {
       case "f64": {
-        const v = raw == null || (typeof raw === "number" && isNaN(raw)) ? NaN : Number(raw);
+        const v =
+          raw == null || (typeof raw === "number" && Number.isNaN(raw)) ? Number.NaN : Number(raw);
         w.f64(v);
         break;
       }
       case "f32": {
-        const v = raw == null ? NaN : Number(raw);
+        const v = raw == null ? Number.NaN : Number(raw);
         w.f32(v);
         break;
       }
@@ -575,16 +655,17 @@ function encodeColData(w: BufWriter, series: { values: readonly unknown[] }, inf
         break;
       }
       case "i32": {
-        w.u32(raw == null ? 0 : (Number(raw) | 0));
+        w.u32(raw == null ? 0 : Number(raw) | 0);
         break;
       }
       case "i16": {
-        const v = raw == null ? 0 : (Number(raw) | 0);
-        w.u8(v & 0xff); w.u8((v >> 8) & 0xff);
+        const v = raw == null ? 0 : Number(raw) | 0;
+        w.u8(v & 0xff);
+        w.u8((v >> 8) & 0xff);
         break;
       }
       case "i8": {
-        w.u8(raw == null ? 0 : (Number(raw) | 0));
+        w.u8(raw == null ? 0 : Number(raw) | 0);
         break;
       }
       case "u64": {
@@ -598,7 +679,8 @@ function encodeColData(w: BufWriter, series: { values: readonly unknown[] }, inf
       }
       case "u16": {
         const v = raw == null ? 0 : Math.abs(Number(raw)) & 0xffff;
-        w.u8(v & 0xff); w.u8((v >> 8) & 0xff);
+        w.u8(v & 0xff);
+        w.u8((v >> 8) & 0xff);
         break;
       }
       case "u8": {
@@ -641,7 +723,9 @@ export function toHdf(df: DataFrame, options?: ToHdfOptions): Uint8Array {
   const writeIndex = options?.writeIndex ?? false;
 
   // Build column list
-  const colNames: string[] = writeIndex ? ["__index__", ...df.columns.values] : [...df.columns.values];
+  const colNames: string[] = writeIndex
+    ? ["__index__", ...df.columns.values]
+    : [...df.columns.values];
   const nCols = colNames.length;
   const nRows = df.shape[0];
 
@@ -696,17 +780,27 @@ export function toHdf(df: DataFrame, options?: ToHdfOptions): Uint8Array {
   let cur = 0;
 
   cur += 96; // superblock
-  const offRootObjHdr = cur; cur += 40;
-  const offRootHeapHdr = cur; cur += 32;
-  const offRootHeapData = cur; cur += rootHeapData.length;
-  const offRootBtree = cur; cur += rootBtreeSize;
-  const offRootSnod = cur; cur += snodSize;
+  const offRootObjHdr = cur;
+  cur += 40;
+  const offRootHeapHdr = cur;
+  cur += 32;
+  const offRootHeapData = cur;
+  cur += rootHeapData.length;
+  const offRootBtree = cur;
+  cur += rootBtreeSize;
+  const offRootSnod = cur;
+  cur += snodSize;
 
-  const offKeyObjHdr = cur; cur += 40;
-  const offKeyHeapHdr = cur; cur += 32;
-  const offKeyHeapData = cur; cur += keyHeapData.length;
-  const offKeyBtree = cur; cur += keyBtreeSize;
-  const offKeySnods = cur; cur += nSnods * snodSize;
+  const offKeyObjHdr = cur;
+  cur += 40;
+  const offKeyHeapHdr = cur;
+  cur += 32;
+  const offKeyHeapData = cur;
+  cur += keyHeapData.length;
+  const offKeyBtree = cur;
+  cur += keyBtreeSize;
+  const offKeySnods = cur;
+  cur += nSnods * snodSize;
 
   const offColObjHdrs: number[] = [];
   const offColData: number[] = [];
@@ -740,11 +834,7 @@ export function toHdf(df: DataFrame, options?: ToHdfOptions): Uint8Array {
   writeLocalHeapData(w, rootHeapData);
 
   // Root B-tree leaf node (1 SNOD pointing to key group entries)
-  writeBtreeLeaf(
-    w,
-    [BigInt(offRootSnod)],
-    [0n, BigInt(rootHeapData.length)],
-  );
+  writeBtreeLeaf(w, [BigInt(offRootSnod)], [0n, BigInt(rootHeapData.length)]);
 
   // Root SNOD (1 active entry: the key group)
   const keyHeapOffset = heapOffset(rootHeapData, key);
@@ -777,7 +867,9 @@ export function toHdf(df: DataFrame, options?: ToHdfOptions): Uint8Array {
   }
   btreeKeys.push(BigInt(keyHeapData.length));
 
-  const snodAddresses = Array.from({ length: nSnods }, (_, i) => BigInt(offKeySnods + i * snodSize));
+  const snodAddresses = Array.from({ length: nSnods }, (_, i) =>
+    BigInt(offKeySnods + i * snodSize),
+  );
   writeBtreeLeaf(w, snodAddresses, btreeKeys);
 
   // Key SNODs (sorted by name within each SNOD for B-tree correctness)
@@ -789,7 +881,9 @@ export function toHdf(df: DataFrame, options?: ToHdfOptions): Uint8Array {
     const entries: SnodEntry[] = [];
     for (let j = sliceStart; j < sliceEnd; j++) {
       const name = sortedColNames[j];
-      if (name === undefined) break;
+      if (name === undefined) {
+        break;
+      }
       const origIdx = nameToIdx.get(name) ?? 0;
       entries.push({
         nameOff: heapOffset(keyHeapData, name),
@@ -805,7 +899,9 @@ export function toHdf(df: DataFrame, options?: ToHdfOptions): Uint8Array {
   // Column dataset object headers and data
   for (let i = 0; i < nCols; i++) {
     const ci = colInfos[i];
-    if (ci === undefined) continue;
+    if (ci === undefined) {
+      continue;
+    }
     const dataAddr = offColData[i] ?? 0;
     writeDatasetObjHdr(w, ci, nRows, BigInt(dataAddr));
 
@@ -863,7 +959,9 @@ class HdfReader {
   /** Read a null-terminated string from the given offset. */
   private readCStr(off: number): string {
     let end = off;
-    while (end < this.raw.length && this.raw[end] !== 0) end++;
+    while (end < this.raw.length && this.raw[end] !== 0) {
+      end++;
+    }
     return new TextDecoder().decode(this.raw.subarray(off, end));
   }
 
@@ -886,7 +984,9 @@ class HdfReader {
     // offset_size is at byte 13
     const offsetSize = this.r8(13);
     if (offsetSize !== 8) {
-      throw new Error(`readHdf: unsupported offset size ${offsetSize} (only 8-byte offsets supported)`);
+      throw new Error(
+        `readHdf: unsupported offset size ${offsetSize} (only 8-byte offsets supported)`,
+      );
     }
     // Root group symbol table entry starts at offset 56:
     // link_name_off (8), obj_hdr_addr (8), cache_type (4), reserved (4),
@@ -904,11 +1004,22 @@ class HdfReader {
     _oHdrAddr: bigint,
     btreeAddr: bigint,
     heapAddr: bigint,
-  ): Array<{ name: string; oHdrAddr: bigint; isGroup: boolean; btreeAddr: bigint; heapAddr: bigint }> {
+  ): Array<{
+    name: string;
+    oHdrAddr: bigint;
+    isGroup: boolean;
+    btreeAddr: bigint;
+    heapAddr: bigint;
+  }> {
     // Read heap data block address and size
     const heapOff = Number(heapAddr);
     // "HEAP" signature check
-    if (this.r8(heapOff) !== 0x48 || this.r8(heapOff + 1) !== 0x45 || this.r8(heapOff + 2) !== 0x41 || this.r8(heapOff + 3) !== 0x50) {
+    if (
+      this.r8(heapOff) !== 0x48 ||
+      this.r8(heapOff + 1) !== 0x45 ||
+      this.r8(heapOff + 2) !== 0x41 ||
+      this.r8(heapOff + 3) !== 0x50
+    ) {
       throw new Error("readHdf: invalid local heap signature");
     }
     const heapDataAddr = Number(this.r64(heapOff + 24));
@@ -917,11 +1028,22 @@ class HdfReader {
     const snodAddrs = this.walkBtree(btreeAddr);
 
     // Read each SNOD
-    const result: Array<{ name: string; oHdrAddr: bigint; isGroup: boolean; btreeAddr: bigint; heapAddr: bigint }> = [];
+    const result: Array<{
+      name: string;
+      oHdrAddr: bigint;
+      isGroup: boolean;
+      btreeAddr: bigint;
+      heapAddr: bigint;
+    }> = [];
     for (const snodAddr of snodAddrs) {
       const off = Number(snodAddr);
       // Validate "SNOD"
-      if (this.r8(off) !== 0x53 || this.r8(off + 1) !== 0x4e || this.r8(off + 2) !== 0x4f || this.r8(off + 3) !== 0x44) {
+      if (
+        this.r8(off) !== 0x53 ||
+        this.r8(off + 1) !== 0x4e ||
+        this.r8(off + 2) !== 0x4f ||
+        this.r8(off + 3) !== 0x44
+      ) {
         throw new Error("readHdf: invalid SNOD signature");
       }
       const nEntries = this.r16(off + 6);
@@ -937,7 +1059,13 @@ class HdfReader {
           childBtree = this.r64(entryOff + 24);
           childHeap = this.r64(entryOff + 32);
         }
-        result.push({ name, oHdrAddr, isGroup: cacheType === 1, btreeAddr: childBtree, heapAddr: childHeap });
+        result.push({
+          name,
+          oHdrAddr,
+          isGroup: cacheType === 1,
+          btreeAddr: childBtree,
+          heapAddr: childHeap,
+        });
       }
     }
     return result;
@@ -947,7 +1075,12 @@ class HdfReader {
   private walkBtree(btreeAddr: bigint): bigint[] {
     const off = Number(btreeAddr);
     // Validate "TREE"
-    if (this.r8(off) !== 0x54 || this.r8(off + 1) !== 0x52 || this.r8(off + 2) !== 0x45 || this.r8(off + 3) !== 0x45) {
+    if (
+      this.r8(off) !== 0x54 ||
+      this.r8(off + 1) !== 0x52 ||
+      this.r8(off + 2) !== 0x45 ||
+      this.r8(off + 3) !== 0x45
+    ) {
       throw new Error("readHdf: invalid B-tree signature");
     }
     const nodeLevel = this.r8(off + 5);
@@ -964,29 +1097,32 @@ class HdfReader {
         snods.push(snodAddr);
       }
       return snods;
-    } else {
-      // Internal node: pointers are child B-tree nodes
-      const result: bigint[] = [];
-      for (let i = 0; i < nEntries; i++) {
-        const childAddr = this.r64(off + 24 + i * 16 + 8);
-        result.push(...this.walkBtree(childAddr));
-      }
-      return result;
     }
+    // Internal node: pointers are child B-tree nodes
+    const result: bigint[] = [];
+    for (let i = 0; i < nEntries; i++) {
+      const childAddr = this.r64(off + 24 + i * 16 + 8);
+      result.push(...this.walkBtree(childAddr));
+    }
+    return result;
   }
 
   /** Parse an object header and extract the Symbol Table message (for groups). */
   parseGroupSymbolTable(oHdrAddr: bigint): { btreeAddr: bigint; heapAddr: bigint } {
     const off = Number(oHdrAddr);
     const ver = this.r8(off);
-    if (ver !== 1) throw new Error(`readHdf: unsupported object header version ${ver}`);
+    if (ver !== 1) {
+      throw new Error(`readHdf: unsupported object header version ${ver}`);
+    }
     const nMsgs = this.r16(off + 2);
     const hdrDataSize = this.r32(off + 8);
     let msgOff = off + 16;
     const msgEnd = off + 16 + hdrDataSize;
 
     for (let m = 0; m < nMsgs; m++) {
-      if (msgOff + 8 > msgEnd) break;
+      if (msgOff + 8 > msgEnd) {
+        break;
+      }
       const msgType = this.r16(msgOff);
       const msgSize = this.r16(msgOff + 2);
       if (msgType === MSG_SYMBOL_TABLE) {
@@ -1008,7 +1144,9 @@ class HdfReader {
   } {
     const off = Number(oHdrAddr);
     const ver = this.r8(off);
-    if (ver !== 1) throw new Error(`readHdf: unsupported object header version ${ver}`);
+    if (ver !== 1) {
+      throw new Error(`readHdf: unsupported object header version ${ver}`);
+    }
     const nMsgs = this.r16(off + 2);
     const hdrDataSize = this.r32(off + 8);
     let msgOff = off + 16;
@@ -1020,7 +1158,9 @@ class HdfReader {
     let elemSize = 8;
 
     for (let m = 0; m < nMsgs; m++) {
-      if (msgOff + 8 > msgEnd) break;
+      if (msgOff + 8 > msgEnd) {
+        break;
+      }
       const msgType = this.r16(msgOff);
       const msgSize = this.r16(msgOff + 2);
       const dataOff = msgOff + 8;
@@ -1044,10 +1184,15 @@ class HdfReader {
           kind = "str";
         } else if (dtClass === DT_FIXED_PT) {
           const signed = (bf0 & 0x40) !== 0;
-          if (elemSize === 8) kind = signed ? "i64" : "u64";
-          else if (elemSize === 4) kind = signed ? "i32" : "u32";
-          else if (elemSize === 2) kind = signed ? "i16" : "u16";
-          else kind = signed ? "i8" : "u8";
+          if (elemSize === 8) {
+            kind = signed ? "i64" : "u64";
+          } else if (elemSize === 4) {
+            kind = signed ? "i32" : "u32";
+          } else if (elemSize === 2) {
+            kind = signed ? "i16" : "u16";
+          } else {
+            kind = signed ? "i8" : "u8";
+          }
         }
       } else if (msgType === MSG_DATA_LAYOUT) {
         // Layout: version(1), class(1), reserved(6), addr(8), size(8)
@@ -1111,7 +1256,9 @@ class HdfReader {
         case "str": {
           // Fixed-length null-padded string
           let end = p + elemSize;
-          while (end > p && this.raw[end - 1] === 0) end--;
+          while (end > p && this.raw[end - 1] === 0) {
+            end--;
+          }
           vals.push(dec.decode(this.raw.subarray(p, end)));
           break;
         }
@@ -1156,7 +1303,9 @@ export function readHdf(data: Uint8Array, options?: ReadHdfOptions): DataFrame {
   }
 
   // Read key group symbol table to get its B-tree and heap
-  const { btreeAddr: keyBtreeAddr, heapAddr: keyHeapAddr } = reader.parseGroupSymbolTable(keyEntry.oHdrAddr);
+  const { btreeAddr: keyBtreeAddr, heapAddr: keyHeapAddr } = reader.parseGroupSymbolTable(
+    keyEntry.oHdrAddr,
+  );
 
   // Read key group children — each is a column dataset
   const colEntries = reader.readGroupChildren(keyEntry.oHdrAddr, keyBtreeAddr, keyHeapAddr);
@@ -1164,8 +1313,12 @@ export function readHdf(data: Uint8Array, options?: ReadHdfOptions): DataFrame {
   // Build columns
   const columns: Record<string, readonly Scalar[]> = {};
   for (const entry of colEntries) {
-    if (entry.isGroup) continue; // skip sub-groups
-    if (usecols !== null && !usecols.includes(entry.name)) continue;
+    if (entry.isGroup) {
+      continue; // skip sub-groups
+    }
+    if (usecols !== null && !usecols.includes(entry.name)) {
+      continue;
+    }
 
     const ds = reader.parseDataset(entry.oHdrAddr);
     const vals = reader.readDatasetValues(ds.dataAddr, ds.nElements, ds.kind, ds.elemSize);

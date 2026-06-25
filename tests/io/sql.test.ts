@@ -155,11 +155,17 @@ function parseValueList(raw: string): SqlValue[] {
   let i = 0;
 
   while (i < raw.length) {
-    while (i < raw.length && raw[i] === " ") i++;
-    if (i >= raw.length) break;
+    while (i < raw.length && raw[i] === " ") {
+      i++;
+    }
+    if (i >= raw.length) {
+      break;
+    }
 
     const ch = raw[i];
-    if (ch === undefined) break;
+    if (ch === undefined) {
+      break;
+    }
 
     if (ch === "N" && raw.slice(i, i + 4) === "NULL") {
       values.push(null);
@@ -209,8 +215,12 @@ function parseValueList(raw: string): SqlValue[] {
       values.push(Number.isNaN(n) ? numStr : n);
     }
 
-    while (i < raw.length && raw[i] === " ") i++;
-    if (raw[i] === ",") i++;
+    while (i < raw.length && raw[i] === " ") {
+      i++;
+    }
+    if (raw[i] === ",") {
+      i++;
+    }
   }
 
   return values;
@@ -272,7 +282,7 @@ describe("readSqlQuery — basic", () => {
   });
 
   it("returns empty DataFrame for empty result", () => {
-    const db = new MockAdapter();
+    const _db = new MockAdapter();
     const result: SqlResult = { columns: ["a", "b"], rows: [] };
     const df = readSqlQuery("SELECT a, b FROM empty_table", {
       query() {
@@ -361,7 +371,7 @@ describe("toSql — basic", () => {
     toSql(df, "t", db, { index: true });
     const rows = db.getRows("t");
     expect(rows[0]).toHaveProperty("index");
-    expect(rows[0]!["index"]).toBe(0);
+    expect(rows[0]?.["index"]).toBe(0);
   });
 
   it("omits index column when index: false", () => {
@@ -394,7 +404,7 @@ describe("toSql — basic", () => {
     toSql(df, "t", db, { ifExists: "replace", index: false });
     const rows = db.getRows("t");
     expect(rows).toHaveLength(1);
-    expect(rows[0]!["x"]).toBe(99);
+    expect(rows[0]?.["x"]).toBe(99);
   });
 
   it("ifExists: append adds to existing data", () => {
@@ -521,7 +531,9 @@ describe("readSqlQuery — property tests", () => {
         fc.integer({ min: 0, max: 20 }),
         (cols, rowCount) => {
           const uniqueCols = [...new Set(cols)];
-          if (uniqueCols.length === 0) return;
+          if (uniqueCols.length === 0) {
+            return;
+          }
           const rows: SqlRow[] = Array.from({ length: rowCount }, () => {
             const row: SqlRow = {};
             for (const c of uniqueCols) {

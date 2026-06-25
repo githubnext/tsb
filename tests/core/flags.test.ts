@@ -133,15 +133,15 @@ describe("Flags", () => {
 
   test("raiseOnDuplicates() throws when flag = false and index has dups", () => {
     const df = makeDFDupIndex();
-    const f = new Flags(df);
+    const _f = new Flags(df);
     // Force-set to false without triggering validator via setter (use fresh object)
     const f2 = new Flags(df, { allowsDuplicateLabels: true });
     f2.allowsDuplicateLabels = true; // reset to default to avoid throws from prev test
     // Now set via constructor with false; this triggers validation (no dups in df)
     // So use a dup-index df here
-    const f3 = getFlags(df);
+    const _f3 = getFlags(df);
     // Manually set the flag state through a fresh Flags
-    const freshFlags = new Flags(df);
+    const _freshFlags = new Flags(df);
     // To avoid the setter validation (which would throw since df has dups),
     // we test raiseOnDuplicates() after bypassing: create a dup-free df, set flag,
     // then simulate calling raiseOnDuplicates() on a dup df

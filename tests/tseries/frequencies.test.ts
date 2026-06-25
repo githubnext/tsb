@@ -8,27 +8,27 @@
 
 import { describe, expect, test } from "bun:test";
 import fc from "fast-check";
-import { toOffset, inferFreq, FREQ_ALIASES } from "../../src/tseries/frequencies.ts";
 import {
+  BusinessDay,
   Day,
   Hour,
-  Minute,
-  Second,
   Milli,
-  Week,
-  MonthEnd,
+  Minute,
   MonthBegin,
-  YearEnd,
+  MonthEnd,
+  Second,
+  Week,
   YearBegin,
-  BusinessDay,
+  YearEnd,
 } from "../../src/core/date_offset.ts";
+import { FREQ_ALIASES, inferFreq, toOffset } from "../../src/tseries/frequencies.ts";
 import {
-  QuarterEnd,
-  QuarterBegin,
-  BMonthEnd,
   BMonthBegin,
-  BYearEnd,
+  BMonthEnd,
   BYearBegin,
+  BYearEnd,
+  QuarterBegin,
+  QuarterEnd,
 } from "../../src/tseries/offsets.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -277,12 +277,7 @@ describe("inferFreq", () => {
   });
 
   test("year-end frequency", () => {
-    const dates = [
-      utc(2021, 12, 31),
-      utc(2022, 12, 31),
-      utc(2023, 12, 31),
-      utc(2024, 12, 31),
-    ];
+    const dates = [utc(2021, 12, 31), utc(2022, 12, 31), utc(2023, 12, 31), utc(2024, 12, 31)];
     expect(inferFreq(dates)).toBe("YE");
   });
 

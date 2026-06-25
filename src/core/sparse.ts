@@ -456,13 +456,7 @@ export class SparseArray {
         newValues[k] = v * scalar;
       }
     }
-    return new SparseArray(
-      this._length,
-      newIndices,
-      newValues,
-      newFill,
-      this._dtype.subtype,
-    );
+    return new SparseArray(this._length, newIndices, newValues, newFill, this._dtype.subtype);
   }
 
   // ─── aggregations ──────────────────────────────────────────────────────────
@@ -541,10 +535,8 @@ export class SparseArray {
       result = this._fillValue;
     }
     for (const v of this._values) {
-      if (!Number.isNaN(v)) {
-        if (Number.isNaN(result) || v > result) {
-          result = v;
-        }
+      if (!Number.isNaN(v) && (Number.isNaN(result) || v > result)) {
+        result = v;
       }
     }
     return result;
@@ -566,10 +558,8 @@ export class SparseArray {
       result = this._fillValue;
     }
     for (const v of this._values) {
-      if (!Number.isNaN(v)) {
-        if (Number.isNaN(result) || v < result) {
-          result = v;
-        }
+      if (!Number.isNaN(v) && (Number.isNaN(result) || v < result)) {
+        result = v;
       }
     }
     return result;

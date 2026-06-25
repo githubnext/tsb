@@ -66,9 +66,7 @@ export class TimedeltaArray {
    * ]);
    * ```
    */
-  static from(
-    values: Iterable<Timedelta | number | string | null | undefined>,
-  ): TimedeltaArray {
+  static from(values: Iterable<Timedelta | number | string | null | undefined>): TimedeltaArray {
     const data: Timedelta[] = [];
     const mask: boolean[] = [];
     for (const v of values) {
@@ -191,9 +189,7 @@ export class TimedeltaArray {
       return TimedeltaArray._fromRaw(data, this._mask.slice());
     }
     if (other.size !== this.size) {
-      throw new RangeError(
-        `TimedeltaArray: operand size mismatch (${this.size} vs ${other.size})`,
-      );
+      throw new RangeError(`TimedeltaArray: operand size mismatch (${this.size} vs ${other.size})`);
     }
     const data: Timedelta[] = [];
     const mask: boolean[] = [];
@@ -214,15 +210,11 @@ export class TimedeltaArray {
    */
   sub(other: TimedeltaArray | Timedelta): TimedeltaArray {
     if (other instanceof Timedelta) {
-      const data = this._data.map((v, i) =>
-        this._mask[i] ? v : v.sub(other),
-      );
+      const data = this._data.map((v, i) => (this._mask[i] ? v : v.sub(other)));
       return TimedeltaArray._fromRaw(data, this._mask.slice());
     }
     if (other.size !== this.size) {
-      throw new RangeError(
-        `TimedeltaArray: operand size mismatch (${this.size} vs ${other.size})`,
-      );
+      throw new RangeError(`TimedeltaArray: operand size mismatch (${this.size} vs ${other.size})`);
     }
     const data: Timedelta[] = [];
     const mask: boolean[] = [];
@@ -240,9 +232,7 @@ export class TimedeltaArray {
 
   /** Multiply every element by a scalar.  NA propagates. */
   mul(factor: number): TimedeltaArray {
-    const data = this._data.map((v, i) =>
-      this._mask[i] ? v : v.mul(factor),
-    );
+    const data = this._data.map((v, i) => (this._mask[i] ? v : v.mul(factor)));
     return TimedeltaArray._fromRaw(data, this._mask.slice());
   }
 

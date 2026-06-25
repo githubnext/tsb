@@ -84,7 +84,7 @@ describe("float64 columns", () => {
   });
 
   it("preserves NaN", () => {
-    const df = DataFrame.fromColumns({ v: [1.0, NaN, 3.0] });
+    const df = DataFrame.fromColumns({ v: [1.0, Number.NaN, 3.0] });
     const buf = toHdf(df);
     const out = readHdf(buf);
     const vals = colVals(out, "v");
@@ -94,10 +94,10 @@ describe("float64 columns", () => {
   });
 
   it("preserves Infinity", () => {
-    const df = DataFrame.fromColumns({ v: [Infinity, -Infinity] });
+    const df = DataFrame.fromColumns({ v: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY] });
     const out = roundtrip(df);
-    expect(colVals(out, "v")[0]).toBe(Infinity);
-    expect(colVals(out, "v")[1]).toBe(-Infinity);
+    expect(colVals(out, "v")[0]).toBe(Number.POSITIVE_INFINITY);
+    expect(colVals(out, "v")[1]).toBe(Number.NEGATIVE_INFINITY);
   });
 });
 
@@ -250,7 +250,10 @@ describe("property tests", () => {
   it("roundtrips float64 arrays of arbitrary length", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.double({ noNaN: true, noDefaultInfinity: true }), { minLength: 0, maxLength: 50 }),
+        fc.array(fc.double({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 0,
+          maxLength: 50,
+        }),
         (arr) => {
           const df = DataFrame.fromColumns({ v: arr });
           const out = roundtrip(df);

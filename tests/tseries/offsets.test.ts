@@ -14,16 +14,16 @@
 import { describe, expect, test } from "bun:test";
 import fc from "fast-check";
 import {
-  QuarterEnd,
-  QuarterBegin,
-  BMonthEnd,
   BMonthBegin,
-  BYearEnd,
+  BMonthEnd,
   BYearBegin,
+  BYearEnd,
+  BusinessDay,
   // Re-exports
   Day,
   MonthEnd,
-  BusinessDay,
+  QuarterBegin,
+  QuarterEnd,
 } from "../../src/tseries/offsets.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -395,40 +395,31 @@ describe("Re-exports from date_offset", () => {
 describe("property-based: offsets are consistent", () => {
   test("QuarterEnd: rollforward(d).getTime() >= d.getTime() always", () => {
     fc.assert(
-      fc.property(
-        fc.date({ min: new Date("2000-01-01"), max: new Date("2030-12-31") }),
-        (d) => {
-          const qe = new QuarterEnd(1);
-          const rolled = qe.rollforward(d);
-          return rolled.getTime() >= d.getTime();
-        },
-      ),
+      fc.property(fc.date({ min: new Date("2000-01-01"), max: new Date("2030-12-31") }), (d) => {
+        const qe = new QuarterEnd(1);
+        const rolled = qe.rollforward(d);
+        return rolled.getTime() >= d.getTime();
+      }),
     );
   });
 
   test("BMonthEnd: rollforward(d) is always on offset", () => {
     fc.assert(
-      fc.property(
-        fc.date({ min: new Date("2000-01-01"), max: new Date("2030-12-31") }),
-        (d) => {
-          const bme = new BMonthEnd(1);
-          const rolled = bme.rollforward(d);
-          return bme.onOffset(rolled);
-        },
-      ),
+      fc.property(fc.date({ min: new Date("2000-01-01"), max: new Date("2030-12-31") }), (d) => {
+        const bme = new BMonthEnd(1);
+        const rolled = bme.rollforward(d);
+        return bme.onOffset(rolled);
+      }),
     );
   });
 
   test("BMonthBegin: rollforward(d) is always on offset", () => {
     fc.assert(
-      fc.property(
-        fc.date({ min: new Date("2000-01-01"), max: new Date("2030-12-31") }),
-        (d) => {
-          const bmb = new BMonthBegin(1);
-          const rolled = bmb.rollforward(d);
-          return bmb.onOffset(rolled);
-        },
-      ),
+      fc.property(fc.date({ min: new Date("2000-01-01"), max: new Date("2030-12-31") }), (d) => {
+        const bmb = new BMonthBegin(1);
+        const rolled = bmb.rollforward(d);
+        return bmb.onOffset(rolled);
+      }),
     );
   });
 });

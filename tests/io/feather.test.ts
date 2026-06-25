@@ -66,22 +66,24 @@ describe("integer columns", () => {
 
 describe("float columns", () => {
   it("roundtrips float64 values", () => {
-    const df = DataFrame.fromColumns({ f: [1.5, -2.25, 0.0, 3.14159265358979] });
+    const df = DataFrame.fromColumns({ f: [1.5, -2.25, 0.0, Math.PI] });
     const out = roundtrip(df);
     const vals = [...colData(out, "f")] as number[];
     expect(vals[0]).toBeCloseTo(1.5, 10);
     expect(vals[1]).toBeCloseTo(-2.25, 10);
     expect(vals[2]).toBe(0);
-    expect(vals[3]).toBeCloseTo(3.14159265358979, 10);
+    expect(vals[3]).toBeCloseTo(Math.PI, 10);
   });
 
   it("roundtrips NaN and Infinity", () => {
-    const df = DataFrame.fromColumns({ f: [NaN, Infinity, -Infinity] });
+    const df = DataFrame.fromColumns({
+      f: [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
+    });
     const out = roundtrip(df);
     const vals = [...colData(out, "f")] as number[];
     expect(Number.isNaN(vals[0])).toBe(true);
-    expect(vals[1]).toBe(Infinity);
-    expect(vals[2]).toBe(-Infinity);
+    expect(vals[1]).toBe(Number.POSITIVE_INFINITY);
+    expect(vals[2]).toBe(Number.NEGATIVE_INFINITY);
   });
 });
 
@@ -260,14 +262,11 @@ describe("property tests", () => {
 
   it("boolean roundtrip", () => {
     fc.assert(
-      fc.property(
-        fc.array(fc.boolean(), { minLength: 0, maxLength: 100 }),
-        (bools) => {
-          const df = DataFrame.fromColumns({ b: bools });
-          const out = roundtrip(df);
-          expect([...colData(out, "b")]).toEqual(bools);
-        },
-      ),
+      fc.property(fc.array(fc.boolean(), { minLength: 0, maxLength: 100 }), (bools) => {
+        const df = DataFrame.fromColumns({ b: bools });
+        const out = roundtrip(df);
+        expect([...colData(out, "b")]).toEqual(bools);
+      }),
     );
   });
 
