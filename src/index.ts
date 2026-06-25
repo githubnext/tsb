@@ -972,3 +972,7 @@ export type {
   RelativeRiskResult,
   OddsRatioResult,
 } from "./stats/contingency.ts";
+
+// multivariate analysis — mahalanobis, PCA, covMatrix, invertMatrix
+export { mahalanobis, covMatrix, invertMatrix, PCA } from "./stats/multivariate.ts";
+export type { PCAOptions, PCAResult } from "./stats/multivariate.ts";
