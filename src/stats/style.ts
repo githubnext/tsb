@@ -257,7 +257,7 @@ function colormapColor(t: number, cmap: string): string {
     const parts = cmap.split(":");
     return lerpColor(parts[0] ?? "#ffffff", parts[1] ?? "#000000", t);
   }
-  const stops = COLORMAPS[cmap] ?? COLORMAPS.Blues!;
+  const stops = COLORMAPS[cmap] ?? COLORMAPS["Blues"]!;
   // Find surrounding stops
   for (let i = 0; i < stops.length - 1; i++) {
     const [p0, c0] = stops[i]!;
@@ -267,7 +267,7 @@ function colormapColor(t: number, cmap: string): string {
       return lerpColor(c0, c1, local);
     }
   }
-  return stops.at(-1)?.[1];
+  return stops.at(-1)?.[1] ?? "";
 }
 
 /** Relative luminance for WCAG contrast check. */
