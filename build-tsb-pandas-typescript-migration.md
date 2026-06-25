@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-24T19:45:00Z |
-| Iteration Count | 377 |
+| Last Run | 2026-06-25T08:20:00Z |
+| Iteration Count | 378 |
 | Best Metric | 177 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, pending-ci, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted |
+| Recent Statuses | accepted, accepted, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io/stats features; next: multivariate stats (mahalanobis, PCA) or read_orc
+- More io/stats features; next: bootstrap (iteration 377 not committed — retry), or read_orc, or kernel density estimation (KDE)
 
 ---
 
@@ -40,6 +40,8 @@
 
 ---
 
+- **PCA/Mahalanobis**: Jacobi eigendecomposition works for symmetric covariance matrices. Closures in `PCAResult` (transform/inverseTransform) capture frozen state at fit time — clean pattern for fitted models.
+
 ## 🚧 Foreclosed Avenues
 
 - Adding offset/frequency classes to existing files: no metric gain (already exported)
@@ -47,6 +49,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 378 — 2026-06-25 08:20 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28155673662)
+- **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
+- **Change**: Add `src/stats/multivariate.ts` — `mahalanobis()`, `PCA` class, `covMatrix()`, `invertMatrix()`. Jacobi eigendecomposition, n_components as int or variance fraction, whiten support. Tests + playground/multivariate.html.
+- **Metric**: 176 → 177 (Δ+1)
+- **Notes**: Iteration 377 (bootstrap) was marked accepted in state but commit was missing from branch — metric was actually 176. This iteration re-achieves 177 with multivariate module.
 
 ### Iteration 377 — 2026-06-24 19:45 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28123622073)
 - **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
