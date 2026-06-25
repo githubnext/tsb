@@ -548,3 +548,13 @@ export type {
 } from "./contingency.ts";
 export { mahalanobis, covMatrix, invertMatrix, PCA } from "./multivariate.ts";
 export type { PCAOptions, PCAResult } from "./multivariate.ts";
+export { bootstrap, bootstrap1 } from "./bootstrap.ts";
+export type {
+  BootstrapResult,
+  BootstrapOptions,
+  BootstrapMethod,
+  ConfidenceInterval as BootstrapCI,
+  StatFn,
+  StatFn1,
+  StatFn2,
+} from "./bootstrap.ts";

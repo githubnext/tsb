@@ -976,3 +976,15 @@ export type {
 // multivariate analysis — mahalanobis, PCA, covMatrix, invertMatrix
 export { mahalanobis, covMatrix, invertMatrix, PCA } from "./stats/multivariate.ts";
 export type { PCAOptions, PCAResult } from "./stats/multivariate.ts";
+
+// bootstrap — non-parametric confidence intervals
+export { bootstrap, bootstrap1 } from "./stats/bootstrap.ts";
+export type {
+  BootstrapResult,
+  BootstrapOptions,
+  BootstrapMethod,
+  BootstrapCI,
+  StatFn,
+  StatFn1,
+  StatFn2,
+} from "./stats/index.ts";
