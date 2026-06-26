@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-25T13:32:48Z |
-| Iteration Count | 373 |
-| Best Metric | 708 |
+| Last Run | 2026-06-25T20:30:00Z |
+| Iteration Count | 374 |
+| Best Metric | 711 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -70,6 +70,11 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 374 — 2026-06-25 20:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28211440553)
+- **Status**: ✅ Accepted
+- **Change**: Add 3 pairs: dataframe_itertuples (DataFrame.itertuples() row iteration), series_items_iter (Series.items()/iteritems() pairs), nanprod (nanprod() product ignoring NaN vs pd.Series.prod()).
+- **Metric**: 711 (previous best: 708, delta: +3)
 
 ### Iteration 373 — 2026-06-25 13:32 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28173787476)
 - **Status**: ✅ Accepted
