@@ -38,8 +38,14 @@ REQUIRED_SECTIONS = {
     "blocked_stop_condition": ("blocked stop condition", "blocked condition", "blockers"),
 }
 
-PLACEHOLDER_RE = re.compile(
-    r"\b(REPLACE|TODO|TBD|FIXME|YOUR_|WITH_|PLACEHOLDER)\b|\.\.\.",
+PLACEHOLDER_ONLY_RE = re.compile(
+    r"^(?:"
+    r"\.{3,}|"
+    r"(?:(?:todo|tbd|fixme|placeholder)(?::.*)?)|"
+    r"(?:replace(?:\s+(?:me|this|with .+))?)|"
+    r"(?:your_.+)|"
+    r"(?:with_.+)"
+    r")$",
     re.IGNORECASE,
 )
 
@@ -111,11 +117,25 @@ def normalize_heading(text: str) -> str:
 def has_real_content(text: str) -> bool:
     stripped = re.sub(r"<!--.*?-->", "", text or "", flags=re.DOTALL).strip()
     stripped = re.sub(r"```.*?```", "", stripped, flags=re.DOTALL).strip()
-    if len(stripped) < 12:
-        return False
-    if PLACEHOLDER_RE.search(stripped):
+    meaningful_lines = [
+        line
+        for line in (normalize_placeholder_line(line) for line in stripped.splitlines())
+        if line and not PLACEHOLDER_ONLY_RE.match(line)
+    ]
+    meaningful_text = "\n".join(meaningful_lines).strip()
+    if len(meaningful_text) < 12:
         return False
     return True
+
+
+def normalize_placeholder_line(line: str) -> str:
+    """Normalize one markdown line before checking if it is only placeholder text."""
+
+    normalized = re.sub(r"^\s*(?:[-*+]|\d+[.)])\s+", "", line or "")
+    normalized = re.sub(r"^>\s*", "", normalized)
+    normalized = normalized.strip(" \t`*_[](){}:;,.!?")
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return normalized
 
 
 def analyze_goal_definition(markdown: str) -> dict[str, object]:
