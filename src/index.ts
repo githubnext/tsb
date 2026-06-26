@@ -988,3 +988,6 @@ export type {
   StatFn1,
   StatFn2,
 } from "./stats/index.ts";
+// Kernel Density Estimation — gaussianKDE (mirrors scipy.stats.gaussian_kde)
+export { gaussianKDE, GaussianKDE } from "./stats/kde.ts";
+export type { GaussianKDEOptions } from "./stats/kde.ts";

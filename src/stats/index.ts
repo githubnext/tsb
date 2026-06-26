@@ -558,3 +558,5 @@ export type {
   StatFn1,
   StatFn2,
 } from "./bootstrap.ts";
+export { gaussianKDE, GaussianKDE } from "./kde.ts";
+export type { GaussianKDEOptions } from "./kde.ts";

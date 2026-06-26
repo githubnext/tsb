@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb · Kernel Density Estimation (KDE)</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+        padding: 2rem;
+        max-width: 960px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: #58a6ff;
+      }
+      h2 {
+        font-size: 1.25rem;
+        margin: 1.5rem 0 0.5rem;
+        color: #8b949e;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.85rem;
+      }
+      p {
+        margin-bottom: 1rem;
+        color: #8b949e;
+      }
+      .card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        color: #c9d1d9;
+      }
+      input[type="range"] {
+        flex: 1;
+        accent-color: #58a6ff;
+      }
+      .val {
+        min-width: 3.5rem;
+        text-align: right;
+        color: #79c0ff;
+        font-variant-numeric: tabular-nums;
+        font-family: monospace;
+      }
+      select {
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 4px;
+        color: #e6edf3;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.9rem;
+      }
+      canvas {
+        width: 100%;
+        height: 300px;
+        display: block;
+        border-radius: 4px;
+        background: #0d1117;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+      }
+      .stat {
+        background: #21262d;
+        border-radius: 6px;
+        padding: 0.6rem 0.8rem;
+      }
+      .stat-label {
+        font-size: 0.7rem;
+        color: #8b949e;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .stat-value {
+        font-size: 1.1rem;
+        font-family: monospace;
+        color: #79c0ff;
+        margin-top: 0.1rem;
+      }
+      pre {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        font-size: 0.85rem;
+        overflow-x: auto;
+        line-height: 1.7;
+        color: #e6edf3;
+      }
+      .kw { color: #ff7b72; }
+      .fn { color: #d2a8ff; }
+      .str { color: #a5d6ff; }
+      .num { color: #79c0ff; }
+      .cm { color: #8b949e; }
+      .chip {
+        display: inline-block;
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 4px;
+        padding: 0.1rem 0.5rem;
+        font-family: monospace;
+        font-size: 0.8rem;
+        margin-right: 0.4rem;
+      }
+      a { color: #58a6ff; }
+      footer { color: #8b949e; font-size: 0.8rem; margin-top: 2rem; }
+    </style>
+  </head>
+  <body>
+    <h1>📊 Kernel Density Estimation</h1>
+    <p>
+      Non-parametric density estimation using Gaussian kernels.
+      Mirrors <span class="chip">scipy.stats.gaussian_kde</span>.
+    </p>
+
+    <div class="card">
+      <h2>Interactive KDE Explorer</h2>
+
+      <label>
+        Dataset preset
+        <select id="preset">
+          <option value="uniform">Uniform [0, 10]</option>
+          <option value="normal" selected>Normal μ=5, σ=1.5</option>
+          <option value="bimodal">Bimodal (two clusters)</option>
+          <option value="skewed">Right-skewed (log-normal)</option>
+          <option value="custom">Custom: enter below</option>
+        </select>
+      </label>
+
+      <label>
+        Custom data (comma-separated)
+        <input
+          id="customData"
+          type="text"
+          style="flex:1;background:#21262d;border:1px solid #30363d;border-radius:4px;color:#e6edf3;padding:0.25rem 0.5rem;font-family:monospace;font-size:0.85rem"
+          placeholder="e.g. 1, 2, 3, 5, 8, 13"
+        />
+      </label>
+
+      <label>
+        Bandwidth method
+        <select id="bwMethod">
+          <option value="silverman" selected>Silverman (default)</option>
+          <option value="scott">Scott</option>
+          <option value="custom">Custom factor</option>
+        </select>
+      </label>
+
+      <label id="bwSliderRow" style="display:none">
+        Bandwidth factor
+        <input type="range" id="bwSlider" min="0.05" max="3" step="0.05" value="1.0" />
+        <span class="val" id="bwVal">1.00</span>
+      </label>
+
+      <label>
+        Sample size
+        <input type="range" id="nSlider" min="20" max="500" step="10" value="200" />
+        <span class="val" id="nVal">200</span>
+      </label>
+
+      <canvas id="chart"></canvas>
+
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Quick-start code</h2>
+      <pre id="codeBlock"></pre>
+    </div>
+
+    <div class="card">
+      <h2>API reference</h2>
+      <p>
+        <strong><code>gaussianKDE(data, options?)</code></strong> — factory; returns a
+        <code>GaussianKDE</code> instance.
+      </p>
+      <p>
+        <strong>Bandwidth methods:</strong>
+        <span class="chip">silverman</span> (default) &nbsp;
+        <span class="chip">scott</span> &nbsp;
+        <span class="chip">number</span> (factor × σ)
+      </p>
+      <p>Key methods on <code>GaussianKDE</code>:</p>
+      <ul style="margin-left:1.5rem;color:#8b949e">
+        <li><code>pdf(x)</code> — density at a single point</li>
+        <li><code>evaluate(points)</code> — density at an array of points</li>
+        <li><code>logPdf(x)</code> / <code>logpdf(points)</code> — log-density</li>
+        <li><code>integrate(low, high)</code> — probability mass in interval</li>
+        <li><code>cdf(x)</code> — cumulative probability up to x</li>
+        <li><code>integrateFull()</code> — total mass (≈ 1)</li>
+        <li><code>integrateGaussian(other)</code> — analytic cross-integral</li>
+        <li><code>resample(size, seed?)</code> — draw samples</li>
+        <li><code>factor</code> — bandwidth h (kernel σ)</li>
+        <li><code>covariance</code> — h² (kernel variance)</li>
+        <li><code>neff</code> — effective sample size</li>
+      </ul>
+    </div>
+
+    <footer>tsb — pandas for TypeScript &nbsp;·&nbsp; <a href="index.html">← back</a></footer>
+
+    <script type="module">
+      // ── seeded PRNG ──────────────────────────────────────────────────────────
+      function makeRng(seed) {
+        let s = BigInt(Math.round(seed)) ^ 0x6d2b79f5n;
+        if (s === 0n) s = 1n;
+        return () => {
+          s ^= s >> 12n; s ^= s << 25n; s ^= s >> 27n;
+          s = BigInt.asUintN(64, s);
+          return Number(BigInt.asUintN(52, (s * 0x2545f4914f6cdd1dn) >> 12n)) / 2 ** 52;
+        };
+      }
+      function boxMuller(u1, u2) {
+        return Math.sqrt(-2 * Math.log(u1 + 1e-300)) * Math.cos(2 * Math.PI * u2);
+      }
+
+      // ── dataset presets ──────────────────────────────────────────────────────
+      function genDataset(preset, n) {
+        const rng = makeRng(42);
+        const out = [];
+        switch (preset) {
+          case "uniform":
+            for (let i = 0; i < n; i++) out.push(rng() * 10);
+            break;
+          case "normal":
+            for (let i = 0; i < n; i++) out.push(5 + 1.5 * boxMuller(Math.max(rng(), 1e-10), rng()));
+            break;
+          case "bimodal":
+            for (let i = 0; i < n; i++) {
+              const cluster = rng() < 0.5 ? -3 : 3;
+              out.push(cluster + boxMuller(Math.max(rng(), 1e-10), rng()));
+            }
+            break;
+          case "skewed": {
+            for (let i = 0; i < n; i++) {
+              const z = boxMuller(Math.max(rng(), 1e-10), rng());
+              out.push(Math.exp(z));
+            }
+            break;
+          }
+        }
+        return out;
+      }
+
+      // ── inline KDE implementation ─────────────────────────────────────────────
+      function sampleStd(xs) {
+        const m = xs.reduce((a, b) => a + b, 0) / xs.length;
+        return Math.sqrt(xs.reduce((a, x) => a + (x - m) ** 2, 0) / (xs.length - 1));
+      }
+      function gaussianKDE(data, bwMethod) {
+        const sigma = sampleStd(data);
+        const n = data.length;
+        let h;
+        if (bwMethod === "silverman") h = Math.pow(4 / (3 * n), 0.2) * sigma;
+        else if (bwMethod === "scott") h = Math.pow(n, -0.2) * sigma;
+        else h = bwMethod * sigma;
+
+        const SQRT_2PI = Math.sqrt(2 * Math.PI);
+        const w = 1 / n;
+        return {
+          factor: h,
+          covariance: h * h,
+          pdf(x) {
+            let d = 0;
+            for (const xi of data) d += Math.exp(-0.5 * ((xi - x) / h) ** 2);
+            return (d * w) / (h * SQRT_2PI);
+          },
+          evaluate(xs) { return xs.map(x => this.pdf(x)); },
+          integrate(lo, hi, nPts = 501) {
+            const step = (hi - lo) / (nPts - 1);
+            let s = this.pdf(lo) + this.pdf(hi);
+            for (let i = 1; i < nPts - 1; i++) s += (i % 2 === 0 ? 2 : 4) * this.pdf(lo + i * step);
+            return (s * step) / 3;
+          },
+        };
+      }
+
+      // ── canvas drawing ────────────────────────────────────────────────────────
+      const canvas = document.getElementById("chart");
+      const ctx = canvas.getContext("2d");
+
+      function render() {
+        const preset = document.getElementById("preset").value;
+        const n = parseInt(document.getElementById("nSlider").value, 10);
+        const bwSel = document.getElementById("bwMethod").value;
+        const bwFactor = parseFloat(document.getElementById("bwSlider").value);
+
+        // Custom data
+        let data;
+        if (preset === "custom") {
+          data = document.getElementById("customData").value
+            .split(",")
+            .map(s => parseFloat(s.trim()))
+            .filter(x => Number.isFinite(x));
+          if (data.length < 2) data = [1, 2, 3, 4, 5];
+        } else {
+          data = genDataset(preset, n);
+        }
+
+        const bwMethod = bwSel === "custom" ? bwFactor : bwSel;
+        let kde;
+        try {
+          kde = gaussianKDE(data, bwMethod);
+        } catch {
+          return;
+        }
+
+        // ── compute KDE curve ──────────────────────────────────────────────────
+        const dMin = Math.min(...data);
+        const dMax = Math.max(...data);
+        const pad = Math.max((dMax - dMin) * 0.4, kde.factor * 3);
+        const xMin = dMin - pad;
+        const xMax = dMax + pad;
+        const resolution = 300;
+        const xs = Array.from({ length: resolution }, (_, i) => xMin + (i / (resolution - 1)) * (xMax - xMin));
+        const ys = kde.evaluate(xs);
+        const yMax = Math.max(...ys) * 1.15;
+
+        // ── draw ───────────────────────────────────────────────────────────────
+        const W = canvas.offsetWidth;
+        const H = canvas.offsetHeight;
+        canvas.width = W * devicePixelRatio;
+        canvas.height = H * devicePixelRatio;
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+
+        const px = (x) => ((x - xMin) / (xMax - xMin)) * W;
+        const py = (y) => H - (y / yMax) * H * 0.9 - H * 0.05;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // histogram
+        const bins = 40;
+        const binW = (dMax - dMin) / bins;
+        const counts = new Array(bins).fill(0);
+        for (const x of data) {
+          const bi = Math.min(Math.floor((x - dMin) / binW), bins - 1);
+          if (bi >= 0) counts[bi]++;
+        }
+        const histMax = Math.max(...counts) / (data.length * binW);
+        const histScale = yMax / histMax;
+
+        ctx.fillStyle = "rgba(56,139,253,0.18)";
+        for (let i = 0; i < bins; i++) {
+          const x0 = dMin + i * binW;
+          const x1 = x0 + binW;
+          const density = counts[i] / (data.length * binW);
+          const bh = (density / yMax) * H * 0.9;
+          ctx.fillRect(px(x0) + 1, py(0) - bh, px(x1) - px(x0) - 2, bh);
+        }
+        void histScale;
+
+        // KDE curve
+        ctx.beginPath();
+        ctx.moveTo(px(xs[0]), py(ys[0]));
+        for (let i = 1; i < xs.length; i++) ctx.lineTo(px(xs[i]), py(ys[i]));
+        ctx.strokeStyle = "#58a6ff";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // fill under curve
+        ctx.lineTo(px(xs[xs.length - 1]), py(0));
+        ctx.lineTo(px(xs[0]), py(0));
+        ctx.closePath();
+        ctx.fillStyle = "rgba(88,166,255,0.08)";
+        ctx.fill();
+
+        // axes
+        ctx.strokeStyle = "#30363d";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, py(0));
+        ctx.lineTo(W, py(0));
+        ctx.stroke();
+
+        // rug plot
+        ctx.strokeStyle = "rgba(88,166,255,0.4)";
+        ctx.lineWidth = 1;
+        for (const x of data) {
+          ctx.beginPath();
+          ctx.moveTo(px(x), py(0));
+          ctx.lineTo(px(x), py(0) + 6);
+          ctx.stroke();
+        }
+
+        // ── stats ──────────────────────────────────────────────────────────────
+        const dataMean = data.reduce((a, b) => a + b, 0) / data.length;
+        const mass = kde.integrate(xMin, xMax, 501);
+
+        document.getElementById("statsGrid").innerHTML = `
+          <div class="stat"><div class="stat-label">n (samples)</div><div class="stat-value">${data.length}</div></div>
+          <div class="stat"><div class="stat-label">bandwidth h</div><div class="stat-value">${kde.factor.toFixed(4)}</div></div>
+          <div class="stat"><div class="stat-label">covariance h²</div><div class="stat-value">${kde.covariance.toFixed(4)}</div></div>
+          <div class="stat"><div class="stat-label">pdf(mean)</div><div class="stat-value">${kde.pdf(dataMean).toFixed(4)}</div></div>
+          <div class="stat"><div class="stat-label">∫ KDE ≈</div><div class="stat-value">${mass.toFixed(4)}</div></div>
+        `;
+
+        // ── update code block ──────────────────────────────────────────────────
+        const bwArg = bwSel === "custom"
+          ? `{ <span class="str">bw_method</span>: <span class="num">${bwFactor}</span> }`
+          : bwSel !== "silverman"
+            ? `{ <span class="str">bw_method</span>: <span class="str">"${bwSel}"</span> }`
+            : "";
+        document.getElementById("codeBlock").innerHTML = `<span class="kw">import</span> { <span class="fn">gaussianKDE</span> } <span class="kw">from</span> <span class="str">"tsb"</span>;
+
+<span class="kw">const</span> data = [${data.slice(0, 5).map(x => x.toFixed(2)).join(", ")}, <span class="cm">/* … ${data.length} points */</span>];
+<span class="kw">const</span> kde = <span class="fn">gaussianKDE</span>(data${bwArg ? ", " + bwArg : ""});
+
+<span class="cm">// bandwidth factor h (kernel σ)</span>
+console.<span class="fn">log</span>(kde.factor);       <span class="cm">// → ${kde.factor.toFixed(4)}</span>
+
+<span class="cm">// PDF at a single point</span>
+console.<span class="fn">log</span>(kde.<span class="fn">pdf</span>(<span class="num">${dataMean.toFixed(2)}</span>));  <span class="cm">// → ${kde.pdf(dataMean).toFixed(4)}</span>
+
+<span class="cm">// Probability mass in [lo, hi]</span>
+<span class="kw">const</span> mass = kde.<span class="fn">integrate</span>(<span class="num">${(dataMean - 1).toFixed(1)}</span>, <span class="num">${(dataMean + 1).toFixed(1)}</span>);
+
+<span class="cm">// Draw 500 smoothed samples</span>
+<span class="kw">const</span> samples = kde.<span class="fn">resample</span>(<span class="num">500</span>, <span class="num">42</span>);
+
+<span class="cm">// Evaluate on a grid</span>
+<span class="kw">const</span> xs = Array.<span class="fn">from</span>({ length: <span class="num">200</span> }, (_, i) => <span class="num">${xMin.toFixed(1)}</span> + i * <span class="num">${((xMax - xMin) / 199).toFixed(3)}</span>);
+<span class="kw">const</span> ys = kde.<span class="fn">evaluate</span>(xs);`;
+      }
+
+      // ── event wiring ──────────────────────────────────────────────────────────
+      document.getElementById("nSlider").addEventListener("input", (e) => {
+        document.getElementById("nVal").textContent = e.target.value;
+        render();
+      });
+      document.getElementById("bwSlider").addEventListener("input", (e) => {
+        document.getElementById("bwVal").textContent = parseFloat(e.target.value).toFixed(2);
+        render();
+      });
+      document.getElementById("bwMethod").addEventListener("change", (e) => {
+        document.getElementById("bwSliderRow").style.display =
+          e.target.value === "custom" ? "flex" : "none";
+        render();
+      });
+      document.getElementById("preset").addEventListener("change", render);
+      document.getElementById("customData").addEventListener("input", render);
+
+      window.addEventListener("resize", render);
+      render();
+    </script>
+  </body>
+</html>
