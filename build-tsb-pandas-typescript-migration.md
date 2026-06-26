@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-25T19:47:31Z |
-| Iteration Count | 379 |
-| Best Metric | 178 |
+| Last Run | 2026-06-26T08:05:36Z |
+| Iteration Count | 380 |
+| Best Metric | 179 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, pending-ci, pending-ci, accepted, pending-ci, pending-ci, pending-ci, accepted |
+| Recent Statuses | accepted, accepted, accepted, pending-ci, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io/stats features; next: kernel density estimation (KDE), or read_orc, or signal processing (FFT/STFT)
+- More io/stats features; next: read_orc, or signal processing (FFT/STFT)
 
 ---
 
@@ -37,6 +37,7 @@
 - **Stats math**: erf (A&S 7.1.26), logGamma, regIncGamma reusable. Peter Acklam probit; BCa = jackknife accel + bias-correction. Rest param `...samples: readonly (readonly number[])[]` avoids `as` casts.
 - **Binary**: Parquet (Thrift compact, zigzag varints, RLE def levels). Arrow/Feather (FlatBuffer). IBM 370 floats (BigInt). SAS7BDAT (IBM 370, Stata struct).
 - **PCA/Mahalanobis**: Jacobi eigendecomposition for symmetric covariance matrices. Closures in `PCAResult` (transform/inverseTransform) capture frozen state — clean fitted-model pattern.
+- **KDE**: Log-sum-exp in logPdf for numerical stability. Box-Muller transform + weighted CDF binary search for resample. Use `new Array<number>(n).fill(0)` not `new Array(n) as number[]`. Use `toNumbers`-style Series→number[] iteration instead of `data.values as readonly number[]`.
 
 ---
 
@@ -45,6 +46,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 380 — 2026-06-26 08:05 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28225452889)
+- **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
+- **Change**: Add `src/stats/kde.ts` — `gaussianKDE()` + `GaussianKDE` class. Silverman/Scott bandwidth rules, evaluate/pdf/logPdf/logpdf, Simpson's-rule integrate, analytic integrateGaussian, CDF, weighted KDE, resample with seeded xorshift* + Box-Muller. Tests + playground/kde.html.
+- **Metric**: 178 → 179 (Δ+1)
+- **Commit**: f219ee5
 
 ### Iteration 379 — 2026-06-25 19:47 UTC
 - **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
