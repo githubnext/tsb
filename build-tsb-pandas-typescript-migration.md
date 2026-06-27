@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-27T01:29:57Z |
-| Iteration Count | 381 |
+| Last Run | 2026-06-27T13:30:00Z |
+| Iteration Count | 382 |
 | Best Metric | 180 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io/stats features; next: read_orc, or information theory (entropy, mutual info, KL divergence)
+- More io/stats features; next: read_orc, or signal processing (FFT/STFT/Welch/window functions)
 
 ---
 
@@ -39,6 +39,7 @@
 - **PCA/Mahalanobis**: Jacobi eigendecomposition for symmetric covariance matrices. Closures in `PCAResult` (transform/inverseTransform) capture frozen state — clean fitted-model pattern.
 - **KDE**: Log-sum-exp in logPdf for numerical stability. Box-Muller transform + weighted CDF binary search for resample.
 - **FFT/signal**: Use `typeof v === "object"` narrowing to avoid `as` casts for `number | Complex` union. Cooley-Tukey radix-2 DIT iterative FFT. `as const` on object literals is fine (not a type cast).
+- **Info theory**: Store `xyByKey: Map<string, [T, U]>` in `buildJointCounts` to avoid `as unknown as T` casts when looking up marginals. Avoids `as` cast entirely for generic observation types.
 
 ---
 
@@ -48,11 +49,16 @@
 
 ## 📊 Iteration History
 
-### Iteration 381 — 2026-06-27 01:29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28274439257)
-- **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
-- **Change**: Add `src/stats/signal.ts` — FFT/IFFT/RFFT/IRFFT (Cooley-Tukey radix-2), fftshift/ifftshift, fftfreq/rfftfreq, 6 window functions (Hann/Hamming/Blackman/Bartlett/Boxcar/Kaiser), STFT, Welch PSD, periodogram, spectrum helpers. 50+ tests + property-based tests + playground/signal.html.
+### Iteration 382 — 2026-06-27 13:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28290293476)
+- **Status**: ✅ Accepted (pre-existing CI failures unrelated to this module; iter 381 push was abortive — actual branch had 179 files)
+- **Change**: Add `src/stats/information.ts` — Shannon entropy, KL divergence, Jensen-Shannon divergence/distance, cross-entropy, mutual information, conditional entropy, normalised MI, variation of information, joint entropy, Rényi entropy, Tsallis entropy. 60+ tests + property-based tests + playground/information.html.
 - **Metric**: 179 → 180 (Δ+1)
-- **Commit**: 3ee559e
+- **Commit**: 9e39fce
+
+### Iteration 381 — 2026-06-27 01:29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28274439257)
+- **Status**: ⚠️ Abortive — commit 3ee559e (signal.ts) recorded in state but never on remote branch
+- **Change**: Attempted `src/stats/signal.ts` — FFT/IFFT/RFFT/IRFFT, signal windows, STFT, Welch PSD
+- **Metric**: 179 → 180 (claimed, but push failed; actual branch stayed at 179)
 
 ### Iteration 380 — 2026-06-26 08:05 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28225452889)
 - **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
