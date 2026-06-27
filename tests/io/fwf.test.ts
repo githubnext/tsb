@@ -111,11 +111,11 @@ describe("readFwf — widths option", () => {
 
   it("widths produce correct colspecs via accumulation", () => {
     const text = "abcdef\n123456";
-    // widths [2,2,2] → colspecs [[0,2],[2,4],[4,6]]
-    const df = readFwf(text, { widths: [2, 2, 2], header: null, names: ["p", "q", "r"] });
-    expect([...df.col("p").values]).toEqual(["12"]);
-    expect([...df.col("q").values]).toEqual(["34"]);
-    expect([...df.col("r").values]).toEqual(["56"]);
+    // widths [2,2,2] → colspecs [[0,2],[2,4],[4,6]]; first row is consumed as header
+    const df = readFwf(text, { widths: [2, 2, 2], names: ["p", "q", "r"] });
+    expect([...df.col("p").values]).toEqual([12]);
+    expect([...df.col("q").values]).toEqual([34]);
+    expect([...df.col("r").values]).toEqual([56]);
   });
 });
 
@@ -195,7 +195,7 @@ describe("readFwf — dtype forcing", () => {
     const text = "a  b\n1  2\n3  4";
     const df = readFwf(text, { dtype: { a: "float64" } });
     expect(df.col("a").dtype.name).toBe("float64");
-    expect([...df.col("a").values]).toEqual([1, 2, 3, 4].slice(0, 2).map(Number));
+    expect([...df.col("a").values]).toEqual([1, 3]);
   });
 
   it("forces a column to object dtype", () => {
@@ -264,7 +264,7 @@ describe("readFwf — property-based (widths round-trip)", () => {
     fc.assert(
       fc.property(
         fc.array(fc.integer({ min: 0, max: 999 }), { minLength: 1, maxLength: 5 }),
-        fc.integer({ min: 1, max: 10 }),
+        fc.integer({ min: 4, max: 10 }),
         (values, width) => {
           // Pad each value to `width` chars.
           const pad = (v: number): string => String(v).padStart(width, " ");

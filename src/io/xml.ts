@@ -342,7 +342,7 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
   // Parse rows
   let depth = 0;
   let inRow = false;
-  let currentRow: Record<string, string | null> = {};
+  let currentRow: Record<string, string | null> = Object.create(null);
   let currentElem = "";
   let currentText = "";
   let rowCount = 0;
@@ -352,7 +352,7 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
       depth++;
       if (!inRow && depth >= 2 && localName(tok.name) === resolvedRowTag) {
         inRow = true;
-        currentRow = {};
+        currentRow = Object.create(null);
         if (attribs) {
           for (const [k, v] of Object.entries(tok.attrs)) {
             currentRow[k] = v;

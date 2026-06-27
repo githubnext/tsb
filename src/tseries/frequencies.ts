@@ -322,12 +322,34 @@ export function inferFreq(dates: readonly Date[]): string | null {
     }
     if (first % MS_DAY === 0) {
       const days = first / MS_DAY;
+      // Year-begin/end dates may have equal diffs when no leap year falls in
+      // the range; check before returning a raw day-count alias.
+      if (_allYearBegin(dates)) return "YS";
+      if (_allYearEnd(dates)) return "YE";
       return `${days}D`;
     }
   }
 
   // ── Month / quarter / year anchored patterns ──────────────────────────────
   // These have variable diffs (different month lengths) but regular structure.
+  // More-specific patterns (year/quarter) must be checked before less-specific
+  // ones (month), because quarter-end dates are also month-end dates, etc.
+
+  if (_allYearEnd(dates)) {
+    return "YE";
+  }
+
+  if (_allYearBegin(dates)) {
+    return "YS";
+  }
+
+  if (_allQuarterEnd(dates)) {
+    return "QE";
+  }
+
+  if (_allQuarterBegin(dates)) {
+    return "QS";
+  }
 
   if (_allMonthEnd(dates)) {
     const months = _countMonthsBetween(dates[0], dates.at(-1));
@@ -343,22 +365,6 @@ export function inferFreq(dates: readonly Date[]): string | null {
     if (Number.isInteger(steps)) {
       return steps === 1 ? "MS" : `${steps}MS`;
     }
-  }
-
-  if (_allQuarterEnd(dates)) {
-    return "QE";
-  }
-
-  if (_allQuarterBegin(dates)) {
-    return "QS";
-  }
-
-  if (_allYearEnd(dates)) {
-    return "YE";
-  }
-
-  if (_allYearBegin(dates)) {
-    return "YS";
   }
 
   // ── Business day ─────────────────────────────────────────────────────────
@@ -445,8 +451,13 @@ function _allBusinessDay(dates: readonly Date[]): boolean {
     const diffMs = curr.getTime() - prev.getTime();
     const diffDays = diffMs / 86_400_000;
     // Business-day step can be 1 day (Mon→Tue … Thu→Fri) or
-    // 3 days (Fri→Mon) or fail.
-    if (diffDays !== 1 && diffDays !== 3) {
+    // 3 days (Fri→Mon, skipping the weekend) or fail.
+    if (diffDays === 3) {
+      // Only valid when prev is a Friday.
+      if (prev.getUTCDay() !== 5) {
+        return false;
+      }
+    } else if (diffDays !== 1) {
       return false;
     }
     // Verify prev is a business day.

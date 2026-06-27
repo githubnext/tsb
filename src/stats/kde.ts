@@ -528,7 +528,7 @@ export function gaussianKDE(
   }
 
   if (arr.length === 0) {
-    throw new RangeError("gaussianKDE: data must contain at least one element");
+    throw new RangeError("gaussianKDE: data must not be empty (at least one element required)");
   }
   if (arr.length === 1) {
     throw new RangeError(

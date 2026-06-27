@@ -50,7 +50,7 @@ export interface ReadSasOptions {
 const HEADER_MAGIC_LIBRARY =
   "HEADER RECORD*******LIBRARY HEADER RECORD!!!!!!!000000000000000000000000000000  ";
 const HEADER_MAGIC_MEMBER =
-  "HEADER RECORD*******MEMBER  HEADER RECORD!!!!!!!000000000000000000000000000001600000000140  ";
+  "HEADER RECORD*******MEMBER  HEADER RECORD!!!!!!";
 const HEADER_MAGIC_NAMESTR = "HEADER RECORD*******NAMESTR HEADER RECORD!!!!!!!";
 const HEADER_MAGIC_OBS =
   "HEADER RECORD*******OBS     HEADER RECORD!!!!!!!000000000000000000000000000000  ";
@@ -95,9 +95,20 @@ function ibmToDouble(buf: Uint8Array, offset: number): number {
       return 0;
     }
   }
-  // SAS missing value: first byte is 0x2e ('.') or A–Z (special missing)
+  // SAS missing value: first byte is 0x2e ('.') or A–Z (special missing),
+  // AND bytes 1–7 must all be zero. Valid IBM 370 floats in the same first-byte
+  // range have a non-zero mantissa in bytes 1–7.
   if (b0 === 0x2e || (b0 >= 0x41 && b0 <= 0x5a)) {
-    return Number.NaN;
+    let mantZero = true;
+    for (let k = 1; k < 8; k++) {
+      if ((buf[offset + k] ?? 0) !== 0) {
+        mantZero = false;
+        break;
+      }
+    }
+    if (mantZero) {
+      return Number.NaN;
+    }
   }
 
   const sign = (b0 & 0x80) !== 0 ? -1 : 1;

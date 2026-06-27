@@ -370,6 +370,16 @@ function bootstrapOne(
   const bootDist = Array.from({ length: n }, () => fn(resample(data, data.length, rng)));
   const sorted = [...bootDist].sort((a, b) => a - b);
 
+  // Degenerate: all bootstrap samples yield the same statistic (e.g. n=1)
+  if (sorted[0] === sorted[sorted.length - 1]) {
+    const val = sorted[0] ?? theta;
+    return {
+      confidenceInterval: { low: val, high: val },
+      bootDistribution: bootDist,
+      standardError: 0,
+    };
+  }
+
   let low: number;
   let high: number;
 

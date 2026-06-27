@@ -280,8 +280,10 @@ describe("readParquet ∘ toParquet — property tests", () => {
           }
           const df = DataFrame.fromColumns(data);
           const rt = roundTrip(df);
-          expect(rt.shape[0]).toBe(nRows);
-          expect(rt.shape[1]).toBe(nCols);
+          // Compare against the actual df shape: when nCols=0, the DataFrame
+          // has 0 rows regardless of nRows since there are no columns to hold data.
+          expect(rt.shape[0]).toBe(df.shape[0]);
+          expect(rt.shape[1]).toBe(df.shape[1]);
         },
       ),
       { numRuns: 30 },

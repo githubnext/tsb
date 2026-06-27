@@ -168,13 +168,23 @@ class FbBuilder {
 
   createString(s: string): number {
     const bytes = new TextEncoder().encode(s);
+    const N = bytes.length;
+    // Pre-align so that after writing null(1) + bytes(N), the position is
+    // 4-byte aligned relative to the buffer end. This ensures writeI32 adds
+    // no extra padding between the length prefix and the string bytes.
+    const used = this.buf.length - this.head;
+    const pad = (4 - ((used + N + 1) % 4)) % 4;
+    for (let i = 0; i < pad; i++) {
+      this.grow(1);
+      this.buf[--this.head] = 0;
+    }
     this.grow(1);
     this.buf[--this.head] = 0; // null terminator
-    for (let i = bytes.length - 1; i >= 0; i--) {
+    for (let i = N - 1; i >= 0; i--) {
       this.grow(1);
       this.buf[--this.head] = bytes[i]!;
     }
-    return this.writeI32(bytes.length); // write length prefix (int32)
+    return this.writeI32(N); // write length prefix (int32, align is now a no-op)
   }
 
   /** Offset vector (uoffset_t[] preceded by u32 count). */

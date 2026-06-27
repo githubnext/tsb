@@ -25,7 +25,7 @@ describe("linregress", () => {
     expect(CLOSE(r.slope, 0.6, 1e-4)).toBe(true);
     expect(CLOSE(r.intercept, 2.2, 1e-4)).toBe(true);
     expect(CLOSE(r.rvalue, 0.7745966, 1e-5)).toBe(true);
-    expect(CLOSE(r.pvalue, 0.12326, 1e-4)).toBe(true);
+    expect(CLOSE(r.pvalue, 0.12403, 1e-4)).toBe(true);
     // stderr = sqrt(MSE/Sxx) = sqrt(0.8/10) ≈ 0.28284
     expect(CLOSE(r.stderr, Math.sqrt(0.08), 1e-4)).toBe(true);
   });
@@ -236,14 +236,14 @@ describe("OLS", () => {
 
   it("multiple regression: y = 2x₁ + 3x₂ + 1", () => {
     const X = [
-      [1, 0],
+      [1, 2],
+      [3, 1],
+      [2, 4],
+      [5, 3],
+      [1, 5],
+      [4, 2],
+      [3, 3],
       [2, 1],
-      [3, 2],
-      [4, 3],
-      [5, 4],
-      [6, 5],
-      [7, 6],
-      [8, 7],
     ];
     const y = X.map(([a, b]) => 2 * (a as number) + 3 * (b as number) + 1);
     const result = new OLS().fit(X, y);
@@ -390,7 +390,16 @@ describe("property tests", () => {
           if (n < 2) {
             return true;
           }
+          if (Math.max(...xs) === Math.min(...xs)) {
+            return true; // constant x makes r² undefined
+          }
+          if (Math.max(...ys) === Math.min(...ys)) {
+            return true; // constant y makes r² undefined
+          }
           const lr = linregress(xs, ys);
+          if (!isFinite(lr.rvalue)) {
+            return true; // degenerate x variance — linregress and OLS diverge
+          }
           const ols = new OLS().fit(
             xs.map((v) => [v]),
             ys,

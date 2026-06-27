@@ -213,7 +213,15 @@ function inferColInfo(df: DataFrame, name: string): ColInfo {
       break;
     }
     case "int64": {
-      kind = "i64";
+      // Values >= 2^63 would overflow signed int64 encoding; fall back to f64
+      const outOfI64Range = (vals as number[]).some(
+        (v) => typeof v === "number" && isFinite(v) && Math.abs(v) >= 2 ** 63,
+      );
+      if (outOfI64Range) {
+        kind = "f64";
+      } else {
+        kind = "i64";
+      }
       elemSize = 8;
       break;
     }
@@ -772,7 +780,7 @@ export function toHdf(df: DataFrame, options?: ToHdfOptions): Uint8Array {
   const colDataSizes: number[] = colInfos.map((ci) => {
     const raw = nRows * ci.elemSize;
     const rem = raw % 8;
-    return rem === 0 ? (raw === 0 ? 8 : raw) : raw + (8 - rem);
+    return raw === 0 ? 0 : rem === 0 ? raw : raw + (8 - rem);
   });
 
   // ── Assign offsets ─────────────────────────────────────────────────────────

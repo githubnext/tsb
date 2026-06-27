@@ -159,7 +159,12 @@ export class StringArray extends MaskedArray<string> {
    * Return a new StringArray with occurrences of `pat` replaced by `repl`.
    */
   replace(pat: string | RegExp, repl: string): StringArray {
-    return this._mapStr((s) => s.replace(pat, repl));
+    if (typeof pat === "string") {
+      return this._mapStr((s) => s.replaceAll(pat, repl));
+    }
+    // Ensure the regex has the global flag so all occurrences are replaced.
+    const globalPat = pat.flags.includes("g") ? pat : new RegExp(pat.source, `${pat.flags}g`);
+    return this._mapStr((s) => s.replace(globalPat, repl));
   }
 
   /** Return a StringArray with strings zero-padded on the left to `width`. */

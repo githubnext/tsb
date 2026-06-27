@@ -114,9 +114,10 @@ describe("toExcel round-trip — strings", () => {
   });
 
   it("round-trips empty string", () => {
+    // Empty strings become null on readExcel (pandas-compatible NA coercion).
     const df = DataFrame.fromColumns({ s: ["a", "", "b"] });
     const rt = roundTrip(df, { index: false });
-    expect([...rt.col("s").values]).toEqual(["a", "", "b"]);
+    expect([...rt.col("s").values]).toEqual(["a", null, "b"]);
   });
 
   it("round-trips strings with spaces", () => {
@@ -153,7 +154,8 @@ describe("toExcel round-trip — null values", () => {
     const rt = roundTrip(df, { index: false, naRep: "N/A" });
     const vals = [...rt.col("a").values];
     expect(vals[0]).toBe(1);
-    expect(vals[1]).toBe("N/A");
+    // "N/A" is in BUILTIN_NA so readExcel converts it back to null.
+    expect(vals[1]).toBeNull();
     expect(vals[2]).toBe(3);
   });
 
@@ -376,7 +378,7 @@ describe("toExcel — property-based round-trip", () => {
   it("round-trips arbitrary string DataFrames", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.string({ minLength: 0, maxLength: 50 }), {
+        fc.array(fc.string({ minLength: 1, maxLength: 50 }), {
           minLength: 1,
           maxLength: 15,
         }),

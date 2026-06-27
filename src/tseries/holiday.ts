@@ -316,16 +316,20 @@ export class Holiday {
         date = applyWeekdayOffset(date, this.offset);
       }
 
+      // Save nominal date (before observance) for startDate/endDate comparisons.
+      const nominalDate = date;
+
       // Apply observance function
       if (this.observance != null) {
         date = this.observance(date);
       }
 
-      // Check validity range
-      if (this.startDate != null && date < this.startDate) {
+      // Check validity range against the nominal (pre-observance) date so that
+      // observance-shifted dates are not incorrectly excluded.
+      if (this.startDate != null && nominalDate < this.startDate) {
         continue;
       }
-      if (this.endDate != null && date > this.endDate) {
+      if (this.endDate != null && nominalDate > this.endDate) {
         continue;
       }
 

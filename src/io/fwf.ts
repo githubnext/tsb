@@ -365,8 +365,13 @@ export function readFwf(text: string, options: ReadFwfOptions = {}): DataFrame {
   } else if (options.colspecs !== undefined && options.colspecs !== "infer") {
     specs = [...options.colspecs];
   } else {
-    // Auto-infer from sample lines (data lines only, not the header).
-    const sampleLines = dataLines.slice(0, inferNrows);
+    // Auto-infer from sample lines. Include the header line (if any) so that
+    // column names wider than their data values produce correct spans.
+    const headerLine =
+      headerLineIdx !== null && headerLineIdx < allLines.length
+        ? [allLines[headerLineIdx] as string]
+        : [];
+    const sampleLines = [...headerLine, ...dataLines.slice(0, inferNrows)];
     specs = inferColspecs(sampleLines);
   }
 

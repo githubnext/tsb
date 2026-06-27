@@ -418,9 +418,12 @@ describe("expectedFreq — properties", () => {
           maxLength: 4,
         }),
         (obs) => {
-          // Ensure all rows have same length
-          const cols = (obs[0] as number[]).length;
-          const uniform = obs.map((row) => row.slice(0, cols));
+          // Ensure all rows have same length (use shortest)
+          const cols = Math.min(...obs.map((row) => (row as number[]).length));
+          if (cols < 1) {
+            return true;
+          }
+          const uniform = obs.map((row) => (row as number[]).slice(0, cols));
           const obsTotal = uniform.flat().reduce((s, v) => s + v, 0);
           if (obsTotal === 0) {
             return true;
@@ -457,7 +460,7 @@ describe("oddsRatio — properties", () => {
     );
   });
 
-  it("OR is symmetric under swap of columns: OR(a,b,c,d) = OR(b,a,d,c)", () => {
+  it("OR is symmetric under swap of rows-and-columns: OR(a,b,c,d) = OR(d,c,b,a)", () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 100 }),
@@ -470,8 +473,8 @@ describe("oddsRatio — properties", () => {
             [c, d],
           ]).statistic;
           const or2 = oddsRatio([
-            [b, a],
             [d, c],
+            [b, a],
           ]).statistic;
           return CLOSE(or1, or2, 1e-9);
         },

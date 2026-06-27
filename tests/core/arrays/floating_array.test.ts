@@ -71,7 +71,8 @@ describe("FloatingArray", () => {
   describe("std()", () => {
     it("returns sample std deviation", () => {
       const a = FloatingArray.from([2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]);
-      expect(a.std()).toBeCloseTo(2.0);
+      // Sample std (ddof=1): sqrt(32/7) ≈ 2.138
+      expect(a.std()).toBeCloseTo(2.138, 3);
     });
 
     it("returns null for single element", () => {

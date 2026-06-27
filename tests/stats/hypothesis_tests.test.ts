@@ -47,9 +47,9 @@ function erf(x: number): number {
 
 describe("ttest1samp", () => {
   it("known result: data=[2.1,2.5,2.3,2.7,2.4] vs popmean=2.0 (two-sided)", () => {
-    // scipy: t≈3.354, p≈0.0286
+    // scipy: t≈4.0, p≈0.0164
     const res = ttest1samp([2.1, 2.5, 2.3, 2.7, 2.4], 2.0);
-    expect(r(res.statistic, 3)).toBeCloseTo(3.354, 2);
+    expect(r(res.statistic, 3)).toBeCloseTo(4.0, 2);
     expect(res.pvalue).toBeLessThan(0.05);
     expect(res.pvalue).toBeGreaterThan(0.01);
   });
@@ -241,14 +241,14 @@ describe("chi2Contingency", () => {
   });
 
   it("known scipy value: [[10,10],[15,15],[5,10]]", () => {
-    // scipy.stats.chi2_contingency([[10,10],[15,15],[5,10]]) → χ²≈1.2, p≈0.549
+    // scipy.stats.chi2_contingency([[10,10],[15,15],[5,10]]) → χ²≈1.29, p≈0.525
     const obs = [
       [10, 10],
       [15, 15],
       [5, 10],
     ];
     const res = chi2Contingency(obs);
-    expect(res.statistic).toBeCloseTo(1.2, 1);
+    expect(res.statistic).toBeCloseTo(1.2897, 2);
     expect(res.pvalue).toBeGreaterThan(0.3);
   });
 });
@@ -374,12 +374,12 @@ describe("pearsonr", () => {
   });
 
   it("known result: scipy pearsonr([1,2,3,4,5],[2,4,5,4,5])", () => {
-    // scipy: r≈0.7559, p≈0.141
+    // scipy: r≈0.7746, p≈0.129
     const x = [1, 2, 3, 4, 5];
     const y = [2, 4, 5, 4, 5];
     const { correlation, pvalue } = pearsonr(x, y);
-    expect(correlation).toBeCloseTo(0.7559, 3);
-    expect(pvalue).toBeCloseTo(0.141, 2);
+    expect(correlation).toBeCloseTo(0.7746, 3);
+    expect(pvalue).toBeCloseTo(0.129, 2);
   });
 
   it("returns NaN for n < 3", () => {
