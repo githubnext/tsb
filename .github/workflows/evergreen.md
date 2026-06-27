@@ -6,8 +6,14 @@ description: |
   readiness without directly merging.
 
 on:
-  pull_request:
-    types: [labeled, synchronize, reopened, ready_for_review]
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+      head_sha:
+        required: false
+        type: string
   schedule: every 15m
   workflow_dispatch:
     inputs:
@@ -15,8 +21,6 @@ on:
         description: "Run Evergreen on a specific PR number"
         required: false
         type: string
-
-if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'evergreen') }}
 
 permissions:
   contents: read
@@ -42,7 +46,7 @@ checkout:
   fetch-depth: 0
 
 concurrency:
-  group: evergreen-${{ github.event.pull_request.number || github.event.inputs.pr_number || 'schedule' }}
+  group: evergreen-${{ inputs.pr_number || github.event.inputs.pr_number || 'schedule' }}
   queue: max
 
 tools:
@@ -152,7 +156,8 @@ steps:
       GITHUB_REPOSITORY: ${{ github.repository }}
       EVENT_NAME: ${{ github.event_name }}
       EVENT_PATH: ${{ github.event_path }}
-      INPUT_PR: ${{ github.event.inputs.pr_number }}
+      INPUT_PR: ${{ inputs.pr_number || github.event.inputs.pr_number }}
+      INPUT_HEAD_SHA: ${{ inputs.head_sha }}
     run: |
       python3 - << 'PYEOF'
       import json
@@ -165,6 +170,7 @@ steps:
       repo = os.environ["GITHUB_REPOSITORY"]
       event_name = os.environ.get("EVENT_NAME", "")
       input_pr = (os.environ.get("INPUT_PR") or "").strip()
+      input_head_sha = (os.environ.get("INPUT_HEAD_SHA") or "").strip()
       event_path = os.environ.get("EVENT_PATH", "")
       out_dir = "/tmp/gh-aw/evergreen"
       os.makedirs(out_dir, exist_ok=True)
@@ -198,20 +204,14 @@ steps:
           if input_pr:
               pr = api(f"/pulls/{int(input_pr)}")
               labels = pr_labels(pr)
-              if pr.get("state") == "open" and "evergreen" in labels:
+              head_sha = pr.get("head", {}).get("sha")
+              if input_head_sha and head_sha != input_head_sha:
+                  reason = f"PR head changed from {input_head_sha} to {head_sha}; skipping stale event"
+              elif pr.get("state") == "open" and "evergreen" in labels:
                   target = pr
-                  reason = "manual dispatch"
+                  reason = "workflow call" if event_name == "workflow_call" else "manual dispatch"
               else:
-                  reason = "manual PR is not open with evergreen label"
-          elif event_name == "pull_request" and event.get("pull_request"):
-              number = event["pull_request"]["number"]
-              pr = api(f"/pulls/{number}")
-              labels = pr_labels(pr)
-              if pr.get("state") == "open" and "evergreen" in labels:
-                  target = pr
-                  reason = "pull_request event"
-              else:
-                  reason = "pull_request event without evergreen label"
+                  reason = "target PR is not open with evergreen label"
           else:
               params = urllib.parse.urlencode({
                   "state": "open",
@@ -237,6 +237,7 @@ steps:
           "selected": target is not None,
           "reason": reason,
           "event_name": event_name,
+          "requested_head_sha": input_head_sha or None,
           "target_pr_number": target["number"] if target else None,
           "target_head_sha": target.get("head", {}).get("sha") if target else None,
           "target_head_ref": target.get("head", {}).get("ref") if target else None,
