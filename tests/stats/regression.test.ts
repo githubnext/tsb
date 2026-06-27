@@ -397,7 +397,7 @@ describe("property tests", () => {
             return true; // constant y makes r² undefined
           }
           const lr = linregress(xs, ys);
-          if (!isFinite(lr.rvalue)) {
+          if (!Number.isFinite(lr.rvalue)) {
             return true; // degenerate x variance — linregress and OLS diverge
           }
           const ols = new OLS().fit(

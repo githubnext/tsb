@@ -215,7 +215,7 @@ function inferColInfo(df: DataFrame, name: string): ColInfo {
     case "int64": {
       // Values >= 2^63 would overflow signed int64 encoding; fall back to f64
       const outOfI64Range = (vals as number[]).some(
-        (v) => typeof v === "number" && isFinite(v) && Math.abs(v) >= 2 ** 63,
+        (v) => typeof v === "number" && Number.isFinite(v) && Math.abs(v) >= 2 ** 63,
       );
       if (outOfI64Range) {
         kind = "f64";
