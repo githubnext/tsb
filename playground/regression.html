@@ -1,71 +1,170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tsb — Regression (linregress, polyfit, OLS)</title>
-    <script src="playground-runtime.js"></script>
-    <style>
-      body {
-        font-family: system-ui, sans-serif;
-        max-width: 900px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-        background: #0d1117;
-        color: #c9d1d9;
-      }
-      h1 { color: #58a6ff; }
-      h2 { color: #79c0ff; margin-top: 2rem; }
-      p  { color: #8b949e; }
-      pre {
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 6px;
-        padding: 1rem;
-        overflow-x: auto;
-      }
-      code { color: #e6edf3; font-size: 0.9rem; }
-      .output {
-        background: #0d1117;
-        border: 1px solid #238636;
-        border-radius: 6px;
-        padding: 1rem;
-        margin-top: 0.5rem;
-        white-space: pre;
-        font-family: monospace;
-        font-size: 0.85rem;
-        color: #3fb950;
-      }
-      button {
-        background: #238636;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 0.4rem 1rem;
-        cursor: pointer;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-      }
-      button:hover { background: #2ea043; }
-      a { color: #58a6ff; }
-    </style>
-  </head>
-  <body>
-    <h1>📐 Regression — linregress, polyfit, polyval, OLS</h1>
-    <p>
-      Linear and polynomial regression from scratch — mirrors
-      <code>scipy.stats.linregress</code>, <code>numpy.polyfit</code>,
-      and <code>statsmodels.OLS</code>.
-      <a href="index.html">← back to index</a>
-    </p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Regression (linregress, polyfit, OLS)</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
 
-    <!-- ── linregress ─────────────────────────────────────────────── -->
-    <h2>1. Simple Linear Regression — <code>linregress(x, y)</code></h2>
-    <p>
-      Fits y = slope·x + intercept by OLS and returns the slope, intercept,
-      Pearson r, two-tailed p-value, and standard errors.
-    </p>
-    <pre><code id="code-linregress">import { linregress } from "tsb";
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Regression</h1>
+  <p class="subtitle">Simple linear regression, polynomial fitting, and multiple OLS —
+  mirrors <code>scipy.stats.linregress</code>, <code>numpy.polyfit</code>, and
+  <code>statsmodels.OLS</code>.</p>
+
+  <div class="section">
+    <h2>1 — Simple Linear Regression</h2>
+    <p><code>linregress(x, y)</code> returns slope, intercept, Pearson r, p-value, and standard error.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { linregress } from "tsb";
 
 const x = [1, 2, 3, 4, 5];
 const y = [2, 4, 5, 4, 5];
@@ -75,17 +174,24 @@ console.log("slope    :", r.slope.toFixed(4));
 console.log("intercept:", r.intercept.toFixed(4));
 console.log("r        :", r.rvalue.toFixed(4));
 console.log("p-value  :", r.pvalue.toFixed(4));
-console.log("stderr   :", r.stderr.toFixed(4));
-</code></pre>
-    <button onclick="runLinregress()">▶ Run</button>
-    <div class="output" id="out-linregress">Output will appear here…</div>
+console.log("stderr   :", r.stderr.toFixed(4));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <!-- ── polyfit / polyval ─────────────────────────────────────── -->
-    <h2>2. Polynomial Fitting — <code>polyfit(x, y, deg)</code> and <code>polyval(coefs, x)</code></h2>
-    <p>
-      Fit a polynomial of any degree to data and evaluate it at new points.
-    </p>
-    <pre><code id="code-polyfit">import { polyfit, polyval } from "tsb";
+  <div class="section">
+    <h2>2 — Polynomial Fitting</h2>
+    <p><code>polyfit(x, y, deg)</code> fits a polynomial of degree <code>deg</code>. Use <code>polyval</code> to evaluate it.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { polyfit, polyval } from "tsb";
 
 const x = [0, 1, 2, 3, 4, 5];
 const y = x.map(v => v * v);          // y = x²
@@ -93,22 +199,26 @@ const y = x.map(v => v * v);          // y = x²
 const coefs = polyfit(x, y, 2);       // degree-2 fit
 console.log("Coefficients (highest first):", coefs.map(c => c.toFixed(4)));
 
-// Evaluate at new points
 const xNew = [6, 7, 8];
 const yNew = polyval(coefs, xNew);
-console.log("Predicted at x=6,7,8:", yNew.map(v => v.toFixed(1)));
-</code></pre>
-    <button onclick="runPolyfit()">▶ Run</button>
-    <div class="output" id="out-polyfit">Output will appear here…</div>
+console.log("Predicted at x=6,7,8:", yNew.map(v => v.toFixed(1)));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <!-- ── OLS ────────────────────────────────────────────────────── -->
-    <h2>3. Multiple OLS Regression — <code>new OLS().fit(X, y)</code></h2>
-    <p>
-      Fit a multiple linear regression model: y = β₁x₁ + β₂x₂ + β₀.
-      Returns coefficients, standard errors, t-statistics, p-values, R²,
-      and an F-test.
-    </p>
-    <pre><code id="code-ols">import { OLS } from "tsb";
+  <div class="section">
+    <h2>3 — Multiple OLS Regression</h2>
+    <p><code>new OLS().fit(X, y)</code> fits multiple linear regression, returning params, R², F-statistic, and a formatted summary.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { OLS } from "tsb";
 
 // y = 2·x₁ + 3·x₂ + 1  (exact)
 const X = [
@@ -124,113 +234,47 @@ console.log("params:", result.params.map(v => v.toFixed(4)));
 console.log("R²    :", result.rsquared.toFixed(6));
 console.log("F-stat:", result.fvalue.toFixed(4));
 console.log();
-console.log(result.summary());
-</code></pre>
-    <button onclick="runOLS()">▶ Run</button>
-    <div class="output" id="out-ols">Output will appear here…</div>
+console.log(result.summary());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <!-- ── OLS predict ────────────────────────────────────────────── -->
-    <h2>4. Prediction — <code>result.predict(newX)</code></h2>
-    <p>
-      Use the fitted model to predict responses for new predictor values.
-    </p>
-    <pre><code id="code-predict">import { OLS, linregress } from "tsb";
+  <div class="section">
+    <h2>4 — Prediction</h2>
+    <p>Use <code>result.predict(Xnew)</code> to generate predictions for new observations.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { OLS } from "tsb";
 
-// Fit simple model
 const X = [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]];
-const y = X.map(([xi]) => 1.5 * xi + 0.5 + (Math.random() - 0.5) * 0.5);
+const y = X.map(([xi]) => 1.5 * xi + 0.5);
 
 const result = new OLS().fit(X, y);
 console.log("slope (approx 1.5)    :", result.params[0].toFixed(3));
 console.log("intercept (approx 0.5):", result.params[1].toFixed(3));
 console.log("R²                    :", result.rsquared.toFixed(4));
 
-// Predict at x = 11, 12, 13
 const preds = result.predict([[11],[12],[13]]);
-console.log("Predictions at x=11,12,13:", preds.map(v => v.toFixed(2)));
-</code></pre>
-    <button onclick="runPredict()">▶ Run</button>
-    <div class="output" id="out-predict">Output will appear here…</div>
+console.log("Predictions at x=11,12,13:", preds.map(v => v.toFixed(2)));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
 
-    <script type="module">
-      import { linregress, polyfit, polyval, OLS } from "./playground-runtime.js";
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
 
-      window.runLinregress = async function () {
-        const out = document.getElementById("out-linregress");
-        try {
-          const tsb = await import("tsb");
-          const x = [1, 2, 3, 4, 5];
-          const y = [2, 4, 5, 4, 5];
-          const r = tsb.linregress(x, y);
-          out.textContent = [
-            `slope    : ${r.slope.toFixed(4)}`,
-            `intercept: ${r.intercept.toFixed(4)}`,
-            `r        : ${r.rvalue.toFixed(4)}`,
-            `p-value  : ${r.pvalue.toFixed(4)}`,
-            `stderr   : ${r.stderr.toFixed(4)}`,
-          ].join("\n");
-        } catch (e) {
-          out.textContent = String(e);
-        }
-      };
-
-      window.runPolyfit = async function () {
-        const out = document.getElementById("out-polyfit");
-        try {
-          const tsb = await import("tsb");
-          const x = [0, 1, 2, 3, 4, 5];
-          const y = x.map((v) => v * v);
-          const coefs = tsb.polyfit(x, y, 2);
-          const yNew = tsb.polyval(coefs, [6, 7, 8]);
-          out.textContent = [
-            `Coefficients (highest first): [${coefs.map((c) => c.toFixed(4)).join(", ")}]`,
-            `Predicted at x=6,7,8: [${yNew.map((v) => v.toFixed(1)).join(", ")}]`,
-          ].join("\n");
-        } catch (e) {
-          out.textContent = String(e);
-        }
-      };
-
-      window.runOLS = async function () {
-        const out = document.getElementById("out-ols");
-        try {
-          const tsb = await import("tsb");
-          const X = [
-            [1, 0], [2, 1], [3, 2], [4, 3],
-            [5, 4], [6, 5], [7, 6], [8, 7],
-          ];
-          const y = X.map(([a, b]) => 2 * a + 3 * b + 1);
-          const result = new tsb.OLS().fit(X, y);
-          out.textContent = [
-            `params: [${result.params.map((v) => v.toFixed(4)).join(", ")}]`,
-            `R²    : ${result.rsquared.toFixed(6)}`,
-            `F-stat: ${result.fvalue.toFixed(4)}`,
-            "",
-            result.summary(),
-          ].join("\n");
-        } catch (e) {
-          out.textContent = String(e);
-        }
-      };
-
-      window.runPredict = async function () {
-        const out = document.getElementById("out-predict");
-        try {
-          const tsb = await import("tsb");
-          const X = [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]];
-          const y = X.map(([xi]) => 1.5 * xi + 0.5);
-          const result = new tsb.OLS().fit(X, y);
-          const preds = result.predict([[11],[12],[13]]);
-          out.textContent = [
-            `slope (approx 1.5)    : ${(result.params[0] ?? 0).toFixed(3)}`,
-            `intercept (approx 0.5): ${(result.params[1] ?? 0).toFixed(3)}`,
-            `R²                    : ${result.rsquared.toFixed(4)}`,
-            `Predictions at x=11,12,13: [${preds.map((v) => v.toFixed(2)).join(", ")}]`,
-          ].join("\n");
-        } catch (e) {
-          out.textContent = String(e);
-        }
-      };
-    </script>
-  </body>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>

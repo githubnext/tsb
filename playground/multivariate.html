@@ -1,476 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Multivariate Analysis — tsb playground</title>
-    <style>
-      :root {
-        --bg: #0d1117;
-        --surface: #161b22;
-        --border: #30363d;
-        --accent: #58a6ff;
-        --green: #3fb950;
-        --red: #f85149;
-        --text: #c9d1d9;
-        --muted: #8b949e;
-        --code-bg: #1c2128;
-      }
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        line-height: 1.6;
-        padding: 2rem;
-        max-width: 900px;
-        margin: 0 auto;
-      }
-      h1 { color: var(--accent); margin-bottom: 0.5rem; }
-      h2 { color: var(--green); margin: 2rem 0 0.75rem; font-size: 1.1rem; }
-      p, li { color: var(--text); margin-bottom: 0.5rem; }
-      ul { padding-left: 1.5rem; }
-      code {
-        background: var(--code-bg);
-        padding: 0.1em 0.4em;
-        border-radius: 4px;
-        font-family: "Fira Code", "Cascadia Code", monospace;
-        font-size: 0.88em;
-        color: #e6edf3;
-      }
-      .cell {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-      }
-      .cell label {
-        display: block;
-        font-size: 0.8rem;
-        color: var(--muted);
-        margin-bottom: 0.4rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-      textarea {
-        width: 100%;
-        background: var(--code-bg);
-        color: #e6edf3;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 0.75rem;
-        font-family: "Fira Code", monospace;
-        font-size: 0.88rem;
-        resize: vertical;
-        min-height: 90px;
-      }
-      textarea:focus { outline: none; border-color: var(--accent); }
-      button {
-        background: var(--accent);
-        color: #0d1117;
-        border: none;
-        border-radius: 6px;
-        padding: 0.5rem 1.25rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-        margin-top: 0.75rem;
-      }
-      button:hover { opacity: 0.85; }
-      .output {
-        background: var(--code-bg);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 0.75rem;
-        font-family: "Fira Code", monospace;
-        font-size: 0.85rem;
-        white-space: pre;
-        margin-top: 0.75rem;
-        min-height: 2.5rem;
-        color: var(--muted);
-      }
-      .output.ok { color: #e6edf3; border-color: var(--green); }
-      .output.err { color: var(--red); border-color: var(--red); }
-      .badge {
-        display: inline-block;
-        background: var(--code-bg);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        padding: 0.1em 0.5em;
-        font-size: 0.8em;
-        font-family: monospace;
-        color: var(--muted);
-        margin-left: 0.5rem;
-      }
-      .formula {
-        font-family: "Fira Code", monospace;
-        color: var(--accent);
-        background: var(--code-bg);
-        border-left: 3px solid var(--accent);
-        padding: 0.5rem 1rem;
-        margin: 0.5rem 0 1rem;
-        border-radius: 0 4px 4px 0;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Multivariate Analysis <span class="badge">tsb</span></h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multivariate Analysis — tsb playground</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Multivariate Analysis</h1>
+  <p class="subtitle">Mahalanobis distance, covariance estimation, and Principal Component Analysis (PCA) —
+  mirrors <code>scipy.spatial.distance.mahalanobis</code> and <code>sklearn.decomposition.PCA</code>.</p>
+
+  <div class="section">
+    <h2>1 — Mahalanobis Distance</h2>
+    <p><code>mahalanobis(u, v, VI)</code> computes distance using inverse covariance <code>VI</code>.
+    Use <code>covMatrix</code> + <code>invertMatrix</code> to estimate <code>VI</code> from data.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { mahalanobis, covMatrix, invertMatrix } from "tsb";
+
+// Identity covariance (= Euclidean distance)
+const u = [0, 0];
+const v = [3, 4];
+const VI = [[1, 0], [0, 1]];
+const d = mahalanobis(u, v, VI);
+console.log("Mahalanobis (identity VI):", d.toFixed(4)); // 5.0
+
+// With data-estimated covariance
+const X = [[1,0],[2,1],[3,0],[2,-1],[1,1],[3,1]];
+const cov = covMatrix(X);
+const viEst = invertMatrix(cov);
+const d2 = mahalanobis([1, 0], [3, 0], viEst);
+console.log("Mahalanobis (estimated VI):", d2.toFixed(4));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2 — Principal Component Analysis (PCA)</h2>
+    <p><code>new PCA({ n_components })</code> reduces dimensionality. <code>fit</code> returns the result with
+    <code>explained_variance_ratio</code>, <code>components</code>, and <code>transform</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { PCA } from "tsb";
+
+const X = [
+  [2.5, 2.4], [0.5, 0.7], [2.2, 2.9], [1.9, 2.2],
+  [3.1, 3.0], [2.3, 2.7], [2.0, 1.6], [1.0, 1.1],
+  [1.5, 1.6], [1.1, 0.9],
+];
+
+const result = new PCA({ n_components: 1 }).fit(X);
+console.log("Explained variance ratio:", result.explained_variance_ratio.map(v => v.toFixed(4)));
+console.log("First principal component:", result.components[0].map(v => v.toFixed(4)));
+
+const Xt = result.transform(X);
+console.log("Projected X (first 3 rows):");
+for (const row of Xt.slice(0, 3)) {
+  console.log(" ", row.map(v => v.toFixed(4)));
+}</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3 — PCA on 3D data</h2>
+    <p>Reduce 3-dimensional data to 2 components and inspect how much variance each component captures.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { PCA } from "tsb";
+
+const X = [[1,2,3],[4,5,6],[7,8,0],[2,3,1],[5,1,4],[0,4,2],[3,6,5],[8,2,1]];
+
+const result = new PCA({ n_components: 2 }).fit(X);
+console.log("Explained variance ratios (2 components):");
+console.log(result.explained_variance_ratio.map(v => v.toFixed(4)));
+console.log("Total variance explained:",
+  result.explained_variance_ratio.reduce((a, b) => a + b, 0).toFixed(4));
+
+const Xt = result.transform(X);
+console.log("\nProjected data (first 3 rows):");
+for (const row of Xt.slice(0, 3)) {
+  console.log(" ", row.map(v => v.toFixed(4)));
+}</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
     <p>
-      Multivariate statistics: <strong>Mahalanobis distance</strong> and
-      <strong>Principal Component Analysis (PCA)</strong> — mirroring
-      <code>scipy.spatial.distance.mahalanobis</code> and
-      <code>sklearn.decomposition.PCA</code>.
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
     </p>
+  </footer>
 
-    <!-- ── Mahalanobis distance ─────────────────────────────────────────────── -->
-    <h2>Mahalanobis Distance</h2>
-    <p>
-      Measures distance between two points accounting for correlations in the data.
-      When the inverse covariance (VI) is the identity matrix, it reduces to Euclidean distance.
-    </p>
-    <div class="formula">d = √( (u−v)ᵀ · VI · (u−v) )   where VI = Σ⁻¹</div>
-
-    <div class="cell">
-      <label>Point u (JSON array)</label>
-      <textarea id="mah-u">[0, 0]</textarea>
-      <label style="margin-top:0.75rem">Point v (JSON array)</label>
-      <textarea id="mah-v">[3, 4]</textarea>
-      <label style="margin-top:0.75rem">Inverse covariance VI (JSON matrix, or null to auto-compute from X)</label>
-      <textarea id="mah-vi">[[1, 0], [0, 1]]</textarea>
-      <label style="margin-top:0.75rem">Data matrix X (optional — used when VI is null)</label>
-      <textarea id="mah-x">null</textarea>
-      <button onclick="runMahalanobis()">Compute</button>
-      <div class="output" id="mah-out">Press "Compute" to see results.</div>
-    </div>
-
-    <div class="cell">
-      <label>Example — correlated data (VI ≠ identity)</label>
-      <textarea id="mah-corr-u">[1, 0]</textarea>
-      <textarea id="mah-corr-v" style="margin-top:0.5rem">[3, 0]</textarea>
-      <textarea id="mah-corr-x" style="margin-top:0.5rem">[[1,0],[2,1],[3,0],[2,-1],[1,1],[3,1]]</textarea>
-      <button onclick="runMahalanobisAuto()">Auto-compute VI from X</button>
-      <div class="output" id="mah-corr-out">Press to see results.</div>
-    </div>
-
-    <!-- ── PCA ──────────────────────────────────────────────────────────────── -->
-    <h2>Principal Component Analysis (PCA)</h2>
-    <p>
-      Reduces dimensionality by projecting data onto the directions of maximum variance.
-      Each row of the input matrix X is one observation; each column is a feature.
-    </p>
-
-    <div class="cell">
-      <label>Data matrix X — n_samples × n_features (JSON)</label>
-      <textarea id="pca-x" style="min-height:160px">[[2.5, 2.4],
- [0.5, 0.7],
- [2.2, 2.9],
- [1.9, 2.2],
- [3.1, 3.0],
- [2.3, 2.7],
- [2.0, 1.6],
- [1.0, 1.1],
- [1.5, 1.6],
- [1.1, 0.9]]</textarea>
-      <label style="margin-top:0.75rem">n_components (integer ≥ 1, float 0–1 for variance fraction, or blank for all)</label>
-      <textarea id="pca-k" style="min-height:40px">1</textarea>
-      <button onclick="runPCA()">Run PCA</button>
-      <div class="output" id="pca-out">Press "Run PCA" to see results.</div>
-    </div>
-
-    <div class="cell">
-      <label>PCA on 3D data — vary n_components to see reconstruction quality</label>
-      <textarea id="pca3-x" style="min-height:160px">[[1,2,3],[4,5,6],[7,8,0],[2,3,1],[5,1,4],[0,4,2],[3,6,5],[8,2,1]]</textarea>
-      <label style="margin-top:0.75rem">n_components</label>
-      <textarea id="pca3-k" style="min-height:40px">2</textarea>
-      <button onclick="runPCA3D()">Run PCA (3D)</button>
-      <div class="output" id="pca3-out">Press to see results.</div>
-    </div>
-
-    <div class="cell">
-      <label>Variance fraction — select components to explain 90% of variance</label>
-      <textarea id="pca-frac-x" style="min-height:120px">[[2.5,2.4,0.1],[0.5,0.7,0.9],[2.2,2.9,0.2],[1.9,2.2,0.4],[3.1,3.0,0.3]]</textarea>
-      <button onclick="runPCAFrac()">Explain ≥ 90% variance</button>
-      <div class="output" id="pca-frac-out">Press to see results.</div>
-    </div>
-
-    <script type="module">
-      // ── import from built package ──────────────────────────────────────────
-      import {
-        mahalanobis,
-        PCA,
-        covMatrix,
-        invertMatrix,
-      } from "https://esm.sh/tsb@0.1.0" // placeholder; replace with local build
-
-      window._tsb = { mahalanobis, PCA, covMatrix, invertMatrix };
-    </script>
-
-    <script>
-      // ── inline fallback implementation ────────────────────────────────────
-
-      function eye(n) {
-        return Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));
-      }
-      function matmul(A,B) {
-        const m=A.length, k=(A[0]||[]).length, n=(B[0]||[]).length;
-        return Array.from({length:m},(_,i)=>Array.from({length:n},(_,j)=>{
-          let s=0;
-          for(let p=0;p<k;p++) s+=(A[i][p]||0)*(B[p][j]||0);
-          return s;
-        }));
-      }
-      function transpose(A) {
-        const m=A.length, n=(A[0]||[]).length;
-        return Array.from({length:n},(_,j)=>Array.from({length:m},(_,i)=>A[i][j]||0));
-      }
-      function invertMatrix(A) {
-        const n=A.length;
-        const aug=A.map((row,i)=>[...row,...Array.from({length:n},(_,j)=>i===j?1:0)]);
-        for(let col=0;col<n;col++){
-          let maxRow=col, maxVal=Math.abs(aug[col][col]||0);
-          for(let row=col+1;row<n;row++){
-            const v=Math.abs(aug[row][col]||0);
-            if(v>maxVal){maxVal=v;maxRow=row;}
-          }
-          if(maxVal<1e-15) return null;
-          [aug[col],aug[maxRow]]=[aug[maxRow],aug[col]];
-          const pivot=aug[col][col];
-          for(let j=0;j<2*n;j++) aug[col][j]/=pivot;
-          for(let row=0;row<n;row++){
-            if(row===col) continue;
-            const f=aug[row][col];
-            if(f===0) continue;
-            for(let j=0;j<2*n;j++) aug[row][j]-=f*aug[col][j];
-          }
-        }
-        return aug.map(r=>r.slice(n));
-      }
-      function covMatrix(X) {
-        const n=X.length, p=(X[0]||[]).length;
-        const mean=Array.from({length:p},(_,j)=>X.reduce((s,r)=>s+(r[j]||0),0)/n);
-        const Xc=X.map(r=>Array.from({length:p},(_,j)=>(r[j]||0)-(mean[j]||0)));
-        const CTC=matmul(transpose(Xc),Xc);
-        return CTC.map(r=>r.map(v=>v/(n-1)));
-      }
-      function jacobiEigen(A) {
-        const n=A.length;
-        const S=A.map(r=>[...r]), V=eye(n);
-        for(let iter=0;iter<Math.max(200*n*n,100);iter++){
-          let maxVal=0,p=0,q=1;
-          for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
-            const v=Math.abs(S[i][j]||0);
-            if(v>maxVal){maxVal=v;p=i;q=j;}
-          }
-          if(maxVal<1e-12) break;
-          const theta=0.5*Math.atan2(2*S[p][q],S[p][p]-S[q][q]);
-          const c=Math.cos(theta),s=Math.sin(theta);
-          const nS=S.map(r=>[...r]);
-          for(let i=0;i<n;i++){
-            const sip=S[i][p]||0,siq=S[i][q]||0;
-            nS[i][p]=c*sip+s*siq; nS[i][q]=-s*sip+c*siq;
-          }
-          for(let j=0;j<n;j++){
-            const spj=nS[p][j]||0,sqj=nS[q][j]||0;
-            nS[p][j]=c*spj+s*sqj; nS[q][j]=-s*spj+c*sqj;
-          }
-          nS[p][q]=0; nS[q][p]=0;
-          for(let i=0;i<n;i++){
-            const vip=V[i][p]||0,viq=V[i][q]||0;
-            V[i][p]=c*vip+s*viq; V[i][q]=-s*vip+c*viq;
-          }
-          for(let i=0;i<n;i++) for(let j=0;j<n;j++) S[i][j]=nS[i][j]||0;
-        }
-        return {values:Array.from({length:n},(_,i)=>S[i][i]||0),vectors:V};
-      }
-      function mahalanobis(u,v,VI,X) {
-        const p=u.length;
-        if(v.length!==p) throw new Error("u and v must have the same length");
-        let viMat;
-        if(VI!==null&&VI!==undefined){viMat=VI;}
-        else{
-          if(!X) throw new Error("provide VI or X");
-          const cov=covMatrix(X), inv=invertMatrix(cov);
-          if(!inv) throw new Error("covariance matrix is singular");
-          viMat=inv;
-        }
-        const diff=u.map((ui,i)=>ui-(v[i]||0));
-        let d2=0;
-        for(let i=0;i<p;i++){
-          let vd=0;
-          for(let j=0;j<p;j++) vd+=(viMat[i][j]||0)*(diff[j]||0);
-          d2+=(diff[i]||0)*vd;
-        }
-        return Math.sqrt(Math.max(0,d2));
-      }
-      function pcaFit(X, nComponents, whiten) {
-        const n=X.length, p=(X[0]||[]).length;
-        const mean=Array.from({length:p},(_,j)=>X.reduce((s,r)=>s+(r[j]||0),0)/n);
-        const Xc=X.map(r=>Array.from({length:p},(_,j)=>(r[j]||0)-(mean[j]||0)));
-        const CTC=matmul(transpose(Xc),Xc);
-        const cov=CTC.map(r=>r.map(v=>v/(n-1)));
-        const {values,vectors}=jacobiEigen(cov);
-        const order=Array.from({length:p},(_,i)=>i).sort((a,b)=>(values[b]||0)-(values[a]||0));
-        const sortedVals=order.map(i=>Math.max(0,values[i]||0));
-        const comps=order.map(oi=>Array.from({length:p},(_,j)=>(vectors[j]||[])[oi]||0));
-        const totalVar=sortedVals.reduce((s,v)=>s+v,0);
-        const evr=sortedVals.map(v=>totalVar>0?v/totalVar:0);
-        const cumEvr=[]; let cum=0;
-        for(const r of evr){cum+=r;cumEvr.push(cum);}
-        let k=p;
-        if(nComponents!==undefined){
-          if(nComponents>=1){k=Math.min(Math.round(nComponents),p);}
-          else if(nComponents>0){const idx=cumEvr.findIndex(c=>c>=nComponents-1e-10);k=idx>=0?idx+1:p;}
-        }
-        const fVals=sortedVals.slice(0,k);
-        const fEvr=evr.slice(0,k);
-        const fCumEvr=cumEvr.slice(0,k);
-        const fComps=comps.slice(0,k);
-        const std=fVals.map(v=>Math.sqrt(v+1e-15));
-        return {
-          explainedVariance:fVals, explainedVarianceRatio:fEvr,
-          cumulativeExplainedVarianceRatio:fCumEvr, components:fComps,
-          mean, nComponents:k, nFeatures:p, nSamples:n, std, whiten,
-          transform(Xin){
-            return Xin.map(row=>{
-              const c=Array.from({length:p},(_,j)=>(row[j]||0)-(mean[j]||0));
-              return fComps.map((comp,ci)=>{
-                const dot=comp.reduce((s,cv,j)=>s+cv*(c[j]||0),0);
-                return whiten?dot/(std[ci]||1):dot;
-              });
-            });
-          },
-          inverseTransform(Z){
-            return Z.map(row=>Array.from({length:p},(_,j)=>{
-              return row.reduce((s,z,ci)=>{
-                const sc=whiten?(std[ci]||1):1;
-                return s+((fComps[ci]||[])[j]||0)*z*sc;
-              },(mean[j]||0));
-            }));
-          }
-        };
-      }
-
-      const fmt = (v, d=4) => typeof v==='number' ? (Number.isFinite(v)?v.toFixed(d):'∞') : String(v);
-
-      window.runMahalanobis = function() {
-        const el = document.getElementById('mah-out');
-        try {
-          const u = JSON.parse(document.getElementById('mah-u').value);
-          const v = JSON.parse(document.getElementById('mah-v').value);
-          const VI = JSON.parse(document.getElementById('mah-vi').value);
-          const X = JSON.parse(document.getElementById('mah-x').value);
-          const d = mahalanobis(u, v, VI, X||undefined);
-          // Also compute Euclidean for comparison
-          const eucl = Math.sqrt(u.reduce((s,ui,i)=>s+(ui-(v[i]||0))**2,0));
-          let out = `Mahalanobis distance: ${fmt(d)}\n`;
-          out += `Euclidean distance:   ${fmt(eucl)}\n`;
-          out += `\nPoints:  u = [${u.map(x=>fmt(x,2)).join(', ')}]\n`;
-          out += `         v = [${v.map(x=>fmt(x,2)).join(', ')}]`;
-          if(VI!==null){ out += `\nVI (inverse cov): ${VI.length}×${(VI[0]||[]).length} matrix`; }
-          el.textContent = out;
-          el.className = 'output ok';
-        } catch(e) { el.textContent = 'Error: '+e.message; el.className = 'output err'; }
-      };
-
-      window.runMahalanobisAuto = function() {
-        const el = document.getElementById('mah-corr-out');
-        try {
-          const u = JSON.parse(document.getElementById('mah-corr-u').value);
-          const v = JSON.parse(document.getElementById('mah-corr-v').value);
-          const X = JSON.parse(document.getElementById('mah-corr-x').value);
-          const cov = covMatrix(X);
-          const VI = invertMatrix(cov);
-          const d = mahalanobis(u, v, null, X);
-          const eucl = Math.sqrt(u.reduce((s,ui,i)=>s+(ui-(v[i]||0))**2,0));
-          let out = `Mahalanobis distance: ${fmt(d)}\n`;
-          out += `Euclidean distance:   ${fmt(eucl)}\n`;
-          out += `\nSample covariance matrix:\n`;
-          cov.forEach((row,i)=>{ out += `  row ${i}: [${row.map(x=>fmt(x,4)).join(', ')}]\n`; });
-          out += `\nInverse covariance (VI):\n`;
-          (VI||[]).forEach((row,i)=>{ out += `  row ${i}: [${row.map(x=>fmt(x,4)).join(', ')}]\n`; });
-          el.textContent = out;
-          el.className = 'output ok';
-        } catch(e) { el.textContent = 'Error: '+e.message; el.className = 'output err'; }
-      };
-
-      window.runPCA = function() {
-        const el = document.getElementById('pca-out');
-        try {
-          const X = JSON.parse(document.getElementById('pca-x').value);
-          const kStr = document.getElementById('pca-k').value.trim();
-          const nc = kStr ? parseFloat(kStr) : undefined;
-          const r = pcaFit(X, nc, false);
-          const Z = r.transform(X);
-          const Xrec = r.inverseTransform(Z);
-          let mse = 0;
-          for(let i=0;i<X.length;i++) for(let j=0;j<(X[0]||[]).length;j++) {
-            const err=((X[i]||[])[j]||0)-((Xrec[i]||[])[j]||0);
-            mse+=err*err;
-          }
-          mse/=X.length*(X[0]||[]).length;
-          let out = `PCA results (${X.length} samples × ${r.nFeatures} features → ${r.nComponents} components)\n\n`;
-          out += `Explained variance:\n`;
-          r.explainedVariance.forEach((v,i)=>{
-            out+=`  PC${i+1}: ${fmt(v,4)} (${(r.explainedVarianceRatio[i]*100).toFixed(1)}% | cumulative: ${(r.cumulativeExplainedVarianceRatio[i]*100).toFixed(1)}%)\n`;
-          });
-          out += `\nComponent loadings:\n`;
-          r.components.forEach((comp,i)=>{
-            out+=`  PC${i+1}: [${comp.map(c=>fmt(c,4)).join(', ')}]\n`;
-          });
-          out += `\nFeature means: [${r.mean.map(m=>fmt(m,4)).join(', ')}]\n`;
-          out += `\nProjected scores (first 5 rows):\n`;
-          Z.slice(0,5).forEach((row,i)=>{out+=`  obs ${i}: [${row.map(v=>fmt(v,4)).join(', ')}]\n`;});
-          out += `\nReconstruction MSE (using ${r.nComponents} PC${r.nComponents===1?'':'s'}): ${fmt(mse,6)}`;
-          el.textContent = out;
-          el.className = 'output ok';
-        } catch(e) { el.textContent = 'Error: '+e.message; el.className = 'output err'; }
-      };
-
-      window.runPCA3D = function() {
-        const el = document.getElementById('pca3-out');
-        try {
-          const X = JSON.parse(document.getElementById('pca3-x').value);
-          const k = parseInt(document.getElementById('pca3-k').value)||2;
-          const r = pcaFit(X, k, false);
-          const Z = r.transform(X);
-          const Xrec = r.inverseTransform(Z);
-          let mse=0;
-          for(let i=0;i<X.length;i++) for(let j=0;j<(X[0]||[]).length;j++) {
-            const err=((X[i]||[])[j]||0)-((Xrec[i]||[])[j]||0);
-            mse+=err*err;
-          }
-          mse/=X.length*(X[0]||[]).length;
-          let out = `PCA: ${X.length}×${r.nFeatures} → ${r.nComponents} components\n\n`;
-          out += `Variance explained:\n`;
-          r.explainedVariance.forEach((v,i)=>{
-            out+=`  PC${i+1}: ${(r.explainedVarianceRatio[i]*100).toFixed(1)}% (cumulative: ${(r.cumulativeExplainedVarianceRatio[i]*100).toFixed(1)}%)\n`;
-          });
-          const discarded=1-r.cumulativeExplainedVarianceRatio[r.nComponents-1];
-          out+=`  Discarded: ${(discarded*100).toFixed(1)}%\n`;
-          out+=`\nProjected scores:\n`;
-          Z.forEach((row,i)=>{out+=`  obs ${i}: [${row.map(v=>fmt(v,3)).join(', ')}]\n`;});
-          out+=`\nReconstruction MSE: ${fmt(mse,4)}`;
-          el.textContent=out;
-          el.className='output ok';
-        } catch(e) { el.textContent='Error: '+e.message; el.className='output err'; }
-      };
-
-      window.runPCAFrac = function() {
-        const el = document.getElementById('pca-frac-out');
-        try {
-          const X = JSON.parse(document.getElementById('pca-frac-x').value);
-          const r = pcaFit(X, 0.90, false);
-          let out = `Keeping ${r.nComponents} component${r.nComponents===1?'':'s'} to explain ≥90% variance\n\n`;
-          out += `Variance per component:\n`;
-          r.explainedVariance.forEach((v,i)=>{
-            out+=`  PC${i+1}: ${fmt(v,4)} (${(r.explainedVarianceRatio[i]*100).toFixed(1)}% | cum: ${(r.cumulativeExplainedVarianceRatio[i]*100).toFixed(1)}%)\n`;
-          });
-          out+=`\nFinal cumulative EVR: ${(r.cumulativeExplainedVarianceRatio[r.nComponents-1]*100).toFixed(1)}%`;
-          el.textContent=out;
-          el.className='output ok';
-        } catch(e) { el.textContent='Error: '+e.message; el.className='output err'; }
-      };
-    </script>
-  </body>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
 </html>
