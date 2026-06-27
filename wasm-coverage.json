@@ -1,0 +1,756 @@
+{
+  "version": "1",
+  "description": "Rust/WASM acceleration coverage manifest for tsb core functions",
+  "notes": "Every value export from src/core/index.ts is classified as either rust-wasm (implemented in Rust, exported through WASM, wired into the accelerated path) or ts-only-ineligible (not suitable for Rust/WASM with a concrete reason). There are no unclassified or todo entries.",
+  "entries": [
+    {
+      "name": "natCompare",
+      "module": "core/natsort",
+      "status": "rust-wasm",
+      "wasm_function": "nat_compare",
+      "parity_test": "tests/wasm/parity.test.ts",
+      "benchmark_group": "wasm-natsort"
+    },
+    {
+      "name": "natSorted",
+      "module": "core/natsort",
+      "status": "rust-wasm",
+      "wasm_function": "nat_sorted",
+      "notes": "Accelerated path covers string arrays without a key function. Calls with a key function fall back to the TypeScript implementation automatically.",
+      "parity_test": "tests/wasm/parity.test.ts",
+      "benchmark_group": "wasm-natsort"
+    },
+    {
+      "name": "natArgSort",
+      "module": "core/natsort",
+      "status": "rust-wasm",
+      "wasm_function": "nat_argsort",
+      "parity_test": "tests/wasm/parity.test.ts",
+      "benchmark_group": "wasm-natsort"
+    },
+    {
+      "name": "natSortKey",
+      "module": "core/natsort",
+      "status": "ts-only-ineligible",
+      "reason": "Return type is readonly (string|number)[] — a JS-specific union array that has no direct WASM representation without per-element boxing. The resulting round-trip cost would likely exceed any benefit."
+    },
+    {
+      "name": "searchsorted",
+      "module": "core/searchsorted",
+      "status": "rust-wasm",
+      "wasm_function": "searchsorted_f64 / searchsorted_str",
+      "notes": "Accelerated path covers numeric (f64) and string arrays with the default comparator. Calls with a custom compareFn or a sorter fall back to TypeScript automatically.",
+      "parity_test": "tests/wasm/parity.test.ts",
+      "benchmark_group": "wasm-searchsorted"
+    },
+    {
+      "name": "searchsortedMany",
+      "module": "core/searchsorted",
+      "status": "rust-wasm",
+      "wasm_function": "searchsorted_many_f64 / searchsorted_many_str",
+      "notes": "Same fallback conditions as searchsorted.",
+      "parity_test": "tests/wasm/parity.test.ts",
+      "benchmark_group": "wasm-searchsorted"
+    },
+    {
+      "name": "argsortScalars",
+      "module": "core/searchsorted",
+      "status": "rust-wasm",
+      "wasm_function": "argsort_f64 / argsort_str",
+      "notes": "Accelerated path covers numeric and string arrays with the default comparator. Custom compareFn falls back to TypeScript.",
+      "parity_test": "tests/wasm/parity.test.ts",
+      "benchmark_group": "wasm-searchsorted"
+    },
+    {
+      "name": "Index",
+      "module": "core/base-index",
+      "status": "ts-only-ineligible",
+      "reason": "Complex JS class with JS-specific semantics: symbol-keyed properties, JS object identity, generator methods, and deep integration with the JS iterator protocol. All label-lookup logic depends on JS Map/Set identity."
+    },
+    {
+      "name": "RangeIndex",
+      "module": "core/range-index",
+      "status": "ts-only-ineligible",
+      "reason": "Inherits from Index (JS class). Its primary value is lazy range generation using JS generators. No CPU-heavy numeric kernel to accelerate independently of the class."
+    },
+    {
+      "name": "Dtype",
+      "module": "core/dtype",
+      "status": "ts-only-ineligible",
+      "reason": "JS class whose instances are used as JS runtime type tokens. Equality is checked via JS object identity. Cannot be serialised to/from WASM without losing identity semantics."
+    },
+    {
+      "name": "Series",
+      "module": "core/series",
+      "status": "ts-only-ineligible",
+      "reason": "High-level JS class whose methods accept arbitrary JS callbacks, return new Series instances, and interoperate with JS accessors, Index objects, and the extension registry. Porting at the class level would require replacing the entire TS implementation."
+    },
+    {
+      "name": "DataFrame",
+      "module": "core/frame",
+      "status": "ts-only-ineligible",
+      "reason": "Same as Series: high-level JS class with arbitrary JS callbacks, JS accessors, rolling/expanding/ewm subclasses, and deep interoperation with Series and Index."
+    },
+    {
+      "name": "DataFrameRolling",
+      "module": "core/frame",
+      "status": "ts-only-ineligible",
+      "reason": "Inner class of DataFrame; window computation returns new DataFrame/Series instances and accepts JS callbacks."
+    },
+    {
+      "name": "DataFrameExpanding",
+      "module": "core/frame",
+      "status": "ts-only-ineligible",
+      "reason": "Inner class of DataFrame; same reasoning as DataFrameRolling."
+    },
+    {
+      "name": "DataFrameEwm",
+      "module": "core/frame",
+      "status": "ts-only-ineligible",
+      "reason": "Inner class of DataFrame; exponentially weighted window — depends on JS class state and returns DataFrame/Series."
+    },
+    {
+      "name": "StringAccessor",
+      "module": "core/string_accessor",
+      "status": "ts-only-ineligible",
+      "reason": "JS accessor class exposing string operations that use JS regex and Intl APIs internally. Many operations have no WASM equivalent without reimplementing the JS Unicode/Intl stack."
+    },
+    {
+      "name": "DatetimeAccessor",
+      "module": "core/datetime_accessor",
+      "status": "ts-only-ineligible",
+      "reason": "Wraps JS Date arithmetic and timezone conversions. Correctness depends on the JS Temporal/Intl system which cannot be reproduced from WASM without calling back into JS."
+    },
+    {
+      "name": "CategoricalAccessor",
+      "module": "core/cat_accessor",
+      "status": "ts-only-ineligible",
+      "reason": "JS accessor that manages a categorical code/categories array pair stored as JS arrays with JS object identity. No isolated numeric kernel."
+    },
+    {
+      "name": "MultiIndex",
+      "module": "core/multi_index",
+      "status": "ts-only-ineligible",
+      "reason": "JS class holding multiple JS Index objects; label lookup uses JS Map with tuple keys represented as strings. Deep JS-identity dependency."
+    },
+    {
+      "name": "Interval",
+      "module": "core/interval",
+      "status": "ts-only-ineligible",
+      "reason": "JS class whose endpoints can be arbitrary Scalar values (including JS Date and Timedelta instances). Cannot be serialised to WASM without losing JS object semantics."
+    },
+    {
+      "name": "IntervalIndex",
+      "module": "core/interval",
+      "status": "ts-only-ineligible",
+      "reason": "Inherits from Index; holds Interval instances. Same JS-identity constraint as Interval."
+    },
+    {
+      "name": "CategoricalIndex",
+      "module": "core/categorical_index",
+      "status": "ts-only-ineligible",
+      "reason": "JS class for categorical index labels; depends on JS Map/Set identity for deduplication."
+    },
+    {
+      "name": "Period",
+      "module": "core/period",
+      "status": "ts-only-ineligible",
+      "reason": "JS class wrapping a period value with frequency metadata. Arithmetic calls JS Date methods and the date-offset registry."
+    },
+    {
+      "name": "PeriodIndex",
+      "module": "core/period",
+      "status": "ts-only-ineligible",
+      "reason": "Holds Period instances; inherits from Index. Same JS-identity dependency as Period."
+    },
+    {
+      "name": "Timedelta",
+      "module": "core/timedelta",
+      "status": "ts-only-ineligible",
+      "reason": "JS class wrapping a duration in milliseconds plus component accessors. Arithmetic depends on JS Date. No isolated WASM-friendly kernel."
+    },
+    {
+      "name": "TimedeltaIndex",
+      "module": "core/timedelta",
+      "status": "ts-only-ineligible",
+      "reason": "Holds Timedelta instances; inherits from Index. Same JS dependency as Timedelta."
+    },
+    {
+      "name": "timedelta_range",
+      "module": "core/timedelta_range",
+      "status": "ts-only-ineligible",
+      "reason": "Generates a TimedeltaIndex using JS Date arithmetic. Output is a JS class instance array."
+    },
+    {
+      "name": "Day",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; applies/rolls dates using JS Date. Cannot function independently of the JS date system."
+    },
+    {
+      "name": "Hour",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; same reasoning as Day."
+    },
+    {
+      "name": "Minute",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; same reasoning as Day."
+    },
+    {
+      "name": "Second",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; same reasoning as Day."
+    },
+    {
+      "name": "Milli",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; same reasoning as Day."
+    },
+    {
+      "name": "Week",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; same reasoning as Day."
+    },
+    {
+      "name": "MonthEnd",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; end-of-month rollforward requires JS Date.setFullYear/setMonth."
+    },
+    {
+      "name": "MonthBegin",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; same reasoning as MonthEnd."
+    },
+    {
+      "name": "YearEnd",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; same reasoning as MonthEnd."
+    },
+    {
+      "name": "YearBegin",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; same reasoning as MonthEnd."
+    },
+    {
+      "name": "BusinessDay",
+      "module": "core/date_offset",
+      "status": "ts-only-ineligible",
+      "reason": "JS DateOffset subclass; business-day skipping requires day-of-week arithmetic via JS Date."
+    },
+    {
+      "name": "DatetimeIndex",
+      "module": "core/date_range",
+      "status": "ts-only-ineligible",
+      "reason": "Holds JS Date timestamps; inherits from Index. All construction and arithmetic uses JS Date APIs."
+    },
+    {
+      "name": "date_range",
+      "module": "core/date_range",
+      "status": "ts-only-ineligible",
+      "reason": "Returns a DatetimeIndex generated by iterated JS Date arithmetic with date-offset objects."
+    },
+    {
+      "name": "bdate_range",
+      "module": "core/date_range",
+      "status": "ts-only-ineligible",
+      "reason": "Business-day date range; depends on JS Date weekday computation and the DateOffset registry."
+    },
+    {
+      "name": "resolveFreq",
+      "module": "core/date_range",
+      "status": "ts-only-ineligible",
+      "reason": "Parses a frequency string and returns a JS DateOffset instance from the runtime registry."
+    },
+    {
+      "name": "TZDatetimeIndex",
+      "module": "core/datetime_tz",
+      "status": "ts-only-ineligible",
+      "reason": "Holds timezone-aware JS Date values; localisation and conversion delegate entirely to the JS Intl.DateTimeFormat API."
+    },
+    {
+      "name": "tz_localize",
+      "module": "core/datetime_tz",
+      "status": "ts-only-ineligible",
+      "reason": "Creates a TZDatetimeIndex using JS Intl APIs; cannot run inside WASM."
+    },
+    {
+      "name": "tz_convert",
+      "module": "core/datetime_tz",
+      "status": "ts-only-ineligible",
+      "reason": "Converts between timezones via JS Intl.DateTimeFormat; same Intl dependency as tz_localize."
+    },
+    {
+      "name": "Timestamp",
+      "module": "core/timestamp",
+      "status": "ts-only-ineligible",
+      "reason": "JS wrapper around a nanosecond-precision timestamp. Format and parse operations delegate to JS Intl and Date. Object identity used throughout tsb's datetime pipeline."
+    },
+    {
+      "name": "dataFrameAssign",
+      "module": "core/assign",
+      "status": "ts-only-ineligible",
+      "reason": "Accepts an AssignSpec object whose values can be arbitrary JS functions (column transformers). Cannot be represented in WASM without callback round-trips."
+    },
+    {
+      "name": "reindexSeries",
+      "module": "core/reindex",
+      "status": "ts-only-ineligible",
+      "reason": "Operates on Series and Index JS class instances; fill methods (ffill/bfill) are JS-level operations on the resulting arrays. Porting requires migrating the entire Series/Index stack."
+    },
+    {
+      "name": "reindexDataFrame",
+      "module": "core/reindex",
+      "status": "ts-only-ineligible",
+      "reason": "Same as reindexSeries; additionally accepts optional fill_value which may be a JS object."
+    },
+    {
+      "name": "alignSeries",
+      "module": "core/align",
+      "status": "ts-only-ineligible",
+      "reason": "Returns a pair of re-indexed Series instances; depends entirely on JS class instances and the reindex pipeline."
+    },
+    {
+      "name": "alignDataFrame",
+      "module": "core/align",
+      "status": "ts-only-ineligible",
+      "reason": "Same as alignSeries for DataFrames."
+    },
+    {
+      "name": "insertColumn",
+      "module": "core/insert_pop",
+      "status": "ts-only-ineligible",
+      "reason": "Mutates a DataFrame JS object's column map. The DataFrame is a live JS instance; mutation is an in-place JS operation with no WASM-amenable equivalent."
+    },
+    {
+      "name": "popColumn",
+      "module": "core/insert_pop",
+      "status": "ts-only-ineligible",
+      "reason": "Same as insertColumn; removes a column from the DataFrame's internal JS Map."
+    },
+    {
+      "name": "reorderColumns",
+      "module": "core/insert_pop",
+      "status": "ts-only-ineligible",
+      "reason": "Reorders the JS Map entries in a DataFrame; depends on JS object mutation."
+    },
+    {
+      "name": "moveColumn",
+      "module": "core/insert_pop",
+      "status": "ts-only-ineligible",
+      "reason": "Combines reorder and insert; same JS object mutation dependency."
+    },
+    {
+      "name": "dataFrameFromPairs",
+      "module": "core/insert_pop",
+      "status": "ts-only-ineligible",
+      "reason": "Constructs a DataFrame from an array of [label, Series] pairs; returns a new JS DataFrame instance."
+    },
+    {
+      "name": "toDictOriented",
+      "module": "core/to_from_dict",
+      "status": "ts-only-ineligible",
+      "reason": "Serialises a DataFrame to a plain JS object with arbitrary key/value structure. Output type is a JS Record whose shape depends on the orient parameter."
+    },
+    {
+      "name": "fromDictOriented",
+      "module": "core/to_from_dict",
+      "status": "ts-only-ineligible",
+      "reason": "Deserialises a plain JS object to a DataFrame; input is an untyped JS object whose structure varies by orient."
+    },
+    {
+      "name": "getAttrs",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Returns a reference to the JS Attrs object (plain Record). Semantics are based on JS object identity; no numeric computation involved."
+    },
+    {
+      "name": "setAttrs",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Sets the attrs object on a Series/DataFrame using JS object identity. Pure JS metadata operation."
+    },
+    {
+      "name": "updateAttrs",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Merges an attrs object using Object.assign semantics; pure JS."
+    },
+    {
+      "name": "copyAttrs",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Shallow-copies an attrs Record; pure JS object operation."
+    },
+    {
+      "name": "withAttrs",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Returns a new Series/DataFrame with updated attrs; depends on JS class constructor."
+    },
+    {
+      "name": "clearAttrs",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Removes the attrs property; pure JS object mutation."
+    },
+    {
+      "name": "hasAttrs",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Checks for the attrs property presence; pure JS property check."
+    },
+    {
+      "name": "getAttr",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Key-value lookup in a JS object; pure JS property access."
+    },
+    {
+      "name": "setAttr",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Key-value write in a JS object; pure JS property mutation."
+    },
+    {
+      "name": "deleteAttr",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Deletes a key from a JS object; pure JS property mutation."
+    },
+    {
+      "name": "attrsCount",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Counts keys in a JS object using Object.keys; pure JS."
+    },
+    {
+      "name": "attrsKeys",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Returns Object.keys of a JS object; pure JS."
+    },
+    {
+      "name": "mergeAttrs",
+      "module": "core/attrs",
+      "status": "ts-only-ineligible",
+      "reason": "Merges two attrs Records using spread; pure JS object operation."
+    },
+    {
+      "name": "pipe",
+      "module": "core/pipe_apply",
+      "status": "ts-only-ineligible",
+      "reason": "Applies an arbitrary JS function to a value; callback semantics make WASM acceleration impossible without JS callback round-trips."
+    },
+    {
+      "name": "seriesApply",
+      "module": "core/pipe_apply",
+      "status": "ts-only-ineligible",
+      "reason": "Maps an arbitrary JS function over Series elements. Each invocation crosses the JS/WASM boundary per element; net cost would exceed benefit."
+    },
+    {
+      "name": "seriesTransform",
+      "module": "core/pipe_apply",
+      "status": "ts-only-ineligible",
+      "reason": "Same as seriesApply; accepts a JS callback that must run in the JS context."
+    },
+    {
+      "name": "dataFrameApply",
+      "module": "core/pipe_apply",
+      "status": "ts-only-ineligible",
+      "reason": "Applies a JS callback across DataFrame rows/columns. Callback semantics prevent WASM acceleration."
+    },
+    {
+      "name": "dataFrameApplyMap",
+      "module": "core/pipe_apply",
+      "status": "ts-only-ineligible",
+      "reason": "Element-wise JS callback across DataFrame cells; same boundary-crossing argument."
+    },
+    {
+      "name": "dataFrameTransform",
+      "module": "core/pipe_apply",
+      "status": "ts-only-ineligible",
+      "reason": "JS callback transform on DataFrame; same reasoning as dataFrameApply."
+    },
+    {
+      "name": "dataFrameTransformRows",
+      "module": "core/pipe_apply",
+      "status": "ts-only-ineligible",
+      "reason": "Row-wise JS callback transform; same reasoning."
+    },
+    {
+      "name": "isScalar",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "JS runtime type predicate that checks typeof, instanceof (Date, Timedelta), and symbol properties. No WASM-friendly primitive representation."
+    },
+    {
+      "name": "isListLike",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Checks for JS iterable/array-like protocol using Symbol.iterator; JS-specific duck-typing check."
+    },
+    {
+      "name": "isArrayLike",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Checks for JS .length property; pure JS duck-typing."
+    },
+    {
+      "name": "isDictLike",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Checks for a plain JS object with key/value access; JS-specific pattern."
+    },
+    {
+      "name": "isIterator",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Checks for the JS iterator protocol (Symbol.iterator + .next); JS-specific."
+    },
+    {
+      "name": "isNumber",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "typeof check; trivial JS predicate, no WASM benefit."
+    },
+    {
+      "name": "isBool",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "typeof check; trivial JS predicate."
+    },
+    {
+      "name": "isStringValue",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "typeof check; trivial JS predicate."
+    },
+    {
+      "name": "isFloat",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Number.isFinite check; trivial JS predicate."
+    },
+    {
+      "name": "isInteger",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Number.isInteger check; trivial JS predicate."
+    },
+    {
+      "name": "isBigInt",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "typeof check; trivial JS predicate."
+    },
+    {
+      "name": "isRegExp",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "instanceof RegExp check; JS-specific."
+    },
+    {
+      "name": "isReCompilable",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Checks whether a value can be used as a RegExp source; JS-specific."
+    },
+    {
+      "name": "isMissing",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "null/undefined check; trivial JS predicate."
+    },
+    {
+      "name": "isHashable",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Checks whether a value can be used as a JS Map key; JS-specific identity semantics."
+    },
+    {
+      "name": "isDate",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "instanceof Date check; JS-specific."
+    },
+    {
+      "name": "isNumericDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Checks whether a Dtype JS class instance represents a numeric kind; depends on JS class identity."
+    },
+    {
+      "name": "isIntegerDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check; same reasoning as isNumericDtype."
+    },
+    {
+      "name": "isSignedIntegerDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isUnsignedIntegerDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isFloatDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isBoolDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isStringDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isDatetimeDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isTimedeltaDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isCategoricalDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isObjectDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isComplexDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isExtensionArrayDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check using instanceof with ExtensionDtype."
+    },
+    {
+      "name": "isPeriodDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "isIntervalDtype",
+      "module": "core/api_types",
+      "status": "ts-only-ineligible",
+      "reason": "Dtype JS class instance check."
+    },
+    {
+      "name": "astypeSeries",
+      "module": "core/astype",
+      "status": "ts-only-ineligible",
+      "reason": "Type-casts a Series using a Dtype JS instance; depends on JS class hierarchy, optional custom converters (JS callbacks), and returns a new Series instance."
+    },
+    {
+      "name": "astype",
+      "module": "core/astype",
+      "status": "ts-only-ineligible",
+      "reason": "Same as astypeSeries; additionally handles DataFrame column-wise coercions."
+    },
+    {
+      "name": "castScalar",
+      "module": "core/astype",
+      "status": "ts-only-ineligible",
+      "reason": "Casts a single Scalar value to a target Dtype; the cast table is defined by JS Dtype class instances and includes JS Date and BigInt conversions."
+    },
+    {
+      "name": "ExtensionDtype",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Abstract JS base class for the extension type system. Instances are registered in a runtime JS Map. No numeric kernel; purely a JS polymorphism mechanism."
+    },
+    {
+      "name": "ExtensionArray",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Abstract JS base class for extension array types. Subclasses implement custom JS accessors. No WASM-accelerable kernel."
+    },
+    {
+      "name": "registerExtensionDtype",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Registers a JS class constructor in a runtime registry Map; pure JS dynamic dispatch mechanism."
+    },
+    {
+      "name": "constructExtensionDtypeFromString",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Looks up a registered ExtensionDtype constructor by string name and calls it; JS runtime dispatch."
+    },
+    {
+      "name": "registerSeriesAccessor",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Installs a JS getter on the Series prototype; JS runtime prototype mutation."
+    },
+    {
+      "name": "registerDataFrameAccessor",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Same as registerSeriesAccessor for DataFrame."
+    },
+    {
+      "name": "registerIndexAccessor",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Same as registerSeriesAccessor for Index."
+    },
+    {
+      "name": "getRegisteredAccessors",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Returns the current state of the accessor registry (a JS Map); pure JS runtime introspection."
+    },
+    {
+      "name": "apiExtensions",
+      "module": "core/extensions",
+      "status": "ts-only-ineligible",
+      "reason": "Namespace object bundling the extension API; not a function, purely a JS namespace accessor."
+    }
+  ],
+  "summary": {
+    "total_core_entries": 121,
+    "rust_wasm": 6,
+    "ts_only_ineligible": 115,
+    "unclassified": 0,
+    "eligible_missing": 0
+  }
+}

@@ -15,7 +15,9 @@
       "playground/serve.ts",
       "golden/snapshots/**",
       "benchmarks/**",
-      ".autoloop/**"
+      ".autoloop/**",
+      "rust/**",
+      "scripts/**"
     ]
   },
   "formatter": {

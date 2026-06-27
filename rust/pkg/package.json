@@ -1,0 +1,12 @@
+{
+  "name": "tsb-wasm",
+  "description": "Rust/WASM acceleration layer for tsb",
+  "version": "0.1.0",
+  "files": [
+    "tsb_wasm_bg.wasm",
+    "tsb_wasm.js",
+    "tsb_wasm.d.ts"
+  ],
+  "main": "tsb_wasm.js",
+  "types": "tsb_wasm.d.ts"
+}

@@ -1,0 +1,163 @@
+{
+  "benchmarks": [
+    {
+      "function": "searchsorted_f64",
+      "tsb": {
+        "mean_ms": 0.0008374999999999986,
+        "iterations": 1000,
+        "total_ms": 0.8374999999999986
+      },
+      "tsb_wasm": {
+        "mean_ms": 0.0021370410000000036,
+        "iterations": 1000,
+        "total_ms": 2.1370410000000035
+      },
+      "wasm_speedup": 0.39189702022562845
+    },
+    {
+      "function": "searchsorted_many_f64",
+      "tsb": {
+        "mean_ms": 0.0034607080000000037,
+        "iterations": 1000,
+        "total_ms": 3.460708000000004
+      },
+      "tsb_wasm": {
+        "mean_ms": 0.005887209000000006,
+        "iterations": 1000,
+        "total_ms": 5.887209000000006
+      },
+      "wasm_speedup": 0.5878350845026905
+    },
+    {
+      "function": "argsort_f64",
+      "tsb": {
+        "mean_ms": 0.1133425,
+        "iterations": 1000,
+        "total_ms": 113.3425
+      },
+      "tsb_wasm": {
+        "mean_ms": 0.01931533300000001,
+        "iterations": 1000,
+        "total_ms": 19.31533300000001
+      },
+      "wasm_speedup": 5.8680065210369365
+    },
+    {
+      "function": "searchsorted_str",
+      "tsb": {
+        "mean_ms": 0.00027391700000001153,
+        "iterations": 1000,
+        "total_ms": 0.2739170000000115
+      },
+      "tsb_wasm": {
+        "mean_ms": 0.002622792000000004,
+        "iterations": 1000,
+        "total_ms": 2.622792000000004
+      },
+      "wasm_speedup": 0.10443717992124847,
+      "notes": "String arrays are copied for each WASM call; raw kernel speedup is partially offset by copy overhead."
+    },
+    {
+      "function": "argsort_str",
+      "tsb": {
+        "mean_ms": 0.0004121250000000032,
+        "iterations": 1000,
+        "total_ms": 0.4121250000000032
+      },
+      "tsb_wasm": {
+        "mean_ms": 0.0014684579999999982,
+        "iterations": 1000,
+        "total_ms": 1.4684579999999983
+      },
+      "wasm_speedup": 0.28065154059564773,
+      "notes": "Same array-copy caveat as searchsorted_str."
+    },
+    {
+      "function": "nat_compare",
+      "tsb": {
+        "mean_ms": 0.0004783749999999998,
+        "iterations": 1000,
+        "total_ms": 0.4783749999999998
+      },
+      "tsb_wasm": {
+        "mean_ms": 0.001035334000000006,
+        "iterations": 1000,
+        "total_ms": 1.035334000000006
+      },
+      "wasm_speedup": 0.4620489619774846
+    },
+    {
+      "function": "nat_sorted",
+      "tsb": {
+        "mean_ms": 0.16902662499999996,
+        "iterations": 1000,
+        "total_ms": 169.02662499999997
+      },
+      "tsb_wasm": {
+        "mean_ms": 0.257211584,
+        "iterations": 1000,
+        "total_ms": 257.211584
+      },
+      "wasm_speedup": 0.6571501266443737
+    },
+    {
+      "function": "nat_argsort",
+      "tsb": {
+        "mean_ms": 0.03192166599999996,
+        "iterations": 1000,
+        "total_ms": 31.92166599999996
+      },
+      "tsb_wasm": {
+        "mean_ms": 0.035225500000000014,
+        "iterations": 1000,
+        "total_ms": 35.22550000000001
+      },
+      "wasm_speedup": 0.9062090247122099
+    }
+  ],
+  "coverage": {
+    "unclassified": 0,
+    "eligible_missing": 0,
+    "total_core_entries": 121,
+    "rust_wasm": 6,
+    "ts_only_ineligible": 115
+  },
+  "timestamp": "2026-06-27T02:33:54.386Z",
+  "slower_than_typescript": [
+    {
+      "function": "searchsorted_f64",
+      "wasm_speedup": 0.39189702022562845,
+      "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
+    },
+    {
+      "function": "searchsorted_many_f64",
+      "wasm_speedup": 0.5878350845026905,
+      "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
+    },
+    {
+      "function": "searchsorted_str",
+      "wasm_speedup": 0.10443717992124847,
+      "explanation": "String arrays are copied for each WASM call; raw kernel speedup is partially offset by copy overhead."
+    },
+    {
+      "function": "argsort_str",
+      "wasm_speedup": 0.28065154059564773,
+      "explanation": "Same array-copy caveat as searchsorted_str."
+    },
+    {
+      "function": "nat_compare",
+      "wasm_speedup": 0.4620489619774846,
+      "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
+    },
+    {
+      "function": "nat_sorted",
+      "wasm_speedup": 0.6571501266443737,
+      "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
+    },
+    {
+      "function": "nat_argsort",
+      "wasm_speedup": 0.9062090247122099,
+      "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
+    }
+  ]
+}
