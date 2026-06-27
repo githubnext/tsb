@@ -1,1 +1,1 @@
-{"pr":323,"sha":"a0a9c7b","skill":"deterministic-repair","helped":true,"action":"rewrote 9 playground HTML files to standard template","tests_fixed":52,"date":"2026-06-27"}
+{"pr":323,"run_sha":"5e8c7f61274572b6477b58a8db7f5e9c2e672722","result_sha":"031f503","skills":["pr-intake","diff-risk-map","ci-log-parser","deterministic-repair"],"tests_fixed":68,"files_changed":17,"outcome":"repair_pushed","timestamp":"2025-07-25"}
