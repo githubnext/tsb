@@ -501,6 +501,23 @@ export function toXml(df: DataFrame, options: ToXmlOptions = {}): string {
   const columns = df.columns.toArray();
   const nRows = df.shape[0];
 
+  // Build unique XML element names, resolving any sanitization collisions.
+  const assignedTags = new Set<string>();
+  const resolvedTags = columns.map((col) => {
+    const base = toXmlName(col);
+    if (!assignedTags.has(base)) {
+      assignedTags.add(base);
+      return base;
+    }
+    let i = 1;
+    while (assignedTags.has(`${base}_${i}`)) {
+      i++;
+    }
+    const unique = `${base}_${i}`;
+    assignedTags.add(unique);
+    return unique;
+  });
+
   for (let i = 0; i < nRows; i++) {
     const rowValues: string[] = [];
     for (const col of columns) {
@@ -511,8 +528,8 @@ export function toXml(df: DataFrame, options: ToXmlOptions = {}): string {
 
     if (attribs) {
       // emit as attributes on the row element
-      const attrStr = columns
-        .map((c, j) => `${toXmlName(c)}="${encodeEntities(rowValues[j] ?? "")}"`)
+      const attrStr = resolvedTags
+        .map((tag, j) => `${tag}="${encodeEntities(rowValues[j] ?? "")}"`)
         .join(" ");
       lines.push(`${ind}<${rowName} ${attrStr}/>`);
     } else {
@@ -520,7 +537,7 @@ export function toXml(df: DataFrame, options: ToXmlOptions = {}): string {
       const childLines: string[] = [];
       for (let j = 0; j < columns.length; j++) {
         const col = columns[j] ?? "";
-        const tag = toXmlName(col);
+        const tag = resolvedTags[j] ?? toXmlName(col);
         const raw = rowValues[j] ?? "";
         const isCdata = cdataCols.includes(col);
         const content = isCdata ? `<![CDATA[${raw}]]>` : encodeEntities(raw);
