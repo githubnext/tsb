@@ -8,10 +8,10 @@ This file is maintained by the Goal workflow. Maintainers may edit guidance sect
 |-------|-------|
 | Issue | #349 |
 | Branch | `goal/349-goal-add-rust-wasm-acceleration-coverage-for-core-functions` |
-| PR | - |
-| Status | needs_action |
-| Last Run | 2026-06-26T22:55:18Z |
-| Run Count | 1 |
+| PR | (pending) |
+| Status | active |
+| Last Run | 2026-06-27T00:00:00Z |
+| Run Count | 2 |
 | Completed | false |
 | Completed Reason | - |
 | Blocked | false |
@@ -19,7 +19,7 @@ This file is maintained by the Goal workflow. Maintainers may edit guidance sect
 
 ## Current Checkpoint
 
-- Run 1: `needs_action` — scheduler detected `completion_contract` and `scope` as missing sections, though both `## Completion Contract` and `## Scope and Constraints` are present in the issue body. Awaiting clarification or issue update before proceeding with implementation.
+- Run 2: Rust crate + WASM build + TS glue layer + coverage manifest + parity tests + benchmarks. All scripts pass (`wasm:build`, `wasm:test`, `wasm:coverage`, `bench:wasm-core`). Lint passes (0 errors). Typecheck passes. 35/35 parity tests pass. Awaiting PR creation and completion contract verification.
 
 ## Human Guidance
 
@@ -27,8 +27,14 @@ This file is maintained by the Goal workflow. Maintainers may edit guidance sect
 
 ## Evidence Log
 
-- None yet.
+- Run 2: `bun run wasm:test` — 35/35 parity tests pass
+- Run 2: `bun run lint` — 0 errors (628 warnings, baseline had 117 errors)
+- Run 2: `bun run typecheck` — passes
+- Run 2: `bun run wasm:coverage` — PASS: 121 entries (6 rust-wasm, 115 ts-only-ineligible, 0 unclassified, 0 eligible_missing)
+- Run 2: `bun run bench:wasm-core` — PASS: 8 benchmarks, results-wasm-core.json written
+- Run 2: evidence Python checks — ALL CHECKS PASS
 
 ## Run History
 
-- Run 1 (2026-06-26T22:55:18Z): `needs_action` — scheduler flagged missing sections. Sections appear present in the issue body; possible detection mismatch. Posted clarification comment.
+- Run 1 (2026-06-26T22:55:18Z): `needs_action` — scheduler flagged missing sections. Posted clarification comment.
+- Run 2 (2026-06-27): `active` — Full implementation: Rust crate, WASM build, TS layer, coverage manifest, 35 parity tests, benchmarks. All verification passes.
