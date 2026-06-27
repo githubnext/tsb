@@ -8,7 +8,7 @@
  */
 import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
-import { gaussianKDE, GaussianKDE } from "../../src/index.ts";
+import { GaussianKDE, gaussianKDE } from "../../src/index.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,13 +68,13 @@ describe("gaussianKDE — bandwidth selection", () => {
 
   it("silverman bandwidth: (4/(3n))^(1/5) * σ", () => {
     const kde = gaussianKDE(data, { bw_method: "silverman" });
-    const expected = Math.pow(4 / (3 * n), 0.2) * sigma;
+    const expected = (4 / (3 * n)) ** 0.2 * sigma;
     expect(r(kde.factor, 6)).toBeCloseTo(r(expected, 6), 5);
   });
 
   it("scott bandwidth: n^(-1/5) * σ", () => {
     const kde = gaussianKDE(data, { bw_method: "scott" });
-    const expected = Math.pow(n, -0.2) * sigma;
+    const expected = n ** -0.2 * sigma;
     expect(r(kde.factor, 6)).toBeCloseTo(r(expected, 6), 5);
   });
 

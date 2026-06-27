@@ -182,16 +182,14 @@ export class GaussianKDE {
 
   // ── constructor (internal — use gaussianKDE()) ─────────────────────────────
 
-  constructor(
-    dataset: readonly number[],
-    factor: number,
-    weights: readonly number[],
-  ) {
+  constructor(dataset: readonly number[], factor: number, weights: readonly number[]) {
     if (dataset.length === 0) {
       throw new RangeError("gaussianKDE: dataset must not be empty");
     }
     if (factor <= 0 || !Number.isFinite(factor)) {
-      throw new RangeError(`gaussianKDE: bandwidth factor must be a positive finite number, got ${factor}`);
+      throw new RangeError(
+        `gaussianKDE: bandwidth factor must be a positive finite number, got ${factor}`,
+      );
     }
     this.dataset = dataset.slice();
     this.weights = weights.slice();
@@ -332,8 +330,8 @@ export class GaussianKDE {
     const dataMax = Math.max(...this.dataset);
     const clip = 6 * sigma + Math.max(Math.abs(dataMin), Math.abs(dataMax), sigma);
 
-    const lo = !Number.isFinite(low) ? (low < 0 ? dataMin - clip : dataMax + clip) : low;
-    const hi = !Number.isFinite(high) ? (high > 0 ? dataMax + clip : dataMin - clip) : high;
+    const lo = Number.isFinite(low) ? low : low < 0 ? dataMin - clip : dataMax + clip;
+    const hi = Number.isFinite(high) ? high : high > 0 ? dataMax + clip : dataMin - clip;
 
     if (lo >= hi) {
       return 0;
@@ -400,7 +398,7 @@ export class GaussianKDE {
    * ```
    */
   resample(size: number, seed?: number): number[] {
-    const rng = makeRng(seed ?? (Date.now() ^ Math.trunc(Math.random() * 0x7fff_ffff)));
+    const rng = makeRng(seed ?? Date.now() ^ Math.trunc(Math.random() * 0x7fff_ffff));
     const ds = this.dataset;
     const ws = this.weights;
     const n = ds.length;
@@ -594,10 +592,10 @@ export function gaussianKDE(
   const bwMethod = options.bw_method ?? "silverman";
   if (bwMethod === "silverman") {
     // h = (4/(3*n))^(1/5) * σ
-    bwFactor = Math.pow(4 / (3 * neff), 0.2) * sigma;
+    bwFactor = (4 / (3 * neff)) ** 0.2 * sigma;
   } else if (bwMethod === "scott") {
     // h = n^(-1/5) * σ
-    bwFactor = Math.pow(neff, -0.2) * sigma;
+    bwFactor = neff ** -0.2 * sigma;
   } else {
     // Scalar factor: h = bw_method * σ  (consistent with scipy)
     if (bwMethod <= 0 || !Number.isFinite(bwMethod)) {

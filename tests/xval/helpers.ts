@@ -86,19 +86,14 @@ function assertDataFrameMatchesSnapshot(actual: DataFrame, step: SnapshotStep): 
   const expectedRows = expectMatrix(step);
   const expectedColumns = labelKeys(expectIndex(step.columns).values);
   const expectedIndex = labelKeys(expectIndex(step.index).values);
-  // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
   expect([...actual.shape]).toEqual([...(step.shape ?? [])]);
-  // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
   expect([...actual.columns.values]).toEqual(expectedColumns);
-  // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
   expect([...actual.index.values]).toEqual(expectedIndex);
   const actualRows = actual.toArray();
-  // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
   expect(actualRows.length).toBe(expectedRows.length);
   for (let row = 0; row < expectedRows.length; row++) {
     const actualRow = actualRows[row];
     const expectedRow = expectedRows[row];
-    // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
     expect(actualRow?.length).toBe(expectedRow?.length);
     for (let col = 0; col < expectedColumns.length; col++) {
       assertJsonEqual(
@@ -108,16 +103,13 @@ function assertDataFrameMatchesSnapshot(actual: DataFrame, step: SnapshotStep): 
       );
     }
   }
-  // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
   expect(Object.keys(step.dtypes ?? {}).length).toBe(expectedColumns.length);
 }
 
 function assertSeriesMatchesSnapshot(actual: Series<Scalar>, step: SnapshotStep): void {
   const expectedValues = expectVector(step);
   const expectedIndex = labelKeys(expectIndex(step.index).values);
-  // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
   expect([...actual.index.values]).toEqual(expectedIndex);
-  // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
   expect(actual.values.length).toBe(expectedValues.length);
   for (let pos = 0; pos < expectedValues.length; pos++) {
     assertJsonEqual(
@@ -126,7 +118,6 @@ function assertSeriesMatchesSnapshot(actual: Series<Scalar>, step: SnapshotStep)
       `STEP ${step.step} [${pos}]`,
     );
   }
-  // biome-ignore lint/suspicious/noMisplacedAssertion: helper called from within test blocks
   expect(step.dtype).toBeDefined();
 }
 

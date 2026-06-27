@@ -61,6 +61,12 @@ const NON_PLAYGROUND_PAGES = new Set<string>([
   "read_table.html",
   "sql.html",
   "stata.html",
+  "arrays.html",
+  "contingency.html",
+  "holiday.html",
+  "kde.html",
+  "multivariate.html",
+  "sas.html",
 ]);
 
 const PORT = 3399;
