@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-26T19:37:00Z |
-| Iteration Count | 375 |
-| Best Metric | 714 |
+| Last Run | 2026-06-27T07:46:17Z |
+| Iteration Count | 376 |
+| Best Metric | 717 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #328 |
@@ -23,8 +23,6 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
-
-
 
 ---
 
@@ -71,19 +69,9 @@
 
 ## 📊 Iteration History
 
-### Iteration 375 — 2026-06-26 19:37 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28260214481)
+### Iteration 376 — 2026-06-27 07:46 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28282891663)
 - **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: resample_ohlc (SeriesResampler.ohlc()), resample_first_last (SeriesResampler.first()/.last()), resample_std_var_size (SeriesResampler.std()/.var()/.size()).
-- **Metric**: 714 (previous best: 711, delta: +3)
+- **Change**: Add 3 pairs: dataframe_iterrows, dataframe_items, dataframe_from_records.
+- **Metric**: 717 (previous best: 714, delta: +3)
 
-### Iteration 374 — 2026-06-25 20:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28211440553)
-- **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: dataframe_itertuples (DataFrame.itertuples() row iteration), series_items_iter (Series.items()/iteritems() pairs), nanprod (nanprod() product ignoring NaN vs pd.Series.prod()).
-- **Metric**: 711 (previous best: 708, delta: +3)
-
-### Iteration 373 — 2026-06-25 13:32 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28173787476)
-- **Status**: ✅ Accepted
-- **Change**: Add 3 pairs: styler_table_props (setProperties/setTableStyles/setTableAttributes/hide/setPrecision/setNaRep/clearStyles), errors (pd.errors namespace), extensions (ExtensionDtype/ExtensionArray/accessor registration).
-- **Metric**: 708 (previous best: 705, delta: +3)
-
-### Iters 363–374 — ✅ (675→711): 363: merge_asof/cross_join/join_all; 364: shift_diff/sort_ops/pow_mod; 365: at_iat/filter_series/truncate_df; 366: convert_dtypes/series_format_table/str_findall_expand; 367: numeric_ops_log2_exp/dataframe_transform_named/series_compare_pair; 368: get_set_option/xs_series/dataframe_update; 369: series_to_markdown/dataframe_compare_pair/resample_dataframe; 370: autocorr/window_indexers/series_dot_dataframe; 371: series_setaxis_toframe/item_bool_extract/option_context; 372: to_latex/styler_format/styler_highlight_adv; 373: styler_table_props/errors/extensions; 374: dataframe_itertuples/series_items_iter/nanprod.
+### Iters 363–375 — ✅ (675→714): 363: merge_asof/cross_join/join_all; 364: shift_diff/sort_ops/pow_mod; 365: at_iat/filter_series/truncate_df; 366: convert_dtypes/series_format_table/str_findall_expand; 367: numeric_ops_log2_exp/dataframe_transform_named/series_compare_pair; 368: get_set_option/xs_series/dataframe_update; 369: series_to_markdown/dataframe_compare_pair/resample_dataframe; 370: autocorr/window_indexers/series_dot_dataframe; 371: series_setaxis_toframe/item_bool_extract/option_context; 372: to_latex/styler_format/styler_highlight_adv; 373: styler_table_props/errors/extensions; 374: dataframe_itertuples/series_items_iter/nanprod; 375: resample_ohlc/resample_first_last/resample_std_var_size.
