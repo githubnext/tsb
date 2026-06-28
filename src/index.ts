@@ -991,3 +991,20 @@ export type {
 // Kernel Density Estimation — gaussianKDE (mirrors scipy.stats.gaussian_kde)
 export { gaussianKDE, GaussianKDE } from "./stats/kde.ts";
 export type { GaussianKDEOptions } from "./stats/kde.ts";
+
+// information theory — entropy, KL, JS divergence, MI, conditional entropy, Rényi, Tsallis
+export {
+  entropy,
+  klDivergence,
+  jsDivergence,
+  jsDistance,
+  crossEntropy,
+  jointEntropy,
+  conditionalEntropy,
+  mutualInformation,
+  normalizedMI,
+  variationOfInformation,
+  renyiEntropy,
+  tsallisEntropy,
+} from "./stats/information.ts";
+export type { PMF, NMIMethod } from "./stats/information.ts";

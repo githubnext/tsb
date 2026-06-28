@@ -560,3 +560,18 @@ export type {
 } from "./bootstrap.ts";
 export { gaussianKDE, GaussianKDE } from "./kde.ts";
 export type { GaussianKDEOptions } from "./kde.ts";
+export {
+  entropy,
+  klDivergence,
+  jsDivergence,
+  jsDistance,
+  crossEntropy,
+  jointEntropy,
+  conditionalEntropy,
+  mutualInformation,
+  normalizedMI,
+  variationOfInformation,
+  renyiEntropy,
+  tsallisEntropy,
+} from "./information.ts";
+export type { PMF, NMIMethod } from "./information.ts";
