@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-27T13:30:00Z |
-| Iteration Count | 382 |
+| Last Run | 2026-06-28T01:32:38Z |
+| Iteration Count | 383 |
 | Best Metric | 180 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -25,7 +25,7 @@
 
 ## 🎯 Current Priorities
 
-- More io/stats features; next: read_orc, or signal processing (FFT/STFT/Welch/window functions)
+- More io/stats features; next: signal processing (FFT/STFT/Welch/window functions) or read_orc
 
 ---
 
@@ -49,11 +49,17 @@
 
 ## 📊 Iteration History
 
+### Iteration 383 — 2026-06-28 01:32 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28307658144)
+- **Status**: ✅ Accepted
+- **Change**: Add `src/stats/information.ts` — Shannon entropy, KL divergence, Jensen-Shannon divergence/distance, cross-entropy, mutual information, conditional entropy, normalised MI, variation of information, joint entropy, Rényi entropy, Tsallis entropy. 65+ unit + property-based tests + playground/information.html.
+- **Metric**: 179 → 180 (Δ+1) — state file had stale best_metric=180 (iter 382 commit 9e39fce was absent from branch); actual branch was at 179
+- **Commit**: 07109e9
+- **Notes**: Branch was behind main (ahead=102, behind=40); used direct checkout of remote branch (no rebase) to avoid non-fast-forward push issues. `buildJointCounts` with `String()` keys avoids any `as` casts on generic T/U observation types.
+
 ### Iteration 382 — 2026-06-27 13:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28290293476)
-- **Status**: ✅ Accepted (pre-existing CI failures unrelated to this module; iter 381 push was abortive — actual branch had 179 files)
-- **Change**: Add `src/stats/information.ts` — Shannon entropy, KL divergence, Jensen-Shannon divergence/distance, cross-entropy, mutual information, conditional entropy, normalised MI, variation of information, joint entropy, Rényi entropy, Tsallis entropy. 60+ tests + property-based tests + playground/information.html.
-- **Metric**: 179 → 180 (Δ+1)
-- **Commit**: 9e39fce
+- **Status**: ⚠️ Abortive — commit 9e39fce recorded in state but was absent from remote branch (push did not persist)
+- **Change**: Attempted `src/stats/information.ts` (same module)
+- **Metric**: 179 → 180 (claimed; push failed — actual branch stayed at 179)
 
 ### Iteration 381 — 2026-06-27 01:29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28274439257)
 - **Status**: ⚠️ Abortive — commit 3ee559e (signal.ts) recorded in state but never on remote branch
