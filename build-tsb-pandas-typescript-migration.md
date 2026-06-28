@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-28T01:32:38Z |
-| Iteration Count | 383 |
-| Best Metric | 180 |
+| Last Run | 2026-06-28T03:05:00Z |
+| Iteration Count | 384 |
+| Best Metric | 184 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io/stats features; next: signal processing (FFT/STFT/Welch/window functions) or read_orc
+- More io/stats features; next: read_orc, or advanced numeric (interpolation, signal deconvolution)
 
 ---
 
@@ -38,7 +38,7 @@
 - **Binary**: Parquet (Thrift compact, zigzag varints, RLE def levels). Arrow/Feather (FlatBuffer). IBM 370 floats (BigInt). SAS7BDAT (IBM 370, Stata struct).
 - **PCA/Mahalanobis**: Jacobi eigendecomposition for symmetric covariance matrices. Closures in `PCAResult` (transform/inverseTransform) capture frozen state — clean fitted-model pattern.
 - **KDE**: Log-sum-exp in logPdf for numerical stability. Box-Muller transform + weighted CDF binary search for resample.
-- **FFT/signal**: Use `typeof v === "object"` narrowing to avoid `as` casts for `number | Complex` union. Cooley-Tukey radix-2 DIT iterative FFT. `as const` on object literals is fine (not a type cast).
+- **FFT/signal**: Use `typeof v === "object"` narrowing to avoid `as` casts for `number | Complex` union. Cooley-Tukey radix-2 DIT iterative FFT. `as const` on object literals is fine (not a type cast). `fftshift` half=⌊(n+1)/2⌋, `ifftshift` half=⌊n/2⌋ (NumPy-compatible). Biome `noExcessiveCognitiveComplexity` on nested-loop FFT/STFT — add ignore comment.
 - **Info theory**: Store `xyByKey: Map<string, [T, U]>` in `buildJointCounts` to avoid `as unknown as T` casts when looking up marginals. Avoids `as` cast entirely for generic observation types.
 
 ---
@@ -49,33 +49,17 @@
 
 ## 📊 Iteration History
 
-### Iteration 383 — 2026-06-28 01:32 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28307658144)
-- **Status**: ✅ Accepted
-- **Change**: Add `src/stats/information.ts` — Shannon entropy, KL divergence, Jensen-Shannon divergence/distance, cross-entropy, mutual information, conditional entropy, normalised MI, variation of information, joint entropy, Rényi entropy, Tsallis entropy. 65+ unit + property-based tests + playground/information.html.
-- **Metric**: 179 → 180 (Δ+1) — state file had stale best_metric=180 (iter 382 commit 9e39fce was absent from branch); actual branch was at 179
-- **Commit**: 07109e9
-- **Notes**: Branch was behind main (ahead=102, behind=40); used direct checkout of remote branch (no rebase) to avoid non-fast-forward push issues. `buildJointCounts` with `String()` keys avoids any `as` casts on generic T/U observation types.
+### Iteration 384 — 2026-06-28 03:05 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28323437397)
+- **Status**: ⏳ Pending CI
+- **Change**: Add `src/stats/signal.ts` — Cooley-Tukey radix-2 DIT FFT/IFFT/RFFT/IRFFT, fftFreq/rfftFreq, fftshift/ifftshift, 8 window functions (Hann/Hamming/Blackman/Bartlett/Kaiser/Boxcar/FlatTop/Nuttall) + getWindow(), STFT/ISTFT (overlap-add), Welch PSD (mean+median), periodogram. 22 exported functions + 4 types. Tests + playground/signal.html.
+- **Metric**: 183 → 184 (Δ+1) — branch was at 183 after rebase onto main; state had stale 180
+- **Commit**: dc68fa2
+- **Notes**: Branch had ahead=108,behind=40 vs origin → rebase. Push deferred via safeoutputs bundle. Signal attempt #3 (iters 381/382 had push failures).
 
-### Iteration 382 — 2026-06-27 13:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28290293476)
-- **Status**: ⚠️ Abortive — commit 9e39fce recorded in state but was absent from remote branch (push did not persist)
-- **Change**: Attempted `src/stats/information.ts` (same module)
-- **Metric**: 179 → 180 (claimed; push failed — actual branch stayed at 179)
+### Iteration 383 — 2026-06-28 — ✅ Accepted — [Run §28307658144](https://github.com/githubnext/tsb/actions/runs/28307658144)
+Add `src/stats/information.ts` (entropy/KL/MI/JSD/Rényi/Tsallis). 179→180 (branch at 179 after stale rebase). Commit 07109e9.
 
-### Iteration 381 — 2026-06-27 01:29 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28274439257)
-- **Status**: ⚠️ Abortive — commit 3ee559e (signal.ts) recorded in state but never on remote branch
-- **Change**: Attempted `src/stats/signal.ts` — FFT/IFFT/RFFT/IRFFT, signal windows, STFT, Welch PSD
-- **Metric**: 179 → 180 (claimed, but push failed; actual branch stayed at 179)
-
-### Iteration 380 — 2026-06-26 08:05 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28225452889)
-- **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
-- **Change**: Add `src/stats/kde.ts` — `gaussianKDE()` + `GaussianKDE` class. Silverman/Scott bandwidth rules, evaluate/pdf/logPdf/logpdf, Simpson's-rule integrate, analytic integrateGaussian, CDF, weighted KDE, resample with seeded xorshift* + Box-Muller. Tests + playground/kde.html.
-- **Metric**: 178 → 179 (Δ+1)
-- **Commit**: f219ee5
-
-### Iteration 379 — 2026-06-25 19:47 UTC
-- **Status**: ✅ accepted (pre-existing CI failures unrelated to this module)
-- **Change**: Add `src/stats/bootstrap.ts` — `bootstrap()` + `bootstrap1()`. Percentile, basic, BCa methods. Seeded xorshift* RNG, Peter Acklam probit, jackknife acceleration. Tests + playground/bootstrap.html.
-- **Metric**: 177 → 178 (Δ+1)
+### Iters 379–382 — 2026-06-25–27: ✅ kde.ts (178→179 f219ee5), ✅ bootstrap.ts (177→178); ⚠️ Abortive: signal.ts (381, 3ee559e push fail), information.ts (382, 9e39fce push fail).
 
 ### Iters 367–378 — ✅ (157→177): multivariate (PCA/Mahalanobis), contingency tables, regression (OLS/polyfit), hypothesis_tests (ttest/chi2/ANOVA/KS), bootstrap, sparse, to_excel, feather, hdf, pd.arrays (7 masked types), holiday calendars, offsets/frequencies, read_sas.
 
