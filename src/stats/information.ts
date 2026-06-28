@@ -107,7 +107,11 @@ function buildJointCounts<T, U>(
 }
 
 /** Shannon entropy from a frequency-count Map with total `n`. */
-function entropyFromCounts(counts: Map<string, number>, n: number, base: number | undefined): number {
+function entropyFromCounts(
+  counts: Map<string, number>,
+  n: number,
+  base: number | undefined,
+): number {
   let h = 0;
   for (const count of counts.values()) {
     const p = count / n;
@@ -156,7 +160,7 @@ export function entropy(pk: PMF, qk?: PMF, base?: number): number {
   let kl = 0;
   const len = Math.max(pk.length, qk.length);
   for (let i = 0; i < len; i++) {
-    const pi = ((pk[i] ?? 0) / pTotal);
+    const pi = (pk[i] ?? 0) / pTotal;
     if (pi <= 0) {
       continue;
     }
@@ -375,10 +379,7 @@ export function jointEntropy<T, U>(xy: readonly (readonly [T, U])[], base?: numb
  * @param base Logarithm base (default: natural log).
  * @returns Conditional entropy ≥ 0.
  */
-export function conditionalEntropy<T, U>(
-  xy: readonly (readonly [T, U])[],
-  base?: number,
-): number {
+export function conditionalEntropy<T, U>(xy: readonly (readonly [T, U])[], base?: number): number {
   if (xy.length === 0) {
     return 0;
   }
@@ -397,10 +398,7 @@ export function conditionalEntropy<T, U>(
  * @param base Logarithm base (default: natural log).
  * @returns Mutual information ≥ 0.
  */
-export function mutualInformation<T, U>(
-  xy: readonly (readonly [T, U])[],
-  base?: number,
-): number {
+export function mutualInformation<T, U>(xy: readonly (readonly [T, U])[], base?: number): number {
   if (xy.length === 0) {
     return 0;
   }

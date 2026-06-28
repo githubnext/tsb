@@ -11,13 +11,13 @@ import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
 import {
   GaussianKDE,
+  conditionalEntropy,
   crossEntropy,
   entropy,
   gaussianKDE,
-  jsDivergence,
-  jsDistance,
   jointEntropy,
-  conditionalEntropy,
+  jsDistance,
+  jsDivergence,
   klDivergence,
   mutualInformation,
   normalizedMI,
@@ -86,9 +86,9 @@ describe("entropy — Shannon", () => {
     const uniformH = entropy(uniform);
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: 0, max: 1, noNaN: true }), { minLength: n, maxLength: n }).filter(
-          (pk) => pk.some((v) => v > 0),
-        ),
+        fc
+          .array(fc.float({ min: 0, max: 1, noNaN: true }), { minLength: n, maxLength: n })
+          .filter((pk) => pk.some((v) => v > 0)),
         (pk) => {
           return entropy(pk) <= uniformH + 1e-10;
         },
@@ -334,7 +334,10 @@ describe("renyiEntropy", () => {
   it("Rényi entropy is always non-negative", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), { minLength: 1, maxLength: 10 }),
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), {
+          minLength: 1,
+          maxLength: 10,
+        }),
         fc.float({ min: 0, max: 20, noNaN: true }),
         (pk, alpha) => {
           return renyiEntropy(pk, alpha) >= -1e-10;
@@ -359,7 +362,10 @@ describe("tsallisEntropy", () => {
   it("Tsallis entropy is always non-negative", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), { minLength: 1, maxLength: 10 }),
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), {
+          minLength: 1,
+          maxLength: 10,
+        }),
         fc.float({ min: Math.fround(0.01), max: 20, noNaN: true }),
         (pk, q) => {
           return tsallisEntropy(pk, q) >= -1e-10;
@@ -468,13 +474,10 @@ describe("conditionalEntropy", () => {
   it("H(X|Y) ≥ 0", () => {
     fc.assert(
       fc.property(
-        fc.array(
-          fc.tuple(
-            fc.integer({ min: 0, max: 4 }),
-            fc.integer({ min: 0, max: 4 }),
-          ),
-          { minLength: 2, maxLength: 20 },
-        ),
+        fc.array(fc.tuple(fc.integer({ min: 0, max: 4 }), fc.integer({ min: 0, max: 4 })), {
+          minLength: 2,
+          maxLength: 20,
+        }),
         (pairs) => {
           const obs = pairs as [number, number][];
           return conditionalEntropy(obs) >= -1e-12;
@@ -535,10 +538,10 @@ describe("mutualInformation", () => {
   it("I(X;Y) ≥ 0", () => {
     fc.assert(
       fc.property(
-        fc.array(
-          fc.tuple(fc.integer({ min: 0, max: 3 }), fc.integer({ min: 0, max: 3 })),
-          { minLength: 2, maxLength: 20 },
-        ),
+        fc.array(fc.tuple(fc.integer({ min: 0, max: 3 }), fc.integer({ min: 0, max: 3 })), {
+          minLength: 2,
+          maxLength: 20,
+        }),
         (pairs) => {
           const obs = pairs as [number, number][];
           return mutualInformation(obs) >= -1e-12;
@@ -593,10 +596,10 @@ describe("mutualInformation", () => {
   it("I(X;Y) ≤ min(H(X), H(Y))", () => {
     fc.assert(
       fc.property(
-        fc.array(
-          fc.tuple(fc.integer({ min: 0, max: 4 }), fc.integer({ min: 0, max: 4 })),
-          { minLength: 2, maxLength: 20 },
-        ),
+        fc.array(fc.tuple(fc.integer({ min: 0, max: 4 }), fc.integer({ min: 0, max: 4 })), {
+          minLength: 2,
+          maxLength: 20,
+        }),
         (pairs) => {
           const obs = pairs as [number, number][];
           const mi = mutualInformation(obs);
@@ -644,10 +647,10 @@ describe("normalizedMI", () => {
   it("NMI ∈ [0, 1] for all methods", () => {
     fc.assert(
       fc.property(
-        fc.array(
-          fc.tuple(fc.integer({ min: 0, max: 4 }), fc.integer({ min: 0, max: 4 })),
-          { minLength: 2, maxLength: 20 },
-        ),
+        fc.array(fc.tuple(fc.integer({ min: 0, max: 4 }), fc.integer({ min: 0, max: 4 })), {
+          minLength: 2,
+          maxLength: 20,
+        }),
         (pairs) => {
           const obs = pairs as [number, number][];
           for (const method of ["arithmetic", "geometric", "min", "max"] as const) {
@@ -694,10 +697,10 @@ describe("variationOfInformation", () => {
   it("VI ≥ 0", () => {
     fc.assert(
       fc.property(
-        fc.array(
-          fc.tuple(fc.integer({ min: 0, max: 3 }), fc.integer({ min: 0, max: 3 })),
-          { minLength: 2, maxLength: 20 },
-        ),
+        fc.array(fc.tuple(fc.integer({ min: 0, max: 3 }), fc.integer({ min: 0, max: 3 })), {
+          minLength: 2,
+          maxLength: 20,
+        }),
         (pairs) => {
           const obs = pairs as [number, number][];
           return variationOfInformation(obs) >= -1e-12;
@@ -742,10 +745,7 @@ describe("variationOfInformation", () => {
       [0, 2],
     ];
     const obsSwapped: [number, number][] = obs.map(([x, y]) => [y, x]);
-    expect(r(variationOfInformation(obs))).toBeCloseTo(
-      r(variationOfInformation(obsSwapped)),
-      8,
-    );
+    expect(r(variationOfInformation(obs))).toBeCloseTo(r(variationOfInformation(obsSwapped)), 8);
   });
 });
 
