@@ -48,7 +48,7 @@ describe("entropy — Shannon", () => {
   });
 
   it("fair 4-sided die: ln(4) nats", () => {
-    expect(r(entropy([0.25, 0.25, 0.25, 0.25]))).toBeCloseTo(Math.log(4), 8);
+    expect(entropy([0.25, 0.25, 0.25, 0.25])).toBeCloseTo(Math.log(4), 8);
   });
 
   it("degenerate distribution: entropy = 0", () => {
@@ -100,7 +100,7 @@ describe("entropy — Shannon", () => {
     const p = [0.3, 0.7];
     const h_nats = entropy(p);
     const h_bits = entropy(p, undefined, 2);
-    expect(r(h_bits)).toBeCloseTo(h_nats / LN2, 8);
+    expect(h_bits).toBeCloseTo(h_nats / LN2, 8);
   });
 
   it("single-element distribution has zero entropy", () => {
@@ -111,7 +111,7 @@ describe("entropy — Shannon", () => {
   it("three-outcome entropy", () => {
     const p = [0.2, 0.3, 0.5];
     const expected = -(0.2 * Math.log(0.2) + 0.3 * Math.log(0.3) + 0.5 * Math.log(0.5));
-    expect(r(entropy(p))).toBeCloseTo(expected, 8);
+    expect(entropy(p)).toBeCloseTo(expected, 8);
   });
 });
 
@@ -120,7 +120,7 @@ describe("entropy — KL divergence mode", () => {
     const p = [0.5, 0.5];
     const q = [0.25, 0.75];
     const kl = 0.5 * Math.log(0.5 / 0.25) + 0.5 * Math.log(0.5 / 0.75);
-    expect(r(entropy(p, q))).toBeCloseTo(kl, 8);
+    expect(entropy(p, q)).toBeCloseTo(kl, 8);
   });
 
   it("D_KL(p‖p) = 0", () => {
@@ -139,11 +139,11 @@ describe("entropy — KL divergence mode", () => {
   it("KL divergence is always non-negative (Gibbs' inequality)", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: 1e-4, max: 1, noNaN: true }), {
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), {
           minLength: 2,
           maxLength: 10,
         }),
-        fc.array(fc.float({ min: 1e-4, max: 1, noNaN: true }), {
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), {
           minLength: 2,
           maxLength: 10,
         }),
@@ -168,8 +168,8 @@ describe("klDivergence", () => {
   });
 
   it("D_KL is asymmetric", () => {
-    const p = [0.2, 0.8];
-    const q = [0.8, 0.2];
+    const p = [0.1, 0.9];
+    const q = [0.4, 0.6];
     expect(klDivergence(p, q)).not.toBeCloseTo(klDivergence(q, p), 4);
   });
 });
@@ -190,11 +190,11 @@ describe("jsDivergence", () => {
   it("JSD ≤ ln(2) in nats", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: 1e-4, max: 1, noNaN: true }), {
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), {
           minLength: 2,
           maxLength: 8,
         }),
-        fc.array(fc.float({ min: 1e-4, max: 1, noNaN: true }), {
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), {
           minLength: 2,
           maxLength: 8,
         }),
@@ -220,7 +220,7 @@ describe("jsDivergence", () => {
 
   it("JSD of maximally different binary distributions ≤ ln(2)", () => {
     const jsd = jsDivergence([1, 0], [0, 1]);
-    expect(r(jsd)).toBeCloseTo(Math.log(2), 8);
+    expect(jsd).toBeCloseTo(Math.log(2), 8);
   });
 });
 
@@ -254,23 +254,23 @@ describe("jsDistance", () => {
 describe("crossEntropy", () => {
   it("H(p, p) = H(p)", () => {
     const p = [0.3, 0.4, 0.3];
-    expect(r(crossEntropy(p, p))).toBeCloseTo(entropy(p), 8);
+    expect(crossEntropy(p, p)).toBeCloseTo(entropy(p), 8);
   });
 
   it("H(p, q) = H(p) + D_KL(p‖q)", () => {
     const p = [0.3, 0.7];
     const q = [0.4, 0.6];
-    expect(r(crossEntropy(p, q))).toBeCloseTo(entropy(p) + klDivergence(p, q), 8);
+    expect(crossEntropy(p, q)).toBeCloseTo(entropy(p) + klDivergence(p, q), 8);
   });
 
   it("H(p, q) ≥ H(p)", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: 1e-4, max: 1, noNaN: true }), {
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), {
           minLength: 2,
           maxLength: 8,
         }),
-        fc.array(fc.float({ min: 1e-4, max: 1, noNaN: true }), {
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), {
           minLength: 2,
           maxLength: 8,
         }),
@@ -298,7 +298,7 @@ describe("crossEntropy", () => {
 describe("renyiEntropy", () => {
   it("α=1 limit equals Shannon entropy", () => {
     const p = [0.3, 0.4, 0.3];
-    expect(r(renyiEntropy(p, 1))).toBeCloseTo(entropy(p), 8);
+    expect(renyiEntropy(p, 1)).toBeCloseTo(entropy(p), 8);
     expect(r(renyiEntropy(p, 1.0000000001))).toBeCloseTo(entropy(p), 5);
   });
 
@@ -306,12 +306,12 @@ describe("renyiEntropy", () => {
     const p = [0.3, 0.4, 0.3];
     const pNorm = p.map((v) => v / p.reduce((a, b) => a + b, 0));
     const sumPow2 = pNorm.reduce((s, v) => s + v ** 2, 0);
-    expect(r(renyiEntropy(p, 2))).toBeCloseTo(-Math.log(sumPow2), 8);
+    expect(renyiEntropy(p, 2)).toBeCloseTo(-Math.log(sumPow2), 8);
   });
 
   it("α=0 equals log(support size)", () => {
     const p = [0.1, 0.9];
-    expect(r(renyiEntropy(p, 0))).toBeCloseTo(Math.log(2), 8);
+    expect(renyiEntropy(p, 0)).toBeCloseTo(Math.log(2), 8);
   });
 
   it("Rényi entropy is decreasing in α", () => {
@@ -334,7 +334,7 @@ describe("renyiEntropy", () => {
   it("Rényi entropy is always non-negative", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: 1e-4, max: 1, noNaN: true }), { minLength: 1, maxLength: 10 }),
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), { minLength: 1, maxLength: 10 }),
         fc.float({ min: 0, max: 20, noNaN: true }),
         (pk, alpha) => {
           return renyiEntropy(pk, alpha) >= -1e-10;
@@ -353,14 +353,14 @@ describe("renyiEntropy", () => {
 describe("tsallisEntropy", () => {
   it("q=1 limit equals Shannon entropy", () => {
     const p = [0.3, 0.4, 0.3];
-    expect(r(tsallisEntropy(p, 1))).toBeCloseTo(entropy(p), 8);
+    expect(tsallisEntropy(p, 1)).toBeCloseTo(entropy(p), 8);
   });
 
   it("Tsallis entropy is always non-negative", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: 1e-4, max: 1, noNaN: true }), { minLength: 1, maxLength: 10 }),
-        fc.float({ min: 0.01, max: 20, noNaN: true }),
+        fc.array(fc.float({ min: Math.fround(1e-4), max: 1, noNaN: true }), { minLength: 1, maxLength: 10 }),
+        fc.float({ min: Math.fround(0.01), max: 20, noNaN: true }),
         (pk, q) => {
           return tsallisEntropy(pk, q) >= -1e-10;
         },
@@ -501,7 +501,7 @@ describe("conditionalEntropy", () => {
       const p = c / obs.length;
       return s + p * Math.log(p);
     }, 0);
-    expect(r(conditionalEntropy(obs))).toBeCloseTo(hXY - hY, 8);
+    expect(conditionalEntropy(obs)).toBeCloseTo(hXY - hY, 8);
   });
 });
 
@@ -572,7 +572,7 @@ describe("mutualInformation", () => {
       const p = c / obs.length;
       return s + p * Math.log(p);
     }, 0);
-    expect(r(mi)).toBeCloseTo(hX + hY - hXY, 8);
+    expect(mi).toBeCloseTo(hX + hY - hXY, 8);
   });
 
   it("I(X;Y) in bits for known pair distribution", () => {
@@ -716,7 +716,6 @@ describe("variationOfInformation", () => {
     ];
     const vi = variationOfInformation(obs);
     const mi = mutualInformation(obs);
-    const hXY = jointEntropy(obs);
     const xCounts = new Map<string, number>();
     const yCounts = new Map<string, number>();
     for (const [x, y] of obs) {
@@ -731,7 +730,7 @@ describe("variationOfInformation", () => {
       const p = c / obs.length;
       return s + p * Math.log(p);
     }, 0);
-    expect(r(vi)).toBeCloseTo(hX + hY - 2 * mi, 8);
+    expect(vi).toBeCloseTo(hX + hY - 2 * mi, 8);
   });
 
   it("VI is symmetric: VI(X,Y) = VI(Y,X)", () => {
