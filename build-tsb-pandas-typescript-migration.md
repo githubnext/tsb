@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-28T19:20:00Z |
-| Iteration Count | 385 |
+| Last Run | 2026-06-29T08:58:47Z |
+| Iteration Count | 386 |
 | Best Metric | 184 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, accepted, pending-ci, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io/stats features; next: read_orc, or advanced numeric (signal deconvolution, wavelet transforms)
+- More io/stats features; next: read_orc, or advanced numeric (signal deconvolution, wavelet transforms, filter design)
 
 ---
 
@@ -48,6 +48,13 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 386 — 2026-06-29 08:58 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28358938651)
+- **Status**: ✅ Accepted
+- **Change**: Add `src/stats/signal.ts` — Cooley-Tukey radix-2 DIT FFT/IFFT/RFFT/IRFFT, fftFreq/rfftFreq, fftshift/ifftshift, 8 window functions + getWindow, STFT/ISTFT (overlap-add), Welch PSD (mean+median), periodogram. Tests + playground/signal.html + playground/index.html updated.
+- **Metric**: 183 → 184 (Δ+1); branch rebased onto main
+- **Commit**: 71df054
+- **Notes**: Iteration 385 claimed this change but push_to_pull_request_branch generated bundle. This iteration re-implements after re-verifying branch state, rebasing (ahead=108, behind=40), and committing correctly. Branch was at SHA 0ae2c3f before this push.
 
 ### Iteration 385 — 2026-06-28 19:20 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28333043306)
 - **Status**: ✅ Accepted (pending CI)
