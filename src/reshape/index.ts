@@ -14,3 +14,5 @@ export { wideToLong } from "./wide_to_long.ts";
 export type { WideToLongOptions } from "./wide_to_long.ts";
 export { pivotTableFull } from "./pivot_table.ts";
 export type { PivotTableFullOptions } from "./pivot_table.ts";
+export { lreshape } from "./lreshape.ts";
+export type { LreshapeGroups, LreshapeOptions } from "./lreshape.ts";

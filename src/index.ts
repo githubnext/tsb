@@ -62,6 +62,36 @@ export { toJsonDenormalize, toJsonRecords, toJsonSplit, toJsonIndex } from "./io
 export type { JsonDenormalizeOptions, JsonSplitOptions, JsonSplitResult } from "./io/index.ts";
 export { readHtml } from "./io/index.ts";
 export type { ReadHtmlOptions } from "./io/index.ts";
+export { readXml, toXml } from "./io/index.ts";
+export type { ReadXmlOptions, ToXmlOptions } from "./io/index.ts";
+export { readTable } from "./io/index.ts";
+export type { ReadTableOptions } from "./io/index.ts";
+export { readSql, readSqlQuery, readSqlTable, toSql } from "./io/index.ts";
+export { TableExistsError, TableNotFoundError } from "./io/index.ts";
+export { readStata, toStata } from "./io/index.ts";
+export type { ReadStataOptions, ToStataOptions } from "./io/index.ts";
+export { readParquet, toParquet } from "./io/index.ts";
+export type { ReadParquetOptions, ToParquetOptions } from "./io/index.ts";
+export { readFeather, toFeather } from "./io/index.ts";
+export type { ReadFeatherOptions, ToFeatherOptions } from "./io/index.ts";
+export { readHdf, toHdf } from "./io/index.ts";
+export type { ReadHdfOptions, ToHdfOptions } from "./io/index.ts";
+export { readFwf } from "./io/index.ts";
+export type { ReadFwfOptions, ColSpec } from "./io/index.ts";
+export { toExcel } from "./io/index.ts";
+export type { ToExcelOptions } from "./io/index.ts";
+export type {
+  SqlValue,
+  SqlRow,
+  SqlResult,
+  SqlConnection,
+  IfExistsStrategy,
+  ReadSqlBaseOptions,
+  ReadSqlQueryOptions,
+  ReadSqlTableOptions,
+  ReadSqlOptions,
+  ToSqlOptions,
+} from "./io/index.ts";
 export { pearsonCorr, dataFrameCorr, dataFrameCov } from "./stats/index.ts";
 export type { CorrMethod, CorrOptions, CovOptions } from "./stats/index.ts";
 export { Rolling } from "./window/index.ts";
@@ -103,6 +133,8 @@ export { wideToLong } from "./reshape/index.ts";
 export type { WideToLongOptions } from "./reshape/index.ts";
 export { pivotTableFull } from "./reshape/index.ts";
 export type { PivotTableFullOptions } from "./reshape/index.ts";
+export { lreshape } from "./reshape/index.ts";
+export type { LreshapeGroups, LreshapeOptions } from "./reshape/index.ts";
 export { MultiIndex } from "./core/index.ts";
 export type { MultiIndexOptions } from "./core/index.ts";
 export { rankSeries, rankDataFrame } from "./stats/index.ts";
@@ -783,3 +815,196 @@ export {
   IndexError,
 } from "./errors.ts";
 export type { PandasError } from "./errors.ts";
+export { DuplicateLabelError } from "./errors.ts";
+export { caseWhen } from "./stats/index.ts";
+export type { CaseWhenBranch, CaseWhenPredicate } from "./stats/index.ts";
+export { Flags, getFlags } from "./core/index.ts";
+export type { FlaggedObject } from "./core/index.ts";
+
+// pd.arrays — nullable typed extension arrays (also exported individually)
+export type {
+  FillValue,
+  IntegerDtypeName,
+  FloatingDtypeName,
+} from "./core/index.ts";
+
+import {
+  BooleanArray,
+  DatetimeArray,
+  FloatingArray,
+  IntegerArray,
+  MaskedArray,
+  StringArray,
+  TimedeltaArray,
+} from "./core/index.ts";
+export {
+  MaskedArray,
+  IntegerArray,
+  FloatingArray,
+  BooleanArray,
+  StringArray,
+  DatetimeArray,
+  TimedeltaArray,
+};
+
+/**
+ * `pd.arrays` namespace — mirrors `pandas.arrays`.
+ *
+ * Provides nullable typed extension arrays for integers, floats, booleans,
+ * strings, datetimes, and timedeltas.
+ *
+ * @example
+ * ```ts
+ * import { arrays } from "tsb";
+ * const a = arrays.IntegerArray.from([1, null, 3], "Int32");
+ * a.toArray(); // [1, null, 3]
+ * ```
+ */
+export const arrays = {
+  IntegerArray,
+  FloatingArray,
+  BooleanArray,
+  StringArray,
+  DatetimeArray,
+  TimedeltaArray,
+} as const;
+
+// pd.tseries — holiday calendars and observance helpers
+export {
+  Holiday,
+  AbstractHolidayCalendar,
+  USFederalHolidayCalendar,
+  USNewYearsDay,
+  USMartinLutherKingJrDay,
+  USPresidentsDay,
+  USMemorialDay,
+  USJuneteenth,
+  USIndependenceDay,
+  USLaborDay,
+  USColumbusDay,
+  USVeteransDay,
+  USThanksgivingDay,
+  USChristmasDay,
+  get_calendar,
+  register_calendar,
+  nearestWorkday,
+  sundayToMonday,
+  nextMonday,
+  nextMondayOrTuesday,
+  previousFriday,
+  previousWorkday,
+  MO,
+  TU,
+  WE,
+  TH,
+  FR,
+  SA,
+  SU,
+} from "./tseries/index.ts";
+export type {
+  WeekdayOffset,
+  ObservanceFn,
+  HolidayOptions,
+  HolidayCalendarOptions,
+} from "./tseries/index.ts";
+
+// pd.tseries.offsets — extended date offset classes
+export {
+  QuarterEnd,
+  QuarterBegin,
+  BMonthEnd,
+  BMonthBegin,
+  BYearEnd,
+  BYearBegin,
+} from "./tseries/offsets.ts";
+
+// pd.tseries.frequencies — frequency string utilities
+export { toOffset, inferFreq, FREQ_ALIASES } from "./tseries/frequencies.ts";
+
+// io.read_sas — SAS XPORT reader
+export { readSas } from "./io/read_sas.ts";
+export type { ReadSasOptions } from "./io/read_sas.ts";
+
+// pd.arrays.SparseArray / pd.SparseDtype — sparse storage for arrays
+// with many repeated (fill) values
+export { SparseArray, SparseDtype } from "./core/sparse.ts";
+
+// scipy-style hypothesis tests — ttest, chi2, ANOVA, KS, Mann-Whitney, etc.
+export {
+  ttest1samp,
+  ttestInd,
+  ttestRel,
+  chi2Contingency,
+  fOneway,
+  jarqueBera,
+  pearsonr,
+  spearmanr,
+  mannWhitneyU,
+  kstest,
+} from "./stats/hypothesis_tests.ts";
+export type {
+  HTestResult,
+  PearsonrResult,
+  SpearmanrResult,
+  Alternative,
+  Ttest1sampOptions,
+  TtestIndOptions,
+  MannWhitneyUOptions,
+  KstestOptions,
+  Chi2ContingencyResult,
+  CdfFn,
+} from "./stats/hypothesis_tests.ts";
+
+// linear/polynomial/OLS regression — linregress, polyfit, polyval, OLS
+export { linregress, polyfit, polyval, OLS } from "./stats/regression.ts";
+export type {
+  LinregressResult,
+  OLSResult,
+  OLSOptions,
+} from "./stats/regression.ts";
+
+// contingency table analysis — expectedFreq, relativeRisk, oddsRatio, association
+export { expectedFreq, relativeRisk, oddsRatio, association } from "./stats/contingency.ts";
+export type {
+  ContingencyTable,
+  AssociationMethod,
+  ConfidenceInterval,
+  RelativeRiskResult,
+  OddsRatioResult,
+} from "./stats/contingency.ts";
+
+// multivariate analysis — mahalanobis, PCA, covMatrix, invertMatrix
+export { mahalanobis, covMatrix, invertMatrix, PCA } from "./stats/multivariate.ts";
+export type { PCAOptions, PCAResult } from "./stats/multivariate.ts";
+
+// bootstrap — non-parametric confidence intervals
+export { bootstrap, bootstrap1 } from "./stats/bootstrap.ts";
+export type {
+  BootstrapResult,
+  BootstrapOptions,
+  BootstrapMethod,
+  BootstrapCI,
+  StatFn,
+  StatFn1,
+  StatFn2,
+} from "./stats/index.ts";
+// Kernel Density Estimation — gaussianKDE (mirrors scipy.stats.gaussian_kde)
+export { gaussianKDE, GaussianKDE } from "./stats/kde.ts";
+export type { GaussianKDEOptions } from "./stats/kde.ts";
+
+// information theory — entropy, KL, JS divergence, MI, conditional entropy, Rényi, Tsallis
+export {
+  entropy,
+  klDivergence,
+  jsDivergence,
+  jsDistance,
+  crossEntropy,
+  jointEntropy,
+  conditionalEntropy,
+  mutualInformation,
+  normalizedMI,
+  variationOfInformation,
+  renyiEntropy,
+  tsallisEntropy,
+} from "./stats/information.ts";
+export type { PMF, NMIMethod } from "./stats/information.ts";

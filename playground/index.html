@@ -236,6 +236,11 @@
           <div class="status done">✅ Complete</div>
         </div>
         <div class="feature-card">
+          <h3><a href="lreshape.html" style="color: var(--accent); text-decoration: none;">↕ lreshape</a></h3>
+          <p>Wide-to-long reshape with named column groups. Stack multiple wide columns into long columns with explicit grouping, dropna support.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
           <h3><a href="pivot.html" style="color: var(--accent); text-decoration: none;">🔄 pivot &amp; pivotTable</a></h3>
           <p>Reshape with aggregation. pivot() for unique reshaping; pivotTable() for aggregation (mean/sum/count/min/max/first/last) with fill_value and dropna support.</p>
           <div class="status done">✅ Complete</div>
@@ -328,6 +333,11 @@
         <div class="feature-card">
           <h3><a href="attrs.html" style="color: var(--accent); text-decoration: none;">🏷️ attrs — User Metadata</a></h3>
           <p>Attach arbitrary key→value metadata to any <code>Series</code> or <code>DataFrame</code> via a <strong>WeakMap registry</strong>. Provides <code>getAttrs</code>, <code>setAttrs</code>, <code>updateAttrs</code>, <code>copyAttrs</code>, <code>withAttrs</code>, <code>mergeAttrs</code>, <code>clearAttrs</code>, <code>getAttr</code>, <code>setAttr</code>, <code>deleteAttr</code>, <code>attrsCount</code>, <code>attrsKeys</code>. Mirrors <code>pandas.DataFrame.attrs</code> / <code>pandas.Series.attrs</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="flags.html" style="color: var(--accent); text-decoration: none;">🚩 flags — Metadata Flags</a></h3>
+          <p>Metadata flags for <code>DataFrame</code> and <code>Series</code>. The <code>flags</code> getter returns a <code>Flags</code> object with <code>allowsDuplicateLabels</code> property. Setting <code>allowsDuplicateLabels = false</code> on an object with duplicate index labels raises <code>DuplicateLabelError</code>. Mirrors <code>pandas.DataFrame.flags</code> / <code>pandas.core.flags.Flags</code>.</p>
           <div class="status done">✅ Complete</div>
         </div>
         <div class="feature-card">
@@ -499,6 +509,96 @@
         <div class="feature-card">
           <h3><a href="read_html.html" style="color: var(--accent); text-decoration: none;">🌐 readHtml — pd.read_html()</a></h3>
           <p>readHtml(html, opts?) — parse HTML tables into DataFrames. Header detection, NA handling, numeric coercion, thousands/decimal separators, indexCol, match filter. Mirrors pandas.read_html().</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="xml.html" style="color: var(--accent); text-decoration: none;">📄 readXml / toXml — pd.read_xml() / DataFrame.to_xml()</a></h3>
+          <p>readXml(text, opts?) / toXml(df, opts?) — parse XML into DataFrames and serialize back. rowTag auto-detection, attributes, CDATA, entities, namespaces, usecols, nrows, indexCol. Mirrors pandas.read_xml() / DataFrame.to_xml().</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="read_table.html" style="color: var(--accent); text-decoration: none;">📋 readTable — pd.read_table()</a></h3>
+          <p>readTable(text, opts?) — parse delimiter-separated text into a DataFrame. Defaults to tab separator; all ReadCsvOptions forwarded. Mirrors pandas.read_table().</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="sql.html" style="color: var(--accent); text-decoration: none;">🗄️ SQL I/O — pd.read_sql() / DataFrame.to_sql()</a></h3>
+          <p>readSql / readSqlQuery / readSqlTable / toSql — adapter-based SQL I/O. Bring your own DB driver; zero runtime dependencies. Mirrors pandas.read_sql(), read_sql_query(), read_sql_table(), DataFrame.to_sql().</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="stata.html" style="color: var(--accent); text-decoration: none;">📊 readStata &amp; toStata — pd.read_stata() / DataFrame.to_stata()</a></h3>
+          <p>readStata / toStata — Stata DTA binary file I/O. Supports reading v114/115 (old binary) and v117/118/119 (new XML-tagged) formats; writes v118. Missing values, string columns, value labels (convertCategoricals). Mirrors pandas.read_stata(), DataFrame.to_stata().</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="parquet.html" style="color: var(--accent); text-decoration: none;">📦 readParquet &amp; toParquet — pd.read_parquet() / DataFrame.to_parquet()</a></h3>
+          <p>readParquet / toParquet — Apache Parquet binary file I/O. Pure-TypeScript Thrift compact protocol, PLAIN encoding, INT32/INT64/DOUBLE/BOOLEAN/BYTE_ARRAY types, optional columns, usecols/nRows/indexCol/writeIndex. Mirrors pandas.read_parquet(), DataFrame.to_parquet().</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="fwf.html" style="color: var(--accent); text-decoration: none;">📐 readFwf — pd.read_fwf()</a></h3>
+          <p>readFwf(text, opts?) — read fixed-width formatted text into a DataFrame. Auto-infers column boundaries from whitespace patterns; supports explicit colspecs / widths, header, names, indexCol, NA handling, dtype forcing, skipRows, nRows. Mirrors pandas.read_fwf().</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="case_when.html" style="color: var(--accent); text-decoration: none;">🔀 case_when — pd.Series.case_when()</a></h3>
+          <p>caseWhen(series, caselist) — conditional value selection using ordered CASE WHEN semantics. Mirrors pandas.Series.case_when() (pandas 2.2+).</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="hdf.html" style="color: var(--accent); text-decoration: none;">🗂️ readHdf &amp; toHdf — pd.read_hdf() / DataFrame.to_hdf()</a></h3>
+          <p>readHdf / toHdf — HDF5 v0 Superblock binary file I/O. Pure-TypeScript, no native deps. Float64/32, Int/UInt 8–64, Bool, fixed-length UTF-8 strings. usecols, indexCol, writeIndex, custom key. Mirrors pandas.read_hdf(), DataFrame.to_hdf().</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="arrays.html" style="color: var(--accent); text-decoration: none;">🔢 pd.arrays — Nullable Typed Extension Arrays</a></h3>
+          <p>Nullable typed arrays: <code>IntegerArray</code>, <code>FloatingArray</code>, <code>BooleanArray</code>, <code>StringArray</code>, <code>DatetimeArray</code>, <code>TimedeltaArray</code>. Three-valued logic, NA masking, element-wise arithmetic, string ops. Mirrors <code>pandas.arrays</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="holiday.html" style="color: var(--accent); text-decoration: none;">🗓️ Holiday Calendars — pd.tseries.holiday</a></h3>
+          <p>Holiday calendar system: <code>Holiday</code> rules (fixed &amp; floating), <code>AbstractHolidayCalendar</code>, <code>USFederalHolidayCalendar</code> (11 US federal holidays), observance helpers (<code>nearestWorkday</code>, <code>sundayToMonday</code>, …), and weekday offsets (<code>MO</code>, <code>TH</code>, …). Mirrors <code>pandas.tseries.holiday</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="sparse.html" style="color: var(--accent); text-decoration: none;">🕳️ SparseArray &amp; SparseDtype — pd.arrays.SparseArray</a></h3>
+          <p>Memory-efficient sparse storage for arrays with many repeated (fill) values. <code>SparseArray</code> stores only non-fill values and their positions. Properties: <code>sp_values</code>, <code>sp_index</code>, <code>density</code>, <code>npoints</code>. Aggregations: sum, mean, max, min, std. Mirrors <code>pandas.arrays.SparseArray</code> and <code>pandas.SparseDtype</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="hypothesis_tests.html" style="color: var(--accent); text-decoration: none;">🔬 Hypothesis Tests — scipy.stats t-tests, chi², ANOVA, KS</a></h3>
+          <p>scipy-style statistical hypothesis tests implemented from scratch: <code>ttest1samp</code>, <code>ttestInd</code> (Welch's), <code>ttestRel</code> (paired), <code>chi2Contingency</code>, <code>fOneway</code> (ANOVA), <code>jarqueBera</code> (normality), <code>pearsonr</code>, <code>spearmanr</code>, <code>mannWhitneyU</code>, <code>kstest</code>. Returns <code>{ statistic, pvalue }</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="regression.html" style="color: var(--accent); text-decoration: none;">📐 Regression — linregress, polyfit, OLS</a></h3>
+          <p>Linear and polynomial regression from scratch: <code>linregress</code> (simple OLS with slope, r, p, stderr), <code>polyfit</code> / <code>polyval</code> (polynomial least squares), and <code>OLS</code> class (multiple regression with R², F-test, AIC, BIC, <code>predict()</code>, <code>summary()</code>). Mirrors <code>scipy.stats.linregress</code>, <code>numpy.polyfit</code>, and <code>statsmodels.OLS</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="contingency.html" style="color: var(--accent); text-decoration: none;">📊 Contingency Tables — expectedFreq, relativeRisk, oddsRatio, association</a></h3>
+          <p>Association and effect-size measures for contingency tables: <code>expectedFreq</code> (expected cell counts under independence), <code>relativeRisk</code> (risk ratio with log-normal CI), <code>oddsRatio</code> (Woolf CI), and <code>association</code> (Cramér's V, phi, Pearson's C, Tschuprow's T). Mirrors <code>scipy.stats.contingency</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="multivariate.html" style="color: var(--accent); text-decoration: none;">🔭 Multivariate Analysis — mahalanobis, PCA</a></h3>
+          <p>Multivariate statistical analysis: <code>mahalanobis</code> distance (Σ⁻¹-weighted Euclidean, mirrors <code>scipy.spatial.distance.mahalanobis</code>), <code>PCA</code> class (eigendecomposition of the covariance matrix, mirrors <code>sklearn.decomposition.PCA</code>), plus <code>covMatrix</code> and <code>invertMatrix</code> helpers.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="bootstrap.html" style="color: var(--accent); text-decoration: none;">🎲 Bootstrap — non-parametric confidence intervals</a></h3>
+          <p>Non-parametric bootstrap confidence intervals for any statistic: <code>bootstrap</code> (one or two samples, mirrors <code>scipy.stats.bootstrap</code>), <code>bootstrap1</code> (single-sample convenience). Methods: <em>percentile</em>, <em>basic</em> (pivoting), and <em>BCa</em> (bias-corrected accelerated, default). Seeded RNG for reproducibility.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="kde.html" style="color: var(--accent); text-decoration: none;">📊 Kernel Density Estimation (KDE)</a></h3>
+          <p>Non-parametric density estimation using Gaussian kernels: <code>gaussianKDE</code> (mirrors <code>scipy.stats.gaussian_kde</code>). Bandwidth methods: Silverman (default), Scott, or custom factor. API: <code>pdf</code>, <code>evaluate</code>, <code>logPdf</code>, <code>integrate</code>, <code>cdf</code>, <code>resample</code>, <code>integrateGaussian</code>, weighted KDE.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="information.html" style="color: var(--accent); text-decoration: none;">ℹ️ Information Theory</a></h3>
+          <p>Shannon entropy, KL divergence, Jensen-Shannon divergence/distance, cross-entropy, mutual information, conditional entropy, normalised MI, variation of information, joint entropy, Rényi entropy, and Tsallis entropy. Mirrors <code>scipy.stats.entropy</code> and related utilities.</p>
           <div class="status done">✅ Complete</div>
         </div>
       </div>

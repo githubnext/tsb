@@ -26,6 +26,8 @@ import type { ExpandingOptions } from "../window/index.ts";
 import { Rolling } from "../window/index.ts";
 import type { RollingOptions } from "../window/index.ts";
 import { Index } from "./base-index.ts";
+import { getFlags } from "./flags.ts";
+import type { Flags } from "./flags.ts";
 import { RangeIndex } from "./range-index.ts";
 import { Series } from "./series.ts";
 
@@ -243,6 +245,21 @@ export class DataFrame {
   /** `true` when the DataFrame has no rows or no columns. */
   get empty(): boolean {
     return this.index.size === 0 || this.columns.size === 0;
+  }
+
+  /**
+   * Metadata flags for this DataFrame.
+   *
+   * Controls behaviour such as whether duplicate labels are allowed.
+   *
+   * @example
+   * ```ts
+   * df.flags.allowsDuplicateLabels;       // true (default)
+   * df.flags.allowsDuplicateLabels = false;
+   * ```
+   */
+  get flags(): Flags {
+    return getFlags(this);
   }
 
   // ─── column access ────────────────────────────────────────────────────────

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — pd.arrays: Nullable Typed Extension Arrays</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>pd.arrays: Nullable Typed Extension Arrays</h1>
+  <p class="subtitle">Nullable typed arrays with three-valued logic — mirrors <code>pandas.arrays</code>
+  with <code>IntegerArray</code>, <code>FloatingArray</code>, <code>BooleanArray</code>, and <code>StringArray</code>.</p>
+
+  <div class="section">
+    <h2>1 — Quick Start</h2>
+    <p>All four array types support nullable values, arithmetic, and reductions.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import {
+  IntegerArray,
+  FloatingArray,
+  BooleanArray,
+  StringArray,
+} from "tsb";
+
+// Nullable integer array
+const ints = IntegerArray.from([1, 2, null, 4, 5], "Int32");
+console.log(ints.dtype);              // "Int32"
+console.log(ints.toArray());          // [1, 2, null, 4, 5]
+console.log(ints.sum());              // 12
+console.log(ints.fillna(0).toArray()); // [1, 2, 0, 4, 5]
+
+// Nullable float array
+const floats = FloatingArray.from([1.5, NaN, 3.0]);
+console.log(floats.mean());           // 2.25
+
+// Nullable boolean — three-valued logic
+const bools = BooleanArray.from([true, null, false]);
+console.log(bools.any());             // true
+console.log(bools.all());             // false
+
+// Nullable string array
+const strs = StringArray.from(["hello", null, "world"]);
+console.log(strs.upper().toArray());  // ["HELLO", null, "WORLD"]
+console.log(strs.len().toArray());    // [5, null, 5]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2 — IntegerArray</h2>
+    <p>Nullable integer array with configurable dtype (<code>Int8</code>, <code>Int16</code>, <code>Int32</code>, <code>Int64</code>, unsigned variants).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { IntegerArray } from "tsb";
+
+const a = IntegerArray.from([1, 2, null, 4], "Int32");
+console.log(a.dtype);          // "Int32"
+console.log(a.size);           // 4
+console.log(a.at(2));          // null  (NA)
+console.log(a.isna());         // [false, false, true, false]
+
+// Arithmetic (NA propagates)
+console.log(a.add(10).toArray());    // [11, 12, null, 14]
+console.log(a.mul(2).toArray());     // [2, 4, null, 8]
+
+// Reductions
+console.log(a.sum());          // 7
+console.log(a.mean());         // ~2.33
+console.log(a.min());          // 1
+console.log(a.max());          // 4</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3 — FloatingArray</h2>
+    <p>Nullable float array — treats <code>NaN</code> as missing, unlike plain JS numbers.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { FloatingArray } from "tsb";
+
+const f = FloatingArray.from([1.0, 2.5, NaN, 4.5]);
+console.log(f.toArray());      // [1.0, 2.5, null, 4.5]
+console.log(f.sum());          // 8.0
+console.log(f.mean());         // ~2.67
+console.log(f.min());          // 1.0
+console.log(f.max());          // 4.5
+
+// Arithmetic
+console.log(f.add(f).toArray());  // [2.0, 5.0, null, 9.0]
+console.log(f.pow(2).toArray());  // [1.0, 6.25, null, 20.25]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>4 — BooleanArray (Three-Valued Logic)</h2>
+    <p>Implements Kleene three-valued logic: <code>true</code>, <code>false</code>, and <code>null</code> (unknown).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { BooleanArray } from "tsb";
+
+const b = BooleanArray.from([true, null, false]);
+console.log(b.any());          // true
+console.log(b.all());          // false
+console.log(b.sum());          // 1
+
+// Kleene logic
+const x = BooleanArray.from([true,  false, null, true ]);
+const y = BooleanArray.from([true,  null,  true, false]);
+console.log(x.and(y).toArray()); // [true, false, null, false]
+console.log(x.or(y).toArray());  // [true, null,  true, false]
+console.log(x.not().toArray());  // [false, null,  true, false]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>5 — StringArray</h2>
+    <p>Nullable string array with vectorised string methods that skip <code>null</code> values.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { StringArray } from "tsb";
+
+const s = StringArray.from(["  Hello  ", null, "world"]);
+console.log(s.strip().toArray());       // ["Hello", null, "world"]
+console.log(s.upper().toArray());       // ["  HELLO  ", null, "WORLD"]
+
+// Pattern matching → BooleanArray
+console.log(s.strip().contains("Hello").toArray());   // [true, null, false]
+console.log(s.strip().startswith("H").toArray());     // [true, null, false]
+
+// Lengths → IntegerArray
+console.log(s.strip().len().toArray());   // [5, null, 5]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — readStata &amp; toStata</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    #playground-loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+    .playground-editor {
+      display: block;
+      width: 100%;
+      min-height: 80px;
+      background: #0d1117;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      line-height: 1.55;
+      resize: vertical;
+      outline: none;
+      tab-size: 2;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #8b949e;
+      white-space: pre-wrap;
+      min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+  <script src="playground-runtime.js"></script>
+</head>
+<body>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>📊 readStata &amp; toStata — Interactive Playground</h1>
+  <p>Read and write Stata DTA files from TypeScript.
+    <code>toStata(df)</code> serializes a DataFrame to a Stata DTA v118 binary buffer.
+    <code>readStata(buf, options)</code> parses the buffer back into a DataFrame.
+    Numeric missing values are represented as <code>null</code>. Mirrors
+    <code>pandas.read_stata()</code> and <code>DataFrame.to_stata()</code>.<br>
+    <strong style="color: var(--text);">Edit any code block below and press ▶ Run
+    (or Ctrl+Enter) to execute it live in your browser.</strong>
+  </p>
+
+  <!-- 1 · Basic round-trip -->
+  <div class="section">
+    <h2>1 · Basic round-trip — write and read back</h2>
+    <p>Create a DataFrame, serialize it to a Stata DTA v118 binary buffer with
+      <code>toStata()</code>, then parse it back with <code>readStata()</code>.
+      All columns, values, and shape are preserved.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, readStata, toStata } from "tsb";
+
+const df = DataFrame.fromColumns({
+  id:    [1, 2, 3, 4, 5],
+  score: [88.5, 92.0, 75.3, 99.1, 83.7],
+  grade: ["B", "A", "C", "A+", "B+"],
+});
+
+const buf = toStata(df);
+console.log("DTA buffer size:", buf.length, "bytes");
+console.log("DTA version marker:", new TextDecoder().decode(buf.subarray(0, 11)));
+
+const rt = readStata(buf);
+console.log("shape:", rt.shape);
+console.log("columns:", rt.columns.toArray());
+console.log("scores:", rt.col("score").toArray());
+console.log("grades:", rt.col("grade").toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+    </div>
+  </div>
+
+  <!-- 2 · Missing values -->
+  <div class="section">
+    <h2>2 · Missing values — null round-trip</h2>
+    <p>Stata represents missing numeric values as special sentinel bit patterns.
+      <code>readStata</code> maps all missing sentinels to <code>null</code>.
+      <code>toStata</code> writes the standard Stata system-missing value for each type.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, readStata, toStata } from "tsb";
+
+const df = DataFrame.fromColumns({
+  value: [1.5, null, 3.0, null, 5.5],
+  label: ["a", "b", null, "d", null],
+});
+
+const rt = readStata(toStata(df));
+console.log("values:", rt.col("value").toArray());
+console.log("labels:", rt.col("label").toArray());
+console.log("nulls in value:", rt.col("value").isna().sum());
+console.log("nulls in label:", rt.col("label").isna().sum());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+    </div>
+  </div>
+
+  <!-- 3 · Options: dataLabel and variableLabels -->
+  <div class="section">
+    <h2>3 · Options — dataLabel &amp; variableLabels</h2>
+    <p>Embed a dataset description with <code>dataLabel</code> and per-column annotations
+      with <code>variableLabels</code>. These metadata fields are stored in the DTA header
+      and are visible in Stata's <code>describe</code> command.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, toStata } from "tsb";
+
+const df = DataFrame.fromColumns({
+  age:    [25, 30, 35],
+  income: [50000, 65000, 80000],
+});
+
+const buf = toStata(df, {
+  dataLabel: "Annual survey 2024",
+  variableLabels: {
+    age:    "Age in years",
+    income: "Annual income (USD)",
+  },
+});
+
+// Scan the buffer as text to see embedded labels
+const text = new TextDecoder("utf-8", { fatal: false }).decode(buf);
+const hasDataLabel = text.includes("Annual survey 2024");
+const hasVarLabel  = text.includes("Age in years");
+console.log("dataLabel embedded:", hasDataLabel);
+console.log("variableLabel embedded:", hasVarLabel);
+console.log("buffer size:", buf.length, "bytes");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+    </div>
+  </div>
+
+  <!-- 4 · Options: usecols, nRows, indexCol -->
+  <div class="section">
+    <h2>4 · Options — usecols, nRows, indexCol</h2>
+    <p>Restrict columns with <code>usecols</code>, limit rows with <code>nRows</code>,
+      and promote a column to the DataFrame index with <code>indexCol</code>.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, readStata, toStata } from "tsb";
+
+const df = DataFrame.fromColumns({
+  id:     ["x1", "x2", "x3", "x4", "x5"],
+  score:  [88, 95, 72, 61, 83],
+  grade:  ["B", "A", "C", "D", "B"],
+  passed: [true, true, true, false, true],
+});
+
+const buf = toStata(df);
+
+// Read only score and grade, first 3 rows, use id as index
+const rt = readStata(buf, {
+  usecols:  ["id", "score", "grade"],
+  nRows:    3,
+  indexCol: "id",
+});
+console.log("shape:", rt.shape);
+console.log("index:", rt.index.toArray());
+console.log("scores:", rt.col("score").toArray());
+console.log("grades:", rt.col("grade").toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+    </div>
+  </div>
+
+  <!-- 5 · Boolean columns -->
+  <div class="section">
+    <h2>5 · Boolean columns</h2>
+    <p>Boolean values are stored as Stata <code>byte</code> (int8) with
+      <code>true → 1</code> and <code>false → 0</code>. Reading converts
+      them back to numbers; use <code>.map()</code> or comparison operators
+      to recover booleans if needed.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, readStata, toStata } from "tsb";
+
+const df = DataFrame.fromColumns({
+  active:  [true, false, true, true, false],
+  flagged: [false, false, true, false, true],
+});
+
+const rt = readStata(toStata(df));
+console.log("active (as 0/1):", rt.col("active").toArray());
+console.log("flagged (as 0/1):", rt.col("flagged").toArray());
+// Recover booleans
+const activeBool = rt.col("active").toArray().map((v) => v === 1);
+console.log("active (bool):", activeBool);</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+    </div>
+  </div>
+
+  <!-- 6 · writeIndex -->
+  <div class="section">
+    <h2>6 · writeIndex — include the row index</h2>
+    <p>Pass <code>writeIndex: true</code> to include the DataFrame's row index
+      as an extra <code>_index</code> column in the DTA file.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, Index, readStata, toStata } from "tsb";
+
+const df = DataFrame.fromColumns(
+  { value: [10, 20, 30] },
+  { index: new Index(["a", "b", "c"]) },
+);
+
+const buf = toStata(df, { writeIndex: true });
+const rt = readStata(buf);
+
+console.log("columns:", rt.columns.toArray());
+console.log("_index:", rt.col("_index").toArray());
+console.log("value:", rt.col("value").toArray());</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="index.html">← Back to roadmap</a> ·
+    tsb — TypeScript port of pandas
+  </footer>
+</body>
+</html>

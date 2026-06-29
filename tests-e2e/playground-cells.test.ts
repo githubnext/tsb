@@ -58,6 +58,15 @@ const NON_PLAYGROUND_PAGES = new Set<string>([
   "extensions.html",
   "format_table.html",
   "read_html.html",
+  "read_table.html",
+  "sql.html",
+  "stata.html",
+  "arrays.html",
+  "contingency.html",
+  "holiday.html",
+  "kde.html",
+  "multivariate.html",
+  "sas.html",
 ]);
 
 const PORT = 3399;
@@ -185,7 +194,9 @@ async function executePageCells(ctx: BrowserContext, file: string): Promise<Cell
     await page.waitForFunction(
       () => {
         const btns = document.querySelectorAll(".playground-run");
-        if (btns.length === 0) return false;
+        if (btns.length === 0) {
+          return false;
+        }
         return Array.from(btns).every((b) => !(b as HTMLButtonElement).disabled);
       },
       { timeout: 25000 },

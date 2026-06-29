@@ -512,3 +512,66 @@ export {
   seriesToLaTeX,
 } from "./format_table.ts";
 export type { ToMarkdownOptions, ToLaTeXOptions } from "./format_table.ts";
+export { caseWhen } from "./case_when.ts";
+export type { CaseWhenBranch, CaseWhenPredicate } from "./case_when.ts";
+export {
+  ttest1samp,
+  ttestInd,
+  ttestRel,
+  chi2Contingency,
+  fOneway,
+  jarqueBera,
+  pearsonr,
+  spearmanr,
+  mannWhitneyU,
+  kstest,
+} from "./hypothesis_tests.ts";
+export type {
+  HTestResult,
+  PearsonrResult,
+  SpearmanrResult,
+  Alternative,
+  Ttest1sampOptions,
+  TtestIndOptions,
+  MannWhitneyUOptions,
+  KstestOptions,
+  Chi2ContingencyResult,
+  CdfFn,
+} from "./hypothesis_tests.ts";
+export { expectedFreq, relativeRisk, oddsRatio, association } from "./contingency.ts";
+export type {
+  ContingencyTable,
+  AssociationMethod,
+  ConfidenceInterval,
+  RelativeRiskResult,
+  OddsRatioResult,
+} from "./contingency.ts";
+export { mahalanobis, covMatrix, invertMatrix, PCA } from "./multivariate.ts";
+export type { PCAOptions, PCAResult } from "./multivariate.ts";
+export { bootstrap, bootstrap1 } from "./bootstrap.ts";
+export type {
+  BootstrapResult,
+  BootstrapOptions,
+  BootstrapMethod,
+  ConfidenceInterval as BootstrapCI,
+  StatFn,
+  StatFn1,
+  StatFn2,
+} from "./bootstrap.ts";
+export { gaussianKDE, GaussianKDE } from "./kde.ts";
+export type { GaussianKDEOptions } from "./kde.ts";
+export {
+  entropy,
+  klDivergence,
+  jsDivergence,
+  jsDistance,
+  crossEntropy,
+  jointEntropy,
+  conditionalEntropy,
+  mutualInformation,
+  normalizedMI,
+  variationOfInformation,
+  renyiEntropy,
+  tsallisEntropy,
+} from "./information.ts";
+export type { PMF, NMIMethod } from "./information.ts";

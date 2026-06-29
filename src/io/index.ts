@@ -23,7 +23,42 @@ export type {
 } from "./to_json_normalize.ts";
 export { readHtml } from "./read_html.ts";
 export type { ReadHtmlOptions } from "./read_html.ts";
+export { readXml, toXml } from "./xml.ts";
+export type { ReadXmlOptions, ToXmlOptions } from "./xml.ts";
+export { readTable } from "./read_table.ts";
+export type { ReadTableOptions } from "./read_table.ts";
+
+export { readSql, readSqlQuery, readSqlTable, toSql } from "./sql.ts";
+export { TableExistsError, TableNotFoundError } from "./sql.ts";
+
+export { readStata, toStata } from "./stata.ts";
+export type { ReadStataOptions, ToStataOptions } from "./stata.ts";
+export { readParquet, toParquet } from "./parquet.ts";
+export type { ReadParquetOptions, ToParquetOptions } from "./parquet.ts";
+export { readFeather, toFeather } from "./feather.ts";
+export type { ReadFeatherOptions, ToFeatherOptions } from "./feather.ts";
+export { readHdf, toHdf } from "./hdf.ts";
+export type { ReadHdfOptions, ToHdfOptions } from "./hdf.ts";
+export { readFwf } from "./fwf.ts";
+export type { ReadFwfOptions, ColSpec } from "./fwf.ts";
+export type {
+  SqlValue,
+  SqlRow,
+  SqlResult,
+  SqlConnection,
+  IfExistsStrategy,
+  ReadSqlBaseOptions,
+  ReadSqlQueryOptions,
+  ReadSqlTableOptions,
+  ReadSqlOptions,
+  ToSqlOptions,
+} from "./sql.ts";
 
 // readExcel / xlsxSheetNames use node:zlib and cannot be bundled for the
 // browser.  Import them directly from "tsb/io/read_excel" when running in
 // Node / Bun.
+export { toExcel } from "./to_excel.ts";
+export type { ToExcelOptions } from "./to_excel.ts";
+
+export { readSas } from "./read_sas.ts";
+export type { ReadSasOptions } from "./read_sas.ts";

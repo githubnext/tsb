@@ -267,7 +267,7 @@ function colormapColor(t: number, cmap: string): string {
       return lerpColor(c0, c1, local);
     }
   }
-  return stops.at(-1)![1];
+  return stops.at(-1)?.[1] ?? "";
 }
 
 /** Relative luminance for WCAG contrast check. */

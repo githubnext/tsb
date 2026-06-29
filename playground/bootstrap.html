@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Bootstrap Confidence Intervals</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem; color: #8b949e;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none;
+      tab-size: 2; white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint {
+      font-size: 0.75rem; color: #484f58;
+      margin-top: 0.35rem; text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>Bootstrap Confidence Intervals</h1>
+  <p class="subtitle">Non-parametric bootstrap resampling for confidence intervals and standard errors —
+  mirrors <code>scipy.stats.bootstrap</code> with <code>percentile</code>, <code>basic</code>,
+  and <code>BCa</code> methods.</p>
+
+  <div class="section">
+    <h2>1 — Basic 95% CI for the mean (BCa)</h2>
+    <p>Use <code>bootstrap1</code> for single-sample statistics. The default method is BCa (bias-corrected and accelerated).</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { bootstrap1 } from "tsb";
+
+const data = [14, 18, 11, 13, 6, 8, 2, 18, 14, 19,
+              11, 14, 1, 3, 12, 9, 8, 15, 16, 7];
+
+function mean(xs) {
+  return xs.reduce((a, b) => a + b, 0) / xs.length;
+}
+
+const result = bootstrap1(data, mean, { n: 5000, seed: 42 });
+
+console.log("CI low :", result.confidenceInterval.low.toFixed(3));
+console.log("CI high:", result.confidenceInterval.high.toFixed(3));
+console.log("SE     :", result.standardError.toFixed(3));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2 — Compare percentile, basic, and BCa methods</h2>
+    <p>All three methods are available via the <code>method</code> option. BCa is generally preferred for skewed distributions.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { bootstrap1 } from "tsb";
+
+const data = [1, 1, 2, 2, 3, 5, 8, 13, 21, 34, 55];
+
+function mean(xs) {
+  return xs.reduce((a, b) => a + b, 0) / xs.length;
+}
+
+for (const method of ["percentile", "basic", "bca"]) {
+  const r = bootstrap1(data, mean, { n: 4000, seed: 0, method });
+  const { low, high } = r.confidenceInterval;
+  console.log(`${method.padEnd(10)} CI: [${low.toFixed(2)}, ${high.toFixed(2)}]`);
+}</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3 — CI for median (BCa)</h2>
+    <p>Any statistic function can be passed — here we compute a 95% BCa confidence interval for the median.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { bootstrap1 } from "tsb";
+
+const data = [5, 2, 9, 1, 8, 3, 7, 4, 6, 10, 11, 3, 7, 2];
+
+function median(xs) {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+const r = bootstrap1(data, median, { n: 4999, seed: 7, method: "bca" });
+console.log("Observed median:", median(data));
+console.log("95% BCa CI     :", r.confidenceInterval.low.toFixed(2), "–", r.confidenceInterval.high.toFixed(2));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>4 — Two-sample bootstrap (mean difference)</h2>
+    <p>Use <code>bootstrap</code> for multi-sample statistics. Each sample is resampled independently.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { bootstrap } from "tsb";
+
+const control   = [4.2, 5.1, 3.8, 4.9, 5.5, 4.4, 4.0, 5.2, 4.7, 4.6];
+const treatment = [6.1, 5.8, 6.4, 5.9, 7.0, 6.2, 5.7, 6.8, 6.3, 6.5];
+
+function meanDiff(a, b) {
+  const avg = xs => xs.reduce((s, x) => s + x, 0) / xs.length;
+  return avg(b) - avg(a);
+}
+
+const r = bootstrap([control, treatment], meanDiff, { n: 5000, seed: 123 });
+console.log("Observed diff:", meanDiff(control, treatment).toFixed(3));
+console.log("95% BCa CI   :", r.confidenceInterval.low.toFixed(3), "–", r.confidenceInterval.high.toFixed(3));
+console.log("SE           :", r.standardError.toFixed(4));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>5 — Bootstrap distribution histogram</h2>
+    <p>The <code>bootDistribution</code> property gives access to all resampled statistic values for custom analysis.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { bootstrap1 } from "tsb";
+
+const data = Array.from({ length: 30 }, (_, i) => i + 1);
+
+function mean(xs) {
+  return xs.reduce((a, b) => a + b, 0) / xs.length;
+}
+
+const r = bootstrap1(data, mean, { n: 2000, seed: 99, method: "percentile" });
+
+const dist = r.bootDistribution;
+const min = Math.min(...dist);
+const max = Math.max(...dist);
+const bins = 10;
+const width = (max - min) / bins;
+const counts = new Array(bins).fill(0);
+for (const v of dist) {
+  const idx = Math.min(bins - 1, Math.floor((v - min) / width));
+  counts[idx]++;
+}
+const barMax = Math.max(...counts);
+for (let i = 0; i < bins; i++) {
+  const lo = (min + i * width).toFixed(1);
+  const bar = "█".repeat(Math.round(counts[i] / barMax * 20));
+  console.log(`${lo.padStart(5)}: ${bar} (${counts[i]})`);
+}
+console.log(`\n95% CI: [${r.confidenceInterval.low.toFixed(2)}, ${r.confidenceInterval.high.toFixed(2)}]`);</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <script type="module" src="playground-runtime.js"></script>
+</body>
+</html>

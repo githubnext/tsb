@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — lreshape</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { display: inline-block; margin-bottom: 1.5rem; font-size: 0.9rem; text-decoration: none; }
+    .section { margin-bottom: 2rem; }
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13,17,23,0.9);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1rem; z-index: 100;
+    }
+    #playground-loading.hidden { display: none; }
+    .spinner {
+      width: 2.5rem; height: 2.5rem;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.9rem; }
+    .playground-block { margin-top: 0.75rem; }
+    .playground-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.5rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .playground-label { font-size: 0.75rem; color: #8b949e; font-family: var(--font-mono); }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-actions button {
+      font-size: 0.8rem; padding: 0.25rem 0.65rem;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 0.3rem;
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .playground-actions button:hover { border-color: var(--accent); }
+    .playground-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .playground-run { font-weight: 600; }
+    .playground-editor {
+      display: block; width: 100%; min-height: 80px;
+      background: #0d1117; color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none; border-bottom: none;
+      padding: 1rem; font-family: var(--font-mono);
+      font-size: 0.875rem; line-height: 1.55;
+      resize: vertical; outline: none; tab-size: 2;
+      white-space: pre; overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    .playground-output {
+      background: #1c2333; border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem; font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e;
+      white-space: pre-wrap; min-height: 2rem; word-break: break-word;
+    }
+    .playground-output.active { color: var(--green); border-color: var(--green); }
+    .playground-output.error { color: var(--red); border-color: var(--red); }
+    .playground-hint { font-size: 0.75rem; color: #484f58; margin-top: 0.35rem; text-align: right; }
+    .api-reference-code {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 0.5rem; padding: 1rem; font-family: var(--font-mono);
+      font-size: 0.85rem; color: #8b949e; overflow-x: auto; margin-top: 0.5rem;
+    }
+    .api-reference-code code { background: none; border: none; padding: 0; }
+    footer {
+      text-align: center; padding: 2rem 0; color: #8b949e; font-size: 0.85rem;
+      border-top: 1px solid var(--border); margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>↕ lreshape — Interactive Playground</h1>
+  <p>Reshape wide-format data to long format using named column groups —
+    mirrors <code>pandas.lreshape()</code>.<br>
+    <strong style="color: var(--text);">Edit any code block below and press ▶ Run
+    (or Ctrl+Enter) to execute it live in your browser.</strong>
+  </p>
+
+  <!-- 1 · Basic lreshape -->
+  <div class="section">
+    <h2>1 · Basic lreshape</h2>
+    <p>Stack two wide columns (<code>v1</code>, <code>v2</code>) into a single long
+      column <code>v</code>, repeating the id column for each block.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, lreshape } from "tsb";
+
+const df = DataFrame.fromColumns({
+  id: ["a", "b"],
+  v1: [1, 2],
+  v2: [3, 4],
+});
+
+const result = lreshape(df, { v: ["v1", "v2"] });
+console.log(result.toRecords());</textarea>
+      <textarea class="playground-python" style="display:none">import pandas as pd
+
+df = pd.DataFrame({
+    "id": ["a", "b"],
+    "v1": [1, 2],
+    "v2": [3, 4],
+})
+
+result = pd.lreshape(df, {"v": ["v1", "v2"]})
+print(result.to_dict("records"))</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 2 · Multiple groups -->
+  <div class="section">
+    <h2>2 · Multiple groups</h2>
+    <p>Reshape with multiple output columns simultaneously. Each output column is
+      fed from a separate list of input columns.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, lreshape } from "tsb";
+
+const df = DataFrame.fromColumns({
+  hr:   [14, 7],
+  team: ["Red", "Blue"],
+  v1:   [1,  3],
+  v2:   [2,  4],
+  w1:   [10, 30],
+  w2:   [20, 40],
+});
+
+const result = lreshape(df, {
+  v: ["v1", "v2"],
+  w: ["w1", "w2"],
+});
+console.log(result.toRecords());</textarea>
+      <textarea class="playground-python" style="display:none">import pandas as pd
+
+df = pd.DataFrame({
+    "hr":   [14, 7],
+    "team": ["Red", "Blue"],
+    "v1":   [1,  3],
+    "v2":   [2,  4],
+    "w1":   [10, 30],
+    "w2":   [20, 40],
+})
+
+result = pd.lreshape(df, {"v": ["v1", "v2"], "w": ["w1", "w2"]})
+print(result.to_dict("records"))</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 3 · dropna -->
+  <div class="section">
+    <h2>3 · dropna option</h2>
+    <p>By default rows where any value column is <code>null</code>/<code>NaN</code>
+      are dropped. Pass <code>dropna: false</code> to keep them.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, lreshape } from "tsb";
+
+const df = DataFrame.fromColumns({
+  id: [1, 2, 3],
+  v1: [10, null, 30],
+  v2: [40, 50,   60],
+});
+
+// dropna: true (default) — row with v1=null is dropped in block 0
+const dropped = lreshape(df, { v: ["v1", "v2"] });
+console.log("dropped:", dropped.shape[0], "rows");
+
+// dropna: false — all rows kept
+const kept = lreshape(df, { v: ["v1", "v2"] }, { dropna: false });
+console.log("kept:", kept.shape[0], "rows");
+console.log(kept.toRecords());</textarea>
+      <textarea class="playground-python" style="display:none">import pandas as pd
+import numpy as np
+
+df = pd.DataFrame({
+    "id": [1, 2, 3],
+    "v1": [10, None, 30],
+    "v2": [40, 50,   60],
+})
+
+dropped = pd.lreshape(df, {"v": ["v1", "v2"]}, dropna=True)
+print("dropped:", len(dropped), "rows")
+
+kept = pd.lreshape(df, {"v": ["v1", "v2"]}, dropna=False)
+print("kept:", len(kept), "rows")
+print(kept.to_dict("records"))</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 4 · Real-world example -->
+  <div class="section">
+    <h2>4 · Real-world: survey scores</h2>
+    <p>Stack multiple rounds of survey scores into a long-format table.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, lreshape } from "tsb";
+
+const df = DataFrame.fromColumns({
+  name:   ["Alice", "Bob", "Carol"],
+  score1: [80, 70, 90],
+  score2: [85, 75, 88],
+  score3: [90, 80, 92],
+});
+
+const long = lreshape(df, { score: ["score1", "score2", "score3"] });
+console.log(long.toRecords());</textarea>
+      <textarea class="playground-python" style="display:none">import pandas as pd
+
+df = pd.DataFrame({
+    "name":   ["Alice", "Bob", "Carol"],
+    "score1": [80, 70, 90],
+    "score2": [85, 75, 88],
+    "score3": [90, 80, 92],
+})
+
+long = pd.lreshape(df, {"score": ["score1", "score2", "score3"]})
+print(long.to_dict("records"))</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- API Reference -->
+  <div class="section">
+    <h2>API Reference</h2>
+    <p>Reshape wide-format data to long format by explicitly naming which input
+      columns map to each output column.</p>
+    <pre class="api-reference-code"><code>lreshape(
+  data: DataFrame,
+  groups: Record&lt;string, string[]&gt;,  // { outputCol: [inputCol1, inputCol2, ...] }
+  options?: {
+    dropna?: boolean,  // drop rows with null/NaN values (default: true)
+  }
+): DataFrame</code></pre>
+    <p style="margin-top:1rem">All input columns <em>not</em> mentioned in <code>groups</code>
+      become identity (id) columns and are repeated for each block. All group lists must
+      have the same length <code>k</code>; the result has <code>nRows × k</code> rows
+      (before applying <code>dropna</code>).</p>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+  <script type="module" src="playground-runtime.js"></script>
+</body>
+</html>
