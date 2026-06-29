@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-28T08:03:00Z |
-| Iteration Count | 378 |
-| Best Metric | 723 |
+| Last Run | 2026-06-29T01:35:00Z |
+| Iteration Count | 379 |
+| Best Metric | 724 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -58,6 +58,9 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 379 — 2026-06-29 — [Run §28343148408](https://github.com/githubnext/tsb/actions/runs/28343148408)
+✅ +1 pair → 724: add_sub_mul_div (seriesAdd/Sub/Mul/Div with scalar & Series operands) · commit 92f482a
 
 ### Iter 378 — 2026-06-28 — [Run §28315875254](https://github.com/githubnext/tsb/actions/runs/28315875254)
 ✅ +3 pairs → 723: merge_ordered_ffill, merge_ordered_by, grouper_class · commit b5584cf
