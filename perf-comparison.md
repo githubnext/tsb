@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-29T01:35:00Z |
-| Iteration Count | 379 |
-| Best Metric | 724 |
+| Last Run | 2026-06-29T14:20:00Z |
+| Iteration Count | 380 |
+| Best Metric | 725 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -23,10 +23,6 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
-
----
-
-## 📋 Program Info
 
 **Goal**: Benchmark every tsb function vs pandas equivalent.
 **Metric**: benchmarked_functions (higher is better) · **PR**: #361 · **Issue**: #221
@@ -44,6 +40,7 @@
 - Import: `../../src/index.ts`. groupby AggName: sum/mean/min/max/count/std/first/last/size.
 - mergeAsof: sorted DFs required. corrWith: df first arg. Python: real triple-quotes only.
 - Resample: "H","D","MS","QS","YS". Series: `new Series({data,index})`. metric=min(TS,PY).
+- Testing utils (assertSeriesEqual/assertFrameEqual/assertIndexEqual) are exported from src/index.ts.
 
 ## 🚧 Foreclosed Avenues
 
@@ -58,6 +55,9 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 380 — 2026-06-29 — [Run §28378441925](https://github.com/githubnext/tsb/actions/runs/28378441925)
+✅ +1 pair → 725: assert_equal (assertSeriesEqual/assertFrameEqual/assertIndexEqual vs pd.testing) · commit 3d8392a
 
 ### Iter 379 — 2026-06-29 — [Run §28343148408](https://github.com/githubnext/tsb/actions/runs/28343148408)
 ✅ +1 pair → 724: add_sub_mul_div (seriesAdd/Sub/Mul/Div with scalar & Series operands) · commit 92f482a
