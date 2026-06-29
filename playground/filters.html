@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Digital Filters</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { color: var(--text); margin: 2rem 0 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+    h3 { color: var(--accent); margin: 1.5rem 0 0.5rem; }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    code { font-family: var(--font-mono); font-size: 0.9em; }
+    .example { margin: 1.5rem 0; }
+    .output {
+      background: #0a2a0a;
+      border: 1px solid var(--green);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      white-space: pre-wrap;
+    }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 1rem; text-align: left; }
+    th { background: var(--surface); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <h1>🎛️ Digital Filters</h1>
+  <p>FIR and IIR filter design and application — mirrors <code>scipy.signal</code>.</p>
+
+  <h2>FIR Filters</h2>
+
+  <h3>1. Low-pass FIR with firwin</h3>
+  <div class="example">
+    <pre>import { firwin, freqz, cAbs } from "tsb";
+
+// 51-tap Hamming-windowed low-pass at 0.3 * Nyquist
+const b = firwin(51, 0.3);
+console.log(`Coefficients: ${b.length} taps`);
+console.log(`DC gain: ${b.reduce((s, v) => s + v, 0).toFixed(6)}`);
+
+// Frequency response
+const { w, H } = freqz(b, [1], 512);
+const mag = H.map(cAbs);
+
+// DC (w=0): should be ≈ 1.0
+console.log(`Gain at DC: ${mag[0].toFixed(4)}`);
+// Nyquist (w=π): should be ≈ 0
+console.log(`Gain at Nyquist: ${mag[511].toFixed(4)}`);</pre>
+    <div class="output" id="out1">Running…</div>
+  </div>
+
+  <h3>2. High-pass FIR</h3>
+  <div class="example">
+    <pre>import { firwin, freqz, cAbs } from "tsb";
+
+// 51-tap high-pass, pass_zero=false
+const b = firwin(51, 0.3, { pass_zero: false });
+const { H } = freqz(b, [1], 512);
+const mag = H.map(cAbs);
+
+console.log(`Gain at DC: ${mag[0].toFixed(4)}    (should be ≈ 0)`);
+console.log(`Gain at Nyquist: ${mag[511].toFixed(4)}  (should be ≈ 1)`);</pre>
+    <div class="output" id="out2">Running…</div>
+  </div>
+
+  <h3>3. Apply FIR filter with lfilter and filtfilt</h3>
+  <div class="example">
+    <pre>import { firwin, lfilter, filtfilt } from "tsb";
+
+const fs = 512, n = 512;
+// Mix 20 Hz (keep) + 200 Hz (remove) signals
+const x = Array.from({ length: n }, (_, i) =>
+  Math.sin(2 * Math.PI * 20 * i / fs) +
+  Math.sin(2 * Math.PI * 200 * i / fs),
+);
+
+// Low-pass FIR: cutoff at 100 Hz
+const b = firwin(63, 100, { fs });
+
+// Causal filter (introduces phase delay)
+const yLf = lfilter(b, [1], x);
+
+// Zero-phase filter (no phase delay)
+const yFf = filtfilt(b, [1], x);
+
+const mid = 256;
+console.log(`Input at mid-point:         ${x[mid].toFixed(4)}`);
+console.log(`lfilter output (causal):    ${yLf[mid].toFixed(4)}`);
+console.log(`filtfilt output (no delay): ${yFf[mid].toFixed(4)}`);</pre>
+    <div class="output" id="out3">Running…</div>
+  </div>
+
+  <h2>IIR Filters — Butterworth</h2>
+
+  <h3>4. Design a Butterworth low-pass filter</h3>
+  <div class="example">
+    <pre>import { butter, sosfreqz, cAbs } from "tsb";
+
+// 4th-order Butterworth, cutoff at 0.3 * Nyquist
+const { sos, b, a } = butter(4, 0.3, "lowpass");
+console.log(`SOS sections: ${sos.length}`);
+console.log(`b coefficients: [${b.map(v => v.toFixed(6)).join(", ")}]`);
+console.log(`a coefficients: [${a.map(v => v.toFixed(6)).join(", ")}]`);
+
+// Frequency response via SOS
+const { H } = sosfreqz(sos, 512);
+const mag = H.map(cAbs);
+console.log(`DC gain: ${mag[0].toFixed(4)}    (should be ≈ 1.0)`);
+console.log(`At cutoff (~bin 77): ${mag[77].toFixed(4)}  (≈ 0.707 = -3dB)`);</pre>
+    <div class="output" id="out4">Running…</div>
+  </div>
+
+  <h3>5. Apply Butterworth filter with sosfilt</h3>
+  <div class="example">
+    <pre>import { butter, sosfilt, sosfiltfilt } from "tsb";
+
+const fs = 1000, n = 1000;
+// Noisy 50 Hz signal
+const x = Array.from({ length: n }, (_, i) =>
+  Math.sin(2 * Math.PI * 50 * i / fs) +
+  0.5 * Math.sin(2 * Math.PI * 300 * i / fs),  // high-freq noise
+);
+
+// 4th-order Butterworth low-pass at 150 Hz
+const { sos } = butter(4, 150 / (fs / 2), "lowpass");
+
+// Causal
+const y1 = sosfilt(sos, x);
+// Zero-phase
+const y2 = sosfiltfilt(sos, x);
+
+const mid = 500;
+const ref = Math.sin(2 * Math.PI * 50 * mid / fs);
+console.log(`Reference (50 Hz):     ${ref.toFixed(4)}`);
+console.log(`sosfilt output:        ${y1[mid].toFixed(4)}`);
+console.log(`sosfiltfilt output:    ${y2[mid].toFixed(4)}  (zero-phase, closer to ref)`);</pre>
+    <div class="output" id="out5">Running…</div>
+  </div>
+
+  <h3>6. High-pass Butterworth</h3>
+  <div class="example">
+    <pre>import { butter, sosfreqz, cAbs } from "tsb";
+
+const { sos } = butter(2, 0.3, "highpass");
+const { w, H } = sosfreqz(sos, 512);
+const mag = H.map(cAbs);
+
+console.log(`Gain at DC (w=0):       ${mag[0].toFixed(4)}  (should be ≈ 0)`);
+console.log(`Gain at Nyquist (w=π):  ${mag[511].toFixed(4)}  (should be ≈ 1.0)`);</pre>
+    <div class="output" id="out6">Running…</div>
+  </div>
+
+  <h3>7. Filter frequency response — multiple orders</h3>
+  <div class="example">
+    <pre>import { butter, sosfreqz, cAbs } from "tsb";
+
+// Compare -3dB attenuation at cutoff for different orders
+const Wn = 0.3;
+console.log("Butterworth -3dB gain at cutoff frequency:");
+for (const N of [1, 2, 4, 6, 8]) {
+  const { sos } = butter(N, Wn, "lowpass");
+  // Evaluate at ω = Wn * π (the digital cutoff frequency)
+  const { H } = sosfreqz(sos, [Wn * Math.PI]);
+  const gain = cAbs(H[0]);
+  const dB = 20 * Math.log10(gain);
+  console.log(`  N=${N}: gain=${gain.toFixed(4)}  (${dB.toFixed(2)} dB)`);
+}</pre>
+    <div class="output" id="out7">Running…</div>
+  </div>
+
+  <h2>API Reference</h2>
+  <table>
+    <tr><th>Function</th><th>Description</th><th>Mirrors</th></tr>
+    <tr><td><code>firwin(n, cutoff, opts?)</code></td><td>FIR design (windowed-sinc)</td><td><code>scipy.signal.firwin</code></td></tr>
+    <tr><td><code>butter(N, Wn, type?)</code></td><td>Butterworth IIR design</td><td><code>scipy.signal.butter</code></td></tr>
+    <tr><td><code>freqz(b, a?, worN?)</code></td><td>FIR/IIR frequency response</td><td><code>scipy.signal.freqz</code></td></tr>
+    <tr><td><code>sosfreqz(sos, worN?)</code></td><td>SOS frequency response</td><td><code>scipy.signal.sosfreqz</code></td></tr>
+    <tr><td><code>lfilter(b, a, x)</code></td><td>Causal FIR/IIR filter</td><td><code>scipy.signal.lfilter</code></td></tr>
+    <tr><td><code>filtfilt(b, a, x)</code></td><td>Zero-phase filter</td><td><code>scipy.signal.filtfilt</code></td></tr>
+    <tr><td><code>sosfilt(sos, x)</code></td><td>Causal SOS filter</td><td><code>scipy.signal.sosfilt</code></td></tr>
+    <tr><td><code>sosfiltfilt(sos, x)</code></td><td>Zero-phase SOS filter</td><td><code>scipy.signal.sosfiltfilt</code></td></tr>
+  </table>
+
+  <script type="module">
+    import * as tsb from "https://esm.sh/tsb@latest";
+
+    function run(id, fn) {
+      const el = document.getElementById(id);
+      try {
+        const logs = [];
+        const origLog = console.log;
+        console.log = (...args) => { logs.push(args.map(String).join(" ")); origLog(...args); };
+        fn(tsb);
+        console.log = origLog;
+        el.textContent = logs.join("\n") || "(no output)";
+        el.style.borderColor = "#3fb950";
+      } catch (err) {
+        el.textContent = "Error: " + err.message;
+        el.style.borderColor = "#f85149";
+      }
+    }
+
+    run("out1", (tsb) => {
+      const b = tsb.firwin(51, 0.3);
+      console.log(`Coefficients: ${b.length} taps`);
+      console.log(`DC gain: ${b.reduce((s, v) => s + v, 0).toFixed(6)}`);
+      const { H } = tsb.freqz(b, [1], 512);
+      const mag = H.map(tsb.cAbs);
+      console.log(`Gain at DC: ${mag[0].toFixed(4)}`);
+      console.log(`Gain at Nyquist: ${mag[511].toFixed(4)}`);
+    });
+
+    run("out2", (tsb) => {
+      const b = tsb.firwin(51, 0.3, { pass_zero: false });
+      const { H } = tsb.freqz(b, [1], 512);
+      const mag = H.map(tsb.cAbs);
+      console.log(`Gain at DC: ${mag[0].toFixed(4)}    (should be ≈ 0)`);
+      console.log(`Gain at Nyquist: ${mag[511].toFixed(4)}  (should be ≈ 1)`);
+    });
+
+    run("out3", (tsb) => {
+      const fs = 512, n = 512;
+      const x = Array.from({ length: n }, (_, i) =>
+        Math.sin(2 * Math.PI * 20 * i / fs) + Math.sin(2 * Math.PI * 200 * i / fs),
+      );
+      const b = tsb.firwin(63, 100, { fs });
+      const yLf = tsb.lfilter(b, [1], x);
+      const yFf = tsb.filtfilt(b, [1], x);
+      const mid = 256;
+      console.log(`Input at mid-point:         ${x[mid].toFixed(4)}`);
+      console.log(`lfilter output (causal):    ${yLf[mid].toFixed(4)}`);
+      console.log(`filtfilt output (no delay): ${yFf[mid].toFixed(4)}`);
+    });
+
+    run("out4", (tsb) => {
+      const { sos, b, a } = tsb.butter(4, 0.3, "lowpass");
+      console.log(`SOS sections: ${sos.length}`);
+      console.log(`b: [${b.map(v => v.toFixed(6)).join(", ")}]`);
+      console.log(`a: [${a.map(v => v.toFixed(6)).join(", ")}]`);
+      const { H } = tsb.sosfreqz(sos, 512);
+      const mag = H.map(tsb.cAbs);
+      console.log(`DC gain: ${mag[0].toFixed(4)}`);
+    });
+
+    run("out5", (tsb) => {
+      const fs = 1000, n = 1000;
+      const x = Array.from({ length: n }, (_, i) =>
+        Math.sin(2 * Math.PI * 50 * i / fs) + 0.5 * Math.sin(2 * Math.PI * 300 * i / fs),
+      );
+      const { sos } = tsb.butter(4, 150 / (fs / 2), "lowpass");
+      const y1 = tsb.sosfilt(sos, x);
+      const y2 = tsb.sosfiltfilt(sos, x);
+      const mid = 500;
+      const ref = Math.sin(2 * Math.PI * 50 * mid / fs);
+      console.log(`Reference (50 Hz):     ${ref.toFixed(4)}`);
+      console.log(`sosfilt output:        ${y1[mid].toFixed(4)}`);
+      console.log(`sosfiltfilt output:    ${y2[mid].toFixed(4)}`);
+    });
+
+    run("out6", (tsb) => {
+      const { sos } = tsb.butter(2, 0.3, "highpass");
+      const { H } = tsb.sosfreqz(sos, 512);
+      const mag = H.map(tsb.cAbs);
+      console.log(`Gain at DC:       ${mag[0].toFixed(4)}`);
+      console.log(`Gain at Nyquist:  ${mag[511].toFixed(4)}`);
+    });
+
+    run("out7", (tsb) => {
+      const Wn = 0.3;
+      console.log("Butterworth -3dB gain at cutoff:");
+      for (const N of [1, 2, 4, 6, 8]) {
+        const { sos } = tsb.butter(N, Wn, "lowpass");
+        const { H } = tsb.sosfreqz(sos, [Wn * Math.PI]);
+        const gain = tsb.cAbs(H[0]);
+        const dB = 20 * Math.log10(gain);
+        console.log(`  N=${N}: gain=${gain.toFixed(4)}  (${dB.toFixed(2)} dB)`);
+      }
+    });
+  </script>
+</body>
+</html>

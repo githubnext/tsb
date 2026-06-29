@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Signal Processing</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { color: var(--text); margin: 2rem 0 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+    h3 { color: var(--accent); margin: 1.5rem 0 0.5rem; }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    code { font-family: var(--font-mono); font-size: 0.9em; }
+    .example { margin: 1.5rem 0; }
+    .output {
+      background: #0a2a0a;
+      border: 1px solid var(--green);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      white-space: pre-wrap;
+    }
+    .note {
+      background: #161b22;
+      border-left: 3px solid var(--accent);
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 1rem; text-align: left; }
+    th { background: var(--surface); color: var(--accent); }
+    canvas { border: 1px solid var(--border); border-radius: 4px; display: block; margin: 0.5rem 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>📡 Signal Processing</h1>
+  <p>FFT, windows, STFT, Welch PSD, and periodogram — mirrors <code>numpy.fft</code> and <code>scipy.signal</code>.</p>
+
+  <h2>FFT / IFFT</h2>
+
+  <h3>1. Basic FFT of a sinusoidal signal</h3>
+  <div class="example">
+    <pre>import { fft, rfftFreq, cAbs } from "tsb";
+
+const fs = 256;  // sampling rate (Hz)
+const f0 = 32;   // signal frequency (Hz)
+const n = 256;
+
+// Generate a 32 Hz sine wave
+const x = Array.from({ length: n }, (_, i) =>
+  Math.sin(2 * Math.PI * f0 * i / fs),
+);
+
+// Compute FFT
+const X = fft(x);
+const freqs = rfftFreq(X.length, 1 / fs);
+
+// Find peak frequency
+const mags = X.slice(0, freqs.length).map(cAbs);
+const peakIdx = mags.indexOf(Math.max(...mags));
+console.log(`Peak frequency: ${freqs[peakIdx].toFixed(1)} Hz`);
+// Peak frequency: 32.0 Hz</pre>
+    <div class="output" id="out1">Running…</div>
+  </div>
+
+  <h3>2. FFT Parseval's theorem — energy preservation</h3>
+  <div class="example">
+    <pre>import { fft } from "tsb";
+
+const x = [1, 2, 3, 4, 5, 6, 7, 8];
+const X = fft(x);
+const N = X.length;
+
+const timePower = x.reduce((s, v) => s + v * v, 0);
+const freqPower = X.reduce((s, c) => s + c.re * c.re + c.im * c.im, 0) / N;
+console.log(`Time-domain power: ${timePower}`);
+console.log(`Freq-domain power: ${freqPower.toFixed(4)}`);
+// Both should equal 204</pre>
+    <div class="output" id="out2">Running…</div>
+  </div>
+
+  <h3>3. RFFT round-trip</h3>
+  <div class="example">
+    <pre>import { rfft, irfft, fft } from "tsb";
+
+const x = [1, 0, -1, 0, 1, 0, -1, 0];
+const X = rfft(x);
+console.log(`rfft output length: ${X.length}  (= ${fft(x).length}/2 + 1)`);
+
+const xBack = irfft(X, fft(x).length);
+console.log("Round-trip error:", Math.max(...x.map((v, i) => Math.abs(v - xBack[i]))).toExponential(2));</pre>
+    <div class="output" id="out3">Running…</div>
+  </div>
+
+  <h2>Windows</h2>
+
+  <h3>4. Available window functions</h3>
+  <div class="example">
+    <pre>import { getWindow, hammingWindow, kaiserWindow } from "tsb";
+
+const n = 16;
+const windows = ["rectangular", "bartlett", "hann", "hamming",
+                 "blackman", "blackmanharris", "flattop", "kaiser"] as const;
+
+for (const name of windows) {
+  const w = getWindow(name, n);
+  const peak = Math.max(...w).toFixed(4);
+  const sum = w.reduce((s, v) => s + v, 0).toFixed(2);
+  console.log(`${name.padEnd(15)} peak=${peak}  sum=${sum}`);
+}
+
+// Kaiser with custom beta
+console.log("Kaiser β=0:", kaiserWindow(8, 0).map(v => v.toFixed(2)).join(", "));
+console.log("Kaiser β=14:", kaiserWindow(8, 14).map(v => v.toFixed(4)).join(", "));</pre>
+    <div class="output" id="out4">Running…</div>
+  </div>
+
+  <h2>STFT / ISTFT</h2>
+
+  <h3>5. Short-Time Fourier Transform</h3>
+  <div class="example">
+    <pre>import { stft, cAbs } from "tsb";
+
+const fs = 512;
+const n = 1024;
+// Chirp: frequency sweeps from 50 to 200 Hz
+const x = Array.from({ length: n }, (_, i) => {
+  const t = i / fs;
+  const f = 50 + 150 * t;   // linearly increasing frequency
+  return Math.sin(2 * Math.PI * f * t);
+});
+
+const { t, f, Zxx } = stft(x, { fs, nperseg: 128, noverlap: 64 });
+console.log(`STFT shape: ${Zxx.length} freq bins × ${Zxx[0].length} time frames`);
+console.log(`Time axis: [${t[0].toFixed(3)}, ..., ${t[t.length-1].toFixed(3)}] s`);
+console.log(`Freq axis: [${f[0].toFixed(1)}, ..., ${f[f.length-1].toFixed(1)}] Hz`);</pre>
+    <div class="output" id="out5">Running…</div>
+  </div>
+
+  <h3>6. ISTFT reconstruction (round-trip)</h3>
+  <div class="example">
+    <pre>import { stft, istft } from "tsb";
+
+const n = 256;
+const x = Array.from({ length: n }, (_, i) =>
+  Math.sin(2 * Math.PI * 10 * i / n),
+);
+
+const { Zxx } = stft(x, { nperseg: 64, noverlap: 32 });
+const xBack = istft(Zxx, { nperseg: 64, noverlap: 32 });
+
+// Check reconstruction error in the interior (avoid boundary effects)
+const err = x.slice(64, n - 64).map((v, i) =>
+  Math.abs(v - (xBack[i + 64] ?? 0)),
+);
+console.log(`Max reconstruction error: ${Math.max(...err).toExponential(2)}`);</pre>
+    <div class="output" id="out6">Running…</div>
+  </div>
+
+  <h2>Power Spectral Density</h2>
+
+  <h3>7. Welch PSD — detect signal frequency</h3>
+  <div class="example">
+    <pre>import { welch } from "tsb";
+
+const fs = 1024;
+const f0 = 128;  // Hz
+const n = 4096;
+const x = Array.from({ length: n }, (_, i) =>
+  2 * Math.sin(2 * Math.PI * f0 * i / fs) + 0.1 * (Math.random() - 0.5),
+);
+
+const { f, Pxx } = welch(x, { fs, nperseg: 512, average: "mean" });
+const peakIdx = Pxx.indexOf(Math.max(...Pxx));
+console.log(`Peak at ${f[peakIdx].toFixed(1)} Hz (expected ${f0} Hz)`);
+console.log(`Peak PSD: ${Pxx[peakIdx].toFixed(2)} V²/Hz`);</pre>
+    <div class="output" id="out7">Running…</div>
+  </div>
+
+  <h3>8. Periodogram</h3>
+  <div class="example">
+    <pre>import { periodogram } from "tsb";
+
+const fs = 512;
+const n = 512;
+const x = Array.from({ length: n }, (_, i) =>
+  Math.cos(2 * Math.PI * 60 * i / fs) + Math.cos(2 * Math.PI * 120 * i / fs),
+);
+
+const { f, Pxx } = periodogram(x, { fs, window: "hann" });
+
+// Find top-2 peaks
+const sorted = [...Pxx.map((v, i) => ({ v, i }))]
+  .sort((a, b) => b.v - a.v)
+  .slice(0, 2);
+console.log("Top peaks:");
+for (const { v, i } of sorted) {
+  console.log(`  ${f[i]?.toFixed(1)} Hz  →  ${v.toFixed(4)} V²/Hz`);
+}</pre>
+    <div class="output" id="out8">Running…</div>
+  </div>
+
+  <h3>9. fftshift / ifftshift</h3>
+  <div class="example">
+    <pre>import { fft, fftFreq, fftshift, cAbs } from "tsb";
+
+const x = [1, 2, 3, 4, 5, 6, 7, 8];
+const X = fft(x);
+const freqs = fftFreq(X.length, 1);
+
+// Shift DC to centre
+const freqsShifted = fftshift(freqs);
+const magsShifted = fftshift(X.map(cAbs));
+
+console.log("Shifted frequencies:", freqsShifted.map(v => v.toFixed(3)).join(", "));
+console.log("Shifted magnitudes:", magsShifted.map(v => v.toFixed(2)).join(", "));</pre>
+    <div class="output" id="out9">Running…</div>
+  </div>
+
+  <h2>API Reference</h2>
+  <table>
+    <tr><th>Function</th><th>Description</th><th>Mirrors</th></tr>
+    <tr><td><code>fft(x)</code></td><td>N-point DFT (pads to power of 2)</td><td><code>numpy.fft.fft</code></td></tr>
+    <tr><td><code>ifft(X)</code></td><td>Inverse FFT</td><td><code>numpy.fft.ifft</code></td></tr>
+    <tr><td><code>rfft(x)</code></td><td>Real-input FFT (one-sided)</td><td><code>numpy.fft.rfft</code></td></tr>
+    <tr><td><code>irfft(X, n?)</code></td><td>Inverse real FFT</td><td><code>numpy.fft.irfft</code></td></tr>
+    <tr><td><code>fftFreq(n, d?)</code></td><td>DFT sample frequencies</td><td><code>numpy.fft.fftfreq</code></td></tr>
+    <tr><td><code>rfftFreq(n, d?)</code></td><td>One-sided DFT frequencies</td><td><code>numpy.fft.rfftfreq</code></td></tr>
+    <tr><td><code>fftshift(x)</code></td><td>Shift DC to centre</td><td><code>numpy.fft.fftshift</code></td></tr>
+    <tr><td><code>ifftshift(x)</code></td><td>Inverse of fftshift</td><td><code>numpy.fft.ifftshift</code></td></tr>
+    <tr><td><code>getWindow(name, n)</code></td><td>Named window function</td><td><code>scipy.signal.get_window</code></td></tr>
+    <tr><td><code>stft(x, opts?)</code></td><td>Short-Time Fourier Transform</td><td><code>scipy.signal.stft</code></td></tr>
+    <tr><td><code>istft(Zxx, opts?)</code></td><td>Inverse STFT (overlap-add)</td><td><code>scipy.signal.istft</code></td></tr>
+    <tr><td><code>welch(x, opts?)</code></td><td>Welch PSD estimate</td><td><code>scipy.signal.welch</code></td></tr>
+    <tr><td><code>periodogram(x, opts?)</code></td><td>Periodogram PSD estimate</td><td><code>scipy.signal.periodogram</code></td></tr>
+  </table>
+
+  <script type="module">
+    import * as tsb from "https://esm.sh/tsb@latest";
+
+    function run(id, fn) {
+      const el = document.getElementById(id);
+      try {
+        const logs = [];
+        const origLog = console.log;
+        console.log = (...args) => { logs.push(args.map(String).join(" ")); origLog(...args); };
+        fn(tsb);
+        console.log = origLog;
+        el.textContent = logs.join("\n") || "(no output)";
+        el.style.borderColor = "#3fb950";
+      } catch (err) {
+        el.textContent = "Error: " + err.message;
+        el.style.borderColor = "#f85149";
+      }
+    }
+
+    run("out1", (tsb) => {
+      const fs = 256, f0 = 32, n = 256;
+      const x = Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * f0 * i / fs));
+      const X = tsb.fft(x);
+      const freqs = tsb.rfftFreq(X.length, 1 / fs);
+      const mags = X.slice(0, freqs.length).map(tsb.cAbs);
+      const peakIdx = mags.indexOf(Math.max(...mags));
+      console.log(`Peak frequency: ${freqs[peakIdx].toFixed(1)} Hz`);
+    });
+
+    run("out2", (tsb) => {
+      const x = [1, 2, 3, 4, 5, 6, 7, 8];
+      const X = tsb.fft(x);
+      const N = X.length;
+      const timePower = x.reduce((s, v) => s + v * v, 0);
+      const freqPower = X.reduce((s, c) => s + c.re * c.re + c.im * c.im, 0) / N;
+      console.log(`Time-domain power: ${timePower}`);
+      console.log(`Freq-domain power: ${freqPower.toFixed(4)}`);
+    });
+
+    run("out3", (tsb) => {
+      const x = [1, 0, -1, 0, 1, 0, -1, 0];
+      const X = tsb.rfft(x);
+      const full = tsb.fft(x);
+      console.log(`rfft output length: ${X.length}  (= ${full.length}/2 + 1)`);
+      const xBack = tsb.irfft(X, full.length);
+      const err = Math.max(...x.map((v, i) => Math.abs(v - xBack[i])));
+      console.log("Round-trip error:", err.toExponential(2));
+    });
+
+    run("out4", (tsb) => {
+      const n = 16;
+      const windows = ["rectangular", "bartlett", "hann", "hamming", "blackman", "blackmanharris", "flattop", "kaiser"];
+      for (const name of windows) {
+        const w = tsb.getWindow(name, n);
+        const peak = Math.max(...w).toFixed(4);
+        const sum = w.reduce((s, v) => s + v, 0).toFixed(2);
+        console.log(`${name.padEnd(15)} peak=${peak}  sum=${sum}`);
+      }
+      console.log("Kaiser β=0:", tsb.kaiserWindow(8, 0).map(v => v.toFixed(2)).join(", "));
+      console.log("Kaiser β=14:", tsb.kaiserWindow(8, 14).map(v => v.toFixed(4)).join(", "));
+    });
+
+    run("out5", (tsb) => {
+      const fs = 512, n = 1024;
+      const x = Array.from({ length: n }, (_, i) => {
+        const t = i / fs, f = 50 + 150 * t;
+        return Math.sin(2 * Math.PI * f * t);
+      });
+      const { t, f, Zxx } = tsb.stft(x, { fs, nperseg: 128, noverlap: 64 });
+      console.log(`STFT shape: ${Zxx.length} freq bins × ${Zxx[0].length} time frames`);
+      console.log(`Time axis: [${t[0].toFixed(3)}, ..., ${t[t.length-1].toFixed(3)}] s`);
+      console.log(`Freq axis: [${f[0].toFixed(1)}, ..., ${f[f.length-1].toFixed(1)}] Hz`);
+    });
+
+    run("out6", (tsb) => {
+      const n = 256;
+      const x = Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * 10 * i / n));
+      const { Zxx } = tsb.stft(x, { nperseg: 64, noverlap: 32 });
+      const xBack = tsb.istft(Zxx, { nperseg: 64, noverlap: 32 });
+      const err = x.slice(64, n - 64).map((v, i) => Math.abs(v - (xBack[i + 64] ?? 0)));
+      console.log(`Max reconstruction error: ${Math.max(...err).toExponential(2)}`);
+    });
+
+    run("out7", (tsb) => {
+      const fs = 1024, f0 = 128, n = 4096;
+      const x = Array.from({ length: n }, (_, i) =>
+        2 * Math.sin(2 * Math.PI * f0 * i / fs) + 0.1 * (Math.random() - 0.5),
+      );
+      const { f, Pxx } = tsb.welch(x, { fs, nperseg: 512, average: "mean" });
+      const peakIdx = Pxx.indexOf(Math.max(...Pxx));
+      console.log(`Peak at ${f[peakIdx].toFixed(1)} Hz (expected ${f0} Hz)`);
+      console.log(`Peak PSD: ${Pxx[peakIdx].toFixed(2)} V²/Hz`);
+    });
+
+    run("out8", (tsb) => {
+      const fs = 512, n = 512;
+      const x = Array.from({ length: n }, (_, i) =>
+        Math.cos(2 * Math.PI * 60 * i / fs) + Math.cos(2 * Math.PI * 120 * i / fs),
+      );
+      const { f, Pxx } = tsb.periodogram(x, { fs, window: "hann" });
+      const sorted = [...Pxx.map((v, i) => ({ v, i }))].sort((a, b) => b.v - a.v).slice(0, 2);
+      console.log("Top peaks:");
+      for (const { v, i } of sorted) {
+        console.log(`  ${f[i]?.toFixed(1)} Hz  →  ${v.toFixed(4)} V²/Hz`);
+      }
+    });
+
+    run("out9", (tsb) => {
+      const x = [1, 2, 3, 4, 5, 6, 7, 8];
+      const X = tsb.fft(x);
+      const freqs = tsb.fftFreq(X.length, 1);
+      const freqsShifted = tsb.fftshift(freqs);
+      const magsShifted = tsb.fftshift(X.map(tsb.cAbs));
+      console.log("Shifted frequencies:", freqsShifted.map(v => v.toFixed(3)).join(", "));
+      console.log("Shifted magnitudes:", magsShifted.map(v => v.toFixed(2)).join(", "));
+    });
+  </script>
+</body>
+</html>
