@@ -925,6 +925,10 @@ export { toOffset, inferFreq, FREQ_ALIASES } from "./tseries/frequencies.ts";
 export { readSas } from "./io/read_sas.ts";
 export type { ReadSasOptions } from "./io/read_sas.ts";
 
+// io.orc — Apache ORC file format read/write
+export { readOrc, toOrc } from "./io/orc.ts";
+export type { ReadOrcOptions, ToOrcOptions } from "./io/orc.ts";
+
 // pd.arrays.SparseArray / pd.SparseDtype — sparse storage for arrays
 // with many repeated (fill) values
 export { SparseArray, SparseDtype } from "./core/sparse.ts";
