@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-30T01:32:00Z |
-| Iteration Count | 381 |
-| Best Metric | 726 |
+| Last Run | 2026-06-30T19:45:00Z |
+| Iteration Count | 382 |
+| Best Metric | 727 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -41,7 +41,8 @@
 - mergeAsof: sorted DFs required. corrWith: df first arg. Python: real triple-quotes only.
 - Resample: "H","D","MS","QS","YS". Series: `new Series({data,index})`. metric=min(TS,PY).
 - Testing utils (assertSeriesEqual/assertFrameEqual/assertIndexEqual) are exported from src/index.ts.
-- Information theory (entropy/klDivergence/jsDivergence/crossEntropy) maps to scipy.stats.entropy; Python computes JS divergence and cross-entropy manually via numpy.
+- Hypothesis tests (ttestInd/pearsonr/spearmanr) map to scipy.stats.ttest_ind/pearsonr/spearmanr; N=10k, ITERATIONS=20.
+- 4 pre-existing TS benchmarks had wrong function names (dataFrameWhere→whereDataFrame, dataFrameMask→maskDataFrame, seriesMask→maskSeries, seriesWhere→whereSeries) and wrong import paths; fixed in iter 382.
 
 ## 🚧 Foreclosed Avenues
 
@@ -52,11 +53,14 @@
 ## 🔭 Future Directions
 
 - Option-variant benchmarks; join/crossJoin with overlapping columns using suffixes.
-- Remaining unbenchmarked stats modules: bootstrap, case_when, hypothesis_tests, kde, multivariate, regression, contingency.
+- Remaining unbenchmarked stats modules: bootstrap, case_when, kde, multivariate, regression, contingency.
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 382 — 2026-06-30 — [Run §28470160041](https://github.com/githubnext/tsb/actions/runs/28470160041)
+✅ +1 pair → 727: hypothesis_tests (ttestInd/pearsonr/spearmanr vs scipy.stats) · commit 4517e56; also fixed 4 pre-existing benchmarks with wrong function names
 
 ### Iter 381 — 2026-06-30 — [Run §28414067931](https://github.com/githubnext/tsb/actions/runs/28414067931)
 ✅ +1 pair → 726: information (entropy/klDivergence/jsDivergence/crossEntropy vs scipy.stats.entropy) · commit 3dbac8f
