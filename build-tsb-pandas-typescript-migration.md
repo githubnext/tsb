@@ -6,26 +6,26 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-29T19:46:04Z |
-| Iteration Count | 387 |
-| Best Metric | 185 |
+| Last Run | 2026-06-29T20:30:00Z |
+| Iteration Count | 388 |
+| Best Metric | 186 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
-| PR | pending (new, iter 387) |
+| PR | #363 |
 | Issue | #1 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- More io/stats features; next: read_orc, or advanced numeric (signal deconvolution, wavelet transforms, filter design)
+- More io/stats features; next: read_avro, or advanced numeric (ACF/PACF, signal deconvolution, wavelet transforms)
 
 ---
 
@@ -40,7 +40,7 @@
 - **KDE**: Log-sum-exp in logPdf for numerical stability. Box-Muller transform + weighted CDF binary search for resample.
 - **FFT/signal**: `typeof v === "object"` narrows `number | Complex`. Cooley-Tukey radix-2 DIT; non-power-of-2 → pad to nextPow2. `fftshift` half=⌊(n+1)/2⌋, `ifftshift` half=⌊n/2⌋. `noExcessiveCognitiveComplexity` → biome-ignore on nested loops. `Zxx[f]![t] = val` pattern.
 - **Filters**: Butterworth → bilinear transform → SOS. `filtfilt`: reverse+sosfilt+reverse. Avoid dead-code duplicates (Biome `noUnreachable`).
-- **Info theory**: Store `xyByKey: Map<string, [T, U]>` in `buildJointCounts` to avoid `as unknown as T` casts.
+- **ORC format**: Standard protobuf (LSB-first varints) for all metadata. Hadoop VInt (MSB-first big-endian) for RLE integer data streams. Single-byte range [-112,127] maps directly. Multi-byte: positive=0x88-0x8F header, negative=0x80-0x87 header + XOR(-1). PRESENT stream: RLE byte v1, MSB-first bits per row. BOOLEAN: same. INT/LONG: RLE int v1 with delta runs. `scalarToLabel()` helper avoids `as` casts when converting Scalar→Label.
 
 ---
 
@@ -49,6 +49,12 @@
 ---
 
 ## 📊 Iteration History
+
+### Iteration 388 — 2026-06-29 20:30 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28429568433)
+- **Status**: ✅ Accepted (pending CI)
+- **Change**: Add `src/io/orc.ts` — Apache ORC file format reader/writer (~1200 lines). Protobuf decoder/encoder, Hadoop VInt, RLE byte/int v1, column encoders for BOOLEAN/INT/LONG/FLOAT/DOUBLE/STRING with full null (PRESENT stream) support.
+- **Metric**: 185 → 186 (Δ+1)
+- **Notes**: `scalarToLabel()` helper avoids `as` cast for Scalar→Label. State reset to origin/autoloop (not rebased) to allow normal push.
 
 ### Iteration 387 — 2026-06-29 19:46 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28396990118)
 - **Status**: ✅ Accepted (pending CI)
