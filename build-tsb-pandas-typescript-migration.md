@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-01T01:38:54Z |
-| Iteration Count | 390 |
-| Best Metric | 187 |
+| Last Run | 2026-07-01T14:01:53Z |
+| Iteration Count | 391 |
+| Best Metric | 188 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Continue io/stats features: read_avro, wavelet transforms (DWT/CWT), ARIMA/state-space models
+- Continue io/stats features: read_avro, wavelet transforms (DWT/CWT), state-space models (Kalman filter)
 
 ---
 
@@ -38,8 +38,9 @@
 - **FFT**: Cooley-Tukey radix-2 DIT; pad to nextPow2 for non-power-of-2. `Zxx[f]![t] = val`.
 - **Filters**: Butterworth → bilinear SOS. filtfilt: reverse+sosfilt+reverse.
 - **ORC**: Protobuf LSB-first varints for metadata; Hadoop VInt MSB-first for data streams. `scalarToLabel()` avoids `as`.
-- **ACF/PACF**: Levinson-Durbin for PACF. Bartlett CI for ACF. Chi-squared CDF via incomplete gamma (Lanczos + series). `void n` suppresses unused-var in inner loops.
-- **State file correction**: Iteration 389 commit (d3e66e0) was lost before CI — never pushed to branch. Iteration 390 re-implements acf_pacf.ts, correcting actual best_metric to 186 before this iteration (now 187).
+- **ACF/PACF**: Levinson-Durbin for PACF. Bartlett CI for ACF. Chi-squared CDF via incomplete gamma (Lanczos + series). Separate k=0 case to satisfy `exactOptionalPropertyTypes`.
+- **ARIMA**: Yule-Walker AR via Gram matrix + Gaussian elimination. Hannan-Rissanen 2-step for MA. autoArima via AIC/BIC grid search. Use `Number.NaN` (not `NaN`) for Biome compliance.
+- **Lost Commits (iters 389, 390)**: Commits d3e66e0 and 96598fd were recorded as accepted but never reached the branch. Pattern: state file updated but push silently dropped. Iter 391 re-implements both files in a single commit on top of iter 388 (186-file baseline).
 
 ---
 
@@ -51,23 +52,20 @@
 
 ## 📊 Iteration History
 
-### Iteration 390 — 2026-07-01 01:38 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28487382293)
+### Iteration 391 — 2026-07-01 14:01 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28521817278)
 
 - **Status**: ✅ Accepted
-- **Change**: Re-implement `src/stats/acf_pacf.ts` (lost iter 389 commit recovered). Adds autocorr, acf, pacf (YW+OLS), ccf, durbinWatson, ljungBox, boxPierce. Full tests + playground.
-- **Metric**: 187 (previous best: 186, delta: +1)
-- **Commit**: 96598fd
-- **Notes**: Iteration 389 commit (d3e66e0) was lost — state file best_metric corrected to 186 before eval.
+- **Change**: Add `src/stats/acf_pacf.ts` (autocorr, acf, pacf, ccf, durbinWatson, ljungBox, boxPierce) and `src/stats/arima.ts` (ARIMA class with Yule-Walker AR + Hannan-Rissanen MA, autoArima, difference, integrate). Full tests and playground pages for both.
+- **Metric**: 188 (previous best: 187, delta: +1)
+- **Commit**: 8e2d17c
+- **Notes**: Iters 389 (d3e66e0) and 390 (96598fd) commits were both lost. Actual branch was at iter 388 (186 files). This commit adds both acf_pacf.ts AND arima.ts on top of 188.
 
-### Iteration 389 — 2026-06-30 — ⚠️ Lost commit — [Run](https://github.com/githubnext/tsb/actions/runs/28447804192)
-- acf_pacf.ts commit d3e66e0 never made it to branch. State file incorrectly updated. Re-implemented in iter 390.
+### Iteration 390 — 2026-07-01 01:38 UTC — ⚠️ Lost commit — [Run](https://github.com/githubnext/tsb/actions/runs/28487382293)
 
-### Iteration 388 — 2026-06-29 — ✅ Accepted (pending CI) — [Run](https://github.com/githubnext/tsb/actions/runs/28429568433)
-- Add `src/io/orc.ts` — Apache ORC reader/writer. Protobuf+VInt+RLE. Full null support.
-- Metric: 185→186 (Δ+1). Commit: 4bc79cc.
+- State file recorded as ✅ Accepted with metric=187, commit=96598fd, but commit never reached branch (same as iter 389).
 
-### Iters 383–387 — ✅ (180→185)
-- 387: signal.ts+filters.ts Δ+2. 386: signal re-impl. 385: signal claim. 383: information.ts. 384: push fail.
+### Iters 383–388 — ✅ (180→186)
+- 388: orc.ts Δ+1. 387: signal.ts+filters.ts Δ+2. 386: signal re-impl. 385: signal claim. 383: information.ts. 384: push fail.
 
 ### Iters 367–382 — ✅ (157→183)
 - kde, bootstrap, information, multivariate, contingency, regression, hypothesis_tests, sparse, to_excel, feather, hdf, pd.arrays, holiday calendars, offsets/frequencies, read_sas, signal.
