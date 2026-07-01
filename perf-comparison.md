@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-06-30T19:45:00Z |
-| Iteration Count | 382 |
-| Best Metric | 727 |
+| Last Run | 2026-07-01T08:15:00Z |
+| Iteration Count | 383 |
+| Best Metric | 728 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -53,11 +53,14 @@
 ## 🔭 Future Directions
 
 - Option-variant benchmarks; join/crossJoin with overlapping columns using suffixes.
-- Remaining unbenchmarked stats modules: bootstrap, case_when, kde, multivariate, regression, contingency.
+- Remaining unbenchmarked stats modules: bootstrap, case_when, kde.
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 383 — 2026-07-01 — [Run §28503418833](https://github.com/githubnext/tsb/actions/runs/28503418833)
+✅ +3 pairs → 728: regression (linregress/polyfit/OLS vs scipy/np.polyfit/lstsq), multivariate (PCA/mahalanobis/covMatrix vs sklearn/scipy/np.cov), contingency (expectedFreq/relativeRisk/oddsRatio/association vs scipy.stats.contingency) · commit c4a973e
 
 ### Iter 382 — 2026-06-30 — [Run §28470160041](https://github.com/githubnext/tsb/actions/runs/28470160041)
 ✅ +1 pair → 727: hypothesis_tests (ttestInd/pearsonr/spearmanr vs scipy.stats) · commit 4517e56; also fixed 4 pre-existing benchmarks with wrong function names
