@@ -1,0 +1,72 @@
+# Evergreen Trigger Workflow
+#
+# Plain deterministic GitHub Actions workflow (NOT an agentic workflow).
+# It handles PR events, checks that a PR is open, labeled `evergreen`, and not
+# exhausted, then dispatches the compiled Evergreen agent (evergreen.lock.yml).
+#
+# The agentic workflow is never activated directly from untrusted PR context.
+
+name: Evergreen Trigger
+
+on:
+  pull_request_target:
+    types: [labeled, synchronize, reopened, ready_for_review]
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: evergreen-trigger-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.scope.outputs.should_run }}
+    steps:
+      - id: scope
+        env:
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          STATE: ${{ github.event.pull_request.state }}
+        run: |
+          if [ "$STATE" != "open" ]; then
+            echo "PR is not open; skipping." >&2
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if echo "$LABELS" | grep -q '"evergreen-exhausted"'; then
+            echo "PR quota exhausted; skipping." >&2
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if echo "$LABELS" | grep -q '"evergreen"'; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "PR not labeled evergreen; skipping." >&2
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  dispatch:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Dispatch Evergreen agent
+        env:
+          GH_TOKEN: ${{ secrets.EVERGREEN_GITHUB_TOKEN || github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          gh workflow run evergreen.lock.yml \
+            --repo "$REPO" \
+            --ref "$REF" \
+            -f pr="$PR" \
+            -f head_sha="$HEAD_SHA"
