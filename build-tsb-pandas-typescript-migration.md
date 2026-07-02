@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-01T14:01:53Z |
-| Iteration Count | 391 |
-| Best Metric | 188 |
+| Last Run | 2026-07-02T01:37:49Z |
+| Iteration Count | 392 |
+| Best Metric | 187 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
@@ -38,9 +38,8 @@
 - **FFT**: Cooley-Tukey radix-2 DIT; pad to nextPow2 for non-power-of-2. `Zxx[f]![t] = val`.
 - **Filters**: Butterworth → bilinear SOS. filtfilt: reverse+sosfilt+reverse.
 - **ORC**: Protobuf LSB-first varints for metadata; Hadoop VInt MSB-first for data streams. `scalarToLabel()` avoids `as`.
-- **ACF/PACF**: Levinson-Durbin for PACF. Bartlett CI for ACF. Chi-squared CDF via incomplete gamma (Lanczos + series). Separate k=0 case to satisfy `exactOptionalPropertyTypes`.
-- **ARIMA**: Yule-Walker AR via Gram matrix + Gaussian elimination. Hannan-Rissanen 2-step for MA. autoArima via AIC/BIC grid search. Use `Number.NaN` (not `NaN`) for Biome compliance.
-- **Lost Commits (iters 389, 390)**: Commits d3e66e0 and 96598fd were recorded as accepted but never reached the branch. Pattern: state file updated but push silently dropped. Iter 391 re-implements both files in a single commit on top of iter 388 (186-file baseline).
+- **ACF/PACF (iter 392)**: Use `noNonNullAssertion`-safe destructuring for polynomial coefficients. Split `regIncGamma` into series + CF helpers for `noExcessiveCognitiveComplexity`. Use `Number.NEGATIVE_INFINITY`/`Number.POSITIVE_INFINITY` not `-Infinity`/`Infinity`.
+- **Lost Commits (iters 389–391)**: Commits were recorded as accepted but never reached the branch. Iter 392 re-implements `acf_pacf.ts` (previously planned for iter 389). The state file's `Best Metric` was over-counted (recorded 188, actual was 186 at baseline).
 
 ---
 
@@ -52,13 +51,19 @@
 
 ## 📊 Iteration History
 
+### Iteration 392 — 2026-07-02 01:37 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28559220424)
+
+- **Status**: ⏳ Pending CI
+- **Change**: Add `src/stats/acf_pacf.ts` (autocorr, acf, pacf, ccf, durbinWatson, ljungBox, boxPierce) — ACF with Bartlett CI, PACF via Levinson-Durbin, portmanteau tests.
+- **Metric**: 187 (baseline was 186, delta: +1). Note: state file's 188 was inflated from lost commits.
+- **Commit**: b3dd88e
+- **Notes**: Re-implements the lost iter 389 acf_pacf module. Branch was rebased onto current main (4 new commits from PRs #364/#365). Biome fixes: split regIncGamma into helpers, use destructuring for polynomial coefficients, use `Number.POSITIVE_INFINITY`.
+
 ### Iteration 391 — 2026-07-01 14:01 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28521817278)
 
-- **Status**: ✅ Accepted
-- **Change**: Add `src/stats/acf_pacf.ts` (autocorr, acf, pacf, ccf, durbinWatson, ljungBox, boxPierce) and `src/stats/arima.ts` (ARIMA class with Yule-Walker AR + Hannan-Rissanen MA, autoArima, difference, integrate). Full tests and playground pages for both.
-- **Metric**: 188 (previous best: 187, delta: +1)
-- **Commit**: 8e2d17c
-- **Notes**: Iters 389 (d3e66e0) and 390 (96598fd) commits were both lost. Actual branch was at iter 388 (186 files). This commit adds both acf_pacf.ts AND arima.ts on top of 188.
+- **Status**: ⚠️ Lost commit (same pattern as 389/390)
+- **Change**: Add `src/stats/acf_pacf.ts` and `src/stats/arima.ts`.
+- **Metric**: Recorded 188 but commit 8e2d17c never reached branch.
 
 ### Iteration 390 — 2026-07-01 01:38 UTC — ⚠️ Lost commit — [Run](https://github.com/githubnext/tsb/actions/runs/28487382293)
 
