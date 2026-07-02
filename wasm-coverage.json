@@ -1,7 +1,7 @@
 {
   "version": "1",
   "description": "Rust/WASM acceleration coverage manifest for tsb core functions",
-  "notes": "Every value export from src/core/index.ts is classified as either rust-wasm (implemented in Rust, exported through WASM, wired into the accelerated path) or ts-only-ineligible (not suitable for Rust/WASM with a concrete reason). There are no unclassified or todo entries.",
+  "notes": "Every value export from src/core/index.ts, plus every top-level value export from src/index.ts whose source is under src/core/**, is classified as either rust-wasm (implemented in Rust, exported through WASM, wired into the accelerated path) or ts-only-ineligible (not suitable for Rust/WASM with a concrete, documented reason). There are no unclassified or todo entries. The coverage check script (scripts/wasm-coverage-check.ts) validates this manifest against the live export surface on every run.",
   "entries": [
     {
       "name": "natCompare",
@@ -744,12 +744,144 @@
       "module": "core/extensions",
       "status": "ts-only-ineligible",
       "reason": "Namespace object bundling the extension API; not a function, purely a JS namespace accessor."
+    },
+    {
+      "name": "Flags",
+      "module": "core/flags",
+      "status": "ts-only-ineligible",
+      "reason": "JS class whose instances are WeakMap-backed runtime objects that track read-only/copy-on-write metadata for DataFrame/Series. Behaviour is defined by JS object identity and WeakMap lifecycle; cannot be serialised to WASM without losing those semantics."
+    },
+    {
+      "name": "getFlags",
+      "module": "core/flags",
+      "status": "ts-only-ineligible",
+      "reason": "Retrieves a Flags instance from a WeakMap keyed on a live JS object reference. Depends entirely on JS object identity and garbage-collector lifecycle; not a numeric kernel."
+    },
+    {
+      "name": "MaskedArray",
+      "module": "core/arrays",
+      "status": "ts-only-ineligible",
+      "reason": "Base nullable extension array class. Its API accepts JS callbacks, returns new class instances, and integrates with the extension registry and the JS dtype system. Class-level porting would require replacing the entire TS class hierarchy."
+    },
+    {
+      "name": "IntegerArray",
+      "module": "core/arrays",
+      "status": "ts-only-ineligible",
+      "reason": "Nullable integer extension array class extending MaskedArray. Same JS class-instance semantics as MaskedArray; no standalone pure numeric kernel separable from the class."
+    },
+    {
+      "name": "FloatingArray",
+      "module": "core/arrays",
+      "status": "ts-only-ineligible",
+      "reason": "Nullable floating-point extension array class extending MaskedArray. Same JS class-instance semantics as MaskedArray."
+    },
+    {
+      "name": "BooleanArray",
+      "module": "core/arrays",
+      "status": "ts-only-ineligible",
+      "reason": "Nullable boolean extension array class extending MaskedArray. Same JS class-instance semantics as MaskedArray."
+    },
+    {
+      "name": "StringArray",
+      "module": "core/arrays",
+      "status": "ts-only-ineligible",
+      "reason": "Nullable string extension array class extending MaskedArray. String data is UTF-16 JS strings; per-element copying to WASM memory would dominate any potential throughput gain."
+    },
+    {
+      "name": "DatetimeArray",
+      "module": "core/arrays",
+      "status": "ts-only-ineligible",
+      "reason": "Nullable datetime extension array class extending MaskedArray. Datetime arithmetic depends on JS Date and Timestamp objects with timezone handling; no pure numeric kernel separable from the class."
+    },
+    {
+      "name": "TimedeltaArray",
+      "module": "core/arrays",
+      "status": "ts-only-ineligible",
+      "reason": "Nullable timedelta extension array class extending MaskedArray. Duration arithmetic depends on JS Timedelta objects and the extension registry; no pure numeric kernel separable from the class."
+    },
+    {
+      "name": "SparseArray",
+      "module": "core/sparse",
+      "status": "ts-only-ineligible",
+      "reason": "Sparse storage array class whose fill-value semantics and block pointer structure are JS-object-based. Internal coordinate/value arrays are nullable JS arrays; no WASM-representable numeric kernel independent of the class."
+    },
+    {
+      "name": "SparseDtype",
+      "module": "core/sparse",
+      "status": "ts-only-ineligible",
+      "reason": "JS class used as a runtime type token for SparseArray. Instances are compared by JS object identity throughout the dtype system; cannot be serialised to/from WASM without losing identity semantics."
+    },
+    {
+      "name": "getOption",
+      "module": "core/options",
+      "status": "ts-only-ineligible",
+      "reason": "Runtime options registry accessor. Returns a JS value (string, number, boolean, or arbitrary object) from a live in-memory JS Map. Not a numeric operation; no WASM kernel applicable."
+    },
+    {
+      "name": "setOption",
+      "module": "core/options",
+      "status": "ts-only-ineligible",
+      "reason": "Runtime options registry mutator. Writes to a live in-memory JS Map with optional validation callbacks. Not a numeric operation; no WASM kernel applicable."
+    },
+    {
+      "name": "resetOption",
+      "module": "core/options",
+      "status": "ts-only-ineligible",
+      "reason": "Runtime options registry reset. Restores a JS Map entry to its default value. Not a numeric operation."
+    },
+    {
+      "name": "describeOption",
+      "module": "core/options",
+      "status": "ts-only-ineligible",
+      "reason": "Returns a human-readable description string for a registered option. Purely a JS string operation over an in-memory registry."
+    },
+    {
+      "name": "optionContext",
+      "module": "core/options",
+      "status": "ts-only-ineligible",
+      "reason": "Returns an async Symbol-keyed context token for scoped option overrides using JS async generators. Depends on JS Symbol identity and async lifecycle; not a numeric operation."
+    },
+    {
+      "name": "registerOption",
+      "module": "core/options",
+      "status": "ts-only-ineligible",
+      "reason": "Registers a new option in the global JS Map with a default value and optional validator callback. Registry mutation is not a numeric operation."
+    },
+    {
+      "name": "options",
+      "module": "core/options",
+      "status": "ts-only-ineligible",
+      "reason": "A JS Proxy object that provides live read/write access to the options registry. A Proxy is a JS-only construct with no WASM equivalent."
+    },
+    {
+      "name": "api",
+      "module": "core/pd_api",
+      "status": "ts-only-ineligible",
+      "reason": "Namespace object exposing the pd.api surface (types, extensions, internals). It is a static JS object used for grouping sub-namespaces; not a numeric function."
+    },
+    {
+      "name": "apiTypes",
+      "module": "core/pd_api",
+      "status": "ts-only-ineligible",
+      "reason": "Namespace object bundling the pd.api.types type-guard utilities. It is a static JS object; not a numeric function."
+    },
+    {
+      "name": "pdArray",
+      "module": "core/pd_array",
+      "status": "ts-only-ineligible",
+      "reason": "Factory function that dispatches to the appropriate nullable extension array constructor based on a dtype argument. Dispatch logic depends on JS instanceof checks and the extension registry."
+    },
+    {
+      "name": "PandasArray",
+      "module": "core/pd_array",
+      "status": "ts-only-ineligible",
+      "reason": "JS class wrapping a plain JS array for ndarray-compatibility (pd.arrays.PandasArray). Its API is defined by JS array semantics and the extension array protocol; not a pure numeric kernel."
     }
   ],
   "summary": {
-    "total_core_entries": 121,
+    "total_core_entries": 143,
     "rust_wasm": 6,
-    "ts_only_ineligible": 115,
+    "ts_only_ineligible": 137,
     "unclassified": 0,
     "eligible_missing": 0
   }
