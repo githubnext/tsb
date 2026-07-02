@@ -3,160 +3,160 @@
     {
       "function": "searchsorted_f64",
       "tsb": {
-        "mean_ms": 0.0008374999999999986,
+        "mean_ms": 0.0016710259999999978,
         "iterations": 1000,
-        "total_ms": 0.8374999999999986
+        "total_ms": 1.6710259999999977
       },
       "tsb_wasm": {
-        "mean_ms": 0.0021370410000000036,
+        "mean_ms": 0.028031712999999996,
         "iterations": 1000,
-        "total_ms": 2.1370410000000035
+        "total_ms": 28.031712999999996
       },
-      "wasm_speedup": 0.39189702022562845
+      "wasm_speedup": 0.05961198304220645
     },
     {
       "function": "searchsorted_many_f64",
       "tsb": {
-        "mean_ms": 0.0034607080000000037,
+        "mean_ms": 0.003219333999999989,
         "iterations": 1000,
-        "total_ms": 3.460708000000004
+        "total_ms": 3.2193339999999893
       },
       "tsb_wasm": {
-        "mean_ms": 0.005887209000000006,
+        "mean_ms": 0.034363152,
         "iterations": 1000,
-        "total_ms": 5.887209000000006
+        "total_ms": 34.363152
       },
-      "wasm_speedup": 0.5878350845026905
+      "wasm_speedup": 0.09368564327277047
     },
     {
       "function": "argsort_f64",
       "tsb": {
-        "mean_ms": 0.1133425,
+        "mean_ms": 0.21699383,
         "iterations": 1000,
-        "total_ms": 113.3425
+        "total_ms": 216.99383
       },
       "tsb_wasm": {
-        "mean_ms": 0.01931533300000001,
+        "mean_ms": 0.057585872999999996,
         "iterations": 1000,
-        "total_ms": 19.31533300000001
+        "total_ms": 57.58587299999999
       },
-      "wasm_speedup": 5.8680065210369365
+      "wasm_speedup": 3.768178178005568
     },
     {
       "function": "searchsorted_str",
       "tsb": {
-        "mean_ms": 0.00027391700000001153,
+        "mean_ms": 0.0009189930000000004,
         "iterations": 1000,
-        "total_ms": 0.2739170000000115
+        "total_ms": 0.9189930000000004
       },
       "tsb_wasm": {
-        "mean_ms": 0.002622792000000004,
+        "mean_ms": 0.007566859999999963,
         "iterations": 1000,
-        "total_ms": 2.622792000000004
+        "total_ms": 7.566859999999963
       },
-      "wasm_speedup": 0.10443717992124847,
+      "wasm_speedup": 0.12144971626275694,
       "notes": "String arrays are copied for each WASM call; raw kernel speedup is partially offset by copy overhead."
     },
     {
       "function": "argsort_str",
       "tsb": {
-        "mean_ms": 0.0004121250000000032,
+        "mean_ms": 0.002078239999999994,
         "iterations": 1000,
-        "total_ms": 0.4121250000000032
+        "total_ms": 2.078239999999994
       },
       "tsb_wasm": {
-        "mean_ms": 0.0014684579999999982,
+        "mean_ms": 0.004294708000000014,
         "iterations": 1000,
-        "total_ms": 1.4684579999999983
+        "total_ms": 4.294708000000014
       },
-      "wasm_speedup": 0.28065154059564773,
+      "wasm_speedup": 0.4839071713373731,
       "notes": "Same array-copy caveat as searchsorted_str."
     },
     {
       "function": "nat_compare",
       "tsb": {
-        "mean_ms": 0.0004783749999999998,
+        "mean_ms": 0.0010837179999999762,
         "iterations": 1000,
-        "total_ms": 0.4783749999999998
+        "total_ms": 1.0837179999999762
       },
       "tsb_wasm": {
-        "mean_ms": 0.001035334000000006,
+        "mean_ms": 0.004259321,
         "iterations": 1000,
-        "total_ms": 1.035334000000006
+        "total_ms": 4.259321
       },
-      "wasm_speedup": 0.4620489619774846
+      "wasm_speedup": 0.25443445093712735
     },
     {
       "function": "nat_sorted",
       "tsb": {
-        "mean_ms": 0.16902662499999996,
+        "mean_ms": 0.226383055,
         "iterations": 1000,
-        "total_ms": 169.02662499999997
+        "total_ms": 226.383055
       },
       "tsb_wasm": {
-        "mean_ms": 0.257211584,
+        "mean_ms": 0.5151697199999998,
         "iterations": 1000,
-        "total_ms": 257.211584
+        "total_ms": 515.1697199999999
       },
-      "wasm_speedup": 0.6571501266443737
+      "wasm_speedup": 0.4394339306277552
     },
     {
       "function": "nat_argsort",
       "tsb": {
-        "mean_ms": 0.03192166599999996,
+        "mean_ms": 0.05495564300000001,
         "iterations": 1000,
-        "total_ms": 31.92166599999996
+        "total_ms": 54.95564300000001
       },
       "tsb_wasm": {
-        "mean_ms": 0.035225500000000014,
+        "mean_ms": 0.06736009400000012,
         "iterations": 1000,
-        "total_ms": 35.22550000000001
+        "total_ms": 67.36009400000012
       },
-      "wasm_speedup": 0.9062090247122099
+      "wasm_speedup": 0.815848668500966
     }
   ],
   "coverage": {
     "unclassified": 0,
     "eligible_missing": 0,
-    "total_core_entries": 121,
+    "total_core_entries": 143,
     "rust_wasm": 6,
-    "ts_only_ineligible": 115
+    "ts_only_ineligible": 137
   },
-  "timestamp": "2026-06-27T02:33:54.386Z",
+  "timestamp": "2026-07-02T09:46:21.112Z",
   "slower_than_typescript": [
     {
       "function": "searchsorted_f64",
-      "wasm_speedup": 0.39189702022562845,
+      "wasm_speedup": 0.05961198304220645,
       "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
     },
     {
       "function": "searchsorted_many_f64",
-      "wasm_speedup": 0.5878350845026905,
+      "wasm_speedup": 0.09368564327277047,
       "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
     },
     {
       "function": "searchsorted_str",
-      "wasm_speedup": 0.10443717992124847,
+      "wasm_speedup": 0.12144971626275694,
       "explanation": "String arrays are copied for each WASM call; raw kernel speedup is partially offset by copy overhead."
     },
     {
       "function": "argsort_str",
-      "wasm_speedup": 0.28065154059564773,
+      "wasm_speedup": 0.4839071713373731,
       "explanation": "Same array-copy caveat as searchsorted_str."
     },
     {
       "function": "nat_compare",
-      "wasm_speedup": 0.4620489619774846,
+      "wasm_speedup": 0.25443445093712735,
       "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
     },
     {
       "function": "nat_sorted",
-      "wasm_speedup": 0.6571501266443737,
+      "wasm_speedup": 0.4394339306277552,
       "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
     },
     {
       "function": "nat_argsort",
-      "wasm_speedup": 0.9062090247122099,
+      "wasm_speedup": 0.815848668500966,
       "explanation": "WASM/JS boundary overhead exceeds kernel speedup at this array size."
     }
   ]
