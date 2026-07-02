@@ -1069,3 +1069,23 @@ export type {
   ButterResult,
   FilterType,
 } from "./stats/filters.ts";
+
+// ACF/PACF — autocorrelation, partial autocorrelation, portmanteau tests
+export {
+  autocorr,
+  acf,
+  pacf,
+  ccf,
+  durbinWatson,
+  ljungBox,
+  boxPierce,
+} from "./stats/acf_pacf.ts";
+export type {
+  ACFResult,
+  PACFResult,
+  PortmanteauResult,
+  ACFOptions,
+  PACFOptions,
+  CCFOptions,
+  PortmanteauOptions,
+} from "./stats/acf_pacf.ts";
