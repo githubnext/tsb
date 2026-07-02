@@ -925,6 +925,10 @@ export { toOffset, inferFreq, FREQ_ALIASES } from "./tseries/frequencies.ts";
 export { readSas } from "./io/read_sas.ts";
 export type { ReadSasOptions } from "./io/read_sas.ts";
 
+// io.orc — Apache ORC file format read/write
+export { readOrc, toOrc } from "./io/orc.ts";
+export type { ReadOrcOptions, ToOrcOptions } from "./io/orc.ts";
+
 // pd.arrays.SparseArray / pd.SparseDtype — sparse storage for arrays
 // with many repeated (fill) values
 export { SparseArray, SparseDtype } from "./core/sparse.ts";
@@ -1008,3 +1012,80 @@ export {
   tsallisEntropy,
 } from "./stats/information.ts";
 export type { PMF, NMIMethod } from "./stats/information.ts";
+
+// signal processing — FFT, windows, STFT, Welch PSD, periodogram
+export {
+  complex,
+  cAbs,
+  cArg,
+  fft,
+  ifft,
+  rfft,
+  irfft,
+  fftFreq,
+  rfftFreq,
+  fftshift,
+  ifftshift,
+  rectangularWindow,
+  bartlettWindow,
+  hannWindow,
+  hammingWindow,
+  blackmanWindow,
+  blackmanHarrisWindow,
+  flatTopWindow,
+  kaiserWindow,
+  getWindow,
+  stft,
+  istft,
+  welch,
+  periodogram,
+} from "./stats/signal.ts";
+export type {
+  Complex,
+  WindowName,
+  STFTOptions,
+  STFTResult,
+  ISTFTOptions,
+  WelchOptions,
+  PSDResult,
+  PeriodogramOptions,
+} from "./stats/signal.ts";
+
+// digital filters — FIR/IIR design and application (mirrors scipy.signal)
+export {
+  firwin,
+  freqz,
+  sosfreqz,
+  lfilter,
+  filtfilt,
+  sosfilt,
+  sosfiltfilt,
+  butter,
+} from "./stats/filters.ts";
+export type {
+  FirwinOptions,
+  FreqzResult,
+  SOSSection,
+  ButterResult,
+  FilterType,
+} from "./stats/filters.ts";
+
+// ACF/PACF — autocorrelation, partial autocorrelation, portmanteau tests
+export {
+  autocorr,
+  acf,
+  pacf,
+  ccf,
+  durbinWatson,
+  ljungBox,
+  boxPierce,
+} from "./stats/acf_pacf.ts";
+export type {
+  ACFResult,
+  PACFResult,
+  PortmanteauResult,
+  ACFOptions,
+  PACFOptions,
+  CCFOptions,
+  PortmanteauOptions,
+} from "./stats/acf_pacf.ts";
