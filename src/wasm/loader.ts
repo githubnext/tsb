@@ -43,7 +43,28 @@ function isTsbWasmModule(mod: unknown): mod is TsbWasmModule {
     hasFn(mod, "argsort_str") &&
     hasFn(mod, "nat_compare") &&
     hasFn(mod, "nat_sorted") &&
-    hasFn(mod, "nat_argsort")
+    hasFn(mod, "nat_argsort") &&
+    hasFn(mod, "sum_f64") &&
+    hasFn(mod, "mean_f64") &&
+    hasFn(mod, "min_f64") &&
+    hasFn(mod, "max_f64") &&
+    hasFn(mod, "var_f64") &&
+    hasFn(mod, "std_f64") &&
+    hasFn(mod, "median_f64") &&
+    hasFn(mod, "rolling_sum_f64") &&
+    hasFn(mod, "rolling_mean_f64") &&
+    hasFn(mod, "rolling_min_f64") &&
+    hasFn(mod, "rolling_max_f64") &&
+    hasFn(mod, "rolling_var_f64") &&
+    hasFn(mod, "rolling_std_f64") &&
+    hasFn(mod, "rolling_median_f64") &&
+    hasFn(mod, "expanding_sum_f64") &&
+    hasFn(mod, "expanding_mean_f64") &&
+    hasFn(mod, "expanding_min_f64") &&
+    hasFn(mod, "expanding_max_f64") &&
+    hasFn(mod, "expanding_var_f64") &&
+    hasFn(mod, "expanding_std_f64") &&
+    hasFn(mod, "expanding_median_f64")
   );
 }
 

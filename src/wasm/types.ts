@@ -55,6 +55,135 @@ export interface TsbWasmModule {
   /** Return the indices that would sort a string array lexicographically. */
   readonly argsort_str: (arr: string[]) => Uint32Array;
 
+  // ── scalar reductions ────────────────────────────────────────────────────────
+
+  /**
+   * Sum of non-NaN values in `data`. Returns `0` when all values are NaN
+   * or the array is empty, matching `Series.sum()` semantics.
+   */
+  readonly sum_f64: (data: Float64Array) => number;
+
+  /**
+   * Arithmetic mean of non-NaN values. Returns `NaN` for empty / all-NaN
+   * input, matching `Series.mean()`.
+   */
+  readonly mean_f64: (data: Float64Array) => number;
+
+  /**
+   * Minimum of non-NaN values. Returns `NaN` for empty / all-NaN input,
+   * matching `Series.min()` returning `undefined`.
+   */
+  readonly min_f64: (data: Float64Array) => number;
+
+  /**
+   * Maximum of non-NaN values. Returns `NaN` for empty / all-NaN input.
+   */
+  readonly max_f64: (data: Float64Array) => number;
+
+  /**
+   * Sample variance with delta degrees-of-freedom `ddof`.
+   * Returns `NaN` when fewer than `ddof + 1` valid values exist.
+   */
+  readonly var_f64: (data: Float64Array, ddof: number) => number;
+
+  /**
+   * Sample standard deviation with delta degrees-of-freedom `ddof`.
+   * Returns `NaN` when fewer than `ddof + 1` valid values exist.
+   */
+  readonly std_f64: (data: Float64Array, ddof: number) => number;
+
+  /**
+   * Median of non-NaN values. Returns `NaN` for empty / all-NaN input.
+   */
+  readonly median_f64: (data: Float64Array) => number;
+
+  // ── rolling window functions ──────────────────────────────────────────────
+
+  /**
+   * Rolling sum. Returns `NaN` at positions with fewer than `min_periods`
+   * non-NaN values in the window.
+   */
+  readonly rolling_sum_f64: (
+    data: Float64Array,
+    window: number,
+    min_periods: number,
+  ) => Float64Array;
+
+  /** Rolling arithmetic mean. */
+  readonly rolling_mean_f64: (
+    data: Float64Array,
+    window: number,
+    min_periods: number,
+  ) => Float64Array;
+
+  /** Rolling minimum. */
+  readonly rolling_min_f64: (
+    data: Float64Array,
+    window: number,
+    min_periods: number,
+  ) => Float64Array;
+
+  /** Rolling maximum. */
+  readonly rolling_max_f64: (
+    data: Float64Array,
+    window: number,
+    min_periods: number,
+  ) => Float64Array;
+
+  /** Rolling variance with delta degrees-of-freedom `ddof`. */
+  readonly rolling_var_f64: (
+    data: Float64Array,
+    window: number,
+    min_periods: number,
+    ddof: number,
+  ) => Float64Array;
+
+  /** Rolling standard deviation with delta degrees-of-freedom `ddof`. */
+  readonly rolling_std_f64: (
+    data: Float64Array,
+    window: number,
+    min_periods: number,
+    ddof: number,
+  ) => Float64Array;
+
+  /** Rolling median. */
+  readonly rolling_median_f64: (
+    data: Float64Array,
+    window: number,
+    min_periods: number,
+  ) => Float64Array;
+
+  // ── expanding window functions ────────────────────────────────────────────
+
+  /** Expanding sum. */
+  readonly expanding_sum_f64: (data: Float64Array, min_periods: number) => Float64Array;
+
+  /** Expanding mean. */
+  readonly expanding_mean_f64: (data: Float64Array, min_periods: number) => Float64Array;
+
+  /** Expanding minimum. */
+  readonly expanding_min_f64: (data: Float64Array, min_periods: number) => Float64Array;
+
+  /** Expanding maximum. */
+  readonly expanding_max_f64: (data: Float64Array, min_periods: number) => Float64Array;
+
+  /** Expanding variance with delta degrees-of-freedom `ddof`. */
+  readonly expanding_var_f64: (
+    data: Float64Array,
+    min_periods: number,
+    ddof: number,
+  ) => Float64Array;
+
+  /** Expanding standard deviation with delta degrees-of-freedom `ddof`. */
+  readonly expanding_std_f64: (
+    data: Float64Array,
+    min_periods: number,
+    ddof: number,
+  ) => Float64Array;
+
+  /** Expanding median. */
+  readonly expanding_median_f64: (data: Float64Array, min_periods: number) => Float64Array;
+
   // ── natsort ─────────────────────────────────────────────────────────────────
 
   /**
