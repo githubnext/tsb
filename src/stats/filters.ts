@@ -58,7 +58,7 @@ function polyMul(a: readonly number[], b: readonly number[]): number[] {
   const out = new Array<number>(a.length + b.length - 1).fill(0);
   for (let i = 0; i < a.length; i++) {
     for (let j = 0; j < b.length; j++) {
-      out[i + j] += (a[i] ?? 0) * (b[j] ?? 0);
+      out[i + j] = (out[i + j] ?? 0) + (a[i] ?? 0) * (b[j] ?? 0);
     }
   }
   return out;

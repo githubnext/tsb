@@ -659,7 +659,12 @@ export function welch(x: readonly number[], options: WelchOptions = {}): PSDResu
 
   if (nFrames <= 0) {
     // Signal too short — return single periodogram
-    return periodogram(x, { fs, nfft: options.nfft, window: options.window, scaling });
+    return periodogram(x, {
+      fs,
+      scaling,
+      ...(options.nfft !== undefined ? { nfft: options.nfft } : {}),
+      ...(options.window !== undefined ? { window: options.window } : {}),
+    });
   }
 
   // Collect per-frame periodograms

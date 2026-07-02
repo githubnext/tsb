@@ -219,7 +219,7 @@ describe("readOrc / toOrc — empty DataFrame", () => {
   it("round-trips an empty DataFrame", () => {
     const df = DataFrame.fromColumns({ x: [] as number[] });
     const rt = roundtrip(df);
-    expect(rt.height).toBe(0);
+    expect(rt.shape[0]).toBe(0);
     expect(rt.columns.toArray()).toEqual(["x"]);
   });
 });
@@ -267,7 +267,7 @@ describe("readOrc — error handling", () => {
     const df = DataFrame.fromColumns({ n: [1, 2] });
     const buf = toOrc(df);
     const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    const rt = readOrc(ab);
+    const rt = readOrc(new Uint8Array(ab));
     expect(colArr(rt, "n")).toEqual([1, 2]);
   });
 });

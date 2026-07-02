@@ -14,7 +14,6 @@
  */
 
 import { DataFrame } from "../core/frame.ts";
-import { Index } from "../core/index.ts";
 import type { Label, Scalar } from "../types.ts";
 
 // ─── Public types ─────────────────────────────────────────────────────────────
@@ -1083,11 +1082,7 @@ export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions 
     }
   }
 
-  const df = DataFrame.fromColumns(cols);
-  if (indexArr !== null) {
-    return df.setIndex(new Index(indexArr));
-  }
-  return df;
+  return DataFrame.fromColumns(cols, indexArr !== null ? { index: indexArr } : undefined);
 }
 
 // ─── Main: toOrc ─────────────────────────────────────────────────────────────
@@ -1133,7 +1128,7 @@ export function toOrc(df: DataFrame, options: ToOrcOptions = {}): Uint8Array {
   for (const b of ORC_MAGIC) out.push(b);
 
   // Build one stripe
-  const nRows = df.height;
+  const nRows = df.shape[0];
   const stripeOffset = 3; // after header
 
   // Write all streams

@@ -15,6 +15,7 @@ import {
   sosfiltfilt,
   butter,
   cAbs,
+  type SOSSection,
 } from "../../src/stats/filters.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -226,7 +227,7 @@ describe("butter", () => {
 
 describe("sosfreqz", () => {
   test("identity SOS (b=[1,0,0], a=[1,0,0]) — H=1", () => {
-    const sos = [[1, 0, 0, 1, 0, 0]] as const;
+    const sos: SOSSection[] = [[1, 0, 0, 1, 0, 0]];
     const { H } = sosfreqz(sos, 32);
     for (const h of H) {
       expect(cAbs(h)).toBeCloseTo(1.0, 10);
@@ -365,7 +366,7 @@ describe("filtfilt", () => {
 describe("sosfilt", () => {
   test("identity SOS passes signal unchanged", () => {
     const x = [1, 2, 3, 4, 5];
-    const sos = [[1, 0, 0, 1, 0, 0]] as const;
+    const sos: SOSSection[] = [[1, 0, 0, 1, 0, 0]];
     const y = sosfilt(sos, x);
     for (let i = 0; i < x.length; i++) {
       expect(y[i] ?? 0).toBeCloseTo(x[i] ?? 0, 10);
