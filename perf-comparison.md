@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-02T10:00:00Z |
-| Iteration Count | 384 |
-| Best Metric | 733 |
+| Last Run | 2026-07-03T13:27:00Z |
+| Iteration Count | 385 |
+| Best Metric | 726 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent.
 **Metric**: benchmarked_functions (higher is better) · **PR**: #361 · **Issue**: #221
@@ -45,7 +45,8 @@
 - 4 pre-existing TS benchmarks had wrong function names (dataFrameWhere→whereDataFrame, dataFrameMask→maskDataFrame, seriesMask→maskSeries, seriesWhere→whereSeries) — re-appeared on this branch after rebase; fixed again in iter 384.
 - bench_read_excel.ts: `readExcel`/`xlsxSheetNames` are NOT in `src/index.ts` (node:zlib excluded). Must inline STORED-only ZIP/XLSX reader — see iter 384 implementation. Import only DataFrame/Series/Index/RangeIndex/Dtype.
 - State's accepted iters can diverge from branch commits after rebase. Always use actual `ls benchmarks/tsb/*.ts | wc -l` as ground truth.
-- bench_str_extract_all.py / bench_str_extract_groups.py had escaped triple-quote docstrings (`\"\"\"`) — fixed to real triple-quotes in iter 384.
+- bench_str_extract_all.py / bench_str_extract_groups.py had escaped triple-quote docstrings (`\"\"\"`) — re-appear after every rebase; fix to real triple-quotes on checkout. This is a persistent recurring issue.
+- SparseArray/SparseDtype are in `src/core/sparse.ts`, exported as `SparseArray`/`SparseDtype` from `src/index.ts`. Key ops: `fromDense`, `toDense`, `sum`, `mean`, `add`, `mul`, `fillna`. Python equivalent: `pd.arrays.SparseArray(data, fill_value=0)` / `.to_dense()` / `.sum()` / `.mean()`.
 
 ## 🚧 Foreclosed Avenues
 
@@ -62,11 +63,11 @@
 
 ## 📊 Iteration History
 
-### Iter 384 — 2026-07-02 — [Run §28542115112](https://github.com/githubnext/tsb/actions/runs/28542115112)
-✅ +8 pairs → 733: information, hypothesis_tests, regression, multivariate, contingency, bootstrap, case_when, kde · fixed mask/where names (re-emerged post-rebase), inlined STORED XLSX reader in bench_read_excel.ts (node:zlib not in index), fixed escaped docstrings in 2 py files · commit 30988d5
+### Iter 385 — 2026-07-03 — [Run §28663472320](https://github.com/githubnext/tsb/actions/runs/28663472320)
+✅ +1 pair → 726: SparseArray (fromDense/toDense/sum/mean) · fixed escaped triple-quotes in 2 py files · commit b4ab16a
 
-### Iters 378–383 — ✅ 720→728 (summarized):
-378: +3 (merge_ordered_ffill/by, grouper_class → 723). 379: +1 (add_sub_mul_div → 724). 380: +1 (assert_equal → 725). 381: +1 (information → 726). 382: +1 (hypothesis_tests → 727). 383: +3 (regression/multivariate/contingency → 728).
+### Iters 378–384 — ✅ 720→726 (summarized):
+378: +3 (merge_ordered_ffill/by, grouper_class → 723). 379: +1 (add_sub_mul_div → 724). 380: +1 (assert_equal → 725). 381–384: fixed broken py files + added stats benchmarks (information/hypothesis_tests/regression/multivariate/contingency/bootstrap/case_when/kde) → but note: state 384 claimed 733 which diverged from branch actual count of 725.
 
 ### Iters 291–377 — ✅ 503→720 (summarized):
 291–339: IO/reshape/window/stats/string/datetime. 340–362: sample/pivot/rolling/rank/clip/diff/replace/mask/sort/pct_change. 363–377: merge_asof, cross_join, join_all, shift, sort, at/iat, convert_dtypes, styler, resample, iterrows, groupby_many_groups, concat_many, str_replace_regex.
