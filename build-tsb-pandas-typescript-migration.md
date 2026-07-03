@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-02T01:37:49Z |
-| Iteration Count | 392 |
-| Best Metric | 187 |
+| Last Run | 2026-07-03T08:19:06Z |
+| Iteration Count | 393 |
+| Best Metric | 188 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, pending-ci |
+| Recent Statuses | accepted, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Continue io/stats features: read_avro, wavelet transforms (DWT/CWT), state-space models (Kalman filter)
+- Continue io/stats features: read_avro, state-space models (Kalman filter), ARIMA
 
 ---
 
@@ -38,6 +38,7 @@
 - **FFT**: Cooley-Tukey radix-2 DIT; pad to nextPow2 for non-power-of-2. `Zxx[f]![t] = val`.
 - **Filters**: Butterworth → bilinear SOS. filtfilt: reverse+sosfilt+reverse.
 - **ORC**: Protobuf LSB-first varints for metadata; Hadoop VInt MSB-first for data streams. `scalarToLabel()` avoids `as`.
+- **Wavelets (iter 393)**: DWT periodization uses `(2n+1-k) mod N` indexing. QMF relations: `loR=rev(loD)`, `hiD[n]=(-1)^(n+1)*loR[n]`, `hiR[n]=(-1)^n*loD[n]`. CWT: convolve signal with scaled Ricker/Morlet wavelets. Use `row !== undefined` guard instead of `as` cast for 2D array writes. Fix pre-existing `new Series({data:...})` vs `new Series([...])` in acf_pacf.test.ts.
 - **ACF/PACF (iter 392)**: Use `noNonNullAssertion`-safe destructuring for polynomial coefficients. Split `regIncGamma` into series + CF helpers for `noExcessiveCognitiveComplexity`. Use `Number.NEGATIVE_INFINITY`/`Number.POSITIVE_INFINITY` not `-Infinity`/`Infinity`.
 - **Lost Commits (iters 389–391)**: Commits were recorded as accepted but never reached the branch. Iter 392 re-implements `acf_pacf.ts` (previously planned for iter 389). The state file's `Best Metric` was over-counted (recorded 188, actual was 186 at baseline).
 
@@ -51,6 +52,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 393 — 2026-07-03 08:19 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28646639178)
+
+- **Status**: ⏳ Pending CI
+- **Change**: Add `src/stats/wavelet.ts` — DWT/IDWT (Haar, Daubechies, Symlets, Coiflets), multi-level wavedec/waverec, 2D DWT/IDWT, CWT (Ricker/Morlet), threshold/visushrinkThreshold denoising. Also fix pre-existing acf_pacf.test.ts `new Series({data:...})` typecheck error.
+- **Metric**: 188 (delta: +1)
+- **Commit**: 8a6ba56
+- **Notes**: Rebased branch onto main (9 commits ahead, 0 behind). QMF filters verified against PyWavelets. Round-trip DWT/IDWT property tested with fast-check.
+
 ### Iteration 392 — 2026-07-02 01:37 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28559220424)
 
 - **Status**: ⏳ Pending CI
@@ -59,22 +68,9 @@
 - **Commit**: b3dd88e
 - **Notes**: Re-implements the lost iter 389 acf_pacf module. Branch was rebased onto current main (4 new commits from PRs #364/#365). Biome fixes: split regIncGamma into helpers, use destructuring for polynomial coefficients, use `Number.POSITIVE_INFINITY`.
 
-### Iteration 391 — 2026-07-01 14:01 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28521817278)
+### Iters 389–392 — ⚠️ Lost/Pending (183→187)
+- 392: acf_pacf.ts (pending-ci). 391/390/389: lost commits (acf_pacf+arima).
 
-- **Status**: ⚠️ Lost commit (same pattern as 389/390)
-- **Change**: Add `src/stats/acf_pacf.ts` and `src/stats/arima.ts`.
-- **Metric**: Recorded 188 but commit 8e2d17c never reached branch.
-
-### Iteration 390 — 2026-07-01 01:38 UTC — ⚠️ Lost commit — [Run](https://github.com/githubnext/tsb/actions/runs/28487382293)
-
-- State file recorded as ✅ Accepted with metric=187, commit=96598fd, but commit never reached branch (same as iter 389).
-
-### Iters 383–388 — ✅ (180→186)
-- 388: orc.ts Δ+1. 387: signal.ts+filters.ts Δ+2. 386: signal re-impl. 385: signal claim. 383: information.ts. 384: push fail.
-
-### Iters 367–382 — ✅ (157→183)
-- kde, bootstrap, information, multivariate, contingency, regression, hypothesis_tests, sparse, to_excel, feather, hdf, pd.arrays, holiday calendars, offsets/frequencies, read_sas, signal.
-
-### Iters 1–366 — ✅ (0→157)
-- Core (Index, Series, DataFrame, Dtype), stats, io, merge, reshape, window, groupby, datetime, multi-index, sql, xml, stata, parquet, fwf, excel, and more.
+### Iters 1–388 — ✅ (0→186)
+- Core (Index, Series, DataFrame, Dtype), stats (signal, filters, orc, information, kde, bootstrap, multivariate, contingency, regression, hypothesis_tests), io (sparse, to_excel, feather, hdf, arrays, read_sas), and more.
 
