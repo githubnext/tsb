@@ -311,6 +311,14 @@ describe("toXml / readXml round-trip", () => {
     expect(df2.col("id").toArray()).toEqual([1, 2]);
     expect(df2.col("name").toArray()).toEqual(["Alice", "Bob"]);
   });
+
+  test("round-trips __proto__ column names", () => {
+    const df = DataFrame.fromColumns(Object.fromEntries([["__proto__", ["Alice", "Bob"]]]));
+    const xml = toXml(df, { xmlDeclaration: false });
+    const df2 = readXml(xml, { converters: false });
+    expect(df2.shape).toEqual(df.shape);
+    expect(df2.col("__proto__").toArray()).toEqual(["Alice", "Bob"]);
+  });
 });
 
 // ─── property-based tests ─────────────────────────────────────────────────────
@@ -327,10 +335,9 @@ describe("readXml / toXml — property tests", () => {
         fc.integer({ min: 1, max: 5 }),
         (colNames, nRows) => {
           const uniqueCols = [...new Set(colNames)];
-          const colData: Record<string, string[]> = {};
-          for (const c of uniqueCols) {
-            colData[c] = Array.from({ length: nRows }, (_, i) => `v${i}`);
-          }
+          const colData = Object.fromEntries(
+            uniqueCols.map((c) => [c, Array.from({ length: nRows }, (_, i) => `v${i}`)]),
+          );
           const df = DataFrame.fromColumns(colData);
           const xml = toXml(df);
           const df2 = readXml(xml, { converters: false });
