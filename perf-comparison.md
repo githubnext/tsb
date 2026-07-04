@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-03T13:27:00Z |
-| Iteration Count | 385 |
-| Best Metric | 726 |
+| Last Run | 2026-07-04T13:23:14Z |
+| Iteration Count | 386 |
+| Best Metric | 727 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -22,7 +22,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent.
 **Metric**: benchmarked_functions (higher is better) · **PR**: #361 · **Issue**: #221
@@ -57,11 +57,15 @@
 ## 🔭 Future Directions
 
 - Option-variant benchmarks; join/crossJoin with overlapping columns using suffixes.
-- Remaining unbenchmarked stats modules: information/hypothesis_tests/regression/multivariate/contingency/bootstrap/case_when/kde now done. Check `src/stats/` for more unexposed functions.
+- Remaining unbenchmarked IO functions: `readXml`/`toXml`, `readFwf`, `readStata`/`toStata`, `readParquet`/`toParquet`, `readFeather`/`toFeather`, `readHdf`/`toHdf`, `toExcel`.
+- `lreshape` is now benchmarked (iter 386).
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 386 — 2026-07-04 — [Run §28707518157](https://github.com/githubnext/tsb/actions/runs/28707518157)
+✅ +1 pair → 727: lreshape (wide-to-long reshape via named column groups, 1k rows × 3 groups) · commit f57f8de
 
 ### Iter 385 — 2026-07-03 — [Run §28663472320](https://github.com/githubnext/tsb/actions/runs/28663472320)
 ✅ +1 pair → 726: SparseArray (fromDense/toDense/sum/mean) · fixed escaped triple-quotes in 2 py files · commit b4ab16a
