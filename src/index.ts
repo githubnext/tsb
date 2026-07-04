@@ -1089,3 +1089,18 @@ export type {
   CCFOptions,
   PortmanteauOptions,
 } from "./stats/acf_pacf.ts";
+
+// ARIMA — ARIMA(p,d,q) time-series model (Hannan-Rissanen, forecast CIs)
+export { ARIMAModel, fitArima } from "./stats/arima.ts";
+export type {
+  ARIMAOptions,
+  ARIMAFitResult,
+  ARIMAForecastResult,
+} from "./stats/arima.ts";
+
+// read_avro / toAvro — Apache Avro OCF I/O for DataFrame
+export { readAvro, toAvro } from "./io/read_avro.ts";
+export type {
+  ReadAvroOptions,
+  ToAvroOptions,
+} from "./io/read_avro.ts";
