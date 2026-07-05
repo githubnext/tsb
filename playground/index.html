@@ -621,6 +621,21 @@
           <p><code>autocorr</code>, <code>acf</code> (Bartlett CI), <code>pacf</code> (Levinson-Durbin), <code>ccf</code>, <code>durbinWatson</code>, Ljung-Box and Box-Pierce portmanteau tests. Mirrors <code>statsmodels.tsa.stattools</code> and <code>pd.Series.autocorr</code>.</p>
           <div class="status done">✅ Complete</div>
         </div>
+        <div class="feature-card">
+          <h3><a href="arima.html" style="color: var(--accent); text-decoration: none;">📉 ARIMA(p,d,q) Time-Series Models</a></h3>
+          <p><code>ARIMAModel</code> and <code>fitArima</code> — Hannan-Rissanen two-step estimation, multi-step forecasting, prediction intervals, AIC/BIC. Mirrors <code>statsmodels.tsa.arima.model.ARIMA</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="kalman.html" style="color: var(--accent); text-decoration: none;">🔭 Kalman Filter &amp; RTS Smoother</a></h3>
+          <p><code>KalmanFilter</code> — linear Gaussian state-space models with forward Kalman filter and backward RTS smoother. Factory helpers <code>localLevel</code>, <code>localLinearTrend</code>. Missing observations handled transparently.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3>📦 Apache Avro OCF I/O — readAvro / toAvro</h3>
+          <p><code>readAvro</code> and <code>toAvro</code> — Apache Avro Object Container File reader and writer. Supports all Avro primitives, arrays, maps, unions, and records. Zigzag varint encoding. Mirrors <code>pandas.read_avro()</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
       <div class="features-grid">
         <div class="feature-card">

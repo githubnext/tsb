@@ -1104,3 +1104,21 @@ export type {
   ReadAvroOptions,
   ToAvroOptions,
 } from "./io/read_avro.ts";
+
+// Kalman filter & RTS smoother — linear Gaussian state-space model
+export {
+  KalmanFilter,
+  StateSpaceModel,
+  kalmanFilter1D,
+  kalmanSmooth1D,
+  extractScalarMeans,
+  extractScalarVariances,
+  filteredPredictionInterval,
+} from "./stats/kalman.ts";
+export type {
+  KalmanFilterOptions,
+  LocalLevelOptions,
+  LocalLinearTrendOptions,
+  KalmanFilterResult,
+  KalmanSmootherResult,
+} from "./stats/kalman.ts";
