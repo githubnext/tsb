@@ -10,8 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-04T13:23:14Z |
-| Iteration Count | 386 |
+| Last Run | 2026-07-05T19:24:02Z |
+| Iteration Count | 387 |
 | Best Metric | 727 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
@@ -47,6 +47,7 @@
 - State's accepted iters can diverge from branch commits after rebase. Always use actual `ls benchmarks/tsb/*.ts | wc -l` as ground truth.
 - bench_str_extract_all.py / bench_str_extract_groups.py had escaped triple-quote docstrings (`\"\"\"`) — re-appear after every rebase; fix to real triple-quotes on checkout. This is a persistent recurring issue.
 - SparseArray/SparseDtype are in `src/core/sparse.ts`, exported as `SparseArray`/`SparseDtype` from `src/index.ts`. Key ops: `fromDense`, `toDense`, `sum`, `mean`, `add`, `mul`, `fillna`. Python equivalent: `pd.arrays.SparseArray(data, fill_value=0)` / `.to_dense()` / `.sum()` / `.mean()`.
+- scipy/numpy not available in agent sandbox; use pure Python for math-heavy Python benchmarks (e.g. linregress). Self-contained implementations pass `py_compile` and work correctly when run.
 
 ## 🚧 Foreclosed Avenues
 
@@ -58,11 +59,15 @@
 
 - Option-variant benchmarks; join/crossJoin with overlapping columns using suffixes.
 - Remaining unbenchmarked IO functions: `readXml`/`toXml`, `readFwf`, `readStata`/`toStata`, `readParquet`/`toParquet`, `readFeather`/`toFeather`, `readHdf`/`toHdf`, `toExcel`.
-- `lreshape` is now benchmarked (iter 386).
+- `lreshape` is now benchmarked (iter 386) — though commit f57f8de wasn't on branch after rebase; iter 387 confirmed branch at 727 with linregress.
+- Next candidates: `polyfit`/`polyval`/`OLS`, `gaussianKDE`, `bootstrap`, `entropy`/`klDivergence`, extension arrays (IntegerArray, FloatingArray), `readSas`, `USFederalHolidayCalendar`.
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 387 — 2026-07-05 — [Run §28752021241](https://github.com/githubnext/tsb/actions/runs/28752021241)
+✅ +1 pair → 727: linregress (OLS linear regression, 10k pts, 50 iters); branch rebased on main (9 ahead 115 behind → clean rebase); Python benchmark uses self-contained pure-Python OLS matching scipy.stats.linregress API · push pending CI
 
 ### Iter 386 — 2026-07-04 — [Run §28707518157](https://github.com/githubnext/tsb/actions/runs/28707518157)
 ✅ +1 pair → 727: lreshape (wide-to-long reshape via named column groups, 1k rows × 3 groups) · commit f57f8de
