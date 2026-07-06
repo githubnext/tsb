@@ -10,9 +10,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-05T19:24:02Z |
-| Iteration Count | 387 |
-| Best Metric | 727 |
+| Last Run | 2026-07-06T19:28:03Z |
+| Iteration Count | 388 |
+| Best Metric | 728 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -59,15 +59,18 @@
 
 - Option-variant benchmarks; join/crossJoin with overlapping columns using suffixes.
 - Remaining unbenchmarked IO functions: `readXml`/`toXml`, `readFwf`, `readStata`/`toStata`, `readParquet`/`toParquet`, `readFeather`/`toFeather`, `readHdf`/`toHdf`, `toExcel`.
-- `lreshape` is now benchmarked (iter 386) — though commit f57f8de wasn't on branch after rebase; iter 387 confirmed branch at 727 with linregress.
-- Next candidates: `polyfit`/`polyval`/`OLS`, `gaussianKDE`, `bootstrap`, `entropy`/`klDivergence`, extension arrays (IntegerArray, FloatingArray), `readSas`, `USFederalHolidayCalendar`.
+- `lreshape` is now benchmarked (iter 386) — commit lost after rebase; iter 387 state claimed 727 but branch was at 726 due to rebase.
+- Next candidates: `OLS`, `gaussianKDE`, `bootstrap`, `entropy`/`klDivergence`, extension arrays (IntegerArray, FloatingArray), `readSas`, `USFederalHolidayCalendar`.
 
 ---
 
 ## 📊 Iteration History
 
+### Iter 388 — 2026-07-06 — [Run §28817435139](https://github.com/githubnext/tsb/actions/runs/28817435139)
+✅ +2 pairs → 728: linregress (re-added after rebase loss, 10k pts, 50 iters) + polyfit_polyval (degree-3 polynomial fit+eval, 10k pts, 30 iters); both Python benchmarks use pure-Python implementations · commit 88787e8
+
 ### Iter 387 — 2026-07-05 — [Run §28752021241](https://github.com/githubnext/tsb/actions/runs/28752021241)
-✅ +1 pair → 727: linregress (OLS linear regression, 10k pts, 50 iters); branch rebased on main (9 ahead 115 behind → clean rebase); Python benchmark uses self-contained pure-Python OLS matching scipy.stats.linregress API · push pending CI
+✅ +1 pair → 727: linregress (OLS linear regression, 10k pts, 50 iters); branch rebased on main (9 ahead 115 behind → clean rebase); Python benchmark uses self-contained pure-Python OLS matching scipy.stats.linregress API · push pending CI — NOTE: state claimed 727 but branch was at 726 after rebase; linregress commit was lost
 
 ### Iter 386 — 2026-07-04 — [Run §28707518157](https://github.com/githubnext/tsb/actions/runs/28707518157)
 ✅ +1 pair → 727: lreshape (wide-to-long reshape via named column groups, 1k rows × 3 groups) · commit f57f8de
