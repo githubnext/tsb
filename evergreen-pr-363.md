@@ -1,34 +1,27 @@
 # Evergreen Run — PR #363
 
 **Branch:** `autoloop/build-tsb-pandas-typescript-migration`
-**Last run:** 2026-07-06
+**Last run:** 2026-07-05
 **Status:** Changes pushed — awaiting CI
 
-## Commits pushed (this run)
+## Commit pushed
 
 ```
-167062d fix: repair TypeScript errors in kalman.ts, E2E orc.html exclusion, and scipy dep
+b5458df fix: repair CI failures for ACF/PACF, signal, filters, and orc E2E
 ```
 
 ## Changes made
 
-### src/stats/kalman.ts
-- `MutMat[][]` → `MutMat[]` for `filtCovs`, `predCovs`, `innovCovs`, `smoothCovs`, `gains` (MutMat = number[][], so MutMat[] is 3D, correct for T×n×n matrices)
-- `ci[j] += X` → `ci[j] = (ci[j] ?? 0) + X` for noUncheckedIndexedAccess
+### TypeScript fix
+- `tests/stats/acf_pacf.test.ts` lines 71 and 318: `new Series([...])` → `new Series({data: [...]})` (Series constructor requires SeriesOptions<T>, not raw array)
 
-### tests/stats/kalman.test.ts
-- Removed 8 invalid `as [number][][]` casts; number[][] is directly assignable without cast
+### Python examples fix
+- `.github/workflows/ci.yml`: Added `scipy` to pip install in `validate-python-examples` job; filters.html and signal.html use `scipy.signal` functions
 
-### tests/stats/acf_pacf.test.ts
-- Lines 71 and 318: `new Series([...])` → `new Series({data: [...]})` (Series constructor requires SeriesOptions<T>)
-
-### tests-e2e/playground-cells.test.ts
-- Added `"orc.html"` to `NON_PLAYGROUND_PAGES`; orc.html uses custom onclick buttons, no `.playground-run` class
-
-### .github/workflows/ci.yml
-- Added `scipy` to pip install in `validate-python-examples` job
+### E2E fix
+- `tests-e2e/playground-cells.test.ts`: Added `orc.html` to `NON_PLAYGROUND_PAGES`; orc.html uses custom onclick buttons (no `.playground-run` class), causing `waitForFunction` to time out
 
 ## CI failures targeted
-- `Test & Lint` — tsc --noEmit: 14+ errors in kalman.ts + 2 errors in acf_pacf.test.ts
-- `Validate Python Examples` — scipy missing for filters.html and signal.html
-- `Playground E2E (Playwright)` — TimeoutError from orc.html
+- `Test & Lint` — tsc --noEmit had 2 errors in acf_pacf.test.ts → fixed
+- `Validate Python Examples` — failures in filters.html (7) and signal.html (5) → fixed with scipy
+- `Playground E2E (Playwright)` — TimeoutError from orc.html → fixed by adding to NON_PLAYGROUND_PAGES
