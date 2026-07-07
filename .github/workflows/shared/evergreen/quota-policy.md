@@ -5,10 +5,12 @@ Quota is per PR and per continuous application of the `evergreen` label.
 1. Quota starts when `evergreen` is applied and continues across runs while the
    label remains.
 2. The per-PR budget is **5000 AI credits** (see `repo-policy.md`).
-3. New commits do not reset quota by themselves.
-4. Empty CI-trigger commits do not count as semantic repair attempts.
-5. Cheap deterministic monitoring runs should consume little or no quota.
-6. Reapplying `evergreen` after exhaustion starts a fresh quota; keep prior
+3. The daily Evergreen workflow guardrail is **20000 AI credits** so scheduled
+   repair runs do not stop after one or two substantial PR passes.
+4. New commits do not reset quota by themselves.
+5. Empty CI-trigger commits do not count as semantic repair attempts.
+6. Cheap deterministic monitoring runs should consume little or no quota.
+7. Reapplying `evergreen` after exhaustion starts a fresh quota; keep prior
    memory.
 
 On quota exhaustion:

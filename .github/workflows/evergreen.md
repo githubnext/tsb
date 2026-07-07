@@ -20,7 +20,7 @@ on:
 permissions: read-all
 
 timeout-minutes: 30
-max-daily-ai-credits: 5000
+max-daily-ai-credits: 20000
 
 network:
   allowed:

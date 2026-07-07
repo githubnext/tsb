@@ -100,6 +100,7 @@ by the maintainer. Evergreen must follow it for all repo-specific behavior.
 
 - Per-PR AI-credit budget: **5000** AI credits per continuous application of the
   `evergreen` label.
+- Daily Evergreen workflow AI-credit guardrail: **20000** AI credits.
 - Max runs: bounded by the budget; scheduled monitoring should use little quota.
 - Max repeated attempts per failure signature: stop repeating a path already
   recorded as failing in memory.
