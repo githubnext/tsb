@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-06T14:09:30Z |
-| Iteration Count | 397 |
-| Best Metric | 191 |
+| Last Run | 2026-07-07T01:28:20Z |
+| Iteration Count | 398 |
+| Best Metric | 190 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Continue io/stats features: read_parquet (pure TS), GARCH/volatility models
+- Continue stats features: SARIMA seasonal ARIMA model
+- More io: read_parquet (pure TS)
 
 ---
 
@@ -34,7 +35,7 @@
 - **Biome/TS**: `noUncheckedIndexedAccess`→`?? 0`, `exactOptionalPropertyTypes`, `readonly` arrays. For 2D writes: `const row=M[i]; if(row) row[j]=v`. `slice()` on `readonly T[]` returns mutable `T[]`.
 - **Metric**: counts `src/**/*.ts` with exports (not index.ts). One new file = +1.
 - **Stats math**: Hannan-Rissanen, Levinson-Durbin, FFT Cooley-Tukey, Butterworth bilinear SOS, ACF/PACF Bartlett CI, Kalman Joseph form.
-- **SARIMA (397)**: Combined multiplicative lag set {i+js}. DiffLevel stack for seasonal+regular diff undo. `arProxy: readonly number[]` typed variable avoids `as` cast.
+- **GARCH (398)**: Nelder-Mead works well for GARCH MLE. Log-transform ω, exp-transform α/β, enforce stationarity via scaling. safeExp clamp ±30 prevents overflow.
 - **Avro/IO**: Zigzag varint, AvroDatum* interfaces for recursive types (interfaces self-ref, aliases can't).
 
 ---
@@ -42,36 +43,28 @@
 ## 🚧 Foreclosed Avenues
 
 - Adding offset/frequency classes to existing files: no metric gain (already exported)
+- **Foreclosed**: SARIMA (iter 397) recorded as accepted (commit 7824921) but never pushed. Real best_metric was 190.
 
 ---
 
 ## 🔭 Future Directions
 
 - Kalman filter / state-space model (SSM) — ✅ Done (iter 396)
-- SARIMA seasonal extension of ARIMA — ✅ Done (iter 397)
-- GARCH/volatility models — next candidate
+- GARCH/volatility models — ✅ Done (iter 398, pending CI)
+- SARIMA seasonal extension of ARIMA — next candidate
 - More io: read_parquet (pure TS)
 
 ---
 
 ## 📊 Iteration History
 
-### Iteration 397 — 2026-07-06 14:09 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28797575617)
+### Iteration 398 — 2026-07-07 01:28 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28834925122)
 
-- **Status**: ✅ Accepted
-- **Change**: Add `src/stats/sarima.ts` — SARIMA(p,d,q)(P,D,Q)[s] multiplicative seasonal ARIMA model
-- **Metric**: 191 (best: 190, +1)
-- **Commit**: 7824921
-- **Notes**: Extended Hannan-Rissanen with combined multiplicative lag set. Seasonal+regular differencing via DiffLevel stack. Full test suite + playground page.
+- **Status**: ⏳ Pending CI
+- **Change**: Add `src/stats/garch.ts` — GARCH(p,q) conditional volatility model (Bollerslev 1986)
+- **Metric**: 191 (previous best: 190, +1) — pending CI confirmation
+- **Commit**: 8cf6ed2
+- **Notes**: Gaussian MLE via Nelder-Mead. `GARCHModel`, `fitGarch()`, `garchUnconditionalVariance()`, `garchHalfLife()`. Supports ARCH(p,0) special case. Iter 397 SARIMA phantom commit corrected; best_metric was 190.
 
-### Iteration 396 — 2026-07-05 13:24 UTC — [Run](https://github.com/githubnext/tsb/actions/runs/28742188479)
-
-- **Status**: ✅ Accepted
-- **Change**: Add `src/stats/kalman.ts` — Kalman filter & RTS smoother
-- **Metric**: 190 (best: 189, +1)
-- **Commit**: 758d4d5
-
-### Iters 394–396 — ✅ (metrics 187→190): ARIMA+Avro (395), Kalman filter (396), lost commit (394).
-
-### Iters 1–393 — (0→187): Core (Index, Series, DataFrame, Dtype), stats, io and more.
+### Iters 1–397 — (0→190): Core (Index, Series, DataFrame, Dtype), stats (ACF/PACF, ARIMA, Kalman, etc.), io (CSV, JSON, Excel, Parquet, HDF5, Feather, Avro, ORC, SAS, Stata, FWF, XML, SQL) and more.
 
