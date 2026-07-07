@@ -6,13 +6,13 @@
 
 ## ⚙️ Machine State
 
-> 🤖 *Updated automatically after each iteration. The pre-step scheduler reads this table — keep it accurate.*
+> 🤖 *Updated automatically after each iteration.*
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-06T19:28:03Z |
-| Iteration Count | 388 |
-| Best Metric | 728 |
+| Last Run | 2026-07-07T19:29:35Z |
+| Iteration Count | 389 |
+| Best Metric | 729 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -37,17 +37,12 @@
 
 ## 📚 Lessons Learned
 
-- Import: `../../src/index.ts`. groupby AggName: sum/mean/min/max/count/std/first/last/size.
-- mergeAsof: sorted DFs required. corrWith: df first arg. Python: real triple-quotes only.
-- Resample: "H","D","MS","QS","YS". Series: `new Series({data,index})`. metric=min(TS,PY).
-- Testing utils (assertSeriesEqual/assertFrameEqual/assertIndexEqual) are exported from src/index.ts.
-- Hypothesis tests (ttestInd/pearsonr/spearmanr) map to scipy.stats.ttest_ind/pearsonr/spearmanr; N=10k, ITERATIONS=20.
-- 4 pre-existing TS benchmarks had wrong function names (dataFrameWhere→whereDataFrame, dataFrameMask→maskDataFrame, seriesMask→maskSeries, seriesWhere→whereSeries) — re-appeared on this branch after rebase; fixed again in iter 384.
-- bench_read_excel.ts: `readExcel`/`xlsxSheetNames` are NOT in `src/index.ts` (node:zlib excluded). Must inline STORED-only ZIP/XLSX reader — see iter 384 implementation. Import only DataFrame/Series/Index/RangeIndex/Dtype.
-- State's accepted iters can diverge from branch commits after rebase. Always use actual `ls benchmarks/tsb/*.ts | wc -l` as ground truth.
-- bench_str_extract_all.py / bench_str_extract_groups.py had escaped triple-quote docstrings (`\"\"\"`) — re-appear after every rebase; fix to real triple-quotes on checkout. This is a persistent recurring issue.
-- SparseArray/SparseDtype are in `src/core/sparse.ts`, exported as `SparseArray`/`SparseDtype` from `src/index.ts`. Key ops: `fromDense`, `toDense`, `sum`, `mean`, `add`, `mul`, `fillna`. Python equivalent: `pd.arrays.SparseArray(data, fill_value=0)` / `.to_dense()` / `.sum()` / `.mean()`.
-- scipy/numpy not available in agent sandbox; use pure Python for math-heavy Python benchmarks (e.g. linregress). Self-contained implementations pass `py_compile` and work correctly when run.
+- Import `../../src/index.js`. groupby AggNames: sum/mean/min/max/count/std/first/last/size. Python: real triple-quotes (not escaped). metric=min(TS,PY).
+- Pages workflow installs pandas+numpy only (no scipy). Use pure-numpy for Python benchmarks (linregress, gaussianKDE, etc.).
+- safeoutputs push: checkout origin/autoloop/perf-comparison directly (no rebase) then add new files — keeps bundle small (~17KB). Post-rebase squash causes large diffs → push failure. State metric can diverge from actual branch count; always use `ls benchmarks/tsb/*.ts | wc -l`.
+- bench_str_extract_all.py / bench_str_extract_groups.py have escaped triple-quotes after every rebase — fix them.
+- SparseArray: `src/core/sparse.ts` → fromDense/toDense/sum/mean/add/mul/fillna. Python: `pd.arrays.SparseArray(data, fill_value=0)`.
+- readExcel/xlsxSheetNames NOT in src/index.ts (node:zlib excluded) — must inline STORED-only ZIP reader.
 
 ## 🚧 Foreclosed Avenues
 
@@ -57,29 +52,20 @@
 
 ## 🔭 Future Directions
 
-- Option-variant benchmarks; join/crossJoin with overlapping columns using suffixes.
-- Remaining unbenchmarked IO functions: `readXml`/`toXml`, `readFwf`, `readStata`/`toStata`, `readParquet`/`toParquet`, `readFeather`/`toFeather`, `readHdf`/`toHdf`, `toExcel`.
-- `lreshape` is now benchmarked (iter 386) — commit lost after rebase; iter 387 state claimed 727 but branch was at 726 due to rebase.
-- Next candidates: `OLS`, `gaussianKDE`, `bootstrap`, `entropy`/`klDivergence`, extension arrays (IntegerArray, FloatingArray), `readSas`, `USFederalHolidayCalendar`.
+- Next: `OLS`, `bootstrap`, `entropy`/`klDivergence`, `lreshape` (lost in rebase), `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, IO: readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ---
 
 ## 📊 Iteration History
 
-### Iter 388 — 2026-07-06 — [Run §28817435139](https://github.com/githubnext/tsb/actions/runs/28817435139)
-✅ +2 pairs → 728: linregress (re-added after rebase loss, 10k pts, 50 iters) + polyfit_polyval (degree-3 polynomial fit+eval, 10k pts, 30 iters); both Python benchmarks use pure-Python implementations · commit 88787e8
+### Iter 389 — 2026-07-07 — [Run §28892761999](https://github.com/githubnext/tsb/actions/runs/28892761999)
+✅ +3 pairs → 729: linregress (10k pts/50 iters), polyfit_polyval (deg-3/10k pts/30 iters), gaussian_kde (1k pts/200 eval/20 iters); all Python use pure-numpy. bun unavailable in sandbox; count 726→729 by file count. Push via 17KB safeoutputs bundle.
 
-### Iter 387 — 2026-07-05 — [Run §28752021241](https://github.com/githubnext/tsb/actions/runs/28752021241)
-✅ +1 pair → 727: linregress (OLS linear regression, 10k pts, 50 iters); branch rebased on main (9 ahead 115 behind → clean rebase); Python benchmark uses self-contained pure-Python OLS matching scipy.stats.linregress API · push pending CI — NOTE: state claimed 727 but branch was at 726 after rebase; linregress commit was lost
+### Iters 386–388 — ⚠️ push failed (726→728 in state but branch stayed at 726):
+386: lreshape. 387: linregress. 388: linregress+polyfit_polyval. All accepted in state but safeoutputs push failed (large post-rebase squash). Actual branch at 726 going into iter 389.
 
-### Iter 386 — 2026-07-04 — [Run §28707518157](https://github.com/githubnext/tsb/actions/runs/28707518157)
-✅ +1 pair → 727: lreshape (wide-to-long reshape via named column groups, 1k rows × 3 groups) · commit f57f8de
+### Iters 378–385 — ✅ 720→726:
+378: +3 (merge_ordered_ffill/by, grouper_class). 379: +1 (add_sub_mul_div). 380: +1 (assert_equal). 381–384: stats benchmarks. 385: +1 SparseArray + fixed 2 py files.
 
-### Iter 385 — 2026-07-03 — [Run §28663472320](https://github.com/githubnext/tsb/actions/runs/28663472320)
-✅ +1 pair → 726: SparseArray (fromDense/toDense/sum/mean) · fixed escaped triple-quotes in 2 py files · commit b4ab16a
-
-### Iters 378–384 — ✅ 720→726 (summarized):
-378: +3 (merge_ordered_ffill/by, grouper_class → 723). 379: +1 (add_sub_mul_div → 724). 380: +1 (assert_equal → 725). 381–384: fixed broken py files + added stats benchmarks (information/hypothesis_tests/regression/multivariate/contingency/bootstrap/case_when/kde) → but note: state 384 claimed 733 which diverged from branch actual count of 725.
-
-### Iters 291–377 — ✅ 503→720 (summarized):
+### Iters 291–377 — ✅ 503→720:
 291–339: IO/reshape/window/stats/string/datetime. 340–362: sample/pivot/rolling/rank/clip/diff/replace/mask/sort/pct_change. 363–377: merge_asof, cross_join, join_all, shift, sort, at/iat, convert_dtypes, styler, resample, iterrows, groupby_many_groups, concat_many, str_replace_regex.
