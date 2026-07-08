@@ -1,27 +1,40 @@
 # Evergreen Run — PR #363
 
 **Branch:** `autoloop/build-tsb-pandas-typescript-migration`
-**Last run:** 2026-07-05
+**Last run:** 2026-07-08
 **Status:** Changes pushed — awaiting CI
 
 ## Commit pushed
 
 ```
-b5458df fix: repair CI failures for ACF/PACF, signal, filters, and orc E2E
+ecdb2f1 fix: resolve CI failures in kalman, ets, acf_pacf, E2E, and Python validation
 ```
 
 ## Changes made
 
-### TypeScript fix
-- `tests/stats/acf_pacf.test.ts` lines 71 and 318: `new Series([...])` → `new Series({data: [...]})` (Series constructor requires SeriesOptions<T>, not raw array)
+### src/stats/kalman.ts
+- `mmul` line 83: `ci[j] += ...` → `ci[j] = (ci[j] ?? 0) + ...` (TS2532 noUncheckedIndexedAccess)
+- `filtCovs`, `predCovs`, `innovCovs`: `MutMat[][] → MutMat[]` (were wrongly double-nested)
+- `smoothCovs`, `gains`: `MutMat[][] = new Array<MutMat[]>` → `MutMat[] = new Array<MutMat>`
 
-### Python examples fix
-- `.github/workflows/ci.yml`: Added `scipy` to pip install in `validate-python-examples` job; filters.html and signal.html use `scipy.signal` functions
+### src/stats/ets.ts
+- Changed `import type { Series }` → `import { Series }` from core/index.ts
+- `toArr()`: `if (Array.isArray(y)) return y; return y.values` → `if (y instanceof Series) return y.values; return y`
+  (Array.isArray didn't narrow `readonly number[]` away from `Series<number>` properly in strict TS)
 
-### E2E fix
-- `tests-e2e/playground-cells.test.ts`: Added `orc.html` to `NON_PLAYGROUND_PAGES`; orc.html uses custom onclick buttons (no `.playground-run` class), causing `waitForFunction` to time out
+### tests/stats/acf_pacf.test.ts
+- Lines 71, 318: `new Series([...])` → `new Series({data: [...]})` (Series requires SeriesOptions)
+
+### tests/stats/kalman.test.ts
+- 8 occurrences of `as [number][][]` removed — TypeScript refuses conversion from `number[][]` to `[number][][]`
+
+### .github/workflows/ci.yml
+- Added `scipy==1.14.1` to validate-python-examples pip install (signal.html, filters.html need scipy)
+
+### tests-e2e/playground-cells.test.ts
+- Added `orc.html` to NON_PLAYGROUND_PAGES (has no .playground-run buttons → waitForFunction timeout)
 
 ## CI failures targeted
-- `Test & Lint` — tsc --noEmit had 2 errors in acf_pacf.test.ts → fixed
-- `Validate Python Examples` — failures in filters.html (7) and signal.html (5) → fixed with scipy
-- `Playground E2E (Playwright)` — TimeoutError from orc.html → fixed by adding to NON_PLAYGROUND_PAGES
+- Test & Lint (tsc): ~25 TypeScript errors in kalman.ts, ets.ts, acf_pacf.test.ts, kalman.test.ts
+- Validate Python Examples: ModuleNotFoundError: No module named 'scipy'
+- Playground E2E: TimeoutError on orc.html (no .playground-run buttons)
