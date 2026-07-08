@@ -1122,3 +1122,26 @@ export type {
   KalmanFilterResult,
   KalmanSmootherResult,
 } from "./stats/kalman.ts";
+
+// ETS — Exponential Smoothing / Holt-Winters (Simple, Holt, full Holt-Winters)
+export {
+  SimpleExpSmoothing,
+  Holt,
+  ExponentialSmoothing,
+  simpleExpSmoothing,
+  holt,
+  fitEts,
+} from "./stats/ets.ts";
+export type {
+  ETSTrend,
+  ETSSeasonal,
+  ETSInit,
+  SESOptions,
+  SESFitResult,
+  HoltOptions,
+  HoltFitResult,
+  ExponentialSmoothingOptions,
+  ExponentialSmoothingFitResult,
+  ETSForecastResult,
+} from "./stats/ets.ts";
+

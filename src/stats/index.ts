@@ -646,3 +646,48 @@ export type {
   CCFOptions,
   PortmanteauOptions,
 } from "./acf_pacf.ts";
+export {
+  ARIMAModel,
+  fitArima,
+} from "./arima.ts";
+export type {
+  ARIMAOptions,
+  ARIMAFitResult,
+  ARIMAForecastResult,
+} from "./arima.ts";
+export {
+  KalmanFilter,
+  StateSpaceModel,
+  kalmanFilter1D,
+  kalmanSmooth1D,
+  extractScalarMeans,
+  extractScalarVariances,
+  filteredPredictionInterval,
+} from "./kalman.ts";
+export type {
+  KalmanFilterOptions,
+  LocalLevelOptions,
+  LocalLinearTrendOptions,
+  KalmanFilterResult,
+  KalmanSmootherResult,
+} from "./kalman.ts";
+export {
+  SimpleExpSmoothing,
+  Holt,
+  ExponentialSmoothing,
+  simpleExpSmoothing,
+  holt,
+  fitEts,
+} from "./ets.ts";
+export type {
+  ETSTrend,
+  ETSSeasonal,
+  ETSInit,
+  SESOptions,
+  SESFitResult,
+  HoltOptions,
+  HoltFitResult,
+  ExponentialSmoothingOptions,
+  ExponentialSmoothingFitResult,
+  ETSForecastResult,
+} from "./ets.ts";
