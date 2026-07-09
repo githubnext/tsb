@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-07T03:30:00Z |
-| Iteration Count | 399 |
+| Last Run | 2026-07-09T01:26:08Z |
+| Iteration Count | 400 |
 | Best Metric | 192 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,7 +19,40 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | accepted, accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted |
+
+---
+
+## 🎯 Current Priorities
+
+- SARIMA (iter 399 phantom — retry)
+- VAR (multivariate) or Prophet-style decomposition
+
+---
+
+## 📚 Lessons Learned
+
+- **TS**: `noUncheckedIndexedAccess`→`?? 0`. `slice()` on `readonly T[]` → mutable. 2D writes: guard row before assign.
+- **Metric**: `find src -name '*.ts' -not -name 'index.ts' | xargs grep -l 'export' | wc -l`. +1 per new file.
+- **GARCH (400)**: Nelder-Mead MLE. Forecast diff-index: diff>0→forecasts[diff-1], diff=0→last observed, diff<0→older observed.
+- **Phantom commits**: always call push_to_pull_request_branch — iters 398/399 were phantom.
+
+---
+
+## 🔭 Future Directions
+
+- SARIMA (phantom 399), VAR, Prophet-style, State-space DLM
+
+---
+
+## 📊 Iteration History
+
+### Iter 400 — 2026-07-09 — [Run §28987406915](https://github.com/githubnext/tsb/actions/runs/28987406915)
+✅ +1 → 192: GARCH(p,q) quasi-MLE. GARCHModel+fitGarch+simulateGarch, 45+ tests, playground. Commit 911b44b. Rebase (ahead=12,behind=11).
+
+### Iters 398–399 — ❌ Phantom (GARCH+SARIMA never pushed; metric stayed 191)
+### Iters 1–397 — (0→191): Core, stats, io (CSV/JSON/Excel/Parquet/HDF5/Feather/Avro/ORC/SAS/Stata/FWF/XML/SQL).
+
 
 ---
 
