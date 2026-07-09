@@ -247,7 +247,9 @@ export function medianF64Accelerated(nums: readonly number[]): number {
   const n = sorted.length;
   if (n === 0) return Number.NaN;
   const mid = Math.floor(n / 2);
-  return n % 2 === 1 ? (sorted[mid] as number) : ((sorted[mid - 1] as number) + (sorted[mid] as number)) / 2;
+  const midVal = sorted[mid] ?? Number.NaN;
+  const lo = sorted[mid - 1] ?? Number.NaN;
+  return n % 2 === 1 ? midVal : (lo + midVal) / 2;
 }
 
 // ─── rolling window accelerated helpers ───────────────────────────────────────
@@ -419,7 +421,8 @@ export function expandingMeanF64Accelerated(
     const input = Float64Array.from(data, (v) => (v === null || v === undefined ? Number.NaN : v));
     return f64ArrayToNullable(wasm.expanding_mean_f64(input, minPeriods));
   }
-  return rollingFallback(data, data.length, minPeriods, (w) => w.reduce((a, v) => a + v, 0) / w.length, true);
+  const meanFn = (w: number[]) => w.reduce((a, v) => a + v, 0) / w.length;
+  return rollingFallback(data, data.length, minPeriods, meanFn, true);
 }
 
 /**
@@ -545,7 +548,7 @@ function rollingFallback(
 ): (number | null)[] {
   return data.map((_, i) => {
     const start = expanding ? 0 : Math.max(0, i + 1 - window);
-    const slice = data.slice(start, i + 1).filter((v) => v !== null && v !== undefined && !Number.isNaN(v)) as number[];
+    const slice = data.slice(start, i + 1).filter((v) => !Number.isNaN(v));
     if (slice.length < minPeriods) return null;
     const result = agg(slice);
     return Number.isNaN(result) ? null : result;
