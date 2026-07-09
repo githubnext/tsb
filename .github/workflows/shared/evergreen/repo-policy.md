@@ -121,6 +121,10 @@ readiness controller and the agentic orchestrator must both respect this file.
   - E2E: `bun run test:e2e`
   - Golden snapshots: `python golden/generate.py`
   - Workflow compile: `gh aw compile` (and `apm compile` when APM sources change)
+- CI/lint diagnosis policy: when a CI gate fails, fetch the exact failing job
+  logs and run the targeted repo command locally before editing. For lint
+  failures, `bun run lint` is the source of truth; do not guess from truncated
+  GitHub summaries.
 - Generated file policy: recompile committed lockfiles/snapshots when their
   sources change. After editing any `.github/workflows/*.md` workflow, recompile
   and commit the generated `.lock.yml`.

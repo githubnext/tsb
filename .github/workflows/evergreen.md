@@ -22,6 +22,8 @@ concurrency:
   group: gh-aw-${{ github.workflow }}-${{ github.event.inputs.pr || github.event.pull_request.number || github.ref || github.run_id }}
   cancel-in-progress: true
 
+timeout-minutes: 60
+
 permissions:
   contents: read
   issues: read
@@ -434,11 +436,38 @@ pre-agent-steps:
       echo "Evergreen workspace is on branch $current_branch at $current_head_sha for PR #$PR_NUMBER."
 
 tools:
+  timeout: 600
   github:
     toolsets: [repos, issues, pull_requests, actions]
   bash:
-    - gh
+    - awk
+    - base64
+    - bun:*
+    - find
+    - gh:*
+    - git add:*
+    - git branch:*
+    - git checkout:*
+    - git commit:*
+    - git diff:*
+    - git log:*
+    - git rev-parse:*
+    - git rm:*
+    - git show:*
+    - git status
+    - git switch:*
+    - grep
     - jq
+    - mkdir
+    - node:*
+    - npm:*
+    - npx:*
+    - pwd
+    - rg
+    - rm:*
+    - sed
+    - tar:*
+    - unzip:*
 
 imports:
   - shared/skills/pr-intake.md
@@ -529,6 +558,10 @@ are merge gates.
 4. Run `ci-run-deduper`.
 5. Run `ci-gate-evaluator`.
 6. Run `ci-log-parser` for failing checks.
+   For CI, lint, typecheck, or test failures, collect the exact failing command
+   and full relevant diagnostics before guessing or delegating. Use GitHub job
+   logs/API, downloaded logs when needed, and targeted local reproduction such as
+   `bun run lint` or `bun run typecheck`.
 7. Run `merge-blocker-comment-reader` only for configured gates or explicit
    merge blockers.
 8. Run `deterministic-repair` before agentic edits.
