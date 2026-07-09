@@ -98,8 +98,8 @@ readiness controller and the agentic orchestrator must both respect this file.
   through safe outputs by the agent (never from preflight) and labeled
   `evergreen: trigger CI`; they do not count as semantic repair attempts.
 - Token policy: `GITHUB_TOKEN` for reads and control-plane label writes.
-  `GH_AW_CI_TRIGGER_TOKEN` (existing PAT) is used by gh-aw for pushes so that PR
-  branch pushes trigger CI (default-token pushes do not).
+  `GH_AW_CI_TRIGGER_TOKEN` (existing PAT) is used by gh-aw for CI reruns and
+  pushes so that PR branch pushes trigger CI (default-token pushes do not).
 
 ## Repair Policy
 
