@@ -1,31 +1,31 @@
-# Evergreen Run — PR #369
+# Evergreen — PR #369
 
-**Branch:** `goal/349-goal-add-rust-wasm-acceleration-coverage-for-core-functions`
-**Last run:** 2026-07-06
-**Status:** Changes pushed — awaiting CI
+**PR**: Add Rust/WASM acceleration coverage for core functions  
+**Branch**: `goal/349-goal-add-rust-wasm-acceleration-coverage-for-core-functions`  
+**Labels**: automation, goal, evergreen
 
-## Commit pushed (this run)
+## Run History
 
-```
-b4e2585 fix: resolve noUncheckedIndexedAccess errors in series.ts radix sort
-```
+### Run 1 (series.ts radix sort `?? 0` fix)
+- Fixed `noUncheckedIndexedAccess` errors in radix sort path in `series.ts`
+- Added `?? 0` fallbacks for typed array indexed access
 
-## Changes made
+### Run 2 (series.ts lint + biome format fixes)
+- CI failure: `bun run lint` → biome check "Found 3 errors. Found 780 warnings."
+- Root cause: commit `bc4c7a7` (feat: wasm acceleration) added format violations
+- Fixed `wasm-coverage.json`: added missing trailing newline (EOF)
+- Fixed `src/wasm/accelerated.ts` lines 250, 422, 548: refactored long (>100 char)
+  lines in `medianF64Accelerated`, `expandingMeanF64Accelerated`, `rollingFallback`
+  - Line 250: extracted `midVal`/`lo` with `?? Number.NaN` (removed `as` casts)
+  - Line 422: extracted `meanFn` variable to shorten return statement
+  - Line 548: simplified filter to `!Number.isNaN(v)` (removed redundant null checks)
+- Fixed `src/core/series.ts` `isIndexLike()`: `rec["size"]` → `rec.size` etc. (useLiteralKeys)
+- Pushed commit `f330ebd` to PR branch; CI triggered
 
-### src/core/series.ts
-Radix sort implementation had ~28 typed array (Uint32Array) element accesses
-returning `number | undefined` under `noUncheckedIndexedAccess`. Previous
-evergreen had removed `!` operators (Biome noNonNullAssertion) which broke tsc.
-Fix: use `?? 0` default value to satisfy both rules.
-
-Specific fixes:
-- `fvalsU32[fsi]` → `fvalsU32[fsi] ?? 0` (lo/hi IEEE-754 bit reads)
-- `_rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1` (8 histogram update lines)
-- `_rxHisto[base + b] ?? 0` (prefix sum computation)
-- `(srcBuf[si + keyOff] ?? 0)` (radix pass bucket computation)
-- `_rxHisto[histoBase + bucket] ?? 0` (radix pass write position)
-- `srcBuf[si] ?? 0`, `srcBuf[si+1] ?? 0`, `srcBuf[si+2] ?? 0` (4 reconstruction loops × 3 reads)
-- `dstBuf[di] = srcBuf[si] ?? 0` etc. (radix pass copy)
-
-## CI failures targeted
-- `Test & Lint` — tsc --noEmit: ~25 TypeScript errors in radix sort section of series.ts
+## Key Notes
+- biome.json ignores: `benchmarks/**`, `scripts/**`, `rust/**`, `*.d.ts`
+- biome counts 1 format error per file (not per line)
+- "Found 3 errors" = likely 1 (wasm-coverage.json) + 1 (accelerated.ts) + 1 unknown
+  → if CI still shows errors after run 2, check `src/wasm/loader.ts`, `src/io/xml.ts`
+- All long lines in `series.ts` (875, 876, 1446) are pre-existing (on main), not new
+- `tests/io/read_excel.test.ts` long lines are pre-existing string literals (biome can't break them)
