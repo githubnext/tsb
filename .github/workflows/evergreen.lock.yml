@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"3d44dadd746e637a927a46788719b763a44ea357f885f1c9cca7f10d9b8993c8","body_hash":"0c136b06c1e5657ee00631d85d1aea9fea8976733f8c75bdd2e288ccfbdfae1a","compiler_version":"v0.79.4","strict":true,"agent_id":"copilot","engine_versions":{"copilot":"1.0.60"}}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"0664335312333e43b4c257c630d5e3997b324337f22a5b450c954fe6234ba1ac","body_hash":"07c091f978475beec6b8ebea7d2a6831f4c75cec8493eebae36f9ef706807224","compiler_version":"v0.79.4","strict":true,"agent_id":"copilot","engine_versions":{"copilot":"1.0.60"}}
 # gh-aw-manifest: {"version":1,"secrets":["COPILOT_GITHUB_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN"],"actions":[{"repo":"actions/checkout","sha":"df4cb1c069e1874edd31b4311f1884172cec0e10","version":"v6.0.3"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"d059700c6a8ec3b5fd798b9ea60f5d048447b918","version":"v0.79.4"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.27.0"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.27.0"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.27.0"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.25","digest":"sha256:c10331ad17668ef89f38f5e356678788a40b0cd5fef96e8f92e1d9c1de47cbaa","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.3.25@sha256:c10331ad17668ef89f38f5e356678788a40b0cd5fef96e8f92e1d9c1de47cbaa"},{"image":"ghcr.io/github/github-mcp-server:v1.1.2","digest":"sha256:30197479d8036c7811892bc07e06f9a05c9ef3cdd79bc59f256d50647f95788c","pinned_image":"ghcr.io/github/github-mcp-server:v1.1.2@sha256:30197479d8036c7811892bc07e06f9a05c9ef3cdd79bc59f256d50647f95788c"},{"image":"node:lts-alpine","digest":"sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14","pinned_image":"node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -102,8 +102,8 @@ on:
 permissions: {}
 
 concurrency:
-  group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.run_id }}"
   cancel-in-progress: true
+  group: gh-aw-${{ github.workflow }}-${{ github.event.inputs.pr || github.event.pull_request.number || github.ref || github.run_id }}
 
 run-name: "Evergreen"
 
@@ -594,6 +594,17 @@ jobs:
         env:
           GH_AW_SKILL_DIR: ".github/skills"
         run: bash "${RUNNER_TEMP}/gh-aw/actions/restore_inline_skills.sh"
+      - env:
+          EXPECTED_HEAD_SHA: ${{ needs.preflight.outputs.head_sha }}
+          GH_TOKEN: ${{ github.token }}
+          OPT_IN_LABEL: evergreen
+          PR_NUMBER: ${{ needs.preflight.outputs.pr }}
+          REPO: ${{ github.repository }}
+        if: needs.preflight.outputs.pr != '' && needs.preflight.outputs.head_sha != ''
+        name: Checkout selected PR head
+        run: "set -euo pipefail\n\nif ! grep -Eq '^[0-9]+$' <<<\"$PR_NUMBER\"; then\n  echo \"Invalid PR number '$PR_NUMBER'; refusing to construct a PR ref.\"\n  exit 1\nfi\n\nif ! grep -Eiq '^[0-9a-f]{40}$' <<<\"$EXPECTED_HEAD_SHA\"; then\n  echo \"Invalid expected head SHA '$EXPECTED_HEAD_SHA'; refusing to check out PR code.\"\n  exit 1\nfi\n\npayload=\"$(gh pr view \"$PR_NUMBER\" --repo \"$REPO\" \\\n  --json state,labels,headRefName,headRefOid)\"\n\nstate=\"$(jq -r '.state' <<<\"$payload\")\"\nif [ \"$state\" != \"OPEN\" ]; then\n  echo \"PR #$PR_NUMBER is $state; refusing to run Evergreen outside an open PR branch.\"\n  exit 1\nfi\n\nif ! jq -e --arg label \"$OPT_IN_LABEL\" '[.labels[].name] | index($label) != null' <<<\"$payload\" >/dev/null; then\n  echo \"PR #$PR_NUMBER no longer has the $OPT_IN_LABEL label; refusing to check out PR code.\"\n  exit 1\nfi\n\nactual_head_sha=\"$(jq -r '.headRefOid' <<<\"$payload\")\"\nif [ \"$actual_head_sha\" != \"$EXPECTED_HEAD_SHA\" ]; then\n  echo \"PR #$PR_NUMBER head changed from $EXPECTED_HEAD_SHA to $actual_head_sha; refusing stale checkout.\"\n  exit 1\nfi\n\ngit fetch origin \"+refs/pull/${PR_NUMBER}/head:refs/remotes/evergreen/pr-${PR_NUMBER}\"\n\nfetched_head_sha=\"$(git rev-parse \"refs/remotes/evergreen/pr-${PR_NUMBER}\")\"\nif [ \"$fetched_head_sha\" != \"$EXPECTED_HEAD_SHA\" ]; then\n  echo \"Fetched PR #$PR_NUMBER at $fetched_head_sha, expected $EXPECTED_HEAD_SHA; refusing stale checkout.\"\n  exit 1\nfi\n\nhead_ref=\"$(jq -r '.headRefName // \"\"' <<<\"$payload\")\"\nlocal_branch=\"evergreen/pr-${PR_NUMBER}\"\nif [ -n \"$head_ref\" ] &&\n   [ \"${head_ref#-}\" = \"$head_ref\" ] &&\n   git check-ref-format --branch \"$head_ref\" >/dev/null 2>&1; then\n  local_branch=\"$head_ref\"\nfi\n\ngit checkout -B \"$local_branch\" \"$EXPECTED_HEAD_SHA\"\n\ncurrent_head_sha=\"$(git rev-parse HEAD)\"\ncurrent_branch=\"$(git branch --show-current)\"\nif [ \"$current_head_sha\" != \"$EXPECTED_HEAD_SHA\" ] || [ -z \"$current_branch\" ]; then\n  echo \"Workspace is not on a local branch at selected PR head; refusing to run agent.\"\n  exit 1\nfi\n\necho \"Evergreen workspace is on branch $current_branch at $current_head_sha for PR #$PR_NUMBER.\"\n"
+        shell: bash
+
       - name: Download container images
         run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh" ghcr.io/github/gh-aw-firewall/agent:0.27.0 ghcr.io/github/gh-aw-firewall/api-proxy:0.27.0 ghcr.io/github/gh-aw-firewall/squid:0.27.0 ghcr.io/github/gh-aw-mcpg:v0.3.25@sha256:c10331ad17668ef89f38f5e356678788a40b0cd5fef96e8f92e1d9c1de47cbaa ghcr.io/github/github-mcp-server:v1.1.2@sha256:30197479d8036c7811892bc07e06f9a05c9ef3cdd79bc59f256d50647f95788c node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14
       - name: Generate Safe Outputs Config
