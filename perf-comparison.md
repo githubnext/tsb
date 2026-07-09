@@ -1,18 +1,14 @@
 # Autoloop: perf-comparison
 
-🤖 *This file is maintained by the Autoloop agent. Maintainers may freely edit any section.*
-
----
+🤖 *Maintained by Autoloop agent.*
 
 ## ⚙️ Machine State
 
-> 🤖 *Updated automatically after each iteration.*
-
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-07T19:29:35Z |
-| Iteration Count | 389 |
-| Best Metric | 729 |
+| Last Run | 2026-07-09T08:06:10Z |
+| Iteration Count | 390 |
+| Best Metric | 727 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -24,48 +20,39 @@
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
-**Goal**: Benchmark every tsb function vs pandas equivalent.
-**Metric**: benchmarked_functions (higher is better) · **PR**: #361 · **Issue**: #221
-
----
+**Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
 ## 🎯 Current Priorities
 
-*(No specific priorities set — exploring freely.)*
-
----
+*(No specific priorities — exploring freely.)*
 
 ## 📚 Lessons Learned
 
-- Import `../../src/index.js`. groupby AggNames: sum/mean/min/max/count/std/first/last/size. Python: real triple-quotes (not escaped). metric=min(TS,PY).
-- Pages workflow installs pandas+numpy only (no scipy). Use pure-numpy for Python benchmarks (linregress, gaussianKDE, etc.).
-- safeoutputs push: checkout origin/autoloop/perf-comparison directly (no rebase) then add new files — keeps bundle small (~17KB). Post-rebase squash causes large diffs → push failure. State metric can diverge from actual branch count; always use `ls benchmarks/tsb/*.ts | wc -l`.
-- bench_str_extract_all.py / bench_str_extract_groups.py have escaped triple-quotes after every rebase — fix them.
-- SparseArray: `src/core/sparse.ts` → fromDense/toDense/sum/mean/add/mul/fillna. Python: `pd.arrays.SparseArray(data, fill_value=0)`.
-- readExcel/xlsxSheetNames NOT in src/index.ts (node:zlib excluded) — must inline STORED-only ZIP reader.
+- Import `../../src/index.js`. groupby AggNames: sum/mean/min/max/count/std/first/last/size. Python: real triple-quotes. metric=min(TS,PY).
+- Pages workflow: pandas+numpy only (no scipy). Use pure-numpy for linregress, gaussianKDE, etc.
+- safeoutputs push: checkout origin/autoloop/perf-comparison directly (no rebase); add new files only → small bundle (~3KB/pair). Post-rebase squash causes large diffs → push failure. State metric can diverge; always use `ls benchmarks/tsb/*.ts | wc -l`.
+- SparseArray: `src/core/sparse.ts`. readExcel/xlsxSheetNames NOT in src/index.ts.
+- OLS: `new OLS().fit(X_2d, y)` from `src/stats/regression.ts`. Python: `np.linalg.lstsq(X_design, y, rcond=None)`.
 
 ## 🚧 Foreclosed Avenues
 
 - Branch suffixes, sequential run_benchmarks.sh, SSH/HTTPS push.
 
----
-
 ## 🔭 Future Directions
 
-- Next: `OLS`, `bootstrap`, `entropy`/`klDivergence`, `lreshape` (lost in rebase), `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, IO: readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
-
----
+- `bootstrap`, `entropy`/`klDivergence`, `lreshape`, `linregress`/`polyfit_polyval`/`gaussian_kde` (lost in push failures), `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
 
-### Iter 389 — 2026-07-07 — [Run §28892761999](https://github.com/githubnext/tsb/actions/runs/28892761999)
-✅ +3 pairs → 729: linregress (10k pts/50 iters), polyfit_polyval (deg-3/10k pts/30 iters), gaussian_kde (1k pts/200 eval/20 iters); all Python use pure-numpy. bun unavailable in sandbox; count 726→729 by file count. Push via 17KB safeoutputs bundle.
+### Iter 390 — 2026-07-09 — [Run §29003458535](https://github.com/githubnext/tsb/actions/runs/29003458535)
+✅ +1 → 727: OLS multiple regression (10k rows×5 predictors, 20 iters). TS: `new OLS().fit(X,y)`. Python: `np.linalg.lstsq`. Actual branch was 726 (iter 389 claimed 729 but files were never pushed). Metric corrected 729→727.
 
-### Iters 386–388 — ⚠️ push failed (726→728 in state but branch stayed at 726):
-386: lreshape. 387: linregress. 388: linregress+polyfit_polyval. All accepted in state but safeoutputs push failed (large post-rebase squash). Actual branch at 726 going into iter 389.
+### Iters 386–389 — ⚠️/✅ push issues (branch stayed at 726):
+386-388: lreshape/linregress/polyfit — safeoutputs push failed (large post-rebase squash). 389: claimed +3 (729) via 17KB bundle but not actually on remote.
 
 ### Iters 378–385 — ✅ 720→726:
-378: +3 (merge_ordered_ffill/by, grouper_class). 379: +1 (add_sub_mul_div). 380: +1 (assert_equal). 381–384: stats benchmarks. 385: +1 SparseArray + fixed 2 py files.
++3 (merge_ordered_ffill/by, grouper). +1 add_sub_mul_div. +1 assert_equal. stats benchmarks. +1 SparseArray.
 
 ### Iters 291–377 — ✅ 503→720:
-291–339: IO/reshape/window/stats/string/datetime. 340–362: sample/pivot/rolling/rank/clip/diff/replace/mask/sort/pct_change. 363–377: merge_asof, cross_join, join_all, shift, sort, at/iat, convert_dtypes, styler, resample, iterrows, groupby_many_groups, concat_many, str_replace_regex.
+IO/reshape/window/stats/string/datetime/sample/pivot/rolling/rank/clip/diff/replace/mask/sort/pct_change/merge_asof/cross_join/join_all/shift/at_iat/convert_dtypes/styler/resample/iterrows/groupby_many/concat_many/str_replace_regex.
+
