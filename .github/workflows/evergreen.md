@@ -1,7 +1,5 @@
 ---
 on:
-  push:
-    branches: [main]
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:

@@ -76,10 +76,11 @@ readiness controller and the agentic orchestrator must both respect this file.
 ## Event Fast Paths
 
 - `pull_request` activity types: not wired in the gh-aw Evergreen workflow.
-  PR activity is covered by schedule/manual/default-branch reconciliation to
-  avoid gh-aw confused-deputy activation on bot-authored PRs.
-- Default-branch `push` policy: `push` to `main` wakes the reconciliation loop
-  because it can make labeled PRs stale or conflicted.
+  PR activity is covered by schedule/manual reconciliation to avoid gh-aw
+  confused-deputy activation on bot-authored PRs.
+- Default-branch `push` policy: not wired in v1; the schedule covers `main`
+  changes that can make labeled PRs stale or conflicted. Use manual dispatch
+  for urgent reconciliation.
 - `workflow_run` policy: not wired in v1; the schedule covers CI state changes.
 - Review event policy: not wired (reviews are not merge gates here).
 - Deployment event policy: not wired (no deployment gates).
