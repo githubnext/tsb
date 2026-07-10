@@ -34,11 +34,6 @@ function defaultIndex(n: number): Index<Label> {
   return new RangeIndex(n) as unknown as Index<Label>;
 }
 
-/** True when the value should be treated as missing (null, undefined, or NaN). */
-function isMissing(v: Scalar): boolean {
-  return v === null || v === undefined || (typeof v === "number" && Number.isNaN(v));
-}
-
 
 /** True when a scalar is a finite number (not null/undefined/NaN). */
 function isFiniteNum(v: Scalar): v is number {
@@ -1533,9 +1528,9 @@ function isIndexLike(v: unknown): v is Index<Label> {
   }
   const rec = v as Record<string, unknown>;
   return (
-    typeof rec["size"] === "number" &&
-    typeof rec["at"] === "function" &&
-    typeof rec["getLoc"] === "function"
+    typeof rec.size === "number" &&
+    typeof rec.at === "function" &&
+    typeof rec.getLoc === "function"
   );
 }
 

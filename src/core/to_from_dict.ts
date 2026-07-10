@@ -103,90 +103,105 @@ export function toDictOriented(
   df: DataFrame,
   orient: ToDictOrient = "dict",
 ): Record<string, unknown> | unknown[] | DictSplit | DictTight {
-  const colNames = [...df.columns.values];
-  const rowLabels = [...(df.index.values as Label[])];
-  const nRows = df.index.size;
-
   switch (orient) {
     case "dict":
-    case "columns": {
-      const result: Record<string, Record<string, Scalar>> = {};
-      for (const col of colNames) {
-        const series = df.col(col);
-        const colObj: Record<string, Scalar> = {};
-        for (let i = 0; i < nRows; i++) {
-          const lbl = rowLabels[i];
-          const key = labelKey(lbl !== undefined ? lbl : null);
-          colObj[key] = (series.values[i] ?? null) as Scalar;
-        }
-        result[col] = colObj;
-      }
-      return result;
-    }
-
-    case "list": {
-      const result: Record<string, Scalar[]> = {};
-      for (const col of colNames) {
-        result[col] = [...(df.col(col).values as readonly Scalar[])];
-      }
-      return result;
-    }
-
-    case "series": {
-      const result: Record<string, Series<Scalar>> = {};
-      for (const col of colNames) {
-        result[col] = df.col(col);
-      }
-      return result;
-    }
-
-    case "split": {
-      const data: Scalar[][] = [];
-      for (let i = 0; i < nRows; i++) {
-        const row: Scalar[] = colNames.map((col) => (df.col(col).values[i] ?? null) as Scalar);
-        data.push(row);
-      }
-      return { index: rowLabels, columns: colNames, data } satisfies DictSplit;
-    }
-
-    case "tight": {
-      const data: Scalar[][] = [];
-      for (let i = 0; i < nRows; i++) {
-        const row: Scalar[] = colNames.map((col) => (df.col(col).values[i] ?? null) as Scalar);
-        data.push(row);
-      }
-      return {
-        index: rowLabels,
-        columns: colNames,
-        data,
-        index_names: [null],
-        column_names: [null],
-      } satisfies DictTight;
-    }
-
-    case "records": {
+    case "columns":
+      return toDictColumns(df);
+    case "list":
+      return toDictList(df);
+    case "series":
+      return toDictSeries(df);
+    case "split":
+      return toDictSplit(df);
+    case "tight":
+      return toDictTight(df);
+    case "records":
       return df.toRecords();
-    }
-
-    case "index": {
-      const result: Record<string, Record<string, Scalar>> = {};
-      for (let i = 0; i < nRows; i++) {
-        const lbl = rowLabels[i];
-        const key = labelKey(lbl !== undefined ? lbl : null);
-        const rowObj: Record<string, Scalar> = {};
-        for (const col of colNames) {
-          rowObj[col] = (df.col(col).values[i] ?? null) as Scalar;
-        }
-        result[key] = rowObj;
-      }
-      return result;
-    }
-
+    case "index":
+      return toDictIndex(df);
     default: {
       const exhaustive: never = orient;
       throw new RangeError(`Unknown orient: ${String(exhaustive)}`);
     }
   }
+}
+
+function toDictColumns(df: DataFrame): Record<string, Record<string, Scalar>> {
+  const colNames = [...df.columns.values];
+  const rowLabels = [...(df.index.values as Label[])];
+  const nRows = df.index.size;
+  const result: Record<string, Record<string, Scalar>> = {};
+  for (const col of colNames) {
+    const series = df.col(col);
+    const colObj: Record<string, Scalar> = {};
+    for (let i = 0; i < nRows; i++) {
+      const lbl = rowLabels[i];
+      colObj[labelKey(lbl !== undefined ? lbl : null)] = (series.values[i] ?? null) as Scalar;
+    }
+    result[col] = colObj;
+  }
+  return result;
+}
+
+function toDictList(df: DataFrame): Record<string, Scalar[]> {
+  const result: Record<string, Scalar[]> = {};
+  for (const col of df.columns.values) {
+    result[col] = [...(df.col(col).values as readonly Scalar[])];
+  }
+  return result;
+}
+
+function toDictSeries(df: DataFrame): Record<string, Series<Scalar>> {
+  const result: Record<string, Series<Scalar>> = {};
+  for (const col of df.columns.values) {
+    result[col] = df.col(col);
+  }
+  return result;
+}
+
+function buildRows(df: DataFrame): Scalar[][] {
+  const colNames = [...df.columns.values];
+  const nRows = df.index.size;
+  const data: Scalar[][] = [];
+  for (let i = 0; i < nRows; i++) {
+    data.push(colNames.map((col) => (df.col(col).values[i] ?? null) as Scalar));
+  }
+  return data;
+}
+
+function toDictSplit(df: DataFrame): DictSplit {
+  return {
+    index: [...(df.index.values as Label[])],
+    columns: [...df.columns.values],
+    data: buildRows(df),
+  } satisfies DictSplit;
+}
+
+function toDictTight(df: DataFrame): DictTight {
+  return {
+    index: [...(df.index.values as Label[])],
+    columns: [...df.columns.values],
+    data: buildRows(df),
+    index_names: [null],
+    column_names: [null],
+  } satisfies DictTight;
+}
+
+function toDictIndex(df: DataFrame): Record<string, Record<string, Scalar>> {
+  const colNames = [...df.columns.values];
+  const rowLabels = [...(df.index.values as Label[])];
+  const nRows = df.index.size;
+  const result: Record<string, Record<string, Scalar>> = {};
+  for (let i = 0; i < nRows; i++) {
+    const lbl = rowLabels[i];
+    const key = labelKey(lbl !== undefined ? lbl : null);
+    const rowObj: Record<string, Scalar> = {};
+    for (const col of colNames) {
+      rowObj[col] = (df.col(col).values[i] ?? null) as Scalar;
+    }
+    result[key] = rowObj;
+  }
+  return result;
 }
 
 // ─── fromDictOriented ─────────────────────────────────────────────────────────
