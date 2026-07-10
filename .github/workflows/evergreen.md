@@ -15,8 +15,9 @@ on:
         required: false
 
 concurrency:
-  group: gh-aw-${{ github.workflow }}-${{ github.event.inputs.pr || github.event.pull_request.number || github.ref || github.run_id }}
-  cancel-in-progress: true
+  group: gh-aw-${{ github.workflow }}-${{ github.event.inputs.pr || github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+  queue: max
 
 timeout-minutes: 60
 
@@ -32,6 +33,10 @@ jobs:
   preflight:
     name: Evergreen deterministic preflight
     runs-on: ubuntu-latest
+    concurrency:
+      group: gh-aw-${{ github.workflow }}-preflight
+      cancel-in-progress: false
+      queue: max
     permissions:
       actions: write
       checks: read
@@ -57,6 +62,7 @@ jobs:
           EVENT_ACTION: ${{ github.event.action }}
           READY_LABEL: evergreen-ready
           OPT_IN_LABEL: evergreen
+          ACTIVE_LABEL: evergreen_active
           EXHAUSTED_LABEL: evergreen-exhausted
           REQUIRED_CHECKS_JSON: '["Test & Lint","Playground E2E (Playwright)","Build","Validate Python Examples"]'
           CHECK_GATE_MODE: configured
@@ -93,6 +99,13 @@ jobs:
             local payload="$1"
             local label="$2"
             jq -e --arg label "$label" '[.labels[].name] | index($label) != null' <<<"$payload" >/dev/null
+          }
+
+          ensure_active_label() {
+            gh label create "$ACTIVE_LABEL" --repo "$REPO" \
+              --color "fbca04" \
+              --description "Evergreen lease: a run is currently working this PR" \
+              >/dev/null 2>&1 || true
           }
 
           check_names() {
@@ -302,6 +315,11 @@ jobs:
               return 1
             fi
 
+            if pr_has_label "$payload" "$ACTIVE_LABEL"; then
+              echo "PR #$pr already has the $ACTIVE_LABEL lease; another Evergreen run is working it."
+              return 1
+            fi
+
             if [ -n "$event_head_sha" ] && [ "$event_head_sha" != "$head_sha" ]; then
               echo "PR #$pr head changed from $event_head_sha to $head_sha; waiting for a fresh event."
               set_result "false" "$pr" "$head_sha" "out_of_scope" "$reason:head_changed"
@@ -321,6 +339,8 @@ jobs:
                 return 1
                 ;;
               needs_branch_update|needs_repair)
+                ensure_active_label
+                gh issue edit "$pr" --repo "$REPO" --add-label "$ACTIVE_LABEL"
                 set_result "true" "$pr" "$head_sha" "$state" "$reason:$state"
                 return 0
                 ;;
@@ -350,9 +370,14 @@ jobs:
           fi
 
           candidates="${RUNNER_TEMP:-.}/evergreen-pr-candidates.tsv"
+          unordered_candidates="${RUNNER_TEMP:-.}/evergreen-pr-candidates-unordered.tsv"
           gh pr list --repo "$REPO" --state open --label "$OPT_IN_LABEL" \
             --json number,headRefOid \
-            --jq '.[] | [.number, .headRefOid] | @tsv' > "$candidates"
+            --jq '.[] | [.number, .headRefOid] | @tsv' > "$unordered_candidates"
+
+          while IFS= read -r line; do
+            printf "%05d\t%s\n" "$RANDOM" "$line"
+          done < "$unordered_candidates" | sort -n | cut -f2- > "$candidates"
 
           while IFS=$'\t' read -r pr head_sha; do
             if consider_pr "$pr" "$head_sha" "$reason"; then
@@ -362,7 +387,11 @@ jobs:
 
 if: needs.preflight.outputs.should_run == 'true'
 
-engine: copilot
+engine:
+  id: copilot
+  concurrency:
+    group: gh-aw-copilot-${{ github.workflow }}-${{ needs.preflight.outputs.pr || github.run_id }}
+    cancel-in-progress: false
 
 network: defaults
 
@@ -380,6 +409,7 @@ pre-agent-steps:
       PR_NUMBER: ${{ needs.preflight.outputs.pr }}
       EXPECTED_HEAD_SHA: ${{ needs.preflight.outputs.head_sha }}
       OPT_IN_LABEL: evergreen
+      ACTIVE_LABEL: evergreen_active
     run: |
       set -euo pipefail
 
@@ -404,6 +434,11 @@ pre-agent-steps:
 
       if ! jq -e --arg label "$OPT_IN_LABEL" '[.labels[].name] | index($label) != null' <<<"$payload" >/dev/null; then
         echo "PR #$PR_NUMBER no longer has the $OPT_IN_LABEL label; refusing to check out PR code."
+        exit 1
+      fi
+
+      if ! jq -e --arg label "$ACTIVE_LABEL" '[.labels[].name] | index($label) != null' <<<"$payload" >/dev/null; then
+        echo "PR #$PR_NUMBER no longer has the $ACTIVE_LABEL lease; refusing to run without a controller claim."
         exit 1
       fi
 
@@ -503,7 +538,7 @@ safe-outputs:
     allowed: ["evergreen-blocked", "evergreen-human-needed", "evergreen-exhausted", "priority/*", "gate/*"]
     max: 5
   remove-labels:
-    allowed: ["evergreen", "evergreen-blocked", "evergreen-human-needed", "evergreen-exhausted", "gate/*"]
+    allowed: ["evergreen", "evergreen_active", "evergreen-blocked", "evergreen-human-needed", "evergreen-exhausted", "gate/*"]
     max: 5
   push-to-pull-request-branch:
     target: "*"
@@ -555,6 +590,9 @@ are merge gates.
 10. Verify every intended side effect before describing it as complete.
 11. Stop on quota exhaustion, repeated safe-output failure, repeated failure
     signatures, trust-policy denial, or any human-owned decision.
+12. Before ending any run that reached the agent, request safe-output removal of
+    the `evergreen_active` lease label from the selected PR. This is lease
+    cleanup, not readiness or blocker state.
 
 ## Required Pass Order
 
