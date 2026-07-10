@@ -73,12 +73,12 @@ readiness controller and the agentic orchestrator must both respect this file.
 
 ## Event Fast Paths
 
-- `pull_request` activity types: `labeled`, `synchronize`, `reopened`,
-  `ready_for_review`.
+- `pull_request` activity types: not wired in the gh-aw Evergreen workflow.
+  PR activity is covered by schedule/manual/default-branch reconciliation to
+  avoid gh-aw confused-deputy activation on bot-authored PRs.
 - Default-branch `push` policy: `push` to `main` wakes the reconciliation loop
   because it can make labeled PRs stale or conflicted.
-- `workflow_run` policy: not wired in v1; the schedule + `synchronize` cover CI
-  state changes.
+- `workflow_run` policy: not wired in v1; the schedule covers CI state changes.
 - Review event policy: not wired (reviews are not merge gates here).
 - Deployment event policy: not wired (no deployment gates).
 - Slash-command policy: not wired in v1.
@@ -98,8 +98,8 @@ readiness controller and the agentic orchestrator must both respect this file.
   through safe outputs by the agent (never from preflight) and labeled
   `evergreen: trigger CI`; they do not count as semantic repair attempts.
 - Token policy: `GITHUB_TOKEN` for reads and control-plane label writes.
-  `GH_AW_CI_TRIGGER_TOKEN` (existing PAT) is used by gh-aw for CI reruns and
-  pushes so that PR branch pushes trigger CI (default-token pushes do not).
+  `GH_AW_CI_TRIGGER_TOKEN` (existing PAT) is used only for CI reruns and
+  safe-output pushes so default-token limitations do not block CI.
 
 ## Repair Policy
 

@@ -1,7 +1,5 @@
 ---
 on:
-  pull_request:
-    types: [labeled, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
   schedule:
@@ -54,7 +52,8 @@ jobs:
         name: Evaluate PR gate state
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN || github.token }}
+          GH_TOKEN: ${{ github.token }}
+          CI_TRIGGER_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN || '' }}
           REPO: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
           EVENT_ACTION: ${{ github.event.action }}
@@ -237,6 +236,14 @@ jobs:
             local head_sha="$2"
             local run_json run_id status conclusion
 
+            ci_gh() {
+              if [ -n "${CI_TRIGGER_TOKEN:-}" ]; then
+                GH_TOKEN="$CI_TRIGGER_TOKEN" "$@"
+              else
+                "$@"
+              fi
+            }
+
             run_json="$(gh run list --repo "$REPO" \
               --workflow "CI" \
               --commit "$head_sha" \
@@ -267,8 +274,8 @@ jobs:
             esac
 
             echo "Reactivating CI run $run_id for PR #$pr ($head_sha) (status=$status conclusion=$conclusion)."
-            gh run rerun "$run_id" --repo "$REPO" --failed || \
-              gh run rerun "$run_id" --repo "$REPO" || \
+            ci_gh gh run rerun "$run_id" --repo "$REPO" --failed || \
+              ci_gh gh run rerun "$run_id" --repo "$REPO" || \
               echo "Could not reactivate CI run $run_id; scheduled monitor will retry."
           }
 
