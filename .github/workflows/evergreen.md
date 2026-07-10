@@ -187,6 +187,30 @@ jobs:
             return 1
           }
 
+          any_configured_check_failing() {
+            local payload="$1"
+            local required="$2"
+            local count
+            local state
+
+            count="$(jq 'length' <<<"$required")"
+            if [ "$count" -eq 0 ]; then
+              has_failing_check "$payload"
+              return
+            fi
+
+            while IFS= read -r name; do
+              state="$(check_state_for "$payload" "$name")"
+              case "$state" in
+                FAILURE|failure|FAILED|failed|ERROR|error|TIMED_OUT|timed_out|CANCELLED|cancelled)
+                  return 0
+                  ;;
+              esac
+            done < <(jq -r '.[]' <<<"$required")
+
+            return 1
+          }
+
           evaluate_readiness() {
             local payload="$1"
             local required
@@ -207,6 +231,11 @@ jobs:
             merge_state="$(jq -r '.mergeStateStatus // ""' <<<"$payload")"
             if [ "$merge_state" = "DIRTY" ] || [ "$merge_state" = "UNKNOWN" ]; then
               echo "needs_branch_update"
+              return 0
+            fi
+
+            if any_configured_check_failing "$payload" "$required"; then
+              echo "needs_repair"
               return 0
             fi
 
@@ -304,7 +333,7 @@ jobs:
 
             if [ -z "$run_id" ]; then
               echo "No CI run found for PR #$pr ($head_sha); leaving for scheduled/PR CI to start."
-              return 0
+              return 1
             fi
 
             case "$status" in
@@ -317,14 +346,22 @@ jobs:
             case "$conclusion" in
               success)
                 echo "CI run $run_id for PR #$pr ($head_sha) already succeeded; not rerunning green checks."
-                return 0
+                return 1
                 ;;
             esac
 
             echo "Reactivating CI run $run_id for PR #$pr ($head_sha) (status=$status conclusion=$conclusion)."
-            ci_gh gh run rerun "$run_id" --repo "$REPO" --failed || \
-              ci_gh gh run rerun "$run_id" --repo "$REPO" || \
-              echo "Could not reactivate CI run $run_id; scheduled monitor will retry."
+            if ci_gh gh run rerun "$run_id" --repo "$REPO" --failed; then
+              return 0
+            fi
+
+            echo "Failed-jobs rerun was unavailable for CI run $run_id; trying full rerun."
+            if ci_gh gh run rerun "$run_id" --repo "$REPO"; then
+              return 0
+            fi
+
+            echo "Could not reactivate CI run $run_id; scheduled monitor will retry."
+            return 1
           }
 
           update_branch_if_needed() {
@@ -402,7 +439,7 @@ jobs:
                 return 1
                 ;;
               needs_ci)
-                trigger_ci_if_needed "$pr" "$head_sha"
+                trigger_ci_if_needed "$pr" "$head_sha" || true
                 return 1
                 ;;
               needs_branch_update)
