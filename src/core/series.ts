@@ -39,30 +39,6 @@ function isMissing(v: Scalar): boolean {
   return v === null || v === undefined || (typeof v === "number" && Number.isNaN(v));
 }
 
-/** Compare two scalar values with null/NaN handling for sorting. */
-function compareScalars(
-  a: Scalar,
-  b: Scalar,
-  ascending: boolean,
-  naPosition: "first" | "last",
-): number {
-  const aNull = isMissing(a);
-  const bNull = isMissing(b);
-  if (aNull && bNull) {
-    return 0;
-  }
-  if (aNull) {
-    return naPosition === "first" ? -1 : 1;
-  }
-  if (bNull) {
-    return naPosition === "first" ? 1 : -1;
-  }
-  if (a === b) {
-    return 0;
-  }
-  const cmp = (a as number | string | boolean) < (b as number | string | boolean) ? -1 : 1;
-  return ascending ? cmp : -cmp;
-}
 
 /** True when a scalar is a finite number (not null/undefined/NaN). */
 function isFiniteNum(v: Scalar): v is number {
@@ -987,13 +963,17 @@ export class Series<T extends Scalar = Scalar> {
           finSlice.sort((a, b) => {
             const av = vals[a] as number | string | boolean;
             const bv = vals[b] as number | string | boolean;
-            return av < bv ? -1 : av > bv ? 1 : 0;
+            if (av < bv) return -1;
+            if (av > bv) return 1;
+            return 0;
           });
         } else {
           finSlice.sort((a, b) => {
             const av = vals[a] as number | string | boolean;
             const bv = vals[b] as number | string | boolean;
-            return av > bv ? -1 : av < bv ? 1 : 0;
+            if (av > bv) return -1;
+            if (av < bv) return 1;
+            return 0;
           });
         }
       }
@@ -1553,9 +1533,9 @@ function isIndexLike(v: unknown): v is Index<Label> {
   }
   const rec = v as Record<string, unknown>;
   return (
-    typeof rec["size"] === "number" &&
-    typeof rec["at"] === "function" &&
-    typeof rec["getLoc"] === "function"
+    typeof rec.size === "number" &&
+    typeof rec.at === "function" &&
+    typeof rec.getLoc === "function"
   );
 }
 
