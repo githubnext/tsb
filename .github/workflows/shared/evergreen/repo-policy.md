@@ -21,6 +21,9 @@ readiness controller and the agentic orchestrator must both respect this file.
   PRs, when the trust model allows branch repair. Do not mark drafts ready for
   review automatically.
 - Required labels: `evergreen` opts a PR into the work loop.
+- Active lease label: `evergreen_active` is controller-owned. The preflight
+  selector applies it before dispatching the agent, other selectors skip PRs
+  with this label, and cleanup removes it when the run finishes.
 - Blocker labels: `evergreen-blocked`, `evergreen-human-needed`.
 - Deployment/environment gates: none.
 - Auto-merge behavior: GitHub auto-merge is ENABLED on the repository. Evergreen
