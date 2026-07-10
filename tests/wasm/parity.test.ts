@@ -373,134 +373,200 @@ describe("nat_argsort parity", () => {
 
 describe("sum_f64 parity", () => {
   test("basic sum", () => {
-    if (wasm === null) { skip("basic sum"); return; }
+    if (wasm === null) {
+      skip("basic sum");
+      return;
+    }
     const arr = new Float64Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     expect(wasm.sum_f64(arr)).toBe(15.0);
   });
 
   test("NaN values are skipped", () => {
-    if (wasm === null) { skip("NaN skipped"); return; }
+    if (wasm === null) {
+      skip("NaN skipped");
+      return;
+    }
     const arr = new Float64Array([1.0, Number.NaN, 3.0]);
     expect(wasm.sum_f64(arr)).toBe(4.0);
   });
 
   test("empty array returns 0", () => {
-    if (wasm === null) { skip("empty"); return; }
+    if (wasm === null) {
+      skip("empty");
+      return;
+    }
     expect(wasm.sum_f64(new Float64Array([]))).toBe(0.0);
   });
 
   test("all-NaN returns 0", () => {
-    if (wasm === null) { skip("all-NaN"); return; }
+    if (wasm === null) {
+      skip("all-NaN");
+      return;
+    }
     expect(wasm.sum_f64(new Float64Array([Number.NaN, Number.NaN]))).toBe(0.0);
   });
 });
 
 describe("mean_f64 parity", () => {
   test("basic mean", () => {
-    if (wasm === null) { skip("basic mean"); return; }
+    if (wasm === null) {
+      skip("basic mean");
+      return;
+    }
     const arr = new Float64Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     expect(wasm.mean_f64(arr)).toBeCloseTo(3.0, 10);
   });
 
   test("NaN values are skipped", () => {
-    if (wasm === null) { skip("NaN skipped"); return; }
+    if (wasm === null) {
+      skip("NaN skipped");
+      return;
+    }
     const arr = new Float64Array([1.0, Number.NaN, 5.0]);
     expect(wasm.mean_f64(arr)).toBeCloseTo(3.0, 10);
   });
 
   test("empty array returns NaN", () => {
-    if (wasm === null) { skip("empty"); return; }
+    if (wasm === null) {
+      skip("empty");
+      return;
+    }
     expect(wasm.mean_f64(new Float64Array([]))).toBeNaN();
   });
 });
 
 describe("min_f64 parity", () => {
   test("basic min", () => {
-    if (wasm === null) { skip("basic min"); return; }
+    if (wasm === null) {
+      skip("basic min");
+      return;
+    }
     const arr = new Float64Array([3.0, 1.0, 4.0, 1.5]);
     expect(wasm.min_f64(arr)).toBe(1.0);
   });
 
   test("NaN values are skipped", () => {
-    if (wasm === null) { skip("NaN skipped"); return; }
+    if (wasm === null) {
+      skip("NaN skipped");
+      return;
+    }
     expect(wasm.min_f64(new Float64Array([Number.NaN, 2.0, 1.0]))).toBe(1.0);
   });
 
   test("empty array returns NaN", () => {
-    if (wasm === null) { skip("empty"); return; }
+    if (wasm === null) {
+      skip("empty");
+      return;
+    }
     expect(wasm.min_f64(new Float64Array([]))).toBeNaN();
   });
 });
 
 describe("max_f64 parity", () => {
   test("basic max", () => {
-    if (wasm === null) { skip("basic max"); return; }
+    if (wasm === null) {
+      skip("basic max");
+      return;
+    }
     const arr = new Float64Array([3.0, 1.0, 4.0, 1.5]);
     expect(wasm.max_f64(arr)).toBe(4.0);
   });
 
   test("NaN values are skipped", () => {
-    if (wasm === null) { skip("NaN skipped"); return; }
+    if (wasm === null) {
+      skip("NaN skipped");
+      return;
+    }
     expect(wasm.max_f64(new Float64Array([Number.NaN, 2.0, 5.0]))).toBe(5.0);
   });
 
   test("empty array returns NaN", () => {
-    if (wasm === null) { skip("empty"); return; }
+    if (wasm === null) {
+      skip("empty");
+      return;
+    }
     expect(wasm.max_f64(new Float64Array([]))).toBeNaN();
   });
 });
 
 describe("var_f64 parity", () => {
   test("known variance (ddof=1)", () => {
-    if (wasm === null) { skip("known variance"); return; }
+    if (wasm === null) {
+      skip("known variance");
+      return;
+    }
     // Variance of [2, 4, 4, 4, 5, 5, 7, 9] = 4.571...
     const arr = new Float64Array([2, 4, 4, 4, 5, 5, 7, 9]);
     expect(wasm.var_f64(arr, 1)).toBeCloseTo(4.5714, 3);
   });
 
   test("NaN values are skipped", () => {
-    if (wasm === null) { skip("NaN skipped"); return; }
+    if (wasm === null) {
+      skip("NaN skipped");
+      return;
+    }
     const arr = new Float64Array([2.0, Number.NaN, 4.0]);
     expect(wasm.var_f64(arr, 1)).toBeCloseTo(2.0, 10);
   });
 
   test("single element returns NaN (ddof=1 makes n-1=0)", () => {
-    if (wasm === null) { skip("single element"); return; }
+    if (wasm === null) {
+      skip("single element");
+      return;
+    }
     expect(wasm.var_f64(new Float64Array([5.0]), 1)).toBeNaN();
   });
 });
 
 describe("std_f64 parity", () => {
   test("basic std (ddof=1)", () => {
-    if (wasm === null) { skip("basic std"); return; }
+    if (wasm === null) {
+      skip("basic std");
+      return;
+    }
     const arr = new Float64Array([2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]);
     expect(wasm.std_f64(arr, 1)).toBeCloseTo(Math.sqrt(4.5714), 3);
   });
 
   test("empty returns NaN", () => {
-    if (wasm === null) { skip("empty"); return; }
+    if (wasm === null) {
+      skip("empty");
+      return;
+    }
     expect(wasm.std_f64(new Float64Array([]), 1)).toBeNaN();
   });
 });
 
 describe("median_f64 parity", () => {
   test("odd count median", () => {
-    if (wasm === null) { skip("odd count"); return; }
+    if (wasm === null) {
+      skip("odd count");
+      return;
+    }
     expect(wasm.median_f64(new Float64Array([3.0, 1.0, 2.0]))).toBe(2.0);
   });
 
   test("even count median is average of two middle", () => {
-    if (wasm === null) { skip("even count"); return; }
+    if (wasm === null) {
+      skip("even count");
+      return;
+    }
     expect(wasm.median_f64(new Float64Array([1.0, 2.0, 3.0, 4.0]))).toBe(2.5);
   });
 
   test("NaN values are skipped", () => {
-    if (wasm === null) { skip("NaN skipped"); return; }
+    if (wasm === null) {
+      skip("NaN skipped");
+      return;
+    }
     expect(wasm.median_f64(new Float64Array([1.0, Number.NaN, 3.0]))).toBe(2.0);
   });
 
   test("empty returns NaN", () => {
-    if (wasm === null) { skip("empty"); return; }
+    if (wasm === null) {
+      skip("empty");
+      return;
+    }
     expect(wasm.median_f64(new Float64Array([]))).toBeNaN();
   });
 });
@@ -509,7 +575,10 @@ describe("median_f64 parity", () => {
 
 describe("rolling_sum_f64 parity", () => {
   test("basic rolling sum (window=3)", () => {
-    if (wasm === null) { skip("rolling sum"); return; }
+    if (wasm === null) {
+      skip("rolling sum");
+      return;
+    }
     const arr = new Float64Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     const result = Array.from(wasm.rolling_sum_f64(arr, 3, 3));
     expect(result[0]).toBeNaN();
@@ -520,7 +589,10 @@ describe("rolling_sum_f64 parity", () => {
   });
 
   test("min_periods=1 produces earlier results", () => {
-    if (wasm === null) { skip("min_periods=1"); return; }
+    if (wasm === null) {
+      skip("min_periods=1");
+      return;
+    }
     const arr = new Float64Array([1.0, 2.0, 3.0]);
     const result = Array.from(wasm.rolling_sum_f64(arr, 3, 1));
     expect(result[0]).toBeCloseTo(1.0, 10);
@@ -531,7 +603,10 @@ describe("rolling_sum_f64 parity", () => {
 
 describe("rolling_mean_f64 parity", () => {
   test("basic rolling mean (window=3)", () => {
-    if (wasm === null) { skip("rolling mean"); return; }
+    if (wasm === null) {
+      skip("rolling mean");
+      return;
+    }
     const arr = new Float64Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     const result = Array.from(wasm.rolling_mean_f64(arr, 3, 3));
     expect(Number.isNaN(result[0])).toBe(true);
@@ -546,7 +621,10 @@ describe("rolling_mean_f64 parity", () => {
 
 describe("expanding_mean_f64 parity", () => {
   test("cumulative mean grows correctly", () => {
-    if (wasm === null) { skip("expanding mean"); return; }
+    if (wasm === null) {
+      skip("expanding mean");
+      return;
+    }
     const arr = new Float64Array([1.0, 3.0, 5.0]);
     const result = Array.from(wasm.expanding_mean_f64(arr, 1));
     expect(result[0]).toBeCloseTo(1.0, 10);
@@ -557,7 +635,10 @@ describe("expanding_mean_f64 parity", () => {
 
 describe("expanding_sum_f64 parity", () => {
   test("cumulative sum", () => {
-    if (wasm === null) { skip("expanding sum"); return; }
+    if (wasm === null) {
+      skip("expanding sum");
+      return;
+    }
     const arr = new Float64Array([1.0, 2.0, 3.0]);
     const result = Array.from(wasm.expanding_sum_f64(arr, 1));
     expect(result[0]).toBeCloseTo(1.0, 10);

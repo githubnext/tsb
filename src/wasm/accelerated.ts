@@ -273,9 +273,7 @@ export function rollingSumF64Accelerated(
     const input = Float64Array.from(data, (v) => (v === null || v === undefined ? Number.NaN : v));
     return f64ArrayToNullable(wasm.rolling_sum_f64(input, window, minPeriods));
   }
-  return rollingFallback(data, window, minPeriods, (w) =>
-    w.reduce((a, v) => a + v, 0),
-  );
+  return rollingFallback(data, window, minPeriods, (w) => w.reduce((a, v) => a + v, 0));
 }
 
 /**

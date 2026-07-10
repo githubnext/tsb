@@ -34,7 +34,6 @@ function defaultIndex(n: number): Index<Label> {
   return new RangeIndex(n) as unknown as Index<Label>;
 }
 
-
 /** True when a scalar is a finite number (not null/undefined/NaN). */
 function isFiniteNum(v: Scalar): v is number {
   return typeof v === "number" && !Number.isNaN(v);
@@ -958,16 +957,24 @@ export class Series<T extends Scalar = Scalar> {
           finSlice.sort((a, b) => {
             const av = vals[a] as number | string | boolean;
             const bv = vals[b] as number | string | boolean;
-            if (av < bv) { return -1; }
-            if (av > bv) { return 1; }
+            if (av < bv) {
+              return -1;
+            }
+            if (av > bv) {
+              return 1;
+            }
             return 0;
           });
         } else {
           finSlice.sort((a, b) => {
             const av = vals[a] as number | string | boolean;
             const bv = vals[b] as number | string | boolean;
-            if (av > bv) { return -1; }
-            if (av < bv) { return 1; }
+            if (av > bv) {
+              return -1;
+            }
+            if (av < bv) {
+              return 1;
+            }
             return 0;
           });
         }
