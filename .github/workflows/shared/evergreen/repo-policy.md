@@ -17,7 +17,9 @@ readiness controller and the agentic orchestrator must both respect this file.
 - Review requirements: none required (no branch protection, no required reviews).
 - CODEOWNERS requirements: none.
 - Unresolved thread policy: not a merge gate. Do not chase review threads.
-- Draft PR policy: do not mark drafts ready for review. Monitor only.
+- Draft PR policy: work on labeled draft PRs, including agent-created draft
+  PRs, when the trust model allows branch repair. Do not mark drafts ready for
+  review automatically.
 - Required labels: `evergreen` opts a PR into the work loop.
 - Blocker labels: `evergreen-blocked`, `evergreen-human-needed`.
 - Deployment/environment gates: none.
