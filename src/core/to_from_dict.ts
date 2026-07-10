@@ -239,33 +239,7 @@ export function fromDictOriented(data: unknown, orient: FromDictOrient = "column
 
     case "index": {
       const indexData = data as Record<string, Record<string, Scalar>>;
-      const rowLabels = Object.keys(indexData);
-      // Collect all column names in insertion order
-      const colSet = new Map<string, null>();
-      for (const rowLabel of rowLabels) {
-        const rowObj = indexData[rowLabel];
-        if (rowObj !== undefined) {
-          for (const col of Object.keys(rowObj)) {
-            colSet.set(col, null);
-          }
-        }
-      }
-      const colNames = [...colSet.keys()];
-      const colArrays: Record<string, Scalar[]> = {};
-      for (const col of colNames) {
-        colArrays[col] = [];
-      }
-      for (const rowLabel of rowLabels) {
-        const rowObj = indexData[rowLabel] ?? {};
-        for (const col of colNames) {
-          const arr = colArrays[col];
-          if (arr !== undefined) {
-            arr.push(rowObj[col] ?? null);
-          }
-        }
-      }
-      const idx = new Index<Label>(rowLabels as Label[]);
-      return DataFrame.fromColumns(colArrays as Record<string, readonly Scalar[]>, { index: idx });
+      return buildFromIndex(indexData);
     }
 
     case "split":
@@ -281,6 +255,52 @@ export function fromDictOriented(data: unknown, orient: FromDictOrient = "column
 }
 
 // ─── internal helpers ──────────────────────────────────────────────────────────
+
+/** Build a DataFrame from an index-oriented rowLabel -> column -> value mapping. */
+function buildFromIndex(indexData: Record<string, Record<string, Scalar>>): DataFrame {
+  const rowLabels = Object.keys(indexData);
+  const colNames = collectIndexColumns(indexData, rowLabels);
+  const colArrays = buildIndexColumnArrays(indexData, rowLabels, colNames);
+  const idx = new Index<Label>(rowLabels as Label[]);
+  return DataFrame.fromColumns(colArrays as Record<string, readonly Scalar[]>, { index: idx });
+}
+
+function collectIndexColumns(
+  indexData: Record<string, Record<string, Scalar>>,
+  rowLabels: readonly string[],
+): string[] {
+  const colSet = new Map<string, null>();
+  for (const rowLabel of rowLabels) {
+    const rowObj = indexData[rowLabel];
+    if (rowObj !== undefined) {
+      for (const col of Object.keys(rowObj)) {
+        colSet.set(col, null);
+      }
+    }
+  }
+  return [...colSet.keys()];
+}
+
+function buildIndexColumnArrays(
+  indexData: Record<string, Record<string, Scalar>>,
+  rowLabels: readonly string[],
+  colNames: readonly string[],
+): Record<string, Scalar[]> {
+  const colArrays: Record<string, Scalar[]> = {};
+  for (const col of colNames) {
+    colArrays[col] = [];
+  }
+  for (const rowLabel of rowLabels) {
+    const rowObj = indexData[rowLabel] ?? {};
+    for (const col of colNames) {
+      const arr = colArrays[col];
+      if (arr !== undefined) {
+        arr.push(rowObj[col] ?? null);
+      }
+    }
+  }
+  return colArrays;
+}
 
 /** Build a DataFrame from a split/tight structure. */
 function buildFromSplit(input: SplitInput): DataFrame {
