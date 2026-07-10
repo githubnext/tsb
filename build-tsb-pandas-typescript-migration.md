@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-09T14:24:33Z |
-| Iteration Count | 401 |
-| Best Metric | 192 |
+| Last Run | 2026-07-10T08:04:41Z |
+| Iteration Count | 402 |
+| Best Metric | 193 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,13 +19,13 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- GARCH(p,q) conditional volatility model (was phantom in iters 398+400 — retry)
+- GARCH(p,q) conditional volatility model (was phantom in iters 398+400 — retry) ✅ done
 - VAR (Vector AutoRegression) — multivariate time series
 - Prophet-style additive decomposition (trend + seasonal + holiday)
 
@@ -33,11 +33,12 @@
 
 ## 📚 Lessons Learned
 
+- **GARCH (402)**: Log-parameterise ω/α/β for unconstrained Nelder-Mead MLE. Soft stationarity penalty (persist≥0.9999→1e12). `conditionalVariances()` helper returns null on σ²≤0. Multi-step forecast: E[ε²_{t+h}]=σ²_{t+h} for h>1. `x.values` (not `as` cast) for Series input.
+- **Phantom commits**: always call push_to_pull_request_branch — iters 398/399/400 were phantom (GARCH+SARIMA never pushed). GARCH (911b44b) never existed on branch.
+- **SARIMA (401)**: CSS via Nelder-Mead on differenced series. `polyMul` for combined AR/MA poly. Store last seasonal/regular values for forecast undifferencing. Fitted values: `y[t] - eps[t - offset]` where `offset = d + D*s`. Series constructor: `new Series<T>({ data: arr })`. `fc.float` bounds need `Math.fround`.
+- **Stats math**: Hannan-Rissanen, Levinson-Durbin, FFT Cooley-Tukey, Butterworth bilinear SOS, ACF/PACF Bartlett CI, Kalman Joseph form, CSS optimisation.
 - **TS**: `noUncheckedIndexedAccess`→`?? 0`. `slice()` on `readonly T[]` → mutable. 2D writes: guard row before assign.
 - **Metric**: `find src -name '*.ts' -not -name 'index.ts' | xargs grep -l 'export' | wc -l`. +1 per new file.
-- **SARIMA (401)**: CSS via Nelder-Mead on differenced series. `polyMul` for combined AR/MA poly. Store last seasonal/regular values for forecast undifferencing. Fitted values: `y[t] - eps[t - offset]` where `offset = d + D*s`. Series constructor: `new Series<T>({ data: arr })`. `fc.float` bounds need `Math.fround`.
-- **Phantom commits**: always call push_to_pull_request_branch — iters 398/399/400 were phantom (GARCH+SARIMA never pushed). GARCH (911b44b) never existed on branch.
-- **Stats math**: Hannan-Rissanen, Levinson-Durbin, FFT Cooley-Tukey, Butterworth bilinear SOS, ACF/PACF Bartlett CI, Kalman Joseph form, CSS optimisation.
 - **Avro/IO**: Zigzag varint, AvroDatum* interfaces for recursive types (interfaces self-ref, aliases can't).
 
 ---
@@ -51,7 +52,7 @@
 
 ## 🔭 Future Directions
 
-- GARCH/volatility models — retry (iters 398+400 phantom, still not in branch)
+- GARCH/volatility models ✅ done (iter 402)
 - Prophet-style additive seasonal decomposition (trend + seasonal + holiday)
 - VAR (Vector AutoRegression) — multivariate time series
 - State-space DLM (Dynamic Linear Model) — generalization of Kalman
@@ -59,6 +60,9 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 402 — 2026-07-10 — [Run §29078452984](https://github.com/githubnext/tsb/actions/runs/29078452984)
+✅ +1 → 193: GARCH(p,q) conditional heteroskedasticity. MLE via Nelder-Mead on log-params; soft stationarity penalty; multi-step variance forecast. 40+ tests, playground. Commit a006aec. Rebase (ahead=12,behind=52).
 
 ### Iter 401 — 2026-07-09 — [Run §29022916600](https://github.com/githubnext/tsb/actions/runs/29022916600)
 ✅ +1 → 192: SARIMA(p,d,q)(P,D,Q)[s] seasonal ARIMA. CSS/Nelder-Mead, polyMul for combined AR/MA poly, undiff forecast, ψ-weight intervals. 40+ tests, playground. Commit fb8d5c5. Rebase (ahead=12,behind=11).
