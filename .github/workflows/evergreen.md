@@ -42,7 +42,7 @@ jobs:
       checks: read
       contents: read
       issues: write
-      pull-requests: read
+      pull-requests: write
       statuses: read
     outputs:
       should_run: ${{ steps.evaluate.outputs.should_run }}
@@ -99,6 +99,14 @@ jobs:
             local payload="$1"
             local label="$2"
             jq -e --arg label "$label" '[.labels[].name] | index($label) != null' <<<"$payload" >/dev/null
+          }
+
+          edit_pr_label() {
+            local pr="$1"
+            local flag="$2"
+            local label="$3"
+
+            gh issue edit "$pr" --repo "$REPO" "$flag" "$label"
           }
 
           ensure_active_label() {
@@ -228,13 +236,42 @@ jobs:
           reconcile_ready_label() {
             local pr="$1"
             local state="$2"
+            local payload="$3"
 
             if [ "$state" = "ready" ]; then
-              gh issue edit "$pr" --repo "$REPO" --add-label "$READY_LABEL" || true
+              if pr_has_label "$payload" "$READY_LABEL"; then
+                return 0
+              fi
+              edit_pr_label "$pr" --add-label "$READY_LABEL"
               return 0
             fi
 
-            gh issue edit "$pr" --repo "$REPO" --remove-label "$READY_LABEL" || true
+            if pr_has_label "$payload" "$READY_LABEL"; then
+              edit_pr_label "$pr" --remove-label "$READY_LABEL"
+            fi
+            return 0
+          }
+
+          claim_active_label() {
+            local pr="$1"
+            local head_sha="$2"
+            local reason="$3"
+            local payload
+
+            ensure_active_label
+            if ! edit_pr_label "$pr" --add-label "$ACTIVE_LABEL"; then
+              echo "Could not add $ACTIVE_LABEL to PR #$pr; refusing to dispatch the agent without a lease."
+              set_result "false" "$pr" "$head_sha" "blocked" "$reason:active_label_failed"
+              return 1
+            fi
+
+            payload="$(pr_json "$pr")"
+            if ! pr_has_label "$payload" "$ACTIVE_LABEL"; then
+              echo "PR #$pr still does not have $ACTIVE_LABEL after label update; refusing to dispatch the agent."
+              set_result "false" "$pr" "$head_sha" "blocked" "$reason:active_label_missing"
+              return 1
+            fi
+            return 0
           }
 
           trigger_ci_if_needed() {
@@ -327,7 +364,11 @@ jobs:
             fi
 
             state="$(evaluate_readiness "$payload")"
-            reconcile_ready_label "$pr" "$state"
+            if ! reconcile_ready_label "$pr" "$state" "$payload"; then
+              echo "Could not reconcile $READY_LABEL for PR #$pr; refusing to dispatch the agent with stale readiness state."
+              set_result "false" "$pr" "$head_sha" "blocked" "$reason:ready_label_failed"
+              return 1
+            fi
 
             case "$state" in
               ready|waiting|blocked|out_of_scope)
@@ -339,8 +380,9 @@ jobs:
                 return 1
                 ;;
               needs_branch_update|needs_repair)
-                ensure_active_label
-                gh issue edit "$pr" --repo "$REPO" --add-label "$ACTIVE_LABEL"
+                if ! claim_active_label "$pr" "$head_sha" "$reason"; then
+                  return 1
+                fi
                 set_result "true" "$pr" "$head_sha" "$state" "$reason:$state"
                 return 0
                 ;;
