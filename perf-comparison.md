@@ -6,12 +6,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-10T01:25:42Z |
-| Iteration Count | 391 |
-| Best Metric | 728 |
+| Last Run | 2026-07-10T13:33:58Z |
+| Iteration Count | 392 |
+| Best Metric | 729 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #361 |
+| PR | — |
 | Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
@@ -40,9 +40,12 @@
 
 ## 🔭 Future Directions
 
-- `entropy`/`klDivergence`, `lreshape`, `linregress`/`polyfit_polyval`/`gaussian_kde` (lost in push failures), `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `entropy`/`klDivergence`, `lreshape`, `linregress`/`polyfit_polyval`, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 392 — 2026-07-10 — [Run §29096370299](https://github.com/githubnext/tsb/actions/runs/29096370299)
+✅ +1 → 729: gaussianKDE evaluate benchmark (1k data pts, 200 grid pts, Silverman bandwidth). TS: `gaussianKDE(data).evaluate(grid)`. Python: pure-numpy Gaussian kernel with Silverman rule.
 
 ### Iter 391 — 2026-07-10 — [Run §29062236162](https://github.com/githubnext/tsb/actions/runs/29062236162)
 ✅ +1 → 728: bootstrap CI benchmark (1k elements, 500 resamples, percentile method). TS: `bootstrap1(arr, mean, {n:500, method:"percentile"})`. Python: pure-numpy percentile bootstrap.
