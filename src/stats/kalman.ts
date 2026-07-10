@@ -522,11 +522,11 @@ function kalmanFilter(
 
   // Storage
   const filtMeans: number[][] = [];
-  const filtCovs: MutMat[][] = [];
+  const filtCovs: MutMat[] = [];
   const predMeans: number[][] = [];
-  const predCovs: MutMat[][] = [];
+  const predCovs: MutMat[] = [];
   const innovations: number[][] = [];
-  const innovCovs: MutMat[][] = [];
+  const innovCovs: MutMat[] = [];
   let logLik = 0;
 
   // Initialize
@@ -644,8 +644,8 @@ function rtsSmooth(fwd: KalmanFilterResult, F: Mat): KalmanSmootherResult {
   const ns = fwd.nStates;
 
   const smoothMeans: number[][] = new Array<number[]>(T_len);
-  const smoothCovs: MutMat[][] = new Array<MutMat[]>(T_len);
-  const gains: MutMat[][] = new Array<MutMat[]>(T_len);
+  const smoothCovs: MutMat[] = new Array<MutMat>(T_len);
+  const gains: MutMat[] = new Array<MutMat>(T_len);
 
   // Initialise last time step from filter
   const lastFiltMean = [...(fwd.filteredStateMeans[T_len - 1] ?? [])];

@@ -225,7 +225,10 @@ const mag = H.map(cAbs);
 console.log(`Gain at DC:      ${mag[0].toFixed(4)}`);
 console.log(`Gain at Nyquist: ${mag[511].toFixed(4)}`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 b = signal.firwin(51, 0.3)
 print(f"Coefficients: {len(b)} taps")
@@ -261,7 +264,10 @@ const mag = H.map(cAbs);
 console.log(`Gain at DC:      ${mag[0].toFixed(4)}    (should be ≈ 0)`);
 console.log(`Gain at Nyquist: ${mag[511].toFixed(4)}  (should be ≈ 1)`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 b = signal.firwin(51, 0.3, pass_zero=False)
 w, h = signal.freqz(b, [1], worN=512)
@@ -302,7 +308,10 @@ console.log(`Input at mid-point:         ${x[mid].toFixed(4)}`);
 console.log(`lfilter output (causal):    ${yLf[mid].toFixed(4)}`);
 console.log(`filtfilt output (no delay): ${yFf[mid].toFixed(4)}`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 fs, n = 512, 512
 i = np.arange(n)
@@ -345,7 +354,10 @@ const mag = H.map(cAbs);
 console.log(`DC gain:        ${mag[0].toFixed(4)}  (should be ≈ 1.0)`);
 console.log(`At cutoff (~77): ${mag[77].toFixed(4)}  (≈ 0.707 = −3 dB)`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 sos = signal.butter(4, 0.3, "low", output="sos")
 b, a = signal.butter(4, 0.3, "low")
@@ -392,7 +404,10 @@ console.log(`Reference (50 Hz):     ${ref.toFixed(4)}`);
 console.log(`sosfilt output:        ${y1[mid].toFixed(4)}`);
 console.log(`sosfiltfilt output:    ${y2[mid].toFixed(4)}  (zero-phase, closer to ref)`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 fs, n = 1000, 1000
 i = np.arange(n)
@@ -433,7 +448,10 @@ const mag = H.map(cAbs);
 console.log(`Gain at DC (w=0):       ${mag[0].toFixed(4)}  (should be ≈ 0)`);
 console.log(`Gain at Nyquist (w=π):  ${mag[511].toFixed(4)}  (should be ≈ 1.0)`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 sos = signal.butter(2, 0.3, "high", output="sos")
 w, h = signal.sosfreqz(sos, worN=512)
@@ -469,7 +487,10 @@ for (const N of [1, 2, 4, 6, 8]) {
   console.log(`  N=${N}: gain=${gain.toFixed(4)}  (${dB.toFixed(2)} dB)`);
 }</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 Wn = 0.3
 print("Butterworth −3 dB gain at cutoff frequency:")

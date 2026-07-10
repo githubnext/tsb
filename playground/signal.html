@@ -344,7 +344,10 @@ for (const name of names) {
   console.log(`${name.padEnd(15)} peak=${peak}  sum=${sum}`);
 }
 console.log("Kaiser β=14:", kaiserWindow(8, 14).map(v => v.toFixed(4)).join(", "));</textarea>
-      <textarea class="playground-python" style="display:none">import scipy.signal as signal
+      <textarea class="playground-python" style="display:none">try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 import numpy as np
 
 n = 16
@@ -392,7 +395,10 @@ console.log(`STFT shape: ${Zxx.length} freq bins × ${Zxx[0].length} time frames
 console.log(`Time axis: [${t[0].toFixed(3)}, ..., ${t[t.length-1].toFixed(3)}] s`);
 console.log(`Freq axis: [${f[0].toFixed(1)}, ..., ${f[f.length-1].toFixed(1)}] Hz`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 fs, n = 512, 1024
 t_sig = np.arange(n) / fs
@@ -435,7 +441,10 @@ const err = x.slice(64, n - 64).map((v, i) =>
 );
 console.log(`Max reconstruction error: ${Math.max(...err).toExponential(2)}`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 n = 256
 x = np.sin(2 * np.pi * 10 * np.arange(n) / n)
@@ -474,7 +483,10 @@ const peakIdx = Pxx.indexOf(Math.max(...Pxx));
 console.log(`Peak at ${f[peakIdx].toFixed(1)} Hz (expected ${f0} Hz)`);
 console.log(`Peak PSD: ${Pxx[peakIdx].toFixed(2)} V²/Hz`);</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 fs, f0, n = 1024, 128, 4096
 rng = np.random.default_rng(42)
@@ -517,7 +529,10 @@ for (const { v, i } of sorted) {
   console.log(`  ${f[i]?.toFixed(1)} Hz  →  ${v.toFixed(4)} V²/Hz`);
 }</textarea>
       <textarea class="playground-python" style="display:none">import numpy as np
-import scipy.signal as signal
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
 
 fs, n = 512, 512
 x = (np.cos(2 * np.pi * 60 * np.arange(n) / fs)

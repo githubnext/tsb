@@ -68,7 +68,7 @@ describe("autocorr", () => {
   });
 
   it("accepts Series input", () => {
-    const s = new Series([1, 2, 3, 4, 5, 6]);
+    const s = new Series({ data: [1, 2, 3, 4, 5, 6] });
     const arr = [1, 2, 3, 4, 5, 6];
     expect(autocorr(s, 1)).toBeCloseTo(autocorr(arr, 1), 8);
   });
@@ -315,7 +315,7 @@ describe("durbinWatson", () => {
 
   it("accepts Series input", () => {
     const e = [1, -1, 1, -1, 1, -1, 1, -1];
-    const s = new Series(e);
+    const s = new Series({ data: e });
     expect(durbinWatson(s)).toBeCloseTo(durbinWatson(e), 8);
   });
 

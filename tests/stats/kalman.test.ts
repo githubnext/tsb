@@ -156,7 +156,7 @@ describe("KalmanFilter direct construction", () => {
 
 describe("filter – local-level basic", () => {
   const kf = KalmanFilter.localLevel({ processNoise: 1, observationNoise: 1 });
-  const obs = [[1], [2], [3], [4], [5]] as [number][][];
+  const obs = [[1], [2], [3], [4], [5]] as number[][];
   const result = kf.filter(obs);
 
   it("returns nTime correct", () => {
@@ -256,15 +256,15 @@ describe("filter – missing observations", () => {
 describe("filter – logLikelihood", () => {
   it("log-likelihood is negative for noisy data", () => {
     const kf = KalmanFilter.localLevel();
-    const obs = [[5], [1], [8], [2], [6]] as [number][][];
+    const obs = [[5], [1], [8], [2], [6]] as number[][];
     const { logLikelihood } = kf.filter(obs);
     expect(logLikelihood).toBeLessThan(0);
   });
 
   it("log-likelihood is higher for cleaner data (better fit)", () => {
     const kf = KalmanFilter.localLevel({ processNoise: 0.1, observationNoise: 0.1 });
-    const cleanObs = [[1], [1.01], [1.02], [1.01], [1.0]] as [number][][];
-    const noisyObs = [[1], [5], [-3], [8], [-1]] as [number][][];
+    const cleanObs = [[1], [1.01], [1.02], [1.01], [1.0]] as number[][];
+    const noisyObs = [[1], [5], [-3], [8], [-1]] as number[][];
     const ll1 = kf.filter(cleanObs).logLikelihood;
     const ll2 = kf.filter(noisyObs).logLikelihood;
     expect(ll1).toBeGreaterThan(ll2);
@@ -272,7 +272,7 @@ describe("filter – logLikelihood", () => {
 
   it("log-likelihood is only computed for non-missing steps", () => {
     const kf = KalmanFilter.localLevel();
-    const full = [[1], [2], [3]] as [number][][];
+    const full = [[1], [2], [3]] as number[][];
     const partial = [[1], [null], [3]] as (number | null)[][];
     const ll1 = kf.filter(full).logLikelihood;
     const ll2 = kf.filter(partial).logLikelihood;
@@ -288,7 +288,7 @@ describe("filter – 2D state (local linear trend)", () => {
     slopeNoise: 0.01,
     observationNoise: 0.5,
   });
-  const obs = Array.from({ length: 15 }, (_, i) => [i * 1.0]) as [number][][];
+  const obs = Array.from({ length: 15 }, (_, i) => [i * 1.0]) as number[][];
   const result = kf.filter(obs);
 
   it("returns 2-element state means", () => {
@@ -335,7 +335,7 @@ describe("filter – predicted state properties", () => {
 
 describe("smooth – basic properties", () => {
   const kf = KalmanFilter.localLevel({ processNoise: 1, observationNoise: 1 });
-  const obs = [[1], [2], [3], [2], [1]] as [number][][];
+  const obs = [[1], [2], [3], [2], [1]] as number[][];
   const sm = kf.smooth(obs);
 
   it("returns smoothedStateMeans of shape T × 1", () => {
@@ -404,7 +404,7 @@ describe("smooth – RTS reduces RMSE vs filter", () => {
 describe("smooth – local linear trend", () => {
   it("smoothes a trending series without NaN", () => {
     const kf = KalmanFilter.localLinearTrend();
-    const obs = Array.from({ length: 10 }, (_, i) => [i * 2.0]) as [number][][];
+    const obs = Array.from({ length: 10 }, (_, i) => [i * 2.0]) as number[][];
     const sm = kf.smooth(obs);
     for (const m of sm.smoothedStateMeans) {
       for (const v of m) expect(isFinite(v)).toBe(true);
