@@ -133,7 +133,8 @@ readiness controller and the agentic orchestrator must both respect this file.
   failures, `bun run lint` is the source of truth; do not guess from truncated
   GitHub summaries. For lint and typecheck gates, iterate locally until the
   current command passes, only non-mechanical blockers remain, or a stop rule
-  applies.
+  applies. Prioritize structural blockers, such as large complexity or
+  control-flow issues, before warning churn that cannot make the gate pass.
 - Generated file policy: recompile committed lockfiles/snapshots when their
   sources change. After editing any `.github/workflows/*.md` workflow, recompile
   and commit the generated `.lock.yml`.

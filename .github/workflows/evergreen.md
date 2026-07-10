@@ -589,6 +589,12 @@ that command, rerun the same command, and repeat until it passes, only
 non-mechanical blockers remain, or a stop rule applies. Prefer one coherent
 gate-clearing commit over several tiny symptom commits.
 
+Prioritize structural blockers before warning churn. If the failing command is
+dominated by a large complexity, architecture, or control-flow blocker that will
+keep the gate red, address that blocker directly when it is scoped and safe; if
+it requires a broader refactor or policy decision, report that instead of
+spending the run on smaller diagnostics that cannot make the gate pass.
+
 ## Stop States
 
 End each run with exactly one of these states:
