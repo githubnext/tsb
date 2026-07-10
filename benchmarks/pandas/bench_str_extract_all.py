@@ -1,4 +1,4 @@
-\"\"\"Benchmark: str.extractall on 10k-element string Series\"\"\"
+"""Benchmark: str.extractall on 10k-element string Series"""
 import json, time
 import pandas as pd
 
