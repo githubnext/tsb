@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-09T08:06:10Z |
-| Iteration Count | 390 |
-| Best Metric | 727 |
+| Last Run | 2026-07-10T01:25:42Z |
+| Iteration Count | 391 |
+| Best Metric | 728 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #361 |
@@ -40,9 +40,12 @@
 
 ## 🔭 Future Directions
 
-- `bootstrap`, `entropy`/`klDivergence`, `lreshape`, `linregress`/`polyfit_polyval`/`gaussian_kde` (lost in push failures), `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `entropy`/`klDivergence`, `lreshape`, `linregress`/`polyfit_polyval`/`gaussian_kde` (lost in push failures), `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 391 — 2026-07-10 — [Run §29062236162](https://github.com/githubnext/tsb/actions/runs/29062236162)
+✅ +1 → 728: bootstrap CI benchmark (1k elements, 500 resamples, percentile method). TS: `bootstrap1(arr, mean, {n:500, method:"percentile"})`. Python: pure-numpy percentile bootstrap.
 
 ### Iter 390 — 2026-07-09 — [Run §29003458535](https://github.com/githubnext/tsb/actions/runs/29003458535)
 ✅ +1 → 727: OLS multiple regression (10k rows×5 predictors, 20 iters). TS: `new OLS().fit(X,y)`. Python: `np.linalg.lstsq`. Actual branch was 726 (iter 389 claimed 729 but files were never pushed). Metric corrected 729→727.
