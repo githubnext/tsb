@@ -958,16 +958,16 @@ export class Series<T extends Scalar = Scalar> {
           finSlice.sort((a, b) => {
             const av = vals[a] as number | string | boolean;
             const bv = vals[b] as number | string | boolean;
-            if (av < bv) return -1;
-            if (av > bv) return 1;
+            if (av < bv) { return -1; }
+            if (av > bv) { return 1; }
             return 0;
           });
         } else {
           finSlice.sort((a, b) => {
             const av = vals[a] as number | string | boolean;
             const bv = vals[b] as number | string | boolean;
-            if (av > bv) return -1;
-            if (av < bv) return 1;
+            if (av > bv) { return -1; }
+            if (av < bv) { return 1; }
             return 0;
           });
         }
@@ -1528,9 +1528,9 @@ function isIndexLike(v: unknown): v is Index<Label> {
   }
   const rec = v as Record<string, unknown>;
   return (
-    typeof rec["size"] === "number" &&
-    typeof rec["at"] === "function" &&
-    typeof rec["getLoc"] === "function"
+    typeof rec.size === "number" &&
+    typeof rec.at === "function" &&
+    typeof rec.getLoc === "function"
   );
 }
 
