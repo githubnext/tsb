@@ -76,10 +76,11 @@ readiness controller and the agentic orchestrator must both respect this file.
 ## Event Fast Paths
 
 - `pull_request` activity types: not wired in the gh-aw Evergreen workflow.
-  PR activity is covered by schedule/manual/default-branch reconciliation to
-  avoid gh-aw confused-deputy activation on bot-authored PRs.
-- Default-branch `push` policy: `push` to `main` wakes the reconciliation loop
-  because it can make labeled PRs stale or conflicted.
+  PR activity is covered by schedule/manual reconciliation to avoid gh-aw
+  confused-deputy activation on bot-authored PRs.
+- Default-branch `push` policy: not wired in v1; the schedule covers `main`
+  changes that can make labeled PRs stale or conflicted. Use manual dispatch
+  for urgent reconciliation.
 - `workflow_run` policy: not wired in v1; the schedule covers CI state changes.
 - Review event policy: not wired (reviews are not merge gates here).
 - Deployment event policy: not wired (no deployment gates).
@@ -106,14 +107,18 @@ readiness controller and the agentic orchestrator must both respect this file.
 ## Repair Policy
 
 - Allowed edits: source, tests, playground, config, and workflow files needed to
-  clear a configured gate. Keep changes small and targeted (one feature/fix per
-  commit per repo convention).
+  clear a configured gate. Keep changes targeted to the failing gate, but a
+  single Evergreen run may edit multiple files and fix multiple diagnostics when
+  they come from the same failing command.
 - Protected files: `README.md` and `.autoloop/programs/**` must not be modified
   unless explicitly requested. `.autoloop/**` and `memory/autoloop` branch state
   are Autoloop-owned. Issue #1 (program definition) must not be modified.
 - High-risk file policy: dependency manifests and lockfiles (`package.json`,
   `bun.lock`, `bunfig.toml`) may be edited only when the failing gate requires
   it; prefer deterministic tooling.
+- Safe-output patch budget: `10240` bytes, the current gh-aw maximum. This is
+  intentionally large enough for one coherent lint/typecheck gate-clearing patch
+  instead of tiny symptom commits.
 - Deterministic commands (repo-native, run before agentic edits):
   - Install: `bun install`
   - Typecheck: `bun run typecheck`
@@ -126,7 +131,9 @@ readiness controller and the agentic orchestrator must both respect this file.
 - CI/lint diagnosis policy: when a CI gate fails, fetch the exact failing job
   logs and run the targeted repo command locally before editing. For lint
   failures, `bun run lint` is the source of truth; do not guess from truncated
-  GitHub summaries.
+  GitHub summaries. For lint and typecheck gates, iterate locally until the
+  current command passes, only non-mechanical blockers remain, or a stop rule
+  applies.
 - Generated file policy: recompile committed lockfiles/snapshots when their
   sources change. After editing any `.github/workflows/*.md` workflow, recompile
   and commit the generated `.lock.yml`.
