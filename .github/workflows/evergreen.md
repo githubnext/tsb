@@ -496,6 +496,7 @@ imports:
   - shared/evergreen/report-template.md
 
 safe-outputs:
+  max-patch-size: 10240
   add-comment:
     max: 2
   add-labels:
@@ -578,6 +579,15 @@ are merge gates.
 
 If a required skill does not apply, record `not_applicable` as a successful
 result rather than saying it was skipped.
+
+## Gate-Clearing Repair Loop
+
+For lint and typecheck gates, do not stop after the first mechanical diagnostic
+unless the next fix is risky or unrelated. Run the failing repo-native command,
+apply the smallest patch that can clear all current mechanical diagnostics for
+that command, rerun the same command, and repeat until it passes, only
+non-mechanical blockers remain, or a stop rule applies. Prefer one coherent
+gate-clearing commit over several tiny symptom commits.
 
 ## Stop States
 

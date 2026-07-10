@@ -14,6 +14,9 @@ Find documented commands for:
 - code generation
 - workflow compilation or validation
 
-Prefer targeted commands over broad commands. Apply or propose only the smallest
-safe patch needed for mechanical failures. Route policy conflicts to the
-appropriate review or human decision instead of guessing.
+Prefer targeted commands over broad commands. Apply or propose the smallest
+safe patch that clears the current failing gate, not just the first diagnostic.
+For lint and typecheck failures, fix all current mechanical diagnostics from the
+same command when they are local and low-risk, then rerun the command before
+pushing. Route policy conflicts to the appropriate review or human decision
+instead of guessing.
