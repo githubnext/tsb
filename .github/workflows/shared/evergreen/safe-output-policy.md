@@ -14,6 +14,8 @@ Disallowed safe outputs in v1:
 
 - Direct PR merge.
 - Base-branch writes.
+- Branch update commits that merge or rebase the base branch into the PR branch;
+  branch freshness is controller-owned.
 - Adding or removing the ready label from the agentic workflow.
 - Secret disclosure in comments, logs, commits, generated policy, or memory.
 
