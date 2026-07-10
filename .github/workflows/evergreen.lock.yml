@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"7b4265834623b5573eebad7d2e52d7bad77148f346e70b69712b8cdc65c5f9fe","body_hash":"058a426b7066098fbd3fa66e0c77d3199f52fe4f89a196f98b2a01cb6580158c","compiler_version":"v0.79.4","strict":true,"agent_id":"copilot","engine_versions":{"copilot":"1.0.60"}}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"d45f839a4ad149d101caba80163b04d9a444aac746fb65fe7469d58d44a7ee40","body_hash":"a4d7db91f7e9ca4e7cba1676052255426f43cca5d5bf193047ff845a5ba81892","compiler_version":"v0.79.4","strict":true,"agent_id":"copilot","engine_versions":{"copilot":"1.0.60"}}
 # gh-aw-manifest: {"version":1,"secrets":["COPILOT_GITHUB_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN"],"actions":[{"repo":"actions/checkout","sha":"df4cb1c069e1874edd31b4311f1884172cec0e10","version":"v6.0.3"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"d059700c6a8ec3b5fd798b9ea60f5d048447b918","version":"v0.79.4"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.27.0"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.27.0"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.27.0"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.25","digest":"sha256:c10331ad17668ef89f38f5e356678788a40b0cd5fef96e8f92e1d9c1de47cbaa","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.3.25@sha256:c10331ad17668ef89f38f5e356678788a40b0cd5fef96e8f92e1d9c1de47cbaa"},{"image":"ghcr.io/github/github-mcp-server:v1.1.2","digest":"sha256:30197479d8036c7811892bc07e06f9a05c9ef3cdd79bc59f256d50647f95788c","pinned_image":"ghcr.io/github/github-mcp-server:v1.1.2@sha256:30197479d8036c7811892bc07e06f9a05c9ef3cdd79bc59f256d50647f95788c"},{"image":"node:lts-alpine","digest":"sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14","pinned_image":"node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -2004,42 +2004,6 @@ jobs:
             return 1
           }
 
-          wait_for_ci_activation() {
-            local pr="$1"
-            local head_sha="$2"
-            local timeout="${CI_ACTIVATION_WAIT_SECONDS:-0}"
-            local deadline payload current_head state
-
-            if ! grep -Eq '^[0-9]+$' <<<"$timeout" || [ "$timeout" -le 0 ]; then
-              return 1
-            fi
-
-            deadline=$((SECONDS + timeout))
-            while [ "$SECONDS" -lt "$deadline" ]; do
-              sleep 10
-              payload="$(pr_json "$pr")"
-              current_head="$(jq -r '.headRefOid' <<<"$payload")"
-              if [ "$current_head" != "$head_sha" ]; then
-                echo "PR #$pr head changed from $head_sha to $current_head while waiting for CI."
-                return 0
-              fi
-
-              state="$(evaluate_readiness "$payload")"
-              case "$state" in
-                waiting|needs_ci)
-                  echo "CI for PR #$pr is still $state; continuing to wait."
-                  ;;
-                *)
-                  echo "CI for PR #$pr settled to $state."
-                  return 0
-                  ;;
-              esac
-            done
-
-            echo "CI for PR #$pr did not settle within ${timeout}s; a later Evergreen run will continue."
-            return 1
-          }
-
           update_branch_if_needed() {
             # Deterministic branch freshness handling. Keep base-branch merges out
             # of agent patches so safe outputs only contain repair edits.
@@ -2115,25 +2079,7 @@ jobs:
                 return 1
                 ;;
               needs_ci)
-                if trigger_ci_if_needed "$pr" "$head_sha" &&
-                   wait_for_ci_activation "$pr" "$head_sha"; then
-                  payload="$(pr_json "$pr")"
-                  head_sha="$(jq -r '.headRefOid' <<<"$payload")"
-                  state="$(evaluate_readiness "$payload")"
-                  if ! reconcile_ready_label "$pr" "$state" "$payload"; then
-                    echo "Could not reconcile $READY_LABEL for PR #$pr after CI activation; refusing to dispatch the agent."
-                    set_result "false" "$pr" "$head_sha" "blocked" "$reason:ready_label_failed"
-                    return 1
-                  fi
-
-                  if [ "$state" = "needs_repair" ]; then
-                    if ! claim_active_label "$pr" "$head_sha" "$reason:ci_failed_after_activation"; then
-                      return 1
-                    fi
-                    set_result "true" "$pr" "$head_sha" "$state" "$reason:ci_failed_after_activation"
-                    return 0
-                  fi
-                fi
+                trigger_ci_if_needed "$pr" "$head_sha" || true
                 return 1
                 ;;
               needs_branch_update)
@@ -2190,7 +2136,6 @@ jobs:
         env:
           ACTIVE_LABEL: evergreen_active
           CHECK_GATE_MODE: configured
-          CI_ACTIVATION_WAIT_SECONDS: "300"
           CI_TRIGGER_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN || '' }}
           EVENT_ACTION: ${{ github.event.action }}
           EVENT_NAME: ${{ github.event_name }}

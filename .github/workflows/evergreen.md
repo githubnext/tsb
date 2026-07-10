@@ -66,7 +66,6 @@ jobs:
           EXHAUSTED_LABEL: evergreen-exhausted
           REQUIRED_CHECKS_JSON: '["Test & Lint","Playground E2E (Playwright)","Build","Validate Python Examples"]'
           CHECK_GATE_MODE: configured
-          CI_ACTIVATION_WAIT_SECONDS: "300"
           MANUAL_PR: ${{ github.event.inputs.pr || '' }}
           MANUAL_HEAD_SHA: ${{ github.event.inputs.head_sha || '' }}
           MANUAL_REASON: ${{ github.event.inputs.reason || '' }}
@@ -365,42 +364,6 @@ jobs:
             return 1
           }
 
-          wait_for_ci_activation() {
-            local pr="$1"
-            local head_sha="$2"
-            local timeout="${CI_ACTIVATION_WAIT_SECONDS:-0}"
-            local deadline payload current_head state
-
-            if ! grep -Eq '^[0-9]+$' <<<"$timeout" || [ "$timeout" -le 0 ]; then
-              return 1
-            fi
-
-            deadline=$((SECONDS + timeout))
-            while [ "$SECONDS" -lt "$deadline" ]; do
-              sleep 10
-              payload="$(pr_json "$pr")"
-              current_head="$(jq -r '.headRefOid' <<<"$payload")"
-              if [ "$current_head" != "$head_sha" ]; then
-                echo "PR #$pr head changed from $head_sha to $current_head while waiting for CI."
-                return 0
-              fi
-
-              state="$(evaluate_readiness "$payload")"
-              case "$state" in
-                waiting|needs_ci)
-                  echo "CI for PR #$pr is still $state; continuing to wait."
-                  ;;
-                *)
-                  echo "CI for PR #$pr settled to $state."
-                  return 0
-                  ;;
-              esac
-            done
-
-            echo "CI for PR #$pr did not settle within ${timeout}s; a later Evergreen run will continue."
-            return 1
-          }
-
           update_branch_if_needed() {
             # Deterministic branch freshness handling. Keep base-branch merges out
             # of agent patches so safe outputs only contain repair edits.
@@ -476,25 +439,7 @@ jobs:
                 return 1
                 ;;
               needs_ci)
-                if trigger_ci_if_needed "$pr" "$head_sha" &&
-                   wait_for_ci_activation "$pr" "$head_sha"; then
-                  payload="$(pr_json "$pr")"
-                  head_sha="$(jq -r '.headRefOid' <<<"$payload")"
-                  state="$(evaluate_readiness "$payload")"
-                  if ! reconcile_ready_label "$pr" "$state" "$payload"; then
-                    echo "Could not reconcile $READY_LABEL for PR #$pr after CI activation; refusing to dispatch the agent."
-                    set_result "false" "$pr" "$head_sha" "blocked" "$reason:ready_label_failed"
-                    return 1
-                  fi
-
-                  if [ "$state" = "needs_repair" ]; then
-                    if ! claim_active_label "$pr" "$head_sha" "$reason:ci_failed_after_activation"; then
-                      return 1
-                    fi
-                    set_result "true" "$pr" "$head_sha" "$state" "$reason:ci_failed_after_activation"
-                    return 0
-                  fi
-                fi
+                trigger_ci_if_needed "$pr" "$head_sha" || true
                 return 1
                 ;;
               needs_branch_update)

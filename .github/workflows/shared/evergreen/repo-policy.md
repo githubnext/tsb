@@ -48,8 +48,8 @@ readiness controller and the agentic orchestrator must both respect this file.
 - Pending check policy: `waiting` — do not repair pending or in-progress checks
   unless another configured gate has already failed.
 - Missing/stale check policy: `needs_ci` — reactivate the latest `CI` run for the
-  head SHA once, wait briefly for a result, then dispatch repair in the same run
-  if the gate fails (see CI/CD Activation). Never rerun green checks.
+  head SHA once, then stop so a later reconciliation can classify the resulting
+  checks (see CI/CD Activation). Never rerun green checks.
 - Branch freshness ready criterion: not required to be up to date with `main`;
   freshness is only enforced when the branch is conflicted (`DIRTY`/`UNKNOWN`).
 - Additional deterministic ready criteria: PR open, has `evergreen`, not
@@ -105,9 +105,7 @@ readiness controller and the agentic orchestrator must both respect this file.
 - Workflows/checks Evergreen may dispatch: none by name in v1; activation is
   rerun-based only.
 - Stale check policy: reactivate the latest `CI` run for the head SHA once per
-  head; briefly wait for it to settle; dispatch repair immediately if a
-  configured gate fails; never rerun green checks; never re-trigger an already
-  in-progress run.
+  head; never rerun green checks; never re-trigger an already in-progress run.
 - Missing check policy: if no `CI` run exists for the head SHA, wait for the
   normal `pull_request`/schedule CI to start rather than forcing activation.
 - Empty commit policy: empty trigger commits are a last resort only, requested
