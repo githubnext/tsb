@@ -53,9 +53,12 @@ readiness controller and the agentic orchestrator must both respect this file.
 ## Branch Updates
 
 - Base branch: `main`.
-- Freshness requirement: not a standalone gate; only merge `main` when the branch
-  is behind and conflicted or CI requires a fresh merge.
-- Merge-main policy: allowed. Prefer ordinary merge commits from `main`.
+- Freshness requirement: not a standalone gate; update from `main` only when the
+  branch is behind and conflicted or CI requires a fresh merge.
+- Merge-main policy: controller-owned. The deterministic preflight asks GitHub
+  to update the PR branch with the expected head SHA. The agent must not run
+  `git merge`, `git rebase`, or include base-branch update commits in safe-output
+  patches.
 - Rebase or force-push policy: force-push is DISABLED. No rebasing history.
 - Fork PR behavior: do not merge `main` into or push to fork branches unless a
   trusted maintainer has approved the current head (see Trust Model).
