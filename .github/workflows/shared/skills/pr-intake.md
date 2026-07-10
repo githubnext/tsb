@@ -1,12 +1,20 @@
----
-description: Build a factual snapshot of a target pull request.
----
+# Skill: pr-intake
 
-## skill: `pr-intake`
+Build a factual snapshot of the target pull request.
 
-Collect the PR number, title, author, draft state, labels, changed files,
-base/head branches and SHAs, review decision, unresolved review threads, the
-most recent author and reviewer comments, and the current check-run status.
+Inputs:
 
-Return facts only. Do not recommend fixes and do not judge code quality. Treat
-`not_applicable` as a successful outcome if there is no target PR.
+- Pull request number.
+- Expected head SHA, if supplied by a trigger.
+- Current repository policy.
+
+Collect:
+
+- title, author, draft state, base branch, head branch, and current head SHA
+- labels and state labels
+- changed files and risk-relevant path groups
+- review decision and unresolved review threads when available
+- recent process-relevant author, reviewer, and maintainer comments
+- status checks and workflow runs for the current head SHA
+
+Return facts only. Do not recommend fixes.

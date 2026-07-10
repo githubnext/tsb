@@ -1,12 +1,19 @@
----
-description: Store semantic attempt state and failure signatures for future passes.
----
+# Skill: attempt-memory-writer
 
-## skill: `attempt-memory-writer`
+Write structured memory for future-useful attempt state.
 
-Write structured, source-aware, non-sensitive memory for the PR pass: semantic
-head key, raw head SHA, failure signatures, selected skills, deterministic
-commands run, side-effect verification status, comment IDs, and the next action.
+Record:
 
-Ignore empty CI-trigger commits when updating semantic attempt counters. Store
-only facts that influence future behavior, not a log of the past.
+- PR number
+- raw head SHA
+- semantic head key when available
+- failure signatures
+- selected skills
+- deterministic commands run
+- patches or safe outputs attempted
+- safe-output verification status
+- repeated attempts to avoid
+- next action
+
+Do not write secrets, raw logs, or noisy run transcripts. Ignore trigger-only
+empty commits when updating semantic attempt counters.

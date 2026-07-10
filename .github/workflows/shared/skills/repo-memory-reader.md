@@ -1,13 +1,16 @@
----
-description: Load and summarize durable repository knowledge for this PR pass.
----
+# Skill: repo-memory-reader
 
-## skill: `repo-memory-reader`
+Load durable repository knowledge that is relevant to the current pass.
 
-Read available repo-memory files for merge gates, label meanings, CI failure
-signatures, known flaky checks, accepted prior fixes, review patterns, and
-velocity metrics. Return only the memory relevant to the current PR, with the
-source filename for each fact.
+Read memory for:
 
-Ignore stale or contradictory memory when current GitHub state disagrees; prefer
-live GitHub state. Return `not_applicable` if no memory exists yet.
+- merge gates and branch protection expectations
+- label meanings
+- known flaky checks and rerun policy
+- reusable accepted fixes
+- review patterns that affect mergeability
+- prior skill outcomes
+- velocity metrics
+
+Return only relevant memory with source filenames or identifiers. Current GitHub
+state wins over stale or contradictory memory.

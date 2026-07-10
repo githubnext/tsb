@@ -1,12 +1,19 @@
----
-description: Route a PR to the right specialist skills based on changed files.
----
+# Skill: diff-risk-map
 
-## skill: `diff-risk-map`
+Classify the pull request diff so the orchestrator can choose specialist work.
 
-Classify changed files by risk: tests only, docs only, frontend, backend, public
-API, data migration, auth/security, dependency, CI/infrastructure,
-agent/workflow, or architecture.
+Risk groups:
 
-Recommend the conditional skills the evidence calls for and explain the trigger
-for each recommendation. Return `not_applicable` if there is no diff to classify.
+- tests only
+- docs only
+- frontend or browser behavior
+- backend or service behavior
+- public API or contract
+- data migration or persistence
+- auth or security
+- dependency or lockfile
+- CI, workflow, runner, or infrastructure
+- agent, workflow, or generated automation
+- broad architecture or high-churn changes
+
+Return the risk profile, evidence paths, and conditional skill routing hints.

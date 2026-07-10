@@ -1,67 +1,13 @@
-# Evergreen Report Templates
+# Evergreen Report Template
 
-Keep comments short and terse. Comment only for meaningful work, blockers,
-human-needed decisions, or quota exhaustion. Never comment on unchanged state.
+Use short reports. Prefer no comment when state has not changed.
 
-## Repair / progress comment
+Required fields when commenting:
 
-```markdown
-evergreen: <one-line summary of what changed>
+- Current blocker or action.
+- Evidence source.
+- What changed, if anything.
+- What happens next.
 
-Gates: <gate table or "N failing / M passing">
-Did: <push | merged main | reran CI | dispatched CI>
-Verified: <head SHA + files, from safe-output-verifier>
-Next: <next action or "monitoring">
-Run: <workflow-run-url>
-```
-
-## Blocked / human-needed comment
-
-```markdown
-evergreen: <blocked | needs a human>
-
-Blocker: <the single current merge blocker>
-Evidence: <logs, checks, or comment IDs>
-Needed: <smallest human action that unblocks progress>
-Run: <workflow-run-url>
-```
-
-## Quota-exhausted comment
-
-```markdown
-evergreen: quota exhausted for this PR
-
-Removed `evergreen`, added `evergreen-exhausted`.
-Reapply `evergreen` to start a fresh quota.
-Summary: <what was tried, what remains>
-Run: <workflow-run-url>
-```
-
-## Recommended commit messages
-
-```text
-evergreen: repair <gate> failures
-
-[evergreen]
-Run: <workflow-run-url-or-id>
-PR: #<n>
-Skills: <skills used>
-Gates: <gates targeted>
-```
-
-```text
-evergreen: merge main into PR branch
-
-[evergreen]
-Run: <workflow-run-url-or-id>
-PR: #<n>
-Reason: branch freshness gate
-```
-
-```text
-evergreen: trigger CI
-
-[evergreen]
-Run: <workflow-run-url-or-id>
-Reason: configured CI requires a push event
-```
+Avoid broad narration. Do not say a fix landed, a check is green, or a PR is
+ready unless the relevant GitHub state proves it.

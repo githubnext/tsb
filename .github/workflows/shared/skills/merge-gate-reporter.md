@@ -1,12 +1,18 @@
----
-description: Decide whether the PR is ready, blocked, or needs another loop.
----
+# Skill: merge-gate-reporter
 
-## skill: `merge-gate-reporter`
+Report gate evidence without owning the ready label.
 
-Evaluate draft state, CI on the current head SHA, merge conflicts, required
-reviews, unresolved threads, required/blocker labels, and any docs/release
-requirements.
+Evaluate:
 
-Produce a concise gate table and a single final state: ready, blocked,
-human-needed, or continue. Base the state on evidence, never on intention.
+- current-head CI/check gates
+- merge conflicts
+- branch freshness
+- draft state
+- review and CODEOWNERS requirements
+- unresolved review threads
+- required and blocker labels
+- docs, release, deployment, security, or other configured gates
+
+Produce a concise gate table and one final state: return-to-controller,
+blocked, needs-human, waiting, or continue. Do not request or mutate a ready
+label.

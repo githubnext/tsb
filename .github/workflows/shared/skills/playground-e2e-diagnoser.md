@@ -1,13 +1,7 @@
----
-description: Diagnose Playwright/browser end-to-end failures with hard evidence.
----
+# Skill: playground-e2e-diagnoser
 
-## skill: `playground-e2e-diagnoser`
+Use when browser, playground, or Playwright-style failures need deeper evidence.
 
-Diagnose browser end-to-end (Playwright) failures. Collect concrete evidence
-before concluding: the failing page, console output, a screenshot or trace, and
-network activity.
-
-Never label an E2E failure "flaky" without page, console, screenshot, and
-network evidence. Recommend the smallest reproduction command and the most
-likely deterministic fix. Return `not_applicable` when no E2E check is failing.
+Capture page file or route, screenshot or trace, console errors, page errors,
+network failures, relevant DOM state, and reproduction command. Do not classify
+as flaky until evidence supports that classification.

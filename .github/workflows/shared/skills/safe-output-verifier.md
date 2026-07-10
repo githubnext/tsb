@@ -1,13 +1,15 @@
----
-description: Verify that every intended GitHub side effect actually landed.
----
+# Skill: safe-output-verifier
 
-## skill: `safe-output-verifier`
+Verify that every intended GitHub side effect actually landed.
 
-After any push, label change, comment, or review is requested, reload GitHub
-state and verify the expected side effect actually landed.
+After a safe output request, reload GitHub state and confirm:
 
-For pushes, confirm the PR head SHA changed to the expected commit and that the
-expected files changed. If verification fails, report the operation as **blocked**
-and do not use completion language. Never claim a side effect landed on belief
-alone.
+- comments exist with the expected content and identifier
+- labels were added or removed as expected
+- workflow dispatch or rerun was accepted
+- reviews or review comments exist
+- PR branch pushes changed the head SHA to the expected commit
+- the expected files changed on the PR branch
+
+If verification fails, report the operation as blocked. Do not use completion
+language for unverified side effects.

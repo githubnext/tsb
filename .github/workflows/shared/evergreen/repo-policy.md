@@ -1,130 +1,198 @@
 # Evergreen Repo Policy
 
-Repository: `githubnext/tsb`. This file records install-time decisions confirmed
-by the maintainer. Evergreen must follow it for all repo-specific behavior.
+Confirmed install-time decisions for `githubnext/tsessebe`. The deterministic
+readiness controller and the agentic orchestrator must both respect this file.
 
 ## Merge Gates
 
-- Required checks: `main` is **not** branch-protected, so GitHub enforces no
-  required checks. By maintainer decision, Evergreen treats these CI jobs as
-  merge gates on the current head SHA:
+- Required checks: none are enforced by branch protection (`main` is not
+  protected). The following CI checks are treated as configured merge gates:
   - `Test & Lint`
   - `Playground E2E (Playwright)`
   - `Build`
   - `Validate Python Examples`
-- Non-required checks treated as gates: none beyond the list above.
-  `OpenEvolve benchmark` runs only on `autoloop/*-evolve` PRs and is **not** a
-  merge gate.
-- Review requirements: none enforced by branch protection.
+- Non-required checks treated as gates: the four checks above.
+- Not a gate: `OpenEvolve benchmark` — it runs only on `autoloop/*-evolve` PRs,
+  reports `neutral` when there is no fitness, and is not a mergeability blocker.
+- Review requirements: none required (no branch protection, no required reviews).
 - CODEOWNERS requirements: none.
-- Unresolved thread policy: read only for merge-blocking signals; do not chase
-  general review comments.
-- Draft PR policy: do **not** mark draft PRs ready for review.
-- Required labels: `evergreen` (opt-in gate).
+- Unresolved thread policy: not a merge gate. Do not chase review threads.
+- Draft PR policy: work on labeled draft PRs, including agent-created draft
+  PRs, when the trust model allows branch repair. Do not mark drafts ready for
+  review automatically.
+- Required labels: `evergreen` opts a PR into the work loop.
+- Active lease label: `evergreen_active` is controller-owned. The preflight
+  selector applies it before dispatching the agent, other selectors skip PRs
+  with this label, and cleanup removes it when the run finishes.
 - Blocker labels: `evergreen-blocked`, `evergreen-human-needed`.
 - Deployment/environment gates: none.
-- Auto-merge behavior: repo-level auto-merge is **enabled**. Satisfying gates on
-  a PR with auto-merge on may cause it to merge. The maintainer accepts this.
-  Evergreen never merges directly and takes no extra merge action.
+- Auto-merge behavior: GitHub auto-merge is ENABLED on the repository. Evergreen
+  never merges directly, but by making the configured gates pass it can
+  indirectly cause a PR with auto-merge armed to merge. This is accepted by the
+  repository owner.
+
+## Readiness Controller
+
+- Ready label: `evergreen-ready`.
+- Controller owns ready label: yes.
+- Add ready label only when: all four configured gate checks report success for
+  the current PR head SHA, there are no pending/failing checks, and the merge
+  state is not dirty/conflicted.
+- Remove ready label when: the controller state is anything other than `ready`
+  (new head SHA, pending, failing, missing check, conflict, out of scope).
+- Current-head SHA policy: readiness is evaluated only against the current PR
+  head SHA. A new push invalidates prior readiness.
+- Pending check policy: `waiting` — do not repair pending or in-progress checks.
+- Missing/stale check policy: `needs_ci` — reactivate the latest `CI` run for the
+  head SHA once (see CI/CD Activation). Never rerun green checks.
+- Branch freshness ready criterion: not required to be up to date with `main`;
+  freshness is only enforced when the branch is conflicted (`DIRTY`/`UNKNOWN`).
+- Additional deterministic ready criteria: PR open, has `evergreen`, not
+  `evergreen-exhausted`, allowed by the trust model.
 
 ## Branch Updates
 
 - Base branch: `main`.
-- Freshness requirement: yes — update PR branches that are behind `main`.
-- Merge-main policy: merge `main` into the PR branch with a normal merge commit.
-- Rebase or force-push policy: force-push is **disabled**.
-- Fork PR behavior: pushes to fork branches may be restricted; if a push cannot
-  land, report `human-needed`.
+- Freshness requirement: not a standalone gate; update from `main` only when the
+  branch is behind and conflicted or CI requires a fresh merge.
+- Merge-main policy: controller-owned. The deterministic preflight asks GitHub
+  to update the PR branch with the expected head SHA. The agent must not run
+  `git merge`, `git rebase`, or include base-branch update commits in safe-output
+  patches.
+- Rebase or force-push policy: force-push is DISABLED. No rebasing history.
+- Fork PR behavior: do not merge `main` into or push to fork branches unless a
+  trusted maintainer has approved the current head (see Trust Model).
+
+## Trust Model
+
+- Repository visibility: public.
+- Fork PR policy: fork PRs are accepted.
+- Are PR branch pushers trusted: not for fork PRs.
+- Default trust level:
+  - Same-repo branches (e.g. `autoloop/*`, maintainer branches): `trusted-branch`.
+  - Fork PRs: `metadata-only` until a trusted maintainer approves the current
+    head SHA.
+- Current-head approval policy: for fork PRs, run PR code / push repairs only
+  after a trusted maintainer approves via `workflow_dispatch` bound to the
+  current head SHA. A new head SHA returns the PR to metadata-only monitoring.
+- Authorized `/evergreen` users: slash commands are not wired in v1. Trusted
+  activation for fork PRs is via manual `workflow_dispatch`.
+- What invalidates approval: any new commit / head SHA change on the PR branch.
+
+## Event Fast Paths
+
+- `pull_request` activity types: not wired in the gh-aw Evergreen workflow.
+  PR activity is covered by schedule/manual reconciliation to avoid gh-aw
+  confused-deputy activation on bot-authored PRs.
+- Default-branch `push` policy: not wired in v1; the schedule covers `main`
+  changes that can make labeled PRs stale or conflicted. Use manual dispatch
+  for urgent reconciliation.
+- `workflow_run` policy: not wired in v1; the schedule covers CI state changes.
+- Review event policy: not wired (reviews are not merge gates here).
+- Deployment event policy: not wired (no deployment gates).
+- Slash-command policy: not wired in v1.
+- Schedule interval: every 15 minutes (reconciliation and fork-PR fallback).
 
 ## CI/CD Activation
 
-- Workflows/checks Evergreen may rerun: `CI` jobs (`Test & Lint`,
-  `Playground E2E (Playwright)`, `Build`, `Validate Python Examples`) when
-  failing, missing, stale, or blocked.
-- Workflows/checks Evergreen may dispatch: `CI` (`workflow_dispatch` is enabled).
-- Stale check policy: ignore results from older SHAs; only the current head SHA
-  matters.
-- Missing check policy: CI runs on `push` to `autoloop/**` and `pull_request` to
-  `main`. Bot-authored pushes with the default token may not trigger required
-  CI; prefer `EVERGREEN_GITHUB_TOKEN` for CI-triggering pushes.
-- Empty commit policy: allowed only as a last resort to trigger CI, using commit
-  subject `evergreen: trigger CI`. Never counts as a semantic repair attempt.
-- Token policy: see below.
+- Workflows/checks Evergreen may rerun: the `CI` workflow run for the current
+  head SHA (via `gh run rerun --failed`, falling back to a full rerun).
+- Workflows/checks Evergreen may dispatch: none by name in v1; activation is
+  rerun-based only.
+- Stale check policy: reactivate the latest `CI` run for the head SHA once per
+  head; never rerun green checks; never re-trigger an already in-progress run.
+- Missing check policy: if no `CI` run exists for the head SHA, wait for the
+  normal `pull_request`/schedule CI to start rather than forcing activation.
+- Empty commit policy: empty trigger commits are a last resort only, requested
+  through safe outputs by the agent (never from preflight) and labeled
+  `evergreen: trigger CI`; they do not count as semantic repair attempts.
+- Token policy: `GITHUB_TOKEN` for reads and control-plane label writes.
+  `GH_AW_CI_TRIGGER_TOKEN` (existing PAT) is used only for CI reruns and
+  safe-output pushes so default-token limitations do not block CI.
 
 ## Repair Policy
 
-- Allowed edits: source, tests, playground, docs, and generated snapshots as
-  needed to pass the gates.
-- Protected files: `README.md` is excluded from pushes (see workflow
-  `protected-files`). Do not modify `.autoloop/programs/**` or Evergreen's own
-  workflow files during a PR run.
-- High-risk file policy: `evergreen` permits high-risk edits; still prefer the
-  smallest change.
-- Deterministic commands (repo-native, verified from CI and `AGENTS.md`):
+- Allowed edits: source, tests, playground, config, and workflow files needed to
+  clear a configured gate. Keep changes targeted to the failing gate, but a
+  single Evergreen run may edit multiple files and fix multiple diagnostics when
+  they come from the same failing command.
+- Protected files: `README.md` and `.autoloop/programs/**` must not be modified
+  unless explicitly requested. `.autoloop/**` and `memory/autoloop` branch state
+  are Autoloop-owned. Issue #1 (program definition) must not be modified.
+- High-risk file policy: dependency manifests and lockfiles (`package.json`,
+  `bun.lock`, `bunfig.toml`) may be edited only when the failing gate requires
+  it; prefer deterministic tooling.
+- Safe-output patch budget: `10240` bytes, the current gh-aw maximum. This is
+  intentionally large enough for one coherent lint/typecheck gate-clearing patch
+  instead of tiny symptom commits.
+- Deterministic commands (repo-native, run before agentic edits):
   - Install: `bun install`
   - Typecheck: `bun run typecheck`
   - Lint: `bun run lint`
-  - Test: `bun test` (coverage: `bun test --coverage ./tests/`)
+  - Test: `bun test`
+  - Cross-validation: `bun test ./tests/xval/`
   - E2E: `bun run test:e2e`
-  - Python examples: `python scripts/validate-python-examples.py playground/`
   - Golden snapshots: `python golden/generate.py`
-  - Workflow compile: `gh aw compile`
-- Generated file policy: regenerate golden snapshots with `python golden/generate.py`
-  and commit them; CI verifies with `git diff --exit-code -- golden/snapshots`.
-- Signed commit policy: not required.
+  - Workflow compile: `gh aw compile` (and `apm compile` when APM sources change)
+- CI/lint diagnosis policy: when a CI gate fails, fetch the exact failing job
+  logs and run the targeted repo command locally before editing. For lint
+  failures, `bun run lint` is the source of truth; do not guess from truncated
+  GitHub summaries. For lint and typecheck gates, iterate locally until the
+  current command passes, only non-mechanical blockers remain, or a stop rule
+  applies. Prioritize structural blockers, such as large complexity or
+  control-flow issues, before warning churn that cannot make the gate pass.
+- Generated file policy: recompile committed lockfiles/snapshots when their
+  sources change. After editing any `.github/workflows/*.md` workflow, recompile
+  and commit the generated `.lock.yml`.
+- Signed commit policy: signed commits are not required. Use the token's natural
+  identity; add Evergreen context in the commit body.
 
 ## Review Policy
 
-- Reviewer request policy: do not request or re-request reviewers in v1.
-- Review thread policy: comment only; do not resolve threads.
-- Human-needed cases: missing/insufficient token permission, protected-edit
-  decisions, ambiguous merge intent, or blockers requiring a human decision.
-- Comment style: short and terse; only for meaningful work, blockers,
-  human-needed decisions, or quota exhaustion.
+- Reviewer request policy: do not request or re-request reviewers.
+- Review thread policy: do not resolve threads. Comment only when a thread maps
+  to a configured merge gate.
+- Human-needed cases: protected-file edits, credential/permission needs, fork-PR
+  code execution before approval, and disallowed operations.
+- Comment style: terse. Comment only for meaningful work, blockers, human-needed
+  decisions, or quota exhaustion. Do not comment on unchanged state.
 
 ## Skills
 
-- Vendored generic skills: `pr-intake`, `repo-memory-reader`, `diff-risk-map`,
-  `ci-run-deduper`, `ci-gate-evaluator`, `ci-log-parser`,
-  `merge-blocker-comment-reader`, `deterministic-repair`, `safe-output-verifier`,
-  `attempt-memory-writer`, `merge-gate-reporter`, `playground-e2e-diagnoser`.
-- Existing repo skills to reuse: `.github/skills/agentic-workflows`,
-  `.github/skills/agentic-workflow-designer` (only if a workflow-file gate needs
-  them).
-- Conditional skills enabled: `playground-e2e-diagnoser` for the Playwright gate.
-- Skills not to use: none configured.
+- Vendored generic skills: all files under
+  `.github/workflows/shared/skills/`.
+- Existing repo skills to reuse: none dedicated to mergeability were found;
+  respect `AGENTS.md`/`CLAUDE.md` conventions.
+- Conditional skills enabled: `playground-e2e-diagnoser` (Playwright E2E gate),
+  `autoloop-coordinator` (Autoloop branches), `lint-policy-review`,
+  `docs-release-gate-repair`, `dependency-gate-repair`, and other conditional
+  skills when evidence identifies the matching gate.
+- Skills not to use: none disabled.
 
 ## Quotas
 
-- Per-PR AI-credit budget: **500** AI credits per continuous application of the
-  `evergreen` label.
-- Max runs: bounded by the budget; scheduled monitoring should use little quota.
-- Max repeated attempts per failure signature: stop repeating a path already
-  recorded as failing in memory.
-- Wall-clock limit: 30 minutes per run (`timeout-minutes`).
+- Per-PR AIC/token/cost budget: 50000 AI credits per continuous application of
+  the `evergreen` label.
+- Max runs: bounded by the per-PR budget; cheap deterministic monitoring should
+  consume little or no quota.
+- Max repeated attempts per failure signature: do not retry the same failure
+  signature indefinitely; record it in memory and stop.
+- Wall-clock limit: none beyond the per-PR budget and schedule cadence.
 - Exhaustion behavior: remove `evergreen`, add `evergreen-exhausted`, leave one
-  terse comment. Reapplying `evergreen` starts a fresh quota.
-
-## Token And Engine
-
-- Action token: `EVERGREEN_GITHUB_TOKEN` (maintainer choice, since default-token
-  pushes may not trigger required CI). Falls back to `GITHUB_TOKEN` in the
-  deterministic trigger when the secret is absent.
-- Engine token: `COPILOT_GITHUB_TOKEN` (already configured) for the Copilot
-  engine.
-- Engine: `copilot`.
+  terse comment. A human may reapply `evergreen` for a fresh quota.
 
 ## Discovered Repo Context
 
-- Agent guidance: `AGENTS.md` (tsb = TypeScript pandas port, Bun, strict TS,
-  100% coverage, one feature per commit, never modify `README.md` or
-  `.autoloop/programs/**`), `CLAUDE.md` (Biome formatting, JSDoc, bun commands).
+- Agent guidance: `AGENTS.md` and `CLAUDE.md` — Bun + strict TypeScript, zero
+  core deps, 100% coverage, one feature per commit, never modify `README.md` or
+  `.autoloop/programs/**`, recompile gh-aw/apm after workflow edits.
 - Existing workflow conventions: gh-aw workflows (`autoloop`, `goal`,
-  `ci-doctor`) use `engine: copilot`, repo-memory on `memory/*` branches, and
-  `shared/*.md` imports. Compiled `*.lock.yml` committed alongside `*.md`.
-- Last 50 closed PR process scan: PRs merged via GitHub (auto-merge enabled, no
-  branch protection). Autoloop PRs carry `automation,autoloop` labels. CI is the
-  de-facto gate. Prior default-token push issues were fixed via a PAT-style
-  CI-trigger token (`GH_AW_CI_TRIGGER_TOKEN` exists).
-- Uncertainties: `EVERGREEN_GITHUB_TOKEN` secret is not yet set — must be added
-  manually before Evergreen can push CI-triggering commits.
+  `ci-doctor`, `agentics-maintenance`) use `engine: copilot` with
+  `COPILOT_GITHUB_TOKEN`; `GH_AW_CI_TRIGGER_TOKEN` PAT is used for CI-triggering
+  pushes. CI workflow name is `CI`.
+- Last 50 closed PR process scan: PRs merge without auto-merge requests or
+  required reviews; many are Autoloop/goal automation PRs labeled
+  `automation`/`autoloop`. No CODEOWNERS or required-review process observed.
+- Uncertainties: `main` has no branch protection, so gate enforcement relies on
+  this policy's configured checks rather than platform-required checks. If branch
+  protection is added later, sync `REQUIRED_CHECKS_JSON` in `evergreen.md`.

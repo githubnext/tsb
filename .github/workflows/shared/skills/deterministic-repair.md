@@ -1,13 +1,23 @@
----
-description: Prefer repo-native scripts and mechanical fixes before agentic edits.
----
+# Skill: deterministic-repair
 
-## skill: `deterministic-repair`
+Prefer deterministic repo-native commands and mechanical fixes before agentic
+edits.
 
-Find the repo's documented install, build, lint, format, typecheck, test, and
-codegen commands (read `AGENTS.md`, `CLAUDE.md`, `package.json`, and CI). Prefer
-targeted commands over broad ones.
+Find documented commands for:
 
-If a fix is mechanical (formatter, generated file, lockfile, import order), apply
-only the smallest patch needed and re-run the relevant command to confirm.
-Return `not_applicable` if no deterministic step applies.
+- install
+- build
+- lint
+- format
+- typecheck
+- test
+- code generation
+- workflow compilation or validation
+
+Prefer targeted commands over broad commands. Apply or propose the smallest
+safe patch that clears the current failing gate, not just the first diagnostic.
+For lint and typecheck failures, fix all current mechanical diagnostics from the
+same command when they are local and low-risk, then rerun the command before
+pushing. Prioritize structural blockers, such as large complexity or control
+flow issues, before warning churn that cannot make the gate pass. Route policy
+conflicts to the appropriate review or human decision instead of guessing.

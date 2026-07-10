@@ -1,12 +1,16 @@
----
-description: Extract normalized failure signatures from check logs.
----
+# Skill: ci-log-parser
 
-## skill: `ci-log-parser`
+Extract normalized failure signatures from failing checks.
 
-Read failing check logs and return structured signatures: check name, tool,
-failure class, file, line, top stack frame, and the failing command.
+Return:
 
-For each signature, state whether the next move is deterministic repair, policy
-review, targeted test reproduction, rerun, or human escalation. Return
-`not_applicable` if there are no failing logs to parse.
+- check or workflow name
+- command that failed
+- tool or framework
+- failure class
+- file, line, and top stack frame when available
+- concise evidence excerpt
+- whether the next move is deterministic repair, policy review, targeted
+  reproduction, rerun, or human escalation
+
+Do not call a failure flaky without direct evidence.

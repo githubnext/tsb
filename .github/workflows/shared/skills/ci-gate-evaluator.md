@@ -1,12 +1,18 @@
----
-description: Explain failing, pending, stale, skipped, or missing CI gates.
----
+# Skill: ci-gate-evaluator
 
-## skill: `ci-gate-evaluator`
+Explain failing, pending, stale, skipped, or missing CI gates.
 
-Inspect check runs and workflow runs for the current head SHA. Distinguish
-deterministic failures from flakes, environment failures, missing CI caused by
-bot-authored commits, and failures caused by the PR itself.
+Distinguish:
 
-Recommend the smallest next action for each gate. Never recommend rerunning a
-green check. Return `not_applicable` if there are no checks to evaluate.
+- configured required gates
+- configured non-required gates
+- pending checks
+- stale checks from older SHAs
+- missing checks
+- failures caused by the pull request
+- environment or infrastructure failures
+- workflow activation failures
+- likely flakes that still need evidence
+
+Recommend the smallest next action: wait, rerun, dispatch, repair, escalate, or
+return to the deterministic controller.

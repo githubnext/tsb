@@ -1,12 +1,14 @@
----
-description: Collapse duplicate check runs into logical merge gates.
----
+# Skill: ci-run-deduper
 
-## skill: `ci-run-deduper`
+Collapse duplicate CI/check runs into logical gates.
 
-Group check runs by head SHA, workflow name, job name, and conclusion. Treat
-duplicate `push` and `pull_request` runs for the same head SHA as a single
-logical gate unless their conclusions disagree.
+Group runs by:
 
-Return the logical gate list plus the raw run IDs used as evidence. Consider only
-the current head SHA; ignore runs from older SHAs.
+- current PR head SHA
+- workflow name
+- job or check name
+- conclusion or state
+
+Treat duplicate `push` and `pull_request` runs for the same head as one logical
+gate unless their conclusions disagree. Return the logical gate list and the raw
+run/check identifiers used as evidence.

@@ -417,22 +417,24 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
   }
 
   // Build column arrays
-  const colData: Record<string, Scalar[]> = {};
-  for (const col of cols) {
-    colData[col] = rows.map((row) => {
-      const raw = row[col] ?? null;
-      if (raw === null || naSet.has(raw)) {
-        return null;
-      }
-      if (converters) {
-        const n = Number(raw);
-        if (!Number.isNaN(n) && raw.trim() !== "") {
-          return n;
+  const colData = Object.fromEntries(
+    cols.map((col) => [
+      col,
+      rows.map((row) => {
+        const raw = row[col] ?? null;
+        if (raw === null || naSet.has(raw)) {
+          return null;
         }
-      }
-      return raw;
-    });
-  }
+        if (converters) {
+          const n = Number(raw);
+          if (!Number.isNaN(n) && raw.trim() !== "") {
+            return n;
+          }
+        }
+        return raw;
+      }),
+    ]),
+  );
 
   // Determine index
   let idxCol: string | null = null;
@@ -445,10 +447,7 @@ export function readXml(text: string, options: ReadXmlOptions = {}): DataFrame {
   if (idxCol !== null && cols.includes(idxCol)) {
     const idxData = colData[idxCol] ?? [];
     const dataColNames = cols.filter((c) => c !== idxCol);
-    const dataColData: Record<string, Scalar[]> = {};
-    for (const c of dataColNames) {
-      dataColData[c] = colData[c] ?? [];
-    }
+    const dataColData = Object.fromEntries(dataColNames.map((c) => [c, colData[c] ?? []]));
     const idx = new Index(idxData.filter(isLabel));
     return DataFrame.fromColumns(dataColData, { index: idx });
   }
