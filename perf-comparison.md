@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-11T01:25:33Z |
-| Iteration Count | 393 |
-| Best Metric | 730 |
+| Last Run | 2026-07-11T13:23:00Z |
+| Iteration Count | 394 |
+| Best Metric | 731 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -41,9 +41,12 @@
 
 ## 🔭 Future Directions
 
-- `entropy`/`klDivergence`, `lreshape`, `linregress`/`polyfit_polyval`, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `entropy`/`klDivergence` ✅ done, `lreshape`, `linregress`/`polyfit_polyval`, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 394 — 2026-07-11 — [Run §29154137340](https://github.com/githubnext/tsb/actions/runs/29154137340)
+✅ +1 → 731: entropy/klDivergence benchmark (N=100 PMF, 50 iters). TS: `entropy(p)` + `klDivergence(p,q)`. Python: pure-numpy equivalents.
 
 ### Iter 393 — 2026-07-11 — [Run §29134514272](https://github.com/githubnext/tsb/actions/runs/29134514272)
 ✅ +1 → 730: hypothesis_tests benchmark (N=1000, 20 iters) covering ttest1samp, ttestInd, ttestRel, fOneway, pearsonr, spearmanr, mannWhitneyU. Python: pure-numpy equivalents.
@@ -54,12 +57,6 @@
 ### Iter 390 — 2026-07-09 — [Run §29003458535](https://github.com/githubnext/tsb/actions/runs/29003458535)
 ✅ +1 → 727: OLS multiple regression (10k rows×5 predictors, 20 iters). TS: `new OLS().fit(X,y)`. Python: `np.linalg.lstsq`. Actual branch was 726 (iter 389 claimed 729 but files were never pushed). Metric corrected 729→727.
 
-### Iters 386–389 — ⚠️/✅ push issues (branch stayed at 726):
-386-388: lreshape/linregress/polyfit — safeoutputs push failed (large post-rebase squash). 389: claimed +3 (729) via 17KB bundle but not actually on remote.
-
-### Iters 378–385 — ✅ 720→726:
-+3 (merge_ordered_ffill/by, grouper). +1 add_sub_mul_div. +1 assert_equal. stats benchmarks. +1 SparseArray.
-
-### Iters 291–377 — ✅ 503→720:
-IO/reshape/window/stats/string/datetime/sample/pivot/rolling/rank/clip/diff/replace/mask/sort/pct_change/merge_asof/cross_join/join_all/shift/at_iat/convert_dtypes/styler/resample/iterrows/groupby_many/concat_many/str_replace_regex.
+### Iters 291–389 — ✅ 503→726:
+IO/reshape/window/stats/string/datetime/sample/pivot/rolling/rank/clip/diff/replace/mask/sort/pct_change/merge_asof/cross_join/join_all/shift/at_iat/convert_dtypes/styler/resample/iterrows/groupby_many/concat_many/str_replace_regex/merge_ordered_ffill/grouper/SparseArray. (Some push failures in 386-389 — lreshape/linregress/polyfit not pushed.)
 
