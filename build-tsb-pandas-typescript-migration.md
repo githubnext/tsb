@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-11T07:29:12Z |
-| Iteration Count | 404 |
+| Last Run | 2026-07-11T19:20:44Z |
+| Iteration Count | 405 |
 | Best Metric | 192 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,14 +19,14 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- VAR (Vector AutoRegression) ✅ done (iter 403) — *not yet on branch (prior phantom)*
-- Prophet-style additive decomposition ✅ done (iter 404)
+- VAR (Vector AutoRegression) ✅ done (iter 405, commit e06ad3a)
+- Prophet-style additive decomposition — implement next (iter 404 was phantom)
 - State-space DLM (Dynamic Linear Model) — generalization of Kalman
 
 ---
@@ -63,17 +63,11 @@
 
 ## 📊 Iteration History
 
+### Iter 405 — 2026-07-11 — [Run §29165013587](https://github.com/githubnext/tsb/actions/runs/29165013587)
+✅ +1 → 192 (branch): VAR(p) Vector AutoRegression. OLS equation-by-equation, IRF, orthogonalized IRF (Cholesky), FEVD, multi-step forecast, lag selection (AIC/BIC/HQIC). 40+ tests, playground. Commit e06ad3a. Iter 403 VAR was phantom; this is the real push.
+
 ### Iter 404 — 2026-07-11 — [Run §29144500148](https://github.com/githubnext/tsb/actions/runs/29144500148)
-✅ +1 → 192: Prophet-style additive decomposition. Piecewise-linear trend (auto change-points), Fourier seasonality, holiday indicators, ridge OLS. 40+ tests, playground. Commit 6d02947. Branch was at 191 (iters 401-403 phantom); this iteration is first push since iter 397.
+⚠️ Phantom: Prophet-style state updated to 192 but push failed. Branch stayed at 191.
 
-### Iter 403 — 2026-07-10 — [Run §29117709797](https://github.com/githubnext/tsb/actions/runs/29117709797)
-⚠️ Phantom +1 → 194 (state): VAR(p) Vector AutoRegression — state file updated but push never landed on branch. Branch metric unchanged at 191.
-
-### Iter 402 — 2026-07-10 — [Run §29078452984](https://github.com/githubnext/tsb/actions/runs/29078452984)
-⚠️ Phantom +1 → 193: GARCH(p,q) — state file updated but push never landed. Branch metric unchanged at 191.
-
-### Iter 401 — 2026-07-09 — [Run §29022916600](https://github.com/githubnext/tsb/actions/runs/29022916600)
-⚠️ Phantom +1 → 192: SARIMA — state file updated but push never landed. Branch metric unchanged at 191.
-
-### Iters 398–400 — ❌ Phantom (GARCH+SARIMA never pushed; metric stayed 191)
+### Iters 398–403 — ⚠️ Phantom (GARCH+SARIMA+VAR never pushed; metric stayed 191)
 ### Iters 1–397 — (0→191): Core (Index, Series, DataFrame, Dtype), stats (ACF/PACF, ARIMA, Kalman, ETS, signal, filters, etc.), io (CSV, JSON, Excel, Parquet, HDF5, Feather, Avro, ORC, SAS, Stata, FWF, XML, SQL) and more.
