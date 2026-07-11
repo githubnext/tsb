@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-10T13:33:58Z |
-| Iteration Count | 392 |
-| Best Metric | 729 |
+| Last Run | 2026-07-11T01:25:33Z |
+| Iteration Count | 393 |
+| Best Metric | 730 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -33,6 +33,7 @@
 - safeoutputs push: checkout origin/autoloop/perf-comparison directly (no rebase); add new files only → small bundle (~3KB/pair). Post-rebase squash causes large diffs → push failure. State metric can diverge; always use `ls benchmarks/tsb/*.ts | wc -l`.
 - SparseArray: `src/core/sparse.ts`. readExcel/xlsxSheetNames NOT in src/index.ts.
 - OLS: `new OLS().fit(X_2d, y)` from `src/stats/regression.ts`. Python: `np.linalg.lstsq(X_design, y, rcond=None)`.
+- hypothesis_tests: use pure-numpy equivalents (no scipy); benchmark suite covers ttest1samp/ttestInd/ttestRel/fOneway/pearsonr/spearmanr/mannWhitneyU in one pair.
 
 ## 🚧 Foreclosed Avenues
 
@@ -44,8 +45,8 @@
 
 ## 📊 Iteration History
 
-### Iter 392 — 2026-07-10 — [Run §29096370299](https://github.com/githubnext/tsb/actions/runs/29096370299)
-✅ +1 → 729: gaussianKDE evaluate benchmark (1k data pts, 200 grid pts, Silverman bandwidth). TS: `gaussianKDE(data).evaluate(grid)`. Python: pure-numpy Gaussian kernel with Silverman rule.
+### Iter 393 — 2026-07-11 — [Run §29134514272](https://github.com/githubnext/tsb/actions/runs/29134514272)
+✅ +1 → 730: hypothesis_tests benchmark (N=1000, 20 iters) covering ttest1samp, ttestInd, ttestRel, fOneway, pearsonr, spearmanr, mannWhitneyU. Python: pure-numpy equivalents.
 
 ### Iter 391 — 2026-07-10 — [Run §29062236162](https://github.com/githubnext/tsb/actions/runs/29062236162)
 ✅ +1 → 728: bootstrap CI benchmark (1k elements, 500 resamples, percentile method). TS: `bootstrap1(arr, mean, {n:500, method:"percentile"})`. Python: pure-numpy percentile bootstrap.
