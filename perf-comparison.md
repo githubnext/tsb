@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-11T13:23:00Z |
-| Iteration Count | 394 |
-| Best Metric | 731 |
+| Last Run | 2026-07-12T01:25:00Z |
+| Iteration Count | 395 |
+| Best Metric | 732 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -41,9 +41,12 @@
 
 ## 🔭 Future Directions
 
-- `entropy`/`klDivergence` ✅ done, `lreshape`, `linregress`/`polyfit_polyval`, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape`, `linregress`/`polyfit_polyval`, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 395 — 2026-07-12 — [Run §29175171519](https://github.com/githubnext/tsb/actions/runs/29175171519)
+✅ +1 → 732: mutualInformation/normalizedMI benchmark (N=1000 paired obs, 10 categories, 50 iters). TS: `mutualInformation(pairs)` + `normalizedMI(pairs, "arithmetic")`. Python: pure-numpy equivalents.
 
 ### Iter 394 — 2026-07-11 — [Run §29154137340](https://github.com/githubnext/tsb/actions/runs/29154137340)
 ✅ +1 → 731: entropy/klDivergence benchmark (N=100 PMF, 50 iters). TS: `entropy(p)` + `klDivergence(p,q)`. Python: pure-numpy equivalents.
