@@ -691,3 +691,20 @@ export type {
   ExponentialSmoothingFitResult,
   ETSForecastResult,
 } from "./ets.ts";
+export {
+  DLM,
+  buildLocalLevel,
+  buildLocalLinearTrend,
+  buildPolynomial,
+  buildFourier,
+  buildRegression,
+  combineDLMs,
+} from "./dlm.ts";
+export type {
+  DLMSpec,
+  DLMOptions,
+  DLMFilterStep,
+  DLMResult,
+  DLMSmootherResult,
+  DLMForecastResult,
+} from "./dlm.ts";

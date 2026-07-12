@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Dynamic Linear Model (DLM)</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    h3 { margin-bottom: 0.5rem; color: var(--accent); font-size: 1rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+
+    label { display: block; font-size: 0.875rem; color: #8b949e; margin-bottom: 0.25rem; }
+    select, input[type="range"], input[type="number"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+      color: var(--text);
+      padding: 0.35rem 0.6rem;
+      font-size: 0.875rem;
+    }
+    button {
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 0.4rem;
+      padding: 0.5rem 1.25rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    button:hover { opacity: 0.85; }
+
+    canvas { width: 100%; height: 260px; display: block; border-radius: 0.5rem; background: var(--bg); }
+    .canvas-wrap { position: relative; }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      font-size: 0.8rem; margin-top: 0.5rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.3rem; }
+    .legend-dot { width: 12px; height: 3px; border-radius: 2px; }
+
+    pre {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+      padding: 1rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      color: #79c0ff;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .stat-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      text-align: center;
+    }
+    .stat-box .val { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+    .stat-box .lbl { font-size: 0.75rem; color: #8b949e; }
+    .range-row { display: flex; align-items: center; gap: 0.5rem; }
+    .range-row span { min-width: 2.5rem; font-size: 0.8rem; text-align: right; font-family: var(--font-mono); }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="back">← back to index</a>
+
+<h1>Dynamic Linear Model (DLM)</h1>
+<p class="subtitle">
+  The DLM (West &amp; Harrison state-space framework) generalises the Kalman filter to
+  named components — local level, linear trend, Fourier seasonality — that can be
+  freely combined. Fits observation and state noise by MLE.
+</p>
+
+<!-- ── Model builder ────────────────────────────────────────────────── -->
+<div class="card">
+  <h2>1 · Model &amp; data</h2>
+  <div class="grid2">
+    <div>
+      <label>Data type</label>
+      <select id="dataType">
+        <option value="level">Local level (random walk)</option>
+        <option value="trend" selected>Linear trend + noise</option>
+        <option value="seasonal">Seasonal (period 12)</option>
+        <option value="trend+seasonal">Trend + seasonal</option>
+      </select>
+    </div>
+    <div>
+      <label>Model</label>
+      <select id="modelType">
+        <option value="localLevel">Local-level</option>
+        <option value="localLinearTrend" selected>Local-linear-trend</option>
+        <option value="polynomial3">Polynomial order-3</option>
+        <option value="fourier">Fourier seasonal (period 12)</option>
+        <option value="combined">Trend + Fourier (combined)</option>
+      </select>
+    </div>
+    <div>
+      <label>Obs noise σ_v</label>
+      <div class="range-row">
+        <input type="range" id="sigmaObs" min="0.1" max="5" step="0.1" value="1.0" />
+        <span id="sigmaObsVal">1.0</span>
+      </div>
+    </div>
+    <div>
+      <label>State noise σ_w</label>
+      <div class="range-row">
+        <input type="range" id="sigmaState" min="0.01" max="2" step="0.01" value="0.3" />
+        <span id="sigmaStateVal">0.30</span>
+      </div>
+    </div>
+    <div>
+      <label>Series length T</label>
+      <div class="range-row">
+        <input type="range" id="seriesLen" min="20" max="120" step="1" value="60" />
+        <span id="seriesLenVal">60</span>
+      </div>
+    </div>
+    <div>
+      <label>Forecast horizon h</label>
+      <div class="range-row">
+        <input type="range" id="forecastH" min="1" max="30" step="1" value="10" />
+        <span id="forecastHVal">10</span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:1rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+    <button id="btnRun">Run filter &amp; forecast</button>
+    <button id="btnSmooth" style="background:#3fb950;">Run smoother</button>
+    <button id="btnMLE" style="background:#d29922; color:#0d1117;">Fit MLE</button>
+    <button id="btnNewData" style="background:var(--surface);border:1px solid var(--border);color:var(--text);">New data</button>
+  </div>
+</div>
+
+<!-- ── Chart ────────────────────────────────────────────────────────── -->
+<div class="card">
+  <h2>2 · Filter / smoother / forecast</h2>
+  <div class="canvas-wrap"><canvas id="chart"></canvas></div>
+  <div class="legend" id="legend"></div>
+  <div class="stats-grid" id="statsGrid"></div>
+</div>
+
+<!-- ── Code example ─────────────────────────────────────────────────── -->
+<div class="card">
+  <h2>3 · Code</h2>
+  <pre id="codeBox">// loading…</pre>
+</div>
+
+<script type="module">
+// ── Tiny inline DLM (no bundler needed) ─────────────────────────────────────
+// We re-implement the core in vanilla JS so the page is self-contained.
+
+function zeros(n,m){return Array.from({length:n},()=>new Array(m).fill(0));}
+function eye(n){return Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));}
+function tr(A){const m=A.length,n=A[0].length,At=zeros(n,m);for(let i=0;i<m;i++)for(let j=0;j<n;j++)At[j][i]=A[i][j];return At;}
+function mmul(A,B){const m=A.length,k=A[0].length,n=B[0].length,C=zeros(m,n);for(let i=0;i<m;i++){const ai=A[i],ci=C[i];for(let p=0;p<k;p++){const aip=ai[p];if(aip===0)continue;const bp=B[p];for(let j=0;j<n;j++)ci[j]+=aip*bp[j];}}return C;}
+function mvmul(A,x){return A.map(row=>{let s=0;row.forEach((v,j)=>s+=v*x[j]);return s;});}
+function madd(A,B){return A.map((row,i)=>row.map((v,j)=>v+B[i][j]));}
+function msub(A,B){return A.map((row,i)=>row.map((v,j)=>v-B[i][j]));}
+function mscale(A,s){return A.map(row=>row.map(v=>v*s));}
+function vadd(a,b){return a.map((v,i)=>v+b[i]);}
+function vsub(a,b){return a.map((v,i)=>v-b[i]);}
+function vdot(a,b){let s=0;a.forEach((v,i)=>s+=v*b[i]);return s;}
+function matInv(A){const n=A.length,aug=A.map((row,i)=>[...row,...Array.from({length:n},(_,j)=>i===j?1:0)]);
+  for(let c=0;c<n;c++){let pr=c,pv=Math.abs(aug[c][c]);for(let r=c+1;r<n;r++){const v=Math.abs(aug[r][c]);if(v>pv){pv=v;pr=r;}}
+  if(pv<1e-14)return null;[aug[c],aug[pr]]=[aug[pr],aug[c]];const sc=1/aug[c][c];for(let j=0;j<2*n;j++)aug[c][j]*=sc;
+  for(let r=0;r<n;r++){if(r===c)continue;const f=aug[r][c];if(f===0)continue;for(let j=0;j<2*n;j++)aug[r][j]-=f*aug[c][j];}}
+  return aug.map(row=>row.slice(n));}
+function logDet(A){const n=A.length,L=zeros(n,n);for(let i=0;i<n;i++){for(let j=0;j<=i;j++){let s=A[i][j];for(let k=0;k<j;k++)s-=L[i][k]*L[j][k];if(i===j){if(s<0)return -Infinity;L[i][j]=Math.sqrt(s);}else L[i][j]=s/(L[j][j]||1);}}let ld=0;for(let i=0;i<n;i++)ld+=2*Math.log(Math.abs(L[i][i]));return ld;}
+
+function dlmFilter(spec, y, m0, C0){
+  const {G,F,W,V}=spec;const p=G.length,q=F.length;
+  m0=m0||new Array(p).fill(0);C0=C0||mscale(eye(p),1e6);
+  let m=m0.slice(),C=C0;let logLik=0;
+  const steps=[];
+  for(const yt of y){
+    const a=mvmul(G,m);
+    const R=madd(mmul(mmul(G,C),tr(G)),W);
+    const f=mvmul(F,a);
+    const Q=madd(mmul(mmul(F,R),tr(F)),V);
+    let mNew=a,CNew=R,inn=null,K=zeros(p,q);
+    const obs=yt===null?null:(typeof yt==='number'?[yt]:yt);
+    if(obs!==null){
+      const Qinv=matInv(Q);
+      if(Qinv){
+        K=mmul(mmul(R,tr(F)),Qinv);
+        inn=vsub(obs,f);mNew=vadd(a,mvmul(K,inn));
+        const IKF=msub(eye(p),mmul(K,F));
+        CNew=madd(mmul(mmul(IKF,R),tr(IKF)),mmul(mmul(K,V),tr(K)));
+        const eQe=vdot(inn,mvmul(Qinv,inn));
+        logLik+=-0.5*(q*Math.log(2*Math.PI)+logDet(Q)+eQe);
+      }
+    }
+    steps.push({a,R,m:mNew,C:CNew,f,Q,K,inn});
+    m=mNew.slice();C=CNew;
+  }
+  return{steps,logLik};
+}
+function dlmSmooth(spec,steps){
+  const{G}=spec;const T=steps.length;
+  const sm=steps.map(s=>s.m.slice());const sC=steps.map(s=>s.C.map(r=>r.slice()));
+  for(let t=T-2;t>=0;t--){
+    const R1=steps[t+1].R,Ri=matInv(R1);if(!Ri)continue;
+    const Jt=mmul(mmul(steps[t].C,tr(G)),Ri);
+    const diff=vsub(sm[t+1],steps[t+1].a);
+    sm[t]=vadd(steps[t].m,mvmul(Jt,diff));
+    const dC=msub(sC[t+1],steps[t+1].R);
+    sC[t]=madd(steps[t].C,mmul(mmul(Jt,dC),tr(Jt)));
+  }
+  return{means:sm,covs:sC};
+}
+function dlmForecast(spec,lastStep,h){
+  const{G,F,W,V}=spec;let m=lastStep.m.slice(),C=lastStep.C;
+  const fc=[];
+  for(let i=0;i<h;i++){
+    const a=mvmul(G,m);const R=madd(mmul(mmul(G,C),tr(G)),W);
+    const f=mvmul(F,a);const Q=madd(mmul(mmul(F,R),tr(F)),V);
+    const sd=Math.sqrt(Math.max(0,Q[0][0]));
+    fc.push({mean:f[0],sd});m=a;C=R;
+  }
+  return fc;
+}
+function buildSpec(modelType,sigmaObs,sigmaState){
+  const sv=sigmaObs,sw=sigmaState;
+  if(modelType==='localLevel')return{G:[[1]],F:[[1]],W:[[sw*sw]],V:[[sv*sv]]};
+  if(modelType==='localLinearTrend')return{G:[[1,1],[0,1]],F:[[1,0]],W:[[sw*sw,0],[0,(sw*0.1)**2]],V:[[sv*sv]]};
+  if(modelType==='polynomial3'){const G=[[1,1,0],[0,1,1],[0,0,1]];return{G,F:[[1,0,0]],W:mscale(eye(3),sw*sw),V:[[sv*sv]]};}
+  if(modelType==='fourier'){
+    const p=12,h=2,dim=2*h,G=zeros(dim,dim),F=[new Array(dim).fill(0)];
+    for(let j=1;j<=h;j++){const om=2*Math.PI*j/p,c=Math.cos(om),s=Math.sin(om),r=2*(j-1);
+    G[r][r]=c;G[r][r+1]=s;G[r+1][r]=-s;G[r+1][r+1]=c;F[0][r]=1;}
+    return{G,F,W:mscale(eye(dim),(sw*0.05)**2),V:[[sv*sv]]};
+  }
+  if(modelType==='combined'){
+    const lt={G:[[1,1],[0,1]],F:[[1,0]],W:[[sw*sw,0],[0,(sw*0.1)**2]],V:[[sv*sv]]};
+    const p=12,h2=2,dim=2*h2,Gf=zeros(dim,dim),Ff=[new Array(dim).fill(0)];
+    for(let j=1;j<=h2;j++){const om=2*Math.PI*j/p,c=Math.cos(om),s=Math.sin(om),r=2*(j-1);
+    Gf[r][r]=c;Gf[r][r+1]=s;Gf[r+1][r]=-s;Gf[r+1][r+1]=c;Ff[0][r]=1;}
+    const pT=lt.G.length,pF=Gf.length,pC=pT+pF;
+    const G=zeros(pC,pC),W=zeros(pC,pC),Fc=[new Array(pC).fill(0)];
+    for(let i=0;i<pT;i++)for(let j=0;j<pT;j++){G[i][j]=lt.G[i][j];W[i][j]=lt.W[i][j];}
+    for(let i=0;i<pF;i++)for(let j=0;j<pF;j++){G[pT+i][pT+j]=Gf[i][j];W[pT+i][pT+j]=(sw*0.05)**2*(i===j?1:0);}
+    for(let j=0;j<pT;j++)Fc[0][j]=lt.F[0][j];
+    for(let j=0;j<pF;j++)Fc[0][pT+j]=Ff[0][j];
+    return{G,F:Fc,W,V:[[sv*sv]]};
+  }
+  return{G:[[1]],F:[[1]],W:[[sw*sw]],V:[[sv*sv]]};
+}
+
+// ── Data generators ──────────────────────────────────────────────────────────
+function genData(type,T){
+  const y=[];let mu=0,slope=0.2;
+  for(let t=0;t<T;t++){
+    const noise=()=>(Math.random()-0.5)*2;
+    let v=0;
+    if(type==='level'){mu+=noise()*0.3;v=mu+noise();}
+    else if(type==='trend'){slope+=noise()*0.01;mu+=slope+noise()*0.1;v=mu+noise();}
+    else if(type==='seasonal'){v=2*Math.sin(2*Math.PI*t/12)+noise();}
+    else if(type==='trend+seasonal'){slope+=noise()*0.005;mu+=slope+noise()*0.05;v=mu+2*Math.sin(2*Math.PI*t/12)+noise()*0.5;}
+    y.push(v);
+  }
+  return y;
+}
+
+// ── Canvas chart ─────────────────────────────────────────────────────────────
+function drawChart(canvas, series, T, h, logLik){
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=canvas.clientWidth*dpr;canvas.height=canvas.clientHeight*dpr;
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  const W=canvas.clientWidth,H=canvas.clientHeight;
+  const pad={l:40,r:20,t:15,b:30};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  // Compute y range
+  let yMin=Infinity,yMax=-Infinity;
+  for(const s of series)for(const v of s.data)if(v!==null&&isFinite(v)){yMin=Math.min(yMin,v);yMax=Math.max(yMax,v);}
+  const yRange=yMax-yMin||1;yMin-=yRange*0.1;yMax+=yRange*0.1;
+  const xTotal=T+h;
+  const xp=i=>(i/xTotal)*cW+pad.l;
+  const yp=v=>cH-(v-yMin)/(yMax-yMin)*cH+pad.t;
+  // Background
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  // Grid
+  ctx.strokeStyle='#21262d';ctx.lineWidth=1;
+  const steps=5;for(let i=0;i<=steps;i++){const y=pad.t+cH*i/steps;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();}
+  // Forecast separator
+  ctx.strokeStyle='#30363d';ctx.setLineDash([4,4]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(xp(T),pad.t);ctx.lineTo(xp(T),pad.t+cH);ctx.stroke();ctx.setLineDash([]);
+  // Series
+  for(const s of series){
+    if(s.band){
+      ctx.fillStyle=s.band;ctx.beginPath();
+      for(let i=0;i<s.upper.length;i++){ctx.lineTo(xp(T+i),yp(s.upper[i]));}
+      for(let i=s.lower.length-1;i>=0;i--){ctx.lineTo(xp(T+i),yp(s.lower[i]));}
+      ctx.closePath();ctx.fill();
+    }
+    if(s.data){
+      ctx.strokeStyle=s.color;ctx.lineWidth=s.lw||1.5;ctx.beginPath();
+      let started=false;
+      s.data.forEach((v,i)=>{if(v===null||!isFinite(v)){started=false;return;}
+      if(!started){ctx.moveTo(xp(s.offset?s.offset+i:i),yp(v));started=true;}
+      else ctx.lineTo(xp(s.offset?s.offset+i:i),yp(v));});
+      ctx.stroke();
+    }
+  }
+  // Axes
+  ctx.strokeStyle='#30363d';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+cH);ctx.lineTo(pad.l+cW,pad.t+cH);ctx.stroke();
+  // Y labels
+  ctx.fillStyle='#8b949e';ctx.font='11px system-ui';ctx.textAlign='right';
+  for(let i=0;i<=steps;i++){const v=yMax-(yMax-yMin)*i/steps;ctx.fillText(v.toFixed(1),pad.l-4,pad.t+cH*i/steps+4);}
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let currentY=[];let currentResult=null;let currentSpec=null;
+
+function getParams(){
+  return{
+    dataType:document.getElementById('dataType').value,
+    modelType:document.getElementById('modelType').value,
+    sigmaObs:parseFloat(document.getElementById('sigmaObs').value),
+    sigmaState:parseFloat(document.getElementById('sigmaState').value),
+    T:parseInt(document.getElementById('seriesLen').value),
+    h:parseInt(document.getElementById('forecastH').value),
+  };
+}
+
+function updateSliderLabels(){
+  document.getElementById('sigmaObsVal').textContent=document.getElementById('sigmaObs').value;
+  document.getElementById('sigmaStateVal').textContent=parseFloat(document.getElementById('sigmaState').value).toFixed(2);
+  document.getElementById('seriesLenVal').textContent=document.getElementById('seriesLen').value;
+  document.getElementById('forecastHVal').textContent=document.getElementById('forecastH').value;
+}
+
+function render(smooth=false){
+  const p=getParams();
+  if(currentY.length!==p.T)currentY=genData(p.dataType,p.T);
+  const spec=buildSpec(p.modelType,p.sigmaObs,p.sigmaState);
+  currentSpec=spec;
+  const res=dlmFilter(spec,currentY);
+  currentResult=res;
+  const filtered=res.steps.map(s=>s.f[0]);
+  const fc=dlmForecast(spec,res.steps[res.steps.length-1],p.h);
+  const fcMean=fc.map(f=>f.mean);
+  const z=1.96;
+  const fcUp=fc.map((f,i)=>f.mean+z*f.sd);
+  const fcLo=fc.map((f,i)=>f.mean-z*f.sd);
+  const series=[
+    {data:currentY,color:'#58a6ff',lw:1.5},
+    {data:filtered,color:'#3fb950',lw:2},
+  ];
+  if(smooth){
+    const sm=dlmSmooth(spec,res.steps);
+    const smMeans=sm.means.map(m=>mvmul(spec.F,m)[0]);
+    series.push({data:smMeans,color:'#ff7b72',lw:2});
+  }
+  series.push({data:fcMean,color:'#d29922',lw:2,offset:p.T});
+  series.push({upper:fcUp,lower:fcLo,band:'rgba(210,153,34,0.15)'});
+
+  const canvas=document.getElementById('chart');
+  drawChart(canvas,series,p.T,p.h,res.logLik);
+
+  // Legend
+  const items=[
+    {color:'#58a6ff',label:'Observations'},
+    {color:'#3fb950',label:'Filtered (one-step-ahead)'},
+    ...(smooth?[{color:'#ff7b72',label:'Smoothed'}]:[]),
+    {color:'#d29922',label:`Forecast (h=${p.h}, 95% CI)`},
+  ];
+  const leg=document.getElementById('legend');
+  leg.innerHTML=items.map(it=>`<div class="legend-item"><div class="legend-dot" style="background:${it.color}"></div>${it.label}</div>`).join('');
+
+  // Stats
+  const inns=res.steps.map(s=>s.inn?s.inn[0]:null).filter(v=>v!==null);
+  const rmse=Math.sqrt(inns.reduce((a,v)=>a+v*v,0)/inns.length);
+  const mae=inns.reduce((a,v)=>a+Math.abs(v),0)/inns.length;
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-box"><div class="val">${res.logLik.toFixed(1)}</div><div class="lbl">Log-likelihood</div></div>
+    <div class="stat-box"><div class="val">${rmse.toFixed(3)}</div><div class="lbl">RMSE (filter)</div></div>
+    <div class="stat-box"><div class="val">${mae.toFixed(3)}</div><div class="lbl">MAE (filter)</div></div>
+    <div class="stat-box"><div class="val">${spec.G.length}</div><div class="lbl">State dim</div></div>
+  `;
+
+  // Code
+  document.getElementById('codeBox').textContent=codeExample(p);
+}
+
+function codeExample(p){
+  const builders={
+    localLevel:`DLM.localLevel({ sigmaObs: ${p.sigmaObs}, sigmaLevel: ${p.sigmaState} })`,
+    localLinearTrend:`DLM.localLinearTrend({ sigmaObs: ${p.sigmaObs}, sigmaLevel: ${p.sigmaState}, sigmaSlope: ${(p.sigmaState*0.1).toFixed(3)} })`,
+    polynomial3:`DLM.polynomial(3, { sigmaObs: ${p.sigmaObs}, sigmaState: ${p.sigmaState} })`,
+    fourier:`DLM.fourier(12, 2, { sigmaObs: ${p.sigmaObs}, sigmaState: ${(p.sigmaState*0.05).toFixed(4)} })`,
+    combined:`// combine trend + Fourier\nimport { buildLocalLinearTrend, buildFourier, combineDLMs } from "tsb";\nconst spec = combineDLMs(\n  buildLocalLinearTrend({ sigmaObs: ${p.sigmaObs}, sigmaLevel: ${p.sigmaState} }),\n  buildFourier(12, 2, { sigmaObs: ${p.sigmaObs}, sigmaState: 0.01 }),\n);\nconst dlm = new DLM(spec);`,
+  };
+  const builder=builders[p.modelType]||builders.localLevel;
+  return `import { DLM, buildLocalLinearTrend, buildFourier, combineDLMs } from "tsb";
+
+const y = [/* ${p.T} observations */];
+
+// Build model
+const dlm = ${builder};
+
+// Filter (Kalman forward pass)
+const res = dlm.filter(y);
+console.log("Log-likelihood:", res.logLikelihood);
+console.log("Filtered means:", res.filteredMeans);
+
+// Smoother (RTS backward pass)
+const smoothed = dlm.smooth(y);
+console.log("Smoothed means:", smoothed.smoothedMeans);
+
+// Forecast ${p.h} steps ahead
+const fc = dlm.forecast(res, ${p.h});
+console.log("Forecast:", fc.mean.map(m => m[0].toFixed(2)));
+console.log("95% lower:", fc.lower.map(v => v.toFixed(2)));
+console.log("95% upper:", fc.upper.map(v => v.toFixed(2)));
+
+// Fit noise parameters by MLE
+const fitted = dlm.fitMLE(y);
+const fitRes = fitted.filter(y);
+console.log("MLE log-lik:", fitRes.logLikelihood);`;
+}
+
+// ── Event wiring ─────────────────────────────────────────────────────────────
+['sigmaObs','sigmaState','seriesLen','forecastH'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',updateSliderLabels);
+});
+document.getElementById('btnRun').addEventListener('click',()=>render(false));
+document.getElementById('btnSmooth').addEventListener('click',()=>render(true));
+document.getElementById('btnMLE').addEventListener('click',()=>{
+  // Nelder-Mead MLE inline
+  const p=getParams();
+  const spec=buildSpec(p.modelType,p.sigmaObs,p.sigmaState);
+  const y=currentY.length===p.T?currentY:genData(p.dataType,p.T);
+  const q=spec.V.length,pDim=spec.G.length;
+  const x0=[...Array.from({length:q},(_,i)=>Math.log(Math.max(1e-8,spec.V[i][i]))),
+             ...Array.from({length:pDim},(_,i)=>Math.log(Math.max(1e-8,spec.W[i][i])))];
+  function obj(x){
+    const V2=spec.V.map(r=>r.slice()),W2=spec.W.map(r=>r.slice());
+    for(let i=0;i<q;i++)V2[i][i]=Math.exp(x[i]);
+    for(let i=0;i<pDim;i++)W2[i][i]=Math.exp(x[q+i]);
+    return -dlmFilter({...spec,V:V2,W:W2},y).logLik;
+  }
+  // Nelder-Mead
+  const n=x0.length;let simplex=[x0.slice()];
+  for(let i=0;i<n;i++){const xi=x0.slice();xi[i]+=(xi[i]!==0?0.05*Math.abs(xi[i]):0.00025);simplex.push(xi);}
+  let fvals=simplex.map(obj);
+  for(let iter=0;iter<300;iter++){
+    const ord=Array.from({length:n+1},(_,i)=>i).sort((a,b)=>fvals[a]-fvals[b]);
+    const sx=ord.map(i=>simplex[i]),sf=ord.map(i=>fvals[i]);
+    if(sf[n]-sf[0]<1e-4){break;}
+    const xbar=new Array(n).fill(0);for(let i=0;i<n;i++)for(let j=0;j<n;j++)xbar[j]+=sx[i][j]/n;
+    const xr=xbar.map((v,j)=>v+(v-sx[n][j]));const fr=obj(xr);
+    if(fr<sf[0]){const xe=xbar.map((v,j)=>v+2*(xr[j]-v));const fe=obj(xe);simplex[ord[n]]=fe<fr?xe:xr;fvals[ord[n]]=fe<fr?fe:fr;}
+    else if(fr<sf[n-1]){simplex[ord[n]]=xr;fvals[ord[n]]=fr;}
+    else{const xc=xbar.map((v,j)=>v+0.5*(sx[n][j]-v));const fc=obj(xc);if(fc<sf[n]){simplex[ord[n]]=xc;fvals[ord[n]]=fc;}
+    else{for(let i=1;i<=n;i++){for(let j=0;j<n;j++)simplex[ord[i]][j]=sx[0][j]+0.5*(sx[i][j]-sx[0][j]);fvals[ord[i]]=obj(simplex[ord[i]]);}}  }
+  }
+  let best=0;for(let i=1;i<simplex.length;i++)if(fvals[i]<fvals[best])best=i;
+  const xOpt=simplex[best];
+  const sv=Math.sqrt(Math.exp(xOpt[0])).toFixed(3);
+  const sw=Math.sqrt(Math.exp(xOpt[q])).toFixed(3);
+  document.getElementById('sigmaObs').value=sv;
+  document.getElementById('sigmaState').value=sw;
+  updateSliderLabels();render(false);
+  alert(`MLE fitted: σ_v ≈ ${sv}, σ_w ≈ ${sw}`);
+});
+document.getElementById('btnNewData').addEventListener('click',()=>{
+  const p=getParams();currentY=genData(p.dataType,p.T);render(false);
+});
+document.getElementById('dataType').addEventListener('change',()=>{const p=getParams();currentY=genData(p.dataType,p.T);render(false);});
+document.getElementById('modelType').addEventListener('change',()=>render(false));
+
+// Initial render
+updateSliderLabels();
+currentY=genData('trend',60);
+render(false);
+</script>
+
+</body>
+</html>

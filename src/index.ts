@@ -1145,3 +1145,21 @@ export type {
   ETSForecastResult,
 } from "./stats/ets.ts";
 
+
+export {
+  DLM,
+  buildLocalLevel,
+  buildLocalLinearTrend,
+  buildPolynomial,
+  buildFourier,
+  buildRegression,
+  combineDLMs,
+} from "./stats/dlm.ts";
+export type {
+  DLMSpec,
+  DLMOptions,
+  DLMFilterStep,
+  DLMResult,
+  DLMSmootherResult,
+  DLMForecastResult,
+} from "./stats/dlm.ts";
