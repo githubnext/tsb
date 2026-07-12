@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-11T19:20:44Z |
-| Iteration Count | 405 |
+| Last Run | 2026-07-12T07:40:55Z |
+| Iteration Count | 406 |
 | Best Metric | 192 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,29 +19,28 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted, accepted |
+| Recent Statuses | pending-ci, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
 - VAR (Vector AutoRegression) ✅ done (iter 405, commit e06ad3a)
-- Prophet-style additive decomposition — implement next (iter 404 was phantom)
-- State-space DLM (Dynamic Linear Model) — generalization of Kalman
+- Prophet-style additive decomposition ✅ done (iter 406, commit 7927d5a)
+- State-space DLM (Dynamic Linear Model) — implement next
 
 ---
 
 ## 📚 Lessons Learned
 
-- **VAR (403)**: OLS equation-by-equation. Build regressor matrix X=[1, y_{t-1},...,y_{t-p}]. Coef matrix: B[offset+lag*K+j][i] = A[i][j]. MSE via MA(∞) Ψ recursion + running sum. IRF: Ψ₀=I, Ψₕ=ΣAⱼΨ_{h-j}. orthIrf=ΨₕP where P=chol(Σ). FEVD: (ΣΘₛ[i,j]²)/(Σ_j ΣΘₛ[i,j]²). Lag selection: AIC/BIC/HQIC over lag 1..maxlags.
-- **Prophet (404)**: Design matrix = [trend_piecewise | fourier_seasonal | holiday_indicators]. Ridge OLS. `exactOptionalPropertyTypes` requires conditional spread for optional fields: `...(v !== undefined ? {k:v} : {})`. Branch metric was 191 (not 194) — iters 401-403 never pushed to branch.
-- **GARCH (402)**: Log-parameterise ω/α/β for unconstrained Nelder-Mead MLE. Soft stationarity penalty (persist≥0.9999→1e12). `conditionalVariances()` helper returns null on σ²≤0. Multi-step forecast: E[ε²_{t+h}]=σ²_{t+h} for h>1. `x.values` (not `as` cast) for Series input.
-- **Phantom commits**: always call push_to_pull_request_branch — iters 398/399/400 were phantom (GARCH+SARIMA never pushed). GARCH (911b44b) never existed on branch.
-- **SARIMA (401)**: CSS via Nelder-Mead on differenced series. `polyMul` for combined AR/MA poly. Store last seasonal/regular values for forecast undifferencing. Fitted values: `y[t] - eps[t - offset]` where `offset = d + D*s`. Series constructor: `new Series<T>({ data: arr })`. `fc.float` bounds need `Math.fround`.
-- **Stats math**: Hannan-Rissanen, Levinson-Durbin, FFT Cooley-Tukey, Butterworth bilinear SOS, ACF/PACF Bartlett CI, Kalman Joseph form, CSS optimisation.
-- **TS**: `noUncheckedIndexedAccess`→`?? 0`. `slice()` on `readonly T[]` → mutable. 2D writes: guard row before assign.
+- **VAR (403)**: OLS per equation, X=[1,y_{t-1},...,y_{t-p}]. IRF: Ψ₀=I, Ψₕ=ΣAⱼΨ_{h-j}. orthIRF=ΨₕP (Cholesky). FEVD, lag select AIC/BIC/HQIC.
+- **Prophet (406)**: Design=[piecewise_trend|fourier_seasonal|holiday_indicators]. Ridge OLS (Cholesky+Gaussian fallback). `exactOptionalPropertyTypes`: use `...(v!==undefined?{k:v}:{})`.
+- **GARCH (402)**: Log-parameterise ω/α/β for Nelder-Mead MLE. Soft stationarity penalty. Multi-step: E[ε²_{t+h}]=σ²_{t+h}.
+- **Phantom commits**: always push via `push_to_pull_request_branch`.
+- **SARIMA (401)**: CSS via Nelder-Mead. `polyMul`. Store last values for undifferencing. `fc.float` needs `Math.fround`.
+- **TS**: `noUncheckedIndexedAccess`→`?? 0`. `slice()` on `readonly T[]`→mutable. Guard 2D row before assign.
 - **Metric**: `find src -name '*.ts' -not -name 'index.ts' | xargs grep -l 'export' | wc -l`. +1 per new file.
-- **Avro/IO**: Zigzag varint, AvroDatum* interfaces for recursive types (interfaces self-ref, aliases can't).
+- **Avro/IO**: Zigzag varint, AvroDatum* interfaces for recursive types.
 
 ---
 
@@ -62,6 +61,9 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 406 — 2026-07-12 — [Run §29184553494](https://github.com/githubnext/tsb/actions/runs/29184553494)
+⏳ pending-ci: Prophet-style additive decomposition. Design matrix = [piecewise trend | Fourier yearly/weekly | holiday indicators]. Ridge OLS (Cholesky + Gaussian fallback). ProphetModel class + prophetFit() fn. predict() for future timestamps. 30+ tests + fast-check. Playground page. Commit 7927d5a. Metric 191→192 locally; CI pending.
 
 ### Iter 405 — 2026-07-11 — [Run §29165013587](https://github.com/githubnext/tsb/actions/runs/29165013587)
 ✅ +1 → 192 (branch): VAR(p) Vector AutoRegression. OLS equation-by-equation, IRF, orthogonalized IRF (Cholesky), FEVD, multi-step forecast, lag selection (AIC/BIC/HQIC). 40+ tests, playground. Commit e06ad3a. Iter 403 VAR was phantom; this is the real push.
