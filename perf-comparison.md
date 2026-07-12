@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-12T01:25:00Z |
-| Iteration Count | 395 |
-| Best Metric | 732 |
+| Last Run | 2026-07-12T13:23:00Z |
+| Iteration Count | 396 |
+| Best Metric | 734 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -19,6 +19,7 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| PR | #423 |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -41,9 +42,12 @@
 
 ## 🔭 Future Directions
 
-- `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape`, `linregress`/`polyfit_polyval`, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape` ✅ done, `linregress`/`polyfit_polyval` ✅ done, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 396 — 2026-07-12 — [Run §29194216373](https://github.com/githubnext/tsb/actions/runs/29194216373)
+✅ +2 → 734: lreshape benchmark (10k rows, 4 value cols, 50 iters) + linregress/polyfit benchmark (10k pts, 20 iters). Python: pd.lreshape + np.polyfit/pure-numpy linregress.
 
 ### Iter 395 — 2026-07-12 — [Run §29175171519](https://github.com/githubnext/tsb/actions/runs/29175171519)
 ✅ +1 → 732: mutualInformation/normalizedMI benchmark (N=1000 paired obs, 10 categories, 50 iters). TS: `mutualInformation(pairs)` + `normalizedMI(pairs, "arithmetic")`. Python: pure-numpy equivalents.
