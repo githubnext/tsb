@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-12T13:23:00Z |
-| Iteration Count | 396 |
-| Best Metric | 734 |
+| Last Run | 2026-07-13T01:27:00Z |
+| Iteration Count | 397 |
+| Best Metric | 735 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -45,6 +45,9 @@
 - `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape` ✅ done, `linregress`/`polyfit_polyval` ✅ done, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 397 — 2026-07-13 — [Run §29217286269](https://github.com/githubnext/tsb/actions/runs/29217286269)
+✅ +1 → 735: contingency benchmark (4×4 and 2×2 tables, 50 iters): expectedFreq, relativeRisk, oddsRatio, association(cramer). Python: pure-numpy equivalents.
 
 ### Iter 396 — 2026-07-12 — [Run §29194216373](https://github.com/githubnext/tsb/actions/runs/29194216373)
 ✅ +2 → 734: lreshape benchmark (10k rows, 4 value cols, 50 iters) + linregress/polyfit benchmark (10k pts, 20 iters). Python: pd.lreshape + np.polyfit/pure-numpy linregress.
