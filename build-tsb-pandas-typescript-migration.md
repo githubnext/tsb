@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-12T19:20:33Z |
-| Iteration Count | 407 |
-| Best Metric | 192 |
+| Last Run | 2026-07-13T07:59:06Z |
+| Iteration Count | 408 |
+| Best Metric | 193 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted, pending-ci |
+| Recent Statuses | accepted, pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, pending-ci, accepted |
 
 ---
 
@@ -28,12 +28,14 @@
 - VAR (Vector AutoRegression) ✅ done (iter 405, commit e06ad3a)
 - Prophet-style additive decomposition ✅ done (iter 406, commit 7927d5a)
 - State-space DLM (Dynamic Linear Model) ✅ done (iter 407, commit e6c6e74)
-- Next: SARIMA(p,d,q)(P,D,Q)_s or GARCH(p,q) volatility models (both were phantom in iters 398-403)
+- GARCH(p,q) volatility model ✅ done (iter 408, commit 4fe4bba)
+- Next: SARIMA(p,d,q)(P,D,Q)_s seasonal ARIMA or Copulas (Gaussian, t, Clayton)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **GARCH (408)**: softplus transforms for positivity + stationarity. Use `!` assertions (not `?? 0`) for noUncheckedIndexedAccess. Nelder-Mead same pattern as DLM. Multi-step forecast: analytically recurse E[r²_{T+h}]=E[σ²_{T+h}] for zero-mean.
 - **DLM (407)**: Joseph-form covariance update. Nelder-Mead MLE on log(V/W diag). RTS: J_t=C_t G' R_{t+1}^{-1}. Logdet via Cholesky (LU fallback). combineDLMs = block-diagonal G/W + horizontal concat F.
 - **VAR+Prophet+GARCH etc**: Phantom commits (398-406). Branch was stuck at iter 397 (metric=191). DLM is first real commit after ETS.
 - **Phantom commits**: always push via `push_to_pull_request_branch`; verify.
@@ -54,7 +56,7 @@
 ## 🔭 Future Directions
 
 - GARCH/volatility models — phantom in iters 398-402, needs real implementation
-- SARIMA(p,d,q)(P,D,Q)_s seasonal ARIMA — phantom in iter 401, needs real push
+- SARIMA(p,d,q)(P,D,Q)_s seasonal ARIMA — needs real push (phantom in 401)
 - VAR — phantom, needs real push (iter 405 was VAR but also may be phantom based on branch state)
 - Copulas (Gaussian, t, Clayton, Gumbel) — multivariate dependence modeling
 - HMM (Hidden Markov Model) — Baum-Welch EM, Viterbi decoding
@@ -63,14 +65,8 @@
 
 ## 📊 Iteration History
 
-### Iter 407 — 2026-07-12 — [Run §29205522612](https://github.com/githubnext/tsb/actions/runs/29205522612)
-⏳ pending-ci: DLM (Dynamic Linear Model) — West & Harrison state-space framework. DLM class: filter (Kalman), smooth (RTS), forecast (h-step), fitMLE (Nelder-Mead), filterDiscount. Factories: localLevel, localLinearTrend, polynomial, fourier, combineDLMs. 40+ tests + fast-check. Playground page. Commit e6c6e74. Metric 191→192.
+### Iter 408 — 2026-07-13 — [Run §29233680010](https://github.com/githubnext/tsb/actions/runs/29233680010)
+✅ Accepted: GARCH(p,q) conditional volatility model. QML (Gaussian log-likelihood) via Nelder-Mead, softplus parameter transforms (ω>0, α≥0, β≥0, persistence<1). Multi-step analytical forecast (converges to unconditional variance). LCG-seeded simulate(). fitGarch() convenience fn. 40+ tests + fast-check properties. playground/garch.html. Commit 4fe4bba. Metric 192→193.
 
-### Iter 406 — 2026-07-12 — [Run §29184553494](https://github.com/githubnext/tsb/actions/runs/29184553494)
-⚠️ Phantom: Prophet-style additive decomposition. CI pending; push never confirmed. Branch stayed at 191.
-
-### Iter 405 — 2026-07-11 — [Run §29165013587](https://github.com/githubnext/tsb/actions/runs/29165013587)
-⚠️ Phantom: VAR(p) reported as accepted (commit e06ad3a) but branch log shows iter 397 (ETS) as latest real commit.
-
-### Iters 398–404 — ⚠️ Phantom (GARCH+SARIMA+VAR+Prophet never pushed; metric stayed 191)
+### Iters 398–407 — mix of ⚠️ Phantom (398-406) and ✅ DLM real commit (407). Metric 191→192.
 ### Iters 1–397 — (0→191): Core (Index, Series, DataFrame, Dtype), stats (ACF/PACF, ARIMA, Kalman, ETS, signal, filters, etc.), io (CSV, JSON, Excel, Parquet, HDF5, Feather, Avro, ORC, SAS, Stata, FWF, XML, SQL) and more.
