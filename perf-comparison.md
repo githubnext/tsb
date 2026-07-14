@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-13T13:40:00Z |
-| Iteration Count | 398 |
-| Best Metric | 736 |
+| Last Run | 2026-07-14T01:24:55Z |
+| Iteration Count | 399 |
+| Best Metric | 737 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -42,9 +42,12 @@
 
 ## 🔭 Future Directions
 
-- `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape` ✅ done, `linregress`/`polyfit_polyval` ✅ done, `contingency` ✅ done, `multivariate` ✅ done, `readSas`, `USFederalHolidayCalendar`, IntegerArray/FloatingArray, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape` ✅ done, `linregress`/`polyfit_polyval` ✅ done, `contingency` ✅ done, `multivariate` ✅ done, `IntegerArray/FloatingArray` ✅ done, `readSas`, `USFederalHolidayCalendar`, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 399 — 2026-07-14 — [Run §29298380978](https://github.com/githubnext/tsb/actions/runs/29298380978)
+✅ +1 → 737: IntegerArray benchmark (N=100k, ~10% nulls, 20 iters): from/sum/mean/min/max/add/fillna vs pandas IntegerArray (Int32 dtype).
 
 ### Iter 398 — 2026-07-13 — [Run §29254325811](https://github.com/githubnext/tsb/actions/runs/29254325811)
 ✅ +1 → 736: multivariate benchmark (N=500×5, 20 iters): mahalanobis distance, covMatrix, PCA (3 components via SVD). Python: pure-numpy equivalents.
