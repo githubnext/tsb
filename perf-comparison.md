@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-14T01:24:55Z |
-| Iteration Count | 399 |
-| Best Metric | 737 |
+| Last Run | 2026-07-14T13:24:48Z |
+| Iteration Count | 400 |
+| Best Metric | 738 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -42,9 +42,12 @@
 
 ## 🔭 Future Directions
 
-- `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape` ✅ done, `linregress`/`polyfit_polyval` ✅ done, `contingency` ✅ done, `multivariate` ✅ done, `IntegerArray/FloatingArray` ✅ done, `readSas`, `USFederalHolidayCalendar`, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape` ✅ done, `linregress`/`polyfit_polyval` ✅ done, `contingency` ✅ done, `multivariate` ✅ done, `IntegerArray` ✅ done, `FloatingArray` ✅ done, `readSas`, `USFederalHolidayCalendar`, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 400 — 2026-07-14 — [Run §29336152876](https://github.com/githubnext/tsb/actions/runs/29336152876)
+✅ +1 → 738: FloatingArray benchmark (N=100k, ~10% nulls, 20 iters): from/sum/mean/min/max/add/fillna vs pandas Float64 nullable array.
 
 ### Iter 399 — 2026-07-14 — [Run §29298380978](https://github.com/githubnext/tsb/actions/runs/29298380978)
 ✅ +1 → 737: IntegerArray benchmark (N=100k, ~10% nulls, 20 iters): from/sum/mean/min/max/add/fillna vs pandas IntegerArray (Int32 dtype).
