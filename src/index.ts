@@ -1163,3 +1163,15 @@ export type {
   DLMSmootherResult,
   DLMForecastResult,
 } from "./stats/dlm.ts";
+export {
+  GaussianHMM,
+  MultinomialHMM,
+  fitGaussianHMM,
+  hmmViterbi,
+} from "./stats/hmm.ts";
+export type {
+  GaussianHMMParams,
+  GaussianHMMFit,
+  MultinomialHMMParams,
+  MultinomialHMMFit,
+} from "./stats/hmm.ts";
