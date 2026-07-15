@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-15T01:25:05Z |
-| Iteration Count | 401 |
-| Best Metric | 739 |
+| Last Run | 2026-07-15T13:25:05Z |
+| Iteration Count | 402 |
+| Best Metric | 740 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -42,9 +42,12 @@
 
 ## 🔭 Future Directions
 
-- `pipe_apply` ✅ done, `readSas`, `USFederalHolidayCalendar`, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel, `flags`, `options`.
+- `pipe_apply` ✅ done, `readXml/toXml` ✅ done, `readSas`, `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel, `flags`, `options`.
 
 ## 📊 Iteration History
+
+### Iter 402 — 2026-07-15 — [Run §29418859475](https://github.com/githubnext/tsb/actions/runs/29418859475)
+✅ +1 → 740: readXml/toXml benchmark (N=1k rows, 20 iters each): parse XML attribute-based document → DataFrame, and DataFrame → XML string, vs pandas read_xml/to_xml equivalents.
 
 ### Iter 401 — 2026-07-15 — [Run §29381454981](https://github.com/githubnext/tsb/actions/runs/29381454981)
 ✅ +1 → 739: pipe_apply benchmark (N=10k, 20 iters): pipe chain (4 transforms on Series), seriesApply (element-wise fn), dataFrameApplyMap (element-wise fn on 10k×3 df) vs pandas pipe/apply/map equivalents.
