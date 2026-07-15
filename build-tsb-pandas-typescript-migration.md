@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-14T19:40:00Z |
-| Iteration Count | 411 |
+| Last Run | 2026-07-15T07:34:05Z |
+| Iteration Count | 412 |
 | Best Metric | 194 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,19 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: Regime-switching models (Markov-switching ARIMA/VAR), spectral analysis (FFT periodogram), or Granger causality tests
+- Next: Markov-switching models (regime-switching ARIMA/VAR), spectral analysis (FFT periodogram)
 
 ---
 
 ## 📚 Lessons Learned
 
-- **SARIMA (411)**: HR two-stage OLS on doubly-differenced series. Combined AR/MA lag polynomials with cross-lag products. Undo seasonal diff via tail-stored last-s-values. Always add missing exports when file exists without index.ts entry.
+- **Granger (412)**: Four tests (F, chi², LR, params) via OLS normal equations + Gaussian elim. Distribution CDFs from scratch (incomplete beta, regularised gamma). Always `?? 0` for noUncheckedIndexedAccess. New file = +1 metric.
 - **HMM (410)**: Forward-backward in log-space via logSumExp. `noUncheckedIndexedAccess`: `arr[i] = (arr[i] ?? 0) + v`. `exactOptionalPropertyTypes`: avoid optional spread.
 - **General TS**: `noUncheckedIndexedAccess`→`?? 0`. `slice()` on `readonly T[]`→mutable. Always push via `push_to_pull_request_branch`. Metric = `find src -name '*.ts' -not -name 'index.ts' | xargs grep -l 'export' | wc -l` (+1 per new exported file).
 - **Models 405-409**: VAR (Yule-Walker multivariate), Prophet decomposition, DLM (Joseph-form + RTS), GARCH (softplus+Nelder-Mead), Copulas (Cholesky/Marshall-Olkin).
@@ -49,12 +49,16 @@
 
 - Markov-switching models (regime-switching ARIMA/VAR)
 - Spectral analysis (FFT periodogram, Welch's method)
-- Granger causality, cointegration tests
+- Cointegration tests (Johansen, Engle-Granger)
 - Transfer function / ARIMAX models
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 412 — 2026-07-15 07:34 UTC — [Run §29397606049](https://github.com/githubnext/tsb/actions/runs/29397606049)
+- **Status**: ⏳ Pending CI | **Change**: Granger causality tests (grangercausalitytests, grangerMatrix)
+- **Metric**: 194 (prev: 193 on branch, delta: +1) | **Commit**: 6c3f041
 
 ### Iter 411 — 2026-07-14 19:40 UTC — [Run §29361438004](https://github.com/githubnext/tsb/actions/runs/29361438004)
 - **Status**: ✅ Accepted | **Change**: SARIMA(p,d,q)(P,D,Q)_s + missing HMM exports
