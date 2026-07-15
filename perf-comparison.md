@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-14T13:24:48Z |
-| Iteration Count | 400 |
-| Best Metric | 738 |
+| Last Run | 2026-07-15T01:25:05Z |
+| Iteration Count | 401 |
+| Best Metric | 739 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -42,9 +42,12 @@
 
 ## 🔭 Future Directions
 
-- `entropy`/`klDivergence` ✅ done, `mutualInformation`/`normalizedMI` ✅ done, `lreshape` ✅ done, `linregress`/`polyfit_polyval` ✅ done, `contingency` ✅ done, `multivariate` ✅ done, `IntegerArray` ✅ done, `FloatingArray` ✅ done, `readSas`, `USFederalHolidayCalendar`, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `pipe_apply` ✅ done, `readSas`, `USFederalHolidayCalendar`, readXml/toXml, readFwf, readStata, readParquet, readFeather, readHdf, toExcel, `flags`, `options`.
 
 ## 📊 Iteration History
+
+### Iter 401 — 2026-07-15 — [Run §29381454981](https://github.com/githubnext/tsb/actions/runs/29381454981)
+✅ +1 → 739: pipe_apply benchmark (N=10k, 20 iters): pipe chain (4 transforms on Series), seriesApply (element-wise fn), dataFrameApplyMap (element-wise fn on 10k×3 df) vs pandas pipe/apply/map equivalents.
 
 ### Iter 400 — 2026-07-14 — [Run §29336152876](https://github.com/githubnext/tsb/actions/runs/29336152876)
 ✅ +1 → 738: FloatingArray benchmark (N=100k, ~10% nulls, 20 iters): from/sum/mean/min/max/add/fillna vs pandas Float64 nullable array.
