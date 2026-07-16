@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-15T13:25:05Z |
-| Iteration Count | 402 |
-| Best Metric | 740 |
+| Last Run | 2026-07-16T01:25:20Z |
+| Iteration Count | 403 |
+| Best Metric | 741 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -42,9 +42,12 @@
 
 ## 🔭 Future Directions
 
-- `pipe_apply` ✅ done, `readXml/toXml` ✅ done, `readSas`, `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel, `flags`, `options`.
+- `flags+options` ✅ done, `readSas`, `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 403 — 2026-07-16 — [Run §29463961249](https://github.com/githubnext/tsb/actions/runs/29463961249)
+✅ +1 → 741: flags+options benchmark (N=10k, 20 iters): getFlags/allowsDuplicateLabels get+set on Series & DataFrame; getOption/setOption/resetOption for display keys; options proxy read vs pandas flags/pd.get_option/pd.options equivalents.
 
 ### Iter 402 — 2026-07-15 — [Run §29418859475](https://github.com/githubnext/tsb/actions/runs/29418859475)
 ✅ +1 → 740: readXml/toXml benchmark (N=1k rows, 20 iters each): parse XML attribute-based document → DataFrame, and DataFrame → XML string, vs pandas read_xml/to_xml equivalents.
