@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-16T01:25:20Z |
-| Iteration Count | 403 |
-| Best Metric | 741 |
+| Last Run | 2026-07-16T13:25:39Z |
+| Iteration Count | 404 |
+| Best Metric | 742 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | — |
@@ -42,34 +42,34 @@
 
 ## 🔭 Future Directions
 
-- `flags+options` ✅ done, `readSas`, `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `flags+options` ✅ done, `case_when` ✅ done, `readSas`, `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iter 404 — 2026-07-16 — [Run §29501918594](https://github.com/githubnext/tsb/actions/runs/29501918594)
+✅ +1 → 742: case_when benchmark (N=100k, 20 iters): caseWhen with 3-condition caselist (low/medium-low/medium-high buckets) on Series vs pandas Series.case_when equivalent.
 
 ### Iter 403 — 2026-07-16 — [Run §29463961249](https://github.com/githubnext/tsb/actions/runs/29463961249)
 ✅ +1 → 741: flags+options benchmark (N=10k, 20 iters): getFlags/allowsDuplicateLabels get+set on Series & DataFrame; getOption/setOption/resetOption for display keys; options proxy read vs pandas flags/pd.get_option/pd.options equivalents.
 
 ### Iter 402 — 2026-07-15 — [Run §29418859475](https://github.com/githubnext/tsb/actions/runs/29418859475)
-✅ +1 → 740: readXml/toXml benchmark (N=1k rows, 20 iters each): parse XML attribute-based document → DataFrame, and DataFrame → XML string, vs pandas read_xml/to_xml equivalents.
+✅ +1 → 740: readXml/toXml benchmark.
 
 ### Iter 401 — 2026-07-15 — [Run §29381454981](https://github.com/githubnext/tsb/actions/runs/29381454981)
-✅ +1 → 739: pipe_apply benchmark (N=10k, 20 iters): pipe chain (4 transforms on Series), seriesApply (element-wise fn), dataFrameApplyMap (element-wise fn on 10k×3 df) vs pandas pipe/apply/map equivalents.
+✅ +1 → 739: pipe_apply benchmark.
 
 ### Iter 400 — 2026-07-14 — [Run §29336152876](https://github.com/githubnext/tsb/actions/runs/29336152876)
-✅ +1 → 738: FloatingArray benchmark (N=100k, ~10% nulls, 20 iters): from/sum/mean/min/max/add/fillna vs pandas Float64 nullable array.
+✅ +1 → 738: FloatingArray benchmark.
 
 ### Iter 399 — 2026-07-14 — [Run §29298380978](https://github.com/githubnext/tsb/actions/runs/29298380978)
-✅ +1 → 737: IntegerArray benchmark (N=100k, ~10% nulls, 20 iters): from/sum/mean/min/max/add/fillna vs pandas IntegerArray (Int32 dtype).
+✅ +1 → 737: IntegerArray benchmark.
 
 ### Iter 398 — 2026-07-13 — [Run §29254325811](https://github.com/githubnext/tsb/actions/runs/29254325811)
-✅ +1 → 736: multivariate benchmark (N=500×5, 20 iters): mahalanobis distance, covMatrix, PCA (3 components via SVD). Python: pure-numpy equivalents.
+✅ +1 → 736: multivariate benchmark.
 
-### Iter 397 — 2026-07-13 — [Run §29217286269](https://github.com/githubnext/tsb/actions/runs/29217286269)
-✅ +1 → 735: contingency benchmark (4×4 and 2×2 tables, 50 iters): expectedFreq, relativeRisk, oddsRatio, association(cramer). Python: pure-numpy equivalents.
+### Iters 391–403 — ✅ 728→741:
+bootstrap, OLS regression, hypothesis_tests, entropy/klDivergence, mutualInformation/normalizedMI, lreshape, linregress/polyfit, contingency tables, multivariate/PCA/mahalanobis, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options.
 
-### Iters 390–397 — ✅ 727→735:
-bootstrap, OLS regression, hypothesis_tests, entropy/klDivergence, mutualInformation/normalizedMI, lreshape, linregress/polyfit, contingency tables (expectedFreq/relativeRisk/oddsRatio/association).
-
-### Iters 291–389 — ✅ 503→726:
+### Iters 291–390 — ✅ 503→727:
 IO/reshape/window/stats/string/datetime/sample/pivot/rolling/rank/clip/diff/replace/mask/sort/pct_change/merge_asof/cross_join/join_all/shift/at_iat/convert_dtypes/styler/resample/iterrows/groupby_many/concat_many/str_replace_regex/merge_ordered_ffill/grouper/SparseArray/gaussianKDE.
 
