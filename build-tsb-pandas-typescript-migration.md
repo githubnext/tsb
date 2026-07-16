@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-15T19:22:19Z |
-| Iteration Count | 413 |
-| Best Metric | 194 |
+| Last Run | 2026-07-16T07:38:36Z |
+| Iteration Count | 414 |
+| Best Metric | 195 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,18 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, accepted, accepted, accepted, pending-ci, accepted, accepted, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: Cointegration tests (Johansen, Engle-Granger), Transfer function / ARIMAX models
+- Next: Transfer function / ARIMAX models, spectral analysis enhancements
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Cointegration (414)**: Engle-Granger two-step (OLS residuals + ADF) + Johansen (generalized eigenvalue via Cholesky + QR-iteration eigSym). `geig` requires Cholesky of S11 then symmetric eig of L⁻¹·A·L⁻ᵀ. MacKinnon (2010) ADF p-value approximation. CV tables from Osterwald-Lenum (1992).
 - **MarkovSwitching (413)**: Hamilton filter (forward) + Kim smoother (backward) inside EM. WLS via normal equations per regime for intercept+AR. `noUncheckedIndexedAccess`→`?? 0` everywhere. `readonly T[]` types for fit results.
 - **HMM (410)**: Forward-backward in log-space via logSumExp. `noUncheckedIndexedAccess`: `arr[i] = (arr[i] ?? 0) + v`. `exactOptionalPropertyTypes`: avoid optional spread.
 - **General TS**: `noUncheckedIndexedAccess`→`?? 0`. `slice()` on `readonly T[]`→mutable. Always push via `push_to_pull_request_branch`. Metric = `find src -name '*.ts' -not -name 'index.ts' | xargs grep -l 'export' | wc -l` (+1 per new exported file).
@@ -47,13 +48,16 @@
 
 ## 🔭 Future Directions
 
-- Cointegration tests (Johansen, Engle-Granger)
 - Transfer function / ARIMAX models
 - Spectral analysis (Welch periodogram already done in signal.ts)
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 414 — 2026-07-16 07:38 UTC — [Run §29480448548](https://github.com/githubnext/tsb/actions/runs/29480448548)
+- **Status**: ⏳ Pending CI | **Change**: Cointegration tests — Engle-Granger two-step, Johansen trace+max-eigenvalue, standalone ADF test
+- **Metric**: 195 (prev: 194, delta: +1) | **Commit**: b44fa9b
 
 ### Iter 413 — 2026-07-15 19:22 UTC — [Run §29444066992](https://github.com/githubnext/tsb/actions/runs/29444066992)
 - **Status**: ⏳ Pending CI | **Change**: Markov-switching regression & autoregression (Hamilton filter, Kim smoother, EM)
