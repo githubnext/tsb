@@ -6,12 +6,12 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-16T13:25:39Z |
-| Iteration Count | 404 |
-| Best Metric | 742 |
+| Last Run | 2026-07-17T01:30:00Z |
+| Iteration Count | 405 |
+| Best Metric | 743 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | — |
+| PR | #423 |
 | Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
@@ -19,7 +19,6 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
-| PR | #423 |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -35,6 +34,7 @@
 - SparseArray: `src/core/sparse.ts`. readExcel/xlsxSheetNames NOT in src/index.ts.
 - OLS: `new OLS().fit(X_2d, y)` from `src/stats/regression.ts`. Python: `np.linalg.lstsq(X_design, y, rcond=None)`.
 - hypothesis_tests: use pure-numpy equivalents (no scipy); benchmark suite covers ttest1samp/ttestInd/ttestRel/fOneway/pearsonr/spearmanr/mannWhitneyU in one pair.
+- SQL benchmark: use MockConnection with correct `insert(tableName, rows, columns, ifExists)` signature from `SqlConnection` interface. Python uses `sqlite3.connect(":memory:")` for realistic pandas equivalence.
 
 ## 🚧 Foreclosed Avenues
 
@@ -42,9 +42,17 @@
 
 ## 🔭 Future Directions
 
-- `flags+options` ✅ done, `case_when` ✅ done, `readSas`, `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `readSas`, `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iteration 405 — 2026-07-17 — [Run §29547282141](https://github.com/githubnext/tsb/actions/runs/29547282141)
+
+- **Status**: ✅ Accepted
+- **Change**: readSqlQuery + toSql benchmark (N=10k rows, 20 iters each) using mock adapters; Python uses sqlite3 in-memory
+- **Metric**: 743 (previous best: 742, delta: +1)
+- **Commit**: 2865f3b
+- **Notes**: Both TS and PY files validated; mock SqlConnection implements correct `insert` signature with `(tableName, rows, columns, ifExists)` parameters.
 
 ### Iter 404 — 2026-07-16 — [Run §29501918594](https://github.com/githubnext/tsb/actions/runs/29501918594)
 ✅ +1 → 742: case_when benchmark (N=100k, 20 iters): caseWhen with 3-condition caselist (low/medium-low/medium-high buckets) on Series vs pandas Series.case_when equivalent.
@@ -64,12 +72,5 @@
 ### Iter 399 — 2026-07-14 — [Run §29298380978](https://github.com/githubnext/tsb/actions/runs/29298380978)
 ✅ +1 → 737: IntegerArray benchmark.
 
-### Iter 398 — 2026-07-13 — [Run §29254325811](https://github.com/githubnext/tsb/actions/runs/29254325811)
-✅ +1 → 736: multivariate benchmark.
-
-### Iters 391–403 — ✅ 728→741:
-bootstrap, OLS regression, hypothesis_tests, entropy/klDivergence, mutualInformation/normalizedMI, lreshape, linregress/polyfit, contingency tables, multivariate/PCA/mahalanobis, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options.
-
-### Iters 291–390 — ✅ 503→727:
-IO/reshape/window/stats/string/datetime/sample/pivot/rolling/rank/clip/diff/replace/mask/sort/pct_change/merge_asof/cross_join/join_all/shift/at_iat/convert_dtypes/styler/resample/iterrows/groupby_many/concat_many/str_replace_regex/merge_ordered_ffill/grouper/SparseArray/gaussianKDE.
-
+### Iters 291–398 — ✅ 503→736:
+bootstrap, OLS regression, hypothesis_tests, entropy/klDivergence, mutualInformation/normalizedMI, lreshape, linregress/polyfit, contingency tables, multivariate/PCA/mahalanobis, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options, case_when, and many more IO/reshape/window/stats/string/datetime operations.
