@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-17T01:30:00Z |
-| Iteration Count | 405 |
-| Best Metric | 743 |
+| Last Run | 2026-07-17T13:25:00Z |
+| Iteration Count | 406 |
+| Best Metric | 744 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -42,9 +42,17 @@
 
 ## 🔭 Future Directions
 
-- `readSas`, `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
+- `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf, toExcel.
 
 ## 📊 Iteration History
+
+### Iteration 406 — 2026-07-17 — [Run §29583613301](https://github.com/githubnext/tsb/actions/runs/29583613301)
+
+- **Status**: ✅ Accepted
+- **Change**: readSas benchmark (N=1k rows, 20 iters): in-memory XPORT v5 file with 3 numeric + 1 char column; Python uses pd.read_sas with format="xport"
+- **Metric**: 744 (previous best: 743, delta: +1)
+- **Commit**: e286683
+- **Notes**: XPORT v5 builder mirrors test helper; IBM 370 float encoder shared between TS and Python implementations.
 
 ### Iteration 405 — 2026-07-17 — [Run §29547282141](https://github.com/githubnext/tsb/actions/runs/29547282141)
 
