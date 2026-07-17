@@ -47,38 +47,6 @@
 ## 📊 Iteration History
 
 ### Iteration 406 — 2026-07-17 — [Run §29583613301](https://github.com/githubnext/tsb/actions/runs/29583613301)
-
-- **Status**: ✅ Accepted
-- **Change**: readSas benchmark (N=1k rows, 20 iters): in-memory XPORT v5 file with 3 numeric + 1 char column; Python uses pd.read_sas with format="xport"
-- **Metric**: 744 (previous best: 743, delta: +1)
-- **Commit**: e286683
-- **Notes**: XPORT v5 builder mirrors test helper; IBM 370 float encoder shared between TS and Python implementations.
-
-### Iteration 405 — 2026-07-17 — [Run §29547282141](https://github.com/githubnext/tsb/actions/runs/29547282141)
-
-- **Status**: ✅ Accepted
-- **Change**: readSqlQuery + toSql benchmark (N=10k rows, 20 iters each) using mock adapters; Python uses sqlite3 in-memory
-- **Metric**: 743 (previous best: 742, delta: +1)
-- **Commit**: 2865f3b
-- **Notes**: Both TS and PY files validated; mock SqlConnection implements correct `insert` signature with `(tableName, rows, columns, ifExists)` parameters.
-
-### Iter 404 — 2026-07-16 — [Run §29501918594](https://github.com/githubnext/tsb/actions/runs/29501918594)
-✅ +1 → 742: case_when benchmark (N=100k, 20 iters): caseWhen with 3-condition caselist (low/medium-low/medium-high buckets) on Series vs pandas Series.case_when equivalent.
-
-### Iter 403 — 2026-07-16 — [Run §29463961249](https://github.com/githubnext/tsb/actions/runs/29463961249)
-✅ +1 → 741: flags+options benchmark (N=10k, 20 iters): getFlags/allowsDuplicateLabels get+set on Series & DataFrame; getOption/setOption/resetOption for display keys; options proxy read vs pandas flags/pd.get_option/pd.options equivalents.
-
-### Iter 402 — 2026-07-15 — [Run §29418859475](https://github.com/githubnext/tsb/actions/runs/29418859475)
-✅ +1 → 740: readXml/toXml benchmark.
-
-### Iter 401 — 2026-07-15 — [Run §29381454981](https://github.com/githubnext/tsb/actions/runs/29381454981)
-✅ +1 → 739: pipe_apply benchmark.
-
-### Iter 400 — 2026-07-14 — [Run §29336152876](https://github.com/githubnext/tsb/actions/runs/29336152876)
-✅ +1 → 738: FloatingArray benchmark.
-
-### Iter 399 — 2026-07-14 — [Run §29298380978](https://github.com/githubnext/tsb/actions/runs/29298380978)
-✅ +1 → 737: IntegerArray benchmark.
-
-### Iters 291–398 — ✅ 503→736:
-bootstrap, OLS regression, hypothesis_tests, entropy/klDivergence, mutualInformation/normalizedMI, lreshape, linregress/polyfit, contingency tables, multivariate/PCA/mahalanobis, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options, case_when, and many more IO/reshape/window/stats/string/datetime operations.
+✅ +1 → 744: readSas benchmark (XPORT v5, 3 numeric+1 char, IBM 370 float encoder).
+### Iter 405 — ✅ +1→743: readSqlQuery+toSql benchmark.
+### Iters 291–404 — ✅ 503→742: bootstrap, OLS, hypothesis_tests, entropy, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options, case_when, and many more IO/reshape/window/stats/string/datetime operations.
