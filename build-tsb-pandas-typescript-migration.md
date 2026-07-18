@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-18T07:25:52Z |
-| Iteration Count | 418 |
-| Best Metric | 197 |
+| Last Run | 2026-07-18T19:20:08Z |
+| Iteration Count | 419 |
+| Best Metric | 199 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -25,16 +25,16 @@
 
 ## 🎯 Current Priorities
 
-- Next: Factor analysis (PCA/FA), Minimum Covariance Determinant (MCD), Bayesian VAR (BVAR)
+- Next: Structural VAR (SVAR), Time-varying parameter VAR (TVP-VAR), Kalman smoother extensions
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 419**: factor_analysis.ts (FactorAnalysis EM + FastICA + rotateFactors varimax/quartimax), mcd.ts (MinCovDet FAST-MCD + mahalanobisRobust + robustOutliers), bvar.ts (BVAR Minnesota prior + bvarForecast + bvarIRF Cholesky + bvarFEVD). Branch baseline 196, +3 new files = 199.
 - **Iter 418**: granger.ts (Granger causality F/Chi2/LR, grangerMatrix), covariance_shrinkage.ts (LW/OAS/shrunkCovariance/correlationFromCov), robust_regression.ts (IRLS huber/bisquare/cauchy/hampel/andrews, theilSen, passingBablok), var_model.ts (fitVAR, varForecast, varIRF, selectVARLag). Branch baseline 193, +4 new files = 197.
 - **Iter 417**: spectral.ts (CSD+Lomb-Scargle), stl.ts (STL+decompose+stlForecast), forecast_eval.ts (MASE/MSIS/CRPS), transfer_func.ts (ARIMAX+CCF+prewhiten). Rebase→193, +4 files=197. `rfft`/`fftFreq`/`Complex` all exported from signal.ts.
 - **MSTL/TBATS (416)**: iterative STL per period; TBATS Fourier state-space + Box-Cox (Guerrero) + ARMA (Yule-Walker+OLS). `[arP,arQ] as [number,number]` for tuple. No `(M[r] as T)[c]` — use `const row = M[r]; if (!row) continue`. Baseline after 52-commit rebase = 193; +2 files = 195.
-- **ARIMAX/CSD/STL (415)**: LOESS cycle-subseries→lowpass→trend. Bisquare robustness. Guerrero λ estimation. Rebase brought baseline 195→194; +2 files = 196.
 - **Cointegration (414)**: Engle-Granger (OLS+ADF) + Johansen (Cholesky+QR eigSym). MacKinnon p-values.
 - **HMM (410)**: Forward-backward log-space. `noUncheckedIndexedAccess`→`?? 0`. `exactOptionalPropertyTypes`: no optional spread.
 - **General TS**: `?? 0` everywhere. `slice()` on `readonly T[]`. Always push via `push_to_pull_request_branch`. Metric = exported TS files (excl index.ts). +1 per new exported file.
@@ -50,20 +50,23 @@
 
 ## 🔭 Future Directions
 
-- Transfer function / ARIMAX models ✅ done in iter 417
-- Cross-spectral density, Lomb-Scargle, seasonal evaluation metrics ✅ done in iter 417
-- Granger causality tests ✅ done in iter 418
-- Covariance shrinkage (Ledoit-Wolf estimator) ✅ done in iter 418
-- Robust regression (IRLS / Huber loss) ✅ done in iter 418
-- VAR models ✅ done in iter 418
-- Factor analysis (PCA/FA)
-- Minimum Covariance Determinant (MCD)
-- Bayesian VAR (BVAR)
-- Structural VAR (SVAR)
+- Factor analysis (PCA/FA) ✅ done in iter 419
+- Minimum Covariance Determinant (MCD) ✅ done in iter 419
+- Bayesian VAR (BVAR) ✅ done in iter 419
+- Structural VAR (SVAR) — identification via short-run/long-run restrictions
+- Time-varying parameter VAR (TVP-VAR) — state-space VAR with Kalman filter
+- Panel data models (fixed effects, random effects, GMM)
+- Survival analysis (Cox PH, Kaplan-Meier, Nelson-Aalen)
+- Spatial statistics (variogram, kriging, spatial lag model)
+- Copula models (Gaussian, t, Clayton, Gumbel, Frank)
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 419 — 2026-07-18 19:20 UTC — [Run §29657514367](https://github.com/githubnext/tsb/actions/runs/29657514367)
+- **Status**: ⏳ Pending CI | **Change**: FactorAnalysis (EM+FastICA+rotateFactors), MinCovDet (FAST-MCD+robustOutliers), BVAR (Minnesota prior+IRF+FEVD)
+- **Metric**: 199 (prev best: 197, delta: +2) | **Commit**: e106398
 
 ### Iter 418 — 2026-07-18 07:25 UTC — [Run §29635636124](https://github.com/githubnext/tsb/actions/runs/29635636124)
 - **Status**: ⏳ Pending CI | **Change**: Granger causality (grangerCausality/grangerMatrix), Ledoit-Wolf+OAS covariance shrinkage, robust regression (IRLS/Huber/Bisquare/Cauchy/Hampel/Andrews + theilSen + passingBablok), VAR model (fitVAR/varForecast/varIRF/selectVARLag)
