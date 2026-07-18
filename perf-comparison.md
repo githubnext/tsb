@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-18T01:25:05Z |
-| Iteration Count | 407 |
-| Best Metric | 745 |
+| Last Run | 2026-07-18T13:22:33Z |
+| Iteration Count | 408 |
+| Best Metric | 746 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -42,10 +42,12 @@
 
 ## 🔭 Future Directions
 
-- `USFederalHolidayCalendar`, readFwf, readStata, readParquet, readFeather, readHdf.
+- `USFederalHolidayCalendar`, readStata, readParquet, readFeather, readHdf.
 
 ## 📊 Iteration History
 
+### Iteration 408 — 2026-07-18 — [Run §29645946373](https://github.com/githubnext/tsb/actions/runs/29645946373)
+✅ +1 → 746: readFwf benchmark (10k rows × 4 cols fixed-width, 10 iters, explicit colspecs).
 ### Iteration 407 — 2026-07-18 — [Run §29625071540](https://github.com/githubnext/tsb/actions/runs/29625071540)
 ✅ +1 → 745: toExcel benchmark (5k-row DataFrame, 20 iters, in-memory XLSX serialization).
 ### Iteration 406 — 2026-07-17 — [Run §29583613301](https://github.com/githubnext/tsb/actions/runs/29583613301)
