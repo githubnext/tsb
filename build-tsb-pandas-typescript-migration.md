@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-17T19:21:47Z |
-| Iteration Count | 417 |
-| Best Metric | 196 |
+| Last Run | 2026-07-18T07:25:52Z |
+| Iteration Count | 418 |
+| Best Metric | 197 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,18 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, accepted, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: Granger causality between multiple series, covariance shrinkage (Ledoit-Wolf), robust regression (IRLS/Huber)
+- Next: Factor analysis (PCA/FA), Minimum Covariance Determinant (MCD), Bayesian VAR (BVAR)
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 418**: granger.ts (Granger causality F/Chi2/LR, grangerMatrix), covariance_shrinkage.ts (LW/OAS/shrunkCovariance/correlationFromCov), robust_regression.ts (IRLS huber/bisquare/cauchy/hampel/andrews, theilSen, passingBablok), var_model.ts (fitVAR, varForecast, varIRF, selectVARLag). Branch baseline 193, +4 new files = 197.
 - **Iter 417**: spectral.ts (CSD+Lomb-Scargle), stl.ts (STL+decompose+stlForecast), forecast_eval.ts (MASE/MSIS/CRPS), transfer_func.ts (ARIMAX+CCF+prewhiten). Rebase→193, +4 files=197. `rfft`/`fftFreq`/`Complex` all exported from signal.ts.
 - **MSTL/TBATS (416)**: iterative STL per period; TBATS Fourier state-space + Box-Cox (Guerrero) + ARMA (Yule-Walker+OLS). `[arP,arQ] as [number,number]` for tuple. No `(M[r] as T)[c]` — use `const row = M[r]; if (!row) continue`. Baseline after 52-commit rebase = 193; +2 files = 195.
 - **ARIMAX/CSD/STL (415)**: LOESS cycle-subseries→lowpass→trend. Bisquare robustness. Guerrero λ estimation. Rebase brought baseline 195→194; +2 files = 196.
@@ -51,14 +52,22 @@
 
 - Transfer function / ARIMAX models ✅ done in iter 417
 - Cross-spectral density, Lomb-Scargle, seasonal evaluation metrics ✅ done in iter 417
-- Spectral analysis (Welch periodogram already done in signal.ts)
-- Granger causality tests (multiple series)
-- Covariance shrinkage (Ledoit-Wolf estimator)
-- Robust regression (IRLS / Huber loss)
+- Granger causality tests ✅ done in iter 418
+- Covariance shrinkage (Ledoit-Wolf estimator) ✅ done in iter 418
+- Robust regression (IRLS / Huber loss) ✅ done in iter 418
+- VAR models ✅ done in iter 418
+- Factor analysis (PCA/FA)
+- Minimum Covariance Determinant (MCD)
+- Bayesian VAR (BVAR)
+- Structural VAR (SVAR)
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 418 — 2026-07-18 07:25 UTC — [Run §29635636124](https://github.com/githubnext/tsb/actions/runs/29635636124)
+- **Status**: ⏳ Pending CI | **Change**: Granger causality (grangerCausality/grangerMatrix), Ledoit-Wolf+OAS covariance shrinkage, robust regression (IRLS/Huber/Bisquare/Cauchy/Hampel/Andrews + theilSen + passingBablok), VAR model (fitVAR/varForecast/varIRF/selectVARLag)
+- **Metric**: 197 (prev best: 196, delta: +1) | **Commit**: 980a618
 
 ### Iter 417 — 2026-07-17 19:21 UTC — [Run §29607085220](https://github.com/githubnext/tsb/actions/runs/29607085220)
 - **Status**: ⏳ Pending CI | **Change**: CSD+coherence+Lomb-Scargle (spectral.ts), STL+classical decompose+stlForecast (stl.ts), MASE/MSIS/CRPS/pinball/RMSSE (forecast_eval.ts), ARIMAX+CCF+prewhiten (transfer_func.ts)
