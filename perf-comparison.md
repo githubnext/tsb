@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-19T01:26:00Z |
-| Iteration Count | 409 |
-| Best Metric | 747 |
+| Last Run | 2026-07-19T13:23:00Z |
+| Iteration Count | 410 |
+| Best Metric | 748 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -42,10 +42,12 @@
 
 ## 🔭 Future Directions
 
-- `USFederalHolidayCalendar`, readParquet, readFeather, readHdf.
+- `USFederalHolidayCalendar`, readParquet, readHdf.
 
 ## 📊 Iteration History
 
+### Iteration 410 — 2026-07-19 — [Run §29688674703](https://github.com/githubnext/tsb/actions/runs/29688674703)
+✅ +1 → 748: readFeather/toFeather benchmark (10k rows × 3 cols, Arrow IPC Feather v2 round-trip, 20 iters).
 ### Iteration 409 — 2026-07-19 — [Run §29668492326](https://github.com/githubnext/tsb/actions/runs/29668492326)
 ✅ +1 → 747: readStata benchmark (10k rows, int32/float64/string cols, toStata round-trip, 20 iters).
 ### Iteration 408 — 2026-07-18 — [Run §29645946373](https://github.com/githubnext/tsb/actions/runs/29645946373)
