@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-19T07:40:09Z |
-| Iteration Count | 420 |
+| Last Run | 2026-07-19T19:21:10Z |
+| Iteration Count | 421 |
 | Best Metric | 196 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,17 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: TVP-VAR (Time-varying parameter VAR), panel data models (fixed/random effects, GMM), spatial statistics (variogram, kriging)
+- Next: multi-level/hierarchical models, functional data analysis, hidden Markov model extensions, OR additional spatial statistics (local Moran, Geary's C, GWR)
 
 ---
 
 ## 📚 Lessons Learned
+
+- **Iter 421**: tvp_var.ts (TVP-VAR with per-equation Kalman filter, forecast), panel_data.ts (PooledOLS, FE/within, FD, RE/Swamy-Arora GLS, AB-GMM), spatial_stats.ts (empirical variogram, variogram model fitting, ordinary kriging, spatial weights, Moran's I, SAR, SEM). Branch rebased 193→196 (+3 new files). CI awaited.
 
 - **Iter 420**: svar.ts (fitVAR/fitSVAR cholesky+long_run, IRF, FEVD, historical decomposition, grangerCausality, selectVARLag), survival.ts (kaplanMeier Greenwood CI, nelsonAalen, logRankTest, coxPH Newton-Raphson + concordance), copula.ts (Gaussian, StudentT, Clayton, Gumbel, Frank + kendallTauEmp + toUniformMarginals). Branch baseline 193, +3 new files = 196.
 - **Iter 419**: factor_analysis.ts, mcd.ts, bvar.ts. +3 files = 199 (pending CI).
@@ -55,15 +57,18 @@
 - Factor analysis (PCA/FA) ✅ done in iter 419
 - Minimum Covariance Determinant (MCD) ✅ done in iter 419
 - Bayesian VAR (BVAR) ✅ done in iter 419
-- Time-varying parameter VAR (TVP-VAR) — state-space VAR with Kalman filter
-- Panel data models (fixed effects, random effects, GMM)
-- Spatial statistics (variogram, kriging, spatial lag model)
+- Time-varying parameter VAR (TVP-VAR) ✅ done in iter 421
+- Panel data models (fixed effects, random effects, GMM) ✅ done in iter 421
+- Spatial statistics (variogram, kriging, spatial lag model) ✅ done in iter 421
 
 ---
 
 ## 📊 Iteration History
 
-### Iter 420 — 2026-07-19 07:40 UTC — [Run §29678414190](https://github.com/githubnext/tsb/actions/runs/29678414190)
+### Iter 421 — 2026-07-19 19:21 UTC — [Run §29700335868](https://github.com/githubnext/tsb/actions/runs/29700335868)
+- **Status**: ✅ Accepted | **Change**: TVP-VAR (Kalman filter, per-equation, forecast), Panel data (Pooled OLS, FE within, FD, RE Swamy-Arora, AB-GMM), Spatial stats (variogram, kriging, weights, Moran I, SAR, SEM)
+- **Metric**: 196 (rebased from 193 +3 new files) | **Commit**: 5e2ce68
+
 - **Status**: ⏳ Pending CI | **Change**: SVAR (fitVAR/fitSVAR cholesky+long_run, IRF, FEVD, HD), Survival analysis (kaplanMeier, nelsonAalen, logRankTest, coxPH), Copulas (Gaussian, StudentT, Clayton, Gumbel, Frank)
 - **Metric**: 196 (prev best: 193, delta: +3) | **Commit**: c4410a7
 
