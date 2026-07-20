@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-19T13:23:00Z |
-| Iteration Count | 410 |
-| Best Metric | 748 |
+| Last Run | 2026-07-20T01:26:27Z |
+| Iteration Count | 411 |
+| Best Metric | 749 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -46,6 +46,8 @@
 
 ## 📊 Iteration History
 
+### Iteration 411 — 2026-07-20 — [Run §29710840981](https://github.com/githubnext/tsb/actions/runs/29710840981)
+✅ +1 → 749: readTable benchmark (100k rows × 3 cols TSV, 5 iters, tab-separated read_table vs pandas.read_table).
 ### Iteration 410 — 2026-07-19 — [Run §29688674703](https://github.com/githubnext/tsb/actions/runs/29688674703)
 ✅ +1 → 748: readFeather/toFeather benchmark (10k rows × 3 cols, Arrow IPC Feather v2 round-trip, 20 iters).
 ### Iteration 409 — 2026-07-19 — [Run §29668492326](https://github.com/githubnext/tsb/actions/runs/29668492326)
