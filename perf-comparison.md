@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-20T01:26:27Z |
-| Iteration Count | 411 |
-| Best Metric | 749 |
+| Last Run | 2026-07-20T13:31:43Z |
+| Iteration Count | 412 |
+| Best Metric | 750 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -35,6 +35,7 @@
 - OLS: `new OLS().fit(X_2d, y)` from `src/stats/regression.ts`. Python: `np.linalg.lstsq(X_design, y, rcond=None)`.
 - hypothesis_tests: use pure-numpy equivalents (no scipy); benchmark suite covers ttest1samp/ttestInd/ttestRel/fOneway/pearsonr/spearmanr/mannWhitneyU in one pair.
 - SQL benchmark: use MockConnection with correct `insert(tableName, rows, columns, ifExists)` signature from `SqlConnection` interface. Python uses `sqlite3.connect(":memory:")` for realistic pandas equivalence.
+- readParquet/toParquet: IO round-trip follows same pattern as feather (BytesIO buffer). pyarrow required for pandas side but only syntax-checked locally.
 
 ## 🚧 Foreclosed Avenues
 
@@ -42,21 +43,11 @@
 
 ## 🔭 Future Directions
 
-- `USFederalHolidayCalendar`, readParquet, readHdf.
+- `readHdf`/`toHdf`, `USFederalHolidayCalendar`.
 
 ## 📊 Iteration History
 
-### Iteration 411 — 2026-07-20 — [Run §29710840981](https://github.com/githubnext/tsb/actions/runs/29710840981)
-✅ +1 → 749: readTable benchmark (100k rows × 3 cols TSV, 5 iters, tab-separated read_table vs pandas.read_table).
-### Iteration 410 — 2026-07-19 — [Run §29688674703](https://github.com/githubnext/tsb/actions/runs/29688674703)
-✅ +1 → 748: readFeather/toFeather benchmark (10k rows × 3 cols, Arrow IPC Feather v2 round-trip, 20 iters).
-### Iteration 409 — 2026-07-19 — [Run §29668492326](https://github.com/githubnext/tsb/actions/runs/29668492326)
-✅ +1 → 747: readStata benchmark (10k rows, int32/float64/string cols, toStata round-trip, 20 iters).
-### Iteration 408 — 2026-07-18 — [Run §29645946373](https://github.com/githubnext/tsb/actions/runs/29645946373)
-✅ +1 → 746: readFwf benchmark (10k rows × 4 cols fixed-width, 10 iters, explicit colspecs).
-### Iteration 407 — 2026-07-18 — [Run §29625071540](https://github.com/githubnext/tsb/actions/runs/29625071540)
-✅ +1 → 745: toExcel benchmark (5k-row DataFrame, 20 iters, in-memory XLSX serialization).
-### Iteration 406 — 2026-07-17 — [Run §29583613301](https://github.com/githubnext/tsb/actions/runs/29583613301)
-✅ +1 → 744: readSas benchmark (XPORT v5, 3 numeric+1 char, IBM 370 float encoder).
-### Iter 405 — ✅ +1→743: readSqlQuery+toSql benchmark.
+### Iteration 412 — 2026-07-20 13:31 UTC — [Run §29746441004](https://github.com/githubnext/tsb/actions/runs/29746441004)
+✅ +1 → 750: readParquet/toParquet benchmark (10k rows × 3 cols, Parquet round-trip, 20 iters).
+### Iters 405–411 — ✅ 743→749: readSqlQuery+toSql, readSas, toExcel, readFwf, readStata, readFeather, readTable.
 ### Iters 291–404 — ✅ 503→742: bootstrap, OLS, hypothesis_tests, entropy, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options, case_when, and many more IO/reshape/window/stats/string/datetime operations.
