@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-20T07:56:44Z |
-| Iteration Count | 422 |
-| Best Metric | 197 |
+| Last Run | 2026-07-20T19:25:27Z |
+| Iteration Count | 423 |
+| Best Metric | 198 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,17 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci |
+| Recent Statuses | pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: svar.ts (Structural VAR), survival.ts (Kaplan-Meier, Cox PH), copula.ts, factor_analysis.ts, spatial_stats.ts — these were done in iters 419-421 but never merged. Re-implement these OR try: local Moran / Geary's C, Gaussian process regression, extreme value theory (GEV/GPD), state-space models (LDS), or stochastic volatility.
+- Next: implement SARIMA, Granger causality, Markov switching, cointegration (these were done in iters 411-414 but never merged to main — re-implement). OR try: non-negative matrix factorization (NMF), independent component analysis (ICA), functional principal component analysis on multivariate data, local polynomial regression, survival regression with time-varying covariates.
 
 ---
 
 ## 📚 Lessons Learned
+
+- **Iter 423**: gp_regression.ts (RBFKernel, MaternKernel, WhiteKernel, SumKernel, ProductKernel, GaussianProcessRegressor, gaussianProcessRegress), extreme_value.ts (GEV/GPD fit, returnLevel, blockMaxima), state_space.ts (KalmanFilter, KalmanSmoother, LinearDynamicalSystem EM), stochastic_vol.ts (GARCH, BasicSVModel particle filter, ewmVariance, fitHAR), changepoint.ts (PELT, BinSeg, CUSUM, BOCPD). Rebased 193→198 (+5 files). CI pending.
 
 - **Iter 422**: multilevel.ts (MultilevelModel EM, fitMultilevel, varComponents), functional_data.ts (bSplineBasis, fourierBasis, FunctionalPCA, scalarOnFunctionRegress, smoothCurve), dirichlet_process.ts (DirichletProcessMixture Gibbs, crpSample, stickBreaking), longitudinal.ts (GEE sandwich SE, growthCurveModel, repeatedMeasuresANOVA GG-correction, transitionModel). Rebased 193→197 (+4 new files). CI pending.
 
@@ -66,6 +68,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 423 — 2026-07-20 19:25 UTC — [Run §29771717624](https://github.com/githubnext/tsb/actions/runs/29771717624)
+- **Status**: ⏳ Pending CI | **Change**: gp_regression.ts, extreme_value.ts, state_space.ts, stochastic_vol.ts, changepoint.ts (+5 new files)
+- **Metric**: 198 (prev best: 197, delta: +1) | **Commit**: 3ca158b
 
 ### Iter 422 — 2026-07-20 07:56 UTC — [Run §29725961399](https://github.com/githubnext/tsb/actions/runs/29725961399)
 - **Status**: ⏳ Pending CI | **Change**: multilevel.ts, functional_data.ts, dirichlet_process.ts, longitudinal.ts (+4 new files)
