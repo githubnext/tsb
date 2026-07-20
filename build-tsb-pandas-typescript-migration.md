@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-19T19:21:10Z |
-| Iteration Count | 421 |
-| Best Metric | 196 |
+| Last Run | 2026-07-20T07:56:44Z |
+| Iteration Count | 422 |
+| Best Metric | 197 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,17 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci, accepted |
+| Recent Statuses | pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: multi-level/hierarchical models, functional data analysis, hidden Markov model extensions, OR additional spatial statistics (local Moran, Geary's C, GWR)
+- Next: svar.ts (Structural VAR), survival.ts (Kaplan-Meier, Cox PH), copula.ts, factor_analysis.ts, spatial_stats.ts — these were done in iters 419-421 but never merged. Re-implement these OR try: local Moran / Geary's C, Gaussian process regression, extreme value theory (GEV/GPD), state-space models (LDS), or stochastic volatility.
 
 ---
 
 ## 📚 Lessons Learned
+
+- **Iter 422**: multilevel.ts (MultilevelModel EM, fitMultilevel, varComponents), functional_data.ts (bSplineBasis, fourierBasis, FunctionalPCA, scalarOnFunctionRegress, smoothCurve), dirichlet_process.ts (DirichletProcessMixture Gibbs, crpSample, stickBreaking), longitudinal.ts (GEE sandwich SE, growthCurveModel, repeatedMeasuresANOVA GG-correction, transitionModel). Rebased 193→197 (+4 new files). CI pending.
 
 - **Iter 421**: tvp_var.ts (TVP-VAR with per-equation Kalman filter, forecast), panel_data.ts (PooledOLS, FE/within, FD, RE/Swamy-Arora GLS, AB-GMM), spatial_stats.ts (empirical variogram, variogram model fitting, ordinary kriging, spatial weights, Moran's I, SAR, SEM). Branch rebased 193→196 (+3 new files). CI awaited.
 
@@ -64,6 +66,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 422 — 2026-07-20 07:56 UTC — [Run §29725961399](https://github.com/githubnext/tsb/actions/runs/29725961399)
+- **Status**: ⏳ Pending CI | **Change**: multilevel.ts, functional_data.ts, dirichlet_process.ts, longitudinal.ts (+4 new files)
+- **Metric**: 197 (prev best: 196, delta: +1) | **Commit**: 387a1ff
 
 ### Iter 421 — 2026-07-19 19:21 UTC — [Run §29700335868](https://github.com/githubnext/tsb/actions/runs/29700335868)
 - **Status**: ✅ Accepted | **Change**: TVP-VAR (Kalman filter, per-equation, forecast), Panel data (Pooled OLS, FE within, FD, RE Swamy-Arora, AB-GMM), Spatial stats (variogram, kriging, weights, Moran I, SAR, SEM)
