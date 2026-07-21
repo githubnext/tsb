@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-20T19:25:27Z |
-| Iteration Count | 423 |
-| Best Metric | 198 |
+| Last Run | 2026-07-21T07:46:21Z |
+| Iteration Count | 424 |
+| Best Metric | 200 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci, pending-ci |
+| Recent Statuses | pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci |
 
 ---
 
@@ -31,7 +31,7 @@
 
 ## 📚 Lessons Learned
 
-- **Iter 423**: gp_regression.ts (RBFKernel, MaternKernel, WhiteKernel, SumKernel, ProductKernel, GaussianProcessRegressor, gaussianProcessRegress), extreme_value.ts (GEV/GPD fit, returnLevel, blockMaxima), state_space.ts (KalmanFilter, KalmanSmoother, LinearDynamicalSystem EM), stochastic_vol.ts (GARCH, BasicSVModel particle filter, ewmVariance, fitHAR), changepoint.ts (PELT, BinSeg, CUSUM, BOCPD). Rebased 193→198 (+5 files). CI pending.
+- **Iter 424**: gp_regression.ts (RBFKernel, MaternKernel, WhiteKernel, SumKernel, ProductKernel, GaussianProcessRegressor), extreme_value.ts (GEV/GPD, returnLevel, blockMaxima), state_space.ts (KalmanFilter, KalmanSmoother, LinearDynamicalSystem), stochastic_vol.ts (GARCH, fitGARCH, ewmVariance, fitHAR, BasicSVModel), changepoint.ts (PELT, BinSeg, CUSUM, BOCPD), quantile_reg.ts (QuantileRegressor, IRLS), nonlinear_ts.ts (SETAR, LSTAR, NadarayaWatson, Bilinear). +7 new files. Rebased 193→200. CI pending.
 
 - **Iter 422**: multilevel.ts (MultilevelModel EM, fitMultilevel, varComponents), functional_data.ts (bSplineBasis, fourierBasis, FunctionalPCA, scalarOnFunctionRegress, smoothCurve), dirichlet_process.ts (DirichletProcessMixture Gibbs, crpSample, stickBreaking), longitudinal.ts (GEE sandwich SE, growthCurveModel, repeatedMeasuresANOVA GG-correction, transitionModel). Rebased 193→197 (+4 new files). CI pending.
 
@@ -57,33 +57,18 @@
 
 - Structural VAR (SVAR) ✅ done in iter 420
 - Survival analysis (Cox PH, Kaplan-Meier, Nelson-Aalen) ✅ done in iter 420
-- Copula models (Gaussian, t, Clayton, Gumbel, Frank) ✅ done in iter 420
-- Factor analysis (PCA/FA) ✅ done in iter 419
-- Minimum Covariance Determinant (MCD) ✅ done in iter 419
-- Bayesian VAR (BVAR) ✅ done in iter 419
-- Time-varying parameter VAR (TVP-VAR) ✅ done in iter 421
-- Panel data models (fixed effects, random effects, GMM) ✅ done in iter 421
-- Spatial statistics (variogram, kriging, spatial lag model) ✅ done in iter 421
+- Copula models ✅ done in iter 420; TVP-VAR, Panel data, Spatial stats ✅ done in iter 421
+- GP regression, EVT, State space, GARCH/SV, Changepoint ✅ done in iter 424
+- Quantile regression, Nonlinear TS (SETAR/LSTAR/NW) ✅ done in iter 424
 
 ---
 
 ## 📊 Iteration History
 
-### Iter 423 — 2026-07-20 19:25 UTC — [Run §29771717624](https://github.com/githubnext/tsb/actions/runs/29771717624)
-- **Status**: ⏳ Pending CI | **Change**: gp_regression.ts, extreme_value.ts, state_space.ts, stochastic_vol.ts, changepoint.ts (+5 new files)
-- **Metric**: 198 (prev best: 197, delta: +1) | **Commit**: 3ca158b
+### Iter 424 — 2026-07-21 07:46 UTC — [Run §29811445572](https://github.com/githubnext/tsb/actions/runs/29811445572)
+- **Status**: ⏳ Pending CI | **Change**: gp_regression.ts, extreme_value.ts, state_space.ts, stochastic_vol.ts, changepoint.ts, quantile_reg.ts, nonlinear_ts.ts (+7 new files)
+- **Metric**: 200 (prev best: 198, delta: +2) | **Commit**: 378fe1a
 
-### Iter 422 — 2026-07-20 07:56 UTC — [Run §29725961399](https://github.com/githubnext/tsb/actions/runs/29725961399)
-- **Status**: ⏳ Pending CI | **Change**: multilevel.ts, functional_data.ts, dirichlet_process.ts, longitudinal.ts (+4 new files)
-- **Metric**: 197 (prev best: 196, delta: +1) | **Commit**: 387a1ff
-
-### Iter 421 — 2026-07-19 19:21 UTC — [Run §29700335868](https://github.com/githubnext/tsb/actions/runs/29700335868)
-- **Status**: ✅ Accepted | **Change**: TVP-VAR (Kalman filter, per-equation, forecast), Panel data (Pooled OLS, FE within, FD, RE Swamy-Arora, AB-GMM), Spatial stats (variogram, kriging, weights, Moran I, SAR, SEM)
-- **Metric**: 196 (rebased from 193 +3 new files) | **Commit**: 5e2ce68
-
-- **Status**: ⏳ Pending CI | **Change**: SVAR (fitVAR/fitSVAR cholesky+long_run, IRF, FEVD, HD), Survival analysis (kaplanMeier, nelsonAalen, logRankTest, coxPH), Copulas (Gaussian, StudentT, Clayton, Gumbel, Frank)
-- **Metric**: 196 (prev best: 193, delta: +3) | **Commit**: c4410a7
-
-### Iters 415–419: ⏳ Pending CI. spectral/stl/forecast_eval/transfer_func(417), granger/covariance_shrinkage/robust_reg/var_model(418), factor_analysis/mcd/bvar(419). Metric 193→199.
-### Iters 407–416: ✅ DLM(407), HMM(410), SARIMA(411), Granger(412), MarkovSwitch(413), Cointegration(414), ARIMAX/CSD/STL(415), MSTL/TBATS(416). Phantom 408-409. Metric 191→196.
+### Iters 417–423: ⏳ Pending CI. spectral/stl/forecast_eval(417), granger/var/robust_reg(418), factor/mcd/bvar(419), svar/survival/copula(420), tvp_var/panel/spatial(421), multilevel/functional/dp/longitudinal(422), gp_reg/extreme_val/state_space/stochvol/changepoint(423). Metric 193→198 (pending).
+### Iters 407–416: ✅ DLM(407), HMM(410), SARIMA(411), Granger(412), MarkovSwitch(413), Cointegration(414), ARIMAX/CSD/STL(415), MSTL/TBATS(416). Metric 191→196.
 ### Iters 1–406: (0→191) Core, stats, io, window, groupby, reshape, merge, tseries, wasm, playground.
