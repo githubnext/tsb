@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-21T01:25:07Z |
-| Iteration Count | 413 |
-| Best Metric | 751 |
+| Last Run | 2026-07-21T13:25:19Z |
+| Iteration Count | 414 |
+| Best Metric | 752 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -47,6 +47,8 @@
 
 ## 📊 Iteration History
 
+### Iteration 414 — 2026-07-21 13:25 UTC — [Run §29834097853](https://github.com/githubnext/tsb/actions/runs/29834097853)
+✅ +1 → 752: categorical_ops benchmarks (catFromCodes, catSortByFreq, catFreqTable, catCrossTab vs pandas Categorical.from_codes, value_counts, crosstab). 100k rows, 5 categories.
 ### Iteration 413 — 2026-07-21 01:25 UTC — [Run §29792948080](https://github.com/githubnext/tsb/actions/runs/29792948080)
 ✅ +1 → 751: readHdf/toHdf benchmark (10k rows × 3 cols, HDF5 round-trip, 20 iters). Python uses `to_hdf`/`read_hdf` with `tables` backend.
 ### Iteration 412 — 2026-07-20 13:31 UTC — [Run §29746441004](https://github.com/githubnext/tsb/actions/runs/29746441004)
