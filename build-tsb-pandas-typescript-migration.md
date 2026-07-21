@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-21T07:46:21Z |
-| Iteration Count | 424 |
-| Best Metric | 200 |
+| Last Run | 2026-07-21T19:23:47Z |
+| Iteration Count | 425 |
+| Best Metric | 197 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,17 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci, accepted, pending-ci |
+| Recent Statuses | pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted, accepted, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: implement SARIMA, Granger causality, Markov switching, cointegration (these were done in iters 411-414 but never merged to main — re-implement). OR try: non-negative matrix factorization (NMF), independent component analysis (ICA), functional principal component analysis on multivariate data, local polynomial regression, survival regression with time-varying covariates.
+- Next: NMF, ICA, functional PCA, local polynomial regression, survival regression with time-varying covariates, spectral.ts, stl.ts, forecast_eval.ts, transfer_func.ts, var_model.ts, factor_analysis.ts, covariance_shrinkage.ts, robust_regression.ts.
 
 ---
 
 ## 📚 Lessons Learned
+
+- **Iter 425**: sarima.ts (fitSARIMA, sarimaForecast, sarimaForecastCI, autoARIMA, CSS MLE + Nelder-Mead), granger.ts (grangerTest F-test, grangerMatrix, adfTest MacKinnon), markov_switch.ts (fitMarkovSwitching EM/Hamilton filter/Kim smoother, regimeDurations), cointegration.ts (engleGrangerTest, johansenTest trace+maxEigen, estimateVECM). Rebased 193→197 (+4 new files). CI pending.
 
 - **Iter 424**: gp_regression.ts (RBFKernel, MaternKernel, WhiteKernel, SumKernel, ProductKernel, GaussianProcessRegressor), extreme_value.ts (GEV/GPD, returnLevel, blockMaxima), state_space.ts (KalmanFilter, KalmanSmoother, LinearDynamicalSystem), stochastic_vol.ts (GARCH, fitGARCH, ewmVariance, fitHAR, BasicSVModel), changepoint.ts (PELT, BinSeg, CUSUM, BOCPD), quantile_reg.ts (QuantileRegressor, IRLS), nonlinear_ts.ts (SETAR, LSTAR, NadarayaWatson, Bilinear). +7 new files. Rebased 193→200. CI pending.
 
@@ -55,6 +57,10 @@
 
 ## 🔭 Future Directions
 
+- SARIMA ✅ done in iter 425
+- Granger causality + ADF ✅ done in iter 425
+- Markov switching ✅ done in iter 425
+- Cointegration (Engle-Granger + Johansen) ✅ done in iter 425
 - Structural VAR (SVAR) ✅ done in iter 420
 - Survival analysis (Cox PH, Kaplan-Meier, Nelson-Aalen) ✅ done in iter 420
 - Copula models ✅ done in iter 420; TVP-VAR, Panel data, Spatial stats ✅ done in iter 421
@@ -64,6 +70,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 425 — 2026-07-21 19:23 UTC — [Run §29861105976](https://github.com/githubnext/tsb/actions/runs/29861105976)
+- **Status**: ⏳ Pending CI | **Change**: sarima.ts, granger.ts, markov_switch.ts, cointegration.ts (+4 new files)
+- **Metric**: 197 (prev branch baseline: 193, delta: +4) | **Commit**: 379b130
 
 ### Iter 424 — 2026-07-21 07:46 UTC — [Run §29811445572](https://github.com/githubnext/tsb/actions/runs/29811445572)
 - **Status**: ⏳ Pending CI | **Change**: gp_regression.ts, extreme_value.ts, state_space.ts, stochastic_vol.ts, changepoint.ts, quantile_reg.ts, nonlinear_ts.ts (+7 new files)
