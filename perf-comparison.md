@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-21T13:25:19Z |
-| Iteration Count | 414 |
-| Best Metric | 752 |
+| Last Run | 2026-07-22T01:25:38Z |
+| Iteration Count | 415 |
+| Best Metric | 753 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -43,14 +43,16 @@
 
 ## 🔭 Future Directions
 
-- `USFederalHolidayCalendar`.
+- `USFederalHolidayCalendar`. ✅ done in iter 415
 
 ## 📊 Iteration History
 
+### Iteration 415 — 2026-07-22 01:25 UTC — [Run §29882922346](https://github.com/githubnext/tsb/actions/runs/29882922346)
+✅ +1 → 753: USFederalHolidayCalendar.holidays() benchmark (10-year range 2000–2009, 20 iters). Python: pandas.tseries.holiday.USFederalHolidayCalendar.
 ### Iteration 414 — 2026-07-21 13:25 UTC — [Run §29834097853](https://github.com/githubnext/tsb/actions/runs/29834097853)
 ✅ +1 → 752: categorical_ops benchmarks (catFromCodes, catSortByFreq, catFreqTable, catCrossTab vs pandas Categorical.from_codes, value_counts, crosstab). 100k rows, 5 categories.
 ### Iteration 413 — 2026-07-21 01:25 UTC — [Run §29792948080](https://github.com/githubnext/tsb/actions/runs/29792948080)
-✅ +1 → 751: readHdf/toHdf benchmark (10k rows × 3 cols, HDF5 round-trip, 20 iters). Python uses `to_hdf`/`read_hdf` with `tables` backend.
+✅ +1 → 751: readHdf/toHdf benchmark (10k rows × 3 cols, HDF5 round-trip, 20 iters).
 ### Iteration 412 — 2026-07-20 13:31 UTC — [Run §29746441004](https://github.com/githubnext/tsb/actions/runs/29746441004)
 ✅ +1 → 750: readParquet/toParquet benchmark (10k rows × 3 cols, Parquet round-trip, 20 iters).
-### Iters 291–411 — ✅ 503→749: bootstrap, OLS, hypothesis_tests, entropy, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options, case_when, IO ops (readSqlQuery, readSas, toExcel, readFwf, readStata, readFeather, readTable), and many more.
+### Iters 291–411 — ✅ 503→749: bootstrap, OLS, hypothesis_tests, entropy, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options, case_when, IO ops, and many more.
