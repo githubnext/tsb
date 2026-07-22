@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-22T01:25:38Z |
-| Iteration Count | 415 |
-| Best Metric | 753 |
+| Last Run | 2026-07-22T13:25:35Z |
+| Iteration Count | 416 |
+| Best Metric | 754 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -44,9 +44,12 @@
 ## 🔭 Future Directions
 
 - `USFederalHolidayCalendar`. ✅ done in iter 415
+- `QuarterEnd/QuarterBegin/BMonthEnd/BMonthBegin/BYearEnd/BYearBegin`: tseries/offsets classes need `d + offset` pattern in pandas (not `offset.apply()`). ✅ done in iter 416
 
 ## 📊 Iteration History
 
+### Iteration 416 — 2026-07-22 13:25 UTC — [Run §29923579451](https://github.com/githubnext/tsb/actions/runs/29923579451)
+✅ +1 → 754: QuarterEnd/QuarterBegin/BMonthEnd/BMonthBegin/BYearEnd/BYearBegin offsets benchmark (5k dates, 50 iters). Python: pandas.tseries.offsets.
 ### Iteration 415 — 2026-07-22 01:25 UTC — [Run §29882922346](https://github.com/githubnext/tsb/actions/runs/29882922346)
 ✅ +1 → 753: USFederalHolidayCalendar.holidays() benchmark (10-year range 2000–2009, 20 iters). Python: pandas.tseries.holiday.USFederalHolidayCalendar.
 ### Iteration 414 — 2026-07-21 13:25 UTC — [Run §29834097853](https://github.com/githubnext/tsb/actions/runs/29834097853)
