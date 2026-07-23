@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-23T07:47:00Z |
-| Iteration Count | 428 |
+| Last Run | 2026-07-23T19:23:00Z |
+| Iteration Count | 429 |
 | Best Metric | 211 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted, pending-ci |
 
 ---
 
@@ -33,6 +33,7 @@
 
 ## 📚 Lessons Learned
 
+- **Iter 429**: survival analysis (KM, CoxPH), Bayesian regression (BayesianRidge, ARD), GARCH/EGARCH/GJR, quantile regression, spatial stats (Moran's I, kriging). +5 files, 188→193 (post-rebase).
 - **Iter 428**: functional_pca, local_poly_regression, kernel_smoothing, isotonic_regression, transfer_func, spectral, stl_decomp, forecast_eval, factor_analysis, covariance_shrinkage, robust_regression, nmf, ica, sarima, granger, markov_switch, cointegration, var_model. +18 files, 193→211.
 - **Iters 420-427**: SARIMA, Granger, Markov switching, cointegration, VAR, spectral, STL, factor_analysis, NMF, ICA, robust_regression, covariance_shrinkage. All pending CI; rebased metric stays at 193 after rebase.
 - **HMM (410)**: Use `?? 0` for `noUncheckedIndexedAccess`. `exactOptionalPropertyTypes`: no optional spread.
@@ -67,19 +68,23 @@
 - Robust regression (Huber, bisquare, MM, LTS) ✅ iter 428
 - NMF ✅ iter 428
 - FastICA ✅ iter 428
-- Next: survival analysis (time-varying covariates), nonlinear_ts, Bayesian regression, spatial stats, advanced GARCH, neural network models.
+- Next: survival analysis (time-varying covariates) ✅ iter 429
+- Bayesian regression ✅ iter 429
+- GARCH ✅ iter 429
+- Quantile regression ✅ iter 429
+- Spatial stats (Moran, kriging) ✅ iter 429
+- Next: neural network regression, nonlinear_ts, changepoint detection, functional data analysis, advanced time-series forecasting (Prophet-style).
 
 ---
 
 ## 📊 Iteration History
 
+### Iter 429 — 2026-07-23 19:23 UTC — [Run §30037527199](https://github.com/githubnext/tsb/actions/runs/30037527199)
+- **Status**: ⏳ Pending CI | **Change**: survival (KM, CoxPH, log-rank), bayesian_regression (BayesianRidge, ARD), garch (GARCH, EGARCH, GJR), quantile_regression, spatial (Moran's I, kriging) (+5 new files)
+- **Metric**: 193 (prev best: 211 pre-rebase / 188 post-rebase, delta: +5) | **Commit**: 6978702
+
 ### Iter 428 — 2026-07-23 07:47 UTC — [Run §29989081120](https://github.com/githubnext/tsb/actions/runs/29989081120)
-- **Status**: ⏳ Pending CI | **Change**: functional_pca, local_poly_regression, kernel_smoothing, isotonic_regression, transfer_func, spectral, stl_decomp, forecast_eval, factor_analysis, covariance_shrinkage, robust_regression, nmf, ica, sarima, granger, markov_switch, cointegration, var_model (+18 new files)
-- **Metric**: 211 (prev best: 193, delta: +18) | **Commit**: 53ebd8e
+- +18 new stats files (functional_pca, sarima, granger, var_model, etc.) Metric: 211. Pending-CI.
 
-### Iter 427 — 2026-07-22 19:24 UTC — [Run §29950528486](https://github.com/githubnext/tsb/actions/runs/29950528486)
-- **Status**: ⏳ Pending CI | **Change**: sarima.ts, granger.ts, markov_switch.ts, cointegration.ts, var_model.ts, spectral.ts, stl.ts, forecast_eval.ts, factor_analysis.ts, covariance_shrinkage.ts, robust_regression.ts, nmf.ts, ica.ts (+13 new files)
-- **Metric**: 206 (prev best: 198, delta: +8) | **Commit**: 358a914
-
-### Iters 407–427: ✅ DLM(407), HMM(410), time series models (420-427). Metric 191→206 across multiple runs. All pending-CI.
+### Iters 407–427: ✅ DLM(407), HMM(410), time-series models. Metric 191→206.
 ### Iters 1–406: (0→191) Core, stats, io, window, groupby, reshape, merge, tseries, wasm, playground.
