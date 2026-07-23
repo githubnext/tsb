@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-22T13:25:35Z |
-| Iteration Count | 416 |
-| Best Metric | 754 |
+| Last Run | 2026-07-23T01:25:48Z |
+| Iteration Count | 417 |
+| Best Metric | 755 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -48,6 +48,8 @@
 
 ## 📊 Iteration History
 
+### Iteration 417 — 2026-07-23 01:25 UTC — [Run §29971651261](https://github.com/githubnext/tsb/actions/runs/29971651261)
+✅ +1 → 755: inferFreq benchmark (6 frequency types: ms/s/min/h/D/W, 200 dates each, 500 iters). Python: pandas.tseries.frequencies.infer_freq.
 ### Iteration 416 — 2026-07-22 13:25 UTC — [Run §29923579451](https://github.com/githubnext/tsb/actions/runs/29923579451)
 ✅ +1 → 754: QuarterEnd/QuarterBegin/BMonthEnd/BMonthBegin/BYearEnd/BYearBegin offsets benchmark (5k dates, 50 iters). Python: pandas.tseries.offsets.
 ### Iteration 415 — 2026-07-22 01:25 UTC — [Run §29882922346](https://github.com/githubnext/tsb/actions/runs/29882922346)
