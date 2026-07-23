@@ -197,8 +197,8 @@ export interface ETSForecastResult {
 
 /** Extract numeric array from Series or array. */
 function toArr(y: readonly number[] | Series<number>): readonly number[] {
-  if (Array.isArray(y)) return y;
-  return y.values;
+  if ("dtype" in y) return y.values;
+  return y;
 }
 
 /** Clamp value to [lo, hi]. */

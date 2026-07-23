@@ -80,7 +80,7 @@ function mmul(A: Mat, B: Mat): MutMat {
       if (aip === 0) continue;
       const bp = B[p]!;
       for (let j = 0; j < n; j++) {
-        ci[j] += aip * bp[j]!;
+        ci[j] = (ci[j] ?? 0) + aip * bp[j]!;
       }
     }
   }
