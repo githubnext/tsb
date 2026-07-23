@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Digital Filters</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+
+    /* ── Loading overlay ──────────────────────────────── */
+    #playground-loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    /* ── Section cards ────────────────────────────────── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    /* ── Playground block ─────────────────────────────── */
+    .playground-block {
+      margin-top: 0.75rem;
+    }
+    .playground-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .playground-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .playground-actions button {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .playground-run { font-weight: 600; }
+
+    /* ── Editor textarea ──────────────────────────────── */
+    .playground-editor {
+      display: block;
+      width: 100%;
+      min-height: 80px;
+      background: #0d1117;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      line-height: 1.55;
+      resize: vertical;
+      outline: none;
+      tab-size: 2;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    /* ── Output area ──────────────────────────────────── */
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #8b949e;
+      white-space: pre-wrap;
+      min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active {
+      color: var(--green);
+      border-color: var(--green);
+    }
+    .playground-output.error {
+      color: var(--red);
+      border-color: var(--red);
+    }
+    .playground-hint {
+      font-size: 0.75rem;
+      color: #484f58;
+      margin-top: 0.35rem;
+      text-align: right;
+    }
+
+    /* ── Footer ───────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    /* ── API table ────────────────────────────────────── */
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 1rem; text-align: left; }
+    th { background: var(--surface); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <!-- Loading overlay (hidden once TS compiler + tsb are ready) -->
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>🎛️ Digital Filters — Interactive Playground</h1>
+  <p>
+    FIR and IIR filter design and application — mirrors <code>scipy.signal</code>.<br>
+    <strong style="color: var(--text);">Edit any code block below and press ▶ Run
+    (or Ctrl+Enter) to execute it live in your browser.</strong>
+  </p>
+
+  <!-- ── 1. Low-pass FIR ──────────────────────────────── -->
+  <div class="section">
+    <h2>1. Low-pass FIR with firwin</h2>
+    <p>Design a 51-tap Hamming-windowed low-pass FIR and check its DC and Nyquist gain.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { firwin, freqz, cAbs } from "tsb";
+
+// 51-tap Hamming-windowed low-pass at 0.3 × Nyquist
+const b = firwin(51, 0.3);
+console.log(`Coefficients: ${b.length} taps`);
+console.log(`DC gain: ${b.reduce((s, v) => s + v, 0).toFixed(6)}`);
+
+const { H } = freqz(b, [1], 512);
+const mag = H.map(cAbs);
+console.log(`Gain at DC:      ${mag[0].toFixed(4)}`);
+console.log(`Gain at Nyquist: ${mag[511].toFixed(4)}`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+b = signal.firwin(51, 0.3)
+print(f"Coefficients: {len(b)} taps")
+print(f"DC gain: {np.sum(b):.6f}")
+
+w, h = signal.freqz(b, [1], worN=512)
+mag = np.abs(h)
+print(f"Gain at DC:      {mag[0]:.4f}")
+print(f"Gain at Nyquist: {mag[511]:.4f}")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 2. High-pass FIR ─────────────────────────────── -->
+  <div class="section">
+    <h2>2. High-pass FIR</h2>
+    <p>Pass high frequencies by setting <code>pass_zero: false</code>. DC gain should be near 0, Nyquist near 1.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { firwin, freqz, cAbs } from "tsb";
+
+const b = firwin(51, 0.3, { pass_zero: false });
+const { H } = freqz(b, [1], 512);
+const mag = H.map(cAbs);
+
+console.log(`Gain at DC:      ${mag[0].toFixed(4)}    (should be ≈ 0)`);
+console.log(`Gain at Nyquist: ${mag[511].toFixed(4)}  (should be ≈ 1)`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+b = signal.firwin(51, 0.3, pass_zero=False)
+w, h = signal.freqz(b, [1], worN=512)
+mag = np.abs(h)
+print(f"Gain at DC:      {mag[0]:.4f}    (should be ≈ 0)")
+print(f"Gain at Nyquist: {mag[511]:.4f}  (should be ≈ 1)")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 3. lfilter vs filtfilt ────────────────────────── -->
+  <div class="section">
+    <h2>3. Apply FIR: lfilter vs filtfilt</h2>
+    <p><code>lfilter</code> is causal (has phase delay); <code>filtfilt</code> applies the filter twice for zero-phase output.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { firwin, lfilter, filtfilt } from "tsb";
+
+const fs = 512, n = 512;
+const x = Array.from({ length: n }, (_, i) =>
+  Math.sin(2 * Math.PI * 20 * i / fs) +
+  Math.sin(2 * Math.PI * 200 * i / fs),
+);
+
+const b = firwin(63, 100, { fs });
+const yLf = lfilter(b, [1], x);
+const yFf = filtfilt(b, [1], x);
+
+const mid = 256;
+console.log(`Input at mid-point:         ${x[mid].toFixed(4)}`);
+console.log(`lfilter output (causal):    ${yLf[mid].toFixed(4)}`);
+console.log(`filtfilt output (no delay): ${yFf[mid].toFixed(4)}`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+fs, n = 512, 512
+i = np.arange(n)
+x = np.sin(2 * np.pi * 20 * i / fs) + np.sin(2 * np.pi * 200 * i / fs)
+
+b = signal.firwin(63, 100, fs=fs)
+yLf = signal.lfilter(b, [1], x)
+yFf = signal.filtfilt(b, [1], x)
+
+mid = 256
+print(f"Input at mid-point:         {x[mid]:.4f}")
+print(f"lfilter output (causal):    {yLf[mid]:.4f}")
+print(f"filtfilt output (no delay): {yFf[mid]:.4f}")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 4. Butterworth low-pass ───────────────────────── -->
+  <div class="section">
+    <h2>4. Butterworth low-pass filter design</h2>
+    <p>Design a 4th-order Butterworth IIR filter. <code>butter</code> returns both SOS form (numerically preferred) and ba form.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { butter, sosfreqz, cAbs } from "tsb";
+
+const { sos, b, a } = butter(4, 0.3, "lowpass");
+console.log(`SOS sections: ${sos.length}`);
+console.log(`b: [${b.map(v => v.toFixed(6)).join(", ")}]`);
+console.log(`a: [${a.map(v => v.toFixed(6)).join(", ")}]`);
+
+const { H } = sosfreqz(sos, 512);
+const mag = H.map(cAbs);
+console.log(`DC gain:        ${mag[0].toFixed(4)}  (should be ≈ 1.0)`);
+console.log(`At cutoff (~77): ${mag[77].toFixed(4)}  (≈ 0.707 = −3 dB)`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+sos = signal.butter(4, 0.3, "low", output="sos")
+b, a = signal.butter(4, 0.3, "low")
+print(f"SOS sections: {len(sos)}")
+print(f"b: [{', '.join(f'{v:.6f}' for v in b)}]")
+print(f"a: [{', '.join(f'{v:.6f}' for v in a)}]")
+
+w, h = signal.sosfreqz(sos, worN=512)
+mag = np.abs(h)
+print(f"DC gain:        {mag[0]:.4f}  (should be ≈ 1.0)")
+print(f"At cutoff (~77): {mag[77]:.4f}  (≈ 0.707 = −3 dB)")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 5. sosfilt vs sosfiltfilt ─────────────────────── -->
+  <div class="section">
+    <h2>5. Apply Butterworth: sosfilt vs sosfiltfilt</h2>
+    <p>Filter a noisy 50 Hz signal to remove 300 Hz interference. Zero-phase output is closer to the clean reference.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { butter, sosfilt, sosfiltfilt } from "tsb";
+
+const fs = 1000, n = 1000;
+const x = Array.from({ length: n }, (_, i) =>
+  Math.sin(2 * Math.PI * 50 * i / fs) +
+  0.5 * Math.sin(2 * Math.PI * 300 * i / fs),
+);
+
+const { sos } = butter(4, 150 / (fs / 2), "lowpass");
+const y1 = sosfilt(sos, x);
+const y2 = sosfiltfilt(sos, x);
+
+const mid = 500;
+const ref = Math.sin(2 * Math.PI * 50 * mid / fs);
+console.log(`Reference (50 Hz):     ${ref.toFixed(4)}`);
+console.log(`sosfilt output:        ${y1[mid].toFixed(4)}`);
+console.log(`sosfiltfilt output:    ${y2[mid].toFixed(4)}  (zero-phase, closer to ref)`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+fs, n = 1000, 1000
+i = np.arange(n)
+x = np.sin(2 * np.pi * 50 * i / fs) + 0.5 * np.sin(2 * np.pi * 300 * i / fs)
+
+sos = signal.butter(4, 150 / (fs / 2), "low", output="sos")
+y1 = signal.sosfilt(sos, x)
+y2 = signal.sosfiltfilt(sos, x)
+
+mid = 500
+ref = np.sin(2 * np.pi * 50 * mid / fs)
+print(f"Reference (50 Hz):     {ref:.4f}")
+print(f"sosfilt output:        {y1[mid]:.4f}")
+print(f"sosfiltfilt output:    {y2[mid]:.4f}  (zero-phase, closer to ref)")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 6. High-pass Butterworth ──────────────────────── -->
+  <div class="section">
+    <h2>6. High-pass Butterworth</h2>
+    <p>A 2nd-order Butterworth high-pass attenuates DC and passes high frequencies.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { butter, sosfreqz, cAbs } from "tsb";
+
+const { sos } = butter(2, 0.3, "highpass");
+const { H } = sosfreqz(sos, 512);
+const mag = H.map(cAbs);
+
+console.log(`Gain at DC (w=0):       ${mag[0].toFixed(4)}  (should be ≈ 0)`);
+console.log(`Gain at Nyquist (w=π):  ${mag[511].toFixed(4)}  (should be ≈ 1.0)`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+sos = signal.butter(2, 0.3, "high", output="sos")
+w, h = signal.sosfreqz(sos, worN=512)
+mag = np.abs(h)
+print(f"Gain at DC (w=0):       {mag[0]:.4f}  (should be ≈ 0)")
+print(f"Gain at Nyquist (w=π):  {mag[511]:.4f}  (should be ≈ 1.0)")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 7. Multiple orders comparison ─────────────────── -->
+  <div class="section">
+    <h2>7. Butterworth gain at cutoff — multiple orders</h2>
+    <p>All Butterworth filters have exactly −3 dB gain at the cutoff frequency, regardless of order.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { butter, sosfreqz, cAbs } from "tsb";
+
+const Wn = 0.3;
+console.log("Butterworth −3 dB gain at cutoff frequency:");
+for (const N of [1, 2, 4, 6, 8]) {
+  const { sos } = butter(N, Wn, "lowpass");
+  const { H } = sosfreqz(sos, [Wn * Math.PI]);
+  const gain = cAbs(H[0]);
+  const dB = 20 * Math.log10(gain);
+  console.log(`  N=${N}: gain=${gain.toFixed(4)}  (${dB.toFixed(2)} dB)`);
+}</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+Wn = 0.3
+print("Butterworth −3 dB gain at cutoff frequency:")
+for N in [1, 2, 4, 6, 8]:
+    sos = signal.butter(N, Wn, "low", output="sos")
+    _, h = signal.sosfreqz(sos, worN=[Wn * np.pi])
+    gain = abs(h[0])
+    dB = 20 * np.log10(gain)
+    print(f"  N={N}: gain={gain:.4f}  ({dB:.2f} dB)")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── API Reference ─────────────────────────────────── -->
+  <div class="section">
+    <h2>API Reference</h2>
+    <table>
+      <tr><th>Function</th><th>Description</th><th>Mirrors</th></tr>
+      <tr><td><code>firwin(n, cutoff, opts?)</code></td><td>FIR design (windowed-sinc)</td><td><code>scipy.signal.firwin</code></td></tr>
+      <tr><td><code>butter(N, Wn, type?)</code></td><td>Butterworth IIR design</td><td><code>scipy.signal.butter</code></td></tr>
+      <tr><td><code>freqz(b, a?, worN?)</code></td><td>FIR/IIR frequency response</td><td><code>scipy.signal.freqz</code></td></tr>
+      <tr><td><code>sosfreqz(sos, worN?)</code></td><td>SOS frequency response</td><td><code>scipy.signal.sosfreqz</code></td></tr>
+      <tr><td><code>lfilter(b, a, x)</code></td><td>Causal FIR/IIR filter</td><td><code>scipy.signal.lfilter</code></td></tr>
+      <tr><td><code>filtfilt(b, a, x)</code></td><td>Zero-phase filter</td><td><code>scipy.signal.filtfilt</code></td></tr>
+      <tr><td><code>sosfilt(sos, x)</code></td><td>Causal SOS filter</td><td><code>scipy.signal.sosfilt</code></td></tr>
+      <tr><td><code>sosfiltfilt(sos, x)</code></td><td>Zero-phase SOS filter</td><td><code>scipy.signal.sosfiltfilt</code></td></tr>
+    </table>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <!-- Playground runtime: loads TypeScript compiler + tsb bundle, sets up editors -->
+  <script type="module" src="playground-runtime.js"></script>
+</body>
+</html>

@@ -67,6 +67,8 @@ const NON_PLAYGROUND_PAGES = new Set<string>([
   "kde.html",
   "multivariate.html",
   "sas.html",
+  "hmm.html",
+  "dlm.html",
 ]);
 
 const PORT = 3399;

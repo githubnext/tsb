@@ -925,6 +925,10 @@ export { toOffset, inferFreq, FREQ_ALIASES } from "./tseries/frequencies.ts";
 export { readSas } from "./io/read_sas.ts";
 export type { ReadSasOptions } from "./io/read_sas.ts";
 
+// io.orc — Apache ORC file format read/write
+export { readOrc, toOrc } from "./io/orc.ts";
+export type { ReadOrcOptions, ToOrcOptions } from "./io/orc.ts";
+
 // pd.arrays.SparseArray / pd.SparseDtype — sparse storage for arrays
 // with many repeated (fill) values
 export { SparseArray, SparseDtype } from "./core/sparse.ts";
@@ -1008,3 +1012,165 @@ export {
   tsallisEntropy,
 } from "./stats/information.ts";
 export type { PMF, NMIMethod } from "./stats/information.ts";
+
+// signal processing — FFT, windows, STFT, Welch PSD, periodogram
+export {
+  complex,
+  cAbs,
+  cArg,
+  fft,
+  ifft,
+  rfft,
+  irfft,
+  fftFreq,
+  rfftFreq,
+  fftshift,
+  ifftshift,
+  rectangularWindow,
+  bartlettWindow,
+  hannWindow,
+  hammingWindow,
+  blackmanWindow,
+  blackmanHarrisWindow,
+  flatTopWindow,
+  kaiserWindow,
+  getWindow,
+  stft,
+  istft,
+  welch,
+  periodogram,
+} from "./stats/signal.ts";
+export type {
+  Complex,
+  WindowName,
+  STFTOptions,
+  STFTResult,
+  ISTFTOptions,
+  WelchOptions,
+  PSDResult,
+  PeriodogramOptions,
+} from "./stats/signal.ts";
+
+// digital filters — FIR/IIR design and application (mirrors scipy.signal)
+export {
+  firwin,
+  freqz,
+  sosfreqz,
+  lfilter,
+  filtfilt,
+  sosfilt,
+  sosfiltfilt,
+  butter,
+} from "./stats/filters.ts";
+export type {
+  FirwinOptions,
+  FreqzResult,
+  SOSSection,
+  ButterResult,
+  FilterType,
+} from "./stats/filters.ts";
+
+// ACF/PACF — autocorrelation, partial autocorrelation, portmanteau tests
+export {
+  autocorr,
+  acf,
+  pacf,
+  ccf,
+  durbinWatson,
+  ljungBox,
+  boxPierce,
+} from "./stats/acf_pacf.ts";
+export type {
+  ACFResult,
+  PACFResult,
+  PortmanteauResult,
+  ACFOptions,
+  PACFOptions,
+  CCFOptions,
+  PortmanteauOptions,
+} from "./stats/acf_pacf.ts";
+
+// ARIMA — ARIMA(p,d,q) time-series model (Hannan-Rissanen, forecast CIs)
+export { ARIMAModel, fitArima } from "./stats/arima.ts";
+export type {
+  ARIMAOptions,
+  ARIMAFitResult,
+  ARIMAForecastResult,
+} from "./stats/arima.ts";
+
+// read_avro / toAvro — Apache Avro OCF I/O for DataFrame
+export { readAvro, toAvro } from "./io/read_avro.ts";
+export type {
+  ReadAvroOptions,
+  ToAvroOptions,
+} from "./io/read_avro.ts";
+
+// Kalman filter & RTS smoother — linear Gaussian state-space model
+export {
+  KalmanFilter,
+  StateSpaceModel,
+  kalmanFilter1D,
+  kalmanSmooth1D,
+  extractScalarMeans,
+  extractScalarVariances,
+  filteredPredictionInterval,
+} from "./stats/kalman.ts";
+export type {
+  KalmanFilterOptions,
+  LocalLevelOptions,
+  LocalLinearTrendOptions,
+  KalmanFilterResult,
+  KalmanSmootherResult,
+} from "./stats/kalman.ts";
+
+// ETS — Exponential Smoothing / Holt-Winters (Simple, Holt, full Holt-Winters)
+export {
+  SimpleExpSmoothing,
+  Holt,
+  ExponentialSmoothing,
+  simpleExpSmoothing,
+  holt,
+  fitEts,
+} from "./stats/ets.ts";
+export type {
+  ETSTrend,
+  ETSSeasonal,
+  ETSInit,
+  SESOptions,
+  SESFitResult,
+  HoltOptions,
+  HoltFitResult,
+  ExponentialSmoothingOptions,
+  ExponentialSmoothingFitResult,
+  ETSForecastResult,
+} from "./stats/ets.ts";
+
+export {
+  DLM,
+  buildLocalLevel,
+  buildLocalLinearTrend,
+  buildPolynomial,
+  buildFourier,
+  buildRegression,
+  combineDLMs,
+} from "./stats/dlm.ts";
+export type {
+  DLMSpec,
+  DLMOptions,
+  DLMFilterStep,
+  DLMResult,
+  DLMSmootherResult,
+  DLMForecastResult,
+} from "./stats/dlm.ts";
+export {
+  GaussianHMM,
+  MultinomialHMM,
+  fitGaussianHMM,
+  hmmViterbi,
+} from "./stats/hmm.ts";
+export type {
+  GaussianHMMParams,
+  GaussianHMMFit,
+  MultinomialHMMParams,
+  MultinomialHMMFit,
+} from "./stats/hmm.ts";
