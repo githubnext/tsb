@@ -21,19 +21,15 @@ import {
 
 /** Passenger data (Box & Jenkins airline data first 12 months). */
 const AIRLINE = [
-  112, 118, 132, 129, 121, 135, 148, 148, 136, 119, 104, 118,
-  115, 126, 141, 135, 125, 149, 170, 170, 158, 133, 114, 140,
-  145, 150, 178, 163, 172, 178, 199, 199, 184, 162, 146, 166,
+  112, 118, 132, 129, 121, 135, 148, 148, 136, 119, 104, 118, 115, 126, 141, 135, 125, 149, 170,
+  170, 158, 133, 114, 140, 145, 150, 178, 163, 172, 178, 199, 199, 184, 162, 146, 166,
 ];
 
 /** Simple upward trend series. */
 const TREND = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30];
 
 /** Seasonal additive series (no trend). */
-const SEASONAL_ADD = [
-  5, 8, 7, 4, 5, 8, 7, 4, 5, 8, 7, 4,
-  5, 8, 7, 4, 5, 8, 7, 4, 6, 9, 8, 5,
-];
+const SEASONAL_ADD = [5, 8, 7, 4, 5, 8, 7, 4, 5, 8, 7, 4, 5, 8, 7, 4, 5, 8, 7, 4, 6, 9, 8, 5];
 
 /** Deterministic LCG for reproducible pseudo-noise. */
 function lcg(seed: number): () => number {
@@ -58,14 +54,18 @@ function buildSeasonal(n: number, amplitude: number, period: number, noiseAmp = 
 /** Mean absolute error between two arrays. */
 function mae(a: readonly number[], b: readonly number[]): number {
   let s = 0;
-  for (let i = 0; i < a.length; i++) s += Math.abs((a[i] ?? 0) - (b[i] ?? 0));
+  for (let i = 0; i < a.length; i++) {
+    s += Math.abs((a[i] ?? 0) - (b[i] ?? 0));
+  }
   return s / a.length;
 }
 
 /** Root mean squared error. */
 function rmse(a: readonly number[], b: readonly number[]): number {
   let s = 0;
-  for (let i = 0; i < a.length; i++) s += ((a[i] ?? 0) - (b[i] ?? 0)) ** 2;
+  for (let i = 0; i < a.length; i++) {
+    s += ((a[i] ?? 0) - (b[i] ?? 0)) ** 2;
+  }
   return Math.sqrt(s / a.length);
 }
 
@@ -97,17 +97,16 @@ describe("SimpleExpSmoothing", () => {
     it("residuals + fittedValues = y", () => {
       const fit = new SimpleExpSmoothing().fit(TREND);
       for (let i = 0; i < TREND.length; i++) {
-        expect((fit.fittedValues[i] ?? 0) + (fit.residuals[i] ?? 0)).toBeCloseTo(
-          TREND[i] ?? 0,
-          8,
-        );
+        expect((fit.fittedValues[i] ?? 0) + (fit.residuals[i] ?? 0)).toBeCloseTo(TREND[i] ?? 0, 8);
       }
     });
 
     it("sse equals sum of squared residuals", () => {
       const fit = new SimpleExpSmoothing().fit(TREND);
       let sse = 0;
-      for (const e of fit.residuals) sse += e * e;
+      for (const e of fit.residuals) {
+        sse += e * e;
+      }
       expect(fit.sse).toBeCloseTo(sse, 6);
     });
 
@@ -157,14 +156,16 @@ describe("SimpleExpSmoothing", () => {
       model.fit(TREND);
       const fc = model.forecast(4);
       expect(fc.length).toBe(4);
-      for (const v of fc) expect(v).toBeCloseTo(fc[0] ?? 0, 8);
+      for (const v of fc) {
+        expect(v).toBeCloseTo(fc[0] ?? 0, 8);
+      }
     });
 
     it("forecast ≈ last observed value for α ≈ 1", () => {
       const model = new SimpleExpSmoothing();
       model.fit(TREND, { alpha: 0.9999 });
       const fc = model.forecast(1);
-      expect(fc[0]).toBeCloseTo(TREND[TREND.length - 1] ?? 0, 0);
+      expect(fc[0]).toBeCloseTo(TREND.at(-1) ?? 0, 0);
     });
 
     it("functional API simpleExpSmoothing returns same result", () => {
@@ -187,7 +188,9 @@ describe("SimpleExpSmoothing", () => {
       const model = new SimpleExpSmoothing();
       model.fit(y);
       const fc = model.forecast(5);
-      for (const v of fc) expect(Math.abs(v - 5)).toBeLessThan(1);
+      for (const v of fc) {
+        expect(Math.abs(v - 5)).toBeLessThan(1);
+      }
     });
   });
 });
@@ -249,7 +252,9 @@ describe("Holt", () => {
     it("sse = sum of squared residuals", () => {
       const fit = new Holt().fit(TREND);
       let sse = 0;
-      for (const e of fit.residuals) sse += e * e;
+      for (const e of fit.residuals) {
+        sse += e * e;
+      }
       expect(fit.sse).toBeCloseTo(sse, 6);
     });
 
@@ -288,8 +293,8 @@ describe("Holt", () => {
       const model = new Holt();
       model.fit(TREND);
       const fc = model.forecast(3);
-      expect((fc[1] ?? 0)).toBeGreaterThan(fc[0] ?? 0);
-      expect((fc[2] ?? 0)).toBeGreaterThan(fc[1] ?? 0);
+      expect(fc[1] ?? 0).toBeGreaterThan(fc[0] ?? 0);
+      expect(fc[2] ?? 0).toBeGreaterThan(fc[1] ?? 0);
     });
 
     it("damped forecasts converge to a limit", () => {
@@ -341,9 +346,8 @@ describe("ExponentialSmoothing", () => {
     });
 
     it("requires 2 full seasonal periods when seasonal is set", () => {
-      expect(
-        () =>
-          new ExponentialSmoothing({ seasonal: "add", seasonalPeriods: 4 }).fit([1, 2, 3, 4, 5]),
+      expect(() =>
+        new ExponentialSmoothing({ seasonal: "add", seasonalPeriods: 4 }).fit([1, 2, 3, 4, 5]),
       ).toThrow(RangeError);
     });
   });
@@ -418,10 +422,7 @@ describe("ExponentialSmoothing", () => {
         seasonalPeriods: m,
       }).fit(y);
       for (let i = 0; i < y.length; i++) {
-        expect((fit.fittedValues[i] ?? 0) + (fit.residuals[i] ?? 0)).toBeCloseTo(
-          y[i] ?? 0,
-          6,
-        );
+        expect((fit.fittedValues[i] ?? 0) + (fit.residuals[i] ?? 0)).toBeCloseTo(y[i] ?? 0, 6);
       }
     });
 
@@ -432,7 +433,9 @@ describe("ExponentialSmoothing", () => {
         seasonalPeriods: m,
       }).fit(y);
       let sse = 0;
-      for (const e of fit.residuals) sse += e * e;
+      for (const e of fit.residuals) {
+        sse += e * e;
+      }
       expect(fit.sse).toBeCloseTo(sse, 6);
     });
 
@@ -465,7 +468,9 @@ describe("ExponentialSmoothing", () => {
       });
       model.fit(y);
       const fc = model.forecast(8);
-      for (const v of fc) expect(Number.isFinite(v)).toBe(true);
+      for (const v of fc) {
+        expect(Number.isFinite(v)).toBe(true);
+      }
     });
 
     it("seasonal forecast repeats seasonal pattern (low noise data)", () => {
@@ -612,7 +617,7 @@ describe("ExponentialSmoothing", () => {
       model.fit(TREND);
       const r = model.forecastWithCI(4);
       for (let i = 0; i < 4; i++) {
-        expect((r.upper[i] ?? 0)).toBeGreaterThan(r.lower[i] ?? 0);
+        expect(r.upper[i] ?? 0).toBeGreaterThan(r.lower[i] ?? 0);
       }
     });
 
@@ -621,8 +626,8 @@ describe("ExponentialSmoothing", () => {
       model.fit(TREND);
       const r = model.forecastWithCI(4);
       for (let i = 0; i < 4; i++) {
-        expect((r.forecast[i] ?? 0)).toBeGreaterThanOrEqual(r.lower[i] ?? 0);
-        expect((r.forecast[i] ?? 0)).toBeLessThanOrEqual(r.upper[i] ?? 0);
+        expect(r.forecast[i] ?? 0).toBeGreaterThanOrEqual(r.lower[i] ?? 0);
+        expect(r.forecast[i] ?? 0).toBeLessThanOrEqual(r.upper[i] ?? 0);
       }
     });
 
@@ -632,7 +637,7 @@ describe("ExponentialSmoothing", () => {
       const r = model.forecastWithCI(5);
       const widths = r.upper.map((u, i) => u - (r.lower[i] ?? 0));
       for (let i = 1; i < widths.length; i++) {
-        expect((widths[i] ?? 0)).toBeGreaterThanOrEqual((widths[i - 1] ?? 0) - 1e-6);
+        expect(widths[i] ?? 0).toBeGreaterThanOrEqual((widths[i - 1] ?? 0) - 1e-6);
       }
     });
   });
@@ -696,7 +701,9 @@ describe("ExponentialSmoothing", () => {
     it("handles constant series (SES mode)", () => {
       const y = new Array<number>(20).fill(7);
       const fit = fitEts(y);
-      for (const v of fit.fittedValues) expect(Math.abs(v - 7)).toBeLessThan(1);
+      for (const v of fit.fittedValues) {
+        expect(Math.abs(v - 7)).toBeLessThan(1);
+      }
     });
 
     it("handles single-cycle seasonal (m=2)", () => {
@@ -735,7 +742,9 @@ describe("ETS property-based", () => {
             const diff = Math.abs(
               (fit.fittedValues[i] ?? 0) + (fit.residuals[i] ?? 0) - (y[i] ?? 0),
             );
-            if (diff > 1e-4) return false;
+            if (diff > 1e-4) {
+              return false;
+            }
           }
           return true;
         },

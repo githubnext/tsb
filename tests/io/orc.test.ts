@@ -42,7 +42,7 @@ describe("toOrc — file structure", () => {
     const df = DataFrame.fromColumns({ x: [1] });
     const buf = toOrc(df);
     // Last byte is postscript length, must be > 0
-    expect(buf[buf.length - 1]).toBeGreaterThan(0);
+    expect(buf.at(-1)).toBeGreaterThan(0);
   });
 });
 
@@ -303,14 +303,17 @@ describe("readOrc / toOrc — large dataset", () => {
 describe("readOrc / toOrc — property tests", () => {
   it("integer round-trip: arbitrary int arrays", () => {
     fc.assert(
-      fc.property(fc.array(fc.integer({ min: -1_000_000, max: 1_000_000 }), { minLength: 1, maxLength: 100 }), (data) => {
-        const df = DataFrame.fromColumns({ n: data });
-        const rt = roundtrip(df);
-        const vals = colArr(rt, "n") as number[];
-        for (let i = 0; i < data.length; i++) {
-          expect(vals[i]).toBe(data[i]);
-        }
-      }),
+      fc.property(
+        fc.array(fc.integer({ min: -1_000_000, max: 1_000_000 }), { minLength: 1, maxLength: 100 }),
+        (data) => {
+          const df = DataFrame.fromColumns({ n: data });
+          const rt = roundtrip(df);
+          const vals = colArr(rt, "n") as number[];
+          for (let i = 0; i < data.length; i++) {
+            expect(vals[i]).toBe(data[i]);
+          }
+        },
+      ),
     );
   });
 

@@ -56,7 +56,7 @@ function cols(A: Mat): number {
 
 /** Create an n×m zero matrix. */
 function zeros(n: number, m: number): MutMat {
-  return Array.from({ length: n }, () => Array<number>(m).fill(0));
+  return Array.from({ length: n }, () => new Array(m).fill(0));
 }
 
 /** Create an n×n identity matrix. */
@@ -77,7 +77,9 @@ function mmul(A: Mat, B: Mat): MutMat {
     const ci = C[i]!;
     for (let p = 0; p < k; p++) {
       const aip = ai[p]!;
-      if (aip === 0) continue;
+      if (aip === 0) {
+        continue;
+      }
       const bp = B[p]!;
       for (let j = 0; j < n; j++) {
         ci[j] = (ci[j] ?? 0) + aip * bp[j]!;
@@ -91,11 +93,13 @@ function mmul(A: Mat, B: Mat): MutMat {
 function mvmul(A: Mat, x: readonly number[]): number[] {
   const m = rows(A);
   const k = x.length;
-  const y = Array<number>(m).fill(0);
+  const y = new Array(m).fill(0);
   for (let i = 0; i < m; i++) {
     const ai = A[i]!;
     let s = 0;
-    for (let p = 0; p < k; p++) s += ai[p]! * x[p]!;
+    for (let p = 0; p < k; p++) {
+      s += ai[p]! * x[p]!;
+    }
     y[i] = s;
   }
   return y;
@@ -106,8 +110,11 @@ function T(A: Mat): MutMat {
   const m = rows(A);
   const n = cols(A);
   const At = zeros(n, m);
-  for (let i = 0; i < m; i++)
-    for (let j = 0; j < n; j++) At[j]![i] = A[i]![j]!;
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      At[j]![i] = A[i]?.[j]!;
+    }
+  }
   return At;
 }
 
@@ -116,7 +123,7 @@ function madd(A: Mat, B: Mat): MutMat {
   const m = rows(A);
   const n = cols(A);
   return Array.from({ length: m }, (_, i) =>
-    Array.from({ length: n }, (_, j) => A[i]![j]! + B[i]![j]!),
+    Array.from({ length: n }, (_, j) => A[i]?.[j]! + B[i]?.[j]!),
   );
 }
 
@@ -125,7 +132,7 @@ function msub(A: Mat, B: Mat): MutMat {
   const m = rows(A);
   const n = cols(A);
   return Array.from({ length: m }, (_, i) =>
-    Array.from({ length: n }, (_, j) => A[i]![j]! - B[i]![j]!),
+    Array.from({ length: n }, (_, j) => A[i]?.[j]! - B[i]?.[j]!),
   );
 }
 
@@ -152,25 +159,35 @@ function matInv(A: Mat): MutMat | null {
   ]);
   for (let col = 0; col < n; col++) {
     let maxRow = col;
-    let maxVal = Math.abs(aug[col]![col]!);
+    let maxVal = Math.abs(aug[col]?.[col]!);
     for (let row = col + 1; row < n; row++) {
-      const v = Math.abs(aug[row]![col]!);
+      const v = Math.abs(aug[row]?.[col]!);
       if (v > maxVal) {
         maxVal = v;
         maxRow = row;
       }
     }
-    if (maxVal < 1e-14) return null;
+    if (maxVal < 1e-14) {
+      return null;
+    }
     [aug[col], aug[maxRow]] = [aug[maxRow]!, aug[col]!];
-    const pivot = aug[col]![col]!;
+    const pivot = aug[col]?.[col]!;
     const pivRow = aug[col]!;
-    for (let j = 0; j < 2 * n; j++) pivRow[j] = pivRow[j]! / pivot;
+    for (let j = 0; j < 2 * n; j++) {
+      pivRow[j] = pivRow[j]! / pivot;
+    }
     for (let row = 0; row < n; row++) {
-      if (row === col) continue;
-      const fac = aug[row]![col]!;
-      if (fac === 0) continue;
+      if (row === col) {
+        continue;
+      }
+      const fac = aug[row]?.[col]!;
+      if (fac === 0) {
+        continue;
+      }
       const r = aug[row]!;
-      for (let j = 0; j < 2 * n; j++) r[j] = r[j]! - fac * pivRow[j]!;
+      for (let j = 0; j < 2 * n; j++) {
+        r[j] = r[j]! - fac * pivRow[j]!;
+      }
     }
   }
   return aug.map((row) => row.slice(n));
@@ -183,9 +200,9 @@ function logDet(A: Mat): number {
   let logD = 0;
   for (let col = 0; col < n; col++) {
     let maxRow = col;
-    let maxVal = Math.abs(L[col]![col]!);
+    let maxVal = Math.abs(L[col]?.[col]!);
     for (let row = col + 1; row < n; row++) {
-      const v = Math.abs(L[row]![col]!);
+      const v = Math.abs(L[row]?.[col]!);
       if (v > maxVal) {
         maxVal = v;
         maxRow = row;
@@ -195,13 +212,17 @@ function logDet(A: Mat): number {
       [L[col], L[maxRow]] = [L[maxRow]!, L[col]!];
       logD += Math.log(-1); // sign flip — handled by real part
     }
-    const pivot = L[col]![col]!;
-    if (Math.abs(pivot) < 1e-300) return -Infinity;
+    const pivot = L[col]?.[col]!;
+    if (Math.abs(pivot) < 1e-300) {
+      return Number.NEGATIVE_INFINITY;
+    }
     logD += Math.log(Math.abs(pivot));
     for (let row = col + 1; row < n; row++) {
-      const fac = L[row]![col]! / pivot;
+      const fac = L[row]?.[col]! / pivot;
       const r = L[row]!;
-      for (let j = col; j < n; j++) r[j] = r[j]! - fac * L[col]![j]!;
+      for (let j = col; j < n; j++) {
+        r[j] = r[j]! - fac * L[col]?.[j]!;
+      }
     }
   }
   return logD;
@@ -387,8 +408,7 @@ export class KalmanFilter {
     this.observationNoiseCov = opts.observationNoiseCov;
 
     const ns = rows(opts.transitionMatrix);
-    this.initialStateMean =
-      opts.initialStateMean ?? Array<number>(ns).fill(0);
+    this.initialStateMean = opts.initialStateMean ?? new Array(ns).fill(0);
     this.initialStateCovariance = opts.initialStateCovariance ?? eye(ns);
   }
 
@@ -465,9 +485,7 @@ export class KalmanFilter {
    * const result = kf.filter([[1], [2], [null], [3], [2.5]]);
    * ```
    */
-  filter(
-    observations: readonly (readonly (number | null)[])[],
-  ): KalmanFilterResult {
+  filter(observations: readonly (readonly (number | null)[])[]): KalmanFilterResult {
     return kalmanFilter(
       observations,
       this.transitionMatrix,
@@ -491,9 +509,7 @@ export class KalmanFilter {
    * console.log(smoothed.smoothedStateMeans);
    * ```
    */
-  smooth(
-    observations: readonly (readonly (number | null)[])[],
-  ): KalmanSmootherResult {
+  smooth(observations: readonly (readonly (number | null)[])[]): KalmanSmootherResult {
     const fwd = this.filter(observations);
     return rtsSmooth(fwd, this.transitionMatrix);
   }
@@ -556,7 +572,7 @@ function kalmanFilter(
 
     if (!hasObs) {
       // ── Missing observation: skip update ──────────────────────────────
-      innovations.push(Array<number>(no).fill(NaN));
+      innovations.push(new Array(no).fill(Number.NaN));
       filtMeans.push(xPred);
       filtCovs.push(PPred);
       xFilt = xPred;
@@ -604,7 +620,9 @@ function kalmanFilter(
     for (let i = 0; i < no; i++) {
       const Sinv_row = Sinv[i]!;
       let sSinvRow = 0;
-      for (let j = 0; j < no; j++) sSinvRow += innov[j]! * Sinv_row[j]!;
+      for (let j = 0; j < no; j++) {
+        sSinvRow += innov[j]! * Sinv_row[j]!;
+      }
       vSv += innov[i]! * sSinvRow;
     }
     logLik -= 0.5 * (no * LOG2PI + logDetS + vSv);
@@ -649,9 +667,7 @@ function rtsSmooth(fwd: KalmanFilterResult, F: Mat): KalmanSmootherResult {
 
   // Initialise last time step from filter
   const lastFiltMean = [...(fwd.filteredStateMeans[T_len - 1] ?? [])];
-  const lastFiltCov = (fwd.filteredStateCovariances[T_len - 1] ?? []).map(
-    (r) => [...r],
-  );
+  const lastFiltCov = (fwd.filteredStateCovariances[T_len - 1] ?? []).map((r) => [...r]);
   smoothMeans[T_len - 1] = lastFiltMean;
   smoothCovs[T_len - 1] = lastFiltCov;
   gains[T_len - 1] = zeros(ns, ns);
@@ -665,10 +681,7 @@ function rtsSmooth(fwd: KalmanFilterResult, F: Mat): KalmanSmootherResult {
 
     // G_t = P_{t|t} · Fᵀ · P_{t+1|t}^{-1}
     const PPredInv = matInv(PPred_next);
-    const G: MutMat =
-      PPredInv !== null
-        ? mmul(mmul(PFilt, FT), PPredInv)
-        : zeros(ns, ns);
+    const G: MutMat = PPredInv !== null ? mmul(mmul(PFilt, FT), PPredInv) : zeros(ns, ns);
 
     const xSmooth_next = smoothMeans[t + 1]!;
     const PSmooth_next = smoothCovs[t + 1]!;
@@ -748,10 +761,8 @@ export function kalmanSmooth1D(
  * const means = extractScalarMeans(result.filteredStateMeans);
  * ```
  */
-export function extractScalarMeans(
-  means: readonly (readonly number[])[],
-): number[] {
-  return means.map((m) => m[0] ?? NaN);
+export function extractScalarMeans(means: readonly (readonly number[])[]): number[] {
+  return means.map((m) => m[0] ?? Number.NaN);
 }
 
 /**
@@ -765,9 +776,9 @@ export function extractScalarMeans(
  * ```
  */
 export function extractScalarVariances(
-  covs: readonly (readonly (readonly number[])[])[]
+  covs: readonly (readonly (readonly number[])[])[],
 ): number[] {
-  return covs.map((P) => P[0]?.[0] ?? NaN);
+  return covs.map((P) => P[0]?.[0] ?? Number.NaN);
 }
 
 /**

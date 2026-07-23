@@ -1,14 +1,14 @@
 /**
  * Tests for dlm.ts — Dynamic Linear Model (State-Space).
  */
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
 import {
   DLM,
+  buildFourier,
   buildLocalLevel,
   buildLocalLinearTrend,
   buildPolynomial,
-  buildFourier,
   buildRegression,
   combineDLMs,
 } from "../../src/stats/dlm.ts";
@@ -30,14 +30,14 @@ describe("DLM — local-level", () => {
     const res = dlm.filter(y);
     expect(res.steps.length).toBe(y.length);
     expect(res.filteredMeans.length).toBe(y.length);
-    expect(res.filteredMeans[0]!.length).toBe(1);
+    expect(res.filteredMeans[0]?.length).toBe(1);
     expect(res.forecastMeans.length).toBe(y.length);
   });
 
   test("log-likelihood is finite and negative", () => {
     const dlm = DLM.localLevel({ sigmaObs: 1, sigmaLevel: 0.5 });
     const res = dlm.filter(y);
-    expect(isFinite(res.logLikelihood)).toBe(true);
+    expect(Number.isFinite(res.logLikelihood)).toBe(true);
     expect(res.logLikelihood).toBeLessThan(0);
   });
 
@@ -57,10 +57,10 @@ describe("DLM — local-level", () => {
     const res = dlm.filter(yMissing);
     expect(res.steps.length).toBe(5);
     // Steps with null observations have null innovation
-    expect(res.steps[1]!.innovation).toBeNull();
-    expect(res.steps[3]!.innovation).toBeNull();
+    expect(res.steps[1]?.innovation).toBeNull();
+    expect(res.steps[3]?.innovation).toBeNull();
     // Steps with observations have non-null innovation
-    expect(res.steps[0]!.innovation).not.toBeNull();
+    expect(res.steps[0]?.innovation).not.toBeNull();
   });
 
   test("higher observation noise → filtered closer to prior", () => {
@@ -69,10 +69,10 @@ describe("DLM — local-level", () => {
     const resLow = dlmLow.filter(y);
     const resHigh = dlmHigh.filter(y);
     // With low obs noise, filtered mean ≈ observation
-    expect(Math.abs(resLow.filteredMeans[0]![0]! - y[0]!)).toBeLessThan(0.1);
+    expect(Math.abs(resLow.filteredMeans[0]?.[0]! - y[0]!)).toBeLessThan(0.1);
     // With high obs noise, filtered mean stays near prior (zero init, drifts slowly)
     // Just check the values are different
-    expect(resLow.filteredMeans[5]![0]).not.toBeCloseTo(resHigh.filteredMeans[5]![0]!, 1);
+    expect(resLow.filteredMeans[5]?.[0]).not.toBeCloseTo(resHigh.filteredMeans[5]?.[0]!, 1);
   });
 });
 
@@ -85,13 +85,13 @@ describe("DLM — local-linear-trend", () => {
     const dlm = DLM.localLinearTrend({ sigmaObs: 0.5, sigmaLevel: 0.1, sigmaSlope: 0.01 });
     const res = dlm.filter(y);
     expect(res.filteredMeans.length).toBe(y.length);
-    expect(res.filteredMeans[0]!.length).toBe(2); // [level, slope]
+    expect(res.filteredMeans[0]?.length).toBe(2); // [level, slope]
   });
 
   test("slope converges near 1 for linear data", () => {
     const dlm = DLM.localLinearTrend({ sigmaObs: 0.1, sigmaLevel: 0.01, sigmaSlope: 0.01 });
     const res = dlm.filter(y);
-    const lastSlope = res.filteredMeans[y.length - 1]![1]!;
+    const lastSlope = res.filteredMeans[y.length - 1]?.[1]!;
     expect(lastSlope).toBeGreaterThan(0.5);
     expect(lastSlope).toBeLessThan(2);
   });
@@ -125,10 +125,8 @@ describe("DLM — RTS smoother", () => {
     const dlm = DLM.localLinearTrend({ sigmaObs: 1, sigmaLevel: 0.5, sigmaSlope: 0.1 });
     const res = dlm.smooth(y);
     for (let t = 0; t < y.length - 1; t++) {
-      const filtTrace =
-        res.filteredCovs[t]![0]![0]! + (res.filteredCovs[t]![1]?.[1] ?? 0);
-      const smTrace =
-        res.smoothedCovs[t]![0]![0]! + (res.smoothedCovs[t]![1]?.[1] ?? 0);
+      const filtTrace = res.filteredCovs[t]?.[0]?.[0]! + (res.filteredCovs[t]?.[1]?.[1] ?? 0);
+      const smTrace = res.smoothedCovs[t]?.[0]?.[0]! + (res.smoothedCovs[t]?.[1]?.[1] ?? 0);
       // Smoother should not increase uncertainty
       expect(smTrace).toBeLessThanOrEqual(filtTrace + 1e-6);
     }
@@ -138,7 +136,7 @@ describe("DLM — RTS smoother", () => {
     const dlm = DLM.localLevel({ sigmaObs: 1, sigmaLevel: 0.5 });
     const res = dlm.smooth(y);
     const T = y.length;
-    expect(res.smoothedMeans[T - 1]![0]).toBeCloseTo(res.filteredMeans[T - 1]![0]!, 6);
+    expect(res.smoothedMeans[T - 1]?.[0]).toBeCloseTo(res.filteredMeans[T - 1]?.[0]!, 6);
   });
 });
 
@@ -160,8 +158,8 @@ describe("DLM — forecasting", () => {
     const res = dlm.filter(y);
     const fc = dlm.forecast(res, 5);
     for (let i = 0; i < 5; i++) {
-      expect(fc.mean[i]![0]).toBeGreaterThan(fc.lower[i]!);
-      expect(fc.mean[i]![0]).toBeLessThan(fc.upper[i]!);
+      expect(fc.mean[i]?.[0]).toBeGreaterThan(fc.lower[i]!);
+      expect(fc.mean[i]?.[0]).toBeLessThan(fc.upper[i]!);
     }
   });
 
@@ -182,8 +180,8 @@ describe("DLM — forecasting", () => {
     const res = dlm.filter(y);
     const fc = dlm.forecast(res, 3);
     // Should forecast above 10
-    expect(fc.mean[0]![0]).toBeGreaterThan(9);
-    expect(fc.mean[2]![0]).toBeGreaterThan(fc.mean[0]![0]!);
+    expect(fc.mean[0]?.[0]).toBeGreaterThan(9);
+    expect(fc.mean[2]?.[0]).toBeGreaterThan(fc.mean[0]?.[0]!);
   });
 });
 
@@ -206,7 +204,7 @@ describe("buildPolynomial", () => {
     const dlm = new DLM(spec);
     const res = dlm.filter([1, 2, 3, 4, 5]);
     expect(res.filteredMeans.length).toBe(5);
-    expect(res.filteredMeans[0]!.length).toBe(3);
+    expect(res.filteredMeans[0]?.length).toBe(3);
   });
 });
 
@@ -215,15 +213,15 @@ describe("buildFourier", () => {
   test("state dimension is 2*harmonics", () => {
     const spec = buildFourier(12, 3);
     expect(spec.G.length).toBe(6);
-    expect(spec.F[0]!.length).toBe(6);
+    expect(spec.F[0]?.length).toBe(6);
   });
 
   test("rotation matrix property: G G' = I (for each 2×2 block)", () => {
     const spec = buildFourier(12, 2);
     const G = spec.G;
     // Check first block is rotation
-    const c = G[0]![0]!;
-    const s = G[1]![0]!;
+    const c = G[0]?.[0]!;
+    const s = G[1]?.[0]!;
     expect(c * c + s * s).toBeCloseTo(1, 6);
   });
 
@@ -234,7 +232,7 @@ describe("buildFourier", () => {
     const dlm = new DLM(spec);
     const res = dlm.filter(y);
     expect(res.steps.length).toBe(8);
-    expect(isFinite(res.logLikelihood)).toBe(true);
+    expect(Number.isFinite(res.logLikelihood)).toBe(true);
   });
 });
 
@@ -243,8 +241,8 @@ describe("buildRegression", () => {
   test("spec has correct dimensions", () => {
     const spec = buildRegression(3, { sigmaObs: 1, sigmaState: 0.001 });
     expect(spec.G.length).toBe(3);
-    expect(spec.G[0]!.length).toBe(3);
-    expect(spec.F[0]!.length).toBe(3);
+    expect(spec.G[0]?.length).toBe(3);
+    expect(spec.F[0]?.length).toBe(3);
   });
 });
 
@@ -256,7 +254,7 @@ describe("combineDLMs", () => {
     const combined = combineDLMs(ll, llt);
     // ll has 1 state, llt has 2 → combined has 3
     expect(combined.G.length).toBe(3);
-    expect(combined.F[0]!.length).toBe(3);
+    expect(combined.F[0]?.length).toBe(3);
     expect(combined.W.length).toBe(3);
   });
 
@@ -274,7 +272,7 @@ describe("combineDLMs", () => {
     const y = [1, 2, 3, 2, 1, 2, 3, 2];
     const res = dlm.filter(y);
     expect(res.steps.length).toBe(8);
-    expect(isFinite(res.logLikelihood)).toBe(true);
+    expect(Number.isFinite(res.logLikelihood)).toBe(true);
   });
 
   test("throws on empty input", () => {
@@ -306,11 +304,11 @@ describe("DLM.filterDiscount", () => {
   test("discount=1 matches standard filter closely", () => {
     const dlm = DLM.localLevel({ sigmaObs: 1, sigmaLevel: 0.5 });
     const y = [1, 2, 3, 4, 5];
-    const stdRes = dlm.filter(y);
+    const _stdRes = dlm.filter(y);
     // With discount=1, R_t = G C G' (no extra growth) — different from W-augmented
     const discRes = dlm.filterDiscount(y, 1.0);
     expect(discRes.steps.length).toBe(y.length);
-    expect(isFinite(discRes.logLikelihood)).toBe(true);
+    expect(Number.isFinite(discRes.logLikelihood)).toBe(true);
   });
 
   test("lower discount factor → wider prediction intervals", () => {
@@ -319,8 +317,8 @@ describe("DLM.filterDiscount", () => {
     const res095 = dlm.filterDiscount(y, 0.95);
     const res099 = dlm.filterDiscount(y, 0.99);
     // delta=0.95 has more uncertainty → larger Q
-    const q095 = res095.steps[3]!.forecastCov[0]![0]!;
-    const q099 = res099.steps[3]!.forecastCov[0]![0]!;
+    const q095 = res095.steps[3]?.forecastCov[0]?.[0]!;
+    const q099 = res099.steps[3]?.forecastCov[0]?.[0]!;
     expect(q095).toBeGreaterThanOrEqual(q099 - 1e-6);
   });
 });
@@ -335,7 +333,7 @@ describe("DLM factory methods", () => {
     const y = [1, 2, 3];
     const r1 = dlm1.filter(y);
     const r2 = dlm2.filter(y);
-    expect(r1.filteredMeans[0]![0]).toBeCloseTo(r2.filteredMeans[0]![0]!, 4);
+    expect(r1.filteredMeans[0]?.[0]).toBeCloseTo(r2.filteredMeans[0]?.[0]!, 4);
   });
 
   test("DLM.fourier factory", () => {
@@ -357,7 +355,7 @@ describe("DLM edge cases", () => {
     const dlm = DLM.localLevel({ sigmaObs: 1, sigmaLevel: 0.5 });
     const res = dlm.filter([3.14]);
     expect(res.filteredMeans.length).toBe(1);
-    expect(isFinite(res.logLikelihood)).toBe(true);
+    expect(Number.isFinite(res.logLikelihood)).toBe(true);
   });
 
   test("all missing observations", () => {
@@ -372,17 +370,17 @@ describe("DLM edge cases", () => {
     const dlm = DLM.localLevel({ sigmaObs: 0.5, sigmaLevel: 0.1 });
     const res = dlm.filter([5, 5, 5, 5, 5]);
     // Filtered means should converge toward 5
-    const last = res.filteredMeans[4]![0]!;
+    const last = res.filteredMeans[4]?.[0]!;
     expect(last).toBeGreaterThan(4);
     expect(last).toBeLessThan(6);
   });
 
   test("custom prior m0 and C0", () => {
     const dlm = DLM.localLevel({ sigmaObs: 1, sigmaLevel: 0.5 });
-    const res1 = dlm.filter([1, 2, 3], { m0: [0], C0: [[1000]] });
+    const _res1 = dlm.filter([1, 2, 3], { m0: [0], C0: [[1000]] });
     const res2 = dlm.filter([1, 2, 3], { m0: [5], C0: [[0.01]] });
     // Strong prior on m0=5 should keep filtered mean near 5 initially
-    expect(res2.filteredMeans[0]![0]).toBeGreaterThan(3);
+    expect(res2.filteredMeans[0]?.[0]).toBeGreaterThan(3);
   });
 });
 
@@ -397,7 +395,7 @@ describe("DLM property tests", () => {
         (y, sv, sw) => {
           const dlm = DLM.localLevel({ sigmaObs: sv, sigmaLevel: sw });
           const res = dlm.filter(y);
-          return isFinite(res.logLikelihood);
+          return Number.isFinite(res.logLikelihood);
         },
       ),
     );
@@ -423,9 +421,7 @@ describe("DLM property tests", () => {
         (y) => {
           const dlm = DLM.localLevel();
           const res = dlm.smooth(y);
-          return (
-            res.smoothedMeans.length === y.length && res.smoothedCovs.length === y.length
-          );
+          return res.smoothedMeans.length === y.length && res.smoothedCovs.length === y.length;
         },
       ),
     );
@@ -441,7 +437,7 @@ describe("DLM property tests", () => {
           const res = dlm.filter(y);
           const fc2 = dlm.forecast(res, h);
           return fc2.lower.every(
-            (lo, i) => lo <= fc2.mean[i]![0]! + 1e-8 && fc2.mean[i]![0]! <= fc2.upper[i]! + 1e-8,
+            (lo, i) => lo <= fc2.mean[i]?.[0]! + 1e-8 && fc2.mean[i]?.[0]! <= fc2.upper[i]! + 1e-8,
           );
         },
       ),

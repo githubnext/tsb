@@ -129,14 +129,8 @@ function logGamma(z: number): number {
   }
   const g = 7;
   const c = [
-    0.99999999999980993,
-    676.5203681218851,
-    -1259.1392167224028,
-    771.32342877765313,
-    -176.61502916214059,
-    12.507343278686905,
-    -0.13857109526572012,
-    9.9843695780195716e-6,
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
     1.5056327351493116e-7,
   ];
   let x = c[0] ?? 0;
@@ -284,9 +278,7 @@ function toNumbers(input: NumericInput): number[] {
     }
     return out;
   }
-  return (input as readonly number[]).filter(
-    (v) => typeof v === "number" && !Number.isNaN(v),
-  );
+  return (input as readonly number[]).filter((v) => typeof v === "number" && !Number.isNaN(v));
 }
 
 // ─── autocovariance ────────────────────────────────────────────────────────────
@@ -311,11 +303,7 @@ function autocovariance(x: readonly number[], mean: number, nlags: number): numb
 // ─── ACF CI helper ────────────────────────────────────────────────────────────
 
 /** Bartlett confidence intervals for ACF coefficients. */
-function buildAcfCI(
-  acfValues: readonly number[],
-  n: number,
-  alpha: number,
-): [number, number][] {
+function buildAcfCI(acfValues: readonly number[], n: number, alpha: number): [number, number][] {
   const z = normalPpf(1 - alpha / 2);
   const ci: [number, number][] = [];
   let sumSq = 0;
@@ -335,11 +323,7 @@ function buildAcfCI(
 // ─── Levinson-Durbin helpers ──────────────────────────────────────────────────
 
 /** Single Levinson-Durbin recursion step: returns [φ_kk, updated φ array]. */
-function ldStep(
-  acfVals: readonly number[],
-  phi: readonly number[],
-  k: number,
-): [number, number[]] {
+function ldStep(acfVals: readonly number[], phi: readonly number[], k: number): [number, number[]] {
   let num = acfVals[k] ?? 0;
   let den = 1;
   for (let j = 1; j < k; j++) {
@@ -404,12 +388,7 @@ function resolveLags(opt: number | readonly number[] | undefined, maxLag: number
 }
 
 /** Compute Ljung-Box or Box-Pierce Q at lag h. */
-function portmanteauQ(
-  acfVals: readonly number[],
-  n: number,
-  h: number,
-  ljung: boolean,
-): number {
+function portmanteauQ(acfVals: readonly number[], n: number, h: number, ljung: boolean): number {
   let q = 0;
   for (let k = 1; k <= h; k++) {
     const r = acfVals[k] ?? 0;
@@ -474,8 +453,7 @@ export function acf(x: NumericInput, options: ACFOptions = {}): ACFResult {
   const gamma0 = cov[0] ?? 1;
   const acfValues: number[] = cov.map((c) => (gamma0 === 0 ? 0 : c / gamma0));
   const lags = Array.from({ length: nlags + 1 }, (_, i) => i);
-  const confint =
-    options.alpha !== undefined ? buildAcfCI(acfValues, n, options.alpha) : undefined;
+  const confint = options.alpha !== undefined ? buildAcfCI(acfValues, n, options.alpha) : undefined;
   return { acf: acfValues, confint, lags };
 }
 
@@ -623,7 +601,7 @@ function portmanteauTest(
   const modelDf = options.modelDf ?? 0;
   const defaultMaxLag = Math.min(Math.floor(10 * Math.log10(n)), n - 1);
   const lagList = resolveLags(options.lags, defaultMaxLag);
-  const hMax = lagList[lagList.length - 1] ?? defaultMaxLag;
+  const hMax = lagList.at(-1) ?? defaultMaxLag;
   const mean = arr.reduce((s, v) => s + v, 0) / n;
   const cov = autocovariance(arr, mean, hMax);
   const gamma0 = cov[0] ?? 1;

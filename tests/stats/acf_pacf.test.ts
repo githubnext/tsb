@@ -75,12 +75,18 @@ describe("autocorr", () => {
 
   it("property: |autocorr| ≤ 1 for any series", () => {
     fc.assert(
-      fc.property(fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 5, maxLength: 30 }), (xs) => {
-        const r = autocorr(xs, 1);
-        if (!Number.isNaN(r)) {
-          expect(Math.abs(r)).toBeLessThanOrEqual(1 + 1e-9);
-        }
-      }),
+      fc.property(
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 5,
+          maxLength: 30,
+        }),
+        (xs) => {
+          const r = autocorr(xs, 1);
+          if (!Number.isNaN(r)) {
+            expect(Math.abs(r)).toBeLessThanOrEqual(1 + 1e-9);
+          }
+        },
+      ),
       { numRuns: 200 },
     );
   });
@@ -162,7 +168,10 @@ describe("acf", () => {
   it("property: ACF values are in [-1, 1]", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 5, maxLength: 40 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 5,
+          maxLength: 40,
+        }),
         (xs) => {
           const result = acf(xs, { nlags: 3 });
           for (const r of result.acf) {
@@ -228,7 +237,10 @@ describe("pacf", () => {
   it("property: PACF[0] = 1 always", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 6, maxLength: 40 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 6,
+          maxLength: 40,
+        }),
         (xs) => {
           const result = pacf(xs);
           expect(result.pacf[0]).toBe(1.0);
@@ -322,7 +334,10 @@ describe("durbinWatson", () => {
   it("property: DW ∈ [0, 4]", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 2, maxLength: 50 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 2,
+          maxLength: 50,
+        }),
         (xs) => {
           const dw = durbinWatson(xs);
           if (!Number.isNaN(dw)) {
@@ -385,16 +400,19 @@ describe("ljungBox", () => {
     const lb = ljungBox(x, { lags: [5] });
     const bp = boxPierce(x, { lags: [5] });
     // LB statistic ≥ BP statistic (LB has larger finite-sample correction)
-    expect((lb.statistic[0] ?? 0)).toBeGreaterThan((bp.statistic[0] ?? 0) * 0.9);
+    expect(lb.statistic[0] ?? 0).toBeGreaterThan((bp.statistic[0] ?? 0) * 0.9);
   });
 
   it("property: statistic ≥ 0 for any series", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 10, maxLength: 50 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), {
+          minLength: 10,
+          maxLength: 50,
+        }),
         (xs) => {
           const result = ljungBox(xs, { lags: [3] });
-          expect((result.statistic[0] ?? 0)).toBeGreaterThanOrEqual(0);
+          expect(result.statistic[0] ?? 0).toBeGreaterThanOrEqual(0);
         },
       ),
       { numRuns: 200 },
@@ -408,19 +426,19 @@ describe("boxPierce", () => {
   it("statistic is non-negative", () => {
     const x = lcgNoise(50);
     const result = boxPierce(x, { lags: [4] });
-    expect((result.statistic[0] ?? 0)).toBeGreaterThanOrEqual(0);
+    expect(result.statistic[0] ?? 0).toBeGreaterThanOrEqual(0);
   });
 
   it("high p-value for white noise", () => {
     const x = lcgNoise(200);
     const result = boxPierce(x);
-    expect((result.pvalue[0] ?? 0)).toBeGreaterThan(0);
+    expect(result.pvalue[0] ?? 0).toBeGreaterThan(0);
   });
 
   it("very low p-value for strong autocorrelation", () => {
     const x = ar1(0.95, 100);
     const result = boxPierce(x, { lags: [10] });
-    expect((result.pvalue[0] ?? 0)).toBeLessThan(0.001);
+    expect(result.pvalue[0] ?? 0).toBeLessThan(0.001);
   });
 
   it("lags array matches requested lags", () => {
@@ -434,7 +452,9 @@ describe("boxPierce", () => {
     const result = boxPierce(x, { lags: [1, 2, 3, 4, 5] });
     for (let i = 1; i < result.statistic.length; i++) {
       // Q is cumulative: adding one more lag adds r_k^2 ≥ 0
-      expect((result.statistic[i] ?? 0)).toBeGreaterThanOrEqual((result.statistic[i - 1] ?? 0) - 1e-9);
+      expect(result.statistic[i] ?? 0).toBeGreaterThanOrEqual(
+        (result.statistic[i - 1] ?? 0) - 1e-9,
+      );
     }
   });
 
@@ -442,7 +462,7 @@ describe("boxPierce", () => {
     // All ACF values at lag ≥ 1 are NaN or 0 for a constant series → Q = 0
     const x = Array.from({ length: 10 }, () => 5);
     const result = boxPierce(x, { lags: [3] });
-    expect((result.statistic[0] ?? 0)).toBe(0);
+    expect(result.statistic[0] ?? 0).toBe(0);
   });
 });
 

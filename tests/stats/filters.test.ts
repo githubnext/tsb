@@ -3,19 +3,19 @@
  * Covers FIR design, Butterworth IIR, frequency response, and filter application.
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
 import {
-  firwin,
-  freqz,
-  sosfreqz,
-  lfilter,
-  filtfilt,
-  sosfilt,
-  sosfiltfilt,
+  type SOSSection,
   butter,
   cAbs,
-  type SOSSection,
+  filtfilt,
+  firwin,
+  freqz,
+  lfilter,
+  sosfilt,
+  sosfiltfilt,
+  sosfreqz,
 } from "../../src/stats/filters.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -74,8 +74,8 @@ describe("firwin", () => {
   });
 
   test("custom fs scaling", () => {
-    const b1 = firwin(21, 0.3, { fs: 2 });     // default
-    const b2 = firwin(21, 300, { fs: 2000 });  // same normalised cutoff
+    const b1 = firwin(21, 0.3, { fs: 2 }); // default
+    const b2 = firwin(21, 300, { fs: 2000 }); // same normalised cutoff
     for (let i = 0; i < b1.length; i++) {
       expect(b1[i] ?? 0).toBeCloseTo(b2[i] ?? 0, 10);
     }
@@ -140,7 +140,7 @@ describe("freqz", () => {
     const b = firwin(51, 0.3, { pass_zero: false });
     const { H } = freqz(b, [1], 256);
     const mag = H.map(cAbs);
-    expect(mag[0] ?? 0).toBeLessThan(0.05);  // near zero at DC
+    expect(mag[0] ?? 0).toBeLessThan(0.05); // near zero at DC
     expect(mag[255] ?? 0).toBeGreaterThan(0.9); // near 1 at Nyquist
   });
 
@@ -282,16 +282,19 @@ describe("lfilter", () => {
     const n = 512;
     const fs = 512;
     // Mix 10 Hz (pass) and 200 Hz (stop) signals
-    const x = Array.from({ length: n }, (_, i) =>
-      Math.sin(2 * Math.PI * 10 * i / fs) + Math.sin(2 * Math.PI * 200 * i / fs),
+    const x = Array.from(
+      { length: n },
+      (_, i) => Math.sin((2 * Math.PI * 10 * i) / fs) + Math.sin((2 * Math.PI * 200 * i) / fs),
     );
     const b = firwin(63, 0.3, { fs });
     const y = lfilter(b, [1], x);
     // After filtering, 200 Hz component should be attenuated
-    const highPower = x.slice(100).reduce((s, v, i) =>
-      s + Math.sin(2 * Math.PI * 200 * (i + 100) / fs) ** 2, 0);
-    const residualHigh = y.slice(100).reduce((s, v, i) =>
-      s + v * Math.sin(2 * Math.PI * 200 * (i + 100) / fs), 0);
+    const highPower = x
+      .slice(100)
+      .reduce((s, _v, i) => s + Math.sin((2 * Math.PI * 200 * (i + 100)) / fs) ** 2, 0);
+    const residualHigh = y
+      .slice(100)
+      .reduce((s, v, i) => s + v * Math.sin((2 * Math.PI * 200 * (i + 100)) / fs), 0);
     expect(Math.abs(residualHigh) / n).toBeLessThan(Math.sqrt(highPower / n) * 0.3);
   });
 
@@ -323,7 +326,7 @@ describe("lfilter", () => {
 
 describe("filtfilt", () => {
   test("zero phase: applies filter forward and backward", () => {
-    const x = Array.from({ length: 64 }, (_, i) => Math.sin(2 * Math.PI * 5 * i / 64));
+    const x = Array.from({ length: 64 }, (_, i) => Math.sin((2 * Math.PI * 5 * i) / 64));
     const b = firwin(11, 0.3);
     const y = filtfilt(b, [1], x);
     expect(y.length).toBe(x.length);
@@ -346,7 +349,7 @@ describe("filtfilt", () => {
 
   test("smoother than lfilter (no phase delay)", () => {
     const n = 128;
-    const x = Array.from({ length: n }, (_, i) => Math.cos(2 * Math.PI * 5 * i / n));
+    const x = Array.from({ length: n }, (_, i) => Math.cos((2 * Math.PI * 5 * i) / n));
     const b = firwin(21, 0.3);
     const yLf = lfilter(b, [1], x);
     const yFf = filtfilt(b, [1], x);
@@ -390,7 +393,7 @@ describe("sosfilt", () => {
 
   test("sosfiltfilt output length equals input", () => {
     const { sos } = butter(2, 0.3);
-    const x = Array.from({ length: 64 }, (_, i) => Math.sin(2 * Math.PI * i / 64));
+    const x = Array.from({ length: 64 }, (_, i) => Math.sin((2 * Math.PI * i) / 64));
     const y = sosfiltfilt(sos, x);
     expect(y.length).toBe(x.length);
   });
@@ -415,8 +418,9 @@ describe("filter pipeline", () => {
   test("Butterworth then FIR: both stable and output finite", () => {
     const n = 256;
     const fs = 512;
-    const signal = Array.from({ length: n }, (_, i) =>
-      Math.sin(2 * Math.PI * 50 * i / fs) + 0.1 * (Math.random() - 0.5),
+    const signal = Array.from(
+      { length: n },
+      (_, i) => Math.sin((2 * Math.PI * 50 * i) / fs) + 0.1 * (Math.random() - 0.5),
     );
 
     // Stage 1: IIR low-pass at 100 Hz

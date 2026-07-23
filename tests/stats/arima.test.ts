@@ -20,14 +20,18 @@ function ar1Series(phi: number, n: number, noiseAmp = 0.1): number[] {
     seed = (seed * 1664525 + 1013904223) & 0x7fffffff;
     return (seed / 0x7fffffff - 0.5) * 2 * noiseAmp;
   };
-  for (let i = 1; i < n; i++) xs.push(phi * (xs[i - 1] ?? 0) + rand());
+  for (let i = 1; i < n; i++) {
+    xs.push(phi * (xs[i - 1] ?? 0) + rand());
+  }
   return xs;
 }
 
 /** Mean absolute error */
 function mae(a: readonly number[], b: readonly number[]): number {
   let s = 0;
-  for (let i = 0; i < a.length; i++) s += Math.abs((a[i] ?? 0) - (b[i] ?? 0));
+  for (let i = 0; i < a.length; i++) {
+    s += Math.abs((a[i] ?? 0) - (b[i] ?? 0));
+  }
   return s / a.length;
 }
 
@@ -176,15 +180,15 @@ describe("forecast – AR(1)", () => {
   it("lower < forecast < upper for all steps", () => {
     const fc3 = model.forecast(3);
     for (let h = 0; h < 3; h++) {
-      expect((fc3.lower[h] ?? 0)).toBeLessThan(fc3.forecast[h] ?? 0);
-      expect((fc3.upper[h] ?? 0)).toBeGreaterThan(fc3.forecast[h] ?? 0);
+      expect(fc3.lower[h] ?? 0).toBeLessThan(fc3.forecast[h] ?? 0);
+      expect(fc3.upper[h] ?? 0).toBeGreaterThan(fc3.forecast[h] ?? 0);
     }
   });
 
   it("stderr increases monotonically for AR(1) with |phi| < 1", () => {
     const fc4 = model.forecast(4);
     for (let h = 1; h < 4; h++) {
-      expect((fc4.stderr[h] ?? 0)).toBeGreaterThanOrEqual(fc4.stderr[h - 1] ?? 0);
+      expect(fc4.stderr[h] ?? 0).toBeGreaterThanOrEqual(fc4.stderr[h - 1] ?? 0);
     }
   });
 
@@ -210,19 +214,21 @@ describe("forecast – AR(1)", () => {
 
 describe("forecast – ARIMA(0,1,0) (random walk)", () => {
   const rw2: number[] = [10];
-  for (let i = 1; i < 80; i++) rw2.push(rw2[i - 1]! + 0.1);
+  for (let i = 1; i < 80; i++) {
+    rw2.push(rw2[i - 1]! + 0.1);
+  }
   const model2 = new ARIMAModel({ p: 0, d: 1, q: 0 });
   model2.fit(rw2);
 
   it("forecast[0] ≈ last observed + drift", () => {
     const fc = model2.forecast(1);
     expect(typeof fc.forecast[0]).toBe("number");
-    expect(Number.isFinite(fc.forecast[0] ?? NaN)).toBe(true);
+    expect(Number.isFinite(fc.forecast[0] ?? Number.NaN)).toBe(true);
   });
 
   it("stderr grows with horizon for I(1)", () => {
     const fc = model2.forecast(5);
-    expect((fc.stderr[4] ?? 0)).toBeGreaterThan(fc.stderr[0] ?? 0);
+    expect(fc.stderr[4] ?? 0).toBeGreaterThan(fc.stderr[0] ?? 0);
   });
 });
 
@@ -250,7 +256,10 @@ describe("property tests", () => {
   it("fitted value count always equals input length", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true, min: -100, max: 100 }), { minLength: 20, maxLength: 60 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true, min: -100, max: 100 }), {
+          minLength: 20,
+          maxLength: 60,
+        }),
         fc.integer({ min: 0, max: 2 }),
         fc.integer({ min: 0, max: 2 }),
         (y, p, q) => {
@@ -269,15 +278,22 @@ describe("property tests", () => {
   it("forecast intervals always satisfy lower <= forecast <= upper", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true, min: -50, max: 50 }), { minLength: 20, maxLength: 50 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true, min: -50, max: 50 }), {
+          minLength: 20,
+          maxLength: 50,
+        }),
         (y) => {
           const model6 = new ARIMAModel({ p: 1, d: 0, q: 0 });
           try {
             model6.fit(y);
             const fc2 = model6.forecast(3);
             for (let h = 0; h < 3; h++) {
-              if ((fc2.lower[h] ?? 0) > (fc2.forecast[h] ?? 0) + 1e-6) return false;
-              if ((fc2.upper[h] ?? 0) < (fc2.forecast[h] ?? 0) - 1e-6) return false;
+              if ((fc2.lower[h] ?? 0) > (fc2.forecast[h] ?? 0) + 1e-6) {
+                return false;
+              }
+              if ((fc2.upper[h] ?? 0) < (fc2.forecast[h] ?? 0) - 1e-6) {
+                return false;
+              }
             }
             return true;
           } catch {
@@ -291,7 +307,10 @@ describe("property tests", () => {
   it("sigma2 is always positive after fit", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true, min: -100, max: 100 }), { minLength: 15, maxLength: 40 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true, min: -100, max: 100 }), {
+          minLength: 15,
+          maxLength: 40,
+        }),
         (y) => {
           const model7 = new ARIMAModel({ p: 1, d: 0, q: 0 });
           try {

@@ -52,15 +52,7 @@ type AvroSchema =
   | AvroUnion
   | AvroFixed;
 
-type AvroPrimitive =
-  | "null"
-  | "boolean"
-  | "int"
-  | "long"
-  | "float"
-  | "double"
-  | "string"
-  | "bytes";
+type AvroPrimitive = "null" | "boolean" | "int" | "long" | "float" | "double" | "string" | "bytes";
 
 interface AvroRecord {
   type: "record";
@@ -102,17 +94,23 @@ interface AvroFixed {
 
 class AvroReader {
   private buf: Uint8Array;
-  private pos: number = 0;
+  private pos = 0;
 
   constructor(buf: Uint8Array) {
     this.buf = buf;
   }
 
-  get position(): number { return this.pos; }
-  get remaining(): number { return this.buf.length - this.pos; }
+  get position(): number {
+    return this.pos;
+  }
+  get remaining(): number {
+    return this.buf.length - this.pos;
+  }
 
   readByte(): number {
-    if (this.pos >= this.buf.length) throw new RangeError("Unexpected end of Avro data");
+    if (this.pos >= this.buf.length) {
+      throw new RangeError("Unexpected end of Avro data");
+    }
     return this.buf[this.pos++] ?? 0;
   }
 
@@ -124,7 +122,9 @@ class AvroReader {
       const b = this.readByte();
       result |= (b & 0x7f) << shift;
       shift += 7;
-      if ((b & 0x80) === 0) break;
+      if ((b & 0x80) === 0) {
+        break;
+      }
       if (shift >= 63) {
         // For very large values, handle the remaining bits separately
         // to avoid JS bitwise overflow (32-bit integers)
@@ -162,7 +162,9 @@ class AvroReader {
 
   /** Read exactly n bytes as a new Uint8Array. */
   readBytes(n: number): Uint8Array {
-    if (this.pos + n > this.buf.length) throw new RangeError("Unexpected end of Avro data");
+    if (this.pos + n > this.buf.length) {
+      throw new RangeError("Unexpected end of Avro data");
+    }
     const slice = this.buf.subarray(this.pos, this.pos + n);
     this.pos += n;
     return slice;
@@ -187,7 +189,9 @@ class AvroReader {
 
   /** Skip forward n bytes. */
   skip(n: number): void {
-    if (this.pos + n > this.buf.length) throw new RangeError("Unexpected end of Avro data");
+    if (this.pos + n > this.buf.length) {
+      throw new RangeError("Unexpected end of Avro data");
+    }
     this.pos += n;
   }
 
@@ -211,32 +215,32 @@ function parseSchema(raw: unknown): AvroSchema {
   }
   if (typeof raw === "object" && raw !== null) {
     const obj = raw as Record<string, unknown>;
-    const type = obj["type"];
+    const type = obj.type;
     if (type === "record") {
-      const fields = (obj["fields"] as unknown[]).map((f) => {
+      const fields = (obj.fields as unknown[]).map((f) => {
         const field = f as Record<string, unknown>;
-        return { name: field["name"] as string, type: parseSchema(field["type"]) };
+        return { name: field.name as string, type: parseSchema(field.type) };
       });
-      return { type: "record", name: obj["name"] as string, fields };
+      return { type: "record", name: obj.name as string, fields };
     }
     if (type === "array") {
-      return { type: "array", items: parseSchema(obj["items"]) };
+      return { type: "array", items: parseSchema(obj.items) };
     }
     if (type === "map") {
-      return { type: "map", values: parseSchema(obj["values"]) };
+      return { type: "map", values: parseSchema(obj.values) };
     }
     if (type === "enum") {
       return {
         type: "enum",
-        name: obj["name"] as string,
-        symbols: obj["symbols"] as string[],
+        name: obj.name as string,
+        symbols: obj.symbols as string[],
       };
     }
     if (type === "fixed") {
       return {
         type: "fixed",
-        name: obj["name"] as string,
-        size: obj["size"] as number,
+        name: obj.name as string,
+        size: obj.size as number,
       };
     }
     // Logical types: delegate to the underlying type
@@ -261,21 +265,31 @@ type AvroDatum = AvroLeaf | AvroDatumArr | AvroDatumMap | AvroDatumRecord;
 function readDatum(reader: AvroReader, schema: AvroSchema): AvroDatum {
   if (typeof schema === "string") {
     switch (schema) {
-      case "null": return null;
-      case "boolean": return reader.readBoolean();
-      case "int": return reader.readInt();
-      case "long": return reader.readLong();
-      case "float": return reader.readFloat();
-      case "double": return reader.readDouble();
-      case "string": return reader.readString();
-      case "bytes": return reader.readByteField();
+      case "null":
+        return null;
+      case "boolean":
+        return reader.readBoolean();
+      case "int":
+        return reader.readInt();
+      case "long":
+        return reader.readLong();
+      case "float":
+        return reader.readFloat();
+      case "double":
+        return reader.readDouble();
+      case "string":
+        return reader.readString();
+      case "bytes":
+        return reader.readByteField();
     }
   }
   if (Array.isArray(schema)) {
     // Union: first read the branch index
     const idx = reader.readLong();
     const branch = (schema as AvroUnion)[idx];
-    if (branch === undefined) throw new RangeError(`Union branch ${idx} out of range`);
+    if (branch === undefined) {
+      throw new RangeError(`Union branch ${idx} out of range`);
+    }
     return readDatum(reader, branch);
   }
   const s = schema as Exclude<AvroSchema, AvroPrimitive | AvroUnion>;
@@ -290,10 +304,17 @@ function readDatum(reader: AvroReader, schema: AvroSchema): AvroDatum {
     const arr: AvroDatum[] = [];
     while (true) {
       let count = reader.readLong();
-      if (count === 0) break;
+      if (count === 0) {
+        break;
+      }
       // Negative count means block has a byte count prefix
-      if (count < 0) { reader.readLong(); count = -count; }
-      for (let i = 0; i < count; i++) arr.push(readDatum(reader, s.items));
+      if (count < 0) {
+        reader.readLong();
+        count = -count;
+      }
+      for (let i = 0; i < count; i++) {
+        arr.push(readDatum(reader, s.items));
+      }
     }
     return arr;
   }
@@ -301,8 +322,13 @@ function readDatum(reader: AvroReader, schema: AvroSchema): AvroDatum {
     const map = new Map<string, AvroDatum>();
     while (true) {
       let count = reader.readLong();
-      if (count === 0) break;
-      if (count < 0) { reader.readLong(); count = -count; }
+      if (count === 0) {
+        break;
+      }
+      if (count < 0) {
+        reader.readLong();
+        count = -count;
+      }
       for (let i = 0; i < count; i++) {
         const key = reader.readString();
         map.set(key, readDatum(reader, s.values));
@@ -325,8 +351,14 @@ function readDatum(reader: AvroReader, schema: AvroSchema): AvroDatum {
 const AVRO_MAGIC = new Uint8Array([79, 98, 106, 1]); // "Obj\x01"
 
 function syncEq(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -334,9 +366,7 @@ function syncEq(a: Uint8Array, b: Uint8Array): boolean {
  * Parse an Apache Avro Object Container File buffer into an array of row objects.
  * Returns the top-level schema and the rows.
  */
-function parseAvroOCF(
-  buf: Uint8Array,
-): { schema: AvroSchema; rows: Record<string, AvroDatum>[] } {
+function parseAvroOCF(buf: Uint8Array): { schema: AvroSchema; rows: Record<string, AvroDatum>[] } {
   const reader = new AvroReader(buf);
 
   // Magic: "Obj\x01"
@@ -351,8 +381,13 @@ function parseAvroOCF(
   const meta = new Map<string, Uint8Array>();
   while (true) {
     let count = reader.readLong();
-    if (count === 0) break;
-    if (count < 0) { reader.readLong(); count = -count; }
+    if (count === 0) {
+      break;
+    }
+    if (count < 0) {
+      reader.readLong();
+      count = -count;
+    }
     for (let i = 0; i < count; i++) {
       const key = reader.readString();
       const val = reader.readByteField();
@@ -362,7 +397,9 @@ function parseAvroOCF(
 
   // Schema
   const schemaBytes = meta.get("avro.schema");
-  if (!schemaBytes) throw new TypeError("Avro file missing avro.schema metadata");
+  if (!schemaBytes) {
+    throw new TypeError("Avro file missing avro.schema metadata");
+  }
   const schemaJson: unknown = JSON.parse(td.decode(schemaBytes));
   const schema = parseSchema(schemaJson);
 
@@ -383,11 +420,19 @@ function parseAvroOCF(
   while (reader.remaining >= 16) {
     const objectCount = reader.readLong();
     const _byteCount = reader.readLong(); // block size (unused for null codec)
-    if (objectCount <= 0) break;
+    if (objectCount <= 0) {
+      break;
+    }
 
     for (let i = 0; i < objectCount; i++) {
       const datum = readDatum(reader, schema);
-      if (typeof datum === "object" && datum !== null && !Array.isArray(datum) && !(datum instanceof Uint8Array) && !(datum instanceof Map)) {
+      if (
+        typeof datum === "object" &&
+        datum !== null &&
+        !Array.isArray(datum) &&
+        !(datum instanceof Uint8Array) &&
+        !(datum instanceof Map)
+      ) {
         rows.push(datum as Record<string, AvroDatum>);
       }
     }
@@ -405,11 +450,19 @@ function parseAvroOCF(
 // ─── DataFrame construction ───────────────────────────────────────────────────
 
 function flattenDatum(v: AvroDatum): unknown {
-  if (v === null || typeof v !== "object") return v;
-  if (v instanceof Uint8Array) return v;
-  if (v instanceof Map) return Object.fromEntries(v);
+  if (v === null || typeof v !== "object") {
+    return v;
+  }
+  if (v instanceof Uint8Array) {
+    return v;
+  }
+  if (v instanceof Map) {
+    return Object.fromEntries(v);
+  }
   // For record/array datums, JSON-stringify for simplicity
-  if (Array.isArray(v)) return JSON.stringify(v);
+  if (Array.isArray(v)) {
+    return JSON.stringify(v);
+  }
   return JSON.stringify(v);
 }
 
@@ -419,10 +472,7 @@ function flattenDatum(v: AvroDatum): unknown {
  * @param data - Raw Avro OCF bytes (`Uint8Array` or `ArrayBuffer`).
  * @param options - Optional read options.
  */
-export function readAvro(
-  data: Uint8Array | ArrayBuffer,
-  options: ReadAvroOptions = {},
-): DataFrame {
+export function readAvro(data: Uint8Array | ArrayBuffer, options: ReadAvroOptions = {}): DataFrame {
   const buf = data instanceof ArrayBuffer ? new Uint8Array(data) : data;
   const { rows } = parseAvroOCF(buf);
 
@@ -437,7 +487,9 @@ export function readAvro(
     : allCols;
 
   const columns: Record<string, Scalar[]> = {};
-  for (const col of cols) columns[col] = [];
+  for (const col of cols) {
+    columns[col] = [];
+  }
 
   for (const row of rows) {
     for (const col of cols) {
@@ -482,17 +534,30 @@ export function toAvro(df: DataFrame, options: ToAvroOptions = {}): Uint8Array {
     let hasBool = false;
     let hasStr = false;
     for (const v of vals) {
-      if (v === null || v === undefined) { hasNull = true; continue; }
-      if (typeof v === "boolean") { hasBool = true; continue; }
+      if (v === null || v === undefined) {
+        hasNull = true;
+        continue;
+      }
+      if (typeof v === "boolean") {
+        hasBool = true;
+        continue;
+      }
       if (typeof v === "number") {
-        if (Number.isInteger(v)) hasInt = true; else hasFloat = true;
+        if (Number.isInteger(v)) {
+          hasInt = true;
+        } else {
+          hasFloat = true;
+        }
         continue;
       }
       hasStr = true;
     }
     let avroType = "string";
-    if (hasBool && !hasInt && !hasFloat && !hasStr) avroType = "boolean";
-    else if ((hasInt || hasFloat) && !hasBool && !hasStr) avroType = hasFloat ? "double" : "long";
+    if (hasBool && !hasInt && !hasFloat && !hasStr) {
+      avroType = "boolean";
+    } else if ((hasInt || hasFloat) && !hasBool && !hasStr) {
+      avroType = hasFloat ? "double" : "long";
+    }
     return { name: col, avroType, nullable: hasNull };
   });
 
@@ -512,8 +577,10 @@ export function toAvro(df: DataFrame, options: ToAvroOptions = {}): Uint8Array {
     h = Math.imul(h ^ (schemaBytes[i] ?? 0), 0x9e3779b9) >>> 0;
   }
   for (let i = 0; i < 16; i++) {
-    sync[i] = (h >> (i % 4) * 8) & 0xff;
-    if (i % 4 === 3) h = Math.imul(h, 0x6c62272e) >>> 0;
+    sync[i] = (h >> ((i % 4) * 8)) & 0xff;
+    if (i % 4 === 3) {
+      h = Math.imul(h, 0x6c62272e) >>> 0;
+    }
   }
 
   const chunks: Uint8Array[] = [];
@@ -538,11 +605,15 @@ export function toAvro(df: DataFrame, options: ToAvroOptions = {}): Uint8Array {
   function writeString(s: string): void {
     const b = new TextEncoder().encode(s);
     writeLong(b.length);
-    for (const byte of b) writeBuf.push(byte);
+    for (const byte of b) {
+      writeBuf.push(byte);
+    }
   }
   function writeBytes(b: Uint8Array): void {
     writeLong(b.length);
-    for (const byte of b) writeBuf.push(byte);
+    for (const byte of b) {
+      writeBuf.push(byte);
+    }
   }
 
   // Magic
@@ -593,19 +664,31 @@ export function toAvro(df: DataFrame, options: ToAvroOptions = {}): Uint8Array {
   const totalLen = chunks.reduce((s, c) => s + c.length, 0);
   const out = new Uint8Array(totalLen);
   let offset = 0;
-  for (const c of chunks) { out.set(c, offset); offset += c.length; }
+  for (const c of chunks) {
+    out.set(c, offset);
+    offset += c.length;
+  }
   return out;
 
   function writeTypedValue(v: unknown, type: string): void {
-    if (v === null || v === undefined) { writeBuf.push(0); return; } // null
+    if (v === null || v === undefined) {
+      writeBuf.push(0);
+      return;
+    } // null
     switch (type) {
-      case "boolean": writeBuf.push(v ? 1 : 0); break;
-      case "long": writeLong(typeof v === "number" ? v : 0); break;
+      case "boolean":
+        writeBuf.push(v ? 1 : 0);
+        break;
+      case "long":
+        writeLong(typeof v === "number" ? v : 0);
+        break;
       case "double": {
         const arr = new Float64Array(1);
         arr[0] = typeof v === "number" ? v : 0;
         const b = new Uint8Array(arr.buffer);
-        for (const byte of b) writeBuf.push(byte);
+        for (const byte of b) {
+          writeBuf.push(byte);
+        }
         break;
       }
       default:

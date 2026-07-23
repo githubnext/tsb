@@ -87,9 +87,13 @@ export function cArg(a: Complex): number {
 
 /** Smallest power of 2 ≥ n. */
 function nextPow2(n: number): number {
-  if (n <= 1) return 1;
+  if (n <= 1) {
+    return 1;
+  }
   let p = 1;
-  while (p < n) p <<= 1;
+  while (p < n) {
+    p <<= 1;
+  }
   return p;
 }
 
@@ -98,7 +102,9 @@ function bitReverse(arr: Complex[], n: number): void {
   let j = 0;
   for (let i = 1; i < n; i++) {
     let bit = n >> 1;
-    for (; j & bit; bit >>= 1) j ^= bit;
+    for (; j & bit; bit >>= 1) {
+      j ^= bit;
+    }
     j ^= bit;
     if (i < j) {
       const tmp = arr[i]!;
@@ -114,7 +120,7 @@ function fftInPlace(arr: Complex[], n: number, inverse: boolean): void {
   bitReverse(arr, n);
   for (let len = 2; len <= n; len <<= 1) {
     const half = len >> 1;
-    const ang = (inverse ? 2 : -2) * Math.PI / len;
+    const ang = ((inverse ? 2 : -2) * Math.PI) / len;
     const wLen: Complex = { re: Math.cos(ang), im: Math.sin(ang) };
     for (let i = 0; i < n; i += len) {
       let w: Complex = { re: 1, im: 0 };
@@ -223,8 +229,12 @@ export function irfft(X: readonly Complex[], n?: number): number[] {
 export function fftFreq(n: number, d = 1): number[] {
   const f: number[] = new Array(n);
   const half = Math.floor(n / 2) + 1;
-  for (let i = 0; i < half; i++) f[i] = i / (n * d);
-  for (let i = half; i < n; i++) f[i] = (i - n) / (n * d);
+  for (let i = 0; i < half; i++) {
+    f[i] = i / (n * d);
+  }
+  for (let i = half; i < n; i++) {
+    f[i] = (i - n) / (n * d);
+  }
   return f;
 }
 
@@ -281,11 +291,7 @@ function besselI0(x: number): number {
       1 +
       t *
         (3.5156229 +
-          t *
-            (3.0899424 +
-              t *
-                (1.2067492 +
-                  t * (0.2659732 + t * (0.0360768 + t * 0.0045813)))))
+          t * (3.0899424 + t * (1.2067492 + t * (0.2659732 + t * (0.0360768 + t * 0.0045813)))))
     );
   }
   const t = 3.75 / ax;
@@ -300,9 +306,7 @@ function besselI0(x: number): number {
                 (-0.00157565 +
                   t *
                     (0.00916281 +
-                      t *
-                        (-0.02057706 +
-                          t * (0.02635537 + t * (-0.01647633 + t * 0.00392377))))))))
+                      t * (-0.02057706 + t * (0.02635537 + t * (-0.01647633 + t * 0.00392377))))))))
   );
 }
 
@@ -339,10 +343,10 @@ export function blackmanWindow(n: number): number[] {
 
 /** Blackman-Harris window (4-term). */
 export function blackmanHarrisWindow(n: number): number[] {
-  const a0 = 0.35875,
-    a1 = 0.48829,
-    a2 = 0.14128,
-    a3 = 0.01168;
+  const a0 = 0.35875;
+  const a1 = 0.48829;
+  const a2 = 0.14128;
+  const a3 = 0.01168;
   return Array.from(
     { length: n },
     (_, i) =>
@@ -355,11 +359,11 @@ export function blackmanHarrisWindow(n: number): number[] {
 
 /** Flat-top window (5-term). */
 export function flatTopWindow(n: number): number[] {
-  const a0 = 0.21557895,
-    a1 = 0.41663158,
-    a2 = 0.277263158,
-    a3 = 0.083578947,
-    a4 = 0.006947368;
+  const a0 = 0.21557895;
+  const a1 = 0.41663158;
+  const a2 = 0.277263158;
+  const a3 = 0.083578947;
+  const a4 = 0.006947368;
   return Array.from(
     { length: n },
     (_, i) =>
@@ -562,11 +566,11 @@ export function istft(Zxx: readonly (readonly Complex[])[], options: ISTFTOption
     // Build full-spectrum (two-sided) for IFFT
     const buf: Complex[] = new Array(nfft);
     for (let fi = 0; fi < nFreqs; fi++) {
-      buf[fi] = (Zxx[fi]?.[k]) ?? { re: 0, im: 0 };
+      buf[fi] = Zxx[fi]?.[k] ?? { re: 0, im: 0 };
     }
     for (let fi = nFreqs; fi < nfft; fi++) {
       const mirrorIdx = nfft - fi;
-      const src = (Zxx[mirrorIdx]?.[k]) ?? { re: 0, im: 0 };
+      const src = Zxx[mirrorIdx]?.[k] ?? { re: 0, im: 0 };
       buf[fi] = cConj(src);
     }
     fftInPlace(buf, nfft, true);
@@ -653,7 +657,10 @@ export function welch(x: readonly number[], options: WelchOptions = {}): PSDResu
         : Array.from(options.window)
       : hannWindow(nperseg);
 
-  const winNorm = scaling === "density" ? win.reduce((s, w) => s + w * w, 0) * fs : win.reduce((s, w) => s + w * w, 0);
+  const winNorm =
+    scaling === "density"
+      ? win.reduce((s, w) => s + w * w, 0) * fs
+      : win.reduce((s, w) => s + w * w, 0);
   const nFreqs = Math.floor(nfft / 2) + 1;
   const nFrames = Math.floor((x.length - noverlap) / step);
 
@@ -680,7 +687,9 @@ export function welch(x: readonly number[], options: WelchOptions = {}): PSDResu
       const c = seg[fi] ?? { re: 0, im: 0 };
       let p = cAbsSq(c) / winNorm;
       // Double one-sided bins (except DC and Nyquist)
-      if (fi > 0 && fi < nFreqs - 1) p *= 2;
+      if (fi > 0 && fi < nFreqs - 1) {
+        p *= 2;
+      }
       return p;
     });
     frames.push(pxx);
@@ -747,7 +756,9 @@ export function periodogram(x: readonly number[], options: PeriodogramOptions = 
       : hannWindow(x.length);
 
   const winNorm =
-    scaling === "density" ? win.reduce((s, w) => s + w * w, 0) * fs : win.reduce((s, w) => s + w * w, 0);
+    scaling === "density"
+      ? win.reduce((s, w) => s + w * w, 0) * fs
+      : win.reduce((s, w) => s + w * w, 0);
 
   const seg: Complex[] = Array.from({ length: nfft }, (_, i) => ({
     re: (x[i] ?? 0) * (win[i] ?? 0),
@@ -760,7 +771,9 @@ export function periodogram(x: readonly number[], options: PeriodogramOptions = 
   const Pxx: number[] = Array.from({ length: nFreqs }, (_, fi) => {
     const c = seg[fi] ?? { re: 0, im: 0 };
     let p = cAbsSq(c) / winNorm;
-    if (fi > 0 && fi < nFreqs - 1) p *= 2;
+    if (fi > 0 && fi < nFreqs - 1) {
+      p *= 2;
+    }
     return p;
   });
 

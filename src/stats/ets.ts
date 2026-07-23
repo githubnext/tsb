@@ -197,7 +197,9 @@ export interface ETSForecastResult {
 
 /** Extract numeric array from Series or array. */
 function toArr(y: readonly number[] | Series<number>): readonly number[] {
-  if ("dtype" in y) return y.values;
+  if ("dtype" in y) {
+    return y.values;
+  }
   return y;
 }
 
@@ -207,10 +209,7 @@ function clamp(v: number, lo: number, hi: number): number {
 }
 
 /** Clamp all elements of a param vector to their respective bounds. */
-function clampParams(
-  params: readonly number[],
-  bounds: readonly [number, number][],
-): number[] {
+function clampParams(params: readonly number[], bounds: readonly [number, number][]): number[] {
   return params.map((v, i) => clamp(v, (bounds[i] ?? [0, 1])[0], (bounds[i] ?? [0, 1])[1]));
 }
 
@@ -222,10 +221,12 @@ function nelderMead(
   fn: (params: readonly number[]) => number,
   x0: readonly number[],
   bounds: readonly [number, number][],
-  maxIter: number = 3000,
+  maxIter = 3000,
 ): { params: number[]; value: number } {
   const n = x0.length;
-  if (n === 0) return { params: [], value: fn([]) };
+  if (n === 0) {
+    return { params: [], value: fn([]) };
+  }
 
   const EPS = 1e-12;
   const ALPHA_NM = 1.0; // reflection
@@ -256,15 +257,21 @@ function nelderMead(
 
     const fBest = fvals[ord[0] ?? 0] ?? 0;
     const fWorst = fvals[ord[n] ?? 0] ?? 0;
-    if (fWorst - fBest < EPS) break;
+    if (fWorst - fBest < EPS) {
+      break;
+    }
 
     // Centroid of best n points
     const cent = new Array<number>(n).fill(0);
     for (let i = 0; i < n; i++) {
       const row = simplex[ord[i] ?? 0] ?? [];
-      for (let j = 0; j < n; j++) cent[j] = (cent[j] ?? 0) + (row[j] ?? 0);
+      for (let j = 0; j < n; j++) {
+        cent[j] = (cent[j] ?? 0) + (row[j] ?? 0);
+      }
     }
-    for (let j = 0; j < n; j++) cent[j] = (cent[j] ?? 0) / n;
+    for (let j = 0; j < n; j++) {
+      cent[j] = (cent[j] ?? 0) / n;
+    }
 
     const worstPt = simplex[ord[n] ?? 0] ?? [];
 
@@ -314,9 +321,11 @@ function nelderMead(
   // Return best
   let bestIdx = 0;
   for (let i = 1; i <= n; i++) {
-    if ((fvals[i] ?? Infinity) < (fvals[bestIdx] ?? Infinity)) bestIdx = i;
+    if ((fvals[i] ?? Number.POSITIVE_INFINITY) < (fvals[bestIdx] ?? Number.POSITIVE_INFINITY)) {
+      bestIdx = i;
+    }
   }
-  return { params: simplex[bestIdx] ?? [], value: fvals[bestIdx] ?? Infinity };
+  return { params: simplex[bestIdx] ?? [], value: fvals[bestIdx] ?? Number.POSITIVE_INFINITY };
 }
 
 /** Compute AIC, BIC, AICc from SSE, n, k. */
@@ -395,12 +404,7 @@ function holtPass(
 }
 
 /** Holt h-step forecast (damped or not). */
-function holtForecast(
-  steps: number,
-  l: number,
-  b: number,
-  phi: number,
-): number[] {
+function holtForecast(steps: number, l: number, b: number, phi: number): number[] {
   const out: number[] = [];
   let phiH = phi; // φ¹
   let phiSum = phi; // φ + φ² + … + φ^h
@@ -475,10 +479,10 @@ function hwPass(
     } else if (trend === "add" && seasonal === "mul") {
       yhat = (l + phi * b) * st_m;
     } else if (trend === "mul" && seasonal === "add") {
-      yhat = l * (phi === 1 ? b : Math.pow(b, phi)) + st_m;
+      yhat = l * (phi === 1 ? b : b ** phi) + st_m;
     } else {
       // mul trend + mul seasonal
-      yhat = l * (phi === 1 ? b : Math.pow(b, phi)) * st_m;
+      yhat = l * (phi === 1 ? b : b ** phi) * st_m;
     }
 
     fitted[t] = yhat;
@@ -494,29 +498,44 @@ function hwPass(
       l = alpha * yt + (1 - alpha) * l;
     } else if (trend !== null && seasonal === null) {
       l = alpha * yt + (1 - alpha) * (l + phi * b);
-      if (beta !== null) b = beta * (l - lPrev) + (1 - beta) * phi * bPrev;
+      if (beta !== null) {
+        b = beta * (l - lPrev) + (1 - beta) * phi * bPrev;
+      }
     } else if (trend === null && seasonal === "add") {
       l = alpha * (yt - st_m) + (1 - alpha) * l;
-      if (gamma !== null) seasonals[sIdx] = gamma * (yt - l) + (1 - gamma) * st_m;
+      if (gamma !== null) {
+        seasonals[sIdx] = gamma * (yt - l) + (1 - gamma) * st_m;
+      }
     } else if (trend === null && seasonal === "mul") {
       l = alpha * (st_m !== 0 ? yt / st_m : yt) + (1 - alpha) * l;
-      if (gamma !== null) seasonals[sIdx] = gamma * (l !== 0 ? yt / l : 1) + (1 - gamma) * st_m;
+      if (gamma !== null) {
+        seasonals[sIdx] = gamma * (l !== 0 ? yt / l : 1) + (1 - gamma) * st_m;
+      }
     } else if (trend === "add" && seasonal === "add") {
       l = alpha * (yt - st_m) + (1 - alpha) * (lPrev + phi * bPrev);
-      if (beta !== null) b = beta * (l - lPrev) + (1 - beta) * phi * bPrev;
-      if (gamma !== null) seasonals[sIdx] = gamma * (yt - l) + (1 - gamma) * st_m;
+      if (beta !== null) {
+        b = beta * (l - lPrev) + (1 - beta) * phi * bPrev;
+      }
+      if (gamma !== null) {
+        seasonals[sIdx] = gamma * (yt - l) + (1 - gamma) * st_m;
+      }
     } else if (trend === "add" && seasonal === "mul") {
-      l =
-        alpha * (st_m !== 0 ? yt / st_m : yt) + (1 - alpha) * (lPrev + phi * bPrev);
-      if (beta !== null) b = beta * (l - lPrev) + (1 - beta) * phi * bPrev;
-      if (gamma !== null)
-        seasonals[sIdx] =
-          gamma * (l + phi * b !== 0 ? yt / (l + phi * b) : 1) + (1 - gamma) * st_m;
+      l = alpha * (st_m !== 0 ? yt / st_m : yt) + (1 - alpha) * (lPrev + phi * bPrev);
+      if (beta !== null) {
+        b = beta * (l - lPrev) + (1 - beta) * phi * bPrev;
+      }
+      if (gamma !== null) {
+        seasonals[sIdx] = gamma * (l + phi * b !== 0 ? yt / (l + phi * b) : 1) + (1 - gamma) * st_m;
+      }
     } else {
       // multiplicative trend — approximate as additive for stability
       l = alpha * yt + (1 - alpha) * (lPrev + phi * bPrev);
-      if (beta !== null) b = beta * (l - lPrev) + (1 - beta) * phi * bPrev;
-      if (gamma !== null) seasonals[sIdx] = gamma * (yt - l) + (1 - gamma) * st_m;
+      if (beta !== null) {
+        b = beta * (l - lPrev) + (1 - beta) * phi * bPrev;
+      }
+      if (gamma !== null) {
+        seasonals[sIdx] = gamma * (yt - l) + (1 - gamma) * st_m;
+      }
     }
   }
 
@@ -554,7 +573,7 @@ function hwForecast(
   // For forecast step h, the seasonal index corresponds to position (n-1+h) % m in
   // the buffer (shifted by 1 because sIdx = (t % m) in hwPass at time t = n-1+h).
   for (let h = 1; h <= steps; h++) {
-    const sIdx = ((n - 1 + h) % m + m) % m;
+    const sIdx = (((n - 1 + h) % m) + m) % m;
     const sVal = finalS[sIdx] ?? 1;
 
     let yhat: number;
@@ -571,9 +590,9 @@ function hwForecast(
     } else if (trend === "add" && seasonal === "mul") {
       yhat = (l + phiSum * b) * sVal;
     } else if (trend === "mul" && seasonal === "add") {
-      yhat = l * Math.pow(b, phiSum) + sVal;
+      yhat = l * b ** phiSum + sVal;
     } else {
-      yhat = l * Math.pow(b, phiSum) * sVal;
+      yhat = l * b ** phiSum * sVal;
     }
 
     out.push(yhat);
@@ -602,12 +621,16 @@ function heuristicInit(
   // Use first season average as l0, slope between first two seasons as b0
   const k = Math.min(m, n);
   let s1 = 0;
-  for (let i = 0; i < k; i++) s1 += y[i] ?? 0;
+  for (let i = 0; i < k; i++) {
+    s1 += y[i] ?? 0;
+  }
   const l0 = s1 / k;
 
   if (n >= 2 * m) {
     let s2 = 0;
-    for (let i = m; i < 2 * m; i++) s2 += y[i] ?? 0;
+    for (let i = m; i < 2 * m; i++) {
+      s2 += y[i] ?? 0;
+    }
     const b0 = (s2 / m - l0) / m;
     return { l0, b0: b0 || (((y[1] ?? 0) - (y[0] ?? 0)) * m) / m };
   }
@@ -648,7 +671,9 @@ function heuristicSeasons(
   }
 
   const rawS = byPos.map((vals) => {
-    if (vals.length === 0) return seasonal === "add" ? 0 : 1;
+    if (vals.length === 0) {
+      return seasonal === "add" ? 0 : 1;
+    }
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   });
 
@@ -656,10 +681,9 @@ function heuristicSeasons(
   if (seasonal === "add") {
     const mean = rawS.reduce((a, b) => a + b, 0) / m;
     return rawS.map((v) => v - mean);
-  } else {
-    const mean = rawS.reduce((a, b) => a + b, 0) / m;
-    return rawS.map((v) => (mean !== 0 ? (v / mean) * 1 : 1));
   }
+  const mean = rawS.reduce((a, b) => a + b, 0) / m;
+  return rawS.map((v) => (mean !== 0 ? (v / mean) * 1 : 1));
 }
 
 // ─── SimpleExpSmoothing ──────────────────────────────────────────────────────
@@ -680,7 +704,7 @@ function heuristicSeasons(
  */
 export class SimpleExpSmoothing {
   private _fit: SESFitResult | null = null;
-  private _finalLevel: number = 0;
+  private _finalLevel = 0;
 
   /**
    * Fit the SES model to observed data.
@@ -690,9 +714,11 @@ export class SimpleExpSmoothing {
   fit(y: readonly number[] | Series<number>, opts?: SESOptions): SESFitResult {
     const arr = toArr(y);
     const n = arr.length;
-    if (n < 2) throw new RangeError("SimpleExpSmoothing requires at least 2 observations");
+    if (n < 2) {
+      throw new RangeError("SimpleExpSmoothing requires at least 2 observations");
+    }
 
-    const l0Init = opts?.initialLevel ?? (arr[0] ?? 0);
+    const l0Init = opts?.initialLevel ?? arr[0] ?? 0;
 
     let alpha: number;
     let l0: number;
@@ -703,11 +729,14 @@ export class SimpleExpSmoothing {
     } else {
       // Optimise α (and optionally l0)
       const result = nelderMead(
-        ([a, l]: readonly number[]) => sesPass(arr, a ?? 0.3, l ?? (arr[0] ?? 0)).sse,
+        ([a, l]: readonly number[]) => sesPass(arr, a ?? 0.3, l ?? arr[0] ?? 0).sse,
         [0.3, l0Init],
         [
           [1e-6, 1 - 1e-6],
-          [(arr[0] ?? 0) - Math.abs(arr[0] ?? 0) * 5 - 1, (arr[0] ?? 0) + Math.abs(arr[0] ?? 0) * 5 + 1],
+          [
+            (arr[0] ?? 0) - Math.abs(arr[0] ?? 0) * 5 - 1,
+            (arr[0] ?? 0) + Math.abs(arr[0] ?? 0) * 5 + 1,
+          ],
         ],
       );
       alpha = result.params[0] ?? 0.3;
@@ -718,7 +747,9 @@ export class SimpleExpSmoothing {
 
     // Final level for forecasting
     let lFinal = l0;
-    for (const yt of arr) lFinal = alpha * yt + (1 - alpha) * lFinal;
+    for (const yt of arr) {
+      lFinal = alpha * yt + (1 - alpha) * lFinal;
+    }
     this._finalLevel = lFinal;
 
     const k = 2; // alpha + l0
@@ -744,7 +775,9 @@ export class SimpleExpSmoothing {
    * Must call {@link fit} first.
    */
   forecast(steps: number): number[] {
-    if (this._fit === null) throw new Error("Call fit() before forecast()");
+    if (this._fit === null) {
+      throw new Error("Call fit() before forecast()");
+    }
     return new Array<number>(steps).fill(this._finalLevel);
   }
 }
@@ -768,9 +801,9 @@ export class SimpleExpSmoothing {
 export class Holt {
   private _opts: HoltOptions = {};
   private _fit: HoltFitResult | null = null;
-  private _finalL: number = 0;
-  private _finalB: number = 0;
-  private _phi: number = 1;
+  private _finalL = 0;
+  private _finalB = 0;
+  private _phi = 1;
 
   constructor(opts?: HoltOptions) {
     this._opts = opts ?? {};
@@ -784,7 +817,9 @@ export class Holt {
   fit(y: readonly number[] | Series<number>, opts?: HoltOptions): HoltFitResult {
     const arr = toArr(y);
     const n = arr.length;
-    if (n < 3) throw new RangeError("Holt requires at least 3 observations");
+    if (n < 3) {
+      throw new RangeError("Holt requires at least 3 observations");
+    }
 
     const merged: HoltOptions = { ...this._opts, ...opts };
     const damped = merged.damped ?? false;
@@ -843,11 +878,11 @@ export class Holt {
     if (x0.length > 0) {
       const result = nelderMead(
         (params: readonly number[]): number => {
-          let a = alphaFixed ?? (params[paramNames.indexOf("alpha")] ?? 0.3);
-          let bta = betaFixed ?? (params[paramNames.indexOf("beta")] ?? 0.1);
-          let ph = damped ? (phiFixed ?? (params[paramNames.indexOf("phi")] ?? 0.98)) : 1.0;
-          let ll0 = optimL0 ? (params[paramNames.indexOf("l0")] ?? l0h) : l0Fixed;
-          let lb0 = optimB0 ? (params[paramNames.indexOf("b0")] ?? b0h) : b0Fixed;
+          let a = alphaFixed ?? params[paramNames.indexOf("alpha")] ?? 0.3;
+          let bta = betaFixed ?? params[paramNames.indexOf("beta")] ?? 0.1;
+          let ph = damped ? (phiFixed ?? params[paramNames.indexOf("phi")] ?? 0.98) : 1.0;
+          const ll0 = optimL0 ? (params[paramNames.indexOf("l0")] ?? l0h) : l0Fixed;
+          const lb0 = optimB0 ? (params[paramNames.indexOf("b0")] ?? b0h) : b0Fixed;
           a = clamp(a, 1e-6, 1 - 1e-6);
           bta = clamp(bta, 1e-6, 1 - 1e-6);
           ph = clamp(ph, 0.8, 1 - 1e-6);
@@ -857,16 +892,18 @@ export class Holt {
         bounds,
       );
       const p = result.params;
-      alpha = alphaFixed ?? (p[paramNames.indexOf("alpha")] ?? alpha);
-      beta = betaFixed ?? (p[paramNames.indexOf("beta")] ?? beta);
-      phi = damped ? (phiFixed ?? (p[paramNames.indexOf("phi")] ?? phi)) : 1.0;
+      alpha = alphaFixed ?? p[paramNames.indexOf("alpha")] ?? alpha;
+      beta = betaFixed ?? p[paramNames.indexOf("beta")] ?? beta;
+      phi = damped ? (phiFixed ?? p[paramNames.indexOf("phi")] ?? phi) : 1.0;
       l0 = optimL0 ? (p[paramNames.indexOf("l0")] ?? l0) : l0Fixed;
       b0 = optimB0 ? (p[paramNames.indexOf("b0")] ?? b0) : b0Fixed;
     }
 
     alpha = clamp(alpha, 1e-6, 1 - 1e-6);
     beta = clamp(beta, 1e-6, 1 - 1e-6);
-    if (damped) phi = clamp(phi, 0.8, 1 - 1e-6);
+    if (damped) {
+      phi = clamp(phi, 0.8, 1 - 1e-6);
+    }
 
     const { fitted, residuals, sse } = holtPass(arr, alpha, beta, phi, l0, b0);
 
@@ -907,7 +944,9 @@ export class Holt {
    * Must call {@link fit} first.
    */
   forecast(steps: number): number[] {
-    if (this._fit === null) throw new Error("Call fit() before forecast()");
+    if (this._fit === null) {
+      throw new Error("Call fit() before forecast()");
+    }
     return holtForecast(steps, this._finalL, this._finalB, this._phi);
   }
 }
@@ -936,15 +975,15 @@ export class Holt {
 export class ExponentialSmoothing {
   private _opts: ExponentialSmoothingOptions;
   private _fit: ExponentialSmoothingFitResult | null = null;
-  private _finalL: number = 0;
-  private _finalB: number = 0;
+  private _finalL = 0;
+  private _finalB = 0;
   private _finalS: number[] = [];
-  private _phi: number = 1;
+  private _phi = 1;
   private _trend: ETSTrend = null;
   private _seasonal: ETSSeasonal = null;
-  private _m: number = 1;
-  private _n: number = 0;
-  private _sigma2: number = 1;
+  private _m = 1;
+  private _n = 0;
+  private _sigma2 = 1;
 
   constructor(opts?: ExponentialSmoothingOptions) {
     this._opts = opts ?? {};
@@ -961,7 +1000,9 @@ export class ExponentialSmoothing {
   ): ExponentialSmoothingFitResult {
     const arr = toArr(y);
     const n = arr.length;
-    if (n < 3) throw new RangeError("ExponentialSmoothing requires at least 3 observations");
+    if (n < 3) {
+      throw new RangeError("ExponentialSmoothing requires at least 3 observations");
+    }
 
     const merged: ExponentialSmoothingOptions = { ...this._opts, ...opts };
     const trend = merged.trend ?? null;
@@ -984,22 +1025,15 @@ export class ExponentialSmoothing {
 
     // Heuristic initialisation
     const { l0: l0h, b0: b0h } = heuristicInit(arr, m, trend !== null);
-    const s0h =
-      seasonal !== null ? heuristicSeasons(arr, m, seasonal, l0h, b0h) : null;
+    const s0h = seasonal !== null ? heuristicSeasons(arr, m, seasonal, l0h, b0h) : null;
 
     // Determine which params to optimise
     const alphaFixed = merged.alpha;
     const betaFixed = merged.beta;
     const gammaFixed = merged.gamma;
     const phiFixed = merged.phi;
-    const l0Fixed =
-      initMethod === "known"
-        ? (merged.initialLevel ?? l0h)
-        : undefined;
-    const b0Fixed =
-      initMethod === "known"
-        ? (merged.initialTrend ?? b0h)
-        : undefined;
+    const l0Fixed = initMethod === "known" ? (merged.initialLevel ?? l0h) : undefined;
+    const b0Fixed = initMethod === "known" ? (merged.initialTrend ?? b0h) : undefined;
     const s0Fixed =
       initMethod === "known" && merged.initialSeasons !== undefined
         ? merged.initialSeasons.slice()
@@ -1033,7 +1067,8 @@ export class ExponentialSmoothing {
 
     const optimL0 = initMethod !== "known" && merged.initialLevel === undefined;
     const optimB0 = trend !== null && initMethod !== "known" && merged.initialTrend === undefined;
-    const optimS0 = seasonal !== null && initMethod !== "known" && merged.initialSeasons === undefined;
+    const optimS0 =
+      seasonal !== null && initMethod !== "known" && merged.initialSeasons === undefined;
 
     if (optimL0) {
       paramNames.push("l0");
@@ -1067,22 +1102,29 @@ export class ExponentialSmoothing {
     if (x0.length > 0) {
       const res = nelderMead(
         (params: readonly number[]): number => {
-          let a = alphaFixed ?? (params[paramNames.indexOf("alpha")] ?? 0.3);
-          let bt = trend !== null ? (betaFixed ?? (params[paramNames.indexOf("beta")] ?? 0.1)) : null;
-          let gm = seasonal !== null ? (gammaFixed ?? (params[paramNames.indexOf("gamma")] ?? 0.1)) : null;
-          let ph = damped ? (phiFixed ?? (params[paramNames.indexOf("phi")] ?? 0.98)) : 1.0;
+          let a = alphaFixed ?? params[paramNames.indexOf("alpha")] ?? 0.3;
+          let bt = trend !== null ? (betaFixed ?? params[paramNames.indexOf("beta")] ?? 0.1) : null;
+          let gm =
+            seasonal !== null ? (gammaFixed ?? params[paramNames.indexOf("gamma")] ?? 0.1) : null;
+          let ph = damped ? (phiFixed ?? params[paramNames.indexOf("phi")] ?? 0.98) : 1.0;
           a = clamp(a, 1e-6, 1 - 1e-6);
-          if (bt !== null) bt = clamp(bt, 1e-6, 1 - 1e-6);
-          if (gm !== null) gm = clamp(gm, 1e-6, 1 - 1e-6);
-          if (damped) ph = clamp(ph, 0.8, 1 - 1e-6);
+          if (bt !== null) {
+            bt = clamp(bt, 1e-6, 1 - 1e-6);
+          }
+          if (gm !== null) {
+            gm = clamp(gm, 1e-6, 1 - 1e-6);
+          }
+          if (damped) {
+            ph = clamp(ph, 0.8, 1 - 1e-6);
+          }
 
-          let ll0 = optimL0 ? (params[paramNames.indexOf("l0")] ?? l0h) : (l0Fixed ?? l0h);
-          let lb0 = optimB0 ? (params[paramNames.indexOf("b0")] ?? b0h) : (b0Fixed ?? b0h);
+          const ll0 = optimL0 ? (params[paramNames.indexOf("l0")] ?? l0h) : (l0Fixed ?? l0h);
+          const lb0 = optimB0 ? (params[paramNames.indexOf("b0")] ?? b0h) : (b0Fixed ?? b0h);
           let ss0: number[] | null = null;
           if (optimS0) {
             ss0 = [];
             for (let j = 0; j < m; j++) {
-              ss0.push(params[paramNames.indexOf(`s0_${j}`)] ?? (s0h?.[j] ?? 0));
+              ss0.push(params[paramNames.indexOf(`s0_${j}`)] ?? s0h?.[j] ?? 0);
             }
           } else {
             ss0 = s0Fixed ?? s0h;
@@ -1095,23 +1137,32 @@ export class ExponentialSmoothing {
         seasonal !== null ? 5000 : 3000,
       );
       const p = res.params;
-      alpha = alphaFixed ?? (p[paramNames.indexOf("alpha")] ?? alpha);
-      beta = trend !== null ? (betaFixed ?? (p[paramNames.indexOf("beta")] ?? (beta ?? 0.1))) : null;
-      gamma = seasonal !== null ? (gammaFixed ?? (p[paramNames.indexOf("gamma")] ?? (gamma ?? 0.1))) : null;
-      phi = damped ? (phiFixed ?? (p[paramNames.indexOf("phi")] ?? phi)) : 1.0;
+      alpha = alphaFixed ?? p[paramNames.indexOf("alpha")] ?? alpha;
+      beta = trend !== null ? (betaFixed ?? p[paramNames.indexOf("beta")] ?? beta ?? 0.1) : null;
+      gamma =
+        seasonal !== null ? (gammaFixed ?? p[paramNames.indexOf("gamma")] ?? gamma ?? 0.1) : null;
+      phi = damped ? (phiFixed ?? p[paramNames.indexOf("phi")] ?? phi) : 1.0;
       l0 = optimL0 ? (p[paramNames.indexOf("l0")] ?? l0) : (l0Fixed ?? l0);
       b0 = optimB0 ? (p[paramNames.indexOf("b0")] ?? b0) : (b0Fixed ?? b0);
       if (optimS0) {
         s0 = [];
-        for (let j = 0; j < m; j++) s0.push(p[paramNames.indexOf(`s0_${j}`)] ?? (s0h?.[j] ?? 0));
+        for (let j = 0; j < m; j++) {
+          s0.push(p[paramNames.indexOf(`s0_${j}`)] ?? s0h?.[j] ?? 0);
+        }
       }
     }
 
     // Final clamp
     alpha = clamp(alpha, 1e-6, 1 - 1e-6);
-    if (beta !== null) beta = clamp(beta, 1e-6, 1 - 1e-6);
-    if (gamma !== null) gamma = clamp(gamma, 1e-6, 1 - 1e-6);
-    if (damped) phi = clamp(phi, 0.8, 1 - 1e-6);
+    if (beta !== null) {
+      beta = clamp(beta, 1e-6, 1 - 1e-6);
+    }
+    if (gamma !== null) {
+      gamma = clamp(gamma, 1e-6, 1 - 1e-6);
+    }
+    if (damped) {
+      phi = clamp(phi, 0.8, 1 - 1e-6);
+    }
 
     const { fitted, residuals, sse, finalL, finalB, finalS } = hwPass(
       arr,
@@ -1170,7 +1221,9 @@ export class ExponentialSmoothing {
    * Must call {@link fit} first.
    */
   forecast(steps: number): number[] {
-    if (this._fit === null) throw new Error("Call fit() before forecast()");
+    if (this._fit === null) {
+      throw new Error("Call fit() before forecast()");
+    }
     return hwForecast(
       steps,
       this._finalL,
@@ -1192,7 +1245,7 @@ export class ExponentialSmoothing {
    * @param steps - Number of steps ahead.
    * @param alpha_ci - Significance level (default 0.05 → 95 % intervals).
    */
-  forecastWithCI(steps: number, alpha_ci: number = 0.05): ETSForecastResult {
+  forecastWithCI(steps: number, alpha_ci = 0.05): ETSForecastResult {
     const fc = this.forecast(steps);
     // Normal quantile for (1 - alpha_ci/2)
     const z = normalQuantile(1 - alpha_ci / 2);
@@ -1216,8 +1269,12 @@ export class ExponentialSmoothing {
  * @internal
  */
 function normalQuantile(p: number): number {
-  if (p <= 0) return -Infinity;
-  if (p >= 1) return Infinity;
+  if (p <= 0) {
+    return Number.NEGATIVE_INFINITY;
+  }
+  if (p >= 1) {
+    return Number.POSITIVE_INFINITY;
+  }
   const a = [2.515517, 0.802853, 0.010328];
   const b = [1.432788, 0.189269, 0.001308];
   const t = Math.sqrt(-2 * Math.log(p < 0.5 ? p : 1 - p));
@@ -1255,10 +1312,7 @@ export function simpleExpSmoothing(
  * console.log(fit.alpha, fit.beta, fit.sse);
  * ```
  */
-export function holt(
-  y: readonly number[] | Series<number>,
-  opts?: HoltOptions,
-): HoltFitResult {
+export function holt(y: readonly number[] | Series<number>, opts?: HoltOptions): HoltFitResult {
   return new Holt(opts).fit(y);
 }
 

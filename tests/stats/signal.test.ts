@@ -3,17 +3,32 @@
  * Covers FFT, windows, STFT, ISTFT, Welch PSD, and periodogram.
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import * as fc from "fast-check";
 import {
-  fft, ifft, rfft, irfft,
-  fftFreq, rfftFreq,
-  fftshift, ifftshift,
-  complex, cAbs,
+  bartlettWindow,
+  blackmanHarrisWindow,
+  blackmanWindow,
+  cAbs,
+  complex,
+  fft,
+  fftFreq,
+  fftshift,
+  flatTopWindow,
   getWindow,
-  rectangularWindow, bartlettWindow, hannWindow, hammingWindow,
-  blackmanWindow, blackmanHarrisWindow, flatTopWindow, kaiserWindow,
-  stft, istft, welch, periodogram,
+  hammingWindow,
+  hannWindow,
+  ifft,
+  ifftshift,
+  irfft,
+  istft,
+  kaiserWindow,
+  periodogram,
+  rectangularWindow,
+  rfft,
+  rfftFreq,
+  stft,
+  welch,
 } from "../../src/stats/signal.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -45,7 +60,9 @@ describe("fft / ifft", () => {
     const mag = X.map((c) => cAbs(c));
     expect(mag[1]).toBeCloseTo(N / 2, 4);
     expect(mag[7]).toBeCloseTo(N / 2, 4);
-    for (let i = 2; i <= 6; i++) expect(mag[i]).toBeCloseTo(0, 4);
+    for (let i = 2; i <= 6; i++) {
+      expect(mag[i]).toBeCloseTo(0, 4);
+    }
   });
 
   test("Parseval's theorem — energy preserved", () => {
@@ -82,15 +99,16 @@ describe("fft / ifft", () => {
   test("linearity: fft(a*x + b*y) = a*fft(x) + b*fft(y)", () => {
     const x = [1, 2, 3, 4, 5, 6, 7, 8];
     const y = [8, 7, 6, 5, 4, 3, 2, 1];
-    const a = 2, b = 3;
+    const a = 2;
+    const b = 3;
     const Xab = fft(x.map((v, i) => a * v + b * (y[i] ?? 0)));
     const Xa = fft(x);
     const Xy = fft(y);
     for (let i = 0; i < Xab.length; i++) {
       const re = a * (Xa[i]?.re ?? 0) + b * (Xy[i]?.re ?? 0);
       const im = a * (Xa[i]?.im ?? 0) + b * (Xy[i]?.im ?? 0);
-      expect((Xab[i]?.re ?? 0)).toBeCloseTo(re, 8);
-      expect((Xab[i]?.im ?? 0)).toBeCloseTo(im, 8);
+      expect(Xab[i]?.re ?? 0).toBeCloseTo(re, 8);
+      expect(Xab[i]?.im ?? 0).toBeCloseTo(im, 8);
     }
   });
 });
@@ -121,7 +139,7 @@ describe("rfft / irfft", () => {
     const freqs = rfftFreq(fft(x).length, 1 / 100);
     expect(freqs.length).toBe(X.length);
     expect(freqs[0]).toBeCloseTo(0);
-    expect(freqs[freqs.length - 1]).toBeCloseTo(50); // Nyquist at 50 Hz for fs=100
+    expect(freqs.at(-1)).toBeCloseTo(50); // Nyquist at 50 Hz for fs=100
   });
 });
 
@@ -169,13 +187,10 @@ describe("fftshift / ifftshift", () => {
 
   test("fftshift(ifftshift(x)) = x (any length)", () => {
     fc.assert(
-      fc.property(
-        fc.array(fc.float({ noNaN: true }), { minLength: 1, maxLength: 20 }),
-        (arr) => {
-          const roundTrip = fftshift(ifftshift(arr));
-          return roundTrip.every((v, i) => v === arr[i]);
-        },
-      ),
+      fc.property(fc.array(fc.float({ noNaN: true }), { minLength: 1, maxLength: 20 }), (arr) => {
+        const roundTrip = fftshift(ifftshift(arr));
+        return roundTrip.every((v, i) => v === arr[i]);
+      }),
     );
   });
 });
@@ -189,7 +204,9 @@ describe("window functions", () => {
     test(`rectangularWindow(${n}) — all ones`, () => {
       const w = rectangularWindow(n);
       expect(w.length).toBe(n);
-      for (const v of w) expect(v).toBe(1);
+      for (const v of w) {
+        expect(v).toBe(1);
+      }
     });
 
     test(`hannWindow(${n}) — ends near 0, sum > 0`, () => {
@@ -240,7 +257,9 @@ describe("window functions", () => {
 
   test("kaiserWindow — beta=0 → rectangular", () => {
     const w = kaiserWindow(8, 0);
-    for (const v of w) expect(v).toBeCloseTo(1, 10);
+    for (const v of w) {
+      expect(v).toBeCloseTo(1, 10);
+    }
   });
 
   test("kaiserWindow — beta=14, symmetric", () => {
@@ -252,7 +271,16 @@ describe("window functions", () => {
   });
 
   test("getWindow dispatches correctly", () => {
-    const names = ["rectangular", "bartlett", "hann", "hamming", "blackman", "blackmanharris", "flattop", "kaiser"] as const;
+    const names = [
+      "rectangular",
+      "bartlett",
+      "hann",
+      "hamming",
+      "blackman",
+      "blackmanharris",
+      "flattop",
+      "kaiser",
+    ] as const;
     for (const name of names) {
       const w = getWindow(name, 16);
       expect(w.length).toBe(16);
@@ -285,7 +313,9 @@ describe("stft", () => {
   test("frequency bins are non-negative", () => {
     const x = new Array(128).fill(1) as number[];
     const { f } = stft(x, { nperseg: 32 });
-    for (const freq of f) expect(freq).toBeGreaterThanOrEqual(0);
+    for (const freq of f) {
+      expect(freq).toBeGreaterThanOrEqual(0);
+    }
   });
 
   test("DC signal — energy only at bin 0", () => {
@@ -305,12 +335,14 @@ describe("stft", () => {
     const fs = 256;
     const f0 = 32; // Hz
     const n = 512;
-    const x = Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * f0 * i / fs));
+    const x = Array.from({ length: n }, (_, i) => Math.sin((2 * Math.PI * f0 * i) / fs));
     const { f, Zxx } = stft(x, { fs, nperseg: 64 });
     // Find bin with highest energy
     const maxMags = Array.from({ length: f.length }, (_, fi) => {
       const col = Zxx[fi];
-      if (!col) return 0;
+      if (!col) {
+        return 0;
+      }
       return Math.max(...col.map(cAbs));
     });
     const peakBin = maxMags.indexOf(Math.max(...maxMags));
@@ -325,7 +357,7 @@ describe("stft", () => {
 describe("istft", () => {
   test("round-trip: istft(stft(x)) ≈ x", () => {
     const n = 256;
-    const x = Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * 10 * i / n));
+    const x = Array.from({ length: n }, (_, i) => Math.sin((2 * Math.PI * 10 * i) / n));
     const nperseg = 64;
     const noverlap = 32;
     const { Zxx } = stft(x, { nperseg, noverlap });
@@ -359,14 +391,16 @@ describe("welch", () => {
   test("PSD values are non-negative", () => {
     const x = Array.from({ length: 512 }, () => Math.random() - 0.5);
     const { Pxx } = welch(x);
-    for (const v of Pxx) expect(v).toBeGreaterThanOrEqual(0);
+    for (const v of Pxx) {
+      expect(v).toBeGreaterThanOrEqual(0);
+    }
   });
 
   test("sinusoidal signal — peak at correct frequency", () => {
     const fs = 512;
     const f0 = 64;
     const n = 2048;
-    const x = Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * f0 * i / fs));
+    const x = Array.from({ length: n }, (_, i) => Math.sin((2 * Math.PI * f0 * i) / fs));
     const { f, Pxx } = welch(x, { fs, nperseg: 256 });
     const peakIdx = Pxx.indexOf(Math.max(...Pxx));
     const peakF = f[peakIdx] ?? 0;
@@ -374,16 +408,18 @@ describe("welch", () => {
   });
 
   test("median averaging option", () => {
-    const x = Array.from({ length: 512 }, (_, i) => Math.cos(2 * Math.PI * 10 * i / 512));
+    const x = Array.from({ length: 512 }, (_, i) => Math.cos((2 * Math.PI * 10 * i) / 512));
     const { Pxx: meanPxx } = welch(x, { average: "mean" });
     const { Pxx: medPxx } = welch(x, { average: "median" });
     expect(meanPxx.length).toBe(medPxx.length);
     // Both should have positive values
-    for (const v of medPxx) expect(v).toBeGreaterThanOrEqual(0);
+    for (const v of medPxx) {
+      expect(v).toBeGreaterThanOrEqual(0);
+    }
   });
 
   test("scaling: density vs spectrum", () => {
-    const x = Array.from({ length: 256 }, (_, i) => Math.sin(2 * Math.PI * i / 256));
+    const x = Array.from({ length: 256 }, (_, i) => Math.sin((2 * Math.PI * i) / 256));
     const { Pxx: dens } = welch(x, { scaling: "density", nperseg: 64 });
     const { Pxx: spec } = welch(x, { scaling: "spectrum", nperseg: 64 });
     // They should differ
@@ -403,13 +439,17 @@ describe("periodogram", () => {
   test("zero signal → near-zero PSD", () => {
     const x = new Array(128).fill(0) as number[];
     const { Pxx } = periodogram(x);
-    for (const v of Pxx) expect(v).toBeCloseTo(0, 10);
+    for (const v of Pxx) {
+      expect(v).toBeCloseTo(0, 10);
+    }
   });
 
   test("PSD non-negative", () => {
-    const x = Array.from({ length: 128 }, (_, i) => Math.sin(2 * Math.PI * 10 * i / 128));
+    const x = Array.from({ length: 128 }, (_, i) => Math.sin((2 * Math.PI * 10 * i) / 128));
     const { Pxx } = periodogram(x);
-    for (const v of Pxx) expect(v).toBeGreaterThanOrEqual(0);
+    for (const v of Pxx) {
+      expect(v).toBeGreaterThanOrEqual(0);
+    }
   });
 
   test("DC signal — peak at bin 0", () => {
@@ -425,7 +465,7 @@ describe("periodogram", () => {
     const x = new Array(n).fill(0) as number[];
     const { f } = periodogram(x, { fs });
     // Max frequency should be Nyquist = fs/2
-    const maxF = f[f.length - 1] ?? 0;
+    const maxF = f.at(-1) ?? 0;
     expect(Math.abs(maxF - fs / 2)).toBeLessThan(fs / n + 1);
   });
 });

@@ -23,12 +23,16 @@ function writeLongTo(arr: number[], v: number): void {
 function writeStringTo(arr: number[], s: string): void {
   const b = new TextEncoder().encode(s);
   writeLongTo(arr, b.length);
-  for (const byte of b) arr.push(byte);
+  for (const byte of b) {
+    arr.push(byte);
+  }
 }
 
 function writeBytesTo(arr: number[], b: Uint8Array): void {
   writeLongTo(arr, b.length);
-  for (const byte of b) arr.push(byte);
+  for (const byte of b) {
+    arr.push(byte);
+  }
 }
 
 function buildAvroOCF(schema: object, rows: Record<string, unknown>[]): Uint8Array {
@@ -48,7 +52,9 @@ function buildAvroOCF(schema: object, rows: Record<string, unknown>[]): Uint8Arr
   writeLongTo(buf, 0);
 
   // Sync marker
-  for (const b of sync) buf.push(b);
+  for (const b of sync) {
+    buf.push(b);
+  }
 
   // Encode rows
   const rowBuf: number[] = [];
@@ -65,7 +71,9 @@ function buildAvroOCF(schema: object, rows: Record<string, unknown>[]): Uint8Arr
       } else if (t === "double") {
         const arr = new Float64Array(1);
         arr[0] = typeof v === "number" ? v : 0;
-        for (const b of new Uint8Array(arr.buffer)) rowBuf.push(b);
+        for (const b of new Uint8Array(arr.buffer)) {
+          rowBuf.push(b);
+        }
       } else if (t === "string") {
         writeStringTo(rowBuf, String(v ?? ""));
       } else if (Array.isArray(t)) {
@@ -75,12 +83,16 @@ function buildAvroOCF(schema: object, rows: Record<string, unknown>[]): Uint8Arr
         } else {
           writeLongTo(rowBuf, 1);
           const inner = t[1] as string;
-          if (inner === "string") writeStringTo(rowBuf, String(v));
-          else if (inner === "long" || inner === "int") writeLongTo(rowBuf, Number(v));
-          else if (inner === "double") {
+          if (inner === "string") {
+            writeStringTo(rowBuf, String(v));
+          } else if (inner === "long" || inner === "int") {
+            writeLongTo(rowBuf, Number(v));
+          } else if (inner === "double") {
             const a2 = new Float64Array(1);
             a2[0] = Number(v);
-            for (const b of new Uint8Array(a2.buffer)) rowBuf.push(b);
+            for (const b of new Uint8Array(a2.buffer)) {
+              rowBuf.push(b);
+            }
           }
         }
       }
@@ -91,8 +103,12 @@ function buildAvroOCF(schema: object, rows: Record<string, unknown>[]): Uint8Arr
   if (rowBuf.length > 0) {
     writeLongTo(buf, rows.length);
     writeLongTo(buf, rowBuf.length);
-    for (const b of rowBuf) buf.push(b);
-    for (const b of sync) buf.push(b);
+    for (const b of rowBuf) {
+      buf.push(b);
+    }
+    for (const b of sync) {
+      buf.push(b);
+    }
   }
 
   return new Uint8Array(buf);
@@ -181,7 +197,10 @@ describe("readAvro – usecols", () => {
         { name: "c", type: "double" },
       ],
     };
-    const rows = [{ a: 1, b: "x", c: 0.5 }, { a: 2, b: "y", c: 1.5 }];
+    const rows = [
+      { a: 1, b: "x", c: 0.5 },
+      { a: 2, b: "y", c: 1.5 },
+    ];
     const df = readAvro(buildAvroOCF(schema, rows), { usecols: ["a", "c"] });
     expect([...df.columns.values]).toEqual(["a", "c"]);
     expect(df.shape[1]).toBe(2);
@@ -213,7 +232,9 @@ describe("readAvro – error handling", () => {
     writeStringTo(buf, "avro.codec");
     writeBytesTo(buf, new TextEncoder().encode("deflate"));
     writeLongTo(buf, 0);
-    for (let i = 0; i < 16; i++) buf.push(i); // sync
+    for (let i = 0; i < 16; i++) {
+      buf.push(i); // sync
+    }
     // No data blocks
     expect(() => readAvro(new Uint8Array(buf))).toThrow(/deflate/);
   });
@@ -236,7 +257,7 @@ describe("toAvro – file structure", () => {
     expect(buf[0]).toBe(79); // 'O'
     expect(buf[1]).toBe(98); // 'b'
     expect(buf[2]).toBe(106); // 'j'
-    expect(buf[3]).toBe(1);  // version
+    expect(buf[3]).toBe(1); // version
   });
 
   it("produces a Uint8Array", () => {
@@ -251,15 +272,17 @@ describe("toAvro + readAvro – round-trip", () => {
     const buf = toAvro(df);
     const df2 = readAvro(buf);
     expect(df2.shape[0]).toBe(5);
-    for (let i = 0; i < 5; i++) expect(df2.col("id").at(i)).toBe(i + 1);
+    for (let i = 0; i < 5; i++) {
+      expect(df2.col("id").at(i)).toBe(i + 1);
+    }
   });
 
   it("double column round-trips", () => {
     const df = DataFrame.fromColumns({ v: [1.5, 2.5, 3.5] });
     const buf = toAvro(df);
     const df2 = readAvro(buf);
-    expect((df2.col("v").at(0) as number)).toBeCloseTo(1.5, 5);
-    expect((df2.col("v").at(2) as number)).toBeCloseTo(3.5, 5);
+    expect(df2.col("v").at(0) as number).toBeCloseTo(1.5, 5);
+    expect(df2.col("v").at(2) as number).toBeCloseTo(3.5, 5);
   });
 
   it("string column round-trips", () => {
@@ -297,7 +320,7 @@ describe("toAvro + readAvro – round-trip", () => {
     const df2 = readAvro(buf);
     expect(df2.shape).toEqual([3, 4]);
     expect(df2.col("name").at(1)).toBe("b");
-    expect((df2.col("score").at(2) as number)).toBeCloseTo(0.3, 5);
+    expect(df2.col("score").at(2) as number).toBeCloseTo(0.3, 5);
   });
 
   it("empty DataFrame round-trips", () => {
@@ -319,7 +342,9 @@ describe("property tests", () => {
           const df = DataFrame.fromColumns({ n: vals });
           const df2 = readAvro(toAvro(df));
           for (let i = 0; i < vals.length; i++) {
-            if (df2.col("n").at(i) !== vals[i]) return false;
+            if (df2.col("n").at(i) !== vals[i]) {
+              return false;
+            }
           }
           return true;
         },
@@ -335,7 +360,9 @@ describe("property tests", () => {
           const df = DataFrame.fromColumns({ s: vals });
           const df2 = readAvro(toAvro(df));
           for (let i = 0; i < vals.length; i++) {
-            if (df2.col("s").at(i) !== vals[i]) return false;
+            if (df2.col("s").at(i) !== vals[i]) {
+              return false;
+            }
           }
           return true;
         },

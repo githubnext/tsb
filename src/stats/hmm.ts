@@ -26,14 +26,18 @@
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
-const LOG_ZERO = -Infinity;
+const LOG_ZERO = Number.NEGATIVE_INFINITY;
 
 // ─── Utility helpers ──────────────────────────────────────────────────────────
 
 /** log(exp(a) + exp(b)) with numerical stability. */
 function logSumExp(a: number, b: number): number {
-  if (a === LOG_ZERO) return b;
-  if (b === LOG_ZERO) return a;
+  if (a === LOG_ZERO) {
+    return b;
+  }
+  if (b === LOG_ZERO) {
+    return a;
+  }
   const m = Math.max(a, b);
   return m + Math.log(Math.exp(a - m) + Math.exp(b - m));
 }
@@ -41,7 +45,9 @@ function logSumExp(a: number, b: number): number {
 /** Stable log-sum-exp over an array. */
 function logSumExpArr(arr: readonly number[]): number {
   let result = LOG_ZERO;
-  for (const v of arr) result = logSumExp(result, v);
+  for (const v of arr) {
+    result = logSumExp(result, v);
+  }
   return result;
 }
 
@@ -53,7 +59,11 @@ function safeLog(x: number): number {
 /** Normalise an array in-place so it sums to 1. Returns sum before normalisation. */
 function normalise(arr: number[]): number {
   const s = arr.reduce((a, b) => a + b, 0);
-  if (s > 0) for (let i = 0; i < arr.length; i++) arr[i] = (arr[i] ?? 0) / s;
+  if (s > 0) {
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = (arr[i] ?? 0) / s;
+    }
+  }
   return s;
 }
 
@@ -202,7 +212,10 @@ function viterbi(
       let bestI = 0;
       for (let i = 0; i < K; i++) {
         const v = (delta[t - 1]?.[i] ?? LOG_ZERO) + (logTransmat[i]?.[j] ?? LOG_ZERO);
-        if (v > best) { best = v; bestI = i; }
+        if (v > best) {
+          best = v;
+          bestI = i;
+        }
       }
       delta[t]![j] = best + (logEmit[t]?.[j] ?? LOG_ZERO);
       psi[t]![j] = bestI;
@@ -215,7 +228,10 @@ function viterbi(
   let best = LOG_ZERO;
   for (let j = 0; j < K; j++) {
     const v = delta[T - 1]?.[j] ?? LOG_ZERO;
-    if (v > best) { best = v; s = j; }
+    if (v > best) {
+      best = v;
+      s = j;
+    }
   }
   path[T - 1] = s;
   for (let t = T - 2; t >= 0; t--) {
@@ -228,7 +244,9 @@ function viterbi(
 
 /** Log probability of x under N(mu, sigma^2). */
 function gaussianLogProb(x: number, mu: number, sigma2: number): number {
-  if (sigma2 <= 0) return LOG_ZERO;
+  if (sigma2 <= 0) {
+    return LOG_ZERO;
+  }
   return -0.5 * (Math.log(2 * Math.PI * sigma2) + ((x - mu) * (x - mu)) / sigma2);
 }
 
@@ -259,7 +277,9 @@ export class GaussianHMM {
   fit(obs: readonly number[]): GaussianHMMFit {
     const T = obs.length;
     const K = this.K;
-    if (T < 2) throw new Error("Need at least 2 observations");
+    if (T < 2) {
+      throw new Error("Need at least 2 observations");
+    }
 
     // ── Initialise ───────────────────────────────────────────────────────────
     // k-means-style: split sorted observations into K equal buckets
@@ -278,11 +298,9 @@ export class GaussianHMM {
 
     // Uniform start and transition
     const startProb = new Array<number>(K).fill(1 / K);
-    const transmat: number[][] = Array.from({ length: K }, () =>
-      new Array<number>(K).fill(1 / K),
-    );
+    const transmat: number[][] = Array.from({ length: K }, () => new Array<number>(K).fill(1 / K));
 
-    let prevLogProb = -Infinity;
+    let prevLogProb = Number.NEGATIVE_INFINITY;
     let nIterDone = 0;
 
     for (let iter = 0; iter < this.nIter; iter++) {
@@ -302,14 +320,18 @@ export class GaussianHMM {
       // Log-likelihood
       const logProb = logSumExpArr(logAlpha[T - 1] ?? []);
 
-      if (Math.abs(logProb - prevLogProb) < this.tol) { nIterDone = iter + 1; break; }
+      if (Math.abs(logProb - prevLogProb) < this.tol) {
+        nIterDone = iter + 1;
+        break;
+      }
       prevLogProb = logProb;
       nIterDone = iter + 1;
 
       // γ_t(k) = P(z_t = k | obs, θ)  in log space
       const logGamma: number[][] = Array.from({ length: T }, (_, t) => {
-        const row = Array.from({ length: K }, (__, k) =>
-          (logAlpha[t]?.[k] ?? LOG_ZERO) + (logBeta[t]?.[k] ?? 0),
+        const row = Array.from(
+          { length: K },
+          (__, k) => (logAlpha[t]?.[k] ?? LOG_ZERO) + (logBeta[t]?.[k] ?? 0),
         );
         const z = logSumExpArr(row);
         return row.map((v) => v - z);
@@ -328,19 +350,23 @@ export class GaussianHMM {
               (logEmit[t + 1]?.[j] ?? LOG_ZERO) +
               (logBeta[t + 1]?.[j] ?? 0) -
               logProb;
-            logXiSum[i]![j] = logSumExp(logXiSum[i]![j] ?? LOG_ZERO, v);
+            logXiSum[i]![j] = logSumExp(logXiSum[i]?.[j] ?? LOG_ZERO, v);
           }
         }
       }
 
       // ── M-step ─────────────────────────────────────────────────────────────
       // Update startProb
-      for (let k = 0; k < K; k++) startProb[k] = Math.exp(logGamma[0]?.[k] ?? LOG_ZERO);
+      for (let k = 0; k < K; k++) {
+        startProb[k] = Math.exp(logGamma[0]?.[k] ?? LOG_ZERO);
+      }
       normalise(startProb);
 
       // Update transmat
       for (let i = 0; i < K; i++) {
-        for (let j = 0; j < K; j++) transmat[i]![j] = Math.exp(logXiSum[i]?.[j] ?? LOG_ZERO);
+        for (let j = 0; j < K; j++) {
+          transmat[i]![j] = Math.exp(logXiSum[i]?.[j] ?? LOG_ZERO);
+        }
         normalise(transmat[i]!);
       }
 
@@ -353,7 +379,7 @@ export class GaussianHMM {
           num += g * (obs[t] ?? 0);
           den += g;
         }
-        means[k] = den > 0 ? num / den : means[k] ?? 0;
+        means[k] = den > 0 ? num / den : (means[k] ?? 0);
       }
 
       // Update covars
@@ -366,7 +392,7 @@ export class GaussianHMM {
           num += g * diff * diff;
           den += g;
         }
-        covars[k] = Math.max(den > 0 ? num / den : covars[k] ?? 1, 1e-6);
+        covars[k] = Math.max(den > 0 ? num / den : (covars[k] ?? 1), 1e-6);
       }
     }
 
@@ -416,7 +442,7 @@ export class GaussianHMM {
       this._transmat.map((row) => row.map(safeLog)),
       logEmit,
     );
-    return logSumExpArr(logAlpha[logAlpha.length - 1] ?? []);
+    return logSumExpArr(logAlpha.at(-1) ?? []);
   }
 
   /** Compute posterior state probabilities (T × nComponents). */
@@ -434,8 +460,9 @@ export class GaussianHMM {
     const logAlpha = logForward(logStartProb, logTransmat, logEmit);
     const logBeta = logBackward(logTransmat, logEmit);
     return Array.from({ length: T }, (_, t) => {
-      const row = Array.from({ length: K }, (__, k) =>
-        (logAlpha[t]?.[k] ?? LOG_ZERO) + (logBeta[t]?.[k] ?? 0),
+      const row = Array.from(
+        { length: K },
+        (__, k) => (logAlpha[t]?.[k] ?? LOG_ZERO) + (logBeta[t]?.[k] ?? 0),
       );
       const z = logSumExpArr(row);
       return row.map((v) => Math.exp(v - z));
@@ -455,7 +482,10 @@ export class GaussianHMM {
     let state = K - 1;
     for (let k = 0; k < K; k++) {
       cumProb += this._startProb[k] ?? 0;
-      if (r0 < cumProb) { state = k; break; }
+      if (r0 < cumProb) {
+        state = k;
+        break;
+      }
     }
 
     for (let t = 0; t < length; t++) {
@@ -463,7 +493,8 @@ export class GaussianHMM {
       const mu = this._means[state] ?? 0;
       const sigma = Math.sqrt(this._covars[state] ?? 1);
       // Box-Muller for Gaussian sample
-      const u1 = Math.random(), u2 = Math.random();
+      const u1 = Math.random();
+      const u2 = Math.random();
       const z = Math.sqrt(-2 * Math.log(Math.max(u1, 1e-15))) * Math.cos(2 * Math.PI * u2);
       obs.push(mu + sigma * z);
 
@@ -474,20 +505,37 @@ export class GaussianHMM {
       let nextState = K - 1;
       for (let k = 0; k < K; k++) {
         cum += row[k] ?? 0;
-        if (rv < cum) { nextState = k; break; }
+        if (rv < cum) {
+          nextState = k;
+          break;
+        }
       }
       state = nextState;
     }
     return { states, obs };
   }
 
-  get startProb(): number[] { this._checkFitted(); return [...this._startProb]; }
-  get transmat(): number[][] { this._checkFitted(); return this._transmat.map((r) => [...r]); }
-  get means(): number[] { this._checkFitted(); return [...this._means]; }
-  get covars(): number[] { this._checkFitted(); return [...this._covars]; }
+  get startProb(): number[] {
+    this._checkFitted();
+    return [...this._startProb];
+  }
+  get transmat(): number[][] {
+    this._checkFitted();
+    return this._transmat.map((r) => [...r]);
+  }
+  get means(): number[] {
+    this._checkFitted();
+    return [...this._means];
+  }
+  get covars(): number[] {
+    this._checkFitted();
+    return [...this._covars];
+  }
 
   private _checkFitted(): void {
-    if (!this._fitted) throw new Error("GaussianHMM is not fitted yet");
+    if (!this._fitted) {
+      throw new Error("GaussianHMM is not fitted yet");
+    }
   }
 }
 
@@ -521,7 +569,9 @@ export class MultinomialHMM {
     const T = obs.length;
     const K = this.K;
     const V = this.nFeatures;
-    if (T < 2) throw new Error("Need at least 2 observations");
+    if (T < 2) {
+      throw new Error("Need at least 2 observations");
+    }
 
     // Uniform initialisation with small random perturbation
     const startProb = new Array<number>(K).fill(1 / K);
@@ -537,15 +587,13 @@ export class MultinomialHMM {
       normalise(emissionProb[k]!);
     }
 
-    let prevLogProb = -Infinity;
+    let prevLogProb = Number.NEGATIVE_INFINITY;
     let nIterDone = 0;
 
     for (let iter = 0; iter < this.nIter; iter++) {
       // Log-emission: logEmit[t][k] = log P(obs[t] | z_t = k)
       const logEmit: number[][] = Array.from({ length: T }, (_, t) =>
-        Array.from({ length: K }, (__, k) =>
-          safeLog(emissionProb[k]?.[obs[t] ?? 0] ?? 0),
-        ),
+        Array.from({ length: K }, (__, k) => safeLog(emissionProb[k]?.[obs[t] ?? 0] ?? 0)),
       );
 
       const logStartProb = startProb.map(safeLog);
@@ -555,14 +603,18 @@ export class MultinomialHMM {
       const logBeta = logBackward(logTransmat, logEmit);
 
       const logProb = logSumExpArr(logAlpha[T - 1] ?? []);
-      if (Math.abs(logProb - prevLogProb) < this.tol) { nIterDone = iter + 1; break; }
+      if (Math.abs(logProb - prevLogProb) < this.tol) {
+        nIterDone = iter + 1;
+        break;
+      }
       prevLogProb = logProb;
       nIterDone = iter + 1;
 
       // γ_t(k)
       const logGamma: number[][] = Array.from({ length: T }, (_, t) => {
-        const row = Array.from({ length: K }, (__, k) =>
-          (logAlpha[t]?.[k] ?? LOG_ZERO) + (logBeta[t]?.[k] ?? 0),
+        const row = Array.from(
+          { length: K },
+          (__, k) => (logAlpha[t]?.[k] ?? LOG_ZERO) + (logBeta[t]?.[k] ?? 0),
         );
         const z = logSumExpArr(row);
         return row.map((v) => v - z);
@@ -581,27 +633,34 @@ export class MultinomialHMM {
               (logEmit[t + 1]?.[j] ?? LOG_ZERO) +
               (logBeta[t + 1]?.[j] ?? 0) -
               logProb;
-            logXiSum[i]![j] = logSumExp(logXiSum[i]![j] ?? LOG_ZERO, v);
+            logXiSum[i]![j] = logSumExp(logXiSum[i]?.[j] ?? LOG_ZERO, v);
           }
         }
       }
 
       // M-step: startProb
-      for (let k = 0; k < K; k++) startProb[k] = Math.exp(logGamma[0]?.[k] ?? LOG_ZERO);
+      for (let k = 0; k < K; k++) {
+        startProb[k] = Math.exp(logGamma[0]?.[k] ?? LOG_ZERO);
+      }
       normalise(startProb);
 
       // transmat
       for (let i = 0; i < K; i++) {
-        for (let j = 0; j < K; j++) transmat[i]![j] = Math.exp(logXiSum[i]?.[j] ?? LOG_ZERO);
+        for (let j = 0; j < K; j++) {
+          transmat[i]![j] = Math.exp(logXiSum[i]?.[j] ?? LOG_ZERO);
+        }
         normalise(transmat[i]!);
       }
 
       // emissionProb
       for (let k = 0; k < K; k++) {
-        for (let v = 0; v < V; v++) emissionProb[k]![v] = 0;
+        for (let v = 0; v < V; v++) {
+          emissionProb[k]![v] = 0;
+        }
         for (let t = 0; t < T; t++) {
           const sym = obs[t] ?? 0;
-          emissionProb[k]![sym] = (emissionProb[k]![sym] ?? 0) + Math.exp(logGamma[t]?.[k] ?? LOG_ZERO);
+          emissionProb[k]![sym] =
+            (emissionProb[k]?.[sym] ?? 0) + Math.exp(logGamma[t]?.[k] ?? LOG_ZERO);
         }
         normalise(emissionProb[k]!);
       }
@@ -626,9 +685,7 @@ export class MultinomialHMM {
     this._checkFitted();
     const K = this.K;
     const logEmit = obs.map((sym) =>
-      Array.from({ length: K }, (_, k) =>
-        safeLog(this._emissionProb[k]?.[sym] ?? 0),
-      ),
+      Array.from({ length: K }, (_, k) => safeLog(this._emissionProb[k]?.[sym] ?? 0)),
     );
     return viterbi(
       this._startProb.map(safeLog),
@@ -642,24 +699,33 @@ export class MultinomialHMM {
     this._checkFitted();
     const K = this.K;
     const logEmit = obs.map((sym) =>
-      Array.from({ length: K }, (_, k) =>
-        safeLog(this._emissionProb[k]?.[sym] ?? 0),
-      ),
+      Array.from({ length: K }, (_, k) => safeLog(this._emissionProb[k]?.[sym] ?? 0)),
     );
     const logAlpha = logForward(
       this._startProb.map(safeLog),
       this._transmat.map((row) => row.map(safeLog)),
       logEmit,
     );
-    return logSumExpArr(logAlpha[logAlpha.length - 1] ?? []);
+    return logSumExpArr(logAlpha.at(-1) ?? []);
   }
 
-  get startProb(): number[] { this._checkFitted(); return [...this._startProb]; }
-  get transmat(): number[][] { this._checkFitted(); return this._transmat.map((r) => [...r]); }
-  get emissionProb(): number[][] { this._checkFitted(); return this._emissionProb.map((r) => [...r]); }
+  get startProb(): number[] {
+    this._checkFitted();
+    return [...this._startProb];
+  }
+  get transmat(): number[][] {
+    this._checkFitted();
+    return this._transmat.map((r) => [...r]);
+  }
+  get emissionProb(): number[][] {
+    this._checkFitted();
+    return this._emissionProb.map((r) => [...r]);
+  }
 
   private _checkFitted(): void {
-    if (!this._fitted) throw new Error("MultinomialHMM is not fitted yet");
+    if (!this._fitted) {
+      throw new Error("MultinomialHMM is not fitted yet");
+    }
   }
 }
 
@@ -673,7 +739,11 @@ export class MultinomialHMM {
  * const model = fitGaussianHMM([0.1, 0.2, 2.1, 2.3, 0.05, 2.5], 2);
  * ```
  */
-export function fitGaussianHMM(obs: readonly number[], nComponents: number, nIter = 100): GaussianHMM {
+export function fitGaussianHMM(
+  obs: readonly number[],
+  nComponents: number,
+  nIter = 100,
+): GaussianHMM {
   const model = new GaussianHMM({ nComponents, nIter });
   model.fit(obs);
   return model;

@@ -16,10 +16,10 @@ import { describe, expect, it } from "bun:test";
 import * as fc from "fast-check";
 import {
   KalmanFilter,
-  kalmanFilter1D,
-  kalmanSmooth1D,
   extractScalarMeans,
   filteredPredictionInterval,
+  kalmanFilter1D,
+  kalmanSmooth1D,
 } from "../../src/index.ts";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -30,14 +30,18 @@ const absDiff = (a: number, b: number) => Math.abs(a - b);
 /** Max absolute difference between two arrays. */
 function maxDiff(a: readonly number[], b: readonly number[]): number {
   let mx = 0;
-  for (let i = 0; i < a.length; i++) mx = Math.max(mx, Math.abs((a[i] ?? 0) - (b[i] ?? 0)));
+  for (let i = 0; i < a.length; i++) {
+    mx = Math.max(mx, Math.abs((a[i] ?? 0) - (b[i] ?? 0)));
+  }
   return mx;
 }
 
 /** Root mean square between two arrays. */
 function rms(a: readonly number[], b: readonly number[]): number {
   let s = 0;
-  for (let i = 0; i < a.length; i++) s += ((a[i] ?? 0) - (b[i] ?? 0)) ** 2;
+  for (let i = 0; i < a.length; i++) {
+    s += ((a[i] ?? 0) - (b[i] ?? 0)) ** 2;
+  }
   return Math.sqrt(s / a.length);
 }
 
@@ -53,11 +57,18 @@ function lcgSeq(seed: number, n: number, scale = 1.0): number[] {
 }
 
 /** Generate a random-walk series with observation noise. */
-function localLevelSeries(n: number, qSd = 1, rSd = 1, seed = 1): { obs: number[]; states: number[] } {
+function localLevelSeries(
+  n: number,
+  qSd = 1,
+  rSd = 1,
+  seed = 1,
+): { obs: number[]; states: number[] } {
   const states: number[] = [0];
   const wNoise = lcgSeq(seed, n, qSd);
   const vNoise = lcgSeq(seed + 999, n, rSd);
-  for (let t = 1; t < n; t++) states.push((states[t - 1] ?? 0) + (wNoise[t] ?? 0));
+  for (let t = 1; t < n; t++) {
+    states.push((states[t - 1] ?? 0) + (wNoise[t] ?? 0));
+  }
   const obs = states.map((s, i) => s + (vNoise[i] ?? 0));
   return { obs, states };
 }
@@ -88,7 +99,10 @@ describe("KalmanFilter.localLevel factory", () => {
 describe("KalmanFilter.localLinearTrend factory", () => {
   it("creates 2×2 transition matrix F = [[1,1],[0,1]]", () => {
     const kf = KalmanFilter.localLinearTrend();
-    expect(kf.transitionMatrix).toEqual([[1, 1], [0, 1]]);
+    expect(kf.transitionMatrix).toEqual([
+      [1, 1],
+      [0, 1],
+    ]);
   });
 
   it("creates 1×2 observation matrix H = [[1,0]]", () => {
@@ -133,9 +147,15 @@ describe("KalmanFilter direct construction", () => {
 
   it("defaults initialStateMean to zero vector", () => {
     const kf = new KalmanFilter({
-      transitionMatrix: [[1, 0], [0, 1]],
+      transitionMatrix: [
+        [1, 0],
+        [0, 1],
+      ],
       observationMatrix: [[1, 0]],
-      processNoiseCov: [[1, 0], [0, 1]],
+      processNoiseCov: [
+        [1, 0],
+        [0, 1],
+      ],
       observationNoiseCov: [[1]],
     });
     expect(kf.initialStateMean).toEqual([0, 0]);
@@ -143,12 +163,21 @@ describe("KalmanFilter direct construction", () => {
 
   it("defaults initialStateCovariance to identity", () => {
     const kf = new KalmanFilter({
-      transitionMatrix: [[1, 0], [0, 1]],
+      transitionMatrix: [
+        [1, 0],
+        [0, 1],
+      ],
       observationMatrix: [[1, 0]],
-      processNoiseCov: [[1, 0], [0, 1]],
+      processNoiseCov: [
+        [1, 0],
+        [0, 1],
+      ],
       observationNoiseCov: [[1]],
     });
-    expect(kf.initialStateCovariance).toEqual([[1, 0], [0, 1]]);
+    expect(kf.initialStateCovariance).toEqual([
+      [1, 0],
+      [0, 1],
+    ]);
   });
 });
 
@@ -183,9 +212,9 @@ describe("filter – local-level basic", () => {
 
   it("filtered means lie between prior and observation", () => {
     for (let t = 0; t < obs.length; t++) {
-      const m = result.filteredStateMeans[t]?.[0] ?? NaN;
-      const y = obs[t]?.[0] ?? NaN;
-      expect(isFinite(m)).toBe(true);
+      const m = result.filteredStateMeans[t]?.[0] ?? Number.NaN;
+      const y = obs[t]?.[0] ?? Number.NaN;
+      expect(Number.isFinite(m)).toBe(true);
       // filtered mean < 2 * observation amplitude
       expect(Math.abs(m)).toBeLessThan(2 * Math.abs(y) + 5);
     }
@@ -203,7 +232,7 @@ describe("filter – local-level basic", () => {
   });
 
   it("logLikelihood is finite", () => {
-    expect(isFinite(result.logLikelihood)).toBe(true);
+    expect(Number.isFinite(result.logLikelihood)).toBe(true);
   });
 });
 
@@ -214,7 +243,7 @@ describe("filter – monotone series tracking", () => {
     const result = kf.filter(obs);
     const means = extractScalarMeans(result.filteredStateMeans);
     for (let t = 0; t < 10; t++) {
-      expect(absDiff(means[t] ?? NaN, t + 1)).toBeLessThan(2);
+      expect(absDiff(means[t] ?? Number.NaN, t + 1)).toBeLessThan(2);
     }
   });
 });
@@ -229,13 +258,13 @@ describe("filter – missing observations", () => {
   });
 
   it("innovations are NaN for missing steps", () => {
-    expect(isNaN(result.innovations[1]?.[0] ?? 0)).toBe(true);
-    expect(isNaN(result.innovations[2]?.[0] ?? 0)).toBe(true);
+    expect(Number.isNaN(result.innovations[1]?.[0] ?? 0)).toBe(true);
+    expect(Number.isNaN(result.innovations[2]?.[0] ?? 0)).toBe(true);
   });
 
   it("innovations are finite for observed steps", () => {
-    expect(isFinite(result.innovations[0]?.[0] ?? NaN)).toBe(true);
-    expect(isFinite(result.innovations[3]?.[0] ?? NaN)).toBe(true);
+    expect(Number.isFinite(result.innovations[0]?.[0] ?? Number.NaN)).toBe(true);
+    expect(Number.isFinite(result.innovations[3]?.[0] ?? Number.NaN)).toBe(true);
   });
 
   it("covariance increases during missing steps (uncertainty grows)", () => {
@@ -248,7 +277,7 @@ describe("filter – missing observations", () => {
 
   it("filtered mean does not jump to NaN during missing steps", () => {
     for (const m of result.filteredStateMeans) {
-      expect(isFinite(m[0] ?? NaN)).toBe(true);
+      expect(Number.isFinite(m[0] ?? Number.NaN)).toBe(true);
     }
   });
 });
@@ -278,7 +307,7 @@ describe("filter – logLikelihood", () => {
     const ll2 = kf.filter(partial).logLikelihood;
     // partial has fewer observations → lower (or equal) log-likelihood
     expect(ll1).toBeLessThanOrEqual(ll1 + 1); // basic: both are finite
-    expect(isFinite(ll1) && isFinite(ll2)).toBe(true);
+    expect(Number.isFinite(ll1) && Number.isFinite(ll2)).toBe(true);
   });
 });
 
@@ -298,14 +327,14 @@ describe("filter – 2D state (local linear trend)", () => {
   it("tracks linear trend: level ≈ t", () => {
     const means = result.filteredStateMeans;
     for (let t = 5; t < 15; t++) {
-      const level = means[t]?.[0] ?? NaN;
+      const level = means[t]?.[0] ?? Number.NaN;
       expect(absDiff(level, t)).toBeLessThan(3);
     }
   });
 
   it("slope converges towards 1", () => {
     const means = result.filteredStateMeans;
-    const slope = means[14]?.[1] ?? NaN;
+    const slope = means[14]?.[1] ?? Number.NaN;
     expect(absDiff(slope, 1.0)).toBeLessThan(0.5);
   });
 
@@ -349,8 +378,8 @@ describe("smooth – basic properties", () => {
   });
 
   it("last smoothed mean equals last filtered mean", () => {
-    const filtLast = sm.filterResult.filteredStateMeans[4]?.[0] ?? NaN;
-    const smoothLast = sm.smoothedStateMeans[4]?.[0] ?? NaN;
+    const filtLast = sm.filterResult.filteredStateMeans[4]?.[0] ?? Number.NaN;
+    const smoothLast = sm.smoothedStateMeans[4]?.[0] ?? Number.NaN;
     expect(absDiff(filtLast, smoothLast)).toBeLessThan(1e-10);
   });
 
@@ -377,12 +406,14 @@ describe("smooth – missing observations", () => {
     const kf = KalmanFilter.localLevel({ processNoise: 1, observationNoise: 0.5 });
     const obs: (number | null)[][] = [[0], [null], [null], [null], [4]];
     const sm = kf.smooth(obs);
-    const means = sm.smoothedStateMeans.map((m) => m[0] ?? NaN);
+    const means = sm.smoothedStateMeans.map((m) => m[0] ?? Number.NaN);
     // Smoothed means should interpolate between 0 and 4
     expect(means[2]).toBeGreaterThan(0.5);
     expect(means[2]).toBeLessThan(3.5);
     // All means should be finite
-    for (const m of means) expect(isFinite(m)).toBe(true);
+    for (const m of means) {
+      expect(Number.isFinite(m)).toBe(true);
+    }
   });
 });
 
@@ -407,7 +438,9 @@ describe("smooth – local linear trend", () => {
     const obs = Array.from({ length: 10 }, (_, i) => [i * 2.0]) as number[][];
     const sm = kf.smooth(obs);
     for (const m of sm.smoothedStateMeans) {
-      for (const v of m) expect(isFinite(v)).toBe(true);
+      for (const v of m) {
+        expect(Number.isFinite(v)).toBe(true);
+      }
     }
   });
 });
@@ -424,12 +457,13 @@ describe("kalmanFilter1D convenience wrapper", () => {
   it("produces same result as KalmanFilter.localLevel().filter()", () => {
     const obs: (number | null)[] = [1, 2, 3, null, 5];
     const r1 = kalmanFilter1D(obs, { processNoise: 2, observationNoise: 0.5 });
-    const r2 = KalmanFilter.localLevel({ processNoise: 2, observationNoise: 0.5 })
-      .filter(obs.map((v) => [v]));
+    const r2 = KalmanFilter.localLevel({ processNoise: 2, observationNoise: 0.5 }).filter(
+      obs.map((v) => [v]),
+    );
     const m1 = extractScalarMeans(r1.filteredStateMeans);
     const m2 = extractScalarMeans(r2.filteredStateMeans);
     for (let i = 0; i < m1.length; i++) {
-      expect(absDiff(m1[i] ?? NaN, m2[i] ?? NaN)).toBeLessThan(1e-10);
+      expect(absDiff(m1[i] ?? Number.NaN, m2[i] ?? Number.NaN)).toBeLessThan(1e-10);
     }
   });
 });
@@ -443,7 +477,7 @@ describe("kalmanSmooth1D convenience wrapper", () => {
 
   it("returns logLikelihood", () => {
     const sm = kalmanSmooth1D([1, 2, 3]);
-    expect(isFinite(sm.logLikelihood)).toBe(true);
+    expect(Number.isFinite(sm.logLikelihood)).toBe(true);
   });
 });
 
@@ -456,7 +490,7 @@ describe("extractScalarMeans", () => {
     const means = extractScalarMeans(result.filteredStateMeans);
     expect(means.length).toBe(3);
     for (let i = 0; i < 3; i++) {
-      expect(means[i]).toBeCloseTo(result.filteredStateMeans[i]?.[0] ?? NaN, 10);
+      expect(means[i]).toBeCloseTo(result.filteredStateMeans[i]?.[0] ?? Number.NaN, 10);
     }
   });
 });
@@ -601,7 +635,7 @@ describe("property – filter – shape invariants", () => {
         (ys) => {
           const kf = KalmanFilter.localLevel();
           const { logLikelihood } = kf.filter(ys.map((v) => [v]));
-          return isFinite(logLikelihood);
+          return Number.isFinite(logLikelihood);
         },
       ),
     );
@@ -619,7 +653,9 @@ describe("property – smoother – uncertainty never exceeds filter", () => {
           for (let t = 0; t < ys.length - 1; t++) {
             const pfilt = sm.filterResult.filteredStateCovariances[t]?.[0]?.[0] ?? 0;
             const psmooth = sm.smoothedStateCovariances[t]?.[0]?.[0] ?? 0;
-            if (psmooth > pfilt + 1e-8) return false;
+            if (psmooth > pfilt + 1e-8) {
+              return false;
+            }
           }
           return true;
         },
@@ -634,7 +670,9 @@ describe("property – all-null observations", () => {
     const obs: (number | null)[][] = Array.from({ length: 5 }, () => [null]);
     const result = kf.filter(obs);
     expect(result.nTime).toBe(5);
-    for (const m of result.filteredStateMeans) expect(isFinite(m[0] ?? NaN)).toBe(true);
+    for (const m of result.filteredStateMeans) {
+      expect(Number.isFinite(m[0] ?? Number.NaN)).toBe(true);
+    }
   });
 });
 

@@ -1,14 +1,9 @@
 /**
  * Tests for Hidden Markov Model (GaussianHMM, MultinomialHMM).
  */
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
-import {
-  GaussianHMM,
-  MultinomialHMM,
-  fitGaussianHMM,
-  hmmViterbi,
-} from "../../src/stats/hmm.ts";
+import { GaussianHMM, MultinomialHMM, fitGaussianHMM, hmmViterbi } from "../../src/stats/hmm.ts";
 
 // ─── GaussianHMM ──────────────────────────────────────────────────────────────
 
@@ -16,7 +11,9 @@ describe("GaussianHMM", () => {
   it("fits a 2-state model on well-separated data", () => {
     // State 0: N(0, 0.1), State 1: N(5, 0.1)
     const obs: number[] = [];
-    for (let i = 0; i < 50; i++) obs.push(i % 5 < 3 ? 0 + 0.1 * (Math.random() - 0.5) : 5 + 0.1 * (Math.random() - 0.5));
+    for (let i = 0; i < 50; i++) {
+      obs.push(i % 5 < 3 ? 0 + 0.1 * (Math.random() - 0.5) : 5 + 0.1 * (Math.random() - 0.5));
+    }
 
     const model = new GaussianHMM({ nComponents: 2, nIter: 200 });
     const fit = model.fit(obs);
@@ -48,7 +45,7 @@ describe("GaussianHMM", () => {
     const model = new GaussianHMM({ nComponents: 2, nIter: 100 });
     model.fit(obs);
     const lp = model.score(obs);
-    expect(isFinite(lp)).toBe(true);
+    expect(Number.isFinite(lp)).toBe(true);
     expect(lp).toBeLessThan(0);
   });
 
@@ -113,12 +110,15 @@ describe("GaussianHMM", () => {
   it("property: log-prob is always finite for sane data", () => {
     fc.assert(
       fc.property(
-        fc.array(fc.float({ min: -10, max: 10, noNaN: true, noDefaultInfinity: true }), { minLength: 10, maxLength: 50 }),
+        fc.array(fc.float({ min: -10, max: 10, noNaN: true, noDefaultInfinity: true }), {
+          minLength: 10,
+          maxLength: 50,
+        }),
         (rawObs) => {
           const model = new GaussianHMM({ nComponents: 2, nIter: 20 });
           model.fit(rawObs);
           const lp = model.score(rawObs);
-          return isFinite(lp);
+          return Number.isFinite(lp);
         },
       ),
       { numRuns: 20 },
@@ -132,13 +132,15 @@ describe("MultinomialHMM", () => {
   it("fits a 2-state model on discrete data", () => {
     // State 0: emits 0 often; State 1: emits 1 often
     const obs: number[] = [];
-    for (let i = 0; i < 60; i++) obs.push(i % 6 < 4 ? 0 : 1);
+    for (let i = 0; i < 60; i++) {
+      obs.push(i % 6 < 4 ? 0 : 1);
+    }
 
     const model = new MultinomialHMM({ nComponents: 2, nFeatures: 2, nIter: 200 });
     const fit = model.fit(obs);
 
     expect(fit.emissionProb.length).toBe(2);
-    expect(fit.emissionProb[0]!.length).toBe(2);
+    expect(fit.emissionProb[0]?.length).toBe(2);
     expect(fit.logProb).toBeLessThan(0);
     expect(fit.nIterDone).toBeGreaterThan(0);
   });
@@ -160,7 +162,7 @@ describe("MultinomialHMM", () => {
     const model = new MultinomialHMM({ nComponents: 2, nFeatures: 3, nIter: 100 });
     model.fit(obs);
     const lp = model.score(obs);
-    expect(isFinite(lp)).toBe(true);
+    expect(Number.isFinite(lp)).toBe(true);
     expect(lp).toBeLessThan(0);
   });
 
@@ -196,8 +198,14 @@ describe("hmmViterbi", () => {
   it("decodes a simple 2-state chain correctly", () => {
     // State 0 emits symbol 0; State 1 emits symbol 1
     const startProb = [0.6, 0.4];
-    const transmat = [[0.7, 0.3], [0.3, 0.7]];
-    const emissionProb = [[0.9, 0.1], [0.1, 0.9]];
+    const transmat = [
+      [0.7, 0.3],
+      [0.3, 0.7],
+    ];
+    const emissionProb = [
+      [0.9, 0.1],
+      [0.1, 0.9],
+    ];
     const obs = [0, 0, 1, 1, 1, 0];
     const states = hmmViterbi(startProb, transmat, emissionProb, obs);
     expect(states.length).toBe(obs.length);
@@ -235,10 +243,7 @@ describe("hmmViterbi", () => {
           const obs = Array.from({ length: T }, () => Math.floor(Math.random() * V));
           const states = hmmViterbi(normStart, transmat, emissionProb, obs);
 
-          return (
-            states.length === T &&
-            states.every((s) => s >= 0 && s < K)
-          );
+          return states.length === T && states.every((s) => s >= 0 && s < K);
         },
       ),
       { numRuns: 50 },

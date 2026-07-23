@@ -61,7 +61,7 @@ function cols(A: Mat): number {
   return A[0]?.length ?? 0;
 }
 function zeros(n: number, m: number): MutMat {
-  return Array.from({ length: n }, () => Array<number>(m).fill(0));
+  return Array.from({ length: n }, () => new Array(m).fill(0));
 }
 function eye(n: number): MutMat {
   return Array.from({ length: n }, (_, i) =>
@@ -78,20 +78,26 @@ function mmul(A: Mat, B: Mat): MutMat {
     const ci = C[i]!;
     for (let p = 0; p < k; p++) {
       const aip = ai[p]!;
-      if (aip === 0) continue;
+      if (aip === 0) {
+        continue;
+      }
       const bp = B[p]!;
-      for (let j = 0; j < n; j++) ci[j]! += aip * bp[j]!;
+      for (let j = 0; j < n; j++) {
+        ci[j]! += aip * bp[j]!;
+      }
     }
   }
   return C;
 }
 function mvmul(A: Mat, x: readonly number[]): number[] {
   const m = rows(A);
-  const y = Array<number>(m).fill(0);
+  const y = new Array(m).fill(0);
   for (let i = 0; i < m; i++) {
     const ai = A[i]!;
     let s = 0;
-    for (let p = 0; p < x.length; p++) s += ai[p]! * x[p]!;
+    for (let p = 0; p < x.length; p++) {
+      s += ai[p]! * x[p]!;
+    }
     y[i] = s;
   }
   return y;
@@ -100,22 +106,25 @@ function tr(A: Mat): MutMat {
   const m = rows(A);
   const n = cols(A);
   const At = zeros(n, m);
-  for (let i = 0; i < m; i++)
-    for (let j = 0; j < n; j++) At[j]![i] = A[i]![j]!;
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      At[j]![i] = A[i]?.[j]!;
+    }
+  }
   return At;
 }
 function madd(A: Mat, B: Mat): MutMat {
   const m = rows(A);
   const n = cols(A);
   return Array.from({ length: m }, (_, i) =>
-    Array.from({ length: n }, (_, j) => A[i]![j]! + B[i]![j]!),
+    Array.from({ length: n }, (_, j) => A[i]?.[j]! + B[i]?.[j]!),
   );
 }
 function msub(A: Mat, B: Mat): MutMat {
   const m = rows(A);
   const n = cols(A);
   return Array.from({ length: m }, (_, i) =>
-    Array.from({ length: n }, (_, j) => A[i]![j]! - B[i]![j]!),
+    Array.from({ length: n }, (_, j) => A[i]?.[j]! - B[i]?.[j]!),
   );
 }
 function mscale(A: Mat, s: number): MutMat {
@@ -123,7 +132,9 @@ function mscale(A: Mat, s: number): MutMat {
 }
 function vdot(a: readonly number[], b: readonly number[]): number {
   let s = 0;
-  for (let i = 0; i < a.length; i++) s += a[i]! * b[i]!;
+  for (let i = 0; i < a.length; i++) {
+    s += a[i]! * b[i]!;
+  }
   return s;
 }
 function vadd(a: readonly number[], b: readonly number[]): number[] {
@@ -147,23 +158,33 @@ function matInv(A: Mat): MutMat | null {
   ]);
   for (let col = 0; col < n; col++) {
     let pivotRow = col;
-    let pivotVal = Math.abs(aug[col]![col]!);
+    let pivotVal = Math.abs(aug[col]?.[col]!);
     for (let r = col + 1; r < n; r++) {
-      const v = Math.abs(aug[r]![col]!);
+      const v = Math.abs(aug[r]?.[col]!);
       if (v > pivotVal) {
         pivotVal = v;
         pivotRow = r;
       }
     }
-    if (pivotVal < 1e-14) return null;
+    if (pivotVal < 1e-14) {
+      return null;
+    }
     [aug[col], aug[pivotRow]] = [aug[pivotRow]!, aug[col]!];
-    const scale = 1 / aug[col]![col]!;
-    for (let j = 0; j < 2 * n; j++) aug[col]![j]! *= scale;
+    const scale = 1 / aug[col]?.[col]!;
+    for (let j = 0; j < 2 * n; j++) {
+      aug[col]![j]! *= scale;
+    }
     for (let r = 0; r < n; r++) {
-      if (r === col) continue;
-      const f = aug[r]![col]!;
-      if (f === 0) continue;
-      for (let j = 0; j < 2 * n; j++) aug[r]![j]! -= f * aug[col]![j]!;
+      if (r === col) {
+        continue;
+      }
+      const f = aug[r]?.[col]!;
+      if (f === 0) {
+        continue;
+      }
+      for (let j = 0; j < 2 * n; j++) {
+        aug[r]![j]! -= f * aug[col]?.[j]!;
+      }
     }
   }
   return aug.map((row) => row.slice(n));
@@ -176,10 +197,16 @@ function blockDiag(A: Mat, B: Mat): MutMat {
   const rb = rows(B);
   const cb = cols(B);
   const C = zeros(ra + rb, ca + cb);
-  for (let i = 0; i < ra; i++)
-    for (let j = 0; j < ca; j++) C[i]![j] = A[i]![j]!;
-  for (let i = 0; i < rb; i++)
-    for (let j = 0; j < cb; j++) C[ra + i]![ca + j] = B[i]![j]!;
+  for (let i = 0; i < ra; i++) {
+    for (let j = 0; j < ca; j++) {
+      C[i]![j] = A[i]?.[j]!;
+    }
+  }
+  for (let i = 0; i < rb; i++) {
+    for (let j = 0; j < cb; j++) {
+      C[ra + i]![ca + j] = B[i]?.[j]!;
+    }
+  }
   return C;
 }
 
@@ -322,7 +349,7 @@ export class DLM {
     this._V = options.V;
     this._p = rows(this._G);
     this._q = rows(this._F);
-    this._m0 = options.m0 ?? Array<number>(this._p).fill(0);
+    this._m0 = options.m0 ?? new Array(this._p).fill(0);
     this._C0 = options.C0 ?? mscale(eye(this._p), 1e6);
   }
 
@@ -370,16 +397,15 @@ export class DLM {
   /**
    * Polynomial trend of order `order` (1 = random walk, 2 = linear trend, …).
    */
-  static polynomial(
-    order: number,
-    opts: { sigmaObs?: number; sigmaState?: number } = {},
-  ): DLM {
+  static polynomial(order: number, opts: { sigmaObs?: number; sigmaState?: number } = {}): DLM {
     const sv = opts.sigmaObs ?? 1;
     const sw = opts.sigmaState ?? 1;
     // Jordan block (upper-triangular ones)
     const G = eye(order);
-    for (let i = 0; i < order - 1; i++) G[i]![i + 1] = 1;
-    const F: MutMat = [Array<number>(order).fill(0)];
+    for (let i = 0; i < order - 1; i++) {
+      G[i]![i + 1] = 1;
+    }
+    const F: MutMat = [new Array(order).fill(0)];
     F[0]![0] = 1;
     const W = mscale(eye(order), sw * sw);
     const V: MutMat = [[sv * sv]];
@@ -400,7 +426,7 @@ export class DLM {
     const p = 2 * harmonics;
     // Block-diagonal G: each 2×2 block is a rotation matrix for harmonic j
     const G = zeros(p, p);
-    const F: MutMat = [Array<number>(p).fill(0)];
+    const F: MutMat = [new Array(p).fill(0)];
     for (let j = 1; j <= harmonics; j++) {
       const omega = (2 * Math.PI * j) / period;
       const c = Math.cos(omega);
@@ -433,7 +459,7 @@ export class DLM {
     // F_t = X[t] (time-varying — not supported by DLMSpec directly, but we
     // handle via per-step override at filter time)
     const G = eye(k);
-    const F: MutMat = [X[0] ? [...X[0]] : Array<number>(k).fill(0)];
+    const F: MutMat = [X[0] ? [...X[0]] : new Array(k).fill(0)];
     const W = mscale(eye(k), sw * sw);
     const V: MutMat = [[sv * sv]];
     return new DLM({ G, F, W, V });
@@ -455,8 +481,12 @@ export class DLM {
   }
 
   private _obs(y: number | readonly number[] | null): readonly number[] | null {
-    if (y === null) return null;
-    if (typeof y === "number") return [y];
+    if (y === null) {
+      return null;
+    }
+    if (typeof y === "number") {
+      return [y];
+    }
     return y;
   }
 
@@ -556,7 +586,9 @@ export class DLM {
       const stepNext = res.steps[t + 1]!;
       const Rt1 = stepNext.predictedCov;
       const Rt1inv = matInv(Rt1);
-      if (Rt1inv === null) continue;
+      if (Rt1inv === null) {
+        continue;
+      }
       // Smoother gain: J_t = C_t G' R_{t+1}^{-1}
       const Jt = mmul(mmul(step.filteredCov, tr(this._G)), Rt1inv);
       // Smoothed mean: s_t = m_t + J_t (s_{t+1} - a_{t+1})
@@ -602,7 +634,7 @@ export class DLM {
       meanArr.push(f);
       covArr.push(Q);
       if (this._q === 1) {
-        const sd = Math.sqrt(Math.max(0, Q[0]![0]!));
+        const sd = Math.sqrt(Math.max(0, Q[0]?.[0]!));
         lower.push(f[0]! - z975 * sd);
         upper.push(f[0]! + z975 * sd);
       }
@@ -626,19 +658,19 @@ export class DLM {
     const q = this._q;
     // Pack: theta = [log V entries (q*q), log diag(W) entries (p)]
     // Only diagonal elements of V and W are fitted; off-diagonal kept fixed.
-    const packV = Array.from({ length: q }, (_, i) =>
-      Math.log(Math.max(1e-8, this._V[i]![i]!)),
-    );
-    const packW = Array.from({ length: p }, (_, i) =>
-      Math.log(Math.max(1e-8, this._W[i]![i]!)),
-    );
+    const packV = Array.from({ length: q }, (_, i) => Math.log(Math.max(1e-8, this._V[i]?.[i]!)));
+    const packW = Array.from({ length: p }, (_, i) => Math.log(Math.max(1e-8, this._W[i]?.[i]!)));
     const x0 = [...packV, ...packW];
 
     const objective = (x: readonly number[]): number => {
       const V2: MutMat = this._V.map((row) => row.slice());
-      for (let i = 0; i < q; i++) V2[i]![i] = Math.exp(x[i]!);
+      for (let i = 0; i < q; i++) {
+        V2[i]![i] = Math.exp(x[i]!);
+      }
       const W2: MutMat = this._W.map((row) => row.slice());
-      for (let i = 0; i < p; i++) W2[i]![i] = Math.exp(x[q + i]!);
+      for (let i = 0; i < p; i++) {
+        W2[i]![i] = Math.exp(x[q + i]!);
+      }
       const dlm2 = new DLM({ G: this._G, F: this._F, W: W2, V: V2, m0: this._m0, C0: this._C0 });
       const res = dlm2._filter(y, this._m0, this._C0);
       return -res.logLikelihood;
@@ -647,9 +679,13 @@ export class DLM {
     const xOpt = nelderMead(objective, x0, { maxIter: 500, tol: 1e-6 });
 
     const Vfit: MutMat = this._V.map((row) => row.slice());
-    for (let i = 0; i < q; i++) Vfit[i]![i] = Math.exp(xOpt[i]!);
+    for (let i = 0; i < q; i++) {
+      Vfit[i]![i] = Math.exp(xOpt[i]!);
+    }
     const Wfit: MutMat = this._W.map((row) => row.slice());
-    for (let i = 0; i < p; i++) Wfit[i]![i] = Math.exp(xOpt[q + i]!);
+    for (let i = 0; i < p; i++) {
+      Wfit[i]![i] = Math.exp(xOpt[q + i]!);
+    }
 
     return new DLM({ G: this._G, F: this._F, W: Wfit, V: Vfit, m0: this._m0, C0: this._C0 });
   }
@@ -660,10 +696,7 @@ export class DLM {
    * where δ ∈ (0,1] is the discount factor (close to 1 = small evolution).
    * Returns a new DLM plus the filter result under the discounted model.
    */
-  filterDiscount(
-    y: readonly (number | readonly number[] | null)[],
-    delta: number,
-  ): DLMResult {
+  filterDiscount(y: readonly (number | readonly number[] | null)[], delta: number): DLMResult {
     const m0 = this._m0;
     const C0 = this._C0;
     const T = y.length;
@@ -743,11 +776,13 @@ export function buildLocalLevel(opts: { sigmaObs?: number; sigmaLevel?: number }
 }
 
 /** Build a local-linear-trend DLM. */
-export function buildLocalLinearTrend(opts: {
-  sigmaObs?: number;
-  sigmaLevel?: number;
-  sigmaSlope?: number;
-} = {}): DLMSpec {
+export function buildLocalLinearTrend(
+  opts: {
+    sigmaObs?: number;
+    sigmaLevel?: number;
+    sigmaSlope?: number;
+  } = {},
+): DLMSpec {
   const sv = opts.sigmaObs ?? 1;
   const sw1 = opts.sigmaLevel ?? 1;
   const sw2 = opts.sigmaSlope ?? 0.1;
@@ -773,8 +808,10 @@ export function buildPolynomial(
   const sv = opts.sigmaObs ?? 1;
   const sw = opts.sigmaState ?? 1;
   const G = eye(order);
-  for (let i = 0; i < order - 1; i++) G[i]![i + 1] = 1;
-  const F: MutMat = [Array<number>(order).fill(0)];
+  for (let i = 0; i < order - 1; i++) {
+    G[i]![i + 1] = 1;
+  }
+  const F: MutMat = [new Array(order).fill(0)];
   F[0]![0] = 1;
   return { G, F, W: mscale(eye(order), sw * sw), V: [[sv * sv]] };
 }
@@ -789,7 +826,7 @@ export function buildFourier(
   const sw = opts.sigmaState ?? 0.01;
   const p = 2 * harmonics;
   const G = zeros(p, p);
-  const F: MutMat = [Array<number>(p).fill(0)];
+  const F: MutMat = [new Array(p).fill(0)];
   for (let j = 1; j <= harmonics; j++) {
     const omega = (2 * Math.PI * j) / period;
     const c = Math.cos(omega);
@@ -813,7 +850,7 @@ export function buildRegression(
   const sw = opts.sigmaState ?? 0.001;
   return {
     G: eye(k),
-    F: [Array<number>(k).fill(0)], // placeholder; rows are set externally
+    F: [new Array(k).fill(0)], // placeholder; rows are set externally
     W: mscale(eye(k), sw * sw),
     V: [[sv * sv]],
   };
@@ -826,14 +863,17 @@ export function buildRegression(
  * observation). All component V matrices must have the same dimension.
  */
 export function combineDLMs(...specs: DLMSpec[]): DLMSpec {
-  if (specs.length === 0) throw new RangeError("combineDLMs requires at least one spec");
-  let G: Mat = specs[0]!.G;
-  let W: Mat = specs[0]!.W;
-  let C0: Mat | undefined = specs[0]!.C0;
-  let m0: number[] = specs[0]!.m0 ? [...specs[0]!.m0] : Array<number>(rows(specs[0]!.G)).fill(0);
+  if (specs.length === 0) {
+    throw new RangeError("combineDLMs requires at least one spec");
+  }
+  const first = specs[0];
+  let G: Mat = first.G;
+  let W: Mat = first.W;
+  let C0: Mat | undefined = first.C0;
+  let m0: number[] = first.m0 ? [...first.m0] : new Array(rows(first.G)).fill(0);
 
   // Combined F: 1 × (p1+p2+…) — horizontal concat of F rows
-  let Fcombined: number[] = specs[0]!.F[0] ? [...specs[0]!.F[0]] : [];
+  let Fcombined: number[] = first.F[0] ? [...first.F[0]] : [];
 
   for (let i = 1; i < specs.length; i++) {
     const s = specs[i]!;
@@ -846,12 +886,12 @@ export function combineDLMs(...specs: DLMSpec[]): DLMSpec {
     }
     const fi = s.F[0] ? [...s.F[0]] : [];
     Fcombined = [...Fcombined, ...fi];
-    const pm = s.m0 ? [...s.m0] : Array<number>(rows(s.G)).fill(0);
+    const pm = s.m0 ? [...s.m0] : new Array(rows(s.G)).fill(0);
     m0 = [...m0, ...pm];
   }
 
   // Use the first component's V (they must agree)
-  const V = specs[0]!.V;
+  const V = specs[0]?.V;
   const spec: DLMSpec = {
     G,
     F: [Fcombined],
@@ -872,18 +912,24 @@ function logDet(A: Mat): number {
   const L = zeros(n, n);
   for (let i = 0; i < n; i++) {
     for (let j = 0; j <= i; j++) {
-      let s = A[i]![j]!;
-      for (let k2 = 0; k2 < j; k2++) s -= L[i]![k2]! * L[j]![k2]!;
+      let s = A[i]?.[j]!;
+      for (let k2 = 0; k2 < j; k2++) {
+        s -= L[i]?.[k2]! * L[j]?.[k2]!;
+      }
       if (i === j) {
-        if (s < 0) return _logDetLU(A); // fall back
+        if (s < 0) {
+          return _logDetLU(A); // fall back
+        }
         L[i]![j] = Math.sqrt(s);
       } else {
-        L[i]![j] = s / (L[j]![j] ?? 1);
+        L[i]![j] = s / (L[j]?.[j] ?? 1);
       }
     }
   }
   let ld = 0;
-  for (let i = 0; i < n; i++) ld += 2 * Math.log(Math.abs(L[i]![i]!));
+  for (let i = 0; i < n; i++) {
+    ld += 2 * Math.log(Math.abs(L[i]?.[i]!));
+  }
   return ld;
 }
 
@@ -892,10 +938,10 @@ function _logDetLU(A: Mat): number {
   const U: MutMat = A.map((r) => r.slice());
   let sign = 1;
   for (let col = 0; col < n; col++) {
-    let maxVal = Math.abs(U[col]![col]!);
+    let maxVal = Math.abs(U[col]?.[col]!);
     let maxRow = col;
     for (let r = col + 1; r < n; r++) {
-      const v = Math.abs(U[r]![col]!);
+      const v = Math.abs(U[r]?.[col]!);
       if (v > maxVal) {
         maxVal = v;
         maxRow = r;
@@ -905,15 +951,21 @@ function _logDetLU(A: Mat): number {
       [U[col], U[maxRow]] = [U[maxRow]!, U[col]!];
       sign *= -1;
     }
-    const pivot = U[col]![col]!;
-    if (Math.abs(pivot) < 1e-14) return -Infinity;
+    const pivot = U[col]?.[col]!;
+    if (Math.abs(pivot) < 1e-14) {
+      return Number.NEGATIVE_INFINITY;
+    }
     for (let r = col + 1; r < n; r++) {
-      const f = U[r]![col]! / pivot;
-      for (let j = col; j < n; j++) U[r]![j]! -= f * U[col]![j]!;
+      const f = U[r]?.[col]! / pivot;
+      for (let j = col; j < n; j++) {
+        U[r]![j]! -= f * U[col]?.[j]!;
+      }
     }
   }
   let ld = Math.log(Math.abs(sign));
-  for (let i = 0; i < n; i++) ld += Math.log(Math.abs(U[i]![i]!));
+  for (let i = 0; i < n; i++) {
+    ld += Math.log(Math.abs(U[i]?.[i]!));
+  }
   return ld;
 }
 
@@ -939,7 +991,7 @@ function nelderMead(
     xi[i]! += xi[i]! !== 0 ? 0.05 * Math.abs(xi[i]!) : 0.00025;
     simplex.push(xi);
   }
-  let fvals = simplex.map((x) => f(x));
+  const fvals = simplex.map((x) => f(x));
 
   const alpha = 1.0;
   const gamma = 2.0;
@@ -948,25 +1000,26 @@ function nelderMead(
 
   for (let iter = 0; iter < maxIter; iter++) {
     // Sort
-    const order = Array.from({ length: n + 1 }, (_, i) => i).sort(
-      (a, b) => fvals[a]! - fvals[b]!,
-    );
+    const order = Array.from({ length: n + 1 }, (_, i) => i).sort((a, b) => fvals[a]! - fvals[b]!);
     const sx = order.map((i) => simplex[i]!);
     const sf = order.map((i) => fvals[i]!);
 
     // Convergence check
     const range = sf[n]! - sf[0]!;
     if (range < tol) {
-      return sx[0]!.slice();
+      return sx[0]?.slice();
     }
 
     // Centroid of all but worst
-    const xbar = Array<number>(n).fill(0);
-    for (let i = 0; i < n; i++)
-      for (let j = 0; j < n; j++) xbar[j]! += sx[i]![j]! / n;
+    const xbar = new Array(n).fill(0);
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        xbar[j]! += sx[i]?.[j]! / n;
+      }
+    }
 
     // Reflect
-    const xr = xbar.map((xi, j) => xi + alpha * (xi - sx[n]![j]!));
+    const xr = xbar.map((xi, j) => xi + alpha * (xi - sx[n]?.[j]!));
     const fr = f(xr);
 
     if (fr < sf[0]!) {
@@ -980,7 +1033,7 @@ function nelderMead(
       fvals[order[n]!] = fr;
     } else {
       // Contract
-      const xc = xbar.map((xi, j) => xi + rho * (sx[n]![j]! - xi));
+      const xc = xbar.map((xi, j) => xi + rho * (sx[n]?.[j]! - xi));
       const fc = f(xc);
       if (fc < sf[n]!) {
         simplex[order[n]!] = xc;
@@ -988,8 +1041,9 @@ function nelderMead(
       } else {
         // Shrink
         for (let i = 1; i <= n; i++) {
-          for (let j = 0; j < n; j++)
-            simplex[order[i]!]![j] = sx[0]![j]! + sigma * (sx[i]![j]! - sx[0]![j]!);
+          for (let j = 0; j < n; j++) {
+            simplex[order[i]!]![j] = sx[0]?.[j]! + sigma * (sx[i]?.[j]! - sx[0]?.[j]!);
+          }
           fvals[order[i]!] = f(simplex[order[i]!]!);
         }
       }
@@ -998,7 +1052,10 @@ function nelderMead(
 
   // Return best found
   let best = 0;
-  for (let i = 1; i < simplex.length; i++)
-    if (fvals[i]! < fvals[best]!) best = i;
-  return simplex[best]!.slice();
+  for (let i = 1; i < simplex.length; i++) {
+    if (fvals[i]! < fvals[best]!) {
+      best = i;
+    }
+  }
+  return simplex[best]?.slice();
 }

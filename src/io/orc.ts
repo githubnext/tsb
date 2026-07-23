@@ -48,9 +48,9 @@ const ORC_MAGIC = new Uint8Array([0x4f, 0x52, 0x43]); // "ORC"
 
 // ORC type kinds
 const KIND_BOOLEAN = 0;
-const KIND_BYTE = 1;
-const KIND_SHORT = 2;
-const KIND_INT = 3;
+const _KIND_BYTE = 1;
+const _KIND_SHORT = 2;
+const _KIND_INT = 3;
 const KIND_LONG = 4;
 const KIND_FLOAT = 5;
 const KIND_DOUBLE = 6;
@@ -66,7 +66,7 @@ const COMP_ZLIB = 1;
 const STREAM_PRESENT = 0;
 const STREAM_DATA = 1;
 const STREAM_LENGTH = 2;
-const STREAM_DICTIONARY_DATA = 3;
+const _STREAM_DICTIONARY_DATA = 3;
 
 // Column encoding kinds
 const ENC_DIRECT = 0;
@@ -87,15 +87,20 @@ type PbMsg = Map<number, PbVal[]>;
 function pbReadVarU(buf: Uint8Array, pos: number): [bigint, number] {
   let result = 0n;
   let shift = 0n;
+  let cur = pos;
   for (;;) {
-    const b = buf[pos];
-    if (b === undefined) throw new Error("ORC: truncated varint");
-    pos++;
+    const b = buf[cur];
+    if (b === undefined) {
+      throw new Error("ORC: truncated varint");
+    }
+    cur++;
     result |= BigInt(b & 0x7f) << shift;
-    if ((b & 0x80) === 0) break;
+    if ((b & 0x80) === 0) {
+      break;
+    }
     shift += 7n;
   }
-  return [result, pos];
+  return [result, cur];
 }
 
 /** Decode a protobuf message from a byte slice. */
@@ -190,7 +195,9 @@ function pbTag(fn: number, wt: 0 | 2, out: number[]): void {
 }
 
 function pbWU64(fn: number, v: bigint, out: number[]): void {
-  if (v === 0n) return;
+  if (v === 0n) {
+    return;
+  }
   pbTag(fn, 0, out);
   pbWvU(v, out);
 }
@@ -202,13 +209,17 @@ function pbWU32(fn: number, v: number, out: number[]): void {
 function pbWBytes(fn: number, v: Uint8Array, out: number[]): void {
   pbTag(fn, 2, out);
   pbWvU(BigInt(v.length), out);
-  for (const b of v) out.push(b);
+  for (const b of v) {
+    out.push(b);
+  }
 }
 
 function pbWMsg(fn: number, msg: number[], out: number[]): void {
   pbTag(fn, 2, out);
   pbWvU(BigInt(msg.length), out);
-  for (const b of msg) out.push(b);
+  for (const b of msg) {
+    out.push(b);
+  }
 }
 
 // ─── Hadoop VInt ──────────────────────────────────────────────────────────────
@@ -225,24 +236,32 @@ function pbWMsg(fn: number, msg: number[], out: number[]): void {
  */
 function hvReadVInt(buf: Uint8Array, pos: number): [bigint, number] {
   const fb = buf[pos];
-  if (fb === undefined) throw new Error("ORC: truncated Hadoop VInt");
-  pos++;
+  if (fb === undefined) {
+    throw new Error("ORC: truncated Hadoop VInt");
+  }
+  let cur = pos + 1;
   // Interpret as signed byte
   const sfb = fb >= 0x80 ? fb - 0x100 : fb;
   // Single-byte range: -112 to 127
-  if (sfb >= -112) return [BigInt(sfb), pos];
+  if (sfb >= -112) {
+    return [BigInt(sfb), cur];
+  }
   // Multi-byte
   const isNeg = sfb < -120; // unsigned 128–135 = negative; 136–143 = positive
   const len = isNeg ? -119 - sfb : -111 - sfb; // total bytes incl. header
   let value = 0n;
   for (let i = 1; i < len; i++) {
-    const b = buf[pos];
-    if (b === undefined) throw new Error("ORC: truncated Hadoop VInt data");
-    pos++;
+    const b = buf[cur];
+    if (b === undefined) {
+      throw new Error("ORC: truncated Hadoop VInt data");
+    }
+    cur++;
     value = (value << 8n) | BigInt(b);
   }
-  if (isNeg) value ^= -1n;
-  return [value, pos];
+  if (isNeg) {
+    value ^= -1n;
+  }
+  return [value, cur];
 }
 
 /** Write a Hadoop-style variable-length signed integer. */
@@ -253,7 +272,9 @@ function hvWriteVInt(value: bigint, out: number[]): void {
   }
   let uval = value;
   const isNeg = value < 0n;
-  if (isNeg) uval = value ^ -1n;
+  if (isNeg) {
+    uval = value ^ -1n;
+  }
   let nbytes = 0;
   let tmp = uval;
   while (tmp > 0n) {
@@ -280,19 +301,27 @@ function rleByteDecodeV1(buf: Uint8Array, off: number, len: number): Uint8Array 
   let pos = off;
   while (pos < end) {
     const ctrl = buf[pos];
-    if (ctrl === undefined) break;
+    if (ctrl === undefined) {
+      break;
+    }
     pos++;
     if (ctrl < 128) {
       const count = ctrl + 3;
       const val = buf[pos];
-      if (val === undefined) break;
+      if (val === undefined) {
+        break;
+      }
       pos++;
-      for (let i = 0; i < count; i++) out.push(val);
+      for (let i = 0; i < count; i++) {
+        out.push(val);
+      }
     } else {
       const count = 256 - ctrl;
       for (let i = 0; i < count; i++) {
         const b = buf[pos];
-        if (b === undefined) break;
+        if (b === undefined) {
+          break;
+        }
         pos++;
         out.push(b);
       }
@@ -303,7 +332,9 @@ function rleByteDecodeV1(buf: Uint8Array, off: number, len: number): Uint8Array 
 
 /** Encode bytes using RLE byte v1. */
 function rleByteEncodeV1(data: readonly number[]): Uint8Array {
-  if (data.length === 0) return new Uint8Array(0);
+  if (data.length === 0) {
+    return new Uint8Array(0);
+  }
   const out: number[] = [];
   let i = 0;
   while (i < data.length) {
@@ -315,7 +346,9 @@ function rleByteEncodeV1(data: readonly number[]): Uint8Array {
     if (runLen >= 3) {
       out.push(runLen - 3);
       const d = data[i];
-      if (d === undefined) throw new Error("ORC: undefined byte in run");
+      if (d === undefined) {
+        throw new Error("ORC: undefined byte in run");
+      }
       out.push(d);
       i += runLen;
     } else {
@@ -325,16 +358,24 @@ function rleByteEncodeV1(data: readonly number[]): Uint8Array {
         // Stop if next 3 values are identical (start a new run)
         const base = data[i + litLen];
         let rcheck = 1;
-        while (rcheck < 3 && i + litLen + rcheck < data.length && data[i + litLen + rcheck] === base) {
+        while (
+          rcheck < 3 &&
+          i + litLen + rcheck < data.length &&
+          data[i + litLen + rcheck] === base
+        ) {
           rcheck++;
         }
-        if (rcheck >= 3) break;
+        if (rcheck >= 3) {
+          break;
+        }
         litLen++;
       }
       out.push(256 - litLen);
       for (let j = 0; j < litLen; j++) {
         const d = data[i + j];
-        if (d === undefined) throw new Error("ORC: undefined byte in literal");
+        if (d === undefined) {
+          throw new Error("ORC: undefined byte in literal");
+        }
         out.push(d);
       }
       i += litLen;
@@ -356,13 +397,17 @@ function rleIntDecodeV1(buf: Uint8Array, off: number, len: number): bigint[] {
   let pos = off;
   while (pos < end) {
     const ctrl = buf[pos];
-    if (ctrl === undefined) break;
+    if (ctrl === undefined) {
+      break;
+    }
     pos++;
     const sctrl = ctrl >= 0x80 ? ctrl - 0x100 : ctrl; // signed
     if (sctrl >= 0) {
       const count = sctrl + 3;
       const deltaByte = buf[pos];
-      if (deltaByte === undefined) break;
+      if (deltaByte === undefined) {
+        break;
+      }
       pos++;
       const delta = BigInt(deltaByte >= 0x80 ? deltaByte - 0x100 : deltaByte);
       let base: bigint;
@@ -384,12 +429,16 @@ function rleIntDecodeV1(buf: Uint8Array, off: number, len: number): bigint[] {
 
 /** Encode bigint values using RLE integer v1. */
 function rleIntEncodeV1(values: readonly bigint[]): Uint8Array {
-  if (values.length === 0) return new Uint8Array(0);
+  if (values.length === 0) {
+    return new Uint8Array(0);
+  }
   const out: number[] = [];
   let i = 0;
   while (i < values.length) {
     const v0 = values[i];
-    if (v0 === undefined) break;
+    if (v0 === undefined) {
+      break;
+    }
     // Attempt to find a run with a constant delta
     if (i + 2 < values.length) {
       const v1 = values[i + 1];
@@ -401,7 +450,9 @@ function rleIntEncodeV1(values: readonly bigint[]): Uint8Array {
           while (runLen < 130 && i + runLen < values.length) {
             const vn = values[i + runLen];
             const vprev = values[i + runLen - 1];
-            if (vn === undefined || vprev === undefined || vn - vprev !== delta) break;
+            if (vn === undefined || vprev === undefined || vn - vprev !== delta) {
+              break;
+            }
             runLen++;
           }
           out.push(runLen - 3);
@@ -421,14 +472,18 @@ function rleIntEncodeV1(values: readonly bigint[]): Uint8Array {
       if (va !== undefined && vb !== undefined && vc !== undefined) {
         const d1 = vb - va;
         const d2 = vc - vb;
-        if (d1 === d2 && d1 >= -128n && d1 <= 127n) break;
+        if (d1 === d2 && d1 >= -128n && d1 <= 127n) {
+          break;
+        }
       }
       litLen++;
     }
     out.push(256 - litLen);
     for (let j = 0; j < litLen; j++) {
       const v = values[i + j];
-      if (v === undefined) break;
+      if (v === undefined) {
+        break;
+      }
       hvWriteVInt(v, out);
     }
     i += litLen;
@@ -444,7 +499,9 @@ function rleIntEncodeV1(values: readonly bigint[]): Uint8Array {
  */
 function expandPresent(raw: Uint8Array, nRows: number): boolean[] {
   const flags: boolean[] = [];
-  for (let i = 0; i < nRows; i++) flags.push(false);
+  for (let i = 0; i < nRows; i++) {
+    flags.push(false);
+  }
   let row = 0;
   for (const byte of raw) {
     for (let bit = 7; bit >= 0 && row < nRows; bit--, row++) {
@@ -459,12 +516,16 @@ function expandPresent(raw: Uint8Array, nRows: number): boolean[] {
  * 1 = non-null, 0 = null. Returns null if all rows are non-null.
  */
 function packPresent(nonNull: boolean[]): Uint8Array | null {
-  if (nonNull.every((v) => v)) return null;
+  if (nonNull.every((v) => v)) {
+    return null;
+  }
   const bytes: number[] = [];
   for (let i = 0; i < nonNull.length; i += 8) {
     let byte = 0;
     for (let bit = 0; bit < 8 && i + bit < nonNull.length; bit++) {
-      if (nonNull[i + bit]) byte |= 1 << (7 - bit);
+      if (nonNull[i + bit]) {
+        byte |= 1 << (7 - bit);
+      }
     }
     bytes.push(byte);
   }
@@ -744,7 +805,9 @@ function encodeF64Col(values: readonly Scalar[]): EncodedCol {
     nonNull.push(isPresent);
     if (isPresent) {
       dv.setFloat64(0, typeof v === "number" ? v : Number(v), true);
-      for (let k = 0; k < 8; k++) bytes.push(dv.getUint8(k));
+      for (let k = 0; k < 8; k++) {
+        bytes.push(dv.getUint8(k));
+      }
     }
   }
   const presentBits = packPresent(nonNull);
@@ -766,7 +829,9 @@ function encodeStringCol(values: readonly Scalar[]): EncodedCol {
     nonNull.push(isPresent);
     if (isPresent) {
       const bytes = enc.encode(String(v));
-      for (const b of bytes) dataBytes.push(b);
+      for (const b of bytes) {
+        dataBytes.push(b);
+      }
       lengths.push(BigInt(bytes.length));
     }
   }
@@ -785,14 +850,18 @@ function encodeBoolCol(values: readonly Scalar[]): EncodedCol {
   for (const v of values) {
     const isPresent = v !== null && v !== undefined;
     nonNull.push(isPresent);
-    if (isPresent) bits.push(Boolean(v));
+    if (isPresent) {
+      bits.push(Boolean(v));
+    }
   }
   // Pack booleans into bytes, MSB first
   const bytes: number[] = [];
   for (let i = 0; i < bits.length; i += 8) {
     let byte = 0;
     for (let b = 0; b < 8 && i + b < bits.length; b++) {
-      if (bits[i + b]) byte |= 1 << (7 - b);
+      if (bits[i + b]) {
+        byte |= 1 << (7 - b);
+      }
     }
     bytes.push(byte);
   }
@@ -810,11 +879,21 @@ function encodeBoolCol(values: readonly Scalar[]): EncodedCol {
 /** Map a DataFrame column's values to an ORC type kind. */
 function inferOrcKind(values: readonly Scalar[]): number {
   for (const v of values) {
-    if (v === null || v === undefined) continue;
-    if (typeof v === "boolean") return KIND_BOOLEAN;
-    if (typeof v === "bigint") return KIND_LONG;
-    if (typeof v === "number") return Number.isInteger(v) ? KIND_LONG : KIND_DOUBLE;
-    if (typeof v === "string") return KIND_STRING;
+    if (v === null || v === undefined) {
+      continue;
+    }
+    if (typeof v === "boolean") {
+      return KIND_BOOLEAN;
+    }
+    if (typeof v === "bigint") {
+      return KIND_LONG;
+    }
+    if (typeof v === "number") {
+      return Number.isInteger(v) ? KIND_LONG : KIND_DOUBLE;
+    }
+    if (typeof v === "string") {
+      return KIND_STRING;
+    }
   }
   return KIND_STRING; // default for all-null columns
 }
@@ -854,15 +933,14 @@ function encodePostscript(footerLen: number, metaLen: number): Uint8Array {
   return new Uint8Array(out);
 }
 
-function encodeFooter(
-  stripes: OrcStripeInfo[],
-  types: OrcType[],
-  nRows: number,
-): Uint8Array {
+function encodeFooter(stripes: OrcStripeInfo[], types: OrcType[], nRows: number): Uint8Array {
   const out: number[] = [];
   pbWU64(1, BigInt(ORC_MAGIC.length), out); // headerLength = 3
   // contentLength: sum of stripe sizes
-  const content = stripes.reduce((s, st) => s + st.indexLength + st.dataLength + st.footerLength, 0);
+  const content = stripes.reduce(
+    (s, st) => s + st.indexLength + st.dataLength + st.footerLength,
+    0,
+  );
   pbWU64(2, BigInt(content), out);
 
   for (const stripe of stripes) {
@@ -878,7 +956,9 @@ function encodeFooter(
   for (const type of types) {
     const tm: number[] = [];
     pbWU32(1, type.kind, tm);
-    for (const st of type.subtypes) pbWU32(2, st, tm);
+    for (const st of type.subtypes) {
+      pbWU32(2, st, tm);
+    }
     for (const fn of type.fieldNames) {
       const fnBytes = new TextEncoder().encode(fn);
       pbWBytes(3, fnBytes, tm);
@@ -903,7 +983,9 @@ function encodeStripeFooter(streams: OrcStream[], columns: OrcColumnEncoding[]):
   for (const c of columns) {
     const cm: number[] = [];
     pbWU32(1, c.kind, cm);
-    if (c.dictionarySize > 0) pbWU32(2, c.dictionarySize, cm);
+    if (c.dictionarySize > 0) {
+      pbWU32(2, c.dictionarySize, cm);
+    }
     pbWMsg(2, cm, out);
   }
   return new Uint8Array(out);
@@ -913,11 +995,21 @@ function encodeStripeFooter(streams: OrcStream[], columns: OrcColumnEncoding[]):
 
 /** Convert a Scalar value to a Label (non-Label Scalars become null). */
 function scalarToLabel(v: Scalar): Label {
-  if (v === undefined) return null;
-  if (typeof v === "bigint") return Number(v);
-  if (typeof v === "number" || typeof v === "string" || typeof v === "boolean") return v;
-  if (v === null) return null;
-  if (v instanceof Date) return v;
+  if (v === undefined) {
+    return null;
+  }
+  if (typeof v === "bigint") {
+    return Number(v);
+  }
+  if (typeof v === "number" || typeof v === "string" || typeof v === "boolean") {
+    return v;
+  }
+  if (v === null) {
+    return null;
+  }
+  if (v instanceof Date) {
+    return v;
+  }
   return null; // TimedeltaLike
 }
 
@@ -937,16 +1029,22 @@ function scalarToLabel(v: Scalar): Label {
  */
 export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions = {}): DataFrame {
   const buf = data instanceof ArrayBuffer ? new Uint8Array(data) : data;
-  if (buf.length < 4) throw new Error("ORC: file too small");
+  if (buf.length < 4) {
+    throw new Error("ORC: file too small");
+  }
   // Validate magic
   if (buf[0] !== 0x4f || buf[1] !== 0x52 || buf[2] !== 0x43) {
     throw new Error("ORC: invalid magic bytes (expected 'ORC')");
   }
   // Read postscript
-  const psLen = buf[buf.length - 1];
-  if (psLen === undefined || psLen === 0) throw new Error("ORC: invalid postscript length");
+  const psLen = buf.at(-1);
+  if (psLen === undefined || psLen === 0) {
+    throw new Error("ORC: invalid postscript length");
+  }
   const psStart = buf.length - 1 - psLen;
-  if (psStart < 3) throw new Error("ORC: file too small for postscript");
+  if (psStart < 3) {
+    throw new Error("ORC: file too small for postscript");
+  }
   const ps = decodePostscript(buf.subarray(psStart, psStart + psLen));
   if (ps.compression !== COMP_NONE) {
     throw new Error(
@@ -957,9 +1055,13 @@ export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions 
   const metaEnd = psStart;
   const footerEnd = metaEnd - ps.metadataLength;
   const footerStart = footerEnd - ps.footerLength;
-  if (footerStart < 3) throw new Error("ORC: invalid footer position");
+  if (footerStart < 3) {
+    throw new Error("ORC: invalid footer position");
+  }
   const footer = decodeFooter(buf.subarray(footerStart, footerEnd));
-  if (footer.types.length === 0) throw new Error("ORC: no type schema in footer");
+  if (footer.types.length === 0) {
+    throw new Error("ORC: no type schema in footer");
+  }
 
   // Root type must be STRUCT
   const rootType = footer.types[0];
@@ -969,8 +1071,7 @@ export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions 
 
   // Column selection
   const allCols = rootType.fieldNames;
-  const wantSet =
-    options.columns != null ? new Set<string>([...options.columns]) : null;
+  const wantSet = options.columns != null ? new Set<string>([...options.columns]) : null;
   const colIndices: number[] = rootType.subtypes.filter((_, i) => {
     const name = allCols[i];
     return name !== undefined && (wantSet === null || wantSet.has(name));
@@ -981,7 +1082,9 @@ export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions 
   });
 
   const allValues: Map<string, Scalar[]> = new Map();
-  for (const name of colNames) allValues.set(name, []);
+  for (const name of colNames) {
+    allValues.set(name, []);
+  }
 
   // Process each stripe
   for (const stripeInfo of footer.stripes) {
@@ -1008,13 +1111,19 @@ export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions 
 
     for (let ci = 0; ci < colIndices.length; ci++) {
       const colIdx = colIndices[ci];
-      if (colIdx === undefined) continue;
+      if (colIdx === undefined) {
+        continue;
+      }
       const name = colNames[ci];
-      if (name === undefined) continue;
+      if (name === undefined) {
+        continue;
+      }
       const typeKind = footer.types[colIdx]?.kind ?? KIND_STRING;
       const colStreams = streamMap.get(colIdx);
       const vals = allValues.get(name);
-      if (vals === undefined) continue;
+      if (vals === undefined) {
+        continue;
+      }
 
       // PRESENT stream (null flags)
       const presentLoc = colStreams?.get(STREAM_PRESENT);
@@ -1031,17 +1140,23 @@ export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions 
       switch (typeKind) {
         case KIND_BOOLEAN: {
           const decoded = decodeBoolCol(buf, dataOff, dataLen, presentFlags, nRows);
-          for (const v of decoded) vals.push(v);
+          for (const v of decoded) {
+            vals.push(v);
+          }
           break;
         }
         case KIND_FLOAT: {
           const decoded = decodeF32Col(buf, dataOff, presentFlags, nRows);
-          for (const v of decoded) vals.push(v);
+          for (const v of decoded) {
+            vals.push(v);
+          }
           break;
         }
         case KIND_DOUBLE: {
           const decoded = decodeF64Col(buf, dataOff, presentFlags, nRows);
-          for (const v of decoded) vals.push(v);
+          for (const v of decoded) {
+            vals.push(v);
+          }
           break;
         }
         case KIND_STRING: {
@@ -1055,13 +1170,17 @@ export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions 
             presentFlags,
             nRows,
           );
-          for (const v of decoded) vals.push(v);
+          for (const v of decoded) {
+            vals.push(v);
+          }
           break;
         }
         default: {
           // Integer types: BOOLEAN, BYTE, SHORT, INT, LONG, DATE
           const decoded = decodeIntCol(buf, dataOff, dataLen, presentFlags, nRows);
-          for (const v of decoded) vals.push(typeKind === KIND_DATE ? Number(v ?? 0) : Number(v ?? 0));
+          for (const v of decoded) {
+            vals.push(typeKind === KIND_DATE ? Number(v ?? 0) : Number(v ?? 0));
+          }
           break;
         }
       }
@@ -1104,8 +1223,7 @@ export function readOrc(data: Uint8Array | ArrayBuffer, options: ReadOrcOptions 
 export function toOrc(df: DataFrame, options: ToOrcOptions = {}): Uint8Array {
   const colNames = df.columns.toArray().map(String);
   const extraCols: string[] = options.writeIndex === true ? ["__index__", ...colNames] : colNames;
-  const indexVals: Scalar[] | null =
-    options.writeIndex === true ? df.index.toArray() : null;
+  const indexVals: Scalar[] | null = options.writeIndex === true ? df.index.toArray() : null;
 
   // Collect column data
   const colData: Scalar[][] = extraCols.map((name) =>
@@ -1125,7 +1243,9 @@ export function toOrc(df: DataFrame, options: ToOrcOptions = {}): Uint8Array {
   const out: number[] = [];
 
   // Header "ORC"
-  for (const b of ORC_MAGIC) out.push(b);
+  for (const b of ORC_MAGIC) {
+    out.push(b);
+  }
 
   // Build one stripe
   const nRows = df.shape[0];
@@ -1134,11 +1254,13 @@ export function toOrc(df: DataFrame, options: ToOrcOptions = {}): Uint8Array {
   // Write all streams
   const streams: OrcStream[] = [];
   const colEncodings: OrcColumnEncoding[] = [{ kind: ENC_DIRECT, dictionarySize: 0 }]; // root STRUCT
-  let streamPos = stripeOffset;
+  const _streamPos = stripeOffset;
 
   for (let ci = 0; ci < encoded.length; ci++) {
     const enc = encoded[ci];
-    if (enc === undefined) continue;
+    if (enc === undefined) {
+      continue;
+    }
     const colIdx = ci + 1; // 1-based (0 = root STRUCT)
 
     if (enc.presentStream !== null) {
@@ -1155,13 +1277,21 @@ export function toOrc(df: DataFrame, options: ToOrcOptions = {}): Uint8Array {
   const stripeIndexLen = 0; // no row indexes
   for (let ci = 0; ci < encoded.length; ci++) {
     const enc = encoded[ci];
-    if (enc === undefined) continue;
-    if (enc.presentStream !== null) {
-      for (const b of enc.presentStream) out.push(b);
+    if (enc === undefined) {
+      continue;
     }
-    for (const b of enc.dataStream) out.push(b);
+    if (enc.presentStream !== null) {
+      for (const b of enc.presentStream) {
+        out.push(b);
+      }
+    }
+    for (const b of enc.dataStream) {
+      out.push(b);
+    }
     if (enc.lengthStream !== null) {
-      for (const b of enc.lengthStream) out.push(b);
+      for (const b of enc.lengthStream) {
+        out.push(b);
+      }
     }
   }
 
@@ -1170,7 +1300,9 @@ export function toOrc(df: DataFrame, options: ToOrcOptions = {}): Uint8Array {
 
   // Stripe footer
   const sf = encodeStripeFooter(streams, colEncodings);
-  for (const b of sf) out.push(b);
+  for (const b of sf) {
+    out.push(b);
+  }
 
   // Build ORC type schema
   // Column 0: STRUCT with all column fields
@@ -1196,17 +1328,23 @@ export function toOrc(df: DataFrame, options: ToOrcOptions = {}): Uint8Array {
 
   // File footer
   const footerBytes = encodeFooter([stripeInfo], types, nRows);
-  for (const b of footerBytes) out.push(b);
+  for (const b of footerBytes) {
+    out.push(b);
+  }
 
   // File metadata (empty for now)
   const metaLen = 0;
 
   // Postscript
   const psBytes = encodePostscript(footerBytes.length, metaLen);
-  for (const b of psBytes) out.push(b);
+  for (const b of psBytes) {
+    out.push(b);
+  }
 
   // Postscript length (1 byte)
-  if (psBytes.length > 255) throw new Error("ORC: postscript too large");
+  if (psBytes.length > 255) {
+    throw new Error("ORC: postscript too large");
+  }
   out.push(psBytes.length);
 
   return new Uint8Array(out);

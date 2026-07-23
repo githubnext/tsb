@@ -83,41 +83,42 @@ function isNumericArray(y: readonly number[] | Series<number>): y is readonly nu
 }
 
 function arrMean(x: readonly number[]): number {
-  if (x.length === 0) return 0;
+  if (x.length === 0) {
+    return 0;
+  }
   let s = 0;
-  for (const v of x) s += v;
+  for (const v of x) {
+    s += v;
+  }
   return s / x.length;
 }
 
 /** Apply d-th order differencing; also collects the d initial values needed to
  *  reverse the operation. */
-function difference(
-  y: readonly number[],
-  d: number,
-): { w: number[]; inits: number[] } {
+function difference(y: readonly number[], d: number): { w: number[]; inits: number[] } {
   const inits: number[] = [];
   let w: number[] = y.slice();
   for (let i = 0; i < d; i++) {
     inits.push(w[0] ?? 0);
     const dw = new Array<number>(w.length - 1);
-    for (let t = 1; t < w.length; t++) dw[t - 1] = (w[t] ?? 0) - (w[t - 1] ?? 0);
+    for (let t = 1; t < w.length; t++) {
+      dw[t - 1] = (w[t] ?? 0) - (w[t - 1] ?? 0);
+    }
     w = dw;
   }
   return { w, inits };
 }
 
 /** Reverse d levels of differencing, using the stored initial values. */
-function undifference(
-  dw: readonly number[],
-  inits: readonly number[],
-  d: number,
-): number[] {
+function undifference(dw: readonly number[], inits: readonly number[], d: number): number[] {
   let w: number[] = dw.slice();
   for (let i = d - 1; i >= 0; i--) {
     const init = inits[i] ?? 0;
     const un = new Array<number>(w.length + 1);
     un[0] = init;
-    for (let t = 0; t < w.length; t++) un[t + 1] = (un[t] ?? 0) + (w[t] ?? 0);
+    for (let t = 0; t < w.length; t++) {
+      un[t + 1] = (un[t] ?? 0) + (w[t] ?? 0);
+    }
     w = un;
   }
   return w;
@@ -125,14 +126,13 @@ function undifference(
 
 /** Estimate AR(k) coefficients via Yule-Walker / Levinson-Durbin.
  *  Returns { ar: coefficients, sigma2: innovation variance }. */
-function yuleWalkerAR(
-  x: readonly number[],
-  k: number,
-): { ar: readonly number[]; sigma2: number } {
+function yuleWalkerAR(x: readonly number[], k: number): { ar: readonly number[]; sigma2: number } {
   if (k === 0) {
     const mu = arrMean(x);
     let s = 0;
-    for (const v of x) s += (v - mu) ** 2;
+    for (const v of x) {
+      s += (v - mu) ** 2;
+    }
     return { ar: [], sigma2: s / x.length || 1 };
   }
   const n = x.length;
@@ -142,7 +142,9 @@ function yuleWalkerAR(
   const acov = new Array<number>(k + 1).fill(0);
   for (let h = 0; h <= k; h++) {
     let s = 0;
-    for (let t = h; t < n; t++) s += ((x[t] ?? 0) - mu) * ((x[t - h] ?? 0) - mu);
+    for (let t = h; t < n; t++) {
+      s += ((x[t] ?? 0) - mu) * ((x[t - h] ?? 0) - mu);
+    }
     acov[h] = s / n;
   }
 
@@ -153,7 +155,9 @@ function yuleWalkerAR(
   for (let m = 1; m <= k; m++) {
     // Reflection coefficient
     let num = acov[m] ?? 0;
-    for (let j = 1; j < m; j++) num -= (prevA[j - 1] ?? 0) * (acov[m - j] ?? 0);
+    for (let j = 1; j < m; j++) {
+      num -= (prevA[j - 1] ?? 0) * (acov[m - j] ?? 0);
+    }
     const km = P > 0 ? num / P : 0;
 
     // Update AR coefficients
@@ -162,7 +166,7 @@ function yuleWalkerAR(
       curA[j - 1] = (prevA[j - 1] ?? 0) - km * (prevA[m - j - 1] ?? 0);
     }
     curA[m - 1] = km;
-    P = P * (1 - km * km);
+    P *= 1 - km * km;
     prevA = curA;
   }
 
@@ -179,11 +183,15 @@ function olsSolve(X: readonly (readonly number[])[], y: readonly number[]): numb
   for (let i = 0; i < k; i++) {
     for (let j = 0; j < k; j++) {
       let s = 0;
-      for (let t = 0; t < n; t++) s += ((X[t] ?? [])[i] ?? 0) * ((X[t] ?? [])[j] ?? 0);
+      for (let t = 0; t < n; t++) {
+        s += ((X[t] ?? [])[i] ?? 0) * ((X[t] ?? [])[j] ?? 0);
+      }
       (A[i] ?? [])[j] = s;
     }
     let s = 0;
-    for (let t = 0; t < n; t++) s += ((X[t] ?? [])[i] ?? 0) * (y[t] ?? 0);
+    for (let t = 0; t < n; t++) {
+      s += ((X[t] ?? [])[i] ?? 0) * (y[t] ?? 0);
+    }
     (A[i] ?? [])[k] = s;
   }
   // Forward elimination
@@ -193,7 +201,10 @@ function olsSolve(X: readonly (readonly number[])[], y: readonly number[]): numb
     let maxAbs = Math.abs((A[col] ?? [])[col] ?? 0);
     for (let row = col + 1; row < k; row++) {
       const abs = Math.abs((A[row] ?? [])[col] ?? 0);
-      if (abs > maxAbs) { maxAbs = abs; pivotRow = row; }
+      if (abs > maxAbs) {
+        maxAbs = abs;
+        pivotRow = row;
+      }
     }
     // Swap rows
     if (pivotRow !== col) {
@@ -202,7 +213,9 @@ function olsSolve(X: readonly (readonly number[])[], y: readonly number[]): numb
       A[pivotRow] = tmp ?? [];
     }
     const pivotVal = (A[col] ?? [])[col] ?? 0;
-    if (Math.abs(pivotVal) < 1e-14) continue; // singular/near-singular
+    if (Math.abs(pivotVal) < 1e-14) {
+      continue; // singular/near-singular
+    }
     for (let row = col + 1; row < k; row++) {
       const factor = ((A[row] ?? [])[col] ?? 0) / pivotVal;
       for (let c = col; c <= k; c++) {
@@ -214,7 +227,9 @@ function olsSolve(X: readonly (readonly number[])[], y: readonly number[]): numb
   const beta = new Array<number>(k).fill(0);
   for (let i = k - 1; i >= 0; i--) {
     let val = (A[i] ?? [])[k] ?? 0;
-    for (let j = i + 1; j < k; j++) val -= ((A[i] ?? [])[j] ?? 0) * (beta[j] ?? 0);
+    for (let j = i + 1; j < k; j++) {
+      val -= ((A[i] ?? [])[j] ?? 0) * (beta[j] ?? 0);
+    }
     const denom = (A[i] ?? [])[i] ?? 0;
     beta[i] = Math.abs(denom) > 1e-14 ? val / denom : 0;
   }
@@ -223,11 +238,7 @@ function olsSolve(X: readonly (readonly number[])[], y: readonly number[]): numb
 
 /** Compute ARMA(p, q) ψ-weights (MA∞ representation) up to lag `h`.
  *  ψ₀ = 1, ψⱼ = Σᵢ₌₁ᵐⁱⁿ⁽ʲ'ᵖ⁾ φᵢ ψⱼ₋ᵢ + θⱼ (θⱼ = 0 for j > q). */
-function psiWeights(
-  ar: readonly number[],
-  ma: readonly number[],
-  h: number,
-): number[] {
+function psiWeights(ar: readonly number[], ma: readonly number[], h: number): number[] {
   const psi = new Array<number>(h).fill(0);
   psi[0] = 1;
   for (let j = 1; j < h; j++) {
@@ -245,7 +256,9 @@ function integrateWeights(psi: readonly number[], d: number): number[] {
   let w = psi.slice();
   for (let level = 0; level < d; level++) {
     const acc = w.slice();
-    for (let j = 1; j < acc.length; j++) acc[j] = (acc[j - 1] ?? 0) + (w[j] ?? 0);
+    for (let j = 1; j < acc.length; j++) {
+      acc[j] = (acc[j - 1] ?? 0) + (w[j] ?? 0);
+    }
     w = acc;
   }
   return w;
@@ -266,13 +279,13 @@ export class ARIMAModel {
   // Set after fit()
   private _ar: readonly number[] = [];
   private _ma: readonly number[] = [];
-  private _mu: number = 0;
-  private _sigma2: number = 1;
+  private _mu = 0;
+  private _sigma2 = 1;
   private _origY: readonly number[] = [];
   private _inits: readonly number[] = [];
   private _diffW: readonly number[] = [];
   private _residuals: readonly number[] = [];
-  private _fitted: boolean = false;
+  private _fitted = false;
 
   constructor(opts: ARIMAOptions = {}) {
     this._p = Math.max(0, Math.floor(opts.p ?? 1));
@@ -281,11 +294,17 @@ export class ARIMAModel {
   }
 
   /** AR order. */
-  get p(): number { return this._p; }
+  get p(): number {
+    return this._p;
+  }
   /** Differencing order. */
-  get d(): number { return this._d; }
+  get d(): number {
+    return this._d;
+  }
   /** MA order. */
-  get q(): number { return this._q; }
+  get q(): number {
+    return this._q;
+  }
 
   /**
    * Fit the model to `y`.
@@ -330,7 +349,9 @@ export class ARIMAModel {
       const eps = new Array<number>(m).fill(0);
       for (let t = kMax; t < m; t++) {
         let pred = arrMean(w);
-        for (let j = 0; j < kMax; j++) pred += (arHat[j] ?? 0) * ((w[t - 1 - j] ?? 0) - arrMean(w));
+        for (let j = 0; j < kMax; j++) {
+          pred += (arHat[j] ?? 0) * ((w[t - 1 - j] ?? 0) - arrMean(w));
+        }
         eps[t] = (w[t] ?? 0) - pred;
       }
 
@@ -353,8 +374,12 @@ export class ARIMAModel {
         for (let i = 0; i < T; i++) {
           const t = s + i;
           const row: number[] = [1];
-          for (let j = 1; j <= p; j++) row.push(w[t - j] ?? 0);
-          for (let j = 1; j <= q; j++) row.push(eps[t - j] ?? 0);
+          for (let j = 1; j <= p; j++) {
+            row.push(w[t - j] ?? 0);
+          }
+          for (let j = 1; j <= q; j++) {
+            row.push(eps[t - j] ?? 0);
+          }
           X.push(row);
           yOLS.push(w[t] ?? 0);
         }
@@ -373,8 +398,12 @@ export class ARIMAModel {
 
     for (let t = 0; t < m; t++) {
       let pred = intercept;
-      for (let j = 0; j < p; j++) pred += (arCoeffs[j] ?? 0) * (w[t - 1 - j] ?? 0);
-      for (let j = 0; j < q; j++) pred += (maCoeffs[j] ?? 0) * (t - 1 - j >= 0 ? (resid[t - 1 - j] ?? 0) : 0);
+      for (let j = 0; j < p; j++) {
+        pred += (arCoeffs[j] ?? 0) * (w[t - 1 - j] ?? 0);
+      }
+      for (let j = 0; j < q; j++) {
+        pred += (maCoeffs[j] ?? 0) * (t - 1 - j >= 0 ? (resid[t - 1 - j] ?? 0) : 0);
+      }
       wHat[t] = pred;
       resid[t] = (w[t] ?? 0) - pred;
     }
@@ -382,7 +411,10 @@ export class ARIMAModel {
     // Sigma2 from residuals after warmup
     let sse = 0;
     let cnt = 0;
-    for (let t = warmup; t < m; t++) { sse += (resid[t] ?? 0) ** 2; cnt++; }
+    for (let t = warmup; t < m; t++) {
+      sse += (resid[t] ?? 0) ** 2;
+      cnt++;
+    }
     const sigma2 = cnt > 0 ? sse / cnt : 1;
 
     // Fitted values on original scale via undifferencing wHat
@@ -424,8 +456,12 @@ export class ARIMAModel {
    * @param steps - Number of future steps to forecast. Default: 1.
    */
   forecast(steps = 1): ARIMAForecastResult {
-    if (!this._fitted) throw new Error("Call fit() before forecast()");
-    if (steps < 1) throw new RangeError("steps must be >= 1");
+    if (!this._fitted) {
+      throw new Error("Call fit() before forecast()");
+    }
+    if (steps < 1) {
+      throw new RangeError("steps must be >= 1");
+    }
 
     const w = this._diffW;
     const m = w.length;
@@ -446,7 +482,9 @@ export class ARIMAModel {
     for (let h = 1; h <= steps; h++) {
       const t = m + h - 1; // index in extended array
       let pred = mu;
-      for (let j = 0; j < p; j++) pred += (ar[j] ?? 0) * (wAll[t - 1 - j] ?? 0);
+      for (let j = 0; j < p; j++) {
+        pred += (ar[j] ?? 0) * (wAll[t - 1 - j] ?? 0);
+      }
       for (let j = 0; j < q; j++) {
         // future residuals are 0; only use past residuals
         const idx = t - 1 - j;
@@ -461,7 +499,7 @@ export class ARIMAModel {
 
     // Undifference to original scale
     // Need the last `d` values at each integration level
-    const fcOrig = undifference(fcW, this._inits, this._d);
+    const _fcOrig = undifference(fcW, this._inits, this._d);
     // undifference returns d + steps values starting from inits;
     // but the inits represent the first observed values at each level.
     // We need to "extend" from the end of the observed data.
@@ -485,7 +523,9 @@ export class ARIMAModel {
       const fc = fcOrigCorrected[h - 1] ?? 0;
       // Var[e_h] = sigma2 * sum_{j=0}^{h-1} psi_j^2
       let varH = 0;
-      for (let j = 0; j < h; j++) varH += (psiInt[j] ?? 0) ** 2;
+      for (let j = 0; j < h; j++) {
+        varH += (psiInt[j] ?? 0) ** 2;
+      }
       const se = Math.sqrt(sigma2 * varH);
       forecastArr.push(fc);
       stderrArr.push(se);
@@ -502,9 +542,11 @@ function computeLastInits(y: readonly number[], d: number): number[] {
   const lasts: number[] = [];
   let w: number[] = y.slice();
   for (let i = 0; i < d; i++) {
-    lasts.push(w[w.length - 1] ?? 0);
+    lasts.push(w.at(-1) ?? 0);
     const dw = new Array<number>(w.length - 1);
-    for (let t = 1; t < w.length; t++) dw[t - 1] = (w[t] ?? 0) - (w[t - 1] ?? 0);
+    for (let t = 1; t < w.length; t++) {
+      dw[t - 1] = (w[t] ?? 0) - (w[t - 1] ?? 0);
+    }
     w = dw;
   }
   return lasts;
@@ -522,7 +564,7 @@ function undifferenceFromLast(
     const un: number[] = [];
     let prev = init;
     for (const dv of w) {
-      prev = prev + dv;
+      prev += dv;
       un.push(prev);
     }
     w = un;
@@ -542,10 +584,7 @@ function undifferenceFromLast(
  * const fc = model.forecast(3);
  * ```
  */
-export function fitArima(
-  y: readonly number[] | Series<number>,
-  opts?: ARIMAOptions,
-): ARIMAModel {
+export function fitArima(y: readonly number[] | Series<number>, opts?: ARIMAOptions): ARIMAModel {
   const model = new ARIMAModel(opts);
   model.fit(y);
   return model;
