@@ -34,36 +34,6 @@ function defaultIndex(n: number): Index<Label> {
   return new RangeIndex(n) as unknown as Index<Label>;
 }
 
-/** True when the value should be treated as missing (null, undefined, or NaN). */
-function isMissing(v: Scalar): boolean {
-  return v === null || v === undefined || (typeof v === "number" && Number.isNaN(v));
-}
-
-/** Compare two scalar values with null/NaN handling for sorting. */
-function compareScalars(
-  a: Scalar,
-  b: Scalar,
-  ascending: boolean,
-  naPosition: "first" | "last",
-): number {
-  const aNull = isMissing(a);
-  const bNull = isMissing(b);
-  if (aNull && bNull) {
-    return 0;
-  }
-  if (aNull) {
-    return naPosition === "first" ? -1 : 1;
-  }
-  if (bNull) {
-    return naPosition === "first" ? 1 : -1;
-  }
-  if (a === b) {
-    return 0;
-  }
-  const cmp = (a as number | string | boolean) < (b as number | string | boolean) ? -1 : 1;
-  return ascending ? cmp : -cmp;
-}
-
 /** True when a scalar is a finite number (not null/undefined/NaN). */
 function isFiniteNum(v: Scalar): v is number {
   return typeof v === "number" && !Number.isNaN(v);
@@ -795,34 +765,28 @@ export class Series<T extends Scalar = Scalar> {
 
   // ─── sorting ─────────────────────────────────────────────────────────────
 
-  /** Return a new Series sorted by values. */
-  sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
-    // ── Per-instance cache: check ascending first, then naLast inside each branch ──
+  /** Look up per-instance sort cache slot for the given direction and NA position. */
+  private _svCacheGet(ascending: boolean, naPosition: "first" | "last"): Series<T> | null {
     // naPosition.length === 4: "last" has 4 chars, "first" has 5 chars.
     // Nested branches instead of ternary selection let JSC use fully-predicted
     // branches (0-cycle latency when taken) rather than a cmov (3-cycle latency).
     if (ascending) {
       if (naPosition.length === 4) {
-        const hit = this._svCacheAL;
-        if (hit !== null) {
-          return hit;
-        }
-      } else {
-        const hit = this._svCacheAF;
-        if (hit !== null) {
-          return hit;
-        }
+        return this._svCacheAL;
       }
-    } else if (naPosition.length === 4) {
-      const hit = this._svCacheDL;
-      if (hit !== null) {
-        return hit;
-      }
-    } else {
-      const hit = this._svCacheDF;
-      if (hit !== null) {
-        return hit;
-      }
+      return this._svCacheAF;
+    }
+    if (naPosition.length === 4) {
+      return this._svCacheDL;
+    }
+    return this._svCacheDF;
+  }
+
+  /** Return a new Series sorted by values. */
+  sortValues(ascending = true, naPosition: "first" | "last" = "last"): Series<T> {
+    const hit = this._svCacheGet(ascending, naPosition);
+    if (hit !== null) {
+      return hit;
     }
     return this._sortValuesCold(ascending, naPosition);
   }
@@ -900,8 +864,8 @@ export class Series<T extends Scalar = Scalar> {
           if (typeof v === "number") {
             fvals[j] = v;
             // Read the IEEE-754 bits via the shared Uint32 view (same buffer, no copy).
-            let lo = fvalsU32[fsi]!;
-            let hi = fvalsU32[fsi + 1]!;
+            let lo = fvalsU32[fsi] ?? 0;
+            let hi = fvalsU32[fsi + 1] ?? 0;
             // Transform floats to sortable unsigned integers:
             // positive → XOR sign bit; negative → XOR all bits.
             if (hi & 0x80000000) {
@@ -918,21 +882,21 @@ export class Series<T extends Scalar = Scalar> {
             // Accumulate all 8 histogram passes inline — no second scan needed.
             let idx: number;
             idx = lo & 0xff;
-            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            _rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1;
             idx = 256 + ((lo >>> 8) & 0xff);
-            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            _rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1;
             idx = 512 + ((lo >>> 16) & 0xff);
-            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            _rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1;
             idx = 768 + ((lo >>> 24) & 0xff);
-            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            _rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1;
             idx = 1024 + (hi & 0xff);
-            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            _rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1;
             idx = 1280 + ((hi >>> 8) & 0xff);
-            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            _rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1;
             idx = 1536 + ((hi >>> 16) & 0xff);
-            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            _rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1;
             idx = 1792 + ((hi >>> 24) & 0xff);
-            _rxHisto[idx] = _rxHisto[idx]! + 1;
+            _rxHisto[idx] = (_rxHisto[idx] ?? 0) + 1;
           } else {
             allNumeric = false;
           }
@@ -957,7 +921,7 @@ export class Series<T extends Scalar = Scalar> {
           const base = pass * 256;
           let total = 0;
           for (let b = 0; b < 256; b++) {
-            const c = _rxHisto[base + b]!;
+            const c = _rxHisto[base + b] ?? 0;
             _rxHisto[base + b] = total;
             total += c;
           }
@@ -973,14 +937,14 @@ export class Series<T extends Scalar = Scalar> {
           const histoBase = pass * 256;
           // Use accumulated stride counter (si += 3) to avoid i*3 multiply per element.
           for (let i = 0, si = 0; i < finCount; i++, si += 3) {
-            const bucket = (srcBuf[si + keyOff]! >>> shift) & 0xff;
-            const p = _rxHisto[histoBase + bucket]!;
+            const bucket = ((srcBuf[si + keyOff] ?? 0) >>> shift) & 0xff;
+            const p = _rxHisto[histoBase + bucket] ?? 0;
             _rxHisto[histoBase + bucket] = p + 1;
             // All three writes land on the same cache line (3 × 4 = 12 bytes).
             const di = p * 3;
-            dstBuf[di] = srcBuf[si]!;
-            dstBuf[di + 1] = srcBuf[si + 1]!;
-            dstBuf[di + 2] = srcBuf[si + 2]!;
+            dstBuf[di] = srcBuf[si] ?? 0;
+            dstBuf[di + 1] = srcBuf[si + 1] ?? 0;
+            dstBuf[di + 2] = srcBuf[si + 2] ?? 0;
           }
           const t = srcBuf;
           srcBuf = dstBuf;
@@ -993,13 +957,25 @@ export class Series<T extends Scalar = Scalar> {
           finSlice.sort((a, b) => {
             const av = vals[a] as number | string | boolean;
             const bv = vals[b] as number | string | boolean;
-            return av < bv ? -1 : av > bv ? 1 : 0;
+            if (av < bv) {
+              return -1;
+            }
+            if (av > bv) {
+              return 1;
+            }
+            return 0;
           });
         } else {
           finSlice.sort((a, b) => {
             const av = vals[a] as number | string | boolean;
             const bv = vals[b] as number | string | boolean;
-            return av > bv ? -1 : av < bv ? 1 : 0;
+            if (av > bv) {
+              return -1;
+            }
+            if (av < bv) {
+              return 1;
+            }
+            return 0;
           });
         }
       }
@@ -1053,9 +1029,9 @@ export class Series<T extends Scalar = Scalar> {
       if (allNumeric) {
         if (ascending) {
           for (let i = 0, si = 0; i < finCount; i++, si += 3) {
-            const origIdx = srcBuf[si]!;
-            const keyLo = srcBuf[si + 1]!;
-            const keyHi = srcBuf[si + 2]!;
+            const origIdx = srcBuf[si] ?? 0;
+            const keyLo = srcBuf[si + 1] ?? 0;
+            const keyHi = srcBuf[si + 2] ?? 0;
             perm[pos] = origIdx;
             // Reverse the IEEE-754 sign-transform to recover the original float bits,
             // avoiding a random read into the JS values array.
@@ -1071,9 +1047,9 @@ export class Series<T extends Scalar = Scalar> {
           }
         } else {
           for (let i = finCount - 1, si = (finCount - 1) * 3; i >= 0; i--, si -= 3) {
-            const origIdx = srcBuf[si]!;
-            const keyLo = srcBuf[si + 1]!;
-            const keyHi = srcBuf[si + 2]!;
+            const origIdx = srcBuf[si] ?? 0;
+            const keyLo = srcBuf[si + 1] ?? 0;
+            const keyHi = srcBuf[si + 2] ?? 0;
             perm[pos] = origIdx;
             if (keyHi & 0x80000000) {
               _fvalsU32[0] = keyLo;
@@ -1088,21 +1064,21 @@ export class Series<T extends Scalar = Scalar> {
         }
       } else {
         for (let i = 0; i < finCount; i++) {
-          const idx = finSlice[i]!;
+          const idx = finSlice[i] ?? 0;
           perm[pos] = idx;
           outData[pos] = vals[idx] as T;
           pos += 1;
         }
       }
       for (let i = 0; i < nanCount; i++) {
-        const idx = nanBuf[i]!;
+        const idx = nanBuf[i] ?? 0;
         perm[pos] = idx;
         outData[pos] = vals[idx] as T;
         pos += 1;
       }
     } else {
       for (let i = 0; i < nanCount; i++) {
-        const idx = nanBuf[i]!;
+        const idx = nanBuf[i] ?? 0;
         perm[pos] = idx;
         outData[pos] = vals[idx] as T;
         pos += 1;
@@ -1110,9 +1086,9 @@ export class Series<T extends Scalar = Scalar> {
       if (allNumeric) {
         if (ascending) {
           for (let i = 0, si = 0; i < finCount; i++, si += 3) {
-            const origIdx = srcBuf[si]!;
-            const keyLo = srcBuf[si + 1]!;
-            const keyHi = srcBuf[si + 2]!;
+            const origIdx = srcBuf[si] ?? 0;
+            const keyLo = srcBuf[si + 1] ?? 0;
+            const keyHi = srcBuf[si + 2] ?? 0;
             perm[pos] = origIdx;
             if (keyHi & 0x80000000) {
               _fvalsU32[0] = keyLo;
@@ -1126,9 +1102,9 @@ export class Series<T extends Scalar = Scalar> {
           }
         } else {
           for (let i = finCount - 1, si = (finCount - 1) * 3; i >= 0; i--, si -= 3) {
-            const origIdx = srcBuf[si]!;
-            const keyLo = srcBuf[si + 1]!;
-            const keyHi = srcBuf[si + 2]!;
+            const origIdx = srcBuf[si] ?? 0;
+            const keyLo = srcBuf[si + 1] ?? 0;
+            const keyHi = srcBuf[si + 2] ?? 0;
             perm[pos] = origIdx;
             if (keyHi & 0x80000000) {
               _fvalsU32[0] = keyLo;
@@ -1143,7 +1119,7 @@ export class Series<T extends Scalar = Scalar> {
         }
       } else {
         for (let i = 0; i < finCount; i++) {
-          const idx = finSlice[i]!;
+          const idx = finSlice[i] ?? 0;
           perm[pos] = idx;
           outData[pos] = vals[idx] as T;
           pos += 1;
