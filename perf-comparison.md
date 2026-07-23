@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-23T01:25:48Z |
-| Iteration Count | 417 |
-| Best Metric | 755 |
+| Last Run | 2026-07-23T13:25:14Z |
+| Iteration Count | 418 |
+| Best Metric | 756 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -45,9 +45,12 @@
 
 - `USFederalHolidayCalendar`. ✅ done in iter 415
 - `QuarterEnd/QuarterBegin/BMonthEnd/BMonthBegin/BYearEnd/BYearBegin`: tseries/offsets classes need `d + offset` pattern in pandas (not `offset.apply()`). ✅ done in iter 416
+- `firstValidIndex`/`lastValidIndex`. ✅ done in iter 418
 
 ## 📊 Iteration History
 
+### Iteration 418 — 2026-07-23 13:25 UTC — [Run §30010910150](https://github.com/githubnext/tsb/actions/runs/30010910150)
+✅ +1 → 756: firstValidIndex/lastValidIndex benchmark (100k-row Series, NaN at start/end/scattered, 500 iters). Python: Series.first_valid_index()/last_valid_index().
 ### Iteration 417 — 2026-07-23 01:25 UTC — [Run §29971651261](https://github.com/githubnext/tsb/actions/runs/29971651261)
 ✅ +1 → 755: inferFreq benchmark (6 frequency types: ms/s/min/h/D/W, 200 dates each, 500 iters). Python: pandas.tseries.frequencies.infer_freq.
 ### Iteration 416 — 2026-07-22 13:25 UTC — [Run §29923579451](https://github.com/githubnext/tsb/actions/runs/29923579451)
