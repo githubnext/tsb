@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-23T13:25:14Z |
-| Iteration Count | 418 |
-| Best Metric | 756 |
+| Last Run | 2026-07-24T01:25:44Z |
+| Iteration Count | 419 |
+| Best Metric | 757 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #423 |
@@ -46,8 +46,12 @@
 - `USFederalHolidayCalendar`. ✅ done in iter 415
 - `QuarterEnd/QuarterBegin/BMonthEnd/BMonthBegin/BYearEnd/BYearBegin`: tseries/offsets classes need `d + offset` pattern in pandas (not `offset.apply()`). ✅ done in iter 416
 - `firstValidIndex`/`lastValidIndex`. ✅ done in iter 418
+- `BooleanArray` extension array (arrays/): benchmarked in iter 419. DatetimeArray/StringArray/TimedeltaArray are next.
 
 ## 📊 Iteration History
+
+### Iteration 419 — 2026-07-24 01:25 UTC — [Run §30058807058](https://github.com/githubnext/tsb/actions/runs/30058807058)
+✅ +1 → 757: BooleanArray benchmark (100k elements, ~10% nulls, 50 iters): from/any/all/sum/and/or/not/fillna. Python: pd.array(dtype='boolean').
 
 ### Iteration 418 — 2026-07-23 13:25 UTC — [Run §30010910150](https://github.com/githubnext/tsb/actions/runs/30010910150)
 ✅ +1 → 756: firstValidIndex/lastValidIndex benchmark (100k-row Series, NaN at start/end/scattered, 500 iters). Python: Series.first_valid_index()/last_valid_index().
