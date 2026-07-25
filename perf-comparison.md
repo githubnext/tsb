@@ -6,19 +6,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-24T13:24:49Z |
-| Iteration Count | 420 |
-| Best Metric | 758 |
+| Last Run | 2026-07-25T01:28:24Z |
+| Iteration Count | 421 |
+| Best Metric | 759 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #423 |
+| PR | #435 |
 | Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -46,9 +46,12 @@
 - `USFederalHolidayCalendar`. ✅ done in iter 415
 - `QuarterEnd/QuarterBegin/BMonthEnd/BMonthBegin/BYearEnd/BYearBegin`: tseries/offsets classes need `d + offset` pattern in pandas (not `offset.apply()`). ✅ done in iter 416
 - `firstValidIndex`/`lastValidIndex`. ✅ done in iter 418
-- `BooleanArray` extension array (arrays/): benchmarked in iter 419. DatetimeArray/TimedeltaArray are next (StringArray done in iter 420).
+- `DatetimeArray` benchmarked in iter 421. `TimedeltaArray` is next.
 
 ## 📊 Iteration History
+
+### Iteration 421 — 2026-07-25 01:28 UTC — [Run §30138360760](https://github.com/githubnext/tsb/actions/runs/30138360760)
+✅ +1 → 759: DatetimeArray benchmark (100k elements, ~10% nulls, 50 iters): from/year/month/day/isna/notna/fillna. Python: pd.array(dtype='datetime64[ns]').
 
 ### Iteration 420 — 2026-07-24 13:24 UTC — [Run §30096576504](https://github.com/githubnext/tsb/actions/runs/30096576504)
 ✅ +1 → 758: StringArray benchmark (100k elements, ~10% nulls, 50 iters): from/upper/lower/strip/contains/len/fillna. Python: pd.array(dtype='string').
