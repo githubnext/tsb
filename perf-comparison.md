@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-25T01:28:24Z |
-| Iteration Count | 421 |
-| Best Metric | 759 |
+| Last Run | 2026-07-25T13:23:42Z |
+| Iteration Count | 422 |
+| Best Metric | 760 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -36,6 +36,7 @@
 - hypothesis_tests: pure-numpy; covers ttest1samp/ttestInd/ttestRel/fOneway/pearsonr/spearmanr/mannWhitneyU.
 - SQL: MockConnection `insert(tableName, rows, columns, ifExists)`. Python: `sqlite3.connect(":memory:")`.
 - IO round-trips (parquet/feather/hdf): BytesIO/Uint8Array buffer pattern. pyarrow/tables: syntax-check only.
+- pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`/`.notna()`. Use `~arr.isna()` for notna. Use small nanosecond values to avoid overflow in `.sum()`.
 
 ## 🚧 Foreclosed Avenues
 
@@ -43,12 +44,12 @@
 
 ## 🔭 Future Directions
 
-- `USFederalHolidayCalendar`. ✅ done in iter 415
-- `QuarterEnd/QuarterBegin/BMonthEnd/BMonthBegin/BYearEnd/BYearBegin`: tseries/offsets classes need `d + offset` pattern in pandas (not `offset.apply()`). ✅ done in iter 416
-- `firstValidIndex`/`lastValidIndex`. ✅ done in iter 418
-- `DatetimeArray` benchmarked in iter 421. `TimedeltaArray` is next.
+- Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 422 — 2026-07-25 13:23 UTC — [Run §30159549081](https://github.com/githubnext/tsb/actions/runs/30159549081)
+✅ +1 → 760: TimedeltaArray benchmark (100k elements, ~10% nulls, 50 iters): from/days/hours/totalSeconds/isna/notna/sum/min/max/fillna. Python: pd.array(dtype='timedelta64[ns]').
 
 ### Iteration 421 — 2026-07-25 01:28 UTC — [Run §30138360760](https://github.com/githubnext/tsb/actions/runs/30138360760)
 ✅ +1 → 759: DatetimeArray benchmark (100k elements, ~10% nulls, 50 iters): from/year/month/day/isna/notna/fillna. Python: pd.array(dtype='datetime64[ns]').
