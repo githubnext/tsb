@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-25T07:36:00Z |
-| Iteration Count | 432 |
+| Last Run | 2026-07-25T19:21:00Z |
+| Iteration Count | 433 |
 | Best Metric | 203 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,18 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted, pending-ci |
 
 ---
 
 ## 🎯 Current Priorities
 
-- Next: TBATS/spectral entropy, network/graph stats, copulas, simulation-based inference, robust statistics, causal discovery.
+- Next: Robust statistics (Huber M-estimator, Theil-Sen), causal discovery (PC algorithm, FCI), spatial statistics extensions, functional analysis.
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 433**: +5 files: tbats (Box-Cox+Fourier seasonality), spectral_entropy (RQA/SampEn/ApEn), copulas (Gaussian/t/Clayton/Frank/Gumbel), network_stats (centrality/PageRank/clustering), simulation_inference (ABC/SMC). 193→198 on rebased HEAD (pending CI).
 - **Iter 432**: +5 files: causal_inference (propensity/IPW/matching/IV/DiD/RD), tvp_regression (Kalman+RTS), regime_switching (Baum-Welch EM Markov), stochastic_processes (BM/GBM/OU/Poisson/fBm/jump/birth-death/FPT), functional_data_extended (B-spline/Fourier/smooth/depth/MBD/registration). 193→198.
 - **Iter 431**: +10 files: survival/bayesian_regression/garch/quantile_regression/spatial/changepoint/neural_regression/nonlinear_ts/extreme_value/prophet_forecast. 193→203.
 - **HMM (410)**: Use `?? 0` for `noUncheckedIndexedAccess`. `exactOptionalPropertyTypes`: no optional spread.
@@ -47,16 +48,19 @@
 
 ## 🔭 Future Directions
 
-- TBATS, spectral entropy, recurrence quantification analysis (RQA)
-- Network/graph statistics (centrality, clustering, shortest paths)
-- Copulas (Gaussian, t, Clayton, Frank, Gumbel)
-- Simulation-based inference (ABC, SMC)
-- Robust statistics (Huber M-estimator, Theil-Sen)
-- Causal discovery (PC algorithm, FCI)
+- Robust statistics (Huber M-estimator, Theil-Sen regression)
+- Causal discovery (PC algorithm, FCI algorithm)
+- Spatial statistics extensions (kriging, variogram, Moran's I)
+- Functional data analysis extensions
+- Information geometry (Fisher information matrix)
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 433 — 2026-07-25 19:21 UTC — [Run §30171363575](https://github.com/githubnext/tsb/actions/runs/30171363575)
+- **Status**: ✅ Accepted (pending CI) | **Change**: +5 files: tbats, spectral_entropy, copulas, network_stats, simulation_inference
+- **Metric**: 198 (prev: 193 post-rebase, delta: +5) | **Commit**: 004e54a
 
 ### Iter 432 — 2026-07-25 07:36 UTC — [Run §30149510620](https://github.com/githubnext/tsb/actions/runs/30149510620)
 - **Status**: ✅ Accepted (pending CI) | **Change**: +5 files: causal_inference, tvp_regression, regime_switching, stochastic_processes, functional_data_extended
