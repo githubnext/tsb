@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-26T01:55:00Z |
-| Iteration Count | 423 |
-| Best Metric | 761 |
+| Last Run | 2026-07-26T13:22:52Z |
+| Iteration Count | 424 |
+| Best Metric | 762 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -47,6 +47,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 424 — 2026-07-26 13:22 UTC — [Run §30203838065](https://github.com/githubnext/tsb/actions/runs/30203838065)
+✅ +1 → 762: mode benchmark (100k-element Series, 10 distinct values, 10 iters): modeSeries. Python: pd.Series.mode().
 
 ### Iteration 423 — 2026-07-26 01:55 UTC — [Run §30182788398](https://github.com/githubnext/tsb/actions/runs/30182788398)
 ✅ +1 → 761: gaussianKDE benchmark (10k bimodal data, 200 eval points, 20 iters): evaluate + integrate. Python: pure-numpy Silverman-bandwidth KDE (no scipy).
