@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-25T13:23:42Z |
-| Iteration Count | 422 |
-| Best Metric | 760 |
+| Last Run | 2026-07-26T01:55:00Z |
+| Iteration Count | 423 |
+| Best Metric | 761 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -48,6 +48,9 @@
 
 ## 📊 Iteration History
 
+### Iteration 423 — 2026-07-26 01:55 UTC — [Run §30182788398](https://github.com/githubnext/tsb/actions/runs/30182788398)
+✅ +1 → 761: gaussianKDE benchmark (10k bimodal data, 200 eval points, 20 iters): evaluate + integrate. Python: pure-numpy Silverman-bandwidth KDE (no scipy).
+
 ### Iteration 422 — 2026-07-25 13:23 UTC — [Run §30159549081](https://github.com/githubnext/tsb/actions/runs/30159549081)
 ✅ +1 → 760: TimedeltaArray benchmark (100k elements, ~10% nulls, 50 iters): from/days/hours/totalSeconds/isna/notna/sum/min/max/fillna. Python: pd.array(dtype='timedelta64[ns]').
 
@@ -60,18 +63,6 @@
 ### Iteration 419 — 2026-07-24 01:25 UTC — [Run §30058807058](https://github.com/githubnext/tsb/actions/runs/30058807058)
 ✅ +1 → 757: BooleanArray benchmark (100k elements, ~10% nulls, 50 iters): from/any/all/sum/and/or/not/fillna. Python: pd.array(dtype='boolean').
 
-### Iteration 418 — 2026-07-23 13:25 UTC — [Run §30010910150](https://github.com/githubnext/tsb/actions/runs/30010910150)
-✅ +1 → 756: firstValidIndex/lastValidIndex benchmark (100k-row Series, NaN at start/end/scattered, 500 iters). Python: Series.first_valid_index()/last_valid_index().
-### Iteration 417 — 2026-07-23 01:25 UTC — [Run §29971651261](https://github.com/githubnext/tsb/actions/runs/29971651261)
-✅ +1 → 755: inferFreq benchmark (6 frequency types: ms/s/min/h/D/W, 200 dates each, 500 iters). Python: pandas.tseries.frequencies.infer_freq.
-### Iteration 416 — 2026-07-22 13:25 UTC — [Run §29923579451](https://github.com/githubnext/tsb/actions/runs/29923579451)
-✅ +1 → 754: QuarterEnd/QuarterBegin/BMonthEnd/BMonthBegin/BYearEnd/BYearBegin offsets benchmark (5k dates, 50 iters). Python: pandas.tseries.offsets.
-### Iteration 415 — 2026-07-22 01:25 UTC — [Run §29882922346](https://github.com/githubnext/tsb/actions/runs/29882922346)
-✅ +1 → 753: USFederalHolidayCalendar.holidays() benchmark (10-year range 2000–2009, 20 iters). Python: pandas.tseries.holiday.USFederalHolidayCalendar.
-### Iteration 414 — 2026-07-21 13:25 UTC — [Run §29834097853](https://github.com/githubnext/tsb/actions/runs/29834097853)
-✅ +1 → 752: categorical_ops benchmarks (catFromCodes, catSortByFreq, catFreqTable, catCrossTab vs pandas Categorical.from_codes, value_counts, crosstab). 100k rows, 5 categories.
-### Iteration 413 — 2026-07-21 01:25 UTC — [Run §29792948080](https://github.com/githubnext/tsb/actions/runs/29792948080)
-✅ +1 → 751: readHdf/toHdf benchmark (10k rows × 3 cols, HDF5 round-trip, 20 iters).
 ### Iteration 412 — 2026-07-20 13:31 UTC — [Run §29746441004](https://github.com/githubnext/tsb/actions/runs/29746441004)
 ✅ +1 → 750: readParquet/toParquet benchmark (10k rows × 3 cols, Parquet round-trip, 20 iters).
 ### Iters 291–411 — ✅ 503→749: bootstrap, OLS, hypothesis_tests, entropy, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options, case_when, IO ops, and many more.
