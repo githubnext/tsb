@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-27T08:07:15Z |
-| Iteration Count | 425 |
-| Best Metric | 763 |
+| Last Run | 2026-07-27T19:24:42Z |
+| Iteration Count | 426 |
+| Best Metric | 764 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -47,6 +47,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 426 — 2026-07-27 19:24 UTC — [Run §30297867311](https://github.com/githubnext/tsb/actions/runs/30297867311)
+✅ +1 → 764: jointEntropy/conditionalEntropy/variationOfInformation benchmark (1000 paired obs, 10 categories, 50 iters). Python: pure-numpy implementations.
 
 ### Iteration 425 — 2026-07-27 08:07 UTC — [Run §30248425219](https://github.com/githubnext/tsb/actions/runs/30248425219)
 ✅ +1 → 763: renyiEntropy/tsallisEntropy/jsDivergence/jsDistance/crossEntropy benchmark (200-element PMF, 50 iters each). Python: pure-numpy implementations of generalized entropy functions.
