@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-26T09:30:00Z |
-| Iteration Count | 435 |
-| Best Metric | 205 |
+| Last Run | 2026-07-27T01:26:04Z |
+| Iteration Count | 436 |
+| Best Metric | 207 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,18 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted |
+| Recent Statuses | accepted, accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- **Next**: Spatial econometrics, tensor decompositions, optimal transport, Bayesian nonparametrics.
+- **Next**: Persistent homology (TDA), reinforcement learning (Q-learning, policy gradient), graph neural networks, variational inference, normalizing flows.
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 436**: +7 files: spatial_econometrics (Moran's I, Geary's C, LISA, SLM, SEM), tensor_decomposition (CP/Tucker/HOSVD), optimal_transport (Sinkhorn, W1/W2, sliced), bayesian_nonparametrics (CRP, DPMM, GP regression), persistent_homology (H0/H1, bottleneck, Wasserstein), causal_discovery (PC algorithm, LinSEM), bandit (EG/UCB1/TS/EXP3/LinUCB). Post-rebase 193→200.
 - **Iter 435**: +12 files iteration 2: robust_stats/causal_discovery/spatial_stats/copulas/extreme_value/stochastic_processes/network_stats/simulation_inference/information_geometry/survival/changepoint/functional_data. 193→205 (rebase).
 - **Iter 434**: +12 files: robust_stats/causal_discovery/spatial_stats/copulas/extreme_value/stochastic_processes/network_stats/simulation_inference/information_geometry/survival/changepoint/functional_data. 193→205.
 - **Iter 433**: +5 files: tbats (Box-Cox+Fourier seasonality), spectral_entropy (RQA/SampEn/ApEn), copulas (Gaussian/t/Clayton/Frank/Gumbel), network_stats (centrality/PageRank/clustering), simulation_inference (ABC/SMC). 193→198 on rebased HEAD (pending CI).
@@ -50,15 +51,19 @@
 
 ## 🔭 Future Directions
 
-- Spatial econometrics (spatial lag/error models)
-- Tensor decompositions (CP, Tucker)
-- Optimal transport / Wasserstein distance
-- Persistent homology (TDA)
-- Bayesian nonparametrics (Dirichlet process, CRP)
+- Reinforcement learning (Q-learning, policy gradient, actor-critic)
+- Variational inference (ELBO, mean-field, black-box VI)
+- Normalizing flows (RealNVP, Glow, planar/radial)
+- Graph neural networks (GCN, GAT, message passing)
+- Matrix factorization (NMF, SVD, probabilistic PCA)
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 436 — 2026-07-27 01:26 UTC — [Run §30229678208](https://github.com/githubnext/tsb/actions/runs/30229678208)
+- **Status**: ✅ Accepted | **Change**: +7 files: spatial_econometrics, tensor_decomposition, optimal_transport, bayesian_nonparametrics, persistent_homology, causal_discovery, bandit
+- **Metric**: 200 (prev: 193 post-rebase, delta: +7) | **Commit**: 2c54536
 
 ### Iter 435 — 2026-07-26 09:30 UTC — [Run §30216597199](https://github.com/githubnext/tsb/actions/runs/30216597199)
 - **Status**: ✅ Accepted | **Change**: +12 files: robust_stats, causal_discovery, spatial_stats, copulas, extreme_value, stochastic_processes, network_stats, simulation_inference, information_geometry, survival, changepoint, functional_data
