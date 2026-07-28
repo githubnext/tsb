@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-28T07:51:34Z |
-| Iteration Count | 427 |
-| Best Metric | 765 |
+| Last Run | 2026-07-28T19:23:41Z |
+| Iteration Count | 428 |
+| Best Metric | 766 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -29,14 +29,12 @@
 ## 📚 Lessons Learned
 
 - Import `../../src/index.js`. groupby AggNames: sum/mean/min/max/count/std/first/last/size. metric=min(TS,PY).
-- Pages workflow: pandas+numpy only (no scipy). Use pure-numpy for gaussianKDE, linregress, etc.
-- safeoutputs push: checkout origin/autoloop/perf-comparison directly (no rebase); new files only → small bundle. State metric can diverge; use `ls benchmarks/tsb/*.ts | wc -l`.
+- Pages workflow: pandas+numpy only (no scipy). Use pure-numpy for KDE, linregress, etc.
 - SparseArray: `src/core/sparse.ts`. readExcel/xlsxSheetNames NOT in src/index.ts.
 - OLS: `new OLS().fit(X_2d, y)` from `src/stats/regression.ts`.
-- hypothesis_tests: pure-numpy; covers ttest1samp/ttestInd/ttestRel/fOneway/pearsonr/spearmanr/mannWhitneyU.
-- SQL: MockConnection `insert(tableName, rows, columns, ifExists)`. Python: `sqlite3.connect(":memory:")`.
-- IO round-trips (parquet/feather/hdf): BytesIO/Uint8Array buffer pattern. pyarrow/tables: syntax-check only.
-- pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`/`.notna()`. Use `~arr.isna()` for notna. Use small nanosecond values to avoid overflow in `.sum()`.
+- IO round-trips (parquet/feather/hdf): BytesIO/Uint8Array buffer pattern.
+- pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`. Use `~arr.isna()` for notna.
+- polyval: Python equivalent is `numpy.polyval`; benchmark with degree-N polynomial at 100k points.
 
 ## 🚧 Foreclosed Avenues
 
@@ -48,33 +46,11 @@
 
 ## 📊 Iteration History
 
-### Iteration 427 — 2026-07-28 07:51 UTC — [Run §30339666515](https://github.com/githubnext/tsb/actions/runs/30339666515)
-✅ +1 → 765: normalizedMI benchmark (4 NMI methods: arithmetic/geometric/min/max, 1000 pairs, 10 categories, 50 iters). Python: pure-stdlib implementation using collections.Counter.
+### Iteration 428 — 2026-07-28 19:23 UTC — [Run §30391517527](https://github.com/githubnext/tsb/actions/runs/30391517527)
+✅ +1 → 766: polyval benchmark (degree-5 polynomial, 100k points, 50 iters). Python: numpy.polyval.
 
-### Iteration 426 — 2026-07-27 19:24 UTC — [Run §30297867311](https://github.com/githubnext/tsb/actions/runs/30297867311)
-✅ +1 → 764: jointEntropy/conditionalEntropy/variationOfInformation benchmark (1000 paired obs, 10 categories, 50 iters). Python: pure-numpy implementations.
+### Iters 419–427 — ✅ 757→765: normalizedMI, jointEntropy/conditionalEntropy/VOI, renyiEntropy/tsallisEntropy/jsDivergence, mode, gaussianKDE, TimedeltaArray, DatetimeArray, StringArray, BooleanArray.
 
-### Iteration 425 — 2026-07-27 08:07 UTC — [Run §30248425219](https://github.com/githubnext/tsb/actions/runs/30248425219)
-✅ +1 → 763: renyiEntropy/tsallisEntropy/jsDivergence/jsDistance/crossEntropy benchmark (200-element PMF, 50 iters each). Python: pure-numpy implementations of generalized entropy functions.
+### Iters 412–418 — ✅ 750→756: readParquet/toParquet and various array/IO benchmarks.
 
-### Iteration 424 — 2026-07-26 13:22 UTC — [Run §30203838065](https://github.com/githubnext/tsb/actions/runs/30203838065)
-✅ +1 → 762: mode benchmark (100k-element Series, 10 distinct values, 10 iters): modeSeries. Python: pd.Series.mode().
-
-### Iteration 423 — 2026-07-26 01:55 UTC — [Run §30182788398](https://github.com/githubnext/tsb/actions/runs/30182788398)
-✅ +1 → 761: gaussianKDE benchmark (10k bimodal data, 200 eval points, 20 iters): evaluate + integrate. Python: pure-numpy Silverman-bandwidth KDE (no scipy).
-
-### Iteration 422 — 2026-07-25 13:23 UTC — [Run §30159549081](https://github.com/githubnext/tsb/actions/runs/30159549081)
-✅ +1 → 760: TimedeltaArray benchmark (100k elements, ~10% nulls, 50 iters): from/days/hours/totalSeconds/isna/notna/sum/min/max/fillna. Python: pd.array(dtype='timedelta64[ns]').
-
-### Iteration 421 — 2026-07-25 01:28 UTC — [Run §30138360760](https://github.com/githubnext/tsb/actions/runs/30138360760)
-✅ +1 → 759: DatetimeArray benchmark (100k elements, ~10% nulls, 50 iters): from/year/month/day/isna/notna/fillna. Python: pd.array(dtype='datetime64[ns]').
-
-### Iteration 420 — 2026-07-24 13:24 UTC — [Run §30096576504](https://github.com/githubnext/tsb/actions/runs/30096576504)
-✅ +1 → 758: StringArray benchmark (100k elements, ~10% nulls, 50 iters): from/upper/lower/strip/contains/len/fillna. Python: pd.array(dtype='string').
-
-### Iteration 419 — 2026-07-24 01:25 UTC — [Run §30058807058](https://github.com/githubnext/tsb/actions/runs/30058807058)
-✅ +1 → 757: BooleanArray benchmark (100k elements, ~10% nulls, 50 iters): from/any/all/sum/and/or/not/fillna. Python: pd.array(dtype='boolean').
-
-### Iteration 412 — 2026-07-20 13:31 UTC — [Run §29746441004](https://github.com/githubnext/tsb/actions/runs/29746441004)
-✅ +1 → 750: readParquet/toParquet benchmark (10k rows × 3 cols, Parquet round-trip, 20 iters).
-### Iters 291–411 — ✅ 503→749: bootstrap, OLS, hypothesis_tests, entropy, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, IntegerArray, FloatingArray, pipe_apply, readXml/toXml, flags+options, case_when, IO ops, and many more.
+### Iters 291–411 — ✅ 503→749: bootstrap, OLS, hypothesis_tests, entropy, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, IntegerArray, FloatingArray, pipe_apply, XML, flags, case_when, and many more.
