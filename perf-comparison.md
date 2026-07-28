@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-27T19:24:42Z |
-| Iteration Count | 426 |
-| Best Metric | 764 |
+| Last Run | 2026-07-28T07:51:34Z |
+| Iteration Count | 427 |
+| Best Metric | 765 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -47,6 +47,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 427 — 2026-07-28 07:51 UTC — [Run §30339666515](https://github.com/githubnext/tsb/actions/runs/30339666515)
+✅ +1 → 765: normalizedMI benchmark (4 NMI methods: arithmetic/geometric/min/max, 1000 pairs, 10 categories, 50 iters). Python: pure-stdlib implementation using collections.Counter.
 
 ### Iteration 426 — 2026-07-27 19:24 UTC — [Run §30297867311](https://github.com/githubnext/tsb/actions/runs/30297867311)
 ✅ +1 → 764: jointEntropy/conditionalEntropy/variationOfInformation benchmark (1000 paired obs, 10 categories, 50 iters). Python: pure-numpy implementations.
