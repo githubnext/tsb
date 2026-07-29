@@ -1174,3 +1174,93 @@ export type {
   MultinomialHMMParams,
   MultinomialHMMFit,
 } from "./stats/hmm.ts";
+export {
+  simulateBrownianMotion,
+  simulateGeometricBrownianMotion,
+  simulateOrnsteinUhlenbeck,
+  fitOrnsteinUhlenbeck,
+  simulatePoissonProcess,
+  poissonCounts,
+  simulateRandomWalk,
+  simulateMarkovChain,
+  stationaryDistribution,
+} from "./stats/stochastic_processes.ts";
+export type {
+  BrownianMotionParams,
+  OUParams,
+  RandomWalkParams,
+  ProcessPath,
+} from "./stats/stochastic_processes.ts";
+export {
+  createGraph,
+  addEdge,
+  graphFromEdges,
+  degreeCentrality,
+  directedDegrees,
+  bfsDistances,
+  dijkstra,
+  betweennessCentrality,
+  clusteringCoefficient,
+  globalClusteringCoefficient,
+  connectedComponents,
+  pageRank,
+  hits,
+} from "./stats/network_stats.ts";
+export type { Graph } from "./stats/network_stats.ts";
+export {
+  euclideanDistance,
+  pairwiseDistances,
+  empiricalVariogram,
+  sphericalVariogram,
+  exponentialVariogram,
+  gaussianVariogram,
+  ordinaryKriging,
+  moransI,
+  ripleysK,
+  ripleysL,
+  kde2d,
+  distanceWeights,
+} from "./stats/spatial_stats.ts";
+export type {
+  SpatialPoint,
+  VariogramPoint,
+  VariogramModelParams,
+} from "./stats/spatial_stats.ts";
+export {
+  normalCdf,
+  normalQuantile,
+  gaussianCopulaCdf,
+  gaussianCopulaDensity,
+  sampleGaussianCopula,
+  claytonCopulaCdf,
+  sampleClaytonCopula,
+  gumbelCopulaCdf,
+  frankCopulaCdf,
+  sampleFrankCopula,
+  empiricalCopula,
+  kendallTau,
+  tauToGaussianRho,
+  tauToClaytonTheta,
+  tauToGumbelTheta,
+} from "./stats/copulas.ts";
+export {
+  gevPdf,
+  gevCdf,
+  gevQuantile,
+  gevReturnLevel,
+  fitGEV,
+  gpdPdf,
+  gpdCdf,
+  gpdQuantile,
+  fitGPD,
+  extractExceedances,
+  gpdReturnLevel,
+  gumbelPdf,
+  gumbelCdf,
+  gumbelQuantile,
+} from "./stats/extreme_value.ts";
+export type {
+  GEVParams,
+  GPDParams,
+  GumbelParams,
+} from "./stats/extreme_value.ts";
