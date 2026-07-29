@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-29T07:52:54Z |
-| Iteration Count | 429 |
-| Best Metric | 767 |
+| Last Run | 2026-07-29T19:23:59Z |
+| Iteration Count | 430 |
+| Best Metric | 768 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -46,6 +46,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 430 — 2026-07-29 19:23 UTC — [Run §30483937580](https://github.com/githubnext/tsb/actions/runs/30483937580)
+✅ +1 → 768: information_extended benchmark combining jsDivergence/jsDistance/crossEntropy/renyiEntropy/tsallisEntropy/jointEntropy/conditionalEntropy/variationOfInformation (100-bin PMF, 1000 paired observations, 50 iters). Python: scipy.stats + numpy equivalents.
 
 ### Iteration 429 — 2026-07-29 07:52 UTC — [Run §30433042744](https://github.com/githubnext/tsb/actions/runs/30433042744)
 ✅ +1 → 767: holiday observance benchmarks (nearestWorkday/nextMonday/nextMondayOrTuesday/previousFriday/previousWorkday/sundayToMonday vs pandas.tseries.holiday equivalents, 1000 dates, 50 iters).
