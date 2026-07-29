@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-28T19:23:41Z |
-| Iteration Count | 428 |
-| Best Metric | 766 |
+| Last Run | 2026-07-29T07:52:54Z |
+| Iteration Count | 429 |
+| Best Metric | 767 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -35,6 +35,7 @@
 - IO round-trips (parquet/feather/hdf): BytesIO/Uint8Array buffer pattern.
 - pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`. Use `~arr.isna()` for notna.
 - polyval: Python equivalent is `numpy.polyval`; benchmark with degree-N polynomial at 100k points.
+- holiday observance fns: `pandas.tseries.holiday` has `nearest_workday`, `next_monday`, `next_monday_or_tuesday`, `previous_friday`, `previous_workday`, `sunday_to_monday`.
 
 ## 🚧 Foreclosed Avenues
 
@@ -45,6 +46,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 429 — 2026-07-29 07:52 UTC — [Run §30433042744](https://github.com/githubnext/tsb/actions/runs/30433042744)
+✅ +1 → 767: holiday observance benchmarks (nearestWorkday/nextMonday/nextMondayOrTuesday/previousFriday/previousWorkday/sundayToMonday vs pandas.tseries.holiday equivalents, 1000 dates, 50 iters).
 
 ### Iteration 428 — 2026-07-28 19:23 UTC — [Run §30391517527](https://github.com/githubnext/tsb/actions/runs/30391517527)
 ✅ +1 → 766: polyval benchmark (degree-5 polynomial, 100k points, 50 iters). Python: numpy.polyval.
