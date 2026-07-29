@@ -6,8 +6,8 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-28T13:32:19Z |
-| Iteration Count | 439 |
+| Last Run | 2026-07-29T01:30:00Z |
+| Iteration Count | 440 |
 | Best Metric | 198 |
 | Target Metric | — |
 | Metric Direction | higher |
@@ -19,7 +19,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted, accepted |
 
 ---
 
@@ -60,6 +60,10 @@
 ---
 
 ## 📊 Iteration History
+
+### Iter 440 — 2026-07-29 01:30 UTC — [Run §30413879442](https://github.com/githubnext/tsb/actions/runs/30413879442)
+- **Status**: ✅ Accepted (pending CI) | **Change**: +5 files: stochastic_processes, network_stats, spatial_stats, copulas, extreme_value
+- **Metric**: 198 (prev: 193 canonical, delta: +5) | **Commit**: 3cd90f0
 
 ### Iter 439 — 2026-07-28 13:32 UTC — [Run §30363242799](https://github.com/githubnext/tsb/actions/runs/30363242799)
 - **Status**: ✅ Accepted (pending CI) | **Change**: +5 files: stochastic_processes, network_stats, spatial_stats, copulas, extreme_value
