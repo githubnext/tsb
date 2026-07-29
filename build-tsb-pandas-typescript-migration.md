@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-29T01:30:00Z |
-| Iteration Count | 440 |
-| Best Metric | 198 |
+| Last Run | 2026-07-29T13:29:00Z |
+| Iteration Count | 441 |
+| Best Metric | 203 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,18 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- **Next**: Reinforcement learning (Q-learning, policy gradient), variational inference (ELBO, mean-field), normalizing flows (RealNVP), GNN (GCN, GAT), matrix factorization (NMF, SVD).
+- **Next**: persistent_homology, robust_stats, causal_discovery, bandit algorithms, online learning.
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 441**: +5 files: reinforcement_learning, variational_inference, normalizing_flows, graph_neural_networks, matrix_factorization. 198→203.
 - **Iter 439**: +5 files: stochastic_processes, network_stats, spatial_stats, copulas, extreme_value. 193→198 (canonical branch baseline).
 - **Iter 438**: +5 files: persistent_homology, robust_stats, causal_discovery, copulas, extreme_value. 193→198 (post-rebase baseline restored).
 - **Iter 437**: +5 files: reinforcement_learning/variational_inference/normalizing_flows/GNN/matrix_factorization. 193→198.
@@ -48,18 +49,19 @@
 
 ## 🔭 Future Directions
 
-- Reinforcement learning (Q-learning, policy gradient, actor-critic)
-- Variational inference (ELBO, mean-field, black-box VI)
-- Normalizing flows (RealNVP, Glow, planar/radial)
-- Graph neural networks (GCN, GAT, message passing)
-- Matrix factorization (NMF, SVD, probabilistic PCA)
 - Persistent homology (TDA, Vietoris-Rips, Betti numbers)
 - Robust statistics (M-estimators, Huber, Tukey)
 - Causal discovery (PC algorithm, structural equations)
+- Bandit algorithms (UCB, Thompson sampling, LinUCB)
+- Online learning (SGD, Perceptron, Passive-Aggressive)
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 441 — 2026-07-29 13:29 UTC — [Run §30455966367](https://github.com/githubnext/tsb/actions/runs/30455966367)
+- **Status**: ✅ Accepted | **Change**: +5 files: reinforcement_learning, variational_inference, normalizing_flows, graph_neural_networks, matrix_factorization
+- **Metric**: 203 (prev: 198, delta: +5) | **Commit**: 7141c9b
 
 ### Iter 440 — 2026-07-29 01:30 UTC — [Run §30413879442](https://github.com/githubnext/tsb/actions/runs/30413879442)
 - **Status**: ✅ Accepted (pending CI) | **Change**: +5 files: stochastic_processes, network_stats, spatial_stats, copulas, extreme_value
