@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-30T07:45:47Z |
-| Iteration Count | 431 |
-| Best Metric | 769 |
+| Last Run | 2026-07-30T19:25:00Z |
+| Iteration Count | 432 |
+| Best Metric | 770 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -47,17 +47,10 @@
 
 ## 📊 Iteration History
 
-### Iteration 431 — 2026-07-30 07:45 UTC — [Run §30523821551](https://github.com/githubnext/tsb/actions/runs/30523821551)
-✅ +1 → 769: stata benchmark (readStata/toStata round-trip, 500 rows × 4 cols, 20 iters). Python: df.to_stata + pd.read_stata with BytesIO.
+### Iteration 432 — 2026-07-30 19:25 UTC — [Run §30574434717](https://github.com/githubnext/tsb/actions/runs/30574434717)
+✅ +1 → 770: SparseArray arithmetic/utility ops benchmark (add, mul, fillna, slice, toCoo, std, min, max; 100k array, 5% density, 30 iters). Python: pd.arrays.SparseArray equivalents.
 
-### Iteration 430 — 2026-07-29 19:23 UTC — [Run §30483937580](https://github.com/githubnext/tsb/actions/runs/30483937580)
-✅ +1 → 768: information_extended benchmark combining jsDivergence/jsDistance/crossEntropy/renyiEntropy/tsallisEntropy/jointEntropy/conditionalEntropy/variationOfInformation (100-bin PMF, 1000 paired observations, 50 iters). Python: scipy.stats + numpy equivalents.
-
-### Iteration 429 — 2026-07-29 07:52 UTC — [Run §30433042744](https://github.com/githubnext/tsb/actions/runs/30433042744)
-✅ +1 → 767: holiday observance benchmarks (nearestWorkday/nextMonday/nextMondayOrTuesday/previousFriday/previousWorkday/sundayToMonday vs pandas.tseries.holiday equivalents, 1000 dates, 50 iters).
-
-### Iteration 428 — 2026-07-28 19:23 UTC — [Run §30391517527](https://github.com/githubnext/tsb/actions/runs/30391517527)
-✅ +1 → 766: polyval benchmark (degree-5 polynomial, 100k points, 50 iters). Python: numpy.polyval.
+### Iters 428–431 — ✅ 766→769: polyval, holiday observances, information_extended, stata round-trip.
 
 ### Iters 419–427 — ✅ 757→765: normalizedMI, jointEntropy/conditionalEntropy/VOI, renyiEntropy/tsallisEntropy/jsDivergence, mode, gaussianKDE, TimedeltaArray, DatetimeArray, StringArray, BooleanArray.
 
