@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-29T13:29:00Z |
-| Iteration Count | 441 |
-| Best Metric | 203 |
+| Last Run | 2026-07-30T01:25:00Z |
+| Iteration Count | 442 |
+| Best Metric | 207 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,18 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted |
+| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- **Next**: persistent_homology, robust_stats, causal_discovery, bandit algorithms, online learning.
+- **Next**: graph_neural_networks, geometric_deep_learning, transformer models, diffusion models, or other ML modules not yet ported.
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 442**: +9 files: persistent_homology, robust_stats, causal_discovery, bandit_algorithms, online_learning, reinforcement_learning, variational_inference, normalizing_flows, matrix_factorization. 203→207.
 - **Iter 441**: +5 files: reinforcement_learning, variational_inference, normalizing_flows, graph_neural_networks, matrix_factorization. 198→203.
 - **Iter 439**: +5 files: stochastic_processes, network_stats, spatial_stats, copulas, extreme_value. 193→198 (canonical branch baseline).
 - **Iter 438**: +5 files: persistent_homology, robust_stats, causal_discovery, copulas, extreme_value. 193→198 (post-rebase baseline restored).
@@ -49,15 +50,19 @@
 
 ## 🔭 Future Directions
 
-- Persistent homology (TDA, Vietoris-Rips, Betti numbers)
-- Robust statistics (M-estimators, Huber, Tukey)
-- Causal discovery (PC algorithm, structural equations)
-- Bandit algorithms (UCB, Thompson sampling, LinUCB)
-- Online learning (SGD, Perceptron, Passive-Aggressive)
+- Graph neural networks (GCN, GAT, message passing)
+- Geometric deep learning
+- Diffusion models (score matching, DDPM)
+- Transformer attention mechanisms
+- Gaussian processes
 
 ---
 
 ## 📊 Iteration History
+
+### Iter 442 — 2026-07-30 01:25 UTC — [Run §30505440621](https://github.com/githubnext/tsb/actions/runs/30505440621)
+- **Status**: ✅ Accepted (pending CI) | **Change**: +9 files: persistent_homology, robust_stats, causal_discovery, bandit_algorithms, online_learning, reinforcement_learning, variational_inference, normalizing_flows, matrix_factorization
+- **Metric**: 207 (prev: 203, delta: +4) | **Commit**: b2692b5
 
 ### Iter 441 — 2026-07-29 13:29 UTC — [Run §30455966367](https://github.com/githubnext/tsb/actions/runs/30455966367)
 - **Status**: ✅ Accepted | **Change**: +5 files: reinforcement_learning, variational_inference, normalizing_flows, graph_neural_networks, matrix_factorization
