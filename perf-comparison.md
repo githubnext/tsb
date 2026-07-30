@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-29T19:23:59Z |
-| Iteration Count | 430 |
-| Best Metric | 768 |
+| Last Run | 2026-07-30T07:45:47Z |
+| Iteration Count | 431 |
+| Best Metric | 769 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -32,7 +32,7 @@
 - Pages workflow: pandas+numpy only (no scipy). Use pure-numpy for KDE, linregress, etc.
 - SparseArray: `src/core/sparse.ts`. readExcel/xlsxSheetNames NOT in src/index.ts.
 - OLS: `new OLS().fit(X_2d, y)` from `src/stats/regression.ts`.
-- IO round-trips (parquet/feather/hdf): BytesIO/Uint8Array buffer pattern.
+- IO round-trips (parquet/feather/hdf/stata): BytesIO/Uint8Array buffer pattern; `toStata`→`readStata` for Stata .dta files.
 - pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`. Use `~arr.isna()` for notna.
 - polyval: Python equivalent is `numpy.polyval`; benchmark with degree-N polynomial at 100k points.
 - holiday observance fns: `pandas.tseries.holiday` has `nearest_workday`, `next_monday`, `next_monday_or_tuesday`, `previous_friday`, `previous_workday`, `sunday_to_monday`.
@@ -46,6 +46,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 431 — 2026-07-30 07:45 UTC — [Run §30523821551](https://github.com/githubnext/tsb/actions/runs/30523821551)
+✅ +1 → 769: stata benchmark (readStata/toStata round-trip, 500 rows × 4 cols, 20 iters). Python: df.to_stata + pd.read_stata with BytesIO.
 
 ### Iteration 430 — 2026-07-29 19:23 UTC — [Run §30483937580](https://github.com/githubnext/tsb/actions/runs/30483937580)
 ✅ +1 → 768: information_extended benchmark combining jsDivergence/jsDistance/crossEntropy/renyiEntropy/tsallisEntropy/jointEntropy/conditionalEntropy/variationOfInformation (100-bin PMF, 1000 paired observations, 50 iters). Python: scipy.stats + numpy equivalents.
