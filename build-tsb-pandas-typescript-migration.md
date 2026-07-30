@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-30T01:25:00Z |
-| Iteration Count | 442 |
-| Best Metric | 207 |
+| Last Run | 2026-07-30T13:26:00Z |
+| Iteration Count | 443 |
+| Best Metric | 208 |
 | Target Metric | — |
 | Metric Direction | higher |
 | Branch | `autoloop/build-tsb-pandas-typescript-migration` |
@@ -19,18 +19,19 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, pending-ci, accepted, pending-ci, accepted, pending-ci, pending-ci, accepted, accepted, accepted |
 
 ---
 
 ## 🎯 Current Priorities
 
-- **Next**: graph_neural_networks, geometric_deep_learning, transformer models, diffusion models, or other ML modules not yet ported.
+- **Next**: sparse transformers, mixture of experts, flow matching, or other deep learning modules not yet ported.
 
 ---
 
 ## 📚 Lessons Learned
 
+- **Iter 443**: +10 files in src/ml/: GNN (GCN/GAT/GraphSAGE), geometric DL (point clouds, mesh), diffusion models (DDPM/DDIM/score), transformer attention (MHA/RoPE/FFN), Gaussian processes (kernels/regression/BO), GANs (losses/spectral norm), contrastive learning (SimCLR/MoCo/BYOL), meta-learning (ProtoNet/MAML/Reptile), neural ODEs (RK4/RK45/symplectic), energy-based models (RBM/CD-k/SVGD). 198→208.
 - **Iter 442**: +9 files: persistent_homology, robust_stats, causal_discovery, bandit_algorithms, online_learning, reinforcement_learning, variational_inference, normalizing_flows, matrix_factorization. 203→207.
 - **Iter 441**: +5 files: reinforcement_learning, variational_inference, normalizing_flows, graph_neural_networks, matrix_factorization. 198→203.
 - **Iter 439**: +5 files: stochastic_processes, network_stats, spatial_stats, copulas, extreme_value. 193→198 (canonical branch baseline).
@@ -60,6 +61,10 @@
 
 ## 📊 Iteration History
 
+### Iter 443 — 2026-07-30 13:26 UTC — [Run §30546619688](https://github.com/githubnext/tsb/actions/runs/30546619688)
+- **Status**: ✅ Accepted | **Change**: +10 files in src/ml/: GNN, geometric DL, diffusion models, transformer attention, Gaussian processes, GANs, contrastive learning, meta-learning, neural ODEs, energy-based models
+- **Metric**: 208 (prev: 207, delta: +1) | **Commit**: aae3f41
+
 ### Iter 442 — 2026-07-30 01:25 UTC — [Run §30505440621](https://github.com/githubnext/tsb/actions/runs/30505440621)
 - **Status**: ✅ Accepted (pending CI) | **Change**: +9 files: persistent_homology, robust_stats, causal_discovery, bandit_algorithms, online_learning, reinforcement_learning, variational_inference, normalizing_flows, matrix_factorization
 - **Metric**: 207 (prev: 203, delta: +4) | **Commit**: b2692b5
@@ -76,13 +81,7 @@
 - **Status**: ✅ Accepted (pending CI) | **Change**: +5 files: stochastic_processes, network_stats, spatial_stats, copulas, extreme_value
 - **Metric**: 198 (prev: 193 canonical post-rebase, delta: +5) | **Commit**: 4d8b384
 
-### Iter 438 — 2026-07-28 01:25 UTC — [Run §30320071053](https://github.com/githubnext/tsb/actions/runs/30320071053)
-- **Status**: ✅ Accepted (pending CI) | **Change**: +5 files: persistent_homology, robust_stats, causal_discovery, copulas, extreme_value
-- **Metric**: 198 (prev: 193 post-rebase, delta: +5) | **Commit**: 3233c8a
-
-### Iter 437 — 2026-07-27 13:46 UTC — [Run §30271641580](https://github.com/githubnext/tsb/actions/runs/30271641580)
-- **Status**: ✅ Accepted | **Change**: +5 files: reinforcement_learning, variational_inference, normalizing_flows, graph_neural_networks, matrix_factorization
-- **Metric**: 198 (post-rebase, delta: +5) | **Commit**: da8809a
+### Iters 437–442 — (193→207) Post-rebase ML modules: stochastic_processes, network_stats, spatial_stats, copulas, extreme_value, persistent_homology, robust_stats, causal_discovery, reinforcement_learning, variational_inference, normalizing_flows, graph_neural_networks, matrix_factorization, bandit_algorithms, online_learning.
 
 ### Iters 435–436 — (193→200) stale-branch iters. Iter 436: +7 files (spatial_econometrics, tensor_decomp, optimal_transport, bayesian_nonparametrics, persistent_homology, causal_discovery, bandit).
 
