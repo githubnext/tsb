@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-07-30T19:25:00Z |
-| Iteration Count | 432 |
-| Best Metric | 770 |
+| Last Run | 2026-07-31T07:53:40Z |
+| Iteration Count | 433 |
+| Best Metric | 771 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -19,6 +19,8 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+
+
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -46,6 +48,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 433 — 2026-07-31 07:53 UTC — [Run §30614182745](https://github.com/githubnext/tsb/actions/runs/30614182745)
+✅ +1 → 771: IntegerArray arithmetic ops benchmark (sub, floordiv, mod, pow, astype, count; 100k Int32 array, 10% nulls, 20 iters). Python: pd.array arithmetic operators and astype/count.
 
 ### Iteration 432 — 2026-07-30 19:25 UTC — [Run §30574434717](https://github.com/githubnext/tsb/actions/runs/30574434717)
 ✅ +1 → 770: SparseArray arithmetic/utility ops benchmark (add, mul, fillna, slice, toCoo, std, min, max; 100k array, 5% density, 30 iters). Python: pd.arrays.SparseArray equivalents.
