@@ -1264,3 +1264,149 @@ export type {
   GPDParams,
   GumbelParams,
 } from "./stats/extreme_value.ts";
+
+// ─── ML ───────────────────────────────────────────────────────────────────────
+export {
+  computeNoiseSchedule,
+  addNoise,
+  ddimStep,
+  ddimTimesteps,
+  snrAtTimestep,
+} from "./ml/ddim.ts";
+export type { NoiseSchedule, DDIMConfig, NoiseScheduleValues } from "./ml/ddim.ts";
+
+export {
+  sparsemax,
+  glu,
+  batchNormInfer,
+  featureTransformer,
+  attentiveTransformer,
+  tabnetStep,
+  aggregateSteps,
+  featureImportance,
+} from "./ml/tabnet.ts";
+export type { BatchNormParams, FeatureTransformerWeights, AttentiveTransformerWeights, TabNetStepResult } from "./ml/tabnet.ts";
+
+export {
+  scaledDotProductAttention,
+  layerNorm,
+  gelu,
+  feedForward,
+  tokenizeNumerical,
+  tokenizeCategorical,
+  addResidual,
+  extractCLSToken,
+  linearHead,
+  softmax,
+} from "./ml/ft_transformer.ts";
+export type { AttentionOutput } from "./ml/ft_transformer.ts";
+
+export {
+  viterbiDecode,
+  forwardLogZ,
+  sequenceScore,
+  crfNegLogLikelihood,
+  logSumExp,
+} from "./ml/crf.ts";
+export type { CRFParams, ViterbiResult } from "./ml/crf.ts";
+
+export {
+  rnnCell,
+  encode,
+  bahdanauAttention,
+  decoderStep,
+  greedyDecode,
+  sigmoid,
+  tanh,
+} from "./ml/seq2seq.ts";
+export type { RNNCellWeights, BahdanauWeights, DecoderWeights, DecoderStepResult } from "./ml/seq2seq.ts";
+
+export {
+  rbfKernel,
+  maternKernel52,
+  kernelMatrix,
+  cholesky,
+  gpPredict,
+  normalCDF,
+  normalPDF,
+  expectedImprovement,
+  probabilityOfImprovement,
+  upperConfidenceBound,
+  initBOState,
+  suggestNext,
+} from "./ml/bayesian_opt.ts";
+export type { BOState } from "./ml/bayesian_opt.ts";
+
+export {
+  karrasNoiseLevels,
+  cSkip,
+  cOut,
+  cIn,
+  cNoise,
+  consistencyFunction,
+  preconditionInput,
+  pseudoHuberLoss,
+  consistencyTrainingLoss,
+  addGaussianNoise,
+  consistencySampleOneStep,
+  consistencySampleMultiStep,
+  updateEMAWeights,
+  adaptiveEMADecay,
+  DEFAULT_CONSISTENCY_CONFIG,
+} from "./ml/consistency_models.ts";
+export type { ConsistencyConfig } from "./ml/consistency_models.ts";
+
+export {
+  buildTree,
+  treePredict,
+  treePredictOne,
+  fitGBM,
+  predictGBM,
+  mse,
+  r2Score,
+  mseGradient,
+} from "./ml/gradient_boosting.ts";
+export type { TreeNode, TreeParams, GBMEnsemble } from "./ml/gradient_boosting.ts";
+
+export {
+  computeKernel,
+  svmDecision,
+  svmPredict,
+  fitSVM,
+  svmAccuracy,
+} from "./ml/svm.ts";
+export type { KernelType, SVMKernelConfig, SVMModel } from "./ml/svm.ts";
+
+export {
+  multiHeadAttention,
+  sinusoidalPositionalEncoding,
+  addPositionalEncoding,
+  causalMask,
+  applyRoPE,
+} from "./ml/attention.ts";
+export type { MHAConfig, MHAWeights } from "./ml/attention.ts";
+
+export {
+  fitRandomForest,
+  predictRandomForest,
+  oobError,
+  LCGRandom,
+} from "./ml/random_forest.ts";
+export type { RandomForestConfig, RandomForestModel } from "./ml/random_forest.ts";
+
+export {
+  denseForward,
+  denseBackward,
+  relu,
+  reluGrad,
+  sigmoidActivation,
+  sigmoidGrad,
+  softmaxCrossEntropy,
+  mseLoss,
+  initAdam,
+  adamStep,
+  heInit,
+  dropoutMask,
+  applyDropout,
+} from "./ml/neural_network.ts";
+export type { AdamState } from "./ml/neural_network.ts";
