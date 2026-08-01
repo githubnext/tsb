@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-01T01:25:52Z |
-| Iteration Count | 434 |
-| Best Metric | 772 |
+| Last Run | 2026-08-01T13:23:31Z |
+| Iteration Count | 435 |
+| Best Metric | 773 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 435 — 2026-08-01 13:23 UTC — [Run §30701520139](https://github.com/githubnext/tsb/actions/runs/30701520139)
+✅ +1 → 773: string_accessor benchmark (Series.str.split/replace/extract/join, 100k strings, 15 iters). Python: pd.Series.str equivalents with matching dataset.
 
 ### Iteration 434 — 2026-08-01 01:25 UTC — [Run §30677780854](https://github.com/githubnext/tsb/actions/runs/30677780854)
 ✅ +1 → 772: applymap benchmark (element-wise DataFrame cell mapping, 50k rows × 4 float cols, 30 iters). Python: df.map/df.applymap with pandas >= 2.1 compatibility.
