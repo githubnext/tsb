@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-01T13:23:31Z |
-| Iteration Count | 435 |
-| Best Metric | 773 |
+| Last Run | 2026-08-02T01:30:00Z |
+| Iteration Count | 436 |
+| Best Metric | 774 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 436 — 2026-08-02 01:30 UTC — [Run §30726948175](https://github.com/githubnext/tsb/actions/runs/30726948175)
+✅ +1 → 774: clip_with_bounds benchmark (clipSeriesWithBounds/clipDataFrameWithBounds with Series bounds, 100k rows × 4 float cols, 20 iters). Python: pd.Series.clip/df.clip with array bounds matching dataset.
 
 ### Iteration 435 — 2026-08-01 13:23 UTC — [Run §30701520139](https://github.com/githubnext/tsb/actions/runs/30701520139)
 ✅ +1 → 773: string_accessor benchmark (Series.str.split/replace/extract/join, 100k strings, 15 iters). Python: pd.Series.str equivalents with matching dataset.
