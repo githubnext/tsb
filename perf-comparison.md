@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-02T01:30:00Z |
-| Iteration Count | 436 |
-| Best Metric | 774 |
+| Last Run | 2026-08-02T13:25:00Z |
+| Iteration Count | 437 |
+| Best Metric | 775 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 437 — 2026-08-02 13:25 UTC — [Run §30749712022](https://github.com/githubnext/tsb/actions/runs/30749712022)
+✅ +1 → 775: swaplevel_dataframe benchmark (swapLevelDataFrame/reorderLevelsDataFrame on 50k-row × 3-col MultiIndex DataFrame, 30 iters). Python: df.swaplevel/df.reorder_levels with matching 3-level index.
 
 ### Iteration 436 — 2026-08-02 01:30 UTC — [Run §30726948175](https://github.com/githubnext/tsb/actions/runs/30726948175)
 ✅ +1 → 774: clip_with_bounds benchmark (clipSeriesWithBounds/clipDataFrameWithBounds with Series bounds, 100k rows × 4 float cols, 20 iters). Python: pd.Series.clip/df.clip with array bounds matching dataset.
