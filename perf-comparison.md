@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-03T01:25:00Z |
-| Iteration Count | 438 |
-| Best Metric | 776 |
+| Last Run | 2026-08-03T13:49:00Z |
+| Iteration Count | 439 |
+| Best Metric | 778 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -20,10 +20,9 @@
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
+## 📋 Program Info
 
-
-
-
+**Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
 ## 🎯 Current Priorities
@@ -38,7 +37,7 @@
 - OLS: `new OLS().fit(X_2d, y)` from `src/stats/regression.ts`.
 - IO round-trips (parquet/feather/hdf/stata): BytesIO/Uint8Array buffer pattern; `toStata`→`readStata` for Stata .dta files.
 - pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`. Use `~arr.isna()` for notna.
-- polyval: Python equivalent is `numpy.polyval`; benchmark with degree-N polynomial at 100k points.
+- `tabulate` (required by pandas `to_markdown`) must be installed; Python benchmark auto-installs it via subprocess if missing.
 - holiday observance fns: `pandas.tseries.holiday` has `nearest_workday`, `next_monday`, `next_monday_or_tuesday`, `previous_friday`, `previous_workday`, `sunday_to_monday`.
 
 ## 🚧 Foreclosed Avenues
@@ -50,6 +49,9 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 439 — 2026-08-03 13:49 UTC — [Run §30819531253](https://github.com/githubnext/tsb/actions/runs/30819531253)
+✅ +2 → 778: format_table benchmark (toMarkdown/toLaTeX/seriesToMarkdown vs df.to_markdown/df.to_latex/s.to_markdown; 1000-row × 3-col DataFrame, 20 iters). Python auto-installs tabulate if missing.
 
 ### Iteration 438 — 2026-08-03 01:25 UTC — [Run §30776731199](https://github.com/githubnext/tsb/actions/runs/30776731199)
 ✅ +1 → 776: information_advanced benchmark (jsDivergence, jsDistance, crossEntropy, renyiEntropy, tsallisEntropy, jointEntropy, conditionalEntropy, normalizedMI, variationOfInformation; N=200 PMF + 1000 paired obs, 50 iters). Python: pure-numpy equivalents.
