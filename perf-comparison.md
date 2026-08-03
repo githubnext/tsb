@@ -50,29 +50,9 @@
 
 ## 📊 Iteration History
 
-### Iteration 439 — 2026-08-03 13:49 UTC — [Run §30819531253](https://github.com/githubnext/tsb/actions/runs/30819531253)
-✅ +2 → 778: format_table benchmark (toMarkdown/toLaTeX/seriesToMarkdown vs df.to_markdown/df.to_latex/s.to_markdown; 1000-row × 3-col DataFrame, 20 iters). Python auto-installs tabulate if missing.
+### Iters 435–439 — ✅ 773→778: string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
 
-### Iteration 438 — 2026-08-03 01:25 UTC — [Run §30776731199](https://github.com/githubnext/tsb/actions/runs/30776731199)
-✅ +1 → 776: information_advanced benchmark (jsDivergence, jsDistance, crossEntropy, renyiEntropy, tsallisEntropy, jointEntropy, conditionalEntropy, normalizedMI, variationOfInformation; N=200 PMF + 1000 paired obs, 50 iters). Python: pure-numpy equivalents.
-
-### Iteration 437 — 2026-08-02 13:25 UTC — [Run §30749712022](https://github.com/githubnext/tsb/actions/runs/30749712022)
-✅ +1 → 775: swaplevel_dataframe benchmark (swapLevelDataFrame/reorderLevelsDataFrame on 50k-row × 3-col MultiIndex DataFrame, 30 iters). Python: df.swaplevel/df.reorder_levels with matching 3-level index.
-
-### Iteration 436 — 2026-08-02 01:30 UTC — [Run §30726948175](https://github.com/githubnext/tsb/actions/runs/30726948175)
-✅ +1 → 774: clip_with_bounds benchmark (clipSeriesWithBounds/clipDataFrameWithBounds with Series bounds, 100k rows × 4 float cols, 20 iters). Python: pd.Series.clip/df.clip with array bounds matching dataset.
-
-### Iteration 435 — 2026-08-01 13:23 UTC — [Run §30701520139](https://github.com/githubnext/tsb/actions/runs/30701520139)
-✅ +1 → 773: string_accessor benchmark (Series.str.split/replace/extract/join, 100k strings, 15 iters). Python: pd.Series.str equivalents with matching dataset.
-
-### Iteration 434 — 2026-08-01 01:25 UTC — [Run §30677780854](https://github.com/githubnext/tsb/actions/runs/30677780854)
-✅ +1 → 772: applymap benchmark (element-wise DataFrame cell mapping, 50k rows × 4 float cols, 30 iters). Python: df.map/df.applymap with pandas >= 2.1 compatibility.
-
-### Iteration 433 — 2026-07-31 07:53 UTC — [Run §30614182745](https://github.com/githubnext/tsb/actions/runs/30614182745)
-✅ +1 → 771: IntegerArray arithmetic ops benchmark (sub, floordiv, mod, pow, astype, count; 100k Int32 array, 10% nulls, 20 iters). Python: pd.array arithmetic operators and astype/count.
-
-### Iteration 432 — 2026-07-30 19:25 UTC — [Run §30574434717](https://github.com/githubnext/tsb/actions/runs/30574434717)
-✅ +1 → 770: SparseArray arithmetic/utility ops benchmark (add, mul, fillna, slice, toCoo, std, min, max; 100k array, 5% density, 30 iters). Python: pd.arrays.SparseArray equivalents.
+### Iters 432–434 — ✅ 770→772: SparseArray, IntegerArray, applymap
 
 ### Iters 428–431 — ✅ 766→769: polyval, holiday observances, information_extended, stata round-trip.
 
