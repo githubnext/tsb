@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-04T01:25:57Z |
-| Iteration Count | 440 |
-| Best Metric | 780 |
+| Last Run | 2026-08-04T13:29:01Z |
+| Iteration Count | 441 |
+| Best Metric | 781 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -22,7 +22,6 @@
 
 ## 📋 Program Info
 
-**Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
 ## 🎯 Current Priorities
@@ -39,6 +38,7 @@
 - pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`. Use `~arr.isna()` for notna.
 - `tabulate` (required by pandas `to_markdown`) must be installed; Python benchmark auto-installs it via subprocess if missing.
 - holiday observance fns: `pandas.tseries.holiday` has `nearest_workday`, `next_monday`, `next_monday_or_tuesday`, `previous_friday`, `previous_workday`, `sunday_to_monday`.
+- Python benchmarks for hypothesis tests (kstest, chi2_contingency) need scipy — available in CI via `pip install scipy`.
 
 ## 🚧 Foreclosed Avenues
 
@@ -50,13 +50,7 @@
 
 ## 📊 Iteration History
 
-### Iteration 440 — 2026-08-04T01:25:57Z — [Run](https://github.com/githubnext/tsb/actions/runs/30868541111)
-
-- **Status**: ✅ Accepted
-- **Change**: Add masked_array (MaskedArray base ops) and frequencies (toOffset/inferFreq) benchmarks
-- **Metric**: 780 (previous best: 778, delta: +2)
-- **Commit**: 2863f1f
-- **Notes**: MaskedArray benchmark uses IntegerArray as concrete subclass; frequencies benchmark tests parsing 13 freq strings plus inferFreq on 365-day array.
+### Iters 440–441 — ✅ 778→781: masked_array/frequencies, chi2_contingency/kstest_jarquebera
 
 ### Iters 435–439 — ✅ 773→778: string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
 
@@ -64,8 +58,4 @@
 
 ### Iters 428–431 — ✅ 766→769: polyval, holiday observances, information_extended, stata round-trip.
 
-### Iters 419–427 — ✅ 757→765: normalizedMI, jointEntropy/conditionalEntropy/VOI, renyiEntropy/tsallisEntropy/jsDivergence, mode, gaussianKDE, TimedeltaArray, DatetimeArray, StringArray, BooleanArray.
-
-### Iters 412–418 — ✅ 750→756: readParquet/toParquet and various array/IO benchmarks.
-
-### Iters 291–411 — ✅ 503→749: bootstrap, OLS, hypothesis_tests, entropy, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, IntegerArray, FloatingArray, pipe_apply, XML, flags, case_when, and many more.
+### Iters 291–427 — ✅ 503→765: normalizedMI, entropy, gaussianKDE, array types, IO benchmarks, bootstrap, OLS, hypothesis_tests, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, pipe_apply, XML, flags, case_when, and many more.
