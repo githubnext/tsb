@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-03T13:49:00Z |
-| Iteration Count | 439 |
-| Best Metric | 778 |
+| Last Run | 2026-08-04T01:25:57Z |
+| Iteration Count | 440 |
+| Best Metric | 780 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -49,6 +49,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 440 — 2026-08-04T01:25:57Z — [Run](https://github.com/githubnext/tsb/actions/runs/30868541111)
+
+- **Status**: ✅ Accepted
+- **Change**: Add masked_array (MaskedArray base ops) and frequencies (toOffset/inferFreq) benchmarks
+- **Metric**: 780 (previous best: 778, delta: +2)
+- **Commit**: 2863f1f
+- **Notes**: MaskedArray benchmark uses IntegerArray as concrete subclass; frequencies benchmark tests parsing 13 freq strings plus inferFreq on 365-day array.
 
 ### Iters 435–439 — ✅ 773→778: string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
 
