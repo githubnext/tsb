@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-05T01:25:30Z |
-| Iteration Count | 442 |
-| Best Metric | 782 |
+| Last Run | 2026-08-05T13:28:08Z |
+| Iteration Count | 443 |
+| Best Metric | 783 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -49,6 +49,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 443 — 2026-08-05T13:28:08Z — [Run](https://github.com/githubnext/tsb/actions/runs/31010097715)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_sort_index_columns.ts/.py` — `sortIndexDataFrame` with `axis=1` (sort column labels), 50-col 100k-row DataFrame, ascending+descending, 30 iters
+- **Metric**: 783 (previous best: 782, delta: +1)
+- **Commit**: 806b80b
+- **Notes**: Exercises the axis=1 code path of sortIndexDataFrame (column-label sort), distinct from the existing row-index sort benchmarks. Clear pandas equivalent via `df.sort_index(axis=1)`.
 
 ### Iters 440–442 — ✅ 778→782: masked_array/frequencies, chi2_contingency/kstest_jarquebera, numeric_extended (digitize/histogram/linspace/arange/zscore/minmax/percentile)
 
