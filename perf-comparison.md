@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-04T13:29:01Z |
-| Iteration Count | 441 |
-| Best Metric | 781 |
+| Last Run | 2026-08-05T01:25:30Z |
+| Iteration Count | 442 |
+| Best Metric | 782 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,7 +50,7 @@
 
 ## 📊 Iteration History
 
-### Iters 440–441 — ✅ 778→781: masked_array/frequencies, chi2_contingency/kstest_jarquebera
+### Iters 440–442 — ✅ 778→782: masked_array/frequencies, chi2_contingency/kstest_jarquebera, numeric_extended (digitize/histogram/linspace/arange/zscore/minmax/percentile)
 
 ### Iters 435–439 — ✅ 773→778: string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
 
