@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-06T01:25:14Z |
-| Iteration Count | 444 |
-| Best Metric | 784 |
+| Last Run | 2026-08-06T13:27:32Z |
+| Iteration Count | 445 |
+| Best Metric | 785 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -49,6 +49,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 445 — 2026-08-06T13:27:32Z — [Run](https://github.com/githubnext/tsb/actions/runs/31105723794)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_hdf.ts/.py` — `toHdf`/`readHdf` round-trip on 5k-row DataFrame (int+float+string columns), 20 iters
+- **Metric**: 785 (previous best: 784, delta: +1)
+- **Commit**: 8ba6bb0
+- **Notes**: Covers the HDF5 I/O code path; Python equivalent uses `df.to_hdf` / `pd.read_hdf` with a temp file.
 
 ### Iteration 444 — 2026-08-06T01:25:14Z — [Run](https://github.com/githubnext/tsb/actions/runs/31062534316)
 
