@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-05T13:28:08Z |
-| Iteration Count | 443 |
-| Best Metric | 783 |
+| Last Run | 2026-08-06T01:25:14Z |
+| Iteration Count | 444 |
+| Best Metric | 784 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -49,6 +49,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 444 — 2026-08-06T01:25:14Z — [Run](https://github.com/githubnext/tsb/actions/runs/31062534316)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_datetime_tz.ts/.py` — `tz_localize` (naive→tz-aware) + `tz_convert` (tz→tz) on 10k-element DatetimeIndex, 3 ops/iter, 50 iters
+- **Metric**: 784 (previous best: 783, delta: +1)
+- **Commit**: 3fd006a
+- **Notes**: Covers the timezone-aware DatetimeIndex code path; pandas equivalent uses `DatetimeIndex.tz_localize` / `tz_convert`.
 
 ### Iteration 443 — 2026-08-05T13:28:08Z — [Run](https://github.com/githubnext/tsb/actions/runs/31010097715)
 
