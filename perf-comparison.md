@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-06T13:27:32Z |
-| Iteration Count | 445 |
-| Best Metric | 785 |
+| Last Run | 2026-08-07T07:22:31Z |
+| Iteration Count | 446 |
+| Best Metric | 786 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -49,6 +49,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 446 — 2026-08-07T07:22:31Z — [Run](https://github.com/githubnext/tsb/actions/runs/31157223454)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_parquet.ts/.py` — `toParquet`/`readParquet` round-trip on 10k-row DataFrame (int+float+bool+string columns), 20 iters
+- **Metric**: 786 (previous best: 785, delta: +1)
+- **Commit**: aa6a24e
+- **Notes**: Covers the Parquet I/O code path; Python equivalent uses `df.to_parquet` / `pd.read_parquet` with `engine="pyarrow"`.
 
 ### Iteration 445 — 2026-08-06T13:27:32Z — [Run](https://github.com/githubnext/tsb/actions/runs/31105723794)
 
