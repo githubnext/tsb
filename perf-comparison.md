@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-07T07:22:31Z |
-| Iteration Count | 446 |
-| Best Metric | 786 |
+| Last Run | 2026-08-07T19:16:32Z |
+| Iteration Count | 447 |
+| Best Metric | 787 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 447 — 2026-08-07T19:16:32Z — [Run](https://github.com/githubnext/tsb/actions/runs/31210523668)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_holiday_calendar.ts/.py` — `AbstractHolidayCalendar`, `Holiday`, `register_calendar`, `get_calendar`; custom 5-rule calendar, 20-year holiday generation, 50 iters
+- **Metric**: 787 (previous best: 786, delta: +1)
+- **Commit**: 5ca3980
+- **Notes**: Covers the custom holiday calendar API path; pandas equivalent uses `pandas.tseries.holiday.AbstractHolidayCalendar`, `Holiday`, and `register`.
+
 ### Iteration 446 — 2026-08-07T07:22:31Z — [Run](https://github.com/githubnext/tsb/actions/runs/31157223454)
 
 - **Status**: ✅ Accepted
@@ -74,20 +82,8 @@
 - **Commit**: 3fd006a
 - **Notes**: Covers the timezone-aware DatetimeIndex code path; pandas equivalent uses `DatetimeIndex.tz_localize` / `tz_convert`.
 
-### Iteration 443 — 2026-08-05T13:28:08Z — [Run](https://github.com/githubnext/tsb/actions/runs/31010097715)
+### Iters 440–446 — ✅ 778→786: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet
 
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_sort_index_columns.ts/.py` — `sortIndexDataFrame` with `axis=1` (sort column labels), 50-col 100k-row DataFrame, ascending+descending, 30 iters
-- **Metric**: 783 (previous best: 782, delta: +1)
-- **Commit**: 806b80b
-- **Notes**: Exercises the axis=1 code path of sortIndexDataFrame (column-label sort), distinct from the existing row-index sort benchmarks. Clear pandas equivalent via `df.sort_index(axis=1)`.
-
-### Iters 440–442 — ✅ 778→782: masked_array/frequencies, chi2_contingency/kstest_jarquebera, numeric_extended (digitize/histogram/linspace/arange/zscore/minmax/percentile)
-
-### Iters 435–439 — ✅ 773→778: string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
-
-### Iters 432–434 — ✅ 770→772: SparseArray, IntegerArray, applymap
-
-### Iters 428–431 — ✅ 766→769: polyval, holiday observances, information_extended, stata round-trip.
+### Iters 428–439 — ✅ 766→778: polyval, holiday observances, stata, SparseArray, IntegerArray, applymap, string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
 
 ### Iters 291–427 — ✅ 503→765: normalizedMI, entropy, gaussianKDE, array types, IO benchmarks, bootstrap, OLS, hypothesis_tests, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, pipe_apply, XML, flags, case_when, and many more.
