@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-08T07:16:13Z |
-| Iteration Count | 448 |
-| Best Metric | 788 |
+| Last Run | 2026-08-08T19:09:46Z |
+| Iteration Count | 449 |
+| Best Metric | 789 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -49,6 +49,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 449 — 2026-08-08T19:09:46Z — [Run](https://github.com/githubnext/tsb/actions/runs/31273616761)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_api_types.ts/.py` — `api.types` predicates (isScalar, isListLike, isNumericDtype, isIntegerDtype, isBoolDtype, isCategoricalDtype, etc.) on 7 values + 8 dtypes, 30 iters
+- **Metric**: 789 (previous best: 788, delta: +1)
+- **Commit**: ed749f3
+- **Notes**: Covers the `pd_api` module (`src/core/pd_api.ts`) which had no benchmark yet; pandas equivalent uses `pd.api.types.*` predicates.
 
 ### Iteration 448 — 2026-08-08T07:16:13Z — [Run](https://github.com/githubnext/tsb/actions/runs/31245670724)
 
