@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-07T19:16:32Z |
-| Iteration Count | 447 |
-| Best Metric | 787 |
+| Last Run | 2026-08-08T07:16:13Z |
+| Iteration Count | 448 |
+| Best Metric | 788 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 448 — 2026-08-08T07:16:13Z — [Run](https://github.com/githubnext/tsb/actions/runs/31245670724)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_read_sql_table.ts/.py` — `readSqlTable` on 10k-row mock adapter (3 columns), 30 iters; Python uses `pd.read_sql_query("SELECT * FROM sensors", sqlite_conn)`
+- **Metric**: 788 (previous best: 787, delta: +1)
+- **Commit**: 15edd35
+- **Notes**: Covers the `readSqlTable` code path (table-name validation via `listTables()` + SELECT dispatch); distinct from the existing `bench_sql.ts` which covers `readSqlQuery`/`toSql`.
+
 ### Iteration 447 — 2026-08-07T19:16:32Z — [Run](https://github.com/githubnext/tsb/actions/runs/31210523668)
 
 - **Status**: ✅ Accepted
@@ -58,31 +66,7 @@
 - **Commit**: 5ca3980
 - **Notes**: Covers the custom holiday calendar API path; pandas equivalent uses `pandas.tseries.holiday.AbstractHolidayCalendar`, `Holiday`, and `register`.
 
-### Iteration 446 — 2026-08-07T07:22:31Z — [Run](https://github.com/githubnext/tsb/actions/runs/31157223454)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_parquet.ts/.py` — `toParquet`/`readParquet` round-trip on 10k-row DataFrame (int+float+bool+string columns), 20 iters
-- **Metric**: 786 (previous best: 785, delta: +1)
-- **Commit**: aa6a24e
-- **Notes**: Covers the Parquet I/O code path; Python equivalent uses `df.to_parquet` / `pd.read_parquet` with `engine="pyarrow"`.
-
-### Iteration 445 — 2026-08-06T13:27:32Z — [Run](https://github.com/githubnext/tsb/actions/runs/31105723794)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_hdf.ts/.py` — `toHdf`/`readHdf` round-trip on 5k-row DataFrame (int+float+string columns), 20 iters
-- **Metric**: 785 (previous best: 784, delta: +1)
-- **Commit**: 8ba6bb0
-- **Notes**: Covers the HDF5 I/O code path; Python equivalent uses `df.to_hdf` / `pd.read_hdf` with a temp file.
-
-### Iteration 444 — 2026-08-06T01:25:14Z — [Run](https://github.com/githubnext/tsb/actions/runs/31062534316)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_datetime_tz.ts/.py` — `tz_localize` (naive→tz-aware) + `tz_convert` (tz→tz) on 10k-element DatetimeIndex, 3 ops/iter, 50 iters
-- **Metric**: 784 (previous best: 783, delta: +1)
-- **Commit**: 3fd006a
-- **Notes**: Covers the timezone-aware DatetimeIndex code path; pandas equivalent uses `DatetimeIndex.tz_localize` / `tz_convert`.
-
-### Iters 440–446 — ✅ 778→786: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet
+### Iters 440–447 — ✅ 778→787: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet, holiday_calendar
 
 ### Iters 428–439 — ✅ 766→778: polyval, holiday observances, stata, SparseArray, IntegerArray, applymap, string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
 
