@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-08T19:09:46Z |
-| Iteration Count | 449 |
-| Best Metric | 789 |
+| Last Run | 2026-08-09T07:16:37Z |
+| Iteration Count | 450 |
+| Best Metric | 790 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -39,6 +39,7 @@
 - `tabulate` (required by pandas `to_markdown`) must be installed; Python benchmark auto-installs it via subprocess if missing.
 - holiday observance fns: `pandas.tseries.holiday` has `nearest_workday`, `next_monday`, `next_monday_or_tuesday`, `previous_friday`, `previous_workday`, `sunday_to_monday`.
 - Python benchmarks for hypothesis tests (kstest, chi2_contingency) need scipy — available in CI via `pip install scipy`.
+- `join` (index-based): `join(left, right, { how: "left" })` from `src/merge/join.ts`; matches `df.join(other, how="left")` in pandas.
 
 ## 🚧 Foreclosed Avenues
 
@@ -49,6 +50,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 450 — 2026-08-09T07:16:37Z — [Run](https://github.com/githubnext/tsb/actions/runs/31300669557)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_join.ts/.py` — index-based left join of two 30k-row DataFrames (1 column each), 5 iters
+- **Metric**: 790 (previous best: 789, delta: +1)
+- **Commit**: 172c813
+- **Notes**: Covers the `join` function (`src/merge/join.ts`) which had no dedicated benchmark; pandas equivalent uses `df.join(other, how="left")`.
 
 ### Iteration 449 — 2026-08-08T19:09:46Z — [Run](https://github.com/githubnext/tsb/actions/runs/31273616761)
 
