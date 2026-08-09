@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-09T07:16:37Z |
-| Iteration Count | 450 |
-| Best Metric | 790 |
+| Last Run | 2026-08-09T19:10:43Z |
+| Iteration Count | 451 |
+| Best Metric | 791 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -40,6 +40,7 @@
 - holiday observance fns: `pandas.tseries.holiday` has `nearest_workday`, `next_monday`, `next_monday_or_tuesday`, `previous_friday`, `previous_workday`, `sunday_to_monday`.
 - Python benchmarks for hypothesis tests (kstest, chi2_contingency) need scipy — available in CI via `pip install scipy`.
 - `join` (index-based): `join(left, right, { how: "left" })` from `src/merge/join.ts`; matches `df.join(other, how="left")` in pandas.
+- `readSql` dispatches: if input looks like SQL query → `readSqlQuery`; otherwise → `readSqlTable`. Python equivalent: `pd.read_sql()` with sqlite3 connection handles both cases.
 
 ## 🚧 Foreclosed Avenues
 
@@ -51,39 +52,17 @@
 
 ## 📊 Iteration History
 
-### Iteration 450 — 2026-08-09T07:16:37Z — [Run](https://github.com/githubnext/tsb/actions/runs/31300669557)
+### Iteration 451 — 2026-08-09T19:10:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/31330835165)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_join.ts/.py` — index-based left join of two 30k-row DataFrames (1 column each), 5 iters
-- **Metric**: 790 (previous best: 789, delta: +1)
-- **Commit**: 172c813
-- **Notes**: Covers the `join` function (`src/merge/join.ts`) which had no dedicated benchmark; pandas equivalent uses `df.join(other, how="left")`.
+- **Change**: Added `bench_read_sql.ts/.py` — `readSql` auto-dispatch (query path + table path), 10k-row mock adapter, 30 iters
+- **Metric**: 791 (previous best: 790, delta: +1)
+- **Commit**: d72d405
+- **Notes**: Covers the `readSql` dispatch function in `src/io/sql.ts`; pandas equivalent uses `pd.read_sql()` with an in-memory SQLite connection.
 
-### Iteration 449 — 2026-08-08T19:09:46Z — [Run](https://github.com/githubnext/tsb/actions/runs/31273616761)
+### Iters 447–450 — ✅ 787→790: holiday_calendar, join, api_types, read_sql_table
 
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_api_types.ts/.py` — `api.types` predicates (isScalar, isListLike, isNumericDtype, isIntegerDtype, isBoolDtype, isCategoricalDtype, etc.) on 7 values + 8 dtypes, 30 iters
-- **Metric**: 789 (previous best: 788, delta: +1)
-- **Commit**: ed749f3
-- **Notes**: Covers the `pd_api` module (`src/core/pd_api.ts`) which had no benchmark yet; pandas equivalent uses `pd.api.types.*` predicates.
-
-### Iteration 448 — 2026-08-08T07:16:13Z — [Run](https://github.com/githubnext/tsb/actions/runs/31245670724)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_read_sql_table.ts/.py` — `readSqlTable` on 10k-row mock adapter (3 columns), 30 iters; Python uses `pd.read_sql_query("SELECT * FROM sensors", sqlite_conn)`
-- **Metric**: 788 (previous best: 787, delta: +1)
-- **Commit**: 15edd35
-- **Notes**: Covers the `readSqlTable` code path (table-name validation via `listTables()` + SELECT dispatch); distinct from the existing `bench_sql.ts` which covers `readSqlQuery`/`toSql`.
-
-### Iteration 447 — 2026-08-07T19:16:32Z — [Run](https://github.com/githubnext/tsb/actions/runs/31210523668)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_holiday_calendar.ts/.py` — `AbstractHolidayCalendar`, `Holiday`, `register_calendar`, `get_calendar`; custom 5-rule calendar, 20-year holiday generation, 50 iters
-- **Metric**: 787 (previous best: 786, delta: +1)
-- **Commit**: 5ca3980
-- **Notes**: Covers the custom holiday calendar API path; pandas equivalent uses `pandas.tseries.holiday.AbstractHolidayCalendar`, `Holiday`, and `register`.
-
-### Iters 440–447 — ✅ 778→787: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet, holiday_calendar
+### Iters 440–446 — ✅ 778→787: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet
 
 ### Iters 428–439 — ✅ 766→778: polyval, holiday observances, stata, SparseArray, IntegerArray, applymap, string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
 
