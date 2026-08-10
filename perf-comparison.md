@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-09T19:10:43Z |
-| Iteration Count | 451 |
-| Best Metric | 791 |
+| Last Run | 2026-08-10T07:23:56Z |
+| Iteration Count | 452 |
+| Best Metric | 792 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -51,6 +51,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 452 — 2026-08-10T07:23:56Z — [Run](https://github.com/githubnext/tsb/actions/runs/31365513170)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_to_sql.ts/.py` — `toSql`/`DataFrame.to_sql` write benchmark, 10k-row DataFrame with mock insert adapter, 30 iters
+- **Metric**: 792 (previous best: 791, delta: +1)
+- **Commit**: efe5493
+- **Notes**: Covers the `toSql` serialisation path; pandas equivalent uses `DataFrame.to_sql()` with in-memory SQLite.
 
 ### Iteration 451 — 2026-08-09T19:10:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/31330835165)
 
