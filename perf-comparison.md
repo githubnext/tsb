@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-10T07:23:56Z |
-| Iteration Count | 452 |
-| Best Metric | 792 |
+| Last Run | 2026-08-10T19:17:26Z |
+| Iteration Count | 453 |
+| Best Metric | 793 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -30,17 +30,16 @@
 
 ## 📚 Lessons Learned
 
-- Import `../../src/index.js`. groupby AggNames: sum/mean/min/max/count/std/first/last/size. metric=min(TS,PY).
+- Import `../../src/index.js`. metric=min(TS,PY). groupby AggNames: sum/mean/min/max/count/std/first/last/size.
 - Pages workflow: pandas+numpy only (no scipy). Use pure-numpy for KDE, linregress, etc.
-- SparseArray: `src/core/sparse.ts`. readExcel/xlsxSheetNames NOT in src/index.ts.
-- OLS: `new OLS().fit(X_2d, y)` from `src/stats/regression.ts`.
-- IO round-trips (parquet/feather/hdf/stata): BytesIO/Uint8Array buffer pattern; `toStata`→`readStata` for Stata .dta files.
-- pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`. Use `~arr.isna()` for notna.
-- `tabulate` (required by pandas `to_markdown`) must be installed; Python benchmark auto-installs it via subprocess if missing.
-- holiday observance fns: `pandas.tseries.holiday` has `nearest_workday`, `next_monday`, `next_monday_or_tuesday`, `previous_friday`, `previous_workday`, `sunday_to_monday`.
-- Python benchmarks for hypothesis tests (kstest, chi2_contingency) need scipy — available in CI via `pip install scipy`.
-- `join` (index-based): `join(left, right, { how: "left" })` from `src/merge/join.ts`; matches `df.join(other, how="left")` in pandas.
-- `readSql` dispatches: if input looks like SQL query → `readSqlQuery`; otherwise → `readSqlTable`. Python equivalent: `pd.read_sql()` with sqlite3 connection handles both cases.
+- OLS: `new OLS().fit(X_2d, y)`. SparseArray: `src/core/sparse.ts`.
+- IO round-trips: BytesIO/Uint8Array buffer pattern for parquet/feather/hdf/stata.
+- pandas TimedeltaArray: has `.days`/`.seconds`/`.total_seconds()` but NOT `.hours`.
+- `tabulate` must be installed for `to_markdown`; auto-install via subprocess if missing.
+- hypothesis tests (kstest, chi2_contingency) need scipy — available in CI.
+- `join`: `join(left, right, { how: "left" })` from `src/merge/join.ts`.
+- `readSql` dispatches: query-like → `readSqlQuery`; table name → `readSqlTable`.
+- Index.union/intersection/difference are distinct from symmetricDifference.
 
 ## 🚧 Foreclosed Avenues
 
@@ -52,21 +51,26 @@
 
 ## 📊 Iteration History
 
+### Iteration 453 — 2026-08-10T19:17:26Z — [Run](https://github.com/githubnext/tsb/actions/runs/31423078837)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_index_setops.ts/.py` — Index.union/intersection/difference on two 10k-element integer indexes (50% overlap), 50 iters
+- **Metric**: 793 (previous best: 792, delta: +1)
+- **Commit**: a13b8e3
+
 ### Iteration 452 — 2026-08-10T07:23:56Z — [Run](https://github.com/githubnext/tsb/actions/runs/31365513170)
 
 - **Status**: ✅ Accepted
 - **Change**: Added `bench_to_sql.ts/.py` — `toSql`/`DataFrame.to_sql` write benchmark, 10k-row DataFrame with mock insert adapter, 30 iters
 - **Metric**: 792 (previous best: 791, delta: +1)
 - **Commit**: efe5493
-- **Notes**: Covers the `toSql` serialisation path; pandas equivalent uses `DataFrame.to_sql()` with in-memory SQLite.
 
 ### Iteration 451 — 2026-08-09T19:10:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/31330835165)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_read_sql.ts/.py` — `readSql` auto-dispatch (query path + table path), 10k-row mock adapter, 30 iters
+- **Change**: Added `bench_read_sql.ts/.py` — `readSql` auto-dispatch, 10k-row mock adapter, 30 iters
 - **Metric**: 791 (previous best: 790, delta: +1)
 - **Commit**: d72d405
-- **Notes**: Covers the `readSql` dispatch function in `src/io/sql.ts`; pandas equivalent uses `pd.read_sql()` with an in-memory SQLite connection.
 
 ### Iters 447–450 — ✅ 787→790: holiday_calendar, join, api_types, read_sql_table
 
