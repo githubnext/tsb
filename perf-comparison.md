@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-11T08:05:00Z |
-| Iteration Count | 454 |
-| Best Metric | 794 |
+| Last Run | 2026-08-11T19:18:41Z |
+| Iteration Count | 455 |
+| Best Metric | 795 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 455 — 2026-08-11T19:18:41Z — [Run](https://github.com/githubnext/tsb/actions/runs/31526954579)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_resample_label_closed.ts/.py` — SeriesResampler with explicit `label` options (label="right" and label="left") on a 50k-row hourly series, 30 iters
+- **Metric**: 795 (previous best: 794, delta: +1)
+- **Commit**: dfb1903
+- **Notes**: Tests the non-default label path where keyToLabel must convert group keys (e.g. label="right" on hourly frequency whose default is "left").
 
 ### Iteration 454 — 2026-08-11T08:05:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/31468446578)
 
