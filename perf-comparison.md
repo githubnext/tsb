@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-10T19:17:26Z |
-| Iteration Count | 453 |
-| Best Metric | 793 |
+| Last Run | 2026-08-11T08:05:00Z |
+| Iteration Count | 454 |
+| Best Metric | 794 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -51,6 +51,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 454 — 2026-08-11T08:05:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/31468446578)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_eval_query_functions.ts/.py` — queryDataFrame/evalDataFrame with built-in functions: abs(), round(), lower(), isnull(), and `in` membership operator on a 50k-row DataFrame, 20 iters
+- **Metric**: 794 (previous best: 793, delta: +1)
+- **Commit**: 7b54cd6
+- **Notes**: Tests a distinct code path in the expression evaluator not covered by the existing bench_eval_query benchmark (which only used comparison and arithmetic operators).
+
 ### Iteration 453 — 2026-08-10T19:17:26Z — [Run](https://github.com/githubnext/tsb/actions/runs/31423078837)
 
 - **Status**: ✅ Accepted
@@ -58,21 +66,7 @@
 - **Metric**: 793 (previous best: 792, delta: +1)
 - **Commit**: a13b8e3
 
-### Iteration 452 — 2026-08-10T07:23:56Z — [Run](https://github.com/githubnext/tsb/actions/runs/31365513170)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_to_sql.ts/.py` — `toSql`/`DataFrame.to_sql` write benchmark, 10k-row DataFrame with mock insert adapter, 30 iters
-- **Metric**: 792 (previous best: 791, delta: +1)
-- **Commit**: efe5493
-
-### Iteration 451 — 2026-08-09T19:10:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/31330835165)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_read_sql.ts/.py` — `readSql` auto-dispatch, 10k-row mock adapter, 30 iters
-- **Metric**: 791 (previous best: 790, delta: +1)
-- **Commit**: d72d405
-
-### Iters 447–450 — ✅ 787→790: holiday_calendar, join, api_types, read_sql_table
+### Iters 447–453 — ✅ 787→793: holiday_calendar, join, api_types, read_sql_table, read_sql, to_sql, index_setops
 
 ### Iters 440–446 — ✅ 778→787: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet
 
