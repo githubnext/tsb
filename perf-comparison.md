@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-12T07:23:25Z |
-| Iteration Count | 456 |
-| Best Metric | 796 |
+| Last Run | 2026-08-12T19:18:54Z |
+| Iteration Count | 457 |
+| Best Metric | 797 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 457 — 2026-08-12T19:18:54Z — [Run](https://github.com/githubnext/tsb/actions/runs/31631782373)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_resample_agg_fn.ts/.py` — SeriesResampler.agg() with custom functions (75th-percentile and range per hourly bin) on 50k-row minute data, 30 iters
+- **Metric**: 797 (previous best: 796, delta: +1)
+- **Commit**: ff2a1b7
+- **Notes**: Covers the `ResampleAggFn` code path in `resampleSeries().agg(fn)` which was not exercised by any existing benchmark (all prior resample benchmarks used named aggregations).
 
 ### Iteration 456 — 2026-08-12T07:23:25Z — [Run](https://github.com/githubnext/tsb/actions/runs/31573572340)
 
