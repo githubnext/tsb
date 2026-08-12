@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-11T19:18:41Z |
-| Iteration Count | 455 |
-| Best Metric | 795 |
+| Last Run | 2026-08-12T07:23:25Z |
+| Iteration Count | 456 |
+| Best Metric | 796 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 456 — 2026-08-12T07:23:25Z — [Run](https://github.com/githubnext/tsb/actions/runs/31573572340)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_cut_qcut.ts/.py` — fixed-bin cut and quantile-based qcut on 100k-row data, 50 iters
+- **Metric**: 796 (previous best: 795, delta: +1)
+- **Commit**: 47467e8
+- **Notes**: `cut_qcut` was unbenchmarked; both TS and Python use identical 100k sinusoidal dataset with 10 bins.
 
 ### Iteration 455 — 2026-08-11T19:18:41Z — [Run](https://github.com/githubnext/tsb/actions/runs/31526954579)
 
