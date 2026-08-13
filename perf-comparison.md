@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-12T19:18:54Z |
-| Iteration Count | 457 |
-| Best Metric | 797 |
+| Last Run | 2026-08-13T07:23:54Z |
+| Iteration Count | 458 |
+| Best Metric | 798 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,10 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 458 — 2026-08-13T07:23:54Z — [Run](https://github.com/githubnext/tsb/actions/runs/31677401936)
+- **Status**: ✅ Accepted | **Metric**: 798 (+1) | **Commit**: 2fbbf0a
+- bench_style: DataFrame Styler API (highlightMax, highlightMin, format, backgroundGradient → toHtml) on 200-row DataFrame.
 
 ### Iteration 457 — 2026-08-12T19:18:54Z — [Run](https://github.com/githubnext/tsb/actions/runs/31631782373)
 - **Status**: ✅ Accepted | **Metric**: 797 (+1) | **Commit**: ff2a1b7
