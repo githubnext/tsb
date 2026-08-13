@@ -52,45 +52,12 @@
 ## 📊 Iteration History
 
 ### Iteration 457 — 2026-08-12T19:18:54Z — [Run](https://github.com/githubnext/tsb/actions/runs/31631782373)
+- **Status**: ✅ Accepted | **Metric**: 797 (+1) | **Commit**: ff2a1b7
+- bench_resample_agg_fn: SeriesResampler.agg() with custom functions on 50k-row data.
 
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_resample_agg_fn.ts/.py` — SeriesResampler.agg() with custom functions (75th-percentile and range per hourly bin) on 50k-row minute data, 30 iters
-- **Metric**: 797 (previous best: 796, delta: +1)
-- **Commit**: ff2a1b7
-- **Notes**: Covers the `ResampleAggFn` code path in `resampleSeries().agg(fn)` which was not exercised by any existing benchmark (all prior resample benchmarks used named aggregations).
+### Iters 453–456 — ✅ 793→796: bench_cut_qcut, bench_resample_label_closed, bench_eval_query_functions, bench_index_setops
 
-### Iteration 456 — 2026-08-12T07:23:25Z — [Run](https://github.com/githubnext/tsb/actions/runs/31573572340)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_cut_qcut.ts/.py` — fixed-bin cut and quantile-based qcut on 100k-row data, 50 iters
-- **Metric**: 796 (previous best: 795, delta: +1)
-- **Commit**: 47467e8
-- **Notes**: `cut_qcut` was unbenchmarked; both TS and Python use identical 100k sinusoidal dataset with 10 bins.
-
-### Iteration 455 — 2026-08-11T19:18:41Z — [Run](https://github.com/githubnext/tsb/actions/runs/31526954579)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_resample_label_closed.ts/.py` — SeriesResampler with explicit `label` options (label="right" and label="left") on a 50k-row hourly series, 30 iters
-- **Metric**: 795 (previous best: 794, delta: +1)
-- **Commit**: dfb1903
-- **Notes**: Tests the non-default label path where keyToLabel must convert group keys (e.g. label="right" on hourly frequency whose default is "left").
-
-### Iteration 454 — 2026-08-11T08:05:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/31468446578)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_eval_query_functions.ts/.py` — queryDataFrame/evalDataFrame with built-in functions: abs(), round(), lower(), isnull(), and `in` membership operator on a 50k-row DataFrame, 20 iters
-- **Metric**: 794 (previous best: 793, delta: +1)
-- **Commit**: 7b54cd6
-- **Notes**: Tests a distinct code path in the expression evaluator not covered by the existing bench_eval_query benchmark (which only used comparison and arithmetic operators).
-
-### Iteration 453 — 2026-08-10T19:17:26Z — [Run](https://github.com/githubnext/tsb/actions/runs/31423078837)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_index_setops.ts/.py` — Index.union/intersection/difference on two 10k-element integer indexes (50% overlap), 50 iters
-- **Metric**: 793 (previous best: 792, delta: +1)
-- **Commit**: a13b8e3
-
-### Iters 447–453 — ✅ 787→793: holiday_calendar, join, api_types, read_sql_table, read_sql, to_sql, index_setops
+### Iters 447–452 — ✅ 787→792: holiday_calendar, join, api_types, read_sql_table, read_sql, to_sql
 
 ### Iters 440–446 — ✅ 778→787: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet
 
