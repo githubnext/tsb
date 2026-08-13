@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-13T07:23:54Z |
-| Iteration Count | 458 |
-| Best Metric | 798 |
+| Last Run | 2026-08-13T19:19:42Z |
+| Iteration Count | 459 |
+| Best Metric | 799 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,10 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 459 — 2026-08-13T19:19:42Z — [Run](https://github.com/githubnext/tsb/actions/runs/31734998176)
+- **Status**: ✅ Accepted | **Metric**: 799 (+1) | **Commit**: b70653a
+- bench_regression: linregress + OLS (lstsq) on 10k-row dataset; pure-numpy Python equivalent.
 
 ### Iteration 458 — 2026-08-13T07:23:54Z — [Run](https://github.com/githubnext/tsb/actions/runs/31677401936)
 - **Status**: ✅ Accepted | **Metric**: 798 (+1) | **Commit**: 2fbbf0a
