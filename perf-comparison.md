@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-13T20:00:00Z |
-| Iteration Count | 460 |
-| Best Metric | 800 |
+| Last Run | 2026-08-14T13:22:15Z |
+| Iteration Count | 461 |
+| Best Metric | 801 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,10 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 461 — 2026-08-14T13:22:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/31804160800)
+- **Status**: ✅ Accepted | **Metric**: 801 (+1) | **Commit**: 98dcf89
+- bench_str_title: Series.str.title() titlecase conversion on 100k strings; pandas Series.str.title() equivalent.
 
 ### Iteration 460 — 2026-08-13T20:00:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/31779566673)
 - **Status**: ✅ Accepted | **Metric**: 800 (+1) | **Commit**: 9e0b94f
