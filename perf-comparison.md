@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-13T19:19:42Z |
-| Iteration Count | 459 |
-| Best Metric | 799 |
+| Last Run | 2026-08-13T20:00:00Z |
+| Iteration Count | 460 |
+| Best Metric | 800 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -50,6 +50,10 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 460 — 2026-08-13T20:00:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/31779566673)
+- **Status**: ✅ Accepted | **Metric**: 800 (+1) | **Commit**: 9e0b94f
+- bench_pca_transform: PCA.fitTransform, result.transform, result.inverseTransform on 1000×10→5 dataset; numpy SVD Python equivalent.
 
 ### Iteration 459 — 2026-08-13T19:19:42Z — [Run](https://github.com/githubnext/tsb/actions/runs/31734998176)
 - **Status**: ✅ Accepted | **Metric**: 799 (+1) | **Commit**: b70653a
