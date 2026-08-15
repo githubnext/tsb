@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-14T13:22:15Z |
-| Iteration Count | 461 |
-| Best Metric | 801 |
+| Last Run | 2026-08-15T01:45:06Z |
+| Iteration Count | 462 |
+| Best Metric | 802 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,10 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 462 — 2026-08-15T01:45:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/31856202878)
+- **Status**: ✅ Accepted | **Metric**: 802 (+1) | **Commit**: d19f908
+- bench_merge_asof_forward: mergeAsof with direction="forward" (smallest right key >= left key) on 10k-row DataFrames; only backward direction was previously covered.
 
 ### Iteration 461 — 2026-08-14T13:22:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/31804160800)
 - **Status**: ✅ Accepted | **Metric**: 801 (+1) | **Commit**: 98dcf89
