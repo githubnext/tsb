@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-15T01:45:06Z |
-| Iteration Count | 462 |
-| Best Metric | 802 |
+| Last Run | 2026-08-15T13:09:38Z |
+| Iteration Count | 463 |
+| Best Metric | 803 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,10 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 463 — 2026-08-15T13:09:38Z — [Run](https://github.com/githubnext/tsb/actions/runs/31886321783)
+- **Status**: ✅ Accepted | **Metric**: 803 (+1) | **Commit**: 80d2324
+- bench_fwf: readFwf vs pd.read_fwf — auto-infer column widths + explicit colspecs on 1000-row FWF text.
 
 ### Iteration 462 — 2026-08-15T01:45:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/31856202878)
 - **Status**: ✅ Accepted | **Metric**: 802 (+1) | **Commit**: d19f908
