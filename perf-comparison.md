@@ -51,48 +51,10 @@
 
 ## 📊 Iteration History
 
-### Iteration 465 — 2026-08-16T13:10:18Z — [Run](https://github.com/githubnext/tsb/actions/runs/31948913632)
-- **Status**: ✅ Accepted | **Metric**: 805 (+1) | **Commit**: ed7dc53
-- bench_elem_ops: seriesAbs, dataFrameAbs, seriesRound, dataFrameRound on 100k-row dataset; pandas Series.abs()/round() equivalents.
+### Iters 457–465 — ✅ 797→805: bench_resample_agg_fn, bench_style, bench_regression, bench_pca_transform, bench_str_title, bench_merge_asof_forward, bench_fwf, bench_tseries_offsets, bench_elem_ops
 
-### Iteration 464 — 2026-08-16T01:22:41Z — [Run](https://github.com/githubnext/tsb/actions/runs/31919325615)
-- **Status**: ✅ Accepted | **Metric**: 804 (+1) | **Commit**: 6b5ab0b
-- bench_tseries_offsets: QuarterEnd, QuarterBegin, BMonthEnd, BMonthBegin, BYearEnd, BYearBegin — apply/rollforward/rollback on 5k dates; first benchmarks for tseries/offsets.ts.
-
-### Iteration 463 — 2026-08-15T13:09:38Z — [Run](https://github.com/githubnext/tsb/actions/runs/31886321783)
-- **Status**: ✅ Accepted | **Metric**: 803 (+1) | **Commit**: 80d2324
-- bench_fwf: readFwf vs pd.read_fwf — auto-infer column widths + explicit colspecs on 1000-row FWF text.
-
-### Iteration 462 — 2026-08-15T01:45:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/31856202878)
-- **Status**: ✅ Accepted | **Metric**: 802 (+1) | **Commit**: d19f908
-- bench_merge_asof_forward: mergeAsof with direction="forward" (smallest right key >= left key) on 10k-row DataFrames; only backward direction was previously covered.
-
-### Iteration 461 — 2026-08-14T13:22:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/31804160800)
-- **Status**: ✅ Accepted | **Metric**: 801 (+1) | **Commit**: 98dcf89
-- bench_str_title: Series.str.title() titlecase conversion on 100k strings; pandas Series.str.title() equivalent.
-
-### Iteration 460 — 2026-08-13T20:00:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/31779566673)
-- **Status**: ✅ Accepted | **Metric**: 800 (+1) | **Commit**: 9e0b94f
-- bench_pca_transform: PCA.fitTransform, result.transform, result.inverseTransform on 1000×10→5 dataset; numpy SVD Python equivalent.
-
-### Iteration 459 — 2026-08-13T19:19:42Z — [Run](https://github.com/githubnext/tsb/actions/runs/31734998176)
-- **Status**: ✅ Accepted | **Metric**: 799 (+1) | **Commit**: b70653a
-- bench_regression: linregress + OLS (lstsq) on 10k-row dataset; pure-numpy Python equivalent.
-
-### Iteration 458 — 2026-08-13T07:23:54Z — [Run](https://github.com/githubnext/tsb/actions/runs/31677401936)
-- **Status**: ✅ Accepted | **Metric**: 798 (+1) | **Commit**: 2fbbf0a
-- bench_style: DataFrame Styler API (highlightMax, highlightMin, format, backgroundGradient → toHtml) on 200-row DataFrame.
-
-### Iteration 457 — 2026-08-12T19:18:54Z — [Run](https://github.com/githubnext/tsb/actions/runs/31631782373)
-- **Status**: ✅ Accepted | **Metric**: 797 (+1) | **Commit**: ff2a1b7
-- bench_resample_agg_fn: SeriesResampler.agg() with custom functions on 50k-row data.
-
-### Iters 453–456 — ✅ 793→796: bench_cut_qcut, bench_resample_label_closed, bench_eval_query_functions, bench_index_setops
-
-### Iters 447–452 — ✅ 787→792: holiday_calendar, join, api_types, read_sql_table, read_sql, to_sql
+### Iters 447–456 — ✅ 787→796: holiday_calendar, join, api_types, read_sql_table, read_sql, to_sql, bench_cut_qcut, bench_resample_label_closed, bench_eval_query_functions, bench_index_setops
 
 ### Iters 440–446 — ✅ 778→787: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet
 
-### Iters 428–439 — ✅ 766→778: polyval, holiday observances, stata, SparseArray, IntegerArray, applymap, string_accessor, clip_with_bounds, swaplevel_df, information_advanced, format_table
-
-### Iters 291–427 — ✅ 503→765: normalizedMI, entropy, gaussianKDE, array types, IO benchmarks, bootstrap, OLS, hypothesis_tests, mutualInfo, lreshape, linregress/polyfit, contingency, multivariate/PCA, pipe_apply, XML, flags, case_when, and many more.
+### Iters 291–439 — ✅ 503→778: polyval, holiday observances, stata, SparseArray, IntegerArray, applymap, string_accessor, many IO/stats/ml benchmarks.
