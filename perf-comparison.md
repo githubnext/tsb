@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-15T13:09:38Z |
-| Iteration Count | 463 |
-| Best Metric | 803 |
+| Last Run | 2026-08-16T01:22:41Z |
+| Iteration Count | 464 |
+| Best Metric | 804 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,10 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 464 — 2026-08-16T01:22:41Z — [Run](https://github.com/githubnext/tsb/actions/runs/31919325615)
+- **Status**: ✅ Accepted | **Metric**: 804 (+1) | **Commit**: 6b5ab0b
+- bench_tseries_offsets: QuarterEnd, QuarterBegin, BMonthEnd, BMonthBegin, BYearEnd, BYearBegin — apply/rollforward/rollback on 5k dates; first benchmarks for tseries/offsets.ts.
 
 ### Iteration 463 — 2026-08-15T13:09:38Z — [Run](https://github.com/githubnext/tsb/actions/runs/31886321783)
 - **Status**: ✅ Accepted | **Metric**: 803 (+1) | **Commit**: 80d2324
