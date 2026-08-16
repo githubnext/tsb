@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-16T01:22:41Z |
-| Iteration Count | 464 |
-| Best Metric | 804 |
+| Last Run | 2026-08-16T13:10:18Z |
+| Iteration Count | 465 |
+| Best Metric | 805 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,10 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 465 — 2026-08-16T13:10:18Z — [Run](https://github.com/githubnext/tsb/actions/runs/31948913632)
+- **Status**: ✅ Accepted | **Metric**: 805 (+1) | **Commit**: ed7dc53
+- bench_elem_ops: seriesAbs, dataFrameAbs, seriesRound, dataFrameRound on 100k-row dataset; pandas Series.abs()/round() equivalents.
 
 ### Iteration 464 — 2026-08-16T01:22:41Z — [Run](https://github.com/githubnext/tsb/actions/runs/31919325615)
 - **Status**: ✅ Accepted | **Metric**: 804 (+1) | **Commit**: 6b5ab0b
