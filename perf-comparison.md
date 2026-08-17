@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-17T01:22:35Z |
-| Iteration Count | 466 |
-| Best Metric | 806 |
+| Last Run | 2026-08-17T13:13:16Z |
+| Iteration Count | 467 |
+| Best Metric | 807 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 467 — 2026-08-17T13:13:16Z — [Run](https://github.com/githubnext/tsb/actions/runs/32033589601)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_kde` benchmarking gaussianKDE (fit, evaluate, integrate, logPdf); Python benchmark uses pure numpy Silverman KDE (no scipy) to match pages workflow constraints
+- **Metric**: 807 (previous best: 806, delta: +1)
+- **Commit**: 935afb3
+- **Notes**: KDE was the last major unbenchmarked stats module; pure-numpy implementation required since pages workflow only has pandas+numpy.
 
 ### Iteration 466 — 2026-08-17T01:22:35Z — [Run](https://github.com/githubnext/tsb/actions/runs/31984632889)
 
