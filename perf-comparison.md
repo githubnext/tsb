@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-16T13:10:18Z |
-| Iteration Count | 465 |
-| Best Metric | 805 |
+| Last Run | 2026-08-17T01:22:35Z |
+| Iteration Count | 466 |
+| Best Metric | 806 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 466 — 2026-08-17T01:22:35Z — [Run](https://github.com/githubnext/tsb/actions/runs/31984632889)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_information_divergence` benchmarking jsDivergence, jsDistance, crossEntropy, renyiEntropy, tsallisEntropy, jointEntropy, conditionalEntropy, variationOfInformation
+- **Metric**: 806 (previous best: 805, delta: +1)
+- **Commit**: 5990466
+- **Notes**: Completed coverage of all `src/stats/information.ts` exports; these divergence/entropy functions were the only remaining unbenchmarked information-theory functions.
 
 ### Iters 457–465 — ✅ 797→805: bench_resample_agg_fn, bench_style, bench_regression, bench_pca_transform, bench_str_title, bench_merge_asof_forward, bench_fwf, bench_tseries_offsets, bench_elem_ops
 
