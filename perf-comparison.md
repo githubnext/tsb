@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-17T13:13:16Z |
-| Iteration Count | 467 |
-| Best Metric | 807 |
+| Last Run | 2026-08-18T01:22:47Z |
+| Iteration Count | 468 |
+| Best Metric | 808 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -50,6 +50,14 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 468 — 2026-08-18T01:22:47Z — [Run](https://github.com/githubnext/tsb/actions/runs/32087829947)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_value_predicates` benchmarking isScalar, isListLike, isArrayLike, isDictLike, isIterator, isNumber, isBool, isFloat, isInteger, isMissing, isHashable, isDate
+- **Metric**: 808 (previous best: 807, delta: +1)
+- **Commit**: ba8f1ae
+- **Notes**: Value-level predicates from api_types were the only missing coverage for the pandas.api.types namespace; dtype predicates were already benchmarked.
 
 ### Iteration 467 — 2026-08-17T13:13:16Z — [Run](https://github.com/githubnext/tsb/actions/runs/32033589601)
 
