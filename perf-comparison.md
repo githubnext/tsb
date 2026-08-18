@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-18T01:22:47Z |
-| Iteration Count | 468 |
-| Best Metric | 808 |
+| Last Run | 2026-08-18T13:14:06Z |
+| Iteration Count | 469 |
+| Best Metric | 809 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -40,6 +40,7 @@
 - `join`: `join(left, right, { how: "left" })` from `src/merge/join.ts`.
 - `readSql` dispatches: query-like → `readSqlQuery`; table name → `readSqlTable`.
 - Index.union/intersection/difference are distinct from symmetricDifference.
+- WASM-accelerated functions (searchsortedAccelerated etc.) live in `src/wasm/index.ts`, not `src/index.ts` — import directly from `../../src/wasm/index.ts`.
 
 ## 🚧 Foreclosed Avenues
 
@@ -51,34 +52,15 @@
 
 ## 📊 Iteration History
 
-### Iteration 468 — 2026-08-18T01:22:47Z — [Run](https://github.com/githubnext/tsb/actions/runs/32087829947)
+### Iteration 469 — 2026-08-18T13:14:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/32140867086)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_value_predicates` benchmarking isScalar, isListLike, isArrayLike, isDictLike, isIterator, isNumber, isBool, isFloat, isInteger, isMissing, isHashable, isDate
-- **Metric**: 808 (previous best: 807, delta: +1)
-- **Commit**: ba8f1ae
-- **Notes**: Value-level predicates from api_types were the only missing coverage for the pandas.api.types namespace; dtype predicates were already benchmarked.
+- **Change**: Added `bench_wasm_accelerated` (searchsortedAccelerated, searchsortedManyAccelerated, argsortScalarsAccelerated from `src/wasm/index.ts` vs numpy)
+- **Metric**: 809 (previous best: 808, delta: +1)
+- **Commit**: d543b0c
 
-### Iteration 467 — 2026-08-17T13:13:16Z — [Run](https://github.com/githubnext/tsb/actions/runs/32033589601)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_kde` benchmarking gaussianKDE (fit, evaluate, integrate, logPdf); Python benchmark uses pure numpy Silverman KDE (no scipy) to match pages workflow constraints
-- **Metric**: 807 (previous best: 806, delta: +1)
-- **Commit**: 935afb3
-- **Notes**: KDE was the last major unbenchmarked stats module; pure-numpy implementation required since pages workflow only has pandas+numpy.
-
-### Iteration 466 — 2026-08-17T01:22:35Z — [Run](https://github.com/githubnext/tsb/actions/runs/31984632889)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_information_divergence` benchmarking jsDivergence, jsDistance, crossEntropy, renyiEntropy, tsallisEntropy, jointEntropy, conditionalEntropy, variationOfInformation
-- **Metric**: 806 (previous best: 805, delta: +1)
-- **Commit**: 5990466
-- **Notes**: Completed coverage of all `src/stats/information.ts` exports; these divergence/entropy functions were the only remaining unbenchmarked information-theory functions.
+### Iters 466–468 — ✅ 806→808: bench_information_divergence, bench_kde (pure-numpy), bench_value_predicates
 
 ### Iters 457–465 — ✅ 797→805: bench_resample_agg_fn, bench_style, bench_regression, bench_pca_transform, bench_str_title, bench_merge_asof_forward, bench_fwf, bench_tseries_offsets, bench_elem_ops
 
-### Iters 447–456 — ✅ 787→796: holiday_calendar, join, api_types, read_sql_table, read_sql, to_sql, bench_cut_qcut, bench_resample_label_closed, bench_eval_query_functions, bench_index_setops
-
-### Iters 440–446 — ✅ 778→787: masked_array, chi2/kstest, numeric_extended, sort_index_columns, datetime_tz, hdf, parquet
-
-### Iters 291–439 — ✅ 503→778: polyval, holiday observances, stata, SparseArray, IntegerArray, applymap, string_accessor, many IO/stats/ml benchmarks.
+### Iters 291–456 — ✅ 503→796: holiday_calendar, join, api_types, read_sql, to_sql, cut_qcut, eval_query, index_setops, masked_array, numeric_extended, datetime_tz, hdf, parquet, polyval, stata, SparseArray, IntegerArray, applymap, string_accessor, many IO/stats/ml benchmarks.
