@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-19T01:22:35Z |
-| Iteration Count | 470 |
-| Best Metric | 810 |
+| Last Run | 2026-08-19T13:14:31Z |
+| Iteration Count | 471 |
+| Best Metric | 811 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -41,6 +41,7 @@
 - `readSql` dispatches: query-like → `readSqlQuery`; table name → `readSqlTable`.
 - Index.union/intersection/difference are distinct from symmetricDifference.
 - WASM-accelerated functions (searchsortedAccelerated etc.) live in `src/wasm/index.ts`, not `src/index.ts` — import directly from `../../src/wasm/index.ts`.
+- `nuniqueSeries`/`nuniqueDataFrame` import from `../../src/stats/index.js`.
 
 ## 🚧 Foreclosed Avenues
 
@@ -48,9 +49,16 @@
 
 ## 🔭 Future Directions
 
-- Explore remaining tsb functions not yet benchmarked.
+- Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 471 — 2026-08-19T13:14:31Z — [Run](https://github.com/githubnext/tsb/actions/runs/32256666621)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_nunique` — nuniqueSeries/nuniqueDataFrame (numeric + string Series, 4-col DataFrame, 100k rows, 1000 distinct values, 50 iters) vs pandas Series.nunique()/DataFrame.nunique()
+- **Metric**: 811 (previous best: 810, delta: +1)
+- **Commit**: aa5bd50
 
 ### Iteration 470 — 2026-08-19T01:22:35Z — [Run](https://github.com/githubnext/tsb/actions/runs/32204535885)
 
