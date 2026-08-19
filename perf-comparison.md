@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-18T13:14:06Z |
-| Iteration Count | 469 |
-| Best Metric | 809 |
+| Last Run | 2026-08-19T01:22:35Z |
+| Iteration Count | 470 |
+| Best Metric | 810 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -51,6 +51,13 @@
 - Explore remaining tsb functions not yet benchmarked.
 
 ## 📊 Iteration History
+
+### Iteration 470 — 2026-08-19T01:22:35Z — [Run](https://github.com/githubnext/tsb/actions/runs/32204535885)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_compare_dataframe` — dataFrameEq/Ne/Lt/Gt/Le/Ge vs scalar and DataFrame (10k rows, 4 cols, 100 iters)
+- **Metric**: 810 (previous best: 809, delta: +1)
+- **Commit**: d81c690
 
 ### Iteration 469 — 2026-08-18T13:14:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/32140867086)
 
