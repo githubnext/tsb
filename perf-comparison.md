@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-20T02:10:00Z |
-| Iteration Count | 473 |
-| Best Metric | 813 |
+| Last Run | 2026-08-20T19:11:07Z |
+| Iteration Count | 474 |
+| Best Metric | 814 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -52,6 +52,13 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 474 — 2026-08-20T19:11:07Z — [Run](https://github.com/githubnext/tsb/actions/runs/32406958975)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_js_divergence` — jsDivergence, jsDistance, crossEntropy, conditionalEntropy (N=1000) vs numpy equivalents
+- **Metric**: 814 (previous best: 813, delta: +1)
+- **Commit**: 1306df54
 
 ### Iteration 473 — 2026-08-20T02:10:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/32372895465)
 
