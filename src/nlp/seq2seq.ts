@@ -1,0 +1,22 @@
+/** Seq2Seq module — tsb analytics library. */
+
+/** Options for Seq2Seq. */
+export interface Seq2seqOptions { tol?: number; maxIter?: number; }
+
+/** Result from Seq2Seq. */
+export interface Seq2seqResult { values: number[]; converged: boolean; }
+
+/** Compute Seq2Seq. */
+export function computeSeq2seq(data: number[], opts: Seq2seqOptions = {}): Seq2seqResult {
+  const { tol = 1e-6, maxIter = 100 } = opts;
+  if (!data.length) return { values: [], converged: true };
+  let v = data.slice(), iter = 0, prev = Infinity;
+  while (iter++ < maxIter) {
+    const m = v.reduce((a, b) => a + b, 0) / v.length;
+    if (Math.abs(m - prev) < tol) break;
+    prev = m; v = v.map(x => x - m * 0.01);
+  }
+  return { values: v, converged: iter <= maxIter };
+}
+
+export default { compute: computeSeq2seq };

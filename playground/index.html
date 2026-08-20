@@ -601,6 +601,56 @@
           <p>Shannon entropy, KL divergence, Jensen-Shannon divergence/distance, cross-entropy, mutual information, conditional entropy, normalised MI, variation of information, joint entropy, Rényi entropy, and Tsallis entropy. Mirrors <code>scipy.stats.entropy</code> and related utilities.</p>
           <div class="status done">✅ Complete</div>
         </div>
+        <div class="feature-card">
+          <h3><a href="signal.html" style="color: var(--accent); text-decoration: none;">📡 Signal Processing — FFT, STFT, Welch PSD</a></h3>
+          <p>FFT/IFFT/RFFT (Cooley-Tukey radix-2), <code>fftFreq</code>, <code>fftshift</code>/<code>ifftshift</code>, 8 window functions (<code>getWindow</code>), Short-Time Fourier Transform (<code>stft</code>/<code>istft</code> with overlap-add), Welch power spectral density, and periodogram. Mirrors <code>numpy.fft</code> and <code>scipy.signal</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="filters.html" style="color: var(--accent); text-decoration: none;">🎛️ Digital Filters — FIR, Butterworth IIR</a></h3>
+          <p>FIR filter design via windowed-sinc (<code>firwin</code>), Butterworth IIR (<code>butter</code>), frequency response (<code>freqz</code>, <code>sosfreqz</code>), and filter application: <code>lfilter</code> (causal), <code>filtfilt</code> (zero-phase), <code>sosfilt</code>, <code>sosfiltfilt</code>. Mirrors <code>scipy.signal</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="orc.html" style="color: var(--accent); text-decoration: none;">🗂️ ORC Format I/O — readOrc / toOrc</a></h3>
+          <p>Apache ORC (Optimized Row Columnar) file format reader and writer. Supports BOOLEAN, INT/LONG, FLOAT/DOUBLE, STRING columns with NONE compression and RLE v1 / direct encoding. Mirrors <code>pandas.read_orc()</code> and <code>DataFrame.to_orc()</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="acf_pacf.html" style="color: var(--accent); text-decoration: none;">📈 ACF / PACF &amp; Portmanteau Tests</a></h3>
+          <p><code>autocorr</code>, <code>acf</code> (Bartlett CI), <code>pacf</code> (Levinson-Durbin), <code>ccf</code>, <code>durbinWatson</code>, Ljung-Box and Box-Pierce portmanteau tests. Mirrors <code>statsmodels.tsa.stattools</code> and <code>pd.Series.autocorr</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="arima.html" style="color: var(--accent); text-decoration: none;">📉 ARIMA(p,d,q) Time-Series Models</a></h3>
+          <p><code>ARIMAModel</code> and <code>fitArima</code> — Hannan-Rissanen two-step estimation, multi-step forecasting, prediction intervals, AIC/BIC. Mirrors <code>statsmodels.tsa.arima.model.ARIMA</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="kalman.html" style="color: var(--accent); text-decoration: none;">🔭 Kalman Filter &amp; RTS Smoother</a></h3>
+          <p><code>KalmanFilter</code> — linear Gaussian state-space models with forward Kalman filter and backward RTS smoother. Factory helpers <code>localLevel</code>, <code>localLinearTrend</code>. Missing observations handled transparently.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3>📦 Apache Avro OCF I/O — readAvro / toAvro</h3>
+          <p><code>readAvro</code> and <code>toAvro</code> — Apache Avro Object Container File reader and writer. Supports all Avro primitives, arrays, maps, unions, and records. Zigzag varint encoding. Mirrors <code>pandas.read_avro()</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="ets.html" style="color: var(--accent); text-decoration: none;">📊 Exponential Smoothing — ETS / Holt-Winters</a></h3>
+          <p><code>SimpleExpSmoothing</code>, <code>Holt</code>, and <code>ExponentialSmoothing</code> — SES, Holt linear trend, and full Holt-Winters with additive/multiplicative seasonal components. Nelder-Mead parameter optimisation, AIC/BIC/AICc, prediction intervals. Mirrors <code>statsmodels.tsa.holtwinters.ExponentialSmoothing</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="dlm.html" style="color: var(--accent); text-decoration: none;">🔲 Dynamic Linear Model (DLM)</a></h3>
+          <p><code>DLM</code> — West &amp; Harrison state-space framework. Local-level, local-linear-trend, polynomial trend, Fourier seasonal components, free combination via <code>combineDLMs</code>. Kalman filter, RTS smoother, h-step forecasting, MLE fitting, discount-factor model. Mirrors the R <code>dlm</code> package.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="hmm.html" style="color: var(--accent); text-decoration: none;">🔮 Hidden Markov Model (HMM)</a></h3>
+          <p><code>GaussianHMM</code>, <code>MultinomialHMM</code> — Baum-Welch EM parameter estimation, Viterbi decoding, forward-backward log-space algorithm. Regime detection, sequence labeling. Mirrors <code>hmmlearn</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
       <div class="features-grid">
         <div class="feature-card">

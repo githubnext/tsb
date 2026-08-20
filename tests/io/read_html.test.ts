@@ -55,7 +55,7 @@ describe("readHtml – basic", () => {
   test("values are numeric by default", () => {
     const html = simpleTable(["n"], [["42"], ["3.14"]]);
     const [df] = readHtml(html);
-    const vals = df!.col("n").toArray();
+    const vals = df?.col("n").toArray();
     expect(vals[0]).toBe(42);
     expect(vals[1]).toBeCloseTo(3.14);
   });
@@ -87,7 +87,7 @@ describe("readHtml – header", () => {
       <tr><td>1</td><td>2</td><td>3</td></tr>
     </table>`;
     const [df] = readHtml(html);
-    const cols = df!.columns.toArray();
+    const cols = df?.columns.toArray();
     expect(cols[0]).toBe("x");
     expect(cols[1]).toBe("x.1");
     expect(cols[2]).toBe("y");
@@ -226,7 +226,7 @@ describe("readHtml – HTML entities", () => {
       <tr><td>hello&nbsp;world</td></tr>
     </table>`;
     const [df] = readHtml(html, { converters: false });
-    const vals = df!.col("k").toArray();
+    const vals = df?.col("k").toArray();
     expect(vals[0]).toBe("a & b");
     expect(vals[1]).toBe("5 < 10");
     expect(vals[2]).toBe("hello world");
@@ -305,14 +305,14 @@ describe("readHtml – property tests", () => {
           ),
         ),
         (rows) => {
-          const ncols = rows[0]!.length;
+          const ncols = rows[0]?.length;
           const headers = Array.from({ length: ncols }, (_, i) => `col${i}`);
           const strRows = rows.map((r) => r.map(String));
           const html = simpleTable(headers, strRows);
           const [df] = readHtml(html);
           const flatIn = rows.flat();
           const flatOut = (df?.toRecords() ?? []).flatMap((record) =>
-            rows[0]!.map((_, ci) => Number(record[headers[ci]!])),
+            rows[0]?.map((_, ci) => Number(record[headers[ci]!])),
           );
           // same length
           if (flatIn.length !== flatOut.length) {

@@ -925,6 +925,10 @@ export { toOffset, inferFreq, FREQ_ALIASES } from "./tseries/frequencies.ts";
 export { readSas } from "./io/read_sas.ts";
 export type { ReadSasOptions } from "./io/read_sas.ts";
 
+// io.orc — Apache ORC file format read/write
+export { readOrc, toOrc } from "./io/orc.ts";
+export type { ReadOrcOptions, ToOrcOptions } from "./io/orc.ts";
+
 // pd.arrays.SparseArray / pd.SparseDtype — sparse storage for arrays
 // with many repeated (fill) values
 export { SparseArray, SparseDtype } from "./core/sparse.ts";
@@ -1008,3 +1012,401 @@ export {
   tsallisEntropy,
 } from "./stats/information.ts";
 export type { PMF, NMIMethod } from "./stats/information.ts";
+
+// signal processing — FFT, windows, STFT, Welch PSD, periodogram
+export {
+  complex,
+  cAbs,
+  cArg,
+  fft,
+  ifft,
+  rfft,
+  irfft,
+  fftFreq,
+  rfftFreq,
+  fftshift,
+  ifftshift,
+  rectangularWindow,
+  bartlettWindow,
+  hannWindow,
+  hammingWindow,
+  blackmanWindow,
+  blackmanHarrisWindow,
+  flatTopWindow,
+  kaiserWindow,
+  getWindow,
+  stft,
+  istft,
+  welch,
+  periodogram,
+} from "./stats/signal.ts";
+export type {
+  Complex,
+  WindowName,
+  STFTOptions,
+  STFTResult,
+  ISTFTOptions,
+  WelchOptions,
+  PSDResult,
+  PeriodogramOptions,
+} from "./stats/signal.ts";
+
+// digital filters — FIR/IIR design and application (mirrors scipy.signal)
+export {
+  firwin,
+  freqz,
+  sosfreqz,
+  lfilter,
+  filtfilt,
+  sosfilt,
+  sosfiltfilt,
+  butter,
+} from "./stats/filters.ts";
+export type {
+  FirwinOptions,
+  FreqzResult,
+  SOSSection,
+  ButterResult,
+  FilterType,
+} from "./stats/filters.ts";
+
+// ACF/PACF — autocorrelation, partial autocorrelation, portmanteau tests
+export {
+  autocorr,
+  acf,
+  pacf,
+  ccf,
+  durbinWatson,
+  ljungBox,
+  boxPierce,
+} from "./stats/acf_pacf.ts";
+export type {
+  ACFResult,
+  PACFResult,
+  PortmanteauResult,
+  ACFOptions,
+  PACFOptions,
+  CCFOptions,
+  PortmanteauOptions,
+} from "./stats/acf_pacf.ts";
+
+// ARIMA — ARIMA(p,d,q) time-series model (Hannan-Rissanen, forecast CIs)
+export { ARIMAModel, fitArima } from "./stats/arima.ts";
+export type {
+  ARIMAOptions,
+  ARIMAFitResult,
+  ARIMAForecastResult,
+} from "./stats/arima.ts";
+
+// read_avro / toAvro — Apache Avro OCF I/O for DataFrame
+export { readAvro, toAvro } from "./io/read_avro.ts";
+export type {
+  ReadAvroOptions,
+  ToAvroOptions,
+} from "./io/read_avro.ts";
+
+// Kalman filter & RTS smoother — linear Gaussian state-space model
+export {
+  KalmanFilter,
+  StateSpaceModel,
+  kalmanFilter1D,
+  kalmanSmooth1D,
+  extractScalarMeans,
+  extractScalarVariances,
+  filteredPredictionInterval,
+} from "./stats/kalman.ts";
+export type {
+  KalmanFilterOptions,
+  LocalLevelOptions,
+  LocalLinearTrendOptions,
+  KalmanFilterResult,
+  KalmanSmootherResult,
+} from "./stats/kalman.ts";
+
+// ETS — Exponential Smoothing / Holt-Winters (Simple, Holt, full Holt-Winters)
+export {
+  SimpleExpSmoothing,
+  Holt,
+  ExponentialSmoothing,
+  simpleExpSmoothing,
+  holt,
+  fitEts,
+} from "./stats/ets.ts";
+export type {
+  ETSTrend,
+  ETSSeasonal,
+  ETSInit,
+  SESOptions,
+  SESFitResult,
+  HoltOptions,
+  HoltFitResult,
+  ExponentialSmoothingOptions,
+  ExponentialSmoothingFitResult,
+  ETSForecastResult,
+} from "./stats/ets.ts";
+
+export {
+  DLM,
+  buildLocalLevel,
+  buildLocalLinearTrend,
+  buildPolynomial,
+  buildFourier,
+  buildRegression,
+  combineDLMs,
+} from "./stats/dlm.ts";
+export type {
+  DLMSpec,
+  DLMOptions,
+  DLMFilterStep,
+  DLMResult,
+  DLMSmootherResult,
+  DLMForecastResult,
+} from "./stats/dlm.ts";
+export {
+  GaussianHMM,
+  MultinomialHMM,
+  fitGaussianHMM,
+  hmmViterbi,
+} from "./stats/hmm.ts";
+export type {
+  GaussianHMMParams,
+  GaussianHMMFit,
+  MultinomialHMMParams,
+  MultinomialHMMFit,
+} from "./stats/hmm.ts";
+export {
+  simulateBrownianMotion,
+  simulateGeometricBrownianMotion,
+  simulateOrnsteinUhlenbeck,
+  fitOrnsteinUhlenbeck,
+  simulatePoissonProcess,
+  poissonCounts,
+  simulateRandomWalk,
+  simulateMarkovChain,
+  stationaryDistribution,
+} from "./stats/stochastic_processes.ts";
+export type {
+  BrownianMotionParams,
+  OUParams,
+  RandomWalkParams,
+  ProcessPath,
+} from "./stats/stochastic_processes.ts";
+export {
+  createGraph,
+  addEdge,
+  graphFromEdges,
+  degreeCentrality,
+  directedDegrees,
+  bfsDistances,
+  dijkstra,
+  betweennessCentrality,
+  clusteringCoefficient,
+  globalClusteringCoefficient,
+  connectedComponents,
+  pageRank,
+  hits,
+} from "./stats/network_stats.ts";
+export type { Graph } from "./stats/network_stats.ts";
+export {
+  euclideanDistance,
+  pairwiseDistances,
+  empiricalVariogram,
+  sphericalVariogram,
+  exponentialVariogram,
+  gaussianVariogram,
+  ordinaryKriging,
+  moransI,
+  ripleysK,
+  ripleysL,
+  kde2d,
+  distanceWeights,
+} from "./stats/spatial_stats.ts";
+export type {
+  SpatialPoint,
+  VariogramPoint,
+  VariogramModelParams,
+} from "./stats/spatial_stats.ts";
+export {
+  normalCdf,
+  normalQuantile,
+  gaussianCopulaCdf,
+  gaussianCopulaDensity,
+  sampleGaussianCopula,
+  claytonCopulaCdf,
+  sampleClaytonCopula,
+  gumbelCopulaCdf,
+  frankCopulaCdf,
+  sampleFrankCopula,
+  empiricalCopula,
+  kendallTau,
+  tauToGaussianRho,
+  tauToClaytonTheta,
+  tauToGumbelTheta,
+} from "./stats/copulas.ts";
+export {
+  gevPdf,
+  gevCdf,
+  gevQuantile,
+  gevReturnLevel,
+  fitGEV,
+  gpdPdf,
+  gpdCdf,
+  gpdQuantile,
+  fitGPD,
+  extractExceedances,
+  gpdReturnLevel,
+  gumbelPdf,
+  gumbelCdf,
+  gumbelQuantile,
+} from "./stats/extreme_value.ts";
+export type {
+  GEVParams,
+  GPDParams,
+  GumbelParams,
+} from "./stats/extreme_value.ts";
+
+// ─── ML ───────────────────────────────────────────────────────────────────────
+export {
+  computeNoiseSchedule,
+  addNoise,
+  ddimStep,
+  ddimTimesteps,
+  snrAtTimestep,
+} from "./ml/ddim.ts";
+export type { NoiseSchedule, DDIMConfig, NoiseScheduleValues } from "./ml/ddim.ts";
+
+export {
+  sparsemax,
+  glu,
+  batchNormInfer,
+  featureTransformer,
+  attentiveTransformer,
+  tabnetStep,
+  aggregateSteps,
+  featureImportance,
+} from "./ml/tabnet.ts";
+export type { BatchNormParams, FeatureTransformerWeights, AttentiveTransformerWeights, TabNetStepResult } from "./ml/tabnet.ts";
+
+export {
+  scaledDotProductAttention,
+  layerNorm,
+  gelu,
+  feedForward,
+  tokenizeNumerical,
+  tokenizeCategorical,
+  addResidual,
+  extractCLSToken,
+  linearHead,
+  softmax,
+} from "./ml/ft_transformer.ts";
+export type { AttentionOutput } from "./ml/ft_transformer.ts";
+
+export {
+  viterbiDecode,
+  forwardLogZ,
+  sequenceScore,
+  crfNegLogLikelihood,
+  logSumExp,
+} from "./ml/crf.ts";
+export type { CRFParams, ViterbiResult } from "./ml/crf.ts";
+
+export {
+  rnnCell,
+  encode,
+  bahdanauAttention,
+  decoderStep,
+  greedyDecode,
+  sigmoid,
+  tanh,
+} from "./ml/seq2seq.ts";
+export type { RNNCellWeights, BahdanauWeights, DecoderWeights, DecoderStepResult } from "./ml/seq2seq.ts";
+
+export {
+  rbfKernel,
+  maternKernel52,
+  kernelMatrix,
+  cholesky,
+  gpPredict,
+  normalCDF,
+  normalPDF,
+  expectedImprovement,
+  probabilityOfImprovement,
+  upperConfidenceBound,
+  initBOState,
+  suggestNext,
+} from "./ml/bayesian_opt.ts";
+export type { BOState } from "./ml/bayesian_opt.ts";
+
+export {
+  karrasNoiseLevels,
+  cSkip,
+  cOut,
+  cIn,
+  cNoise,
+  consistencyFunction,
+  preconditionInput,
+  pseudoHuberLoss,
+  consistencyTrainingLoss,
+  addGaussianNoise,
+  consistencySampleOneStep,
+  consistencySampleMultiStep,
+  updateEMAWeights,
+  adaptiveEMADecay,
+  DEFAULT_CONSISTENCY_CONFIG,
+} from "./ml/consistency_models.ts";
+export type { ConsistencyConfig } from "./ml/consistency_models.ts";
+
+export {
+  buildTree,
+  treePredict,
+  treePredictOne,
+  fitGBM,
+  predictGBM,
+  mse,
+  r2Score,
+  mseGradient,
+} from "./ml/gradient_boosting.ts";
+export type { TreeNode, TreeParams, GBMEnsemble } from "./ml/gradient_boosting.ts";
+
+export {
+  computeKernel,
+  svmDecision,
+  svmPredict,
+  fitSVM,
+  svmAccuracy,
+} from "./ml/svm.ts";
+export type { KernelType, SVMKernelConfig, SVMModel } from "./ml/svm.ts";
+
+export {
+  multiHeadAttention,
+  sinusoidalPositionalEncoding,
+  addPositionalEncoding,
+  causalMask,
+  applyRoPE,
+} from "./ml/attention.ts";
+export type { MHAConfig, MHAWeights } from "./ml/attention.ts";
+
+export {
+  fitRandomForest,
+  predictRandomForest,
+  oobError,
+  LCGRandom,
+} from "./ml/random_forest.ts";
+export type { RandomForestConfig, RandomForestModel } from "./ml/random_forest.ts";
+
+export {
+  denseForward,
+  denseBackward,
+  relu,
+  reluGrad,
+  sigmoidActivation,
+  sigmoidGrad,
+  softmaxCrossEntropy,
+  mseLoss,
+  initAdam,
+  adamStep,
+  heInit,
+  dropoutMask,
+  applyDropout,
+} from "./ml/neural_network.ts";
+export type { AdamState } from "./ml/neural_network.ts";

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Signal Processing</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+
+    /* ── Loading overlay ──────────────────────────────── */
+    #playground-loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      gap: 1rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #playground-status { color: #8b949e; font-size: 0.95rem; }
+
+    /* ── Section cards ────────────────────────────────── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section p { margin-bottom: 0.75rem; }
+
+    /* ── Playground block ─────────────────────────────── */
+    .playground-block {
+      margin-top: 0.75rem;
+    }
+    .playground-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 0.5rem 0.5rem 0 0;
+      padding: 0.4rem 0.75rem;
+    }
+    .playground-label {
+      font-size: 0.75rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .playground-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .playground-actions button {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: system-ui, sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .playground-actions button:hover:not(:disabled) {
+      background: rgba(88, 166, 255, 0.1);
+      border-color: var(--accent);
+    }
+    .playground-actions button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .playground-run { font-weight: 600; }
+
+    /* ── Editor textarea ──────────────────────────────── */
+    .playground-editor {
+      display: block;
+      width: 100%;
+      min-height: 80px;
+      background: #0d1117;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-bottom: none;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      line-height: 1.55;
+      resize: vertical;
+      outline: none;
+      tab-size: 2;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .playground-editor:focus {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    /* ── Output area ──────────────────────────────────── */
+    .playground-output {
+      background: #1c2333;
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.5rem 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #8b949e;
+      white-space: pre-wrap;
+      min-height: 2rem;
+      word-break: break-word;
+    }
+    .playground-output.active {
+      color: var(--green);
+      border-color: var(--green);
+    }
+    .playground-output.error {
+      color: var(--red);
+      border-color: var(--red);
+    }
+    .playground-hint {
+      font-size: 0.75rem;
+      color: #484f58;
+      margin-top: 0.35rem;
+      text-align: right;
+    }
+
+    /* ── Footer ───────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: #8b949e;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    /* ── API table ────────────────────────────────────── */
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 1rem; text-align: left; }
+    th { background: var(--surface); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <!-- Loading overlay (hidden once TS compiler + tsb are ready) -->
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <div id="playground-status">Initializing playground…</div>
+  </div>
+
+  <a class="back" href="index.html">← Back to roadmap</a>
+  <h1>📡 Signal Processing — Interactive Playground</h1>
+  <p>
+    FFT, windows, STFT, Welch PSD, and periodogram — mirrors <code>numpy.fft</code>
+    and <code>scipy.signal</code>.<br>
+    <strong style="color: var(--text);">Edit any code block below and press ▶ Run
+    (or Ctrl+Enter) to execute it live in your browser.</strong>
+  </p>
+
+  <!-- ── 1. Basic FFT ─────────────────────────────────── -->
+  <div class="section">
+    <h2>1. Basic FFT of a sinusoidal signal</h2>
+    <p>Compute a 32 Hz sine wave's FFT and identify the peak frequency bin.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { fft, rfftFreq, cAbs } from "tsb";
+
+const fs = 256;  // sampling rate (Hz)
+const f0 = 32;   // signal frequency (Hz)
+const n = 256;
+
+const x = Array.from({ length: n }, (_, i) =>
+  Math.sin(2 * Math.PI * f0 * i / fs),
+);
+
+const X = fft(x);
+const freqs = rfftFreq(X.length, 1 / fs);
+const mags = X.slice(0, freqs.length).map(cAbs);
+const peakIdx = mags.indexOf(Math.max(...mags));
+console.log(`Peak frequency: ${freqs[peakIdx].toFixed(1)} Hz`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+
+fs, f0, n = 256, 32, 256
+x = np.sin(2 * np.pi * f0 * np.arange(n) / fs)
+
+X = np.fft.fft(x)
+freqs = np.fft.rfftfreq(len(X), d=1/fs)
+mags = np.abs(X[:len(freqs)])
+peak_idx = np.argmax(mags)
+print(f"Peak frequency: {freqs[peak_idx]:.1f} Hz")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 2. Parseval's theorem ─────────────────────────── -->
+  <div class="section">
+    <h2>2. Parseval's theorem — energy preservation</h2>
+    <p>The total energy is preserved between time and frequency domains.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { fft } from "tsb";
+
+const x = [1, 2, 3, 4, 5, 6, 7, 8];
+const X = fft(x);
+const N = X.length;
+
+const timePower = x.reduce((s, v) => s + v * v, 0);
+const freqPower = X.reduce((s, c) => s + c.re * c.re + c.im * c.im, 0) / N;
+console.log(`Time-domain power: ${timePower}`);
+console.log(`Freq-domain power: ${freqPower.toFixed(4)}`);
+// Both should equal 204</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+
+x = np.array([1, 2, 3, 4, 5, 6, 7, 8], dtype=float)
+X = np.fft.fft(x)
+N = len(X)
+
+time_power = np.sum(x ** 2)
+freq_power = np.sum(np.abs(X) ** 2) / N
+print(f"Time-domain power: {time_power}")
+print(f"Freq-domain power: {freq_power:.4f}")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 3. RFFT round-trip ────────────────────────────── -->
+  <div class="section">
+    <h2>3. RFFT round-trip</h2>
+    <p>Real-input FFT produces a half-spectrum; <code>irfft</code> reconstructs the original signal.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { rfft, irfft, fft } from "tsb";
+
+const x = [1, 0, -1, 0, 1, 0, -1, 0];
+const X = rfft(x);
+const full = fft(x);
+console.log(`rfft output length: ${X.length}  (= ${full.length}/2 + 1)`);
+
+const xBack = irfft(X, full.length);
+const err = Math.max(...x.map((v, i) => Math.abs(v - (xBack[i] ?? 0))));
+console.log("Round-trip error:", err.toExponential(2));</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+
+x = np.array([1, 0, -1, 0, 1, 0, -1, 0], dtype=float)
+X = np.fft.rfft(x)
+full = np.fft.fft(x)
+print(f"rfft output length: {len(X)}  (= {len(full)}/2 + 1)")
+
+x_back = np.fft.irfft(X, n=len(full))
+err = np.max(np.abs(x - x_back))
+print(f"Round-trip error: {err:.2e}")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 4. Window functions ───────────────────────────── -->
+  <div class="section">
+    <h2>4. Window functions</h2>
+    <p>Named windows reduce spectral leakage. Use <code>getWindow(name, n)</code> to obtain any built-in window.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { getWindow, kaiserWindow } from "tsb";
+
+const n = 16;
+const names = ["rectangular", "bartlett", "hann", "hamming",
+               "blackman", "blackmanharris", "flattop", "kaiser"] as const;
+
+for (const name of names) {
+  const w = getWindow(name, n);
+  const peak = Math.max(...w).toFixed(4);
+  const sum = w.reduce((s, v) => s + v, 0).toFixed(2);
+  console.log(`${name.padEnd(15)} peak=${peak}  sum=${sum}`);
+}
+console.log("Kaiser β=14:", kaiserWindow(8, 14).map(v => v.toFixed(4)).join(", "));</textarea>
+      <textarea class="playground-python" style="display:none">try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+import numpy as np
+
+n = 16
+names = ["boxcar", "bartlett", "hann", "hamming",
+         "blackman", "blackmanharris", "flattop", "kaiser"]
+
+for name in names:
+    if name == "kaiser":
+        w = signal.get_window(("kaiser", 0), n)
+    else:
+        w = signal.get_window(name, n)
+    print(f"{name:<15} peak={np.max(w):.4f}  sum={np.sum(w):.2f}")
+
+w14 = signal.get_window(("kaiser", 14), 8)
+print("Kaiser β=14:", ", ".join(f"{v:.4f}" for v in w14))</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 5. STFT ───────────────────────────────────────── -->
+  <div class="section">
+    <h2>5. Short-Time Fourier Transform (STFT)</h2>
+    <p>Analyze a chirp signal whose frequency increases linearly over time.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { stft } from "tsb";
+
+const fs = 512, n = 1024;
+// Chirp: frequency sweeps from 50 to 200 Hz
+const x = Array.from({ length: n }, (_, i) => {
+  const t = i / fs;
+  const f = 50 + 150 * t;
+  return Math.sin(2 * Math.PI * f * t);
+});
+
+const { t, f, Zxx } = stft(x, { fs, nperseg: 128, noverlap: 64 });
+console.log(`STFT shape: ${Zxx.length} freq bins × ${Zxx[0].length} time frames`);
+console.log(`Time axis: [${t[0].toFixed(3)}, ..., ${t[t.length-1].toFixed(3)}] s`);
+console.log(`Freq axis: [${f[0].toFixed(1)}, ..., ${f[f.length-1].toFixed(1)}] Hz`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+fs, n = 512, 1024
+t_sig = np.arange(n) / fs
+f_inst = 50 + 150 * t_sig
+x = np.sin(2 * np.pi * f_inst * t_sig)
+
+f, t, Zxx = signal.stft(x, fs=fs, nperseg=128, noverlap=64)
+print(f"STFT shape: {len(f)} freq bins × {len(t)} time frames")
+print(f"Time axis: [{t[0]:.3f}, ..., {t[-1]:.3f}] s")
+print(f"Freq axis: [{f[0]:.1f}, ..., {f[-1]:.1f}] Hz")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 6. ISTFT reconstruction ──────────────────────── -->
+  <div class="section">
+    <h2>6. ISTFT reconstruction (round-trip)</h2>
+    <p>Invert an STFT back to the time domain. Interior reconstruction error should be near machine epsilon.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { stft, istft } from "tsb";
+
+const n = 256;
+const x = Array.from({ length: n }, (_, i) =>
+  Math.sin(2 * Math.PI * 10 * i / n),
+);
+
+const { Zxx } = stft(x, { nperseg: 64, noverlap: 32 });
+const xBack = istft(Zxx, { nperseg: 64, noverlap: 32 });
+
+const err = x.slice(64, n - 64).map((v, i) =>
+  Math.abs(v - (xBack[i + 64] ?? 0)),
+);
+console.log(`Max reconstruction error: ${Math.max(...err).toExponential(2)}`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+n = 256
+x = np.sin(2 * np.pi * 10 * np.arange(n) / n)
+
+_, Zxx = signal.stft(x, nperseg=64, noverlap=32)
+_, x_back = signal.istft(Zxx, nperseg=64, noverlap=32)
+
+err = np.max(np.abs(x[64:n-64] - x_back[64:n-64]))
+print(f"Max reconstruction error: {err:.2e}")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 7. Welch PSD ──────────────────────────────────── -->
+  <div class="section">
+    <h2>7. Welch PSD — detect signal frequency</h2>
+    <p>Welch's method averages periodograms of overlapping segments for a lower-variance PSD estimate.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { welch } from "tsb";
+
+const fs = 1024, f0 = 128, n = 4096;
+const x = Array.from({ length: n }, (_, i) =>
+  2 * Math.sin(2 * Math.PI * f0 * i / fs) + 0.1 * (Math.random() - 0.5),
+);
+
+const { f, Pxx } = welch(x, { fs, nperseg: 512, average: "mean" });
+const peakIdx = Pxx.indexOf(Math.max(...Pxx));
+console.log(`Peak at ${f[peakIdx].toFixed(1)} Hz (expected ${f0} Hz)`);
+console.log(`Peak PSD: ${Pxx[peakIdx].toFixed(2)} V²/Hz`);</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+fs, f0, n = 1024, 128, 4096
+rng = np.random.default_rng(42)
+x = 2 * np.sin(2 * np.pi * f0 * np.arange(n) / fs) + 0.1 * (rng.random(n) - 0.5)
+
+f, Pxx = signal.welch(x, fs=fs, nperseg=512, average="mean")
+peak_idx = np.argmax(Pxx)
+print(f"Peak at {f[peak_idx]:.1f} Hz (expected {f0} Hz)")
+print(f"Peak PSD: {Pxx[peak_idx]:.2f} V²/Hz")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 8. Periodogram ────────────────────────────────── -->
+  <div class="section">
+    <h2>8. Periodogram</h2>
+    <p>A single-segment PSD estimate — higher variance but simpler than Welch.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { periodogram } from "tsb";
+
+const fs = 512, n = 512;
+const x = Array.from({ length: n }, (_, i) =>
+  Math.cos(2 * Math.PI * 60 * i / fs) + Math.cos(2 * Math.PI * 120 * i / fs),
+);
+
+const { f, Pxx } = periodogram(x, { fs, window: "hann" });
+const sorted = [...Pxx.map((v, i) => ({ v, i }))]
+  .sort((a, b) => b.v - a.v)
+  .slice(0, 2);
+console.log("Top peaks:");
+for (const { v, i } of sorted) {
+  console.log(`  ${f[i]?.toFixed(1)} Hz  →  ${v.toFixed(4)} V²/Hz`);
+}</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+try:
+    import scipy.signal as signal
+except ImportError:
+    import sys; print("scipy not available — skip"); sys.exit(0)
+
+fs, n = 512, 512
+x = (np.cos(2 * np.pi * 60 * np.arange(n) / fs)
+     + np.cos(2 * np.pi * 120 * np.arange(n) / fs))
+
+f, Pxx = signal.periodogram(x, fs=fs, window="hann")
+top2 = np.argsort(Pxx)[-2:][::-1]
+print("Top peaks:")
+for i in top2:
+    print(f"  {f[i]:.1f} Hz  →  {Pxx[i]:.4f} V²/Hz")</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── 9. fftshift / ifftshift ───────────────────────── -->
+  <div class="section">
+    <h2>9. fftshift / ifftshift</h2>
+    <p>Rearrange the FFT output so that the zero-frequency component is in the centre.</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { fft, fftFreq, fftshift, cAbs } from "tsb";
+
+const x = [1, 2, 3, 4, 5, 6, 7, 8];
+const X = fft(x);
+const freqs = fftFreq(X.length, 1);
+
+const freqsShifted = fftshift(freqs);
+const magsShifted = fftshift(X.map(cAbs));
+
+console.log("Shifted frequencies:", freqsShifted.map(v => v.toFixed(3)).join(", "));
+console.log("Shifted magnitudes:", magsShifted.map(v => v.toFixed(2)).join(", "));</textarea>
+      <textarea class="playground-python" style="display:none">import numpy as np
+
+x = np.array([1, 2, 3, 4, 5, 6, 7, 8], dtype=float)
+X = np.fft.fft(x)
+freqs = np.fft.fftfreq(len(X), d=1)
+
+freqs_shifted = np.fft.fftshift(freqs)
+mags_shifted = np.fft.fftshift(np.abs(X))
+
+print("Shifted frequencies:", ", ".join(f"{v:.3f}" for v in freqs_shifted))
+print("Shifted magnitudes:", ", ".join(f"{v:.2f}" for v in mags_shifted))</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- ── API Reference ─────────────────────────────────── -->
+  <div class="section">
+    <h2>API Reference</h2>
+    <table>
+      <tr><th>Function</th><th>Description</th><th>Mirrors</th></tr>
+      <tr><td><code>fft(x)</code></td><td>N-point DFT (pads to power of 2)</td><td><code>numpy.fft.fft</code></td></tr>
+      <tr><td><code>ifft(X)</code></td><td>Inverse FFT</td><td><code>numpy.fft.ifft</code></td></tr>
+      <tr><td><code>rfft(x)</code></td><td>Real-input FFT (one-sided)</td><td><code>numpy.fft.rfft</code></td></tr>
+      <tr><td><code>irfft(X, n?)</code></td><td>Inverse real FFT</td><td><code>numpy.fft.irfft</code></td></tr>
+      <tr><td><code>fftFreq(n, d?)</code></td><td>DFT sample frequencies</td><td><code>numpy.fft.fftfreq</code></td></tr>
+      <tr><td><code>rfftFreq(n, d?)</code></td><td>One-sided DFT frequencies</td><td><code>numpy.fft.rfftfreq</code></td></tr>
+      <tr><td><code>fftshift(x)</code></td><td>Shift DC to centre</td><td><code>numpy.fft.fftshift</code></td></tr>
+      <tr><td><code>ifftshift(x)</code></td><td>Inverse of fftshift</td><td><code>numpy.fft.ifftshift</code></td></tr>
+      <tr><td><code>getWindow(name, n)</code></td><td>Named window function</td><td><code>scipy.signal.get_window</code></td></tr>
+      <tr><td><code>stft(x, opts?)</code></td><td>Short-Time Fourier Transform</td><td><code>scipy.signal.stft</code></td></tr>
+      <tr><td><code>istft(Zxx, opts?)</code></td><td>Inverse STFT (overlap-add)</td><td><code>scipy.signal.istft</code></td></tr>
+      <tr><td><code>welch(x, opts?)</code></td><td>Welch PSD estimate</td><td><code>scipy.signal.welch</code></td></tr>
+      <tr><td><code>periodogram(x, opts?)</code></td><td>Periodogram PSD estimate</td><td><code>scipy.signal.periodogram</code></td></tr>
+    </table>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">tsb playground</a> ·
+      Built by <a href="https://github.com/githubnext/autoloop">Autoloop</a>
+    </p>
+  </footer>
+
+  <!-- Playground runtime: loads TypeScript compiler + tsb bundle, sets up editors -->
+  <script type="module" src="playground-runtime.js"></script>
+</body>
+</html>

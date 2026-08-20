@@ -726,7 +726,7 @@ function encodeStrings(values: readonly (Scalar | null)[]): {
   for (let i = 0; i < encoded.length; i++) {
     ov.setInt32(i * 4, pos, true);
     data.set(encoded[i]!, pos);
-    pos += encoded[i]!.length;
+    pos += encoded[i]?.length;
   }
   ov.setInt32(values.length * 4, pos, true);
   return { offsets, data };
@@ -918,7 +918,7 @@ export function toFeather(df: DataFrame, options: ToFeatherOptions = {}): Uint8A
     cols.push({ name, type, values });
   }
 
-  const numRows = cols.length > 0 ? cols[0]!.values.length : df.index.size;
+  const numRows = cols.length > 0 ? cols[0]?.values.length : df.index.size;
   const schemaCols = cols.map((c) => ({ name: c.name, type: c.type }));
 
   // Encode all column buffers into a single body array

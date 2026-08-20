@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Exponential Smoothing (ETS / Holt-Winters)</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); }
+    h1 { color: var(--accent); margin-bottom: 0.5rem; }
+    h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    p { color: #8b949e; margin-bottom: 1rem; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      padding: 0.1rem 0.4rem;
+    }
+    .back { margin-bottom: 2rem; display: inline-block; }
+    .subtitle { margin-bottom: 1.5rem; }
+
+    #playground-loading {
+      position: fixed; inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000; gap: 1rem;
+    }
+    #playground-loading .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    #playground-loading p { color: var(--text); margin: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .playground-block {
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    .playground-header {
+      background: #1c2128;
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .playground-label { font-size: 0.75rem; color: #8b949e; font-family: var(--font-mono); }
+    .playground-actions { display: flex; gap: 0.5rem; }
+    .playground-run, .playground-reset {
+      padding: 0.2rem 0.75rem;
+      border-radius: 0.35rem;
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text);
+      transition: background 0.15s;
+    }
+    .playground-run { background: #1f6feb; border-color: #1f6feb; }
+    .playground-run:hover:not(:disabled) { background: #388bfd; }
+    .playground-run:disabled { opacity: 0.5; cursor: not-allowed; }
+    .playground-reset:hover { background: #1c2128; }
+    .playground-editor {
+      width: 100%;
+      min-height: 160px;
+      padding: 1rem;
+      background: var(--bg);
+      color: var(--text);
+      border: none;
+      resize: vertical;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      outline: none;
+    }
+    .playground-output {
+      padding: 0.75rem 1rem;
+      background: #0a0e14;
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      min-height: 2.5rem;
+      border-top: 1px solid var(--border);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .playground-output.error { color: var(--red); }
+    .playground-hint { padding: 0.4rem 1rem; background: var(--surface); color: #484f58; font-size: 0.7rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div id="playground-loading">
+    <div class="spinner"></div>
+    <p>Loading tsb runtime…</p>
+  </div>
+
+  <a href="index.html" class="back">← back to tsb playground</a>
+  <h1>Exponential Smoothing (ETS / Holt-Winters)</h1>
+  <p class="subtitle">
+    Simple Exponential Smoothing, Holt linear trend, and full Holt-Winters seasonal models.
+    Mirrors <code>statsmodels.tsa.holtwinters.ExponentialSmoothing</code>.
+  </p>
+
+  <!-- 1. Simple Exponential Smoothing -->
+  <div class="section">
+    <h2>1 — Simple Exponential Smoothing (SES)</h2>
+    <p>
+      <code>SimpleExpSmoothing</code> fits ETS(A,N,N): level-only smoothing with
+      parameter α. All h-step forecasts equal the final level. α is estimated by
+      minimising SSE via Nelder-Mead.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { SimpleExpSmoothing, simpleExpSmoothing } from "tsb";
+
+// Monthly sales data (no clear trend/seasonality)
+const sales = [17, 21, 19, 23, 20, 18, 22, 24, 21, 19, 23, 25,
+               22, 20, 24, 26, 23, 21, 25, 27, 24, 22, 26, 28];
+
+const model = new SimpleExpSmoothing();
+const fit = model.fit(sales);
+
+console.log("Smoothing level α:", fit.alpha.toFixed(4));
+console.log("Initial level l₀:", fit.initialLevel.toFixed(4));
+console.log("SSE:              ", fit.sse.toFixed(4));
+console.log("AIC:              ", fit.aic.toFixed(4));
+console.log("BIC:              ", fit.bic.toFixed(4));
+
+// 6-step forecast (all equal to final level)
+const fc = model.forecast(6);
+console.log("\n6-step forecast:", fc.map(v => v.toFixed(2)));
+console.log("(SES flat forecast — all equal)");
+
+// Using fixed alpha
+const fit2 = simpleExpSmoothing(sales, { alpha: 0.3 });
+console.log("\nWith fixed α=0.3 — SSE:", fit2.sse.toFixed(4));
+console.log("Optimised α better:", fit.sse < fit2.sse ? "yes" : "no");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 2. Holt Linear Trend -->
+  <div class="section">
+    <h2>2 — Holt's Linear Trend (Double Exponential Smoothing)</h2>
+    <p>
+      <code>Holt</code> extends SES with a trend component β (ETS(A,A,N)).
+      Optionally damps the trend with φ (ETS(A,Ad,N)) to prevent over-shooting.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Holt, holt } from "tsb";
+
+// Upward trend data (roughly linear)
+const y = [10, 12, 13, 15, 17, 18, 20, 22, 24, 25, 27, 29,
+           31, 32, 34, 36, 38, 39, 41, 43];
+
+// Standard Holt (ETS(A,A,N))
+const modelA = new Holt();
+const fitA = modelA.fit(y);
+console.log("=== Holt (no damping) ===");
+console.log("α:", fitA.alpha.toFixed(4), "  β:", fitA.beta.toFixed(4));
+console.log("φ:", fitA.phi, " (= 1, no damping)");
+console.log("AIC:", fitA.aic.toFixed(2));
+console.log("5-step forecast:", modelA.forecast(5).map(v => v.toFixed(1)));
+
+// Damped Holt (ETS(A,Ad,N))
+const modelD = new Holt({ damped: true });
+const fitD = modelD.fit(y);
+console.log("\n=== Damped Holt ===");
+console.log("α:", fitD.alpha.toFixed(4), "  β:", fitD.beta.toFixed(4));
+console.log("φ:", fitD.phi.toFixed(4), " (< 1, damped)");
+console.log("AIC:", fitD.aic.toFixed(2));
+console.log("5-step forecast:", modelD.forecast(5).map(v => v.toFixed(1)));
+
+// Damped forecasts converge, non-damped grow linearly
+const fc5 = modelA.forecast(10);
+const fcd5 = modelD.forecast(10);
+console.log("\nStep 10 undamped:", fc5[9].toFixed(1), "vs damped:", fcd5[9].toFixed(1));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 3. Holt-Winters Additive Seasonal -->
+  <div class="section">
+    <h2>3 — Holt-Winters Additive Seasonal</h2>
+    <p>
+      <code>ExponentialSmoothing</code> with <code>trend: "add"</code> and
+      <code>seasonal: "add"</code> models data with a linear trend plus additive
+      seasonal fluctuations. Classic Holt-Winters ETS(A,A,A).
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { ExponentialSmoothing } from "tsb";
+
+// Monthly passenger data — clear trend and seasonality (period = 12)
+const airline = [
+  112, 118, 132, 129, 121, 135, 148, 148, 136, 119, 104, 118,
+  115, 126, 141, 135, 125, 149, 170, 170, 158, 133, 114, 140,
+  145, 150, 178, 163, 172, 178, 199, 199, 184, 162, 146, 166,
+];
+
+const model = new ExponentialSmoothing({
+  trend: "add",
+  seasonal: "add",
+  seasonalPeriods: 12,
+});
+const fit = model.fit(airline);
+
+console.log("=== Holt-Winters Additive ===");
+console.log("α (level):    ", fit.alpha.toFixed(4));
+console.log("β (trend):    ", fit.beta.toFixed(4));
+console.log("γ (seasonal): ", fit.gamma.toFixed(4));
+console.log("φ (damping):  ", fit.phi.toFixed(4));
+console.log("AIC:", fit.aic.toFixed(2), " BIC:", fit.bic.toFixed(2));
+console.log("AICc:", fit.aicc.toFixed(2));
+console.log("logL:", fit.logLikelihood.toFixed(2));
+
+// In-sample MAE
+const mae = fit.residuals.reduce((s, e) => s + Math.abs(e), 0) / fit.residuals.length;
+console.log("In-sample MAE:", mae.toFixed(2));
+
+// 12-month forecast
+const fc = model.forecast(12);
+console.log("\n12-month forecast:");
+console.log(fc.map(v => v.toFixed(1)).join(", "));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 4. Holt-Winters Multiplicative Seasonal -->
+  <div class="section">
+    <h2>4 — Holt-Winters Multiplicative Seasonal</h2>
+    <p>
+      Use <code>seasonal: "mul"</code> when the amplitude of seasonal swings
+      grows with the level (common in economic time series). ETS(A,A,M).
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { ExponentialSmoothing, fitEts } from "tsb";
+
+// Quarterly data with multiplicative seasonality (amplitude grows with level)
+const y = [
+  90, 120, 160, 80,    // year 1
+  100, 135, 180, 90,   // year 2
+  115, 155, 200, 100,  // year 3
+  130, 170, 220, 115,  // year 4
+];
+
+// Additive model
+const fitAdd = fitEts(y, { trend: "add", seasonal: "add", seasonalPeriods: 4 });
+
+// Multiplicative model
+const fitMul = fitEts(y, { trend: "add", seasonal: "mul", seasonalPeriods: 4 });
+
+console.log("Additive AIC:       ", fitAdd.aic.toFixed(2));
+console.log("Multiplicative AIC: ", fitMul.aic.toFixed(2));
+console.log("\nMultiplicative seasonal indices:", fitMul.initialSeasons?.map(v => v.toFixed(3)));
+console.log("(values near 1.0 = neutral, >1 = above average, <1 = below)");
+
+// 4-quarter forecasts
+const modelMul = new ExponentialSmoothing({
+  trend: "add", seasonal: "mul", seasonalPeriods: 4,
+});
+modelMul.fit(y);
+const fc = modelMul.forecast(4);
+console.log("\nNext 4 quarters forecast:", fc.map(v => v.toFixed(1)));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 5. Prediction intervals -->
+  <div class="section">
+    <h2>5 — Forecast with prediction intervals</h2>
+    <p>
+      <code>forecastWithCI(steps, alpha)</code> returns point forecasts plus
+      (1 − α) % prediction intervals. Intervals widen with forecast horizon.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { ExponentialSmoothing } from "tsb";
+
+const y = [10, 12, 13, 15, 17, 18, 20, 22, 24, 25, 27, 29,
+           31, 32, 34, 36, 38, 39, 41, 43];
+
+const model = new ExponentialSmoothing({ trend: "add" });
+model.fit(y);
+
+// 95% confidence intervals (default alpha = 0.05)
+const r95 = model.forecastWithCI(6);
+// 80% confidence intervals
+const r80 = model.forecastWithCI(6, 0.20);
+
+console.log("Step | Forecast | 80% CI                    | 95% CI");
+console.log("-----|----------|---------------------------|---------------------------");
+for (let h = 0; h < 6; h++) {
+  const fc = r95.forecast[h].toFixed(2);
+  const l80 = r80.lower[h].toFixed(2);
+  const u80 = r80.upper[h].toFixed(2);
+  const l95 = r95.lower[h].toFixed(2);
+  const u95 = r95.upper[h].toFixed(2);
+  console.log(`  ${h+1}  | ${fc.padStart(8)} | [${l80}, ${u80}] | [${l95}, ${u95}]`);
+}
+console.log("\nIntervals widen with horizon (higher uncertainty).");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 6. Model comparison -->
+  <div class="section">
+    <h2>6 — Model selection via AIC/BIC</h2>
+    <p>
+      Compare SES, Holt, and Holt-Winters using information criteria. Lower AIC/BIC
+      indicates a better balance of fit and parsimony.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { simpleExpSmoothing, holt, fitEts } from "tsb";
+
+// Clearly seasonal data
+const y = [
+  17, 21, 23, 18, 22, 26, 19, 24, 27, 20, 25, 28,
+  18, 23, 25, 20, 24, 28, 21, 26, 29, 22, 27, 30,
+];
+
+const ses = simpleExpSmoothing(y);
+const holtFit = holt(y);
+const hwAdd = fitEts(y, { trend: "add", seasonal: "add", seasonalPeriods: 4 });
+const hwMul = fitEts(y, { trend: "add", seasonal: "mul", seasonalPeriods: 4 });
+const hwDamped = fitEts(y, { trend: "add", seasonal: "add", seasonalPeriods: 4, damped: true });
+
+const models = [
+  { name: "SES (ETS(A,N,N))",         r: ses },
+  { name: "Holt (ETS(A,A,N))",        r: holtFit },
+  { name: "H-W add (ETS(A,A,A))",     r: hwAdd },
+  { name: "H-W mul (ETS(A,A,M))",     r: hwMul },
+  { name: "H-W add damped (ETS(A,Ad,A))", r: hwDamped },
+];
+
+console.log("Model                        | AIC     | BIC     | SSE");
+console.log("-----------------------------|---------|---------|--------");
+for (const { name, r } of models) {
+  console.log(
+    name.padEnd(28) + " | " +
+    r.aic.toFixed(2).padStart(7) + " | " +
+    r.bic.toFixed(2).padStart(7) + " | " +
+    r.sse.toFixed(2)
+  );
+}
+console.log("\n↑ Lower AIC/BIC = better model fit vs complexity trade-off");</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <!-- 7. Known initialisation -->
+  <div class="section">
+    <h2>7 — Known initialisation and fixed parameters</h2>
+    <p>
+      You can supply fixed smoothing parameters or initial state values.
+      Use <code>initializationMethod: "known"</code> to set the initial state
+      directly without estimating it.
+    </p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">JavaScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { ExponentialSmoothing } from "tsb";
+
+const y = [17, 21, 23, 18, 22, 26, 19, 24, 27, 20, 25, 28,
+           18, 23, 25, 20, 24, 28, 21, 26, 29, 22, 27, 30];
+
+// Fix all smoothing parameters
+const fitFixed = new ExponentialSmoothing({
+  trend: "add",
+  seasonal: "add",
+  seasonalPeriods: 4,
+  alpha: 0.3,
+  beta: 0.1,
+  gamma: 0.2,
+}).fit(y);
+console.log("Fixed params — α:", fitFixed.alpha, "β:", fitFixed.beta, "γ:", fitFixed.gamma);
+
+// Supply known initial state
+const fitKnown = new ExponentialSmoothing({
+  trend: "add",
+  seasonal: "add",
+  seasonalPeriods: 4,
+  initializationMethod: "known",
+  initialLevel: 20,
+  initialTrend: 0.5,
+  initialSeasons: [0, 3, 2, -1],
+}).fit(y);
+console.log("\nKnown init:");
+console.log("  l₀:", fitKnown.initialLevel, " b₀:", fitKnown.initialTrend);
+console.log("  s₀..s₃:", fitKnown.initialSeasons?.map(v => v.toFixed(3)));
+console.log("  AIC:", fitKnown.aic.toFixed(2));</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <script type="module">
+    // ── load tsb via esm.sh (CDN) ─────────────────────────────────────────────
+    const CDN = "https://esm.sh/tsb@latest";
+    let tsbModule = null;
+
+    async function loadTsb() {
+      try {
+        tsbModule = await import(CDN);
+      } catch {
+        tsbModule = null;
+      }
+      document.getElementById("playground-loading").style.display = "none";
+      document.querySelectorAll(".playground-run").forEach(btn => {
+        btn.disabled = false;
+      });
+    }
+    loadTsb();
+
+    // ── run handler ───────────────────────────────────────────────────────────
+    function runCode(editor, outputEl) {
+      const code = editor.value;
+      outputEl.className = "playground-output";
+      outputEl.textContent = "";
+
+      const logs = [];
+      const origLog = console.log;
+      console.log = (...args) => {
+        logs.push(args.map(a => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" "));
+      };
+
+      try {
+        const modifiedCode = code.replace(
+          /import\s*\{([^}]*)\}\s*from\s*["']tsb["']/g,
+          (_, names) => {
+            const parts = names.split(",").map(n => n.trim()).filter(Boolean);
+            return parts.map(n => `const ${n} = tsbModule["${n}"];`).join("\n");
+          }
+        );
+        // eslint-disable-next-line no-new-func
+        const fn = new Function("tsbModule", modifiedCode);
+        const result = fn(tsbModule);
+        if (result instanceof Promise) result.catch(e => { outputEl.className += " error"; outputEl.textContent += "\n" + String(e); });
+      } catch (e) {
+        outputEl.className += " error";
+        logs.push(String(e));
+      } finally {
+        console.log = origLog;
+      }
+      outputEl.textContent = logs.join("\n") || "(no output)";
+    }
+
+    // ── wire up all playground blocks ─────────────────────────────────────────
+    document.querySelectorAll(".playground-block").forEach(block => {
+      const editor = block.querySelector(".playground-editor");
+      const output = block.querySelector(".playground-output");
+      const runBtn = block.querySelector(".playground-run");
+      const resetBtn = block.querySelector(".playground-reset");
+      const original = editor.value;
+
+      runBtn.addEventListener("click", () => runCode(editor, output));
+      resetBtn.addEventListener("click", () => { editor.value = original; output.textContent = "Click ▶ Run to execute"; output.className = "playground-output"; });
+      editor.addEventListener("keydown", e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runCode(editor, output); }
+        if (e.key === "Tab") { e.preventDefault(); const s = editor.selectionStart; editor.value = editor.value.slice(0, s) + "  " + editor.value.slice(editor.selectionEnd); editor.selectionStart = editor.selectionEnd = s + 2; }
+      });
+    });
+  </script>
+</body>
+</html>

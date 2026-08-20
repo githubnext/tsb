@@ -575,3 +575,136 @@ export {
   tsallisEntropy,
 } from "./information.ts";
 export type { PMF, NMIMethod } from "./information.ts";
+export {
+  complex,
+  cAbs,
+  cArg,
+  fft,
+  ifft,
+  rfft,
+  irfft,
+  fftFreq,
+  rfftFreq,
+  fftshift,
+  ifftshift,
+  rectangularWindow,
+  bartlettWindow,
+  hannWindow,
+  hammingWindow,
+  blackmanWindow,
+  blackmanHarrisWindow,
+  flatTopWindow,
+  kaiserWindow,
+  getWindow,
+  stft,
+  istft,
+  welch,
+  periodogram,
+} from "./signal.ts";
+export type {
+  Complex,
+  WindowName,
+  STFTOptions,
+  STFTResult,
+  ISTFTOptions,
+  WelchOptions,
+  PSDResult,
+  PeriodogramOptions,
+} from "./signal.ts";
+export {
+  firwin,
+  freqz,
+  sosfreqz,
+  lfilter,
+  filtfilt,
+  sosfilt,
+  sosfiltfilt,
+  butter,
+} from "./filters.ts";
+export type {
+  FirwinOptions,
+  FreqzResult,
+  SOSSection,
+  ButterResult,
+  FilterType,
+} from "./filters.ts";
+export {
+  autocorr,
+  acf,
+  pacf,
+  ccf,
+  durbinWatson,
+  ljungBox,
+  boxPierce,
+} from "./acf_pacf.ts";
+export type {
+  ACFResult,
+  PACFResult,
+  PortmanteauResult,
+  ACFOptions,
+  PACFOptions,
+  CCFOptions,
+  PortmanteauOptions,
+} from "./acf_pacf.ts";
+export {
+  ARIMAModel,
+  fitArima,
+} from "./arima.ts";
+export type {
+  ARIMAOptions,
+  ARIMAFitResult,
+  ARIMAForecastResult,
+} from "./arima.ts";
+export {
+  KalmanFilter,
+  StateSpaceModel,
+  kalmanFilter1D,
+  kalmanSmooth1D,
+  extractScalarMeans,
+  extractScalarVariances,
+  filteredPredictionInterval,
+} from "./kalman.ts";
+export type {
+  KalmanFilterOptions,
+  LocalLevelOptions,
+  LocalLinearTrendOptions,
+  KalmanFilterResult,
+  KalmanSmootherResult,
+} from "./kalman.ts";
+export {
+  SimpleExpSmoothing,
+  Holt,
+  ExponentialSmoothing,
+  simpleExpSmoothing,
+  holt,
+  fitEts,
+} from "./ets.ts";
+export type {
+  ETSTrend,
+  ETSSeasonal,
+  ETSInit,
+  SESOptions,
+  SESFitResult,
+  HoltOptions,
+  HoltFitResult,
+  ExponentialSmoothingOptions,
+  ExponentialSmoothingFitResult,
+  ETSForecastResult,
+} from "./ets.ts";
+export {
+  DLM,
+  buildLocalLevel,
+  buildLocalLinearTrend,
+  buildPolynomial,
+  buildFourier,
+  buildRegression,
+  combineDLMs,
+} from "./dlm.ts";
+export type {
+  DLMSpec,
+  DLMOptions,
+  DLMFilterStep,
+  DLMResult,
+  DLMSmootherResult,
+  DLMForecastResult,
+} from "./dlm.ts";

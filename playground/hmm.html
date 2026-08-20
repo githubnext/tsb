@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsb — Hidden Markov Models</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; background: #0d1117; color: #e6edf3; }
+    h1 { color: #58a6ff; } h2 { color: #79c0ff; border-bottom: 1px solid #30363d; padding-bottom: 0.3rem; }
+    pre { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.85rem; }
+    code { color: #a5d6ff; }
+    .demo { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+    button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: 0.5rem 1.2rem; cursor: pointer; font-size: 0.9rem; }
+    button:hover { background: #2ea043; }
+    .output { font-family: monospace; font-size: 0.85rem; white-space: pre; margin-top: 0.8rem; color: #7ee787; min-height: 2em; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .state0 { background: #0d419d; color: #79c0ff; }
+    .state1 { background: #4d2600; color: #ffa657; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #30363d; padding: 6px 10px; text-align: left; font-size: 0.85rem; }
+    th { background: #161b22; color: #8b949e; }
+    a { color: #58a6ff; }
+    nav { margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+  <nav><a href="index.html">← tsb playground</a></nav>
+  <h1>Hidden Markov Models</h1>
+  <p>
+    <strong>tsb</strong> implements <code>GaussianHMM</code> and <code>MultinomialHMM</code>:
+    Hidden Markov Models with Baum-Welch EM parameter estimation and Viterbi decoding.
+    Mirrors the <a href="https://hmmlearn.readthedocs.io/" target="_blank">hmmlearn</a> API.
+  </p>
+
+  <h2>1 · Gaussian HMM — two hidden regimes</h2>
+  <p>Generate a regime-switching time series (e.g. bull/bear market) and recover the hidden states.</p>
+  <div class="demo">
+    <button onclick="runGaussian()">Run Gaussian HMM demo</button>
+    <div id="gaussianOut" class="output"></div>
+  </div>
+
+  <h2>2 · Multinomial HMM — discrete symbols</h2>
+  <p>Fit a model to a discrete sequence (e.g. text symbols, DNA codons).</p>
+  <div class="demo">
+    <button onclick="runMultinomial()">Run Multinomial HMM demo</button>
+    <div id="multinomialOut" class="output"></div>
+  </div>
+
+  <h2>3 · Viterbi standalone</h2>
+  <p>Given known parameters, decode the most-likely state sequence directly.</p>
+  <div class="demo">
+    <button onclick="runViterbi()">Run Viterbi demo</button>
+    <div id="viterbiOut" class="output"></div>
+  </div>
+
+  <h2>API Reference</h2>
+  <pre><code>import { GaussianHMM, MultinomialHMM, fitGaussianHMM, hmmViterbi } from "tsb";
+
+// Gaussian HMM
+const model = new GaussianHMM({ nComponents: 2, nIter: 100 });
+model.fit(observations);
+const states = model.predict(newObs);   // Viterbi
+const logP   = model.score(newObs);     // log P(obs | model)
+const proba  = model.predictProba(obs); // posterior P(z_t | obs)
+const sample = model.sample(100);       // { states, obs }
+
+// Multinomial HMM (integer symbols)
+const mmodel = new MultinomialHMM({ nComponents: 2, nFeatures: 4, nIter: 100 });
+mmodel.fit(integerObs);
+const mstates = mmodel.predict(integerObs);
+
+// Convenience: fit and return model
+const fitted = fitGaussianHMM(obs, 2);
+
+// Standalone Viterbi with known parameters
+const decoded = hmmViterbi(startProb, transmat, emissionProb, obs);
+</code></pre>
+
+  <script type="module">
+    // ── Minimal HMM implementation inlined for playground (no bundler) ─────
+    const LOG_ZERO = -Infinity;
+    const logSumExp = (a, b) => {
+      if (a === LOG_ZERO) return b;
+      if (b === LOG_ZERO) return a;
+      const m = Math.max(a, b);
+      return m + Math.log(Math.exp(a - m) + Math.exp(b - m));
+    };
+    const logSumExpArr = (arr) => arr.reduce(logSumExp, LOG_ZERO);
+    const safeLog = (x) => x > 0 ? Math.log(x) : LOG_ZERO;
+    const normalise = (arr) => { const s = arr.reduce((a,b)=>a+b,0); if(s>0) arr.forEach((_,i)=>arr[i]/=s); return s; };
+
+    function gaussianLogProb(x, mu, s2) {
+      if (s2 <= 0) return LOG_ZERO;
+      return -0.5 * (Math.log(2*Math.PI*s2) + (x-mu)**2/s2);
+    }
+
+    function logForward(logStart, logA, logEmit) {
+      const T=logEmit.length, K=logStart.length;
+      const a = Array.from({length:T}, ()=>new Array(K).fill(LOG_ZERO));
+      for(let j=0;j<K;j++) a[0][j]=logStart[j]+logEmit[0][j];
+      for(let t=1;t<T;t++) for(let j=0;j<K;j++){
+        let s=LOG_ZERO; for(let i=0;i<K;i++) s=logSumExp(s,a[t-1][i]+logA[i][j]);
+        a[t][j]=s+logEmit[t][j];
+      }
+      return a;
+    }
+    function logBackward(logA, logEmit) {
+      const T=logEmit.length, K=logA.length;
+      const b = Array.from({length:T}, ()=>new Array(K).fill(0));
+      for(let t=T-2;t>=0;t--) for(let i=0;i<K;i++){
+        let s=LOG_ZERO; for(let j=0;j<K;j++) s=logSumExp(s,logA[i][j]+logEmit[t+1][j]+b[t+1][j]);
+        b[t][i]=s;
+      }
+      return b;
+    }
+    function viterbi(logStart, logA, logEmit) {
+      const T=logEmit.length, K=logStart.length;
+      const d=Array.from({length:T},()=>new Array(K).fill(LOG_ZERO));
+      const p=Array.from({length:T},()=>new Array(K).fill(0));
+      for(let j=0;j<K;j++) d[0][j]=logStart[j]+logEmit[0][j];
+      for(let t=1;t<T;t++) for(let j=0;j<K;j++){
+        let bst=LOG_ZERO,bi=0;
+        for(let i=0;i<K;i++){const v=d[t-1][i]+logA[i][j];if(v>bst){bst=v;bi=i;}}
+        d[t][j]=bst+logEmit[t][j]; p[t][j]=bi;
+      }
+      const path=new Array(T).fill(0);
+      let s=0,bst=LOG_ZERO;
+      for(let j=0;j<K;j++) if(d[T-1][j]>bst){bst=d[T-1][j];s=j;}
+      path[T-1]=s;
+      for(let t=T-2;t>=0;t--) path[t]=p[t+1][path[t+1]];
+      return path;
+    }
+
+    class GaussianHMM {
+      constructor({nComponents, nIter=100, tol=1e-4}){this.K=nComponents;this.nIter=nIter;this.tol=tol;}
+      fit(obs) {
+        const {K,nIter,tol}=this; const T=obs.length;
+        const sorted=[...obs].sort((a,b)=>a-b);
+        const means=new Array(K).fill(0), covars=new Array(K).fill(1);
+        for(let k=0;k<K;k++){
+          const lo=Math.floor(k*T/K),hi=Math.floor((k+1)*T/K);
+          const sl=sorted.slice(lo,hi), mu=sl.reduce((a,b)=>a+b,0)/sl.length;
+          means[k]=mu; covars[k]=Math.max(sl.reduce((a,b)=>a+(b-mu)**2,0)/Math.max(sl.length-1,1),1e-6);
+        }
+        const sp=new Array(K).fill(1/K);
+        const A=Array.from({length:K},()=>new Array(K).fill(1/K));
+        let prevLP=-Infinity;
+        for(let iter=0;iter<nIter;iter++){
+          const logEmit=obs.map(x=>Array.from({length:K},(_,k)=>gaussianLogProb(x,means[k],covars[k])));
+          const lsp=sp.map(safeLog), lA=A.map(r=>r.map(safeLog));
+          const la=logForward(lsp,lA,logEmit), lb=logBackward(lA,logEmit);
+          const lp=logSumExpArr(la[T-1]);
+          if(Math.abs(lp-prevLP)<tol) break; prevLP=lp;
+          const lg=Array.from({length:T},(_,t)=>{const row=Array.from({length:K},(__,k)=>la[t][k]+lb[t][k]);const z=logSumExpArr(row);return row.map(v=>v-z);});
+          const lxi=Array.from({length:K},()=>new Array(K).fill(LOG_ZERO));
+          for(let t=0;t<T-1;t++) for(let i=0;i<K;i++) for(let j=0;j<K;j++){
+            const v=la[t][i]+lA[i][j]+logEmit[t+1][j]+lb[t+1][j]-lp;
+            lxi[i][j]=logSumExp(lxi[i][j],v);
+          }
+          for(let k=0;k<K;k++) sp[k]=Math.exp(lg[0][k]); normalise(sp);
+          for(let i=0;i<K;i++){for(let j=0;j<K;j++) A[i][j]=Math.exp(lxi[i][j]); normalise(A[i]);}
+          for(let k=0;k<K;k++){
+            let num=0,den=0; for(let t=0;t<T;t++){const g=Math.exp(lg[t][k]);num+=g*obs[t];den+=g;}
+            means[k]=den>0?num/den:means[k];
+          }
+          for(let k=0;k<K;k++){
+            let num=0,den=0; for(let t=0;t<T;t++){const g=Math.exp(lg[t][k]),d=obs[t]-means[k];num+=g*d*d;den+=g;}
+            covars[k]=Math.max(den>0?num/den:covars[k],1e-6);
+          }
+        }
+        this._sp=sp; this._A=A; this._means=means; this._covars=covars; this._logProb=prevLP;
+        return {startProb:sp,transmat:A,means,covars,logProb:prevLP};
+      }
+      predict(obs){
+        const K=this.K;
+        const logEmit=obs.map(x=>Array.from({length:K},(_,k)=>gaussianLogProb(x,this._means[k],this._covars[k])));
+        return viterbi(this._sp.map(safeLog),this._A.map(r=>r.map(safeLog)),logEmit);
+      }
+    }
+
+    window.GaussianHMM = GaussianHMM;
+    window.viterbi = viterbi;
+    window.safeLog = safeLog;
+
+    window.runGaussian = function() {
+      const out = document.getElementById('gaussianOut');
+      // Generate regime-switching data: 30 obs from N(0,1), 30 from N(5,1)
+      const obs = [];
+      const trueStates = [];
+      for (let i = 0; i < 60; i++) {
+        const s = i < 30 ? 0 : 1;
+        trueStates.push(s);
+        const mu = s === 0 ? 0 : 5;
+        const u1 = Math.random(), u2 = Math.random();
+        const z = Math.sqrt(-2*Math.log(Math.max(u1,1e-15)))*Math.cos(2*Math.PI*u2);
+        obs.push(+(mu + z).toFixed(2));
+      }
+
+      const model = new GaussianHMM({ nComponents: 2, nIter: 200 });
+      const fit = model.fit(obs);
+      const states = model.predict(obs);
+
+      // Align state labels (state with lower mean = true state 0)
+      const flip = fit.means[0] > fit.means[1];
+      const aligned = states.map(s => flip ? 1-s : s);
+      const accuracy = aligned.filter((s,i) => s === trueStates[i]).length / 60;
+
+      const sortedMeans = [...fit.means].sort((a,b)=>a-b);
+      out.textContent = [
+        `Fitted means:    [${sortedMeans.map(m=>m.toFixed(3)).join(', ')}]`,
+        `True means:      [0.000, 5.000]`,
+        `Log-likelihood:  ${fit.logProb.toFixed(2)}`,
+        `Viterbi accuracy: ${(accuracy*100).toFixed(1)}%`,
+        ``,
+        `Observations (first 20): ${obs.slice(0,20).join(', ')}`,
+        `Decoded states  (first 20): ${aligned.slice(0,20).join(' ')}`,
+        `True states     (first 20): ${trueStates.slice(0,20).join(' ')}`,
+      ].join('\n');
+    };
+
+    window.runMultinomial = function() {
+      const out = document.getElementById('multinomialOut');
+      // 2 states, 3 symbols. State 0: [0.7,0.2,0.1], State 1: [0.1,0.2,0.7]
+      const K = 2, V = 3;
+      const trueEmit = [[0.7,0.2,0.1],[0.1,0.2,0.7]];
+      const trueTransmat = [[0.8,0.2],[0.2,0.8]];
+      const trueStart = [0.5,0.5];
+
+      const trueStates = [], obs = [];
+      let state = 0;
+      for (let t = 0; t < 80; t++) {
+        trueStates.push(state);
+        const r = Math.random(), e = trueEmit[state];
+        let sym = V-1;
+        let cum = 0;
+        for (let v = 0; v < V; v++) { cum += e[v]; if (r < cum) { sym = v; break; } }
+        obs.push(sym);
+        const rr = Math.random(), tr = trueTransmat[state];
+        let next = K-1;
+        let cum2 = 0;
+        for (let k = 0; k < K; k++) { cum2 += tr[k]; if (rr < cum2) { next = k; break; } }
+        state = next;
+      }
+
+      // Simple multinomial HMM (inline)
+      const startProb = [0.5, 0.5];
+      const transmat = [[0.5,0.5],[0.5,0.5]];
+      const emitProb = [[1/V,1/V,1/V],[1/V,1/V,1/V]].map(r=>r.map((_,i)=>1/V+(Math.random()*0.1-0.05)/V));
+      for(let k=0;k<K;k++){normalise(transmat[k]);normalise(emitProb[k]);}
+
+      let prevLP = -Infinity;
+      for (let iter = 0; iter < 200; iter++) {
+        const T = obs.length;
+        const logEmit = obs.map(sym => Array.from({length:K},(_,k)=>safeLog(emitProb[k][sym])));
+        const lsp = startProb.map(safeLog), lA = transmat.map(r=>r.map(safeLog));
+        const la = logForward(lsp,lA,logEmit), lb = logBackward(lA,logEmit);
+        const lp = logSumExpArr(la[T-1]);
+        if (Math.abs(lp-prevLP) < 1e-4) break; prevLP = lp;
+        const lg = Array.from({length:T},(_,t)=>{const row=Array.from({length:K},(__,k)=>la[t][k]+lb[t][k]);const z=logSumExpArr(row);return row.map(v=>v-z);});
+        const lxi = Array.from({length:K},()=>new Array(K).fill(LOG_ZERO));
+        for(let t=0;t<T-1;t++) for(let i=0;i<K;i++) for(let j=0;j<K;j++){
+          const v=la[t][i]+lA[i][j]+logEmit[t+1][j]+lb[t+1][j]-lp;
+          lxi[i][j]=logSumExp(lxi[i][j],v);
+        }
+        for(let k=0;k<K;k++) startProb[k]=Math.exp(lg[0][k]); normalise(startProb);
+        for(let i=0;i<K;i++){for(let j=0;j<K;j++) transmat[i][j]=Math.exp(lxi[i][j]); normalise(transmat[i]);}
+        for(let k=0;k<K;k++){
+          for(let v=0;v<V;v++) emitProb[k][v]=0;
+          for(let t=0;t<T;t++) emitProb[k][obs[t]]=(emitProb[k][obs[t]]||0)+Math.exp(lg[t][k]);
+          normalise(emitProb[k]);
+        }
+      }
+
+      const logEmit2 = obs.map(sym => Array.from({length:K},(_,k)=>safeLog(emitProb[k][sym])));
+      const decoded = viterbi(startProb.map(safeLog), transmat.map(r=>r.map(safeLog)), logEmit2);
+
+      // Align
+      const flip = emitProb[0][0] < emitProb[1][0];
+      const aligned = decoded.map(s => flip ? 1-s : s);
+      const acc = aligned.filter((s,i) => s === trueStates[i]).length / 80;
+
+      out.textContent = [
+        `Fitted emission probs (state 0): [${(flip?emitProb[1]:emitProb[0]).map(v=>v.toFixed(3)).join(', ')}]`,
+        `Fitted emission probs (state 1): [${(flip?emitProb[0]:emitProb[1]).map(v=>v.toFixed(3)).join(', ')}]`,
+        `True emission probs  (state 0): [0.700, 0.200, 0.100]`,
+        `True emission probs  (state 1): [0.100, 0.200, 0.700]`,
+        `Log-likelihood: ${prevLP.toFixed(2)}`,
+        `Viterbi accuracy: ${(acc*100).toFixed(1)}%`,
+        ``,
+        `Observations (first 20): ${obs.slice(0,20).join(' ')}`,
+        `Decoded (first 20):      ${aligned.slice(0,20).join(' ')}`,
+        `True    (first 20):      ${trueStates.slice(0,20).join(' ')}`,
+      ].join('\n');
+    };
+
+    window.runViterbi = function() {
+      const out = document.getElementById('viterbiOut');
+      // Classic CpG island example: 2 states (A,T-rich vs CpG-island)
+      const startProb = [0.5, 0.5];
+      const transmat = [[0.9, 0.1], [0.1, 0.9]];
+      // 4 symbols: A=0, C=1, G=2, T=3
+      const emissionProb = [
+        [0.30, 0.20, 0.20, 0.30],  // state 0: A/T-rich
+        [0.15, 0.35, 0.35, 0.15],  // state 1: CpG island (C/G-rich)
+      ];
+      // Generate sequence: first 10 from state 0, next 10 from state 1, last 10 from state 0
+      const trueStates = [...new Array(10).fill(0), ...new Array(10).fill(1), ...new Array(10).fill(0)];
+      const obs = trueStates.map(s => {
+        const e = emissionProb[s];
+        const r = Math.random();
+        let c = 0;
+        for (let v = 0; v < 4; v++) { c += e[v]; if (r < c) return v; }
+        return 3;
+      });
+      const symbols = ['A','C','G','T'];
+      const decoded = viterbi(
+        startProb.map(safeLog),
+        transmat.map(r => r.map(safeLog)),
+        obs.map(sym => emissionProb.map(e => safeLog(e[sym])))
+      );
+      const acc = decoded.filter((s,i) => s === trueStates[i]).length / 30;
+      out.textContent = [
+        `Sequence: ${obs.map(v=>symbols[v]).join('')}`,
+        `Decoded:  ${decoded.join('')}`,
+        `True:     ${trueStates.join('')}`,
+        ``,
+        `Accuracy: ${(acc*100).toFixed(1)}%`,
+        `(0=A/T-rich region, 1=CpG island)`,
+      ].join('\n');
+    };
+  </script>
+</body>
+</html>

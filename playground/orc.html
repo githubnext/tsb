@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tsb · ORC Format I/O</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+        line-height: 1.6;
+        background: #0d1117;
+        color: #e6edf3;
+      }
+      h1 { color: #58a6ff; }
+      h2 { color: #79c0ff; margin-top: 2rem; }
+      pre {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        padding: 1rem;
+        overflow-x: auto;
+        font-size: 0.9rem;
+      }
+      code { color: #e6edf3; }
+      .badge {
+        display: inline-block;
+        background: #388bfd26;
+        color: #58a6ff;
+        border: 1px solid #388bfd66;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 6px;
+      }
+      .output {
+        background: #0d1117;
+        border: 1px solid #21262d;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-top: 0.5rem;
+        font-family: monospace;
+        white-space: pre-wrap;
+        min-height: 60px;
+        color: #8b949e;
+      }
+      button {
+        background: #21262d;
+        color: #c9d1d9;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        padding: 0.4rem 1rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+      button:hover { background: #30363d; }
+      .note {
+        background: #161b22;
+        border-left: 4px solid #58a6ff;
+        padding: 0.75rem 1rem;
+        margin: 1rem 0;
+        border-radius: 0 6px 6px 0;
+        font-size: 0.9rem;
+      }
+      a { color: #58a6ff; }
+    </style>
+  </head>
+  <body>
+    <p><a href="index.html">← tsb playground</a></p>
+    <h1>ORC Format I/O</h1>
+    <p>
+      <span class="badge">pandas.read_orc</span>
+      <span class="badge">DataFrame.to_orc</span>
+    </p>
+    <p>
+      Apache ORC (Optimized Row Columnar) is a self-describing, type-aware columnar file format designed
+      for large-scale analytical workloads. <code>tsb</code> supports reading and writing ORC files with
+      NONE compression using RLE v1 integer encoding, direct float/double, and direct string encoding.
+    </p>
+
+    <div class="note">
+      ℹ️ This playground runs entirely in-browser via a bundled tsb build. ORC buffers are created
+      in-memory — no file system access is required.
+    </div>
+
+    <h2>1 — Write &amp; read a DataFrame</h2>
+    <p>Create a DataFrame, serialize it to ORC bytes, then parse it back:</p>
+    <pre><code id="ex1-code">import { DataFrame, readOrc, toOrc } from "tsb";
+
+const df = DataFrame.fromColumns({
+  id:     [1, 2, 3, 4, 5],
+  name:   ["Alice", "Bob", "Carol", "Dave", "Eve"],
+  score:  [95.5, 87.0, 92.3, 78.1, 99.9],
+  passed: [true, false, true, false, true],
+});
+
+// Serialize to binary ORC
+const buf = toOrc(df);
+console.log("ORC buffer size:", buf.length, "bytes");
+
+// Parse back
+const df2 = readOrc(buf);
+console.log(df2.toString());</code></pre>
+    <button onclick="runEx1()">▶ Run</button>
+    <div class="output" id="ex1-out">Click "Run" to execute…</div>
+
+    <h2>2 — Nullable columns</h2>
+    <p>ORC natively supports null values via PRESENT streams:</p>
+    <pre><code id="ex2-code">import { DataFrame, readOrc, toOrc } from "tsb";
+
+const df = DataFrame.fromColumns({
+  x:    [1, null, 3, null, 5],
+  name: ["a", null, "c", null, "e"],
+});
+
+const buf = toOrc(df);
+const rt = readOrc(buf);
+console.log("x values:", rt.col("x").values.join(", "));
+console.log("name values:", rt.col("name").values.join(", "));</code></pre>
+    <button onclick="runEx2()">▶ Run</button>
+    <div class="output" id="ex2-out">Click "Run" to execute…</div>
+
+    <h2>3 — Column selection</h2>
+    <p>Use the <code>columns</code> option to read only a subset of columns:</p>
+    <pre><code id="ex3-code">import { DataFrame, readOrc, toOrc } from "tsb";
+
+const df = DataFrame.fromColumns({
+  a: [1, 2, 3],
+  b: ["x", "y", "z"],
+  c: [true, false, true],
+  d: [10.0, 20.0, 30.0],
+});
+
+const buf = toOrc(df);
+
+// Only read columns a and c
+const partial = readOrc(buf, { columns: ["a", "c"] });
+console.log("columns:", partial.columns.toArray().join(", "));
+console.log("a:", partial.col("a").values.join(", "));
+console.log("c:", partial.col("c").values.join(", "));</code></pre>
+    <button onclick="runEx3()">▶ Run</button>
+    <div class="output" id="ex3-out">Click "Run" to execute…</div>
+
+    <h2>4 — Large dataset benchmark</h2>
+    <p>Serialize and parse a 10 000-row DataFrame to measure throughput:</p>
+    <pre><code id="ex4-code">import { DataFrame, readOrc, toOrc } from "tsb";
+
+const N = 10_000;
+const ids    = Array.from({ length: N }, (_, i) => i);
+const names  = Array.from({ length: N }, (_, i) => `user_${i}`);
+const scores = Array.from({ length: N }, () => Math.random() * 100);
+
+const df = DataFrame.fromColumns({ id: ids, name: names, score: scores });
+
+const t0 = performance.now();
+const buf = toOrc(df);
+const t1 = performance.now();
+const df2 = readOrc(buf);
+const t2 = performance.now();
+
+console.log(`Rows: ${df2.height}, Columns: ${df2.width}`);
+console.log(`ORC size: ${buf.length.toLocaleString()} bytes`);
+console.log(`Write: ${(t1 - t0).toFixed(1)} ms`);
+console.log(`Read:  ${(t2 - t1).toFixed(1)} ms`);</code></pre>
+    <button onclick="runEx4()">▶ Run</button>
+    <div class="output" id="ex4-out">Click "Run" to execute…</div>
+
+    <script type="module">
+      // Dynamic import of tsb from the built bundle
+      async function loadTsb() {
+        try {
+          return await import("../dist/index.js");
+        } catch {
+          // Fallback: try ESM via Bun dev server
+          return await import("/src/index.ts");
+        }
+      }
+
+      async function runExample(code, outId) {
+        const out = document.getElementById(outId);
+        out.textContent = "Running…";
+        try {
+          const tsb = await loadTsb();
+          const lines = [];
+          const fakeConsole = { log: (...args) => lines.push(args.map(String).join(" ")) };
+          const fn = new Function("tsb", "console", `
+            const { DataFrame, readOrc, toOrc } = tsb;
+            ${code}
+          `);
+          fn(tsb, fakeConsole);
+          out.textContent = lines.join("\n");
+        } catch (e) {
+          out.textContent = "Error: " + e.message;
+        }
+      }
+
+      window.runEx1 = () => runExample(document.getElementById("ex1-code").textContent, "ex1-out");
+      window.runEx2 = () => runExample(document.getElementById("ex2-code").textContent, "ex2-out");
+      window.runEx3 = () => runExample(document.getElementById("ex3-code").textContent, "ex3-out");
+      window.runEx4 = () => runExample(document.getElementById("ex4-code").textContent, "ex4-out");
+    </script>
+  </body>
+</html>

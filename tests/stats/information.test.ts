@@ -34,7 +34,7 @@ function r(v: number, dp = 6): number {
 }
 
 const LN2 = Math.log(2);
-const LOG2 = Math.log(2);
+const _LOG2 = Math.log(2);
 
 // ─── entropy ──────────────────────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ describe("entropy — Shannon", () => {
 
   it("entropy is maximised by uniform distribution", () => {
     const n = 5;
-    const uniform = Array<number>(n).fill(1 / n);
+    const uniform = new Array(n).fill(1 / n);
     const uniformH = entropy(uniform);
     fc.assert(
       fc.property(
@@ -381,7 +381,7 @@ describe("tsallisEntropy", () => {
 
   it("Tsallis entropy of uniform n is (n^(1-q) - 1)/(1-q) for q≠1", () => {
     const n = 4;
-    const p = Array<number>(n).fill(1 / n);
+    const p = new Array(n).fill(1 / n);
     const q = 2;
     const expected = (n ** (1 - q) - 1) / (1 - q);
     expect(r(tsallisEntropy(p, q))).toBeCloseTo(expected, 8);

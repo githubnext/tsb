@@ -324,8 +324,12 @@ export function inferFreq(dates: readonly Date[]): string | null {
       const days = first / MS_DAY;
       // Year-begin/end dates may have equal diffs when no leap year falls in
       // the range; check before returning a raw day-count alias.
-      if (_allYearBegin(dates)) return "YS";
-      if (_allYearEnd(dates)) return "YE";
+      if (_allYearBegin(dates)) {
+        return "YS";
+      }
+      if (_allYearEnd(dates)) {
+        return "YE";
+      }
       return `${days}D`;
     }
   }
