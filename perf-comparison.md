@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-20T01:22:47Z |
-| Iteration Count | 472 |
-| Best Metric | 812 |
+| Last Run | 2026-08-20T02:10:00Z |
+| Iteration Count | 473 |
+| Best Metric | 813 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -53,33 +53,14 @@
 
 ## 📊 Iteration History
 
-### Iteration 472 — 2026-08-20T01:22:47Z — [Run](https://github.com/githubnext/tsb/actions/runs/32320623603)
+### Iteration 473 — 2026-08-20T02:10:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/32372895465)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_wasm_natsort` — natCompareAccelerated/natSortedAccelerated/natArgSortAccelerated from `src/wasm/index.ts` vs Python natsort package (with fallback to manual key)
-- **Metric**: 812 (previous best: 811, delta: +1)
-- **Commit**: 917daff
+- **Change**: Added `bench_sort_index_series` — sortIndexSeries (ascending/descending, numeric and string index, 100k rows) vs pandas Series.sort_index()
+- **Metric**: 813 (previous best: 812, delta: +1)
+- **Commit**: c70d0c3
 
-### Iteration 471 — 2026-08-19T13:14:31Z — [Run](https://github.com/githubnext/tsb/actions/runs/32256666621)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_nunique` — nuniqueSeries/nuniqueDataFrame (numeric + string Series, 4-col DataFrame, 100k rows, 1000 distinct values, 50 iters) vs pandas Series.nunique()/DataFrame.nunique()
-- **Metric**: 811 (previous best: 810, delta: +1)
-- **Commit**: aa5bd50
-
-### Iteration 470 — 2026-08-19T01:22:35Z — [Run](https://github.com/githubnext/tsb/actions/runs/32204535885)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_compare_dataframe` — dataFrameEq/Ne/Lt/Gt/Le/Ge vs scalar and DataFrame (10k rows, 4 cols, 100 iters)
-- **Metric**: 810 (previous best: 809, delta: +1)
-- **Commit**: d81c690
-
-### Iteration 469 — 2026-08-18T13:14:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/32140867086)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_wasm_accelerated` (searchsortedAccelerated, searchsortedManyAccelerated, argsortScalarsAccelerated from `src/wasm/index.ts` vs numpy)
-- **Metric**: 809 (previous best: 808, delta: +1)
-- **Commit**: d543b0c
+### Iters 469–472 — ✅ 809→812: bench_wasm_accelerated, bench_compare_dataframe, bench_nunique, bench_wasm_natsort
 
 ### Iters 466–468 — ✅ 806→808: bench_information_divergence, bench_kde (pure-numpy), bench_value_predicates
 
