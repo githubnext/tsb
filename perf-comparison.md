@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-19T13:14:31Z |
-| Iteration Count | 471 |
-| Best Metric | 811 |
+| Last Run | 2026-08-20T01:22:47Z |
+| Iteration Count | 472 |
+| Best Metric | 812 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 ## 📋 Program Info
 
@@ -52,6 +52,13 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 472 — 2026-08-20T01:22:47Z — [Run](https://github.com/githubnext/tsb/actions/runs/32320623603)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_wasm_natsort` — natCompareAccelerated/natSortedAccelerated/natArgSortAccelerated from `src/wasm/index.ts` vs Python natsort package (with fallback to manual key)
+- **Metric**: 812 (previous best: 811, delta: +1)
+- **Commit**: 917daff
 
 ### Iteration 471 — 2026-08-19T13:14:31Z — [Run](https://github.com/githubnext/tsb/actions/runs/32256666621)
 
