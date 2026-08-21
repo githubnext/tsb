@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-20T19:11:07Z |
-| Iteration Count | 474 |
-| Best Metric | 814 |
+| Last Run | 2026-08-21T07:14:49Z |
+| Iteration Count | 475 |
+| Best Metric | 815 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -52,6 +52,13 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 475 — 2026-08-21T07:14:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/32457469342)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_renyi_tsallis_vi` — renyiEntropy, tsallisEntropy, variationOfInformation (N=1000, 50 iters) vs scipy equivalents
+- **Metric**: 815 (previous best: 814, delta: +1)
+- **Commit**: 1ac58e2c
 
 ### Iteration 474 — 2026-08-20T19:11:07Z — [Run](https://github.com/githubnext/tsb/actions/runs/32406958975)
 
