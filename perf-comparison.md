@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-21T07:14:49Z |
-| Iteration Count | 475 |
-| Best Metric | 815 |
+| Last Run | 2026-08-21T19:09:01Z |
+| Iteration Count | 476 |
+| Best Metric | 816 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -53,26 +53,14 @@
 
 ## 📊 Iteration History
 
-### Iteration 475 — 2026-08-21T07:14:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/32457469342)
+### Iteration 476 — 2026-08-21T19:09:01Z — [Run](https://github.com/githubnext/tsb/actions/runs/32516695675)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_renyi_tsallis_vi` — renyiEntropy, tsallisEntropy, variationOfInformation (N=1000, 50 iters) vs scipy equivalents
-- **Metric**: 815 (previous best: 814, delta: +1)
-- **Commit**: 1ac58e2c
+- **Change**: Added `bench_series_between_fn` — seriesBetween standalone function with all 4 inclusive modes (both/left/right/neither) on 100k numeric Series vs pandas Series.between(inclusive=...)
+- **Metric**: 816 (previous best: 815, delta: +1)
+- **Commit**: cf899e3a
 
-### Iteration 474 — 2026-08-20T19:11:07Z — [Run](https://github.com/githubnext/tsb/actions/runs/32406958975)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_js_divergence` — jsDivergence, jsDistance, crossEntropy, conditionalEntropy (N=1000) vs numpy equivalents
-- **Metric**: 814 (previous best: 813, delta: +1)
-- **Commit**: 1306df54
-
-### Iteration 473 — 2026-08-20T02:10:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/32372895465)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_sort_index_series` — sortIndexSeries (ascending/descending, numeric and string index, 100k rows) vs pandas Series.sort_index()
-- **Metric**: 813 (previous best: 812, delta: +1)
-- **Commit**: c70d0c3
+### Iters 473–475 — ✅ 813→815: bench_sort_index_series, bench_js_divergence, bench_renyi_tsallis_vi
 
 ### Iters 469–472 — ✅ 809→812: bench_wasm_accelerated, bench_compare_dataframe, bench_nunique, bench_wasm_natsort
 
