@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-21T19:09:01Z |
-| Iteration Count | 476 |
-| Best Metric | 816 |
+| Last Run | 2026-08-22T07:09:47Z |
+| Iteration Count | 477 |
+| Best Metric | 817 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -42,6 +42,7 @@
 - Index.union/intersection/difference are distinct from symmetricDifference.
 - WASM-accelerated functions (searchsortedAccelerated etc.) live in `src/wasm/index.ts`, not `src/index.ts` — import directly from `../../src/wasm/index.ts`.
 - `nuniqueSeries`/`nuniqueDataFrame` import from `../../src/stats/index.js`.
+- MO/TU/WE/TH/FR/SA/SU weekday offset constructors exported from `src/index.js`; Holiday offset param accepts WeekdayOffset directly.
 
 ## 🚧 Foreclosed Avenues
 
@@ -52,6 +53,13 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 477 — 2026-08-22T07:09:47Z — [Run](https://github.com/githubnext/tsb/actions/runs/32558735667)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_holiday_weekday_offset` — Holiday with MO/TH/FR weekday offset constructors, floating holidays (3rd Monday Jan, 4th Thursday Nov, etc.) over 10-year range
+- **Metric**: 817 (previous best: 816, delta: +1)
+- **Commit**: a73895bb
 
 ### Iteration 476 — 2026-08-21T19:09:01Z — [Run](https://github.com/githubnext/tsb/actions/runs/32516695675)
 
