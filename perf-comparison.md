@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-22T07:09:47Z |
-| Iteration Count | 477 |
-| Best Metric | 817 |
+| Last Run | 2026-08-22T19:03:49Z |
+| Iteration Count | 478 |
+| Best Metric | 818 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -53,6 +53,13 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 478 — 2026-08-22T19:03:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/32592447666)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_cross_joint_entropy` — crossEntropy, jointEntropy, conditionalEntropy from `src/stats/information.ts`
+- **Metric**: 818 (previous best: 817, delta: +1)
+- **Commit**: c46fbfab
 
 ### Iteration 477 — 2026-08-22T07:09:47Z — [Run](https://github.com/githubnext/tsb/actions/runs/32558735667)
 
