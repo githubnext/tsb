@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-22T19:03:49Z |
-| Iteration Count | 478 |
-| Best Metric | 818 |
+| Last Run | 2026-08-23T07:10:41Z |
+| Iteration Count | 479 |
+| Best Metric | 819 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -20,7 +20,7 @@
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
-## 📋 Program Info
+
 
 **Goal**: Benchmark every tsb function vs pandas equivalent. **Metric**: benchmarked_functions (higher is better)
 
@@ -44,6 +44,8 @@
 - `nuniqueSeries`/`nuniqueDataFrame` import from `../../src/stats/index.js`.
 - MO/TU/WE/TH/FR/SA/SU weekday offset constructors exported from `src/index.js`; Holiday offset param accepts WeekdayOffset directly.
 
+- `toOffset` / `inferFreq` live in `src/tseries/frequencies.ts` — import from `../../src/index.js`.
+
 ## 🚧 Foreclosed Avenues
 
 - Branch suffixes, sequential run_benchmarks.sh, SSH/HTTPS push.
@@ -53,6 +55,13 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 479 — 2026-08-23T07:10:41Z — [Run](https://github.com/githubnext/tsb/actions/runs/32624724971)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_to_offset_infer_freq` — `toOffset` (14 freq aliases) and `inferFreq` (daily + month-end series) from `src/tseries/frequencies.ts`
+- **Metric**: 819 (previous best: 818, delta: +1)
+- **Commit**: ea2e5165
 
 ### Iteration 478 — 2026-08-22T19:03:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/32592447666)
 
