@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-23T07:10:41Z |
-| Iteration Count | 479 |
-| Best Metric | 819 |
+| Last Run | 2026-08-23T19:03:29Z |
+| Iteration Count | 480 |
+| Best Metric | 820 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,13 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 480 — 2026-08-23T19:03:29Z — [Run](https://github.com/githubnext/tsb/actions/runs/32659855303)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_datetime_array_advanced` — hour, minute, second, millisecond, dayofweek, dayofyear, quarter, min, max on 100k-element DatetimeArray with ~10% nulls
+- **Metric**: 820 (previous best: 819, delta: +1)
+- **Commit**: 6e6f7726
 
 ### Iteration 479 — 2026-08-23T07:10:41Z — [Run](https://github.com/githubnext/tsb/actions/runs/32624724971)
 
