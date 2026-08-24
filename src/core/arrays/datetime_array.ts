@@ -250,7 +250,7 @@ export class DatetimeArray {
     const data = this._data;
     const mask = this._mask;
     return {
-      next() {
+      next(): IteratorResult<Timestamp | null, null> {
         if (i >= data.length) {
           return { value: null, done: true };
         }

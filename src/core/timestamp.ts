@@ -383,6 +383,8 @@ function parseString(
 
 // ─── frequency helpers for floor/ceil/round ───────────────────────────────────
 
+const RE_FREQ_NUNIT = /^(\d+)(.+)$/;
+
 /** Return the size of a frequency in milliseconds. */
 function freqMs(freq: string): number {
   const upper = freq.toUpperCase();
@@ -408,7 +410,7 @@ function freqMs(freq: string): number {
     return MS_PER_DAY;
   }
   // Try "Nunit" pattern (e.g. "2H", "15T").
-  const m = /^(\d+)(.+)$/.exec(freq);
+  const m = RE_FREQ_NUNIT.exec(freq);
   if (m !== null && m[1] !== undefined && m[2] !== undefined) {
     return Number(m[1]) * freqMs(m[2]);
   }

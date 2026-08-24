@@ -227,6 +227,49 @@ const benchmarks: BenchmarkEntry[] = [];
   });
 }
 
+// ─── sum_f64 ──────────────────────────────────────────────────────────────────
+
+{
+  const sumF64Wasm = getWasmFn("sum_f64");
+  const DATA_F64 = Float64Array.from({ length: 10_000 }, (_, i) => i * 0.5);
+  const DATA_ARR = Array.from(DATA_F64);
+  const tsResult = bench(() => DATA_ARR.reduce((acc, v) => acc + v, 0), ITERS);
+  const wasmResult = bench(() => sumF64Wasm(DATA_F64), ITERS);
+  benchmarks.push({
+    function: "sum_f64",
+    tsb: tsResult,
+    tsb_wasm: wasmResult,
+    wasm_speedup: tsResult.mean_ms / wasmResult.mean_ms,
+    notes: "Scalar sum over 10 000-element f64 array; WASM avoids JS→TS dispatch overhead.",
+  });
+}
+
+// ─── rolling_mean_f64 ────────────────────────────────────────────────────────
+
+{
+  const rollingMeanWasm = getWasmFn("rolling_mean_f64");
+  const ROLL_DATA = Float64Array.from({ length: 1_000 }, (_, i) => i * 1.0);
+  const ROLL_ARR = Array.from(ROLL_DATA);
+  const window = 10;
+  const minPeriods = 10;
+  const tsResult = bench(() => {
+    return ROLL_ARR.map((_, i) => {
+      const start = Math.max(0, i + 1 - window);
+      const slice = ROLL_ARR.slice(start, i + 1).filter((v) => !Number.isNaN(v));
+      if (slice.length < minPeriods) return null;
+      return slice.reduce((a, b) => a + b, 0) / slice.length;
+    });
+  }, ITERS);
+  const wasmResult = bench(() => rollingMeanWasm(ROLL_DATA, window, minPeriods), ITERS);
+  benchmarks.push({
+    function: "rolling_mean_f64",
+    tsb: tsResult,
+    tsb_wasm: wasmResult,
+    wasm_speedup: tsResult.mean_ms / wasmResult.mean_ms,
+    notes: "Rolling window mean over 1 000 elements with window=10.",
+  });
+}
+
 // ─── coverage summary ─────────────────────────────────────────────────────────
 
 const coverageManifest = JSON.parse(

@@ -7,7 +7,11 @@
  */
 
 mod natsort;
+mod reductions;
+mod rolling;
 mod searchsorted;
 
 pub use natsort::*;
+pub use reductions::*;
+pub use rolling::*;
 pub use searchsorted::*;

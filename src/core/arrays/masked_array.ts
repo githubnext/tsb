@@ -174,7 +174,7 @@ export abstract class MaskedArray<T extends Scalar> {
     const data = this._data;
     const mask = this._mask;
     return {
-      next() {
+      next(): IteratorResult<T | null, null> {
         if (i >= data.length) {
           return { value: null, done: true };
         }

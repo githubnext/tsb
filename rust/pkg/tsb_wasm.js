@@ -33,6 +33,177 @@ function argsort_str(arr) {
 exports.argsort_str = argsort_str;
 
 /**
+ * Expanding maximum.
+ * @param {Float64Array} data
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function expanding_max_f64(data, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.expanding_max_f64(ptr0, len0, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.expanding_max_f64 = expanding_max_f64;
+
+/**
+ * Expanding mean.
+ * @param {Float64Array} data
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function expanding_mean_f64(data, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.expanding_mean_f64(ptr0, len0, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.expanding_mean_f64 = expanding_mean_f64;
+
+/**
+ * Expanding median.
+ * @param {Float64Array} data
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function expanding_median_f64(data, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.expanding_median_f64(ptr0, len0, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.expanding_median_f64 = expanding_median_f64;
+
+/**
+ * Expanding minimum.
+ * @param {Float64Array} data
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function expanding_min_f64(data, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.expanding_min_f64(ptr0, len0, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.expanding_min_f64 = expanding_min_f64;
+
+/**
+ * Expanding standard deviation (delta degrees-of-freedom `ddof`).
+ * @param {Float64Array} data
+ * @param {number} min_periods
+ * @param {number} ddof
+ * @returns {Float64Array}
+ */
+function expanding_std_f64(data, min_periods, ddof) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.expanding_std_f64(ptr0, len0, min_periods, ddof);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.expanding_std_f64 = expanding_std_f64;
+
+/**
+ * Expanding sum.
+ * @param {Float64Array} data
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function expanding_sum_f64(data, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.expanding_sum_f64(ptr0, len0, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.expanding_sum_f64 = expanding_sum_f64;
+
+/**
+ * Expanding variance (delta degrees-of-freedom `ddof`).
+ * @param {Float64Array} data
+ * @param {number} min_periods
+ * @param {number} ddof
+ * @returns {Float64Array}
+ */
+function expanding_var_f64(data, min_periods, ddof) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.expanding_var_f64(ptr0, len0, min_periods, ddof);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.expanding_var_f64 = expanding_var_f64;
+
+/**
+ * Maximum of non-NaN values. Returns `NaN` for empty / all-NaN input.
+ * @param {Float64Array} data
+ * @returns {number}
+ */
+function max_f64(data) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.max_f64(ptr0, len0);
+    return ret;
+}
+exports.max_f64 = max_f64;
+
+/**
+ * Arithmetic mean of non-NaN values. Returns `NaN` for empty / all-NaN input,
+ * matching `Series.mean()`.
+ * @param {Float64Array} data
+ * @returns {number}
+ */
+function mean_f64(data) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.mean_f64(ptr0, len0);
+    return ret;
+}
+exports.mean_f64 = mean_f64;
+
+/**
+ * Median of non-NaN values (middle value of sorted data; average of two
+ * middle values for even-length arrays). Returns `NaN` for empty / all-NaN
+ * input, matching `Series.median()`.
+ * @param {Float64Array} data
+ * @returns {number}
+ */
+function median_f64(data) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.median_f64(ptr0, len0);
+    return ret;
+}
+exports.median_f64 = median_f64;
+
+/**
+ * Minimum of non-NaN values. Returns `NaN` for empty / all-NaN input,
+ * matching `Series.min()` returning `undefined` (coerced to NaN in numeric
+ * contexts).
+ * @param {Float64Array} data
+ * @returns {number}
+ */
+function min_f64(data) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.min_f64(ptr0, len0);
+    return ret;
+}
+exports.min_f64 = min_f64;
+
+/**
  * Return the indices that would sort `arr` in natural order.
  * @param {string[]} arr
  * @param {boolean} ignore_case
@@ -93,6 +264,128 @@ function nat_sorted(arr, ignore_case, reverse) {
     return v2;
 }
 exports.nat_sorted = nat_sorted;
+
+/**
+ * Rolling maximum.
+ * @param {Float64Array} data
+ * @param {number} window
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function rolling_max_f64(data, window, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.rolling_max_f64(ptr0, len0, window, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.rolling_max_f64 = rolling_max_f64;
+
+/**
+ * Rolling arithmetic mean.
+ * @param {Float64Array} data
+ * @param {number} window
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function rolling_mean_f64(data, window, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.rolling_mean_f64(ptr0, len0, window, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.rolling_mean_f64 = rolling_mean_f64;
+
+/**
+ * Rolling median.
+ * @param {Float64Array} data
+ * @param {number} window
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function rolling_median_f64(data, window, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.rolling_median_f64(ptr0, len0, window, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.rolling_median_f64 = rolling_median_f64;
+
+/**
+ * Rolling minimum.
+ * @param {Float64Array} data
+ * @param {number} window
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function rolling_min_f64(data, window, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.rolling_min_f64(ptr0, len0, window, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.rolling_min_f64 = rolling_min_f64;
+
+/**
+ * Rolling standard deviation (delta degrees-of-freedom `ddof`).
+ * @param {Float64Array} data
+ * @param {number} window
+ * @param {number} min_periods
+ * @param {number} ddof
+ * @returns {Float64Array}
+ */
+function rolling_std_f64(data, window, min_periods, ddof) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.rolling_std_f64(ptr0, len0, window, min_periods, ddof);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.rolling_std_f64 = rolling_std_f64;
+
+/**
+ * Rolling sum. Positions with fewer than `min_periods` non-NaN values → NaN.
+ * @param {Float64Array} data
+ * @param {number} window
+ * @param {number} min_periods
+ * @returns {Float64Array}
+ */
+function rolling_sum_f64(data, window, min_periods) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.rolling_sum_f64(ptr0, len0, window, min_periods);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.rolling_sum_f64 = rolling_sum_f64;
+
+/**
+ * Rolling variance (delta degrees-of-freedom `ddof`).
+ * Positions with fewer than `ddof + 1` valid values → NaN.
+ * @param {Float64Array} data
+ * @param {number} window
+ * @param {number} min_periods
+ * @param {number} ddof
+ * @returns {Float64Array}
+ */
+function rolling_var_f64(data, window, min_periods, ddof) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.rolling_var_f64(ptr0, len0, window, min_periods, ddof);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+exports.rolling_var_f64 = rolling_var_f64;
 
 /**
  * Binary-search a sorted f64 slice for `value`.
@@ -171,6 +464,51 @@ function searchsorted_str(arr, value, side_right) {
     return ret >>> 0;
 }
 exports.searchsorted_str = searchsorted_str;
+
+/**
+ * Sample standard deviation with delta degrees-of-freedom `ddof`.
+ * Returns `NaN` when fewer than `ddof + 1` valid values exist.
+ * @param {Float64Array} data
+ * @param {number} ddof
+ * @returns {number}
+ */
+function std_f64(data, ddof) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.std_f64(ptr0, len0, ddof);
+    return ret;
+}
+exports.std_f64 = std_f64;
+
+/**
+ * Sum of non-NaN values. Returns `0.0` when there are no valid values,
+ * matching `Series.sum()` on an all-null / empty series.
+ * @param {Float64Array} data
+ * @returns {number}
+ */
+function sum_f64(data) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.sum_f64(ptr0, len0);
+    return ret;
+}
+exports.sum_f64 = sum_f64;
+
+/**
+ * Sample variance of non-NaN values with delta degrees-of-freedom `ddof`.
+ * Returns `NaN` when fewer than `ddof + 1` valid values exist, matching
+ * `Series.var(ddof)`.
+ * @param {Float64Array} data
+ * @param {number} ddof
+ * @returns {number}
+ */
+function var_f64(data, ddof) {
+    const ptr0 = passArrayF64ToWasm0(data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.var_f64(ptr0, len0, ddof);
+    return ret;
+}
+exports.var_f64 = var_f64;
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
@@ -210,6 +548,11 @@ function addToExternrefTable0(obj) {
     const idx = wasm.__externref_table_alloc();
     wasm.__wbindgen_externrefs.set(idx, obj);
     return idx;
+}
+
+function getArrayF64FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getFloat64ArrayMemory0().subarray(ptr / 8, ptr / 8 + len);
 }
 
 function getArrayJsValueFromWasm0(ptr, len) {

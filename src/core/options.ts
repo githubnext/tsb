@@ -210,7 +210,10 @@ function _makeProxy(prefix: string): OptionsProxy {
       // If there is a direct match, return its value
       const k = _normalizeKey(key);
       if (_registry.has(k)) {
-        return _registry.get(k)!.currentValue;
+        const entry = _registry.get(k);
+        if (entry !== undefined) {
+          return entry.currentValue;
+        }
       }
       // Otherwise return a nested proxy for deeper access
       return _makeProxy(k);
