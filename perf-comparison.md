@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-24T07:18:42Z |
-| Iteration Count | 481 |
-| Best Metric | 821 |
+| Last Run | 2026-08-24T19:10:19Z |
+| Iteration Count | 482 |
+| Best Metric | 822 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 482 — 2026-08-24T19:10:19Z — [Run](https://github.com/githubnext/tsb/actions/runs/32766310388)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_wasm_agg_ops` — WASM-accelerated aggregate ops (sum/mean/min/max/var/std/median + rolling/expanding) vs numpy equivalents
+- **Metric**: 822 (previous best: 821, delta: +1)
+- **Commit**: 8bc64d05
+- **Notes**: The WASM aggregate dispatch wrappers (sumF64Accelerated, meanF64Accelerated, etc.) and rolling/expanding variants were not yet benchmarked; only searchsorted/argsort/natsort WASM functions had coverage.
 
 ### Iters 476–481 — ✅ 815→821: bench_series_between, bench_sort_index, bench_js_divergence, bench_renyi_tsallis, bench_wasm_accelerated_ext, bench_holiday_offset, bench_datetime_array_advanced, bench_timedelta_array_arithmetic
 
