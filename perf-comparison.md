@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-23T19:03:29Z |
-| Iteration Count | 480 |
-| Best Metric | 820 |
+| Last Run | 2026-08-24T07:18:42Z |
+| Iteration Count | 481 |
+| Best Metric | 821 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #435 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,13 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 481 — 2026-08-24T07:18:42Z — [Run](https://github.com/githubnext/tsb/actions/runs/32700718376)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_timedelta_array_arithmetic` — TimedeltaArray.add/sub/mul (both array and scalar operands) plus extended component accessors: .minutes, .milliseconds, .totalMilliseconds, .totalHours, .totalDays
+- **Metric**: 821 (previous best: 820, delta: +1)
+- **Commit**: a6aea3b5
 
 ### Iteration 480 — 2026-08-23T19:03:29Z — [Run](https://github.com/githubnext/tsb/actions/runs/32659855303)
 
