@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-25T07:13:27Z |
-| Iteration Count | 483 |
-| Best Metric | 823 |
+| Last Run | 2026-08-25T19:10:15Z |
+| Iteration Count | 484 |
+| Best Metric | 824 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 484 — 2026-08-25T19:10:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/32887698741)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_to_dict_series_orient` — benchmarks `toDictOriented(df, "series")` (converts DataFrame columns to Series objects), mirroring pandas `df.to_dict(orient="series")`
+- **Metric**: 824 (previous best: 823, delta: +1)
+- **Commit**: 6808d338
+- **Notes**: The "series" orient for toDictOriented was the only variant not yet benchmarked; existing bench_to_dict_oriented_all only covered "records", "list", and "split" orients.
 
 ### Iteration 483 — 2026-08-25T07:13:27Z — [Run](https://github.com/githubnext/tsb/actions/runs/32820317584)
 
