@@ -6,19 +6,19 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-24T19:10:19Z |
-| Iteration Count | 482 |
-| Best Metric | 822 |
+| Last Run | 2026-08-25T07:13:27Z |
+| Iteration Count | 483 |
+| Best Metric | 823 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
-| PR | #435 |
+| PR | #461 |
 | Issue | #221 |
 | Paused | false |
 | Pause Reason | — |
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 483 — 2026-08-25T07:13:27Z — [Run](https://github.com/githubnext/tsb/actions/runs/32820317584)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_wasm_rolling_stats` — remaining WASM rolling/expanding stats (min/max/var/std/median) not covered by bench_wasm_agg_ops
+- **Metric**: 823 (previous best: 822, delta: +1)
+- **Commit**: 11976600
+- **Notes**: bench_wasm_agg_ops only covered rollingSum/rollingMean/expandingSum/expandingMean; this adds rollingMin/Max/Var/Std/Median and expandingMin/Max/Var/Std/Median for complete WASM rolling/expanding coverage.
 
 ### Iteration 482 — 2026-08-24T19:10:19Z — [Run](https://github.com/githubnext/tsb/actions/runs/32766310388)
 
