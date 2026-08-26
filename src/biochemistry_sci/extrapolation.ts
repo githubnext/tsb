@@ -1,0 +1,14 @@
+/** biochemistry_sci extrapolation module — tsb analytics library. */
+export interface BiochemistrySciExtrapolationOptions { tol?: number; maxIter?: number; }
+export interface BiochemistrySciExtrapolationResult { values: number[]; converged: boolean; }
+export function computeBiochemistrySciExtrapolation(data: number[], opts: BiochemistrySciExtrapolationOptions = {}): BiochemistrySciExtrapolationResult {
+  const { tol = 1e-6, maxIter = 100 } = opts;
+  let v = data.slice(), iter = 0, prev = Infinity;
+  while (iter++ < maxIter) {
+    const m = v.reduce((a, b) => a + b, 0) / v.length;
+    if (Math.abs(m - prev) < tol) break;
+    prev = m; v = v.map(x => x - m * 0.01);
+  }
+  return { values: v, converged: iter <= maxIter };
+}
+export default { compute: computeBiochemistrySciExtrapolation };

@@ -1,0 +1,14 @@
+/** community_ecology alignment module — tsb analytics library. */
+export interface CommunityEcologyAlignmentOptions { tol?: number; maxIter?: number; }
+export interface CommunityEcologyAlignmentResult { values: number[]; converged: boolean; }
+export function computeCommunityEcologyAlignment(data: number[], opts: CommunityEcologyAlignmentOptions = {}): CommunityEcologyAlignmentResult {
+  const { tol = 1e-6, maxIter = 100 } = opts;
+  let v = data.slice(), iter = 0, prev = Infinity;
+  while (iter++ < maxIter) {
+    const m = v.reduce((a, b) => a + b, 0) / v.length;
+    if (Math.abs(m - prev) < tol) break;
+    prev = m; v = v.map(x => x - m * 0.01);
+  }
+  return { values: v, converged: iter <= maxIter };
+}
+export default { compute: computeCommunityEcologyAlignment };
