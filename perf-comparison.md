@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-25T19:10:15Z |
-| Iteration Count | 484 |
-| Best Metric | 824 |
+| Last Run | 2026-08-26T07:13:49Z |
+| Iteration Count | 485 |
+| Best Metric | 825 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 485 — 2026-08-26T07:13:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/32941495823)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_register_option` — benchmarks `registerOption` with and without validator, plus get/set/reset on custom keys; mirrors pandas `pd.core.config.register_option`
+- **Metric**: 825 (previous best: 824, delta: +1)
+- **Commit**: c0902886
+- **Notes**: `registerOption` was the only export from `src/core/options.ts` not yet benchmarked; all other options functions (getOption/setOption/resetOption/describeOption/optionContext) already had coverage.
 
 ### Iteration 484 — 2026-08-25T19:10:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/32887698741)
 
