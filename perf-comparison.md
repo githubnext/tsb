@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-26T07:13:49Z |
-| Iteration Count | 485 |
-| Best Metric | 825 |
+| Last Run | 2026-08-26T13:30:00Z |
+| Iteration Count | 486 |
+| Best Metric | 826 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 486 — 2026-08-26T13:30:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/33033035649)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_multi_index_to_list` — benchmarks `MultiIndex.toList()` on 100k-pair MultiIndex; mirrors pandas `MultiIndex.tolist()`
+- **Metric**: 826 (previous best: 825, delta: +1)
+- **Commit**: 78ffce69
+- **Notes**: `bench_multi_index_to_array.ts` covered `toArray()` but `toList()` had no dedicated benchmark pair.
 
 ### Iteration 485 — 2026-08-26T07:13:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/32941495823)
 
