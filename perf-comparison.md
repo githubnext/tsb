@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-26T13:30:00Z |
-| Iteration Count | 486 |
-| Best Metric | 826 |
+| Last Run | 2026-08-27T16:40:17Z |
+| Iteration Count | 487 |
+| Best Metric | 827 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -56,45 +56,15 @@
 
 ## 📊 Iteration History
 
-### Iteration 486 — 2026-08-26T13:30:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/33033035649)
+### Iteration 487 — 2026-08-27T16:40:17Z — [Run](https://github.com/githubnext/tsb/actions/runs/33094086022)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_multi_index_to_list` — benchmarks `MultiIndex.toList()` on 100k-pair MultiIndex; mirrors pandas `MultiIndex.tolist()`
-- **Metric**: 826 (previous best: 825, delta: +1)
-- **Commit**: 78ffce69
-- **Notes**: `bench_multi_index_to_array.ts` covered `toArray()` but `toList()` had no dedicated benchmark pair.
+- **Change**: Added `bench_string_array_str_ops` — StringArray.lstrip/rstrip/startswith/endswith/replace/zfill on 100k nullable strings
+- **Metric**: 827 (previous best: 826, delta: +1)
+- **Commit**: fceac8ce
+- **Notes**: Complements bench_string_array.ts (upper/lower/strip/contains/len/fillna) with the remaining 6 StringArray string methods.
 
-### Iteration 485 — 2026-08-26T07:13:49Z — [Run](https://github.com/githubnext/tsb/actions/runs/32941495823)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_register_option` — benchmarks `registerOption` with and without validator, plus get/set/reset on custom keys; mirrors pandas `pd.core.config.register_option`
-- **Metric**: 825 (previous best: 824, delta: +1)
-- **Commit**: c0902886
-- **Notes**: `registerOption` was the only export from `src/core/options.ts` not yet benchmarked; all other options functions (getOption/setOption/resetOption/describeOption/optionContext) already had coverage.
-
-### Iteration 484 — 2026-08-25T19:10:15Z — [Run](https://github.com/githubnext/tsb/actions/runs/32887698741)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_to_dict_series_orient` — benchmarks `toDictOriented(df, "series")` (converts DataFrame columns to Series objects), mirroring pandas `df.to_dict(orient="series")`
-- **Metric**: 824 (previous best: 823, delta: +1)
-- **Commit**: 6808d338
-- **Notes**: The "series" orient for toDictOriented was the only variant not yet benchmarked; existing bench_to_dict_oriented_all only covered "records", "list", and "split" orients.
-
-### Iteration 483 — 2026-08-25T07:13:27Z — [Run](https://github.com/githubnext/tsb/actions/runs/32820317584)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_wasm_rolling_stats` — remaining WASM rolling/expanding stats (min/max/var/std/median) not covered by bench_wasm_agg_ops
-- **Metric**: 823 (previous best: 822, delta: +1)
-- **Commit**: 11976600
-- **Notes**: bench_wasm_agg_ops only covered rollingSum/rollingMean/expandingSum/expandingMean; this adds rollingMin/Max/Var/Std/Median and expandingMin/Max/Var/Std/Median for complete WASM rolling/expanding coverage.
-
-### Iteration 482 — 2026-08-24T19:10:19Z — [Run](https://github.com/githubnext/tsb/actions/runs/32766310388)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_wasm_agg_ops` — WASM-accelerated aggregate ops (sum/mean/min/max/var/std/median + rolling/expanding) vs numpy equivalents
-- **Metric**: 822 (previous best: 821, delta: +1)
-- **Commit**: 8bc64d05
-- **Notes**: The WASM aggregate dispatch wrappers (sumF64Accelerated, meanF64Accelerated, etc.) and rolling/expanding variants were not yet benchmarked; only searchsorted/argsort/natsort WASM functions had coverage.
+### Iters 482–486 — ✅ 821→826: bench_wasm_agg_ops, bench_wasm_rolling_stats, bench_to_dict_series_orient, bench_register_option, bench_multi_index_to_list
 
 ### Iters 476–481 — ✅ 815→821: bench_series_between, bench_sort_index, bench_js_divergence, bench_renyi_tsallis, bench_wasm_accelerated_ext, bench_holiday_offset, bench_datetime_array_advanced, bench_timedelta_array_arithmetic
 
