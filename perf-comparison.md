@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-28T03:39:52Z |
-| Iteration Count | 488 |
-| Best Metric | 828 |
+| Last Run | 2026-08-28T16:59:06Z |
+| Iteration Count | 489 |
+| Best Metric | 829 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 489 — 2026-08-28T16:59:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/33192323250)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_string_array_cat` — StringArray.cat(sep, other) element-wise string concatenation with separator on 100k nullable strings
+- **Metric**: 829 (previous best: 828, delta: +1)
+- **Commit**: 85dc9453
+- **Notes**: StringArray.cat() was the only uncovered StringArray method; mirrors pandas Series.str.cat(other, sep="-") with na_rep=None.
 
 ### Iteration 488 — 2026-08-28T03:39:52Z — [Run](https://github.com/githubnext/tsb/actions/runs/33139413271)
 
