@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-27T16:40:17Z |
-| Iteration Count | 487 |
-| Best Metric | 827 |
+| Last Run | 2026-08-28T03:39:52Z |
+| Iteration Count | 488 |
+| Best Metric | 828 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 488 — 2026-08-28T03:39:52Z — [Run](https://github.com/githubnext/tsb/actions/runs/33139413271)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_ewm` — EWM (Exponentially Weighted Moving) mean/std/var with span=20 on 100k-element Series
+- **Metric**: 828 (previous best: 827, delta: +1)
+- **Commit**: 56519d05
+- **Notes**: ewm() is used heavily in time series analysis; benchmarks span/com/halflife decay modes through the standard mean/std/var aggregations.
 
 ### Iteration 487 — 2026-08-27T16:40:17Z — [Run](https://github.com/githubnext/tsb/actions/runs/33094086022)
 
