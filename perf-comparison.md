@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-29T01:05:43Z |
-| Iteration Count | 490 |
-| Best Metric | 830 |
+| Last Run | 2026-08-29T12:58:19Z |
+| Iteration Count | 491 |
+| Best Metric | 831 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -56,6 +56,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 491 — 2026-08-29T12:58:19Z — [Run](https://github.com/githubnext/tsb/actions/runs/33253694015)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_wasm_rolling_sum_mean` — rollingSumF64Accelerated, rollingMeanF64Accelerated, expandingSumF64Accelerated, expandingMeanF64Accelerated on 100k float64 array
+- **Metric**: 831 (previous best: 830, delta: +1)
+- **Commit**: 5d7effde
+- **Notes**: These 4 WASM-accelerated functions were the only remaining uncovered accelerated.ts exports; mirrors pandas Series.rolling(50).sum/mean and Series.expanding().sum/mean.
+
 ### Iteration 490 — 2026-08-29T01:05:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/33225322029)
 
 - **Status**: ✅ Accepted
@@ -64,20 +72,7 @@
 - **Commit**: fd0704ae
 - **Notes**: These 5 exported functions from src/stats/rename_ops.ts had no dedicated benchmark pair; mirrors pandas Series.add_prefix/add_suffix/set_axis, DataFrame.set_axis, Series.to_frame.
 
-### Iteration 489 — 2026-08-28T16:59:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/33192323250)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_string_array_cat` — StringArray.cat(sep, other) element-wise string concatenation with separator on 100k nullable strings
-- **Metric**: 829 (previous best: 828, delta: +1)
-- **Commit**: 85dc9453
-- **Notes**: StringArray.cat() was the only uncovered StringArray method; mirrors pandas Series.str.cat(other, sep="-") with na_rep=None.
-
-### Iteration 488 — 2026-08-28T03:39:52Z — [Run](https://github.com/githubnext/tsb/actions/runs/33139413271)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_ewm` — EWM mean/std/var with span=20 on 100k-element Series
-- **Metric**: 828 (previous best: 827, delta: +1)
-- **Commit**: 56519d05
+### Iters 488–490 — ✅ 828→830: ewm, string_array_cat, series_rename_ops
 
 ### Iters 482–487 — ✅ 821→827: wasm_agg_ops, wasm_rolling_stats, to_dict_series_orient, register_option, multi_index_to_list, string_array_str_ops
 
