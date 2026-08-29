@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-28T16:59:06Z |
-| Iteration Count | 489 |
-| Best Metric | 829 |
+| Last Run | 2026-08-29T01:05:43Z |
+| Iteration Count | 490 |
+| Best Metric | 830 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -18,7 +18,7 @@
 | Completed | false |
 | Completed Reason | — |
 | Consecutive Errors | 0 |
-| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+| Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
 
 
 
@@ -56,6 +56,14 @@
 
 ## 📊 Iteration History
 
+### Iteration 490 — 2026-08-29T01:05:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/33225322029)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_series_rename_ops` — addPrefixSeries/addSuffixSeries/setAxisSeries/setAxisDataFrame/seriesToFrame on 100k-element inputs
+- **Metric**: 830 (previous best: 829, delta: +1)
+- **Commit**: fd0704ae
+- **Notes**: These 5 exported functions from src/stats/rename_ops.ts had no dedicated benchmark pair; mirrors pandas Series.add_prefix/add_suffix/set_axis, DataFrame.set_axis, Series.to_frame.
+
 ### Iteration 489 — 2026-08-28T16:59:06Z — [Run](https://github.com/githubnext/tsb/actions/runs/33192323250)
 
 - **Status**: ✅ Accepted
@@ -67,20 +75,11 @@
 ### Iteration 488 — 2026-08-28T03:39:52Z — [Run](https://github.com/githubnext/tsb/actions/runs/33139413271)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_ewm` — EWM (Exponentially Weighted Moving) mean/std/var with span=20 on 100k-element Series
+- **Change**: Added `bench_ewm` — EWM mean/std/var with span=20 on 100k-element Series
 - **Metric**: 828 (previous best: 827, delta: +1)
 - **Commit**: 56519d05
-- **Notes**: ewm() is used heavily in time series analysis; benchmarks span/com/halflife decay modes through the standard mean/std/var aggregations.
 
-### Iteration 487 — 2026-08-27T16:40:17Z — [Run](https://github.com/githubnext/tsb/actions/runs/33094086022)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_string_array_str_ops` — StringArray.lstrip/rstrip/startswith/endswith/replace/zfill on 100k nullable strings
-- **Metric**: 827 (previous best: 826, delta: +1)
-- **Commit**: fceac8ce
-- **Notes**: Complements bench_string_array.ts (upper/lower/strip/contains/len/fillna) with the remaining 6 StringArray string methods.
-
-### Iters 482–486 — ✅ 821→826: bench_wasm_agg_ops, bench_wasm_rolling_stats, bench_to_dict_series_orient, bench_register_option, bench_multi_index_to_list
+### Iters 482–487 — ✅ 821→827: wasm_agg_ops, wasm_rolling_stats, to_dict_series_orient, register_option, multi_index_to_list, string_array_str_ops
 
 ### Iters 476–481 — ✅ 815→821: bench_series_between, bench_sort_index, bench_js_divergence, bench_renyi_tsallis, bench_wasm_accelerated_ext, bench_holiday_offset, bench_datetime_array_advanced, bench_timedelta_array_arithmetic
 
