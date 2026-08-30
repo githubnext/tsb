@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-29T12:58:19Z |
-| Iteration Count | 491 |
-| Best Metric | 831 |
+| Last Run | 2026-08-29T13:35:00Z |
+| Iteration Count | 492 |
+| Best Metric | 832 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 492 — 2026-08-29T13:35:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/33285207528)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_datetime_index_min_max` — DatetimeIndex.min(), max(), at(), toArray(), toTimestamps() on 10k-element index
+- **Metric**: 832 (previous best: 831, delta: +1)
+- **Commit**: dce1128e
+- **Notes**: Regular DatetimeIndex min/max/at/toArray/toTimestamps methods had no dedicated benchmark (TZDatetimeIndex was covered by bench_tz_datetime_index_extra). Mirrors pandas DatetimeIndex.min(), max(), index access, to_pydatetime(), asi8.
 
 ### Iteration 491 — 2026-08-29T12:58:19Z — [Run](https://github.com/githubnext/tsb/actions/runs/33253694015)
 
