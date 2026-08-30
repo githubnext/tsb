@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-30T06:57:39Z |
-| Iteration Count | 493 |
-| Best Metric | 833 |
+| Last Run | 2026-08-30T18:57:42Z |
+| Iteration Count | 494 |
+| Best Metric | 834 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -45,6 +45,7 @@
 - MO/TU/WE/TH/FR/SA/SU weekday offset constructors exported from `src/index.js`; Holiday offset param accepts WeekdayOffset directly.
 - `toOffset` / `inferFreq` live in `src/tseries/frequencies.ts` — import from `../../src/index.js`.
 - SparseArray.fromSparse(length, indices, values, fill) takes COO representation; SparseDtype(subtype, fill_value) mirrors pd.SparseDtype; pandas equivalent uses pd.arrays.SparseArray(dense, fill_value=...).
+- Expanding wasm functions (expandingMin/Max/Var/Std/MedianF64Accelerated) take (data, minPeriods) — use SIZE=10k for median (O(n²) fallback).
 
 ## 🚧 Foreclosed Avenues
 
@@ -56,32 +57,16 @@
 
 ## 📊 Iteration History
 
-### Iteration 493 — 2026-08-30T06:57:39Z — [Run](https://github.com/githubnext/tsb/actions/runs/33297998405)
+### Iteration 494 — 2026-08-30T18:57:42Z — [Run](https://github.com/githubnext/tsb/actions/runs/33329400368)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_sparse_array_advanced` — SparseArray.fromSparse, withFillValue, at(), SparseDtype on 100k 2%-density sparse array
-- **Metric**: 833 (previous best: 832, delta: +1)
-- **Commit**: bbd59e8b
-- **Notes**: SparseArray.fromSparse (COO constructor), withFillValue (fill sentinel change), element-level at() access, and SparseDtype construction + .equals() had no dedicated benchmark pair; mirrors pd.arrays.SparseArray COO construction, fill_value change, and pd.SparseDtype.
+- **Change**: Added `bench_wasm_expanding_stats` — expandingMin/Max/Var/Std/MedianF64Accelerated on 10k-element array
+- **Metric**: 834 (previous best: 833, delta: +1)
+- **Commit**: 98554366
 
-### Iteration 492 — 2026-08-29T13:35:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/33285207528)
+### Iters 488–493 — ✅ 828→833: sparse_array_advanced, datetime_index_min_max, wasm_rolling_sum_mean, wasm_rolling_stats, wasm_agg_ops, string_array_cat
 
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_datetime_index_min_max` — DatetimeIndex.min(), max(), at(), toArray(), toTimestamps() on 10k-element index
-- **Metric**: 832 (previous best: 831, delta: +1)
-- **Commit**: dce1128e
-- **Notes**: Regular DatetimeIndex min/max/at/toArray/toTimestamps methods had no dedicated benchmark (TZDatetimeIndex was covered by bench_tz_datetime_index_extra). Mirrors pandas DatetimeIndex.min(), max(), index access, to_pydatetime(), asi8.
-
-### Iteration 491 — 2026-08-29T12:58:19Z — [Run](https://github.com/githubnext/tsb/actions/runs/33253694015)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_wasm_rolling_sum_mean` — rollingSumF64Accelerated, rollingMeanF64Accelerated, expandingSumF64Accelerated, expandingMeanF64Accelerated
-- **Metric**: 831 (previous best: 830, delta: +1)
-- **Commit**: 5d7effde
-
-### Iters 490–492 — ✅ 830→832: series_rename_ops, datetime_index_min_max, wasm_rolling_sum_mean
-
-### Iters 482–487 — ✅ 821→827: wasm_agg_ops, wasm_rolling_stats, to_dict_series_orient, register_option, multi_index_to_list, string_array_str_ops
+### Iters 482–487 — ✅ 821→827: to_dict_series_orient, register_option, multi_index_to_list, string_array_str_ops, series_rename_ops, ewm
 
 ### Iters 476–481 — ✅ 815→821: bench_series_between, bench_sort_index, bench_js_divergence, bench_renyi_tsallis, bench_wasm_accelerated_ext, bench_holiday_offset, bench_datetime_array_advanced, bench_timedelta_array_arithmetic
 
