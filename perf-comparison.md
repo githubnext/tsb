@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-29T13:35:00Z |
-| Iteration Count | 492 |
-| Best Metric | 832 |
+| Last Run | 2026-08-30T06:57:39Z |
+| Iteration Count | 493 |
+| Best Metric | 833 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -43,8 +43,8 @@
 - WASM-accelerated functions (searchsortedAccelerated etc.) live in `src/wasm/index.ts`, not `src/index.ts` — import directly from `../../src/wasm/index.ts`.
 - `nuniqueSeries`/`nuniqueDataFrame` import from `../../src/stats/index.js`.
 - MO/TU/WE/TH/FR/SA/SU weekday offset constructors exported from `src/index.js`; Holiday offset param accepts WeekdayOffset directly.
-
 - `toOffset` / `inferFreq` live in `src/tseries/frequencies.ts` — import from `../../src/index.js`.
+- SparseArray.fromSparse(length, indices, values, fill) takes COO representation; SparseDtype(subtype, fill_value) mirrors pd.SparseDtype; pandas equivalent uses pd.arrays.SparseArray(dense, fill_value=...).
 
 ## 🚧 Foreclosed Avenues
 
@@ -55,6 +55,14 @@
 - Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 493 — 2026-08-30T06:57:39Z — [Run](https://github.com/githubnext/tsb/actions/runs/33297998405)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_sparse_array_advanced` — SparseArray.fromSparse, withFillValue, at(), SparseDtype on 100k 2%-density sparse array
+- **Metric**: 833 (previous best: 832, delta: +1)
+- **Commit**: bbd59e8b
+- **Notes**: SparseArray.fromSparse (COO constructor), withFillValue (fill sentinel change), element-level at() access, and SparseDtype construction + .equals() had no dedicated benchmark pair; mirrors pd.arrays.SparseArray COO construction, fill_value change, and pd.SparseDtype.
 
 ### Iteration 492 — 2026-08-29T13:35:00Z — [Run](https://github.com/githubnext/tsb/actions/runs/33285207528)
 
@@ -67,20 +75,11 @@
 ### Iteration 491 — 2026-08-29T12:58:19Z — [Run](https://github.com/githubnext/tsb/actions/runs/33253694015)
 
 - **Status**: ✅ Accepted
-- **Change**: Added `bench_wasm_rolling_sum_mean` — rollingSumF64Accelerated, rollingMeanF64Accelerated, expandingSumF64Accelerated, expandingMeanF64Accelerated on 100k float64 array
+- **Change**: Added `bench_wasm_rolling_sum_mean` — rollingSumF64Accelerated, rollingMeanF64Accelerated, expandingSumF64Accelerated, expandingMeanF64Accelerated
 - **Metric**: 831 (previous best: 830, delta: +1)
 - **Commit**: 5d7effde
-- **Notes**: These 4 WASM-accelerated functions were the only remaining uncovered accelerated.ts exports; mirrors pandas Series.rolling(50).sum/mean and Series.expanding().sum/mean.
 
-### Iteration 490 — 2026-08-29T01:05:43Z — [Run](https://github.com/githubnext/tsb/actions/runs/33225322029)
-
-- **Status**: ✅ Accepted
-- **Change**: Added `bench_series_rename_ops` — addPrefixSeries/addSuffixSeries/setAxisSeries/setAxisDataFrame/seriesToFrame on 100k-element inputs
-- **Metric**: 830 (previous best: 829, delta: +1)
-- **Commit**: fd0704ae
-- **Notes**: These 5 exported functions from src/stats/rename_ops.ts had no dedicated benchmark pair; mirrors pandas Series.add_prefix/add_suffix/set_axis, DataFrame.set_axis, Series.to_frame.
-
-### Iters 488–490 — ✅ 828→830: ewm, string_array_cat, series_rename_ops
+### Iters 490–492 — ✅ 830→832: series_rename_ops, datetime_index_min_max, wasm_rolling_sum_mean
 
 ### Iters 482–487 — ✅ 821→827: wasm_agg_ops, wasm_rolling_stats, to_dict_series_orient, register_option, multi_index_to_list, string_array_str_ops
 
