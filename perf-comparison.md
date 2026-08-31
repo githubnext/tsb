@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-31T07:09:02Z |
-| Iteration Count | 495 |
-| Best Metric | 835 |
+| Last Run | 2026-08-31T18:58:23Z |
+| Iteration Count | 496 |
+| Best Metric | 836 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -59,6 +59,13 @@
 - Explore remaining tsb functions not yet benchmarked (numeric_ops, where_mask, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 496 — 2026-08-31T18:58:23Z — [Run](https://github.com/githubnext/tsb/actions/runs/33427668624)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_series_digitize_cv` — seriesDigitize and coefficientOfVariation on 100k-element Series
+- **Metric**: 836 (previous best: 835, delta: +1)
+- **Commit**: bd27092e
 
 ### Iteration 495 — 2026-08-31T07:09:02Z — [Run](https://github.com/githubnext/tsb/actions/runs/33366886818)
 
