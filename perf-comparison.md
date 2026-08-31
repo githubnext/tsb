@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-30T18:57:42Z |
-| Iteration Count | 494 |
-| Best Metric | 834 |
+| Last Run | 2026-08-31T07:09:02Z |
+| Iteration Count | 495 |
+| Best Metric | 835 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -19,6 +19,8 @@
 | Completed Reason | — |
 | Consecutive Errors | 0 |
 | Recent Statuses | accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted, accepted |
+
+
 
 
 
@@ -46,6 +48,7 @@
 - `toOffset` / `inferFreq` live in `src/tseries/frequencies.ts` — import from `../../src/index.js`.
 - SparseArray.fromSparse(length, indices, values, fill) takes COO representation; SparseDtype(subtype, fill_value) mirrors pd.SparseDtype; pandas equivalent uses pd.arrays.SparseArray(dense, fill_value=...).
 - Expanding wasm functions (expandingMin/Max/Var/Std/MedianF64Accelerated) take (data, minPeriods) — use SIZE=10k for median (O(n²) fallback).
+- `stack(df)` / `df.stack()` and `series.unstack()` from `src/reshape/stack_unstack.ts`; pandas uses `future_stack=True` to avoid deprecation warning.
 
 ## 🚧 Foreclosed Avenues
 
@@ -53,9 +56,16 @@
 
 ## 🔭 Future Directions
 
-- Explore remaining tsb functions not yet benchmarked (format_ops, etc.).
+- Explore remaining tsb functions not yet benchmarked (numeric_ops, where_mask, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 495 — 2026-08-31T07:09:02Z — [Run](https://github.com/githubnext/tsb/actions/runs/33366886818)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_stack_unstack` — DataFrame.stack() and Series.unstack() on 1000×5 DataFrame
+- **Metric**: 835 (previous best: 834, delta: +1)
+- **Commit**: 85b793ca
 
 ### Iteration 494 — 2026-08-30T18:57:42Z — [Run](https://github.com/githubnext/tsb/actions/runs/33329400368)
 
