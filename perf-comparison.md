@@ -6,9 +6,9 @@
 
 | Field | Value |
 |-------|-------|
-| Last Run | 2026-08-31T18:58:23Z |
-| Iteration Count | 496 |
-| Best Metric | 836 |
+| Last Run | 2026-09-01T07:03:02Z |
+| Iteration Count | 497 |
+| Best Metric | 837 |
 | Target Metric | — |
 | Branch | `autoloop/perf-comparison` |
 | PR | #461 |
@@ -59,6 +59,14 @@
 - Explore remaining tsb functions not yet benchmarked (numeric_ops, where_mask, etc.).
 
 ## 📊 Iteration History
+
+### Iteration 497 — 2026-09-01T07:03:02Z — [Run](https://github.com/githubnext/tsb/actions/runs/33480036252)
+
+- **Status**: ✅ Accepted
+- **Change**: Added `bench_cat_accessor_mutation` — CategoricalAccessor mutation methods (removeCategories, renameCategories, setCategories, reorderCategories, asOrdered, asUnordered)
+- **Metric**: 837 (previous best: 836, delta: +1)
+- **Commit**: ef191e61
+- **Notes**: Covered the 6 mutation methods on CategoricalAccessor not benchmarked in bench_cat_accessor.ts. Both TS and Python use N=50k dataset with 5-category series.
 
 ### Iteration 496 — 2026-08-31T18:58:23Z — [Run](https://github.com/githubnext/tsb/actions/runs/33427668624)
 
