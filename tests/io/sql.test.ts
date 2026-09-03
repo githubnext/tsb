@@ -292,6 +292,21 @@ describe("readSqlQuery — basic", () => {
     expect(df.shape).toEqual([0, 2]);
     expect([...df.columns.values]).toEqual(["a", "b"]);
   });
+
+  it("preserves prototype-named columns", () => {
+    const columns = ["__proto__", "constructor"];
+    const row: SqlRow = Object.fromEntries([
+      ["__proto__", 1],
+      ["constructor", 2],
+    ]);
+    const result: SqlResult = { columns, rows: [row] };
+    const df = readSqlQuery("SELECT special columns", { query: () => result });
+
+    expect(df.shape).toEqual([1, 2]);
+    expect([...df.columns.values]).toEqual(columns);
+    expect([...df.col("__proto__").values]).toEqual([1]);
+    expect([...df.col("constructor").values]).toEqual([2]);
+  });
 });
 
 // ─── readSqlTable ─────────────────────────────────────────────────────────────
