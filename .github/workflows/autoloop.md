@@ -65,7 +65,7 @@ safe-outputs:
   push-to-pull-request-branch:
     signed-commits: false
     target: "*"
-    title-prefix: "[Autoloop"
+    required-title-prefix: "[Autoloop"
     protected-files:
       policy: allowed
       exclude:
