@@ -1,0 +1,50 @@
+name: Merge Steward Reconcile
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
+  pull_request_review:
+    branches: [main]
+    types: [submitted, dismissed]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        description: Pull request number to observe
+        required: true
+        type: string
+      expected_head_sha:
+        description: Optional expected head SHA
+        required: false
+        type: string
+
+concurrency:
+  group: merge-steward-reconcile-${{ github.event.pull_request.number || github.event.workflow_run.id || github.event.inputs.pull_request_number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+
+jobs:
+  reconcile:
+    name: Observe merge readiness
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Plan deterministic transitions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/merge-steward/reconcile.mjs

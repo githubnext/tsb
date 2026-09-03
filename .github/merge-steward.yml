@@ -1,0 +1,449 @@
+# yaml-language-server: $schema=https://github.com/githubnext/mq/raw/main/.agents/skills/merge-steward-builder/assets/merge-steward.schema.json
+version: 1
+
+defaults:
+  operation_mode: observe
+  auto_merge: "on"
+  merge_method: squash
+  base_strategy: on-conflict
+  max_parallel_cost: medium
+  notify_after_minutes: 30
+  max_automatic_retries: 0
+
+readiness:
+  require_non_draft: true
+  required_approvals: 0
+  dismiss_stale_approvals: true
+  require_resolved_threads: false
+  dependencies: ignore
+
+jobs:
+  test-and-lint:
+    source: .github/workflows/ci.yml#test
+    check_name: Test & Lint
+    provides: [typecheck, source-lints, unit-tests, coverage, golden-snapshots, pandas-cross-validation]
+    necessity:
+      level: required
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: medium
+      expected_minutes: 0.6
+      runner: ubuntu-latest
+    phase: on-change
+    failure:
+      automatic_retries: 0
+      diagnose: true
+
+  playground-e2e:
+    source: .github/workflows/ci.yml#playground-e2e
+    check_name: Playground E2E (Playwright)
+    provides: [playground-browser-tests]
+    necessity:
+      level: required
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: internet
+      external_writes: [actions-cache]
+    cost:
+      tier: high
+      expected_minutes: 1.2
+      runner: ubuntu-latest
+    phase: on-change
+    failure:
+      automatic_retries: 0
+      diagnose: true
+
+  build:
+    source: .github/workflows/ci.yml#build
+    check_name: Build
+    provides: [browser-library-build]
+    necessity:
+      level: required
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: package-registries
+      external_writes: [actions-artifact]
+    cost:
+      tier: low
+      expected_minutes: 0.2
+      runner: ubuntu-latest
+    prerequisites: [typecheck, source-lints, unit-tests, coverage, golden-snapshots, pandas-cross-validation]
+    phase: on-change
+    failure:
+      automatic_retries: 0
+      diagnose: true
+
+  validate-python-examples:
+    source: .github/workflows/ci.yml#validate-python-examples
+    check_name: Validate Python Examples
+    provides: [python-playground-examples]
+    necessity:
+      level: required
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: medium
+      expected_minutes: 1.7
+      runner: ubuntu-latest
+    phase: on-change
+    failure:
+      automatic_retries: 0
+      diagnose: true
+
+  openevolve-benchmark:
+    source: .github/workflows/ci.yml#benchmark
+    check_name: OpenEvolve benchmark
+    provides: [openevolve-fitness]
+    necessity:
+      level: advisory
+      when:
+        paths: [.autoloop/programs/**]
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: internet
+      external_writes: [actions-artifact, check-run]
+    cost:
+      tier: high
+      runner: ubuntu-latest
+    phase: on-change
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  copilot-setup:
+    source: .github/workflows/copilot-setup-steps.yml#copilot-setup-steps
+    check_name: copilot-setup-steps
+    provides: [copilot-agent-setup]
+    necessity:
+      level: advisory
+      when:
+        paths: [.github/workflows/copilot-setup-steps.yml]
+    freshness:
+      subject: same-diff
+      invalidated_by: [relevant-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["contents:read"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: low
+      expected_minutes: 1
+      runner: ubuntu-latest
+    phase: on-change
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  pages-build:
+    source: .github/workflows/pages.yml#build
+    check_name: Build Playground
+    provides: [pages-playground-artifact]
+    necessity:
+      level: advisory
+      when:
+        base_branches: [main]
+    freshness:
+      subject: latest-base
+      invalidated_by: [any-base-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["contents:read", "pages:write", "id-token:write"]
+      network: internet
+      external_writes: [pages-artifact]
+    cost:
+      tier: high
+      expected_minutes: 17
+      runner: ubuntu-latest
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  pages-deploy:
+    source: .github/workflows/pages.yml#deploy
+    check_name: Deploy to Pages
+    provides: [pages-deployment]
+    necessity:
+      level: advisory
+      when:
+        base_branches: [main]
+    freshness:
+      subject: latest-base
+      invalidated_by: [any-base-change, workflow-change, policy-change]
+    approval:
+      mode: always
+      environment: github-pages
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["contents:read", "pages:write", "id-token:write"]
+      network: internet
+      external_writes: [github-pages]
+    cost:
+      tier: low
+      expected_minutes: 0.2
+      runner: ubuntu-latest
+    prerequisites: [pages-playground-artifact]
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  autoloop-agent:
+    source: .github/workflows/autoloop.md#agent
+    check_name: Autoloop / agent
+    provides: [autoloop-proposals]
+    necessity:
+      level: advisory
+    freshness:
+      subject: once-per-pr
+      invalidated_by: [manual, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: [COPILOT_GITHUB_TOKEN, GH_AW_GITHUB_MCP_SERVER_TOKEN, GH_AW_GITHUB_TOKEN]
+      permissions: ["contents:write", "issues:write", "pull-requests:write"]
+      network: privileged
+      external_writes: [issues, labels, pull-request-branches, pull-requests, repo-memory]
+    cost:
+      tier: scarce
+      expected_minutes: 10
+      runner: ubuntu-latest
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  goal-agent:
+    source: .github/workflows/goal.md#agent
+    check_name: Goal / agent
+    provides: [goal-implementation]
+    necessity:
+      level: advisory
+    freshness:
+      subject: once-per-pr
+      invalidated_by: [manual, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: [COPILOT_GITHUB_TOKEN, GH_AW_GITHUB_MCP_SERVER_TOKEN, GH_AW_GITHUB_TOKEN]
+      permissions: ["contents:write", "issues:write", "pull-requests:write"]
+      network: privileged
+      external_writes: [issues, labels, pull-request-branches, pull-requests, repo-memory]
+    cost:
+      tier: scarce
+      expected_minutes: 10
+      runner: ubuntu-latest
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  evergreen-preflight:
+    source: .github/workflows/evergreen.md#preflight
+    check_name: Evergreen deterministic preflight
+    provides: [evergreen-opt-in-coordination]
+    necessity:
+      level: advisory
+      when:
+        labels: [evergreen]
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, any-base-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: [GH_AW_CI_TRIGGER_TOKEN]
+      permissions: ["actions:write", "contents:write", "issues:write", "pull-requests:write"]
+      network: internet
+      external_writes: [labels, workflow-reruns]
+    cost:
+      tier: low
+      expected_minutes: 0.2
+      runner: ubuntu-latest
+    phase: after-review
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  evergreen-agent:
+    source: .github/workflows/evergreen.md#agent
+    check_name: Evergreen / agent
+    provides: [evergreen-repair]
+    necessity:
+      level: diagnostic
+      when:
+        labels: [evergreen]
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, any-base-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: [COPILOT_GITHUB_TOKEN, GH_AW_GITHUB_MCP_SERVER_TOKEN, GH_AW_GITHUB_TOKEN]
+      permissions: ["contents:write", "issues:write", "pull-requests:write"]
+      network: privileged
+      external_writes: [labels, pull-request-branches, pull-request-reviews, pull-requests]
+    cost:
+      tier: scarce
+      expected_minutes: 10
+      runner: ubuntu-latest
+    phase: after-review
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  ci-doctor:
+    source: .github/workflows/ci-doctor.md#agent
+    check_name: CI Failure Doctor / agent
+    provides: [main-ci-failure-diagnosis]
+    necessity:
+      level: diagnostic
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: [COPILOT_GITHUB_TOKEN, GH_AW_GITHUB_MCP_SERVER_TOKEN, GH_AW_GITHUB_TOKEN]
+      permissions: ["contents:read", "issues:write", "pull-requests:write"]
+      network: internet
+      external_writes: [issue-comments, issues]
+    cost:
+      tier: scarce
+      expected_minutes: 10
+      runner: ubuntu-latest
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  merge-steward-reconcile:
+    source: .github/workflows/merge-steward-reconcile.yml#reconcile
+    check_name: Observe merge readiness
+    provides: [merge-steward-advisory-plan]
+    necessity:
+      level: advisory
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["actions:read", "contents:read", "pull-requests:read"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: low
+      expected_minutes: 0.2
+      runner: ubuntu-latest
+    phase: on-change
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  merge-steward-diagnosis:
+    source: .github/workflows/merge-steward-diagnose.md#agent
+    check_name: Merge Steward Diagnosis / agent
+    provides: [merge-blocker-diagnosis]
+    necessity:
+      level: diagnostic
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: [COPILOT_GITHUB_TOKEN, GH_AW_GITHUB_MCP_SERVER_TOKEN, GH_AW_GITHUB_TOKEN]
+      permissions: ["actions:read", "checks:read", "contents:read", "issues:read", "pull-requests:read"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: scarce
+      expected_minutes: 10
+      runner: ubuntu-latest
+    phase: final-candidate
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  merge-steward-diagnosis-preflight:
+    source: .github/workflows/merge-steward-diagnose.md#preflight
+    check_name: Validate current exception
+    provides: [merge-blocker-preflight]
+    necessity:
+      level: diagnostic
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["checks:read", "contents:read", "pull-requests:read"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: low
+      expected_minutes: 0.2
+      runner: ubuntu-latest
+    phase: final-candidate
+    failure:
+      automatic_retries: 0
+      diagnose: false
