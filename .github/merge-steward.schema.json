@@ -185,7 +185,14 @@
       "required": ["subject", "invalidated_by"],
       "properties": {
         "subject": {
-          "enum": ["every-head", "same-diff", "once-per-pr", "latest-base", "before-merge", "merge-group"]
+          "enum": [
+            "every-head",
+            "same-diff",
+            "once-per-pr",
+            "latest-base",
+            "before-merge",
+            "merge-group"
+          ]
         },
         "invalidated_by": {
           "type": "array",
@@ -327,4 +334,3 @@
     }
   }
 }
-
