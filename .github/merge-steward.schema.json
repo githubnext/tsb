@@ -1,0 +1,330 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/githubnext/mq/schema/merge-steward.schema.json",
+  "title": "Merge Steward configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "defaults", "jobs"],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "defaults": {
+      "$ref": "#/$defs/defaults"
+    },
+    "readiness": {
+      "$ref": "#/$defs/readiness"
+    },
+    "jobs": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/job"
+      }
+    }
+  },
+  "$defs": {
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["auto_merge", "base_strategy", "max_parallel_cost"],
+      "properties": {
+        "auto_merge": {
+          "enum": ["off", "opt-in", "on"]
+        },
+        "merge_method": {
+          "enum": ["merge", "squash", "rebase"],
+          "default": "squash"
+        },
+        "base_strategy": {
+          "enum": ["synthetic", "on-conflict", "before-final-checks", "always-current"]
+        },
+        "max_parallel_cost": {
+          "enum": ["low", "medium", "high", "unbounded"]
+        },
+        "notify_after_minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 30
+        },
+        "max_automatic_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5,
+          "default": 1
+        }
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "require_non_draft": {
+          "type": "boolean",
+          "default": true
+        },
+        "required_approvals": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 1
+        },
+        "dismiss_stale_approvals": {
+          "type": "boolean",
+          "default": true
+        },
+        "require_resolved_threads": {
+          "type": "boolean",
+          "default": true
+        },
+        "dependencies": {
+          "enum": ["ignore", "require-merged"],
+          "default": "require-merged"
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "provides", "necessity", "freshness", "approval", "risk", "cost"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "pattern": "^\\.github/workflows/[^#]+#[A-Za-z0-9_.-]+$"
+        },
+        "check_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provides": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*$"
+          }
+        },
+        "necessity": {
+          "$ref": "#/$defs/necessity"
+        },
+        "freshness": {
+          "$ref": "#/$defs/freshness"
+        },
+        "approval": {
+          "$ref": "#/$defs/approval"
+        },
+        "risk": {
+          "$ref": "#/$defs/risk"
+        },
+        "cost": {
+          "$ref": "#/$defs/cost"
+        },
+        "prerequisites": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "dispatch": {
+          "$ref": "#/$defs/dispatch"
+        },
+        "failure": {
+          "$ref": "#/$defs/failure"
+        }
+      }
+    },
+    "necessity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": {
+          "enum": ["required", "conditional", "advisory", "diagnostic"]
+        },
+        "when": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "paths": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "labels": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "base_branches": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "invalidated_by"],
+      "properties": {
+        "subject": {
+          "enum": ["every-head", "same-diff", "once-per-pr", "latest-base", "before-merge", "merge-group"]
+        },
+        "invalidated_by": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "any-head-change",
+              "relevant-head-change",
+              "any-base-change",
+              "relevant-base-change",
+              "workflow-change",
+              "policy-change",
+              "manual"
+            ]
+          }
+        },
+        "ttl_minutes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["never", "untrusted-only", "always"]
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "enum": ["untrusted-only", "always"]
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "required": ["environment"]
+          }
+        }
+      ]
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executes_pr_code", "secrets", "permissions", "network", "external_writes"],
+      "properties": {
+        "executes_pr_code": {
+          "type": "boolean"
+        },
+        "secrets": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "permissions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z-]+:(read|write)$"
+          }
+        },
+        "network": {
+          "enum": ["none", "package-registries", "internet", "privileged"]
+        },
+        "external_writes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tier"],
+      "properties": {
+        "tier": {
+          "enum": ["low", "medium", "high", "scarce"]
+        },
+        "expected_minutes": {
+          "type": "number",
+          "minimum": 0
+        },
+        "runner": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "dispatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow"],
+      "properties": {
+        "workflow": {
+          "type": "string",
+          "pattern": "^[^/]+\\.(yml|yaml|md)$"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          }
+        }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "automatic_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "diagnose": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  }
+}
+

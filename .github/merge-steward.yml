@@ -1,0 +1,231 @@
+# yaml-language-server: $schema=merge-steward.schema.json
+#
+# Generated from the trusted workflow definitions and repository rules on main.
+# Merge Steward is staged: this file describes readiness, but the workflow does
+# not dispatch CI, update branches, or merge pull requests in this installation.
+version: 1
+
+defaults:
+  auto_merge: "off"
+  merge_method: squash
+  base_strategy: synthetic
+  max_parallel_cost: medium
+  notify_after_minutes: 30
+  max_automatic_retries: 1
+
+# TSB currently has no branch-protection review requirement. Evergreen treats
+# the four CI checks below as the required gate, so this contract preserves that
+# behavior rather than introducing a new human-review requirement.
+readiness:
+  require_non_draft: true
+  required_approvals: 0
+  dismiss_stale_approvals: true
+  require_resolved_threads: false
+  dependencies: ignore
+
+jobs:
+  test-and-lint:
+    source: .github/workflows/ci.yml#test
+    check_name: Test & Lint
+    provides: [typecheck, source-lints, unit-tests, coverage, golden-snapshots, pandas-cross-validation]
+    necessity:
+      level: required
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: medium
+      expected_minutes: 2
+      runner: ubuntu-latest
+    failure:
+      automatic_retries: 1
+      diagnose: true
+
+  playground-e2e:
+    source: .github/workflows/ci.yml#playground-e2e
+    check_name: Playground E2E (Playwright)
+    provides: [playground-browser-tests]
+    necessity:
+      level: required
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: internet
+      external_writes: [actions-cache]
+    cost:
+      tier: high
+      expected_minutes: 2
+      runner: ubuntu-latest
+    failure:
+      automatic_retries: 1
+      diagnose: true
+
+  build:
+    source: .github/workflows/ci.yml#build
+    check_name: Build
+    provides: [browser-library-build]
+    necessity:
+      level: required
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: package-registries
+      external_writes: [actions-artifact]
+    cost:
+      tier: low
+      expected_minutes: 1
+      runner: ubuntu-latest
+    prerequisites: [typecheck, source-lints, unit-tests, coverage, golden-snapshots, pandas-cross-validation]
+    failure:
+      automatic_retries: 1
+      diagnose: true
+
+  validate-python-examples:
+    source: .github/workflows/ci.yml#validate-python-examples
+    check_name: Validate Python Examples
+    provides: [python-playground-examples]
+    necessity:
+      level: required
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: medium
+      expected_minutes: 2
+      runner: ubuntu-latest
+    failure:
+      automatic_retries: 1
+      diagnose: true
+
+  openevolve-benchmark:
+    source: .github/workflows/ci.yml#benchmark
+    check_name: OpenEvolve benchmark
+    provides: [openevolve-fitness]
+    necessity:
+      level: advisory
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: true
+      secrets: []
+      permissions: ["contents:read", "checks:write"]
+      network: internet
+      external_writes: [check-run, actions-artifact]
+    cost:
+      tier: high
+      runner: ubuntu-latest
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  copilot-setup:
+    source: .github/workflows/copilot-setup-steps.yml#copilot-setup-steps
+    check_name: copilot-setup-steps
+    provides: [copilot-agent-setup]
+    necessity:
+      level: advisory
+      when:
+        paths: [.github/workflows/copilot-setup-steps.yml]
+    freshness:
+      subject: same-diff
+      invalidated_by: [relevant-head-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["contents:read"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: low
+      expected_minutes: 1
+      runner: ubuntu-latest
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  pages-build:
+    source: .github/workflows/pages.yml#build
+    check_name: Build Playground
+    provides: [pages-playground-artifact]
+    necessity:
+      level: advisory
+      when:
+        base_branches: [main]
+    freshness:
+      subject: latest-base
+      invalidated_by: [any-base-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["contents:read", "pages:write", "id-token:write"]
+      network: internet
+      external_writes: [pages-artifact]
+    cost:
+      tier: high
+      runner: ubuntu-latest
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  pages-deploy:
+    source: .github/workflows/pages.yml#deploy
+    check_name: Deploy to GitHub Pages
+    provides: [pages-deployment]
+    necessity:
+      level: advisory
+      when:
+        base_branches: [main]
+    freshness:
+      subject: latest-base
+      invalidated_by: [any-base-change, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["contents:read", "pages:write", "id-token:write"]
+      network: internet
+      external_writes: [github-pages]
+    cost:
+      tier: low
+      expected_minutes: 1
+      runner: ubuntu-latest
+    prerequisites: [pages-playground-artifact]
+    failure:
+      automatic_retries: 0
+      diagnose: false
