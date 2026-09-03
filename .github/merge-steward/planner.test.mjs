@@ -47,12 +47,7 @@ const base = {
 
 const cases = [
   ["green candidate", {}, "ready", "all-requirements-satisfied"],
-  [
-    "stale event",
-    { event: { ...base.event, expectedHeadSha: "old" } },
-    "noop",
-    "stale-event",
-  ],
+  ["stale event", { event: { ...base.event, expectedHeadSha: "old" } }, "noop", "stale-event"],
   ["missing evidence", { evidence: {} }, "waiting", "required-check-not-reported"],
   [
     "pending evidence",
@@ -66,24 +61,9 @@ const cases = [
     "diagnose",
     "required-check-failed",
   ],
-  [
-    "unknown failure hands off",
-    { unknownBlockingFailure: true },
-    "diagnose",
-    "unknown-failure",
-  ],
-  [
-    "policy ambiguity hands off",
-    { policyAmbiguity: true },
-    "diagnose",
-    "policy-ambiguity",
-  ],
-  [
-    "duplicate event",
-    { event: { ...base.event, duplicate: true } },
-    "noop",
-    "duplicate-event",
-  ],
+  ["unknown failure hands off", { unknownBlockingFailure: true }, "diagnose", "unknown-failure"],
+  ["policy ambiguity hands off", { policyAmbiguity: true }, "diagnose", "policy-ambiguity"],
+  ["duplicate event", { event: { ...base.event, duplicate: true } }, "noop", "duplicate-event"],
 ];
 
 for (const [name, changes, expectedState, expectedReason] of cases) {

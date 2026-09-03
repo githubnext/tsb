@@ -13,9 +13,10 @@ head SHA has succeeded for:
 - `Build`
 - `Validate Python Examples`
 
-The repository currently requires neither approvals nor resolved review threads,
-and has no branch protection or rulesets. Merge Steward records the four checks
-as policy requirements without adding a synthetic required status check.
+The repository currently requires neither approvals nor resolved review threads.
+Branch protection requires the authoritative `Test & Lint` check. Merge Steward
+records all four CI checks as policy requirements without adding a synthetic
+Steward status check.
 
 ## Boundaries
 

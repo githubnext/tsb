@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { readFileSync, appendFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { appendFileSync, readFileSync } from "node:fs";
 import { plan, projectPolicy } from "./planner.mjs";
 
 const repo = process.env.GITHUB_REPOSITORY;
@@ -74,7 +74,9 @@ function aggregateEvidence(checks) {
   for (const check of checks ?? []) {
     const name = check.name ?? check.context;
     if (!name) continue;
-    const conclusion = String(check.conclusion ?? check.state ?? check.status ?? "MISSING").toUpperCase();
+    const conclusion = String(
+      check.conclusion ?? check.state ?? check.status ?? "MISSING",
+    ).toUpperCase();
     const completedAt = check.completedAt ?? check.startedAt ?? "";
     const previous = evidence[name];
     if (!previous || completedAt >= previous.completedAt) {
@@ -150,7 +152,9 @@ const summary = [
   "| PR | Head | State | Reason | Proposed effects |",
   "|---:|---|---|---|---|",
   ...plans.map((item) => {
-    const effects = item.proposedEffects.map(({ type, reason }) => reason ? `${type}:${reason}` : type);
+    const effects = item.proposedEffects.map(({ type, reason }) =>
+      reason ? `${type}:${reason}` : type,
+    );
     return `| #${item.candidate.number} | \`${item.candidate.headSha.slice(0, 12)}\` | ${item.state} | ${item.reason} | ${effects.join(", ") || "none"} |`;
   }),
 ];

@@ -7,14 +7,7 @@ const COST_ORDER = new Map([
 
 const SUCCESS = new Set(["SUCCESS", "NEUTRAL", "SKIPPED"]);
 const PENDING = new Set(["EXPECTED", "PENDING", "QUEUED", "IN_PROGRESS", "WAITING"]);
-const FAILURE = new Set([
-  "ACTION_REQUIRED",
-  "CANCELLED",
-  "ERROR",
-  "FAILURE",
-  "STALE",
-  "TIMED_OUT",
-]);
+const FAILURE = new Set(["ACTION_REQUIRED", "CANCELLED", "ERROR", "FAILURE", "STALE", "TIMED_OUT"]);
 
 function effectKey(candidate, type, subject) {
   return [
@@ -152,11 +145,13 @@ export function plan(input) {
     const job = failed[0];
     const attempts = input.evidence[job.checkName]?.automaticRetries ?? 0;
     if (job.dispatch && attempts < job.automaticRetries) {
-      const proposed = [{
-        type: "dispatch",
-        job: job.id,
-        key: effectKey(candidate, "dispatch", job.id),
-      }];
+      const proposed = [
+        {
+          type: "dispatch",
+          job: job.id,
+          key: effectKey(candidate, "dispatch", job.id),
+        },
+      ];
       return result("dispatch", "retry-required-check", candidate, proposed, {
         ...common,
         failed: failed.map(({ id }) => id),
@@ -194,11 +189,13 @@ export function plan(input) {
       .sort((left, right) => COST_ORDER.get(left.cost) - COST_ORDER.get(right.cost));
     if (dispatchable.length > 0) {
       const job = dispatchable[0];
-      const proposed = [{
-        type: "dispatch",
-        job: job.id,
-        key: effectKey(candidate, "dispatch", job.id),
-      }];
+      const proposed = [
+        {
+          type: "dispatch",
+          job: job.id,
+          key: effectKey(candidate, "dispatch", job.id),
+        },
+      ];
       return result("dispatch", "missing-required-check", candidate, proposed, {
         ...common,
         missing: missing.map(({ id }) => id),
@@ -211,11 +208,13 @@ export function plan(input) {
   }
 
   if (policy.autoMerge === "on") {
-    const proposed = [{
-      type: "auto-merge",
-      method: policy.mergeMethod,
-      key: effectKey(candidate, "auto-merge", policy.mergeMethod),
-    }];
+    const proposed = [
+      {
+        type: "auto-merge",
+        method: policy.mergeMethod,
+        key: effectKey(candidate, "auto-merge", policy.mergeMethod),
+      },
+    ];
     return result("auto-merge", "all-requirements-satisfied", candidate, proposed, common);
   }
 
