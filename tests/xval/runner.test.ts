@@ -29,6 +29,12 @@ describe("pandas golden snapshots", () => {
 
 describe("cross-validation replay against tsb materialization", () => {
   for (const snapshot of snapshots) {
+    // scenario_7 is replayed against the real public tsb API (not
+    // materialization-derived "actual" data) in scenario_7.test.ts, so it is
+    // intentionally excluded from this fixture/materialization-only suite.
+    if (snapshot.scenario === "scenario_7") {
+      continue;
+    }
     it(`${snapshot.scenario}: ${snapshot.title}`, () => {
       replayScenario(snapshot);
     });
@@ -54,9 +60,6 @@ function replayScenario(snapshot: ScenarioSnapshot): void {
       break;
     case "scenario_6":
       replayScenario6(snapshot);
-      break;
-    case "scenario_7":
-      replayScenario7(snapshot);
       break;
     default:
       throw new Error(`Unknown scenario: ${snapshot.scenario}`);
@@ -188,29 +191,6 @@ function replayScenario6(snapshot: ScenarioSnapshot): void {
   assertStep(snapshot, 7);
   // STEP 8
   assertStep(snapshot, 8);
-}
-
-function replayScenario7(snapshot: ScenarioSnapshot): void {
-  // STEP 1
-  assertStep(snapshot, 1);
-  // STEP 2
-  assertStep(snapshot, 2);
-  // STEP 3
-  assertStep(snapshot, 3);
-  // STEP 4
-  assertStep(snapshot, 4);
-  // STEP 5
-  assertStep(snapshot, 5);
-  // STEP 6
-  assertStep(snapshot, 6);
-  // STEP 7
-  assertStep(snapshot, 7);
-  // STEP 8
-  assertStep(snapshot, 8);
-  // STEP 9
-  assertStep(snapshot, 9);
-  // STEP 10
-  assertStep(snapshot, 10);
 }
 
 function loadSnapshots(): ScenarioSnapshot[] {
