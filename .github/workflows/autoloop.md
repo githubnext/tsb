@@ -180,7 +180,7 @@ no setup.
 
 After switching/synchronizing branches, use the absolute pinned Python executable
 recorded in the read-only `$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_manifest.json`
-to run `$RUNNER_TEMP/gh-aw/actions/tsb_provision_agent_runtime.py` with
+with `-I` to run `$RUNNER_TEMP/gh-aw/actions/tsb_provision_agent_runtime.py` with
 `--selection "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json" --repo-root "$GITHUB_WORKSPACE"`,
 then repeat with `--check-only` for a bounded refresh-then-check sequence.
 Never source a writable `.env`, substitute the branch-owned helper, or restage
@@ -513,18 +513,22 @@ automatic rejection-plateau skip.
 
 ### Step 3: Implement
 
-1. Synchronize the canonical branch locally with the repository default branch.
+1. Prepare the canonical branch locally, without refreshing active PRs from main.
    Read `head_branch` from `/tmp/gh-aw/autoloop.json` into `branch`, determine
    `default_branch` from repository metadata, then run the trusted helper:
 
    ```bash
-   bash .github/workflows/scripts/sync_automation_branch.sh "$branch" "$default_branch"
+   bash "$RUNNER_TEMP/gh-aw/actions/sync_automation_branch.sh" "$branch" "$default_branch" \
+     "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json"
    ```
 
-   The helper checks out the existing remote tip and merges the base, using a
-   fast-forward when possible. It preserves every existing branch commit and
-   never publishes. If it reports a conflict, stop and record the conflict for
-   a focused repair. Do not rebase, reset a divergent branch, force-push, or
+   The trusted helper verifies current PR state. An active PR resumes its exact
+   remote head without merging main. Only verified no-open-PR reuse refreshes
+   the base while preserving history, including after squash merges; a new
+   branch starts at current main. Stop on missing/stale evidence or conflicts;
+   never substitute the branch-owned helper. If an active PR genuinely requires
+   a base update, report it for separate authorized coordination, not as part
+   of the task patch. Do not bypass protected-file checks, rebase, reset a divergent branch, force-push, or
    invoke `git push` from the agent; all publication uses safe outputs.
 2. Make the proposed changes to the target files only.
 3. **Respect the program constraints**: do not modify files outside the target list.

@@ -187,7 +187,7 @@ no setup.
 
 After switching/synchronizing branches, use the absolute pinned Python executable
 recorded in the read-only `$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_manifest.json`
-to run `$RUNNER_TEMP/gh-aw/actions/tsb_provision_agent_runtime.py` with
+with `-I` to run `$RUNNER_TEMP/gh-aw/actions/tsb_provision_agent_runtime.py` with
 `--selection "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json" --repo-root "$GITHUB_WORKSPACE"`,
 then repeat with `--check-only` for a bounded refresh-then-check sequence.
 Never source a writable `.env`, substitute the branch-owned helper, or restage
@@ -296,15 +296,21 @@ The branch name is always exactly the scheduler-provided `selected.branch`.
 Never add suffixes, hashes, run IDs, timestamps, or random tokens. Never let the
 framework auto-generate a branch name.
 
-Synchronize the branch locally before making changes. Read `selected.branch`
+Prepare the branch locally before making changes. Read `selected.branch`
 into `branch`, determine `default_branch` from repository metadata, then run:
 
 ```bash
-bash .github/workflows/scripts/sync_automation_branch.sh "$branch" "$default_branch"
+bash "$RUNNER_TEMP/gh-aw/actions/sync_automation_branch.sh" "$branch" "$default_branch" \
+  "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json"
 ```
 
-This preserves remote history and merges the base without rewriting existing
-commits. Stop on conflicts and record the focused repair needed. Never rebase,
+The trusted helper verifies current PR state. An active PR resumes its exact
+remote head without merging main. Only verified no-open-PR reuse refreshes the
+base while preserving history, including after squash merges; a new branch
+starts at current main. Stop on missing/stale evidence or conflicts. Never use
+the branch-owned helper. If an active PR genuinely requires a base update,
+report that separately for authorized branch coordination; do not mix it into
+the repair or bypass protected-file checks. Never rebase,
 force-push, or run `git push` from the agent. Publish through exactly one
 `push-to-pull-request-branch` request for an existing PR, or one
 `create-pull-request` request when no canonical open PR exists.

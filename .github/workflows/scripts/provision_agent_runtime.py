@@ -108,6 +108,8 @@ def stage_runtime(actions_dir, selection, report):
     source = Path(__file__).resolve()
     shutil.copy2(source, actions_dir / "tsb_provision_agent_runtime.py")
     shutil.copy2(source.with_name("tsb_runtime_harness.cjs"), actions_dir / "tsb_runtime_harness.cjs")
+    for helper in ("sync_automation_branch.sh", "automation_branch_state.py"):
+        shutil.copy2(source.with_name(helper), actions_dir / helper)
     (actions_dir / "tsb_agent_runtime_selection.json").write_text(json.dumps(selection, indent=2) + "\n")
     (actions_dir / "tsb_agent_runtime_manifest.json").write_text(
         json.dumps({"schema_version": 1, **report}, indent=2) + "\n")
