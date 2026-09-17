@@ -370,6 +370,84 @@ jobs:
       automatic_retries: 0
       diagnose: false
 
+  autoloop-publication-guard:
+    source: .github/workflows/autoloop.md#publication_guard
+    check_name: Autoloop / publication_guard
+    provides: [autoloop-publication-authorization]
+    necessity:
+      level: advisory
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, manual, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["contents:read", "actions:read", "checks:read", "statuses:read", "issues:read", "pull-requests:read"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: low
+      expected_minutes: 0.5
+      runner: ubuntu-latest
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  goal-publication-guard:
+    source: .github/workflows/goal.md#publication_guard
+    check_name: Goal / publication_guard
+    provides: [goal-publication-authorization]
+    necessity:
+      level: advisory
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, manual, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: []
+      permissions: ["contents:read", "actions:read", "checks:read", "statuses:read", "issues:read", "pull-requests:read"]
+      network: internet
+      external_writes: []
+    cost:
+      tier: low
+      expected_minutes: 0.5
+      runner: ubuntu-latest
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  autoloop-publication-detection:
+    source: .github/workflows/autoloop.md#detection
+    check_name: Autoloop / detection
+    provides: [autoloop-publication-threat-check]
+    necessity:
+      level: advisory
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, manual, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: [COPILOT_GITHUB_TOKEN, GH_AW_DEFAULT_OTLP_HEADERS]
+      permissions: ["contents:read"]
+      network: privileged
+      external_writes: [actions-artifact, telemetry]
+    cost:
+      tier: scarce
+      expected_minutes: 1
+      runner: ubuntu-latest
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
   autoloop-safe-outputs:
     source: .github/workflows/autoloop.md#safe_outputs
     check_name: Autoloop / safe_outputs
@@ -391,6 +469,32 @@ jobs:
       tier: low
       expected_minutes: 1
       runner: ubuntu-slim
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  goal-publication-detection:
+    source: .github/workflows/goal.md#detection
+    check_name: Goal / detection
+    provides: [goal-publication-threat-check]
+    necessity:
+      level: advisory
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, manual, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: [COPILOT_GITHUB_TOKEN, GH_AW_DEFAULT_OTLP_HEADERS]
+      permissions: ["contents:read"]
+      network: privileged
+      external_writes: [actions-artifact, telemetry]
+    cost:
+      tier: scarce
+      expected_minutes: 1
+      runner: ubuntu-latest
     phase: post-merge
     failure:
       automatic_retries: 0

@@ -12,6 +12,7 @@ REQUIRED_JOBS = {
 }
 
 CI_PATH = ".github/workflows/ci.yml"
+MCP_ACTIONS_PAGE_SIZE = 30
 
 
 def _object(value):
@@ -70,15 +71,21 @@ def rest_runs(payload):
 
 
 def mcp_runs(payload):
-    """Validate a bounded first page; the pinned MCP ignores head_sha filters."""
+    """Validate the pinned Actions provider's default first page (30 rows).
+
+    v1.11.0 advertises per_page but reads perPage; gh-aw normalizes the latter
+    back to the former. Omit the size argument instead of claiming 100 rows.
+    The provider also ignores head_sha filters, so absent heads stay pending.
+    """
     payload = _object(payload)
     if (type(payload.get("page")) is not int or payload["page"] != 1 or
-            type(payload.get("per_page")) is not int or payload["per_page"] != 100):
-        raise ValueError("MCP run selection requires the requested first page of 100")
+            type(payload.get("per_page")) is not int or
+            payload["per_page"] != MCP_ACTIONS_PAGE_SIZE):
+        raise ValueError("MCP run selection requires the default first page of 30")
     response = _object(payload.get("runs"))
     rows, total = response.get("workflow_runs"), response.get("total_count")
     if (not isinstance(rows, list) or type(total) is not int or total < 0 or
-            len(rows) != min(total, 100)):
+            len(rows) != min(total, MCP_ACTIONS_PAGE_SIZE)):
         raise ValueError("Incomplete first-page run evidence; preserve the original count")
     runs = [_rest_run(run) for run in rows]
     order = [(run["createdAt"], run["databaseId"]) for run in runs]

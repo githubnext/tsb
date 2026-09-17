@@ -711,4 +711,30 @@ for (const workflow of ["autoloop", "goal"]) {
     assert.match(publisher.if, /needs\.agent\.result == 'success'/);
     assert.match(publisher.if, /needs\.detection\.result == 'success'/);
   });
+
+  test(`actual ${workflow} publication guard is read-only and is not a merge requirement`, () => {
+    const { config, compiled, workflows } = actualRepositoryInventory();
+    const entry = config.jobs[`${workflow}-publication-guard`];
+    const guard = compiled[`.github/workflows/${workflow}.lock.yml`].jobs.publication_guard;
+    const source = `.github/workflows/${workflow}.md#publication_guard`;
+    assert.ok(guard);
+    assert.equal(entry.source, source);
+    assert.equal(entry.necessity.level, "advisory");
+    assert.equal(entry.risk.executes_pr_code, false);
+    assert.deepEqual(entry.risk.secrets, []);
+    assert.deepEqual(entry.risk.external_writes, []);
+    assert.equal(entry.cost.runner, guard["runs-on"]);
+    assert.equal(entry.dispatch, undefined);
+    assert.deepEqual(
+      [...entry.risk.permissions].sort(),
+      Object.entries(guard.permissions)
+        .map(([scope, level]) => `${scope}:${level}`)
+        .sort(),
+    );
+    assert.ok(Object.values(guard.permissions).every((level) => level === "read"));
+    const jobs = Object.fromEntries(
+      Object.entries(config.jobs).filter(([, job]) => job.source !== source),
+    );
+    assert.deepEqual(policyInventory({ ...config, jobs }, workflows), [source]);
+  });
 }

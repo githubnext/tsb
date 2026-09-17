@@ -233,25 +233,26 @@ class McpAutomationCITest(unittest.TestCase):
         return payload
 
     def first_page(self, count=1, total=None):
-        return {"page": 1, "per_page": 100, "runs": {
+        return {"page": 1, "per_page": 30, "runs": {
             "total_count": count if total is None else total,
             "workflow_runs": [{**self.run_payload(), "id": 1000 - index}
                               for index in range(count)]}}
 
     def test_truthful_bounded_first_page_does_not_require_all_history(self):
-        payload = self.first_page(100, 900)
+        payload = self.first_page(30, 900)
         self.assertEqual(latest_run_id(mcp_runs(payload), self.SHA), 1000)
         self.assertEqual(payload["runs"]["total_count"], 900)
         self.assertIsNone(latest_run_id(mcp_runs(payload), self.OLD))
         self.assertEqual(mcp_runs(self.first_page(0)), [])
 
     def test_first_page_rejects_missing_rows_wrong_page_and_order(self):
-        for field, value in (("page", 2), ("page", True), ("per_page", 30)):
+        for field, value in (("page", 2), ("page", True), ("per_page", 100), ("per_page", True)):
             payload = self.first_page()
             payload[field] = value
             with self.subTest(field=field, value=value), self.assertRaises(ValueError):
                 mcp_runs(payload)
-        for payload in (self.first_page(99, 900), self.first_page(1, True), self.first_page(1, -1)):
+        for payload in (self.first_page(29, 900), self.first_page(100, 900),
+                        self.first_page(1, True), self.first_page(1, -1)):
             with self.subTest(payload=payload), self.assertRaises(ValueError):
                 mcp_runs(payload)
         payload = self.first_page(2)

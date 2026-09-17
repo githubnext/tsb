@@ -231,7 +231,8 @@ class AgentRuntimeTest(unittest.TestCase):
             self.assertEqual((actions / "tsb_provision_agent_runtime.py").read_text(), Path(runtime.__file__).read_text())
             self.assertEqual((actions / "tsb_runtime_harness.cjs").read_text(),
                              Path(runtime.__file__).with_name("tsb_runtime_harness.cjs").read_text())
-            for helper in ("sync_automation_branch.sh", "automation_branch_state.py", "capture_agent_branch_state.py", "automation_ci.py"):
+            for helper in ("sync_automation_branch.sh", "automation_branch_state.py", "capture_agent_branch_state.py",
+                           "capture_agent_steering.py", "automation_ci.py"):
                 self.assertEqual((actions / helper).read_text(), Path(runtime.__file__).with_name(helper).read_text())
             self.assertEqual((actions / "tsb_agent_runtime_env.sh").read_text(), runtime.environment_exports(report))
 
@@ -276,12 +277,13 @@ class AgentRuntimeTest(unittest.TestCase):
                 self.assertIn("job_receipts", source)
                 self.assertIn("resource_id:'ci.yml'", source)
                 self.assertIn("workflow_runs_filter:{branch:canonical}", source)
-                self.assertIn("`page:1`, `perPage:100`", source)
+                self.assertIn("`page:1`, omitting the page-size", source)
+                self.assertIn("{page:1,per_page:30,runs:<original>}", source)
                 self.assertIn("`pullNumber`", source)
                 self.assertIn('git rev-parse --verify "$remote_sha^{tree}"', source)
                 self.assertIn("MCP commit reads", source)
                 self.assertNotIn("workflow_id=ci.yml", source)
-                self.assertIn("head_sha` filter is ignored", source)
+                self.assertIn("`per_page` parameter is ignored", source)
                 self.assertIn("verify-only mode", source)
                 self.assertIn("first shell action", source)
                 self.assertIn("using `&&` (or `set -e`)", source)
@@ -319,7 +321,9 @@ class AgentRuntimeTest(unittest.TestCase):
                 self.assertIn("gh_aw_exit_code=$?", execution)
                 self.assertIn("agent_execution_exit_code.txt", execution)
                 publication = compiled.split("\n  safe_outputs:\n", 1)[1].split("    runs-on:", 1)[0]
-                self.assertIn("(needs.agent.result == 'success')", publication)
+                self.assertIn("needs.agent.result == 'success'", publication)
+                self.assertIn("needs.publication_guard.result == 'success'", publication)
+                self.assertIn("needs.publication_guard.outputs.allowed == 'true'", publication)
                 self.assertIn("needs.detection.result == 'success'", publication)
                 memory = compiled.split("\n  push_repo_memory:\n", 1)[1].split("    runs-on:", 1)[0]
                 self.assertIn("needs.agent.result == 'success'", memory)
