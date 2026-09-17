@@ -6,7 +6,11 @@ sync_automation_branch() {
   local branch="${1:?automation branch required}"
   local base="${2:?base branch required}"
   local selection="${3:?trusted scheduler selection required}"
-  local remote_head mode helper_dir
+  local verify_only="${4:-}" mode helper_dir decision expected_head expected_base actual
+
+  if [ "$#" -gt 4 ] || { [ -n "$verify_only" ] && [ "$verify_only" != --verify-only ]; }; then
+    echo "Only the optional --verify-only mode is supported" >&2; return 1
+  fi
 
   case "$branch" in
     autoloop/*|goal/*) ;;
@@ -16,36 +20,54 @@ sync_automation_branch() {
   git check-ref-format --branch "$base" >/dev/null
   [ "$branch" != "$base" ] || return 1
   if [ -n "$(git status --porcelain)" ]; then
-    echo "Refusing to switch branches with uncommitted changes" >&2
+    echo "Uncommitted files (including trusted PR-context config overlays) must be preserved; rerun the explicit issue via workflow_dispatch or issue context" >&2
     return 1
   fi
 
   helper_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-  mode="$(python3 -I "$helper_dir/automation_branch_state.py" --selection "$selection" \
+  decision="$(python3 -I "$helper_dir/automation_branch_state.py" --selection "$selection" \
     --branch "$branch" --base "$base" --repo "${GITHUB_REPOSITORY:?repository identity required}")"
+  read -r mode expected_head expected_base <<< "$decision"
   case "$mode" in
     resume|refresh-base) ;;
     *) echo "Invalid branch preparation decision" >&2; return 1 ;;
   esac
 
-  # An empty successful response means the branch is absent. Network and
-  # permission failures must stop instead of being mistaken for a first run.
-  remote_head="$(git ls-remote --heads origin "refs/heads/$branch")"
-  if [ -z "$remote_head" ]; then
+  # All objects and remote-tracking refs were fetched by authenticated host
+  # setup. No GitHub API, Git transport, or credentials are used in the sandbox.
+  if [ "$mode" = refresh-base ]; then
+    actual="$(git rev-parse --verify "refs/remotes/origin/$base")"
+    if [ "$actual" != "$expected_base" ]; then
+      echo "Base ref differs from the bound host snapshot" >&2; return 1
+    fi
+  fi
+  if [ "$expected_head" = absent ]; then
     if [ "$mode" = resume ]; then
       echo "Active PR branch is missing; refusing to recreate it from the base" >&2
       return 1
     fi
-    git fetch origin "+refs/heads/$base:refs/remotes/origin/$base"
-    git checkout -b "$branch" "refs/remotes/origin/$base"
-    return
+    if git show-ref --verify --quiet "refs/heads/$branch"; then
+      echo "Local branch exists without a bound remote head; refusing to discard it" >&2; return 1
+    fi
+  else
+    actual="$(git rev-parse --verify "refs/remotes/origin/$branch")"
+    if [ "$actual" != "$expected_head" ]; then
+      echo "Canonical ref differs from the bound host snapshot" >&2; return 1
+    fi
+    if git show-ref --verify --quiet "refs/heads/$branch" &&
+      ! git merge-base --is-ancestor "refs/heads/$branch" "refs/remotes/origin/$branch"; then
+      echo "Local branch has unpublished or divergent commits; refusing to discard them" >&2
+      return 1
+    fi
   fi
 
-  git fetch origin "+refs/heads/$branch:refs/remotes/origin/$branch"
-  if git show-ref --verify --quiet "refs/heads/$branch" &&
-    ! git merge-base --is-ancestor "refs/heads/$branch" "refs/remotes/origin/$branch"; then
-    echo "Local branch has unpublished or divergent commits; refusing to discard them" >&2
-    return 1
+  if [ "$verify_only" = --verify-only ]; then
+    echo "Verified fresh host evidence, bound refs and clean history; startup checkout unchanged"
+    return
+  fi
+  if [ "$expected_head" = absent ]; then
+    git checkout -b "$branch" "refs/remotes/origin/$base"
+    return
   fi
   git checkout -B "$branch" "refs/remotes/origin/$branch"
   if [ "$mode" = resume ]; then
@@ -55,7 +77,6 @@ sync_automation_branch() {
     return
   fi
 
-  git fetch origin "+refs/heads/$base:refs/remotes/origin/$base"
   if ! git merge --no-edit "refs/remotes/origin/$base"; then
     git merge --abort
     echo "Base merge conflicts require a focused repair before the next iteration" >&2

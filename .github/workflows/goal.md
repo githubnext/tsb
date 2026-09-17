@@ -152,6 +152,15 @@ steps:
     run: |
       python3 -I .github/workflows/scripts/provision_agent_runtime.py --selection /tmp/gh-aw/goal.json --repo-root "$GITHUB_WORKSPACE" --stage-actions-dir "$RUNNER_TEMP/gh-aw/actions"
 
+pre-agent-steps:
+  - name: Capture authenticated branch evidence before inference
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      TSB_BASE_BRANCH: ${{ github.event.repository.default_branch }}
+    run: |
+      bash "$RUNNER_TEMP/gh-aw/actions/clean_git_credentials.sh"
+      python3 -I "$RUNNER_TEMP/gh-aw/actions/capture_agent_branch_state.py" --selection "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json" --output "$RUNNER_TEMP/gh-aw/actions/tsb_agent_branch_state.json" --repo-root "$GITHUB_WORKSPACE" --base "$TSB_BASE_BRANCH"
+
 source: githubnext/goal
 engine:
   id: copilot
@@ -182,8 +191,19 @@ issue number or add the `goal` label to the intended issue, then stop.
 At the start of every run, read `/tmp/gh-aw/goal.json`.
 
 Startup automatically selects and verifies pinned tools before the agent runs.
-This proves startup health, not exact-head test results. A null selection needs
-no setup.
+It validates fresh branch evidence, bound local refs and clean history in
+verify-only mode, leaving the framework's startup workspace/instructions unchanged.
+This proves startup health, not candidate checkout or exact-head test results.
+A null selection needs no setup.
+
+Before exploring issue comments or history, your first shell action for selected
+work must prepare the branch offline. Read `branch` and `base` from the read-only
+`$RUNNER_TEMP/gh-aw/actions/tsb_agent_branch_state.json` and invoke
+`bash "$RUNNER_TEMP/gh-aw/actions/sync_automation_branch.sh" "$branch" "$base" "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json"`.
+Chain this with the following refresh/check using `&&` (or `set -e`); stop on any
+failure. The same five-minute snapshot expiry applies: if startup/tool delay
+expires it, report a blocker and reschedule, never reset its timestamp or bypass
+the helper. Do not fetch, log in, or improvise a checkout.
 
 After switching/synchronizing branches, use the absolute pinned Python executable
 recorded in the read-only `$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_manifest.json`
@@ -296,24 +316,29 @@ The branch name is always exactly the scheduler-provided `selected.branch`.
 Never add suffixes, hashes, run IDs, timestamps, or random tokens. Never let the
 framework auto-generate a branch name.
 
-Prepare the branch locally before making changes. Read `selected.branch`
-into `branch`, determine `default_branch` from repository metadata, then run:
-
-```bash
-bash "$RUNNER_TEMP/gh-aw/actions/sync_automation_branch.sh" "$branch" "$default_branch" \
-  "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json"
-```
-
-The trusted helper verifies current PR state. An active PR resumes its exact
-remote head without merging main. Only verified no-open-PR reuse refreshes the
-base while preserving history, including after squash merges; a new branch
-starts at current main. Stop on missing/stale evidence or conflicts. Never use
-the branch-owned helper. If an active PR genuinely requires a base update,
+Startup only verified the unchanged workspace. The first-action trusted helper
+prepares the canonical branch offline using a read-only host snapshot and exact
+authenticated host-fetched refs. An active PR resumes
+its bound head without merging main. No-open-PR reuse refreshes the bound base
+while preserving history, including after squash merges. The snapshot is bound
+to this run/selection and expires after five minutes at both validation and use; it does
+not prove PR state remains unchanged afterward. Publication still rechecks its
+own conditions. Do not repeat branch preparation, substitute branch-owned code,
+or improvise around a startup failure. Dirty PR-context config overlays are
+preserved by failing before inference; rerun the explicit issue using
+workflow_dispatch or issue context. If an active PR genuinely requires a base update,
 report that separately for authorized branch coordination; do not mix it into
 the repair or bypass protected-file checks. Never rebase,
 force-push, or run `git push` from the agent. Publish through exactly one
 `push-to-pull-request-branch` request for an existing PR, or one
 `create-pull-request` request when no canonical open PR exists.
+
+Finish all edits and verification before publication. Consolidate only this
+checkpoint's unpublished changes into one new commit before updating an active
+PR; never amend or rewrite published history. Request publication once as the
+last code-changing action, then stop editing or committing. On a tool quota
+rejection, preserve evidence and inspect the final bundle and remote result on
+reconciliation; do not assume the changes are unrecoverable or claim a push.
 
 Safe outputs publish only after the agent ends. Record the candidate tree and
 local evidence as pending, then verify the remote tree and required CI on a
@@ -332,25 +357,58 @@ Create or update the PR:
 ## Reconcile Pending Publication
 
 Before selecting another checkpoint, inspect `Pending Tree` in the authoritative
-state file. When it is present, fetch `selected.branch` and resolve its remote
-head SHA and tree. Do not overwrite pending evidence with a new checkpoint.
+state file. When it is present, use authenticated GitHub MCP PR/branch reads to
+resolve `selected.branch`'s actual current `remote_sha` (the `sha` used below).
+MCP commit reads omit the tree: resolve only that immutable, host-fetched object
+with `git rev-parse --verify "$remote_sha^{tree}"`, never local `HEAD` or an
+invented MCP tree. If the current remote object is absent locally, keep pending
+for a fresh host fetch; do not fetch or authenticate in the sandbox. The startup
+snapshot alone is not current remote proof. Do not overwrite pending evidence
+with a new checkpoint.
 
 - If the remote tree differs, inspect `Pending Run` safe-output results. Recover
   or retry a failed publication from its artifacts if possible; otherwise report
   the failed checkpoint and the focused action needed. If another actor changed
   the branch, evaluate that new head before replacing pending evidence. Never
   claim the prior checkpoint landed or completed from local evidence alone.
-- If the tree matches, query `gh run list --workflow CI --commit "$sha" --limit
-  100 --json databaseId,headSha,createdAt,status,conclusion`. Pass the response to
-  `python3 .github/workflows/scripts/automation_ci.py select "$sha"`. For its
-  selected run, get `gh run view "$run_id" --json headSha,status,conclusion,jobs`
-  and pass it to the helper's `status` mode. Also get `gh pr view "$pr" --json
-  headRefOid,statusCheckRollup` and pass it to `pr-status` mode. Use the actual
-  canonical PR and fetched SHA, quote arguments, and stop on any command error.
-- Both helper results must be `success`. Missing runs and pending checks mean
-  keep the pending fields and yield. Failing checks permit only a focused repair
-  of the pending checkpoint, followed by another publication request. Do not
-  replace it with unrelated work or mark the goal complete.
+  If the final bundle proves the remote tree is a later published revision of
+  this same checkpoint, record that revision as pending and preserve the
+  superseded tree/history; this is reconciliation, not acceptance.
+- Once the actual published candidate/tree is resolved, use authenticated MCP
+  reads for this repository's owner/repo. Call `actions_list` with
+  `method:'list_workflow_runs'`, `resource_id:'ci.yml'`,
+  `workflow_runs_filter:{branch:canonical}`, `page:1`, `perPage:100`;
+  its `head_sha` filter is ignored.
+  Preserve the original `{total_count,workflow_runs}` response as `runs` in
+  `{page:1,per_page:100,runs:<original>}` and pass it to
+  `python3 -I "$RUNNER_TEMP/gh-aw/actions/automation_ci.py" mcp-select "$sha"`.
+  This checks provider order/page length and selects the exact head locally;
+  absent head means pending, not a historical crawl. Read the returned run with
+  `actions_get/get_workflow_run` using `resource_id` set to the run ID string,
+  and all `actions_list/list_workflow_jobs` pages with that same `resource_id`,
+  `page` and `perPage:100`.
+  Extract the latter's inner `{total_count,jobs}` from its `jobs` wrapper; pass
+  `{run:<original run>,jobs:<inner jobs payload>}` to `rest-status "$sha"`.
+  Read the canonical PR via `pull_request_read` with `method:'get'` and
+  `pullNumber`, then `get_check_runs` and `get_status` using `page`/`perPage:100`.
+  Minimized checks omit head SHA: get a full raw
+  `actions_get/get_workflow_job` receipt with `resource_id` set to the job ID
+  string for every required-name check, including
+  duplicates from other runs (map job IDs via HTML links/lists). Pass
+  `{pull_request:<original PR with base.repo.full_name>,check_runs:<original>,status:<original>,job_receipts:[<full raw jobs>]}`
+  to `mcp-pr-status "$sha"`; the helper binds each check to its receipt's
+  `check_run_url` and `head_sha`. Use the same trusted helper for every mode.
+  Collect every jobs/checks/statuses page with real `total_count`; never invent
+  SHAs, counts or a green summary, or omit duplicate required checks. Malformed
+  or unavailable evidence is pending/a blocker, never success.
+  The sandbox has no `gh` login: do not log in, source tokens or use `gh run`/`gh pr`.
+- Both helper results must be `success` for acceptance. Missing runs and pending
+  checks normally mean keep the pending fields and yield. Once the actual
+  published candidate/tree is resolved, a documented review or contract defect
+  permits a focused same-checkpoint repair even while CI is pending, just as a
+  failing check does. Preserve superseded evidence/history and record the new
+  pending candidate; never call the prior work successful, waive approvals,
+  clear pending as accepted, or replace it with unrelated work.
 - Immediately before acceptance, re-read the branch, newest CI run, and PR
   rollup. If the head or selected run changed, or any required gate is no longer
   successful, defer. Otherwise record `Verified Head` and CI evidence, clear the

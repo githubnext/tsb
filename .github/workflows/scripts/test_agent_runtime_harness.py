@@ -33,9 +33,15 @@ class AgentRuntimeHarnessTest(unittest.TestCase):
         self.started = self.root / "copilot-started.json"
         self.shadow_called = self.root / "shadow-called"
         self.manifest = self.actions / "tsb_agent_runtime_manifest.json"
+        self.branch_evidence = self.actions / "tsb_agent_branch_state.json"
+        self.branch_evidence.write_text('{"branch":"goal/42-goal","base":"main"}')
+        self.branch_verified = self.root / "branch-verified"
         shutil.copy2(SCRIPTS / "tsb_runtime_harness.cjs", self.actions)
         (self.actions / "tsb_provision_agent_runtime.py").write_text("# controlled checker fixture\n")
         (self.actions / "tsb_agent_runtime_selection.json").write_text('{"selected":"local"}')
+        self.executable(self.actions / "sync_automation_branch.sh",
+                        '[ "$4" = --verify-only ] || exit 1\n' +
+                        "printf verified > " + shlex.quote(str(self.branch_verified)) + "\n")
         report = {"schema_version": 1, "status": "ready", "python_executable": str(self.python),
                   "bun_executable": str(self.bun), "versions": VERSIONS}
         self.manifest.write_text(json.dumps(report))
@@ -112,6 +118,56 @@ process.exitCode = Number(process.env.TEST_HARNESS_EXIT || '0');
         self.assertIn(str(self.actions / "tsb_agent_runtime_selection.json"), calls)
         self.assertIn(str(self.actions / "tsb_provision_agent_runtime.py"), calls)
         self.assertFalse((self.workspace / ".github").exists())
+        self.assertTrue(self.branch_verified.exists())
+
+    def test_missing_or_bad_branch_evidence_never_starts_copilot(self):
+        for evidence in ("{}", "null", "{"):
+            self.branch_evidence.write_text(evidence)
+            self.assert_not_started(self.run_wrapper())
+        self.branch_evidence.unlink()
+        self.assert_not_started(self.run_wrapper())
+        self.assertFalse(self.branch_verified.exists())
+
+    def test_failed_branch_preflight_prevents_dependency_refresh_and_inference(self):
+        self.executable(self.actions / "sync_automation_branch.sh",
+                        "echo 'stale attestation or dirty trusted overlay' >&2\nexit 1\n")
+        self.assert_not_started(self.run_wrapper())
+        self.assertNotIn("--selection", self.calls.read_text())
+
+    def test_snapshot_expiring_during_refresh_fails_before_inference(self):
+        self.executable(self.actions / "sync_automation_branch.sh",
+                        '[ "$4" = --verify-only ] || exit 1\n' +
+                        "if [ -f " + shlex.quote(str(self.branch_verified)) + " ]; then\n" +
+                        "  echo 'Original host snapshot expired during refresh' >&2\n  exit 1\nfi\n" +
+                        "printf verified > " + shlex.quote(str(self.branch_verified)) + "\n")
+        result = self.run_wrapper()
+        self.assert_not_started(result)
+        self.assertIn("snapshot expired", result.stderr)
+        self.assertIn("--check-only", self.calls.read_text())
+
+    def test_real_offline_helper_preserves_dirty_overlay_before_inference(self):
+        self.env["GITHUB_REPOSITORY"] = "example/repo"
+        self.env["GITHUB_RUN_ID"] = "123"
+        self.env["GITHUB_RUN_ATTEMPT"] = "1"
+        actual_git = shutil.which("git")
+        for name in ("sync_automation_branch.sh", "automation_branch_state.py"):
+            shutil.copy2(SCRIPTS / name, self.actions / name)
+        # Git runs for real; the Python version probe remains a controlled
+        # fixture so this test needs no installed pandas/Bun or GitHub login.
+        self.executable(self.shadow / "git", "exec " + shlex.quote(actual_git) + ' "$@"\n')
+        setup_env = {**os.environ, "GIT_AUTHOR_NAME": "Test", "GIT_AUTHOR_EMAIL": "test@example.invalid",
+                     "GIT_COMMITTER_NAME": "Test", "GIT_COMMITTER_EMAIL": "test@example.invalid"}
+        subprocess.run([actual_git, "init", "-b", "main"], cwd=self.workspace, env=setup_env,
+                       check=True, capture_output=True)
+        (self.workspace / "AGENTS.md").write_text("original\n")
+        subprocess.run([actual_git, "add", "AGENTS.md"], cwd=self.workspace, env=setup_env, check=True)
+        subprocess.run([actual_git, "commit", "-m", "initial"], cwd=self.workspace, env=setup_env,
+                       check=True, capture_output=True)
+        (self.workspace / "AGENTS.md").write_text("trusted restored overlay\n")
+        result = self.run_wrapper()
+        self.assert_not_started(result)
+        self.assertIn("workflow_dispatch or issue context", result.stderr)
+        self.assertEqual((self.workspace / "AGENTS.md").read_text(), "trusted restored overlay\n")
 
     def test_actual_version_mismatch_stops_before_refresh_or_inference(self):
         for key, value in (("python", "3.13.0"), ("python", "3.12.9"),

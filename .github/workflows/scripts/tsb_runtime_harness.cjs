@@ -121,12 +121,24 @@ async function main(args = process.argv.slice(2), inherited = process.env, actio
       const versions = verifyDefaults(manifest, env, cwd);
       const helper = path.join(actionsDir, "tsb_provision_agent_runtime.py");
       const selection = path.join(actionsDir, "tsb_agent_runtime_selection.json");
-      // The framework may have checked out a PR after host setup. Refresh once
-      // inside the sandbox; no candidate code is executed on the host here.
+      const snapshot = JSON.parse(fs.readFileSync(path.join(actionsDir, "tsb_agent_branch_state.json"), "utf8"));
+      if (!snapshot || typeof snapshot.branch !== "string" || typeof snapshot.base !== "string") {
+        throw new Error("Successful trusted host branch evidence is required");
+      }
+      // Check age/run/selection, refs and clean history without changing the
+      // workspace from which Copilot loads trusted startup instructions.
+      console.log(checkedCommand("/bin/bash", [path.join(actionsDir, "sync_automation_branch.sh"),
+        snapshot.branch, snapshot.base, selection, "--verify-only"], env, cwd, 60000));
+      // Check this unchanged startup checkout. The agent's first command must
+      // prepare the branch offline and refresh its dependencies in the sandbox.
       console.log(checkedCommand(manifest.python_executable,
         ["-I", helper, "--selection", selection, "--repo-root", cwd], env, cwd, 660000));
       console.log(checkedCommand(manifest.python_executable,
         ["-I", helper, "--check-only", "--repo-root", cwd], env, cwd));
+      // A bounded dependency refresh can outlast the original five-minute
+      // snapshot. Recheck it unchanged rather than starting doomed inference.
+      console.log(checkedCommand("/bin/bash", [path.join(actionsDir, "sync_automation_branch.sh"),
+        snapshot.branch, snapshot.base, selection, "--verify-only"], env, cwd, 60000));
       console.log("[tsb-runtime] " + JSON.stringify({ status: "ready", versions,
         python_executable: manifest.python_executable, bun_executable: manifest.bun_executable }));
     } else {

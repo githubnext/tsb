@@ -231,7 +231,7 @@ class AgentRuntimeTest(unittest.TestCase):
             self.assertEqual((actions / "tsb_provision_agent_runtime.py").read_text(), Path(runtime.__file__).read_text())
             self.assertEqual((actions / "tsb_runtime_harness.cjs").read_text(),
                              Path(runtime.__file__).with_name("tsb_runtime_harness.cjs").read_text())
-            for helper in ("sync_automation_branch.sh", "automation_branch_state.py"):
+            for helper in ("sync_automation_branch.sh", "automation_branch_state.py", "capture_agent_branch_state.py", "automation_ci.py"):
                 self.assertEqual((actions / helper).read_text(), Path(runtime.__file__).with_name(helper).read_text())
             self.assertEqual((actions / "tsb_agent_runtime_env.sh").read_text(), runtime.environment_exports(report))
 
@@ -266,10 +266,33 @@ class AgentRuntimeTest(unittest.TestCase):
                     '--repo-root "$GITHUB_WORKSPACE" --stage-actions-dir "$RUNNER_TEMP/gh-aw/actions"', source)
                 self.assertIn("engine:\n  id: copilot\n  harness:\n    use: tsb_runtime_harness.cjs", source)
                 self.assertIn("  safe_outputs:\n    if: needs.agent.result == 'success'", source)
-                self.assertIn('bash "$RUNNER_TEMP/gh-aw/actions/sync_automation_branch.sh"', source)
+                self.assertIn("pre-agent-steps:", source)
+                self.assertIn('python3 -I "$RUNNER_TEMP/gh-aw/actions/capture_agent_branch_state.py"', source)
+                self.assertIn('bash "$RUNNER_TEMP/gh-aw/actions/clean_git_credentials.sh"', source)
                 self.assertNotIn('bash .github/workflows/scripts/sync_automation_branch.sh', source)
+                self.assertIn("mcp-select", source)
+                self.assertIn("rest-status", source)
+                self.assertIn("mcp-pr-status", source)
+                self.assertIn("job_receipts", source)
+                self.assertIn("resource_id:'ci.yml'", source)
+                self.assertIn("workflow_runs_filter:{branch:canonical}", source)
+                self.assertIn("`page:1`, `perPage:100`", source)
+                self.assertIn("`pullNumber`", source)
+                self.assertIn('git rev-parse --verify "$remote_sha^{tree}"', source)
+                self.assertIn("MCP commit reads", source)
+                self.assertNotIn("workflow_id=ci.yml", source)
+                self.assertIn("head_sha` filter is ignored", source)
+                self.assertIn("verify-only mode", source)
+                self.assertIn("first shell action", source)
+                self.assertIn("using `&&` (or `set -e`)", source)
+                self.assertIn("documented review or contract defect", source)
+                self.assertNotIn("Startup has already prepared", source)
+                self.assertNotIn("gh run list", source)
+                self.assertNotIn("gh pr view", source)
+                self.assertIn("last code-changing", source)
+                self.assertIn("unrecoverable", source)
                 prompt = source.split("Startup automatically selects and verifies pinned tools", 1)[1]
-                self.assertIn("not exact-head test results", prompt)
+                self.assertIn("not candidate checkout or exact-head test results", prompt)
                 self.assertIn("switching/synchronizing branches", prompt)
                 self.assertIn("absolute pinned Python executable", prompt)
                 self.assertIn("$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_manifest.json", prompt)
@@ -300,6 +323,25 @@ class AgentRuntimeTest(unittest.TestCase):
                 self.assertIn("needs.detection.result == 'success'", publication)
                 memory = compiled.split("\n  push_repo_memory:\n", 1)[1].split("    runs-on:", 1)[0]
                 self.assertIn("needs.agent.result == 'success'", memory)
+
+                # The framework configures credentials AFTER its optional early
+                # checkout cleanup. The hook must clean the final configuration,
+                # not merely rely on an unrelated earlier cleanup step.
+                agent = compiled.split("\n  agent:\n", 1)[1].split("\n  detection:\n", 1)[0]
+                hook = agent.index("name: Capture authenticated branch evidence before inference")
+                last_configure = agent.rfind("name: Configure Git credentials", 0, hook)
+                self.assertGreaterEqual(last_configure, 0)
+                self.assertLess(last_configure, agent.index("name: Restore agent config folders from base branch"))
+                hook_cleanup = agent.index('bash "$RUNNER_TEMP/gh-aw/actions/clean_git_credentials.sh"', hook)
+                capture = agent.index('python3 -I "$RUNNER_TEMP/gh-aw/actions/capture_agent_branch_state.py"', hook)
+                gateway = agent.index("name: Start MCP Gateway")
+                late_cleanup = agent.index("name: Clean credentials\n")
+                audit = agent.index("name: Audit pre-agent workspace")
+                sandbox = agent.index("id: agentic_execution")
+                self.assertEqual(sorted((last_configure, hook, hook_cleanup, capture, gateway, late_cleanup, audit, sandbox)),
+                                 [last_configure, hook, hook_cleanup, capture, gateway, late_cleanup, audit, sandbox])
+                self.assertIn('run: bash "${RUNNER_TEMP}/gh-aw/actions/clean_git_credentials.sh"', agent[late_cleanup:audit])
+                self.assertNotIn("GITHUB_TOKEN", agent[capture:gateway].split("\n      - name:", 1)[0])
 
 
 if __name__ == "__main__":

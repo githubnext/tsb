@@ -160,6 +160,15 @@ steps:
     run: |
       python3 -I .github/workflows/scripts/provision_agent_runtime.py --selection /tmp/gh-aw/autoloop.json --repo-root "$GITHUB_WORKSPACE" --stage-actions-dir "$RUNNER_TEMP/gh-aw/actions"
 
+pre-agent-steps:
+  - name: Capture authenticated branch evidence before inference
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      TSB_BASE_BRANCH: ${{ github.event.repository.default_branch }}
+    run: |
+      bash "$RUNNER_TEMP/gh-aw/actions/clean_git_credentials.sh"
+      python3 -I "$RUNNER_TEMP/gh-aw/actions/capture_agent_branch_state.py" --selection "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json" --output "$RUNNER_TEMP/gh-aw/actions/tsb_agent_branch_state.json" --repo-root "$GITHUB_WORKSPACE" --base "$TSB_BASE_BRANCH"
+
 source: githubnext/autoloop
 engine:
   id: copilot
@@ -175,8 +184,20 @@ features:
 An iterative optimization agent that proposes changes, evaluates them against a metric, and keeps only improvements — running autonomously on a schedule.
 
 Startup automatically selects and verifies pinned tools before the agent runs.
-This proves startup health, not exact-head test results. A null selection needs
-no setup.
+It validates fresh branch evidence, bound local refs and clean history in
+verify-only mode, leaving the framework's startup workspace/instructions unchanged.
+This proves startup health, not candidate checkout or exact-head test results.
+A null selection needs no setup.
+
+Before exploring program files, issue comments or history, read
+`/tmp/gh-aw/autoloop.json`. Your first shell action for selected work must prepare
+the branch offline: read `branch` and `base` from the read-only
+`$RUNNER_TEMP/gh-aw/actions/tsb_agent_branch_state.json` and invoke
+`bash "$RUNNER_TEMP/gh-aw/actions/sync_automation_branch.sh" "$branch" "$base" "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json"`.
+Chain this with the following refresh/check using `&&` (or `set -e`); stop on any
+failure. The same five-minute snapshot expiry applies: if startup/tool delay
+expires it, report a blocker and reschedule, never reset its timestamp or bypass
+the helper. Do not fetch, log in, or improvise a checkout.
 
 After switching/synchronizing branches, use the absolute pinned Python executable
 recorded in the read-only `$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_manifest.json`
@@ -450,7 +471,7 @@ Examples:
 ### How It Works
 
 1. On the **first accepted iteration**, the branch is created from the default branch.
-2. On **subsequent iterations**, the agent checks out the existing branch and ensures it is up to date with the default branch. The branch is fast-forwarded when its tip is already an ancestor of the default branch; otherwise, the default branch is merged into it without rewriting existing commits.
+2. On **subsequent iterations**, an active PR resumes its exact bound head without merging the default branch. Only reuse with no open PR refreshes the bound default branch, fast-forwarding or merging while preserving history.
 3. **Accepted iterations** are committed and pushed to the branch. Each commit message references the GitHub Actions run URL.
 4. **Rejected or errored iterations** do not commit — changes are discarded.
 5. A **single draft PR** is created for the branch on the first accepted iteration. Future accepted iterations push additional commits to the same PR.
@@ -513,20 +534,16 @@ automatic rejection-plateau skip.
 
 ### Step 3: Implement
 
-1. Prepare the canonical branch locally, without refreshing active PRs from main.
-   Read `head_branch` from `/tmp/gh-aw/autoloop.json` into `branch`, determine
-   `default_branch` from repository metadata, then run the trusted helper:
-
-   ```bash
-   bash "$RUNNER_TEMP/gh-aw/actions/sync_automation_branch.sh" "$branch" "$default_branch" \
-     "$RUNNER_TEMP/gh-aw/actions/tsb_agent_runtime_selection.json"
-   ```
-
-   The trusted helper verifies current PR state. An active PR resumes its exact
-   remote head without merging main. Only verified no-open-PR reuse refreshes
-   the base while preserving history, including after squash merges; a new
-   branch starts at current main. Stop on missing/stale evidence or conflicts;
-   never substitute the branch-owned helper. If an active PR genuinely requires
+1. Startup verified evidence without changing its workspace. The first-action
+   trusted helper prepares the canonical branch offline from a read-only
+   host snapshot and exact authenticated host-fetched refs. Active PRs retain
+   their bound head without merging main; no-open-PR reuse refreshes the bound
+   base while preserving history, including after squash merges. The snapshot
+   is run/selection-bound and expires after five minutes at validation and use, not
+   proof of unchanged PR state afterward. Do not rerun preparation, substitute
+   branch-owned helpers, or improvise around a startup failure. Dirty PR-context
+   config overlays fail before inference and remain intact; rerun the program
+   through workflow_dispatch or issue context. If an active PR genuinely requires
    a base update, report it for separate authorized coordination, not as part
    of the task patch. Do not bypass protected-file checks, rebase, reset a divergent branch, force-push, or
    invoke `git push` from the agent; all publication uses safe outputs.
@@ -561,7 +578,9 @@ counts as a candidate improvement.
 
 #### Step 5a: Queue publication and yield
 
-1. Commit the candidate on `head_branch` with subject
+1. Finish all edits and verification, then consolidate only this checkpoint's
+   unpublished changes into one new commit before updating an active PR. Never
+   amend or rewrite published history. Use subject
    `[Autoloop: {program-name}] Iteration <N>: <short description>` and a body
    containing `Run: {run_url}`.
 2. Read `existing_pr` from the scheduler and verify it is still open. When it is
@@ -571,7 +590,10 @@ counts as a candidate improvement.
    none exists, request `create-pull-request` exactly once, with the canonical
    branch, title `[Autoloop: {program-name}]`, goal, program issue link, candidate
    metric, local verification, and AI disclosure in the body. Never call both
-   publication tools for the same candidate. Do not use direct GitHub writes.
+   publication tools for the same candidate. Make this the last code-changing
+   action: stop editing or committing afterward. If a tool quota rejects a
+   request, preserve evidence and reconcile the final bundle and remote result;
+   never assume the changes are unrecoverable. Do not use direct GitHub writes.
 4. Record `Pending Tree` (`git rev-parse HEAD^{tree}`), `Pending Metric`,
    `Pending Iteration`, `Pending Run`, and `CI Fix Attempts` in the machine state.
    Tree identity survives the signed commit or CI-trigger commit that PR
@@ -585,7 +607,13 @@ counts as a candidate improvement.
 Perform this step immediately after reading state, **before proposing new work**,
 when `Pending Tree` is present.
 
-1. Fetch the canonical remote branch and inspect its current tree and open PR.
+1. Use authenticated GitHub MCP PR/branch reads to obtain the canonical branch's
+   actual current `remote_sha` (the `sha` used below) and open PR. MCP commit reads
+   omit the tree: resolve only that immutable, host-fetched object with
+   `git rev-parse --verify "$remote_sha^{tree}"`, never local `HEAD` or an invented
+   MCP tree. If the current remote object is absent locally, keep pending for a
+   fresh host fetch; do not fetch or authenticate in the sandbox. The startup
+   snapshot alone is not current remote proof.
    If the tree differs from `Pending Tree`, inspect the prior `Pending Run`
    safe-output result. A failed publication is an error to repair, not an
    accepted iteration. Recover the candidate from its run artifacts if possible;
@@ -593,44 +621,55 @@ when `Pending Tree` is present.
    cause, and start a fresh candidate from the current remote tip on a later
    run. If another actor changed the branch, inspect and evaluate that new head
    before proceeding. Do not overwrite it or advance the metric.
-2. For the matching remote head SHA, query and evaluate CI with the trusted
-   helper. Use the exact fetched remote head as `sha`; keep `set -o pipefail`
-   enabled so a failed query cannot look like an empty successful check list:
+   If the final bundle proves the remote tree is a later published revision of
+   this same checkpoint, record that revision as pending while preserving the
+   superseded tree/history; do not count it as accepted.
+2. Use authenticated MCP reads for this repository's owner/repo. Call
+   `actions_list` with `method:'list_workflow_runs'`, `resource_id:'ci.yml'`,
+   `workflow_runs_filter:{branch:canonical}`, `page:1`, `perPage:100`;
+   its `head_sha` filter is ignored. Preserve the original
+   `{total_count,workflow_runs}` response in `{page:1,per_page:100,runs:<original>}`
+   and pass it to `python3 -I "$RUNNER_TEMP/gh-aw/actions/automation_ci.py" mcp-select "$sha"`.
+   This verifies provider order/page length and selects the exact head locally;
+   absent head is pending, not a historical crawl. Read the selected run with
+   `actions_get/get_workflow_run` with `resource_id` set to the run ID string,
+   and every `actions_list/list_workflow_jobs` page with that same `resource_id`,
+   `page` and `perPage:100`. Extract its inner `{total_count,jobs}` from the `jobs` wrapper; pass
+   `{run:<original run>,jobs:<inner jobs payload>}` to `rest-status "$sha"`.
+   Read the canonical PR via `pull_request_read` with `method:'get'` and
+   `pullNumber`, then `get_check_runs` and `get_status` using `page`/`perPage:100`.
+   Minimized checks omit head SHA: get a full raw
+   `actions_get/get_workflow_job` receipt with `resource_id` set to the job ID
+   string for every required-name check,
+   including duplicates from other runs (map job IDs via HTML links/lists).
+   Pass `{pull_request:<original PR with base.repo.full_name>,check_runs:<original>,status:<original>,job_receipts:[<full raw jobs>]}`
+   to `mcp-pr-status "$sha"`; the helper binds checks to each receipt's
+   `check_run_url` and `head_sha`. Use the same trusted helper for all modes.
+   Collect every jobs/checks/statuses page with real `total_count`; never invent
+   SHAs, counts or a green summary, or omit duplicate required checks.
+   Malformed or unavailable evidence is pending/a blocker, never success. The sandbox has no `gh`
+   login: never log in, source tokens or use `gh run`/`gh pr` for these reads.
 
-   ```bash
-   set -o pipefail
-   gh run list --workflow CI --commit "$sha" --limit 100 \
-     --json databaseId,headSha,createdAt,status,conclusion > /tmp/gh-aw/agent/ci-runs.json
-   run_id=$(python3 .github/workflows/scripts/automation_ci.py select "$sha" \
-     < /tmp/gh-aw/agent/ci-runs.json)
-   gh run view "$run_id" --json headSha,status,conclusion,jobs > /tmp/gh-aw/agent/ci-run.json
-   run_status=$(python3 .github/workflows/scripts/automation_ci.py status "$sha" \
-     < /tmp/gh-aw/agent/ci-run.json)
-   gh pr view "$pr" --json headRefOid,statusCheckRollup > /tmp/gh-aw/agent/pr-checks.json
-   pr_status=$(python3 .github/workflows/scripts/automation_ci.py pr-status "$sha" \
-     < /tmp/gh-aw/agent/pr-checks.json)
-   if [ "$run_status" = success ] && [ "$pr_status" = success ]; then
-     echo success
-   else
-     printf 'Run status: %s; PR gates: %s\n' "$run_status" "$pr_status"
-   fi
-   ```
-
-   Stop this sequence if any command fails. No matching run is pending evidence,
-   not success. The selector chooses the newest CI run for the exact SHA by
-   creation time and run ID, independent of API response order; use that run even
+   Stop if any read or helper fails. No matching run is pending evidence,
+   not success. The selector verifies descending provider order and chooses the
+   newest CI run for the exact SHA by creation time and run ID; use that run even
    when an older duplicate succeeded. Never cherry-pick green jobs across runs.
 3. Both the selected run and the exact-head PR rollup must return `success`:
    the run is complete and successful, and all four required gates are present
    and successful in both sources. A newer successful push or manual CI run
    cannot override a failing or pending pull-request gate for the same SHA.
    Missing, pending, skipped, stale, or failed gates do not establish acceptance.
-   If CI has not finished, record `pending-ci` and yield; a later scheduled run
-   will reconcile it. Immediately before acceptance, re-read the branch head and
+   If CI has not finished, normally record `pending-ci` and yield; a later scheduled run
+   will reconcile it. After resolving the actual published candidate/tree, a
+   documented review or contract defect permits only a focused same-checkpoint
+   repair under Step 4 even while CI is pending. Preserve superseded evidence
+   and history; do not claim prior success, waive approvals, add unrelated work,
+   or clear pending as accepted. Immediately before acceptance, re-read the branch head and
    re-select the latest CI run and re-read the PR rollup; if the head or selected
    run changed, or any required PR gate stopped succeeding, defer and evaluate
    the new evidence instead of accepting the old snapshot.
-4. If CI fails, read the failing job logs, record a normalized failure signature,
+4. If CI fails or a documented review/contract defect qualifies under Step 3,
+   read the failure evidence, record a normalized failure signature,
    and make a focused repair on the current remote branch. Run the relevant
    local checks, re-evaluate the candidate metric, increment `CI Fix Attempts`,
    and return to Step 5a only if the measured candidate still improves the

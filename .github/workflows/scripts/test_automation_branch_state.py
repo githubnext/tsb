@@ -4,7 +4,7 @@ import copy
 import json
 import subprocess
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock
 
 import automation_branch_state as state
 
@@ -39,7 +39,8 @@ class AutomationBranchStateTest(unittest.TestCase):
                           {"error": "lookup failed", **SELECTION},
                           *({"selected": {"branch": BRANCH, "existing_pr": number}}
                             for number in (0, -1, True, "42", 1.5))):
-            with self.subTest(selection=selection), patch.object(state, "github_open_prs") as api:
+            with self.subTest(selection=selection):
+                api = Mock()
                 with self.assertRaises(ValueError):
                     state.branch_mode(selection, BRANCH, BASE, REPOSITORY, api)
                 api.assert_not_called()
@@ -73,15 +74,41 @@ class AutomationBranchStateTest(unittest.TestCase):
                 with self.assertRaises(type(error)):
                     state.branch_mode(SELECTION, BRANCH, BASE, REPOSITORY, fail)
 
-    def test_api_call_is_read_only_and_exact_branch_scoped(self):
-        with patch.object(state.subprocess, "run") as command:
-            command.return_value.stdout = json.dumps([PR])
-            self.assertEqual(state.github_open_prs(REPOSITORY, BRANCH), [PR])
-        self.assertEqual(command.call_args.args[0], [
-            "gh", "api", "--method", "GET", "repos/example/repo/pulls", "-f", "state=open",
-            "-f", "head=example:goal/42-goal", "-F", "per_page=100"])
-        self.assertTrue(command.call_args.kwargs["check"])
-        self.assertEqual(command.call_args.kwargs["timeout"], 30)
+    def snapshot(self):
+        return {"schema_version": 1, "status": "ready", "repository": REPOSITORY,
+                "branch": BRANCH, "base": BASE, "existing_pr": 42, "mode": "resume",
+                "run_id": "123", "run_attempt": "1", "captured_at": 1000,
+                "head_sha": "a" * 40, "base_sha": "b" * 40,
+                "selection_digest": state.selection_digest(SELECTION)}
+
+    def validate(self, snapshot):
+        return state.validate_snapshot(SELECTION, snapshot, BRANCH, BASE, REPOSITORY, "123", "1", now=1001)
+
+    def test_snapshot_requires_exact_run_selection_and_ref_identity(self):
+        original = self.snapshot()
+        self.assertEqual(self.validate(original), original)
+        for key, replacement in (("schema_version", True), ("status", "error"), ("repository", "fork/repo"),
+                                 ("branch", "goal/other"), ("base", "other"), ("existing_pr", 43),
+                                 ("existing_pr", 42.0), ("mode", "refresh-base"), ("run_id", "124"),
+                                 ("run_attempt", "2"), ("selection_digest", "wrong"),
+                                 ("head_sha", None), ("head_sha", "bad"), ("base_sha", "bad")):
+            with self.subTest(key=key, replacement=replacement), self.assertRaises(ValueError):
+                self.validate({**original, key: replacement})
+        for key in original:
+            with self.subTest(missing=key), self.assertRaises(ValueError):
+                self.validate({name: value for name, value in original.items() if name != key})
+
+    def test_expired_future_or_invalid_capture_times_fail_closed(self):
+        for captured_at in (700, 1002, True, None, "1000", float("nan"), float("inf")):
+            with self.subTest(captured_at=captured_at), self.assertRaises(ValueError):
+                self.validate({**self.snapshot(), "captured_at": captured_at})
+
+    def test_only_explicit_no_pr_allows_a_bound_absent_branch(self):
+        selection = {"selected": {"branch": BRANCH, "existing_pr": None}}
+        snapshot = {**self.snapshot(), "existing_pr": None, "head_sha": None,
+                    "mode": "refresh-base", "selection_digest": state.selection_digest(selection)}
+        self.assertEqual(state.validate_snapshot(selection, snapshot, BRANCH, BASE, REPOSITORY,
+                                               "123", "1", now=1001), snapshot)
 
     def test_invalid_repository_is_rejected_without_an_api_call(self):
         with self.assertRaises(ValueError):
