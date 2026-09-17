@@ -15,7 +15,12 @@ import {
   searchsorted,
   searchsortedMany,
 } from "../../src/core/index.ts";
-import { loadWasm } from "../../src/wasm/index.ts";
+import {
+  loadWasm,
+  rollingMaxF64Accelerated,
+  rollingMedianF64Accelerated,
+  rollingMinF64Accelerated,
+} from "../../src/wasm/index.ts";
 import type { TsbWasmModule } from "../../src/wasm/index.ts";
 
 let wasm: TsbWasmModule | null = null;
@@ -648,5 +653,82 @@ describe("expanding_sum_f64 parity", () => {
     expect(result[0]).toBeCloseTo(1.0, 10);
     expect(result[1]).toBeCloseTo(3.0, 10);
     expect(result[2]).toBeCloseTo(6.0, 10);
+  });
+});
+
+// ─── accelerated wrapper regression: issue #496 ───────────────────────────────
+//
+// These tests exercise the actual public `*Accelerated` wrappers (not the raw
+// Wasm module) with the module successfully loaded, so a missing module or an
+// accidental fallback cannot make the test pass without exercising the real
+// Wasm path. `wasm` (loaded in the top-level `beforeAll`) must be non-null for
+// these assertions to be meaningful — the tests fail loudly otherwise, they
+// do not silently skip.
+
+describe("rolling*Accelerated missing-value parity (issue #496)", () => {
+  test("wasm module loaded successfully for this suite", () => {
+    expect(wasm).not.toBeNull();
+  });
+
+  test("rollingMedianF64Accelerated on all-missing windows does not trap and matches fallback semantics", () => {
+    if (wasm === null) {
+      throw new Error("wasm module failed to load — cannot verify accelerated path");
+    }
+    const data = [Number.NaN, 1, Number.NaN, 3];
+    const result = rollingMedianF64Accelerated(data, 1, 0);
+    expect(result).toEqual([null, 1, null, 3]);
+  });
+
+  test("rollingMinF64Accelerated preserves TS fallback Infinity semantics for empty windows", () => {
+    if (wasm === null) {
+      throw new Error("wasm module failed to load — cannot verify accelerated path");
+    }
+    const data = [Number.NaN, 1, Number.NaN, 3];
+    const result = rollingMinF64Accelerated(data, 1, 0);
+    expect(result).toEqual([Number.POSITIVE_INFINITY, 1, Number.POSITIVE_INFINITY, 3]);
+  });
+
+  test("rollingMaxF64Accelerated preserves TS fallback -Infinity semantics for empty windows", () => {
+    if (wasm === null) {
+      throw new Error("wasm module failed to load — cannot verify accelerated path");
+    }
+    const data = [Number.NaN, 1, Number.NaN, 3];
+    const result = rollingMaxF64Accelerated(data, 1, 0);
+    expect(result).toEqual([Number.NEGATIVE_INFINITY, 1, Number.NEGATIVE_INFINITY, 3]);
+  });
+
+  test("rollingMinF64Accelerated / rollingMaxF64Accelerated with positive minPeriods still yield null when insufficient", () => {
+    if (wasm === null) {
+      throw new Error("wasm module failed to load — cannot verify accelerated path");
+    }
+    const data = [Number.NaN, Number.NaN, Number.NaN];
+    expect(rollingMinF64Accelerated(data, 3, 1)).toEqual([null, null, null]);
+    expect(rollingMaxF64Accelerated(data, 3, 1)).toEqual([null, null, null]);
+  });
+
+  test("rollingMinF64Accelerated / rollingMaxF64Accelerated with mixed finite and NaN across window sizes", () => {
+    if (wasm === null) {
+      throw new Error("wasm module failed to load — cannot verify accelerated path");
+    }
+    const data = [5, Number.NaN, 2, Number.NaN, Number.NaN, 8, 1];
+    const min2 = rollingMinF64Accelerated(data, 2, 0);
+    const max2 = rollingMaxF64Accelerated(data, 2, 0);
+    expect(min2).toEqual([5, 5, 2, 2, Number.POSITIVE_INFINITY, 8, 1]);
+    expect(max2).toEqual([5, 5, 2, 2, Number.NEGATIVE_INFINITY, 8, 8]);
+  });
+
+  test("rollingMedianF64Accelerated on an empty array returns an empty result", () => {
+    if (wasm === null) {
+      throw new Error("wasm module failed to load — cannot verify accelerated path");
+    }
+    expect(rollingMedianF64Accelerated([], 3, 0)).toEqual([]);
+  });
+
+  test("rollingMinF64Accelerated / rollingMaxF64Accelerated on an empty array return an empty result", () => {
+    if (wasm === null) {
+      throw new Error("wasm module failed to load — cannot verify accelerated path");
+    }
+    expect(rollingMinF64Accelerated([], 3, 0)).toEqual([]);
+    expect(rollingMaxF64Accelerated([], 3, 0)).toEqual([]);
   });
 });

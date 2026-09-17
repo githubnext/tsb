@@ -100,6 +100,9 @@ export function nat_sorted(arr: string[], ignore_case: boolean, reverse: boolean
 
 /**
  * Rolling maximum.
+ *
+ * An empty window (zero non-NaN values) yields `f64::NEG_INFINITY`, matching
+ * the TypeScript fallback's `Math.max()` called with no arguments.
  */
 export function rolling_max_f64(data: Float64Array, window: number, min_periods: number): Float64Array;
 
@@ -115,6 +118,9 @@ export function rolling_median_f64(data: Float64Array, window: number, min_perio
 
 /**
  * Rolling minimum.
+ *
+ * An empty window (zero non-NaN values) yields `f64::INFINITY`, matching the
+ * TypeScript fallback's `Math.min()` called with no arguments.
  */
 export function rolling_min_f64(data: Float64Array, window: number, min_periods: number): Float64Array;
 

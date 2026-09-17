@@ -29,7 +29,13 @@ fn window_sum_count(data: &[f64], start: usize, end: usize) -> (f64, usize) {
 }
 
 /// Return the median of `nums` (already collected as non-NaN values).
+///
+/// Returns `NaN` for an empty slice instead of panicking (which would abort
+/// the Wasm module with an `unreachable` trap).
 fn slice_median(nums: &mut Vec<f64>) -> f64 {
+    if nums.is_empty() {
+        return f64::NAN;
+    }
     nums.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
     let n = nums.len();
     if n % 2 == 1 {
@@ -76,6 +82,9 @@ pub fn rolling_mean_f64(data: &[f64], window: u32, min_periods: u32) -> Vec<f64>
 }
 
 /// Rolling minimum.
+///
+/// An empty window (zero non-NaN values) yields `f64::INFINITY`, matching the
+/// TypeScript fallback's `Math.min()` called with no arguments.
 #[wasm_bindgen]
 pub fn rolling_min_f64(data: &[f64], window: u32, min_periods: u32) -> Vec<f64> {
     let n = data.len();
@@ -84,11 +93,11 @@ pub fn rolling_min_f64(data: &[f64], window: u32, min_periods: u32) -> Vec<f64> 
     let mut result = vec![f64::NAN; n];
     for i in 0..n {
         let start = if i + 1 >= w { i + 1 - w } else { 0 };
-        let mut min_val = f64::NAN;
+        let mut min_val = f64::INFINITY;
         let mut count = 0_usize;
         for j in start..i + 1 {
             if !data[j].is_nan() {
-                if min_val.is_nan() || data[j] < min_val {
+                if data[j] < min_val {
                     min_val = data[j];
                 }
                 count += 1;
@@ -102,6 +111,9 @@ pub fn rolling_min_f64(data: &[f64], window: u32, min_periods: u32) -> Vec<f64> 
 }
 
 /// Rolling maximum.
+///
+/// An empty window (zero non-NaN values) yields `f64::NEG_INFINITY`, matching
+/// the TypeScript fallback's `Math.max()` called with no arguments.
 #[wasm_bindgen]
 pub fn rolling_max_f64(data: &[f64], window: u32, min_periods: u32) -> Vec<f64> {
     let n = data.len();
@@ -110,11 +122,11 @@ pub fn rolling_max_f64(data: &[f64], window: u32, min_periods: u32) -> Vec<f64> 
     let mut result = vec![f64::NAN; n];
     for i in 0..n {
         let start = if i + 1 >= w { i + 1 - w } else { 0 };
-        let mut max_val = f64::NAN;
+        let mut max_val = f64::NEG_INFINITY;
         let mut count = 0_usize;
         for j in start..i + 1 {
             if !data[j].is_nan() {
-                if max_val.is_nan() || data[j] > max_val {
+                if data[j] > max_val {
                     max_val = data[j];
                 }
                 count += 1;
@@ -345,6 +357,101 @@ mod tests {
             &result,
             &[f64::NAN, f64::NAN, 2.0, 3.0, 4.0],
         );
+    }
+
+    // Regression tests for issue #496: all-missing windows at `min_periods = 0`
+    // must not panic (integer underflow / unreachable trap) and must agree
+    // with the TypeScript fallback's `Math.min()`/`Math.max()` semantics for
+    // empty argument lists (`Infinity`/`-Infinity`), not `NaN`.
+
+    #[test]
+    fn test_rolling_median_all_missing_min_periods_zero_does_not_panic() {
+        let data = vec![f64::NAN, 1.0, f64::NAN, 3.0];
+        let result = rolling_median_f64(&data, 1, 0);
+        // window size 1: each position's window is just itself.
+        assert!(result[0].is_nan(), "expected NaN, got {}", result[0]);
+        assert_near(result[1], 1.0);
+        assert!(result[2].is_nan(), "expected NaN, got {}", result[2]);
+        assert_near(result[3], 3.0);
+    }
+
+    #[test]
+    fn test_rolling_median_empty_input() {
+        let data: Vec<f64> = vec![];
+        let result = rolling_median_f64(&data, 3, 0);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_rolling_min_all_missing_min_periods_zero_matches_ts_infinity() {
+        let data = vec![f64::NAN, 1.0, f64::NAN, 3.0];
+        let result = rolling_min_f64(&data, 1, 0);
+        assert_eq!(result[0], f64::INFINITY);
+        assert_eq!(result[1], 1.0);
+        assert_eq!(result[2], f64::INFINITY);
+        assert_eq!(result[3], 3.0);
+    }
+
+    #[test]
+    fn test_rolling_max_all_missing_min_periods_zero_matches_ts_neg_infinity() {
+        let data = vec![f64::NAN, 1.0, f64::NAN, 3.0];
+        let result = rolling_max_f64(&data, 1, 0);
+        assert_eq!(result[0], f64::NEG_INFINITY);
+        assert_eq!(result[1], 1.0);
+        assert_eq!(result[2], f64::NEG_INFINITY);
+        assert_eq!(result[3], 3.0);
+    }
+
+    #[test]
+    fn test_rolling_min_empty_input() {
+        let data: Vec<f64> = vec![];
+        let result = rolling_min_f64(&data, 3, 0);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_rolling_min_max_positive_min_periods_still_nan_when_insufficient() {
+        // With a positive min_periods, an all-missing window must still
+        // produce NaN (not Infinity) because the count check gates the
+        // output — this guards against over-fixing the empty-window case.
+        let data = vec![f64::NAN, f64::NAN, f64::NAN];
+        let min_result = rolling_min_f64(&data, 3, 1);
+        let max_result = rolling_max_f64(&data, 3, 1);
+        for v in &min_result {
+            assert!(v.is_nan(), "expected NaN, got {}", v);
+        }
+        for v in &max_result {
+            assert!(v.is_nan(), "expected NaN, got {}", v);
+        }
+    }
+
+    #[test]
+    fn test_rolling_min_max_mixed_finite_and_nan_various_windows() {
+        let data = vec![5.0, f64::NAN, 2.0, f64::NAN, f64::NAN, 8.0, 1.0];
+        let min_w2 = rolling_min_f64(&data, 2, 0);
+        let max_w2 = rolling_max_f64(&data, 2, 0);
+        // window=2, min_periods=0:
+        // i=0: [5] -> min 5, max 5
+        // i=1: [5,NaN] -> min 5, max 5
+        // i=2: [NaN,2] -> min 2, max 2
+        // i=3: [2,NaN] -> min 2, max 2
+        // i=4: [NaN,NaN] -> all missing -> Infinity / -Infinity
+        // i=5: [NaN,8] -> min 8, max 8
+        // i=6: [8,1] -> min 1, max 8
+        assert_eq!(min_w2[0], 5.0);
+        assert_eq!(max_w2[0], 5.0);
+        assert_eq!(min_w2[1], 5.0);
+        assert_eq!(max_w2[1], 5.0);
+        assert_eq!(min_w2[2], 2.0);
+        assert_eq!(max_w2[2], 2.0);
+        assert_eq!(min_w2[3], 2.0);
+        assert_eq!(max_w2[3], 2.0);
+        assert_eq!(min_w2[4], f64::INFINITY);
+        assert_eq!(max_w2[4], f64::NEG_INFINITY);
+        assert_eq!(min_w2[5], 8.0);
+        assert_eq!(max_w2[5], 8.0);
+        assert_eq!(min_w2[6], 1.0);
+        assert_eq!(max_w2[6], 8.0);
     }
 
     #[test]

@@ -1,6 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
+export const argsort_f64: (a: number, b: number) => [number, number];
+export const argsort_str: (a: number, b: number) => [number, number];
 export const expanding_max_f64: (a: number, b: number, c: number) => [number, number];
 export const expanding_mean_f64: (a: number, b: number, c: number) => [number, number];
 export const expanding_median_f64: (a: number, b: number, c: number) => [number, number];
@@ -8,6 +10,10 @@ export const expanding_min_f64: (a: number, b: number, c: number) => [number, nu
 export const expanding_std_f64: (a: number, b: number, c: number, d: number) => [number, number];
 export const expanding_sum_f64: (a: number, b: number, c: number) => [number, number];
 export const expanding_var_f64: (a: number, b: number, c: number, d: number) => [number, number];
+export const max_f64: (a: number, b: number) => number;
+export const mean_f64: (a: number, b: number) => number;
+export const median_f64: (a: number, b: number) => number;
+export const min_f64: (a: number, b: number) => number;
 export const nat_argsort: (a: number, b: number, c: number, d: number) => [number, number];
 export const nat_compare: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
 export const nat_sorted: (a: number, b: number, c: number, d: number) => [number, number];
@@ -18,12 +24,6 @@ export const rolling_min_f64: (a: number, b: number, c: number, d: number) => [n
 export const rolling_std_f64: (a: number, b: number, c: number, d: number, e: number) => [number, number];
 export const rolling_sum_f64: (a: number, b: number, c: number, d: number) => [number, number];
 export const rolling_var_f64: (a: number, b: number, c: number, d: number, e: number) => [number, number];
-export const argsort_f64: (a: number, b: number) => [number, number];
-export const argsort_str: (a: number, b: number) => [number, number];
-export const max_f64: (a: number, b: number) => number;
-export const mean_f64: (a: number, b: number) => number;
-export const median_f64: (a: number, b: number) => number;
-export const min_f64: (a: number, b: number) => number;
 export const searchsorted_f64: (a: number, b: number, c: number, d: number) => number;
 export const searchsorted_many_f64: (a: number, b: number, c: number, d: number, e: number) => [number, number];
 export const searchsorted_many_str: (a: number, b: number, c: number, d: number, e: number) => [number, number];
