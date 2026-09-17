@@ -370,6 +370,58 @@ jobs:
       automatic_retries: 0
       diagnose: false
 
+  autoloop-safe-outputs:
+    source: .github/workflows/autoloop.md#safe_outputs
+    check_name: Autoloop / safe_outputs
+    provides: [autoloop-published-proposals]
+    necessity:
+      level: advisory
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, manual, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: [GH_AW_GITHUB_TOKEN, GH_AW_GITHUB_MCP_SERVER_TOKEN, GH_AW_CI_TRIGGER_TOKEN, GH_AW_DEFAULT_OTLP_HEADERS]
+      permissions: ["contents:write", "issues:write", "pull-requests:write"]
+      network: internet
+      external_writes: [issues, issue-comments, labels, pull-request-branches, pull-requests, actions-artifact, telemetry]
+    cost:
+      tier: low
+      expected_minutes: 1
+      runner: ubuntu-slim
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
+  goal-safe-outputs:
+    source: .github/workflows/goal.md#safe_outputs
+    check_name: Goal / safe_outputs
+    provides: [goal-published-proposals]
+    necessity:
+      level: advisory
+    freshness:
+      subject: every-head
+      invalidated_by: [any-head-change, manual, workflow-change, policy-change]
+    approval:
+      mode: never
+    risk:
+      executes_pr_code: false
+      secrets: [GH_AW_GITHUB_TOKEN, GH_AW_GITHUB_MCP_SERVER_TOKEN, GH_AW_CI_TRIGGER_TOKEN, GH_AW_DEFAULT_OTLP_HEADERS]
+      permissions: ["contents:write", "issues:write", "pull-requests:write"]
+      network: internet
+      external_writes: [issues, issue-comments, labels, pull-request-branches, pull-requests, actions-artifact, telemetry]
+    cost:
+      tier: low
+      expected_minutes: 1
+      runner: ubuntu-slim
+    phase: post-merge
+    failure:
+      automatic_retries: 0
+      diagnose: false
+
   evergreen-preflight:
     source: .github/workflows/evergreen.md#preflight
     check_name: Evergreen deterministic preflight

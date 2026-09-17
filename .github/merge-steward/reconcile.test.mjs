@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
 import { plan } from "./planner.mjs";
 import {
@@ -630,3 +632,81 @@ test("fully classified inventory is a no-op without inventing generated jobs", (
     [],
   );
 });
+
+let repositoryInventory;
+function actualRepositoryInventory() {
+  if (repositoryInventory) return repositoryInventory;
+  const root = new URL("../../", import.meta.url);
+  const workflowPaths = readdirSync(new URL(".github/workflows/", root))
+    .filter((name) => /\.(yml|yaml|md)$/.test(name) && !name.endsWith(".lock.yml"))
+    .sort()
+    .map((name) => `.github/workflows/${name}`);
+  const policyPath = ".github/merge-steward.yml";
+  const lockPaths = ["autoloop", "goal"].map((name) => `.github/workflows/${name}.lock.yml`);
+  const texts = Object.fromEntries(
+    [policyPath, ...workflowPaths, ...lockPaths].map((path) => {
+      const contents = readFileSync(new URL(path, root), "utf8");
+      return [path, path.endsWith(".md") ? contents.split(/^---\s*$/m)[1] : contents];
+    }),
+  );
+  // Match the reconciler's safe YAML parser; no Bun or installed repo packages needed.
+  const definitions = JSON.parse(
+    execFileSync(
+      "ruby",
+      [
+        "-ryaml",
+        "-rjson",
+        "-e",
+        "puts JSON.generate(JSON.parse(STDIN.read).transform_values { |text| YAML.safe_load(text, permitted_classes: [], aliases: false) })",
+      ],
+      { input: JSON.stringify(texts), encoding: "utf8", maxBuffer: 16 * 1024 * 1024 },
+    ),
+  );
+  repositoryInventory = {
+    config: definitions[policyPath],
+    workflows: Object.fromEntries(workflowPaths.map((path) => [path, definitions[path]])),
+    compiled: Object.fromEntries(lockPaths.map((path) => [path, definitions[path]])),
+  };
+  return repositoryInventory;
+}
+
+test("actual repository workflow inventory has no unclassified source jobs", () => {
+  const { config, workflows } = actualRepositoryInventory();
+  assert.deepEqual(policyInventory(config, workflows), []);
+});
+
+for (const workflow of ["autoloop", "goal"]) {
+  test(`actual ${workflow} safe_outputs still requires an explicit policy classification`, () => {
+    const { config, workflows } = actualRepositoryInventory();
+    const source = `.github/workflows/${workflow}.md#safe_outputs`;
+    assert.ok(workflows[`.github/workflows/${workflow}.md`].jobs.safe_outputs);
+    const jobs = Object.fromEntries(
+      Object.entries(config.jobs).filter(([, job]) => job.source !== source),
+    );
+    assert.deepEqual(policyInventory({ ...config, jobs }, workflows), [source]);
+  });
+
+  test(`actual ${workflow} publisher classification matches its compiled authority`, () => {
+    const { config, compiled } = actualRepositoryInventory();
+    const entry = config.jobs[`${workflow}-safe-outputs`];
+    const definition = compiled[`.github/workflows/${workflow}.lock.yml`];
+    const publisher = definition.jobs.safe_outputs;
+    assert.equal(entry.necessity.level, "advisory");
+    assert.equal(entry.risk.executes_pr_code, false);
+    assert.equal(entry.cost.tier, "low");
+    assert.equal(entry.cost.runner, publisher["runs-on"]);
+    assert.equal(entry.dispatch, undefined);
+    assert.deepEqual(
+      [...entry.risk.permissions].sort(),
+      Object.entries(publisher.permissions).map(([scope, level]) => `${scope}:${level}`).sort(),
+    );
+    const secretNames = new Set(
+      [...JSON.stringify({ env: definition.env, publisher }).matchAll(/secrets\.([A-Z0-9_]+)/g)]
+        .map((match) => match[1])
+        .filter((name) => name !== "GITHUB_TOKEN"),
+    );
+    assert.deepEqual([...entry.risk.secrets].sort(), [...secretNames].sort());
+    assert.match(publisher.if, /needs\.agent\.result == 'success'/);
+    assert.match(publisher.if, /needs\.detection\.result == 'success'/);
+  });
+}

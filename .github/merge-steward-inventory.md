@@ -66,7 +66,7 @@ scopes. Named tokens may have permissions beyond the workflow token scopes.
 | Autoloop, Goal / `agent` | Independent implementation agent; ubuntu-latest; scarce | `read-all`; runs repository code; Copilot and GitHub tokens; privileged network; proposes changes and safe outputs. |
 | Autoloop, Goal / `detection` | Output threat detection; ubuntu-latest; scarce | `contents:read` plus Copilot token; separate model cost. |
 | Autoloop, Goal / `push_repo_memory` | Deterministic memory publisher; ubuntu-slim; low | `contents:write` to repository memory. |
-| Autoloop, Goal / `safe_outputs` | Deterministic proposed-write handler; ubuntu-slim; low | `contents:write`, `issues:write`, `pull-requests:write`; writes branches, PRs, issues and labels per source allowlists; may trigger CI using `GH_AW_CI_TRIGGER_TOKEN`. |
+| Autoloop, Goal / `safe_outputs` | Advisory deterministic proposed-write handler; ubuntu-slim; low (37–47 s in the live trials; budget estimate 1 min) | No PR code or model execution. `contents:write`, `issues:write`, `pull-requests:write`; writes branches, draft PRs, issues/comments, labels and result artifacts per source allowlists. GitHub/MCP token fallbacks, optional CI-trigger token and inherited optional telemetry headers; details below. |
 | Autoloop, Goal / `conclusion` | Reporting/cleanup; ubuntu-slim; low | `actions:read`, `contents:write`, `issues:write`, `pull-requests:write`; reports and bookkeeping. |
 | Evergreen / `preflight` | Opt-in deterministic repair coordinator; ubuntu-latest; low | Actions/content/issues/PR write scopes plus check/status reads; labels, retries and `GH_AW_CI_TRIGGER_TOKEN`. |
 | Evergreen / `activation` | Trusted activation; ubuntu-slim; low | Actions/content reads and engine/token verification. |
@@ -86,6 +86,25 @@ scopes. Named tokens may have permissions beyond the workflow token scopes.
 | Merge Steward Diagnosis / `detection` | Output threat detection; ubuntu-latest; scarce | `contents:read` plus Copilot token. |
 | Merge Steward Diagnosis / `safe_outputs` | Staged output processing; ubuntu-slim; low | Empty workflow permissions; proposed comments and labels are staged, not published. |
 | Merge Steward Diagnosis / `conclusion` | Usage bookkeeping and reporting; ubuntu-slim; low | `actions:write` for usage cache/artifacts. Automatic failure, missing-tool and incomplete-work issues are disabled; no content/issues/PR write scope. |
+
+The explicit `jobs.safe_outputs` overrides in `autoloop.md` and `goal.md` are
+classified separately in policy. They require successful agent execution and
+successful threat detection before publication. Pinned framework handlers
+process proposed JSON and patches; they do not execute checked-out PR scripts,
+tests or installers. These are independent publication jobs, not merge evidence
+or Steward-dispatchable workers; their `post-merge` policy phase excludes them
+from PR-readiness scheduling, not from their own scheduled/manual triggers.
+
+For these two publishers, the built-in token has only content, issue and PR
+write scopes. `GH_AW_GITHUB_TOKEN` falls back to `GITHUB_TOKEN` for checkout,
+persisted git credentials and API writes; additional ref fetching prefers
+`GH_AW_GITHUB_MCP_SERVER_TOKEN`. `GH_AW_CI_TRIGGER_TOKEN` may use a configured
+PAT or GitHub App credential to trigger normal CI with an extra empty commit;
+it does not add a workflow-dispatch or merge handler. `GH_AW_DEFAULT_OTLP_HEADERS` is
+inherited for optional telemetry. Custom-token scopes cannot be inferred from
+these job permissions. Neither publisher receives `COPILOT_GITHUB_TOKEN`.
+These declarations record existing privileges; they grant no new capability.
+New or unclassified source jobs still require maintainer review.
 
 Source timeout budgets are 45 minutes for Autoloop, 60 minutes for Goal and
 Evergreen, and 10 minutes for CI Doctor and Steward Diagnosis. Actual duration
