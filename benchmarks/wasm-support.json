@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "benchmarks": {
+    "wasm_accelerated": {
+      "scope": "kernel",
+      "kernels": ["searchsorted_f64", "searchsorted_many_f64", "argsort_f64"]
+    },
+    "wasm_natsort": { "scope": "kernel", "kernels": ["nat_compare", "nat_sorted", "nat_argsort"] },
+    "wasm_agg_scalar": {
+      "scope": "kernel",
+      "kernels": ["sum_f64", "mean_f64", "min_f64", "max_f64", "var_f64", "std_f64", "median_f64"]
+    },
+    "wasm_agg_ops": {
+      "scope": "kernel",
+      "kernels": [
+        "sum_f64",
+        "mean_f64",
+        "min_f64",
+        "max_f64",
+        "var_f64",
+        "std_f64",
+        "median_f64",
+        "rolling_sum_f64",
+        "rolling_mean_f64",
+        "expanding_sum_f64",
+        "expanding_mean_f64"
+      ]
+    },
+    "wasm_rolling_sum_mean": {
+      "scope": "kernel",
+      "kernels": ["rolling_sum_f64", "rolling_mean_f64", "expanding_sum_f64", "expanding_mean_f64"]
+    },
+    "wasm_rolling_stats": {
+      "scope": "kernel",
+      "kernels": [
+        "rolling_min_f64",
+        "rolling_max_f64",
+        "rolling_var_f64",
+        "rolling_std_f64",
+        "rolling_median_f64",
+        "expanding_min_f64",
+        "expanding_max_f64",
+        "expanding_var_f64",
+        "expanding_std_f64",
+        "expanding_median_f64"
+      ]
+    },
+    "wasm_expanding_stats": {
+      "scope": "kernel",
+      "kernels": [
+        "expanding_min_f64",
+        "expanding_max_f64",
+        "expanding_var_f64",
+        "expanding_std_f64",
+        "expanding_median_f64"
+      ]
+    }
+  }
+}

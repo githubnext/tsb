@@ -21,6 +21,10 @@ SMOKE_PATHS = {
     ".github/workflows/scripts/benchmark_selection.py",
     ".github/workflows/scripts/test_benchmark_selection.py",
 }
+WASM_MANIFEST = "benchmarks/wasm-support.json"
+WASM_PATHS = SMOKE_PATHS | {WASM_MANIFEST, "benchmarks/backend.ts", "benchmarks/kernel-workloads.ts",
+                          "benchmarks/pandas/wasm_helpers.py"}
+WASM_PREFIXES = ("benchmarks/helpers/", "rust/", "src/wasm/")
 
 
 class IncompletePairError(ValueError):
@@ -40,8 +44,31 @@ def paired_names(root: Path) -> set[str]:
     return ts & py
 
 
+def registered_wasm_names(root: Path, available: set[str]) -> set[str]:
+    """Require the explicit kernel registry instead of inferring support by name."""
+    manifest = json.loads((root / WASM_MANIFEST).read_text(encoding="utf-8"))
+    if not isinstance(manifest, dict) or type(manifest.get("schema_version")) is not int or manifest["schema_version"] != 1:
+        raise ValueError("Wasm support manifest must use schema_version 1")
+    entries = manifest.get("benchmarks")
+    if not isinstance(entries, dict) or not entries:
+        raise ValueError("Wasm support manifest must register at least one kernel benchmark")
+    for name, entry in entries.items():
+        if not NAME.fullmatch(name) or not isinstance(entry, dict) or entry.get("scope") != "kernel":
+            raise ValueError("Wasm support manifest entries must be named kernel benchmarks")
+        kernels = entry.get("kernels")
+        if not isinstance(kernels, list) or not kernels or any(
+            not isinstance(kernel, str) or not NAME.fullmatch(kernel) for kernel in kernels
+        ):
+            raise ValueError(f"Wasm benchmark {name} must identify its kernels")
+    missing = entries.keys() - available
+    if missing:
+        raise ValueError("registered Wasm benchmarks do not have matched pairs: " + ", ".join(sorted(missing)))
+    return set(entries)
+
+
 def select_pairs(event: str, available: set[str], changed: list[str], requested: str,
-                 present_names: set[str] | None = None):
+                 present_names: set[str] | None = None, wasm_names: set[str] | None = None):
+    registered = wasm_names or set()
     if event == "workflow_dispatch":
         names = requested.split(",")
         selected = {name.strip() for name in names}
@@ -65,6 +92,10 @@ def select_pairs(event: str, available: set[str], changed: list[str], requested:
             reason = "runner_or_worker_smoke_and_changed_pairs"
         else:
             selected, reason = changed_names & available, "changed_matched_pairs"
+        if WASM_PATHS.intersection(changed) or any(path.startswith(WASM_PREFIXES) for path in changed):
+            selected |= registered
+            if registered:
+                reason += "_and_registered_wasm"
     else:
         raise ValueError("only pull_request or workflow_dispatch is supported")
     missing = selected - available
@@ -72,7 +103,9 @@ def select_pairs(event: str, available: set[str], changed: list[str], requested:
         raise ValueError("requested benchmark pairs do not exist on this candidate: " + ", ".join(sorted(missing)))
     if len(selected) > MAX_PAIRS:
         raise ValueError(f"{len(selected)} pairs exceed the {MAX_PAIRS}-pair tranche limit; split the PR or dispatch named tranches")
-    return {"pairs": sorted(selected), "reason": reason, "removed_pairs": unmatched}
+    wasm_pairs = sorted(selected & registered)
+    return {"pairs": sorted(selected), "reason": reason, "removed_pairs": unmatched,
+            "wasm_pairs": wasm_pairs, "needs_wasm": bool(wasm_pairs)}
 
 
 def changed_paths(root: Path, base: str, head: str) -> list[str]:
@@ -104,12 +137,13 @@ def main(argv=None) -> int:
         report["head_sha"] = head
         paths = changed_paths(root, base, head) if event == "pull_request" else []
         ts, py = benchmark_names(root)
-        selection = select_pairs(event, ts & py, paths, os.environ.get("INPUT_PAIRS", ""), ts | py)
+        registered = registered_wasm_names(root, ts & py)
+        selection = select_pairs(event, ts & py, paths, os.environ.get("INPUT_PAIRS", ""), ts | py, registered)
         report.update(selection, head_sha=head, status="selected" if selection["pairs"] else "no_matched_changes")
         exit_code = 0
         print(f"{report['status']}: {','.join(selection['pairs']) or '(none)'} ({selection['reason']})")
     except (ValueError, OSError, subprocess.SubprocessError) as error:
-        report.update(status="selection_error", error=str(error), pairs=[])
+        report.update(status="selection_error", error=str(error), pairs=[], wasm_pairs=[], needs_wasm=False)
         if isinstance(error, IncompletePairError):
             report["incomplete_pairs"] = error.names
         exit_code = 1
@@ -120,6 +154,7 @@ def main(argv=None) -> int:
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
             handle.write("should_run=" + str(exit_code == 0 and bool(report["pairs"])).lower() + "\n")
             handle.write("pairs=" + ",".join(report["pairs"]) + "\n")
+            handle.write("needs_wasm=" + str(exit_code == 0 and report["needs_wasm"]).lower() + "\n")
     return exit_code
 
 

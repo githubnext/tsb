@@ -1,5 +1,7 @@
 """Exercise benchmark accounting cheaply using fake TS/Python executables."""
 import json
+import hashlib
+import importlib.util
 import os
 from pathlib import Path
 import subprocess
@@ -19,7 +21,7 @@ class BenchmarkRunnerTest(unittest.TestCase):
         for directory in ("tsb", "pandas"):
             (self.root / "benchmarks" / directory).mkdir(parents=True)
         self.stub = self.root / "runtime"
-        self.stub.write_text(f"#!{sys.executable}\n" + """import json,pathlib,sys,time
+        self.stub.write_text(f"#!{sys.executable}\n" + """import hashlib,json,os,pathlib,sys,time
 if sys.argv[1] == '--version':
     print('test-runtime-1')
 elif sys.argv[1] == '-c':
@@ -27,6 +29,58 @@ elif sys.argv[1] == '-c':
 else:
     script = pathlib.Path(sys.argv[1])
     behavior = script.read_text().strip()
+    if behavior.startswith('wasm_'):
+        backend = os.environ.get('TSB_BENCHMARK_BACKEND', 'pandas')
+        if behavior == 'wasm_failure' and backend == 'rust-wasm':
+            print('cannot load Wasm module', file=sys.stderr)
+            sys.exit(1)
+        if behavior == 'wasm_timeout' and backend == 'rust-wasm':
+            time.sleep(2)
+        result = {'function':script.stem[6:], 'backend':backend, 'mean_ms':1, 'iterations':2, 'total_ms':2,
+                  'scope':'kernel', 'fixture':'fixture-v1', 'warmup':3,
+                  'verification':{'schema_version':1,'outputs':{'sum_f64':[1,2.5,None,'file10']}}}
+        if behavior == 'wasm_wrong_output' and backend == 'rust-wasm':
+            result['verification']['outputs']['sum_f64'][0] = 3
+        if behavior == 'wasm_wrong_shape' and backend == 'typescript':
+            result['verification']['outputs']['sum_f64'].append(None)
+        if behavior == 'wasm_no_outputs':
+            result.pop('verification')
+        if behavior == 'wasm_unrelated_outputs':
+            result['verification']['outputs'] = {'unrelated': []}
+        if behavior == 'wasm_wrong_name':
+            result['function'] = 'not_the_selected_workload'
+        if behavior == 'wasm_bad_iterations':
+            result['iterations'] = True
+        if behavior == 'wasm_huge_iterations':
+            result['iterations'] = 10**400
+        if behavior == 'wasm_huge_timing':
+            result.update(mean_ms=10**308, total_ms=10**308)
+        if behavior == 'wasm_bad_total':
+            result['total_ms'] = 999
+        if behavior == 'wasm_wrong_fixture' and backend == 'rust-wasm':
+            result['fixture'] = 'easier-fixture'
+        if behavior == 'wasm_wrong_warmup' and backend == 'typescript':
+            result['warmup'] = 100
+        if behavior == 'wasm_zero_total':
+            result.update(mean_ms=1e-9, total_ms=0)
+        if behavior == 'wasm_negative_total':
+            result.update(mean_ms=1e-9, total_ms=-1e-9)
+        if backend == 'rust-wasm':
+            binary = script.parents[2] / 'rust/pkg/tsb_wasm_bg.wasm'
+            result['wasm'] = {'binary_sha256':hashlib.sha256(binary.read_bytes()).hexdigest(), 'kernel_calls':{'sum_f64':2}}
+            if behavior == 'wasm_fallback': result['backend'] = 'typescript'
+            if behavior == 'wasm_no_receipt': result.pop('wasm')
+            if behavior == 'wasm_wrong_hash': result['wasm']['binary_sha256'] = 'f' * 64
+            if behavior == 'wasm_no_calls': result['wasm']['kernel_calls'] = {}
+            if behavior == 'wasm_wrong_calls': result['wasm']['kernel_calls'] = {'other_f64':2}
+            if behavior == 'wasm_warmup_only': result['wasm']['kernel_calls'] = {'sum_f64':3}
+            if behavior == 'wasm_boolean_calls': result['wasm']['kernel_calls'] = {'sum_f64':True}
+            if behavior == 'wasm_receipt_override': result['wasm'].update(mean_ms=0.000001, iterations=999, status='faked')
+            if behavior == 'wasm_mutated_binary': binary.write_bytes(b'changed after measurement')
+        if behavior == 'wasm_ts_contaminated' and backend == 'typescript':
+            result['wasm'] = {'kernel_calls': {'sum_f64':2}}
+        print(json.dumps(result))
+        sys.exit(0)
     if behavior == 'fail':
         print('deliberate fixture failure', file=sys.stderr)
         sys.exit(7)
@@ -58,6 +112,16 @@ else:
         (self.root / "benchmarks" / "tsb" / f"bench_{name}.ts").write_text(ts)
         (self.root / "benchmarks" / "pandas" / f"bench_{name}.py").write_text(pandas)
 
+    def register(self, name="kernel", behavior="wasm_ok"):
+        self.pair(name, behavior, "wasm_ok")
+        path = self.root / "benchmarks/wasm-support.json"
+        manifest = json.loads(path.read_text()) if path.exists() else {"schema_version": 1, "benchmarks": {}}
+        manifest["benchmarks"][name] = {"scope": "kernel", "kernels": ["sum_f64"]}
+        path.write_text(json.dumps(manifest))
+        binary = self.root / "rust/pkg/tsb_wasm_bg.wasm"
+        binary.parent.mkdir(parents=True, exist_ok=True)
+        binary.write_bytes(b'fixture wasm binary')
+
     def run_report(self, *extra, environment=None):
         result = subprocess.run([
             sys.executable, str(RUNNER), "--repo-root", str(self.root),
@@ -79,6 +143,131 @@ else:
         self.assertEqual(report["provenance"]["typescript_version"], "test-runtime-1")
         self.assertIn("candidate_sha", report["provenance"])
         self.assertEqual(report["provenance"]["workers"], 2)
+        self.assertEqual(report["schema_version"], 3)
+        self.assertEqual(report["comparisons"][0]["rust_wasm"]["status"], "unsupported")
+        self.assertEqual(report["backend_summary"]["rust_wasm"]["unsupported"], 1)
+
+    def test_three_backends_require_real_receipt_and_compare_full_outputs(self):
+        self.register()
+        result, report = self.run_report("--strict", environment={**self.environment, "TSB_BENCHMARK_BACKEND": "rust-wasm"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        comparison = report["comparisons"][0]
+        self.assertEqual(comparison["scope"], "kernel")
+        self.assertEqual(comparison["output_verification"]["status"], "matched")
+        self.assertEqual(comparison["tsb"]["mean_ms"], 1)
+        self.assertEqual(comparison["rust_wasm"]["status"], "success")
+        self.assertEqual(comparison["rust_wasm"]["kernel_calls"], {"sum_f64": 2})
+        self.assertEqual(comparison["rust_wasm"]["binary_sha256"], hashlib.sha256(b'fixture wasm binary').hexdigest())
+        self.assertNotIn("verification", report["benchmarks"][0]["tsb"])
+        self.assertEqual(report["backend_summary"]["rust_wasm"]["success"], 1)
+
+    def test_failed_or_unverified_rust_preserves_python_and_typescript(self):
+        for behavior in ("wasm_failure", "wasm_timeout", "wasm_fallback", "wasm_no_receipt", "wasm_wrong_hash",
+                         "wasm_no_calls", "wasm_wrong_calls", "wasm_warmup_only", "wasm_boolean_calls", "wasm_mutated_binary"):
+            with self.subTest(behavior=behavior):
+                self.register(behavior=behavior)
+                result, report = self.run_report("--strict")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                row = report["comparisons"][0]
+                self.assertEqual(row["pandas"]["status"], "success")
+                self.assertEqual(row["tsb"]["status"], "success")
+                self.assertNotEqual(row["rust_wasm"]["status"], "success")
+                self.assertNotIn("mean_ms", row["rust_wasm"])
+                self.assertEqual(report["summary"]["failed"], 1)
+                self.assertEqual(len(report["benchmarks"]), 1)
+
+    def test_receipt_cannot_override_validated_timing_or_status(self):
+        self.register(behavior="wasm_receipt_override")
+        result, report = self.run_report("--strict")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        wasm = report["comparisons"][0]["rust_wasm"]
+        self.assertEqual(wasm["mean_ms"], 1)
+        self.assertEqual(wasm["iterations"], 2)
+        self.assertEqual(wasm["status"], "success")
+        self.assertEqual(set(report["benchmarks"][0]["tsb"]), {"function", "backend", "mean_ms", "iterations", "total_ms", "scope", "fixture", "warmup"})
+
+    def test_huge_iteration_count_is_a_reported_failure_not_collector_crash(self):
+        for behavior in ("wasm_huge_iterations", "wasm_huge_timing"):
+            self.register(behavior=behavior)
+            result, report = self.run_report("--strict")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIsNotNone(report)
+            self.assertEqual(report["summary"]["failed"], 1)
+
+    def test_incorrect_output_or_ts_contamination_cannot_be_a_timing_win(self):
+        for behavior in ("wasm_wrong_output", "wasm_wrong_shape", "wasm_ts_contaminated", "wasm_no_outputs",
+                         "wasm_wrong_name", "wasm_bad_iterations", "wasm_bad_total", "wasm_zero_total", "wasm_negative_total",
+                         "wasm_wrong_fixture", "wasm_wrong_warmup"):
+            with self.subTest(behavior=behavior):
+                self.register(behavior=behavior)
+                result, report = self.run_report("--strict")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                row = report["comparisons"][0]
+                self.assertEqual(row["output_verification"]["status"], "incomplete")
+                self.assertTrue(any(row[side]["status"] in ("incorrect", "unverified") for side in ("tsb", "rust_wasm")))
+
+    def test_missing_binary_is_failure_not_unsupported(self):
+        self.register()
+        (self.root / "rust/pkg/tsb_wasm_bg.wasm").unlink()
+        result, report = self.run_report("--strict")
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(report["comparisons"][0]["rust_wasm"]["status"], "error")
+        self.assertIsNone(report["provenance"]["wasm"]["binary_sha256"])
+
+    def test_missing_reference_prevents_unverified_comparison_timings(self):
+        self.register()
+        (self.root / "benchmarks/pandas/bench_kernel.py").write_text("fail")
+        result, report = self.run_report("--strict")
+        self.assertEqual(result.returncode, 1)
+        row = report["comparisons"][0]
+        self.assertEqual(row["pandas"]["status"], "error")
+        for side in ("tsb", "rust_wasm"):
+            self.assertEqual(row[side]["status"], "unverified")
+            self.assertNotIn("mean_ms", row[side])
+            self.assertIn("reference", row[side]["reason"])
+
+    def test_matching_unrelated_outputs_cannot_certify_registered_kernels(self):
+        self.register(behavior="wasm_unrelated_outputs")
+        (self.root / "benchmarks/pandas/bench_kernel.py").write_text("wasm_unrelated_outputs")
+        result, report = self.run_report("--strict")
+        self.assertEqual(result.returncode, 1)
+        row = report["comparisons"][0]
+        self.assertEqual(row["output_verification"]["status"], "incomplete")
+        for side in ("tsb", "pandas", "rust_wasm"):
+            self.assertEqual(row[side]["status"], "unverified")
+            self.assertNotIn("mean_ms", row[side])
+
+    def test_unselected_registered_backend_is_not_executed(self):
+        self.register(behavior="wasm_failure")
+        self.pair("join")
+        result, report = self.run_report("--filter", "join", "--strict")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(report["comparisons"][1]["rust_wasm"]["status"], "not_selected")
+        self.assertEqual(report["backend_summary"]["rust_wasm"], {"success": 0, "failed": 0, "unsupported": 1, "not_selected": 1})
+
+    def test_invalid_manifest_fails_closed(self):
+        self.pair("kernel")
+        for entry in ({"scope": "api", "kernels": ["sum_f64"]}, {"scope": "kernel", "kernels": []},
+                      {"scope": "kernel", "kernels": ["sum_f64", "sum_f64"]}, {"scope": "kernel", "kernels": [False]}):
+            (self.root / "benchmarks/wasm-support.json").write_text(json.dumps({"schema_version": 1, "benchmarks": {"kernel": entry}}))
+            result, report = self.run_report()
+            self.assertEqual(result.returncode, 2)
+            self.assertIsNone(report)
+        (self.root / "benchmarks/wasm-support.json").write_text('not json')
+        result, report = self.run_report()
+        self.assertEqual(result.returncode, 2)
+        self.assertIsNone(report)
+
+    def test_output_comparison_keeps_shapes_identities_and_order(self):
+        spec = importlib.util.spec_from_file_location("three_backend_runner", RUNNER)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        compare = module.output_difference
+        self.assertIsNone(compare({"data": [1.1, None, "file1"]}, {"data": [1.10000000001, None, "file1"]}))
+        self.assertIsNotNone(compare({"argsort_f64": [0, 1]}, {"argsort_f64": [1e-10, 1.00000000001]}))
+        for expected, actual in (([1, 2], [2, 1]), ([1], [1, None]), (True, 1), ({"x": 1}, {"y": 1}),
+                                 ("1", 1), (None, 0), ([1.2], [1.21])):
+            self.assertIsNotNone(compare(expected, actual))
 
     def test_every_failure_is_reported_and_default_publish_is_incomplete(self):
         for name, behavior in (("good", "ok"), ("broken", "fail"), ("slow", "timeout"), ("bad_json", "malformed"), ("nan", "nan"), ("infinite", "infinity")):

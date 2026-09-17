@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Run matched tsb/pandas benchmarks with an outcome for every discovered pair.
+# Run Python/TypeScript comparisons and explicitly registered Rust/Wasm kernels.
+# Schema 3 retains per-backend failures and unsupported/not-selected outcomes.
 # BENCHMARK_FILTER=join,rolling_mean selects exact pair names for a cheap probe.
 # BENCHMARK_STRICT=1 fails if any selected pair fails; Pages defaults to publishing
 # an explicitly incomplete report. BENCHMARK_WORKERS=8, BENCHMARK_TIMEOUT=30.

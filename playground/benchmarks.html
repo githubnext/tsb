@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tsb — Performance Benchmarks: tsb vs pandas</title>
+  <title>tsb — Python, TypeScript and Rust/Wasm Benchmarks</title>
   <style>
     :root {
       --bg: #0d1117;
@@ -23,7 +23,7 @@
       font-family: system-ui, -apple-system, sans-serif;
       line-height: 1.6;
       padding: 2rem;
-      max-width: 960px;
+      max-width: 1280px;
       margin: 0 auto;
     }
     a { color: var(--accent); }
@@ -65,8 +65,18 @@
     .bench-table tr:nth-child(even) {
       background: rgba(22, 27, 34, 0.5);
     }
-    .faster-tsb { color: var(--green); font-weight: 600; }
-    .faster-pandas { color: var(--orange); font-weight: 600; }
+    .table-scroll { overflow-x: auto; }
+    .bench-table { min-width: 960px; }
+    .bench-table td small { display: block; color: #8b949e; font: 0.75rem system-ui, sans-serif; max-width: 20rem; overflow-wrap: anywhere; }
+    .bench-table td:first-child { overflow-wrap: anywhere; }
+    .bench-table th:first-child, .bench-table td:first-child { min-width: 17rem; }
+    .result-error, .result-unverified { color: var(--orange); }
+    .result-unavailable { color: #8b949e; }
+    .controls { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    .controls[hidden] { display: none; }
+    .controls label { display: grid; gap: 0.25rem; font-size: 0.8rem; color: #8b949e; }
+    .controls input, .controls select { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 0.3rem; padding: 0.5rem; font: inherit; }
+    #visible-count, #backend-summary { font-size: 0.85rem; white-space: pre-line; }
     .ratio-badge {
       display: inline-block;
       padding: 0.15rem 0.5rem;
@@ -98,7 +108,7 @@
       margin-top: 0.5rem;
     }
     .info-box li { margin-bottom: 0.25rem; }
-    #measurement-status { white-space: pre-line; border-color: var(--orange); }
+    #measurement-status { white-space: pre-line; border-color: var(--orange); overflow-wrap: anywhere; }
 
     .timestamp {
       color: #484f58;
@@ -127,36 +137,46 @@
   <a class="back" href="index.html">← back to index</a>
   <h1>⚡ Performance Benchmarks</h1>
   <p class="desc">
-    Side-by-side performance comparison of <code>tsb</code> (TypeScript/Bun) vs
-    <code>pandas</code> (Python). Workloads vary by benchmark; comparable inputs
-    and operations must be verified before drawing conclusions.
+    Python (pandas/NumPy/stdlib), TypeScript (Bun), and Rust/Wasm (Bun host), side by side.
+    Workloads vary; comparable inputs, outputs, and operations must be verified
+    before timings become optimization targets.
   </p>
 
   <p id="measurement-status" class="info-box" role="status" hidden></p>
+  <p id="backend-summary" hidden></p>
 
   <div id="no-data" style="display: none;">
     <p>📊 No benchmark data available yet.</p>
     <p style="font-size: 0.875rem; margin-top: 0.5rem;">
-      Benchmarks are added automatically by the
-      <a href="https://github.com/githubnext/autoloop">Autoloop</a>
-      perf-comparison program. Each iteration adds a new function benchmark.
+      Publish a benchmark report to see measurements and unavailable backends here.
     </p>
   </div>
 
   <!-- Table section -->
   <h2 id="table-heading" style="display: none;">Detailed Results</h2>
+  <div id="bench-controls" class="controls" hidden>
+    <label>Find a benchmark <input id="bench-search" type="search" placeholder="Name or failure reason" /></label>
+    <label>Scope <select id="bench-scope" aria-label="Scope"><option value="all">All workloads</option><option value="api">Existing workload</option><option value="kernel">Direct kernel</option></select></label>
+    <label>Results <select id="bench-status" aria-label="Results"><option value="all">All results</option><option value="selected">Selected this run</option><option value="problems">Failed or unverified</option></select></label>
+    <label>Sort <select id="bench-sort" aria-label="Sort"><option value="tsb">Worst TypeScript / Python</option><option value="rust_wasm">Worst Wasm / Python</option><option value="name">Benchmark name</option></select></label>
+  </div>
+  <p id="visible-count" role="status" hidden></p>
+  <div class="table-scroll" role="region" aria-label="Three-backend benchmark results" tabindex="0">
   <table id="bench-table" class="bench-table" style="display: none;">
     <thead>
       <tr>
         <th>Function</th>
-        <th>tsb (ms)</th>
-        <th>pandas (ms)</th>
-        <th>Ratio</th>
-        <th>Faster</th>
+        <th>Scope</th>
+        <th>Python<br />pandas/NumPy/stdlib · ms</th>
+        <th>TypeScript<br />Bun · ms</th>
+        <th>Rust/Wasm<br />Bun host · ms</th>
+        <th>TS / Python</th>
+        <th>Wasm / Python</th>
       </tr>
     </thead>
     <tbody id="bench-tbody"></tbody>
   </table>
+  </div>
   <p id="bench-timestamp" class="timestamp" style="display: none;"></p>
 
   <!-- Methodology -->
@@ -167,17 +187,19 @@
       <li><strong>Dataset and operation</strong>: defined separately in each paired script</li>
       <li><strong>Warm-up and measurement</strong>: iteration counts vary; reported timings are means</li>
       <li><strong>Environment</strong>: new reports record runtime versions, concurrency, timeout, and measured commit</li>
-      <li><strong>Ratio</strong>: tsb_time / pandas_time — below 1.0 means tsb is faster</li>
+      <li><strong>Ratios</strong>: backend time / Python time. Below 1 means faster than Python for that row, not an overall winner. Only successful, finite positive measurements can be compared.</li>
+      <li><strong>Scope</strong>: direct kernel rows exercise registered kernels; existing workload rows reflect their paired scripts. Neither label demonstrates that normal TypeScript API methods dispatch to Wasm.</li>
+      <li><strong>Rust/Wasm</strong>: runs under Bun. Verified timings require a binary hash and positive kernel-call receipt; no TypeScript fallback is counted as Wasm. Module loading and warm-up are outside the timed kernel region.</li>
+      <li><strong>Missing results</strong>: unsupported, unverified, failed, and unselected backends remain visible. Older two-way reports show Wasm as “Not measured.”</li>
     </ul>
   </div>
 
   <div class="info-box">
     <h3>🤖 About</h3>
     <p>
-      These benchmarks are generated automatically by the Autoloop
-      <code>perf-comparison</code> program. Each iteration adds a new function
-      comparison. The Pages workflow collects and publishes results when
-      <code>main</code> changes.
+      The Pages workflow collects paired benchmark scripts and publishes their
+      results when <code>main</code> changes. Timings alone do not establish
+      semantic equivalence or approve a performance claim.
     </p>
   </div>
 
@@ -189,17 +211,92 @@
   </footer>
 
   <script>
-    function measurementDisclosure(data) {
+    const backends = ["pandas", "tsb", "rust_wasm"];
+    const backendNames = { pandas: "Python (pandas/NumPy/stdlib)", tsb: "TypeScript (Bun)", rust_wasm: "Rust/Wasm (Bun host)" };
+    const statusNames = {
+      error: "Error", timeout: "Timed out", malformed: "Invalid result", non_finite: "Invalid timing", incorrect: "Output mismatch",
+      unresolvable: "Unresolvable timing", unsupported: "Unsupported", not_selected: "Not selected",
+      unverified: "Unverified", not_measured: "Not measured", missing: "No result", unknown: "Unknown status",
+    };
+
+    function validMean(value) {
+      return typeof value === "number" && Number.isFinite(value) && value > 0;
+    }
+
+    function verifiedWasm(side) {
+      const calls = side.kernel_calls;
+      return typeof side.binary_sha256 === "string" && /^[0-9a-f]{64}$/.test(side.binary_sha256)
+        && calls !== null && typeof calls === "object" && !Array.isArray(calls)
+        && Object.keys(calls).length > 0 && Object.values(calls).every((count) => Number.isSafeInteger(count) && count > 0);
+    }
+
+    function backendResult(side, backend, legacy = false) {
+      if (side === null || typeof side !== "object" || Array.isArray(side)) {
+        return { status: legacy && backend === "rust_wasm" ? "not_measured" : "missing" };
+      }
+      const status = legacy && side.status === undefined ? "success" : side.status;
+      const reason = typeof side.reason === "string" ? side.reason : "";
+      if (status === "success") {
+        if (!validMean(side.mean_ms)) return { status: "unresolvable", reason: "A finite, positive timing is required." };
+        if (backend === "rust_wasm" && !verifiedWasm(side)) {
+          return { status: "unverified", reason: "Missing a valid binary hash or positive kernel-call receipt." };
+        }
+        return { ...side, status, reason };
+      }
+      return typeof status === "string" && Object.hasOwn(statusNames, status) ? { status, reason } : { status: "unknown", reason };
+    }
+
+    function normalizeRow(row, legacy = false) {
+      return {
+        function: typeof row?.function === "string" ? row.function : "(unnamed benchmark)",
+        scope: row?.scope === "kernel" ? "kernel" : "api",
+        fixtureMatched: row?.output_verification?.status === "matched" && row.output_verification.reference === "pandas",
+        ...Object.fromEntries(backends.map((backend) => [backend, backendResult(row?.[backend], backend, legacy)])),
+      };
+    }
+
+    function comparisonRows(data) {
+      if (data.schema_version === 3 && Array.isArray(data.comparisons)) return data.comparisons.map((row) => normalizeRow(row));
+      // Older reports kept failed attempts outside the successful benchmarks list.
+      const rows = new Map();
+      for (const row of Array.isArray(data.benchmarks) ? data.benchmarks : []) {
+        const normalized = normalizeRow(row, true);
+        rows.set(normalized.function, normalized);
+      }
+      for (const outcome of Array.isArray(data.outcomes) ? data.outcomes : []) {
+        const normalized = normalizeRow(outcome, true);
+        const previous = rows.get(normalized.function);
+        if (!previous) rows.set(normalized.function, normalized);
+        else for (const backend of ["pandas", "tsb"]) {
+          if (outcome?.[backend]?.status && outcome[backend].status !== "success") previous[backend] = normalized[backend];
+        }
+      }
+      return [...rows.values()];
+    }
+
+    function timingRatio(row, backend) {
+      if (row[backend].status !== "success" || row.pandas.status !== "success") return null;
+      const ratio = row[backend].mean_ms / row.pandas.mean_ms;
+      return validMean(ratio) ? ratio : null;
+    }
+
+    function displayNumber(number) {
+      return Number(number.toPrecision(6)).toString();
+    }
+
+    function measurementDisclosure(data, rows = []) {
       const summary = data.summary;
       const scope = data.scope;
       const counts = [summary?.completed, summary?.total, summary?.failed, scope?.discovered_pairs];
-      const known = data.schema_version === 2 && counts.every((count) => Number.isInteger(count) && count >= 0)
+      const known = [2, 3].includes(data.schema_version) && counts.every((count) => Number.isSafeInteger(count) && count >= 0)
         && summary.completed + summary.failed === summary.total && summary.total > 0
         && scope.discovered_pairs >= summary.total && ["all", "filtered"].includes(scope.kind)
-        && (scope.kind === "filtered" || scope.discovered_pairs === summary.total);
+        && (scope.kind === "filtered" || scope.discovered_pairs === summary.total)
+        && (data.schema_version !== 3 || (Array.isArray(data.comparisons) && data.comparisons.length === scope.discovered_pairs));
       const lines = [];
       if (known) {
-        const incomplete = data.status !== "complete" || summary.failed > 0;
+        const incomplete = data.status !== "complete" || summary.failed > 0
+          || rows.some((row) => backends.some((backend) => !["success", "unsupported", "not_selected", "not_measured"].includes(row[backend].status)));
         lines.push(incomplete ? "Incomplete measurement." : scope.kind === "filtered"
           ? "Filtered measurement — not the full benchmark suite." : "Measurement collection complete for discovered pairs.");
         lines.push(`${summary.completed}/${summary.total} selected pairs completed; ${scope.discovered_pairs} pairs discovered; ${summary.failed} failed.`);
@@ -210,8 +307,90 @@
       lines.push(typeof sha === "string" && /^[0-9a-f]{40,64}$/.test(sha)
         ? `Measured SHA: ${sha}${data.provenance.working_tree_dirty ? " (includes local changes)" : ""}.`
         : "Measured SHA: unknown.");
+      const versions = data.provenance?.python_libraries;
+      if (versions) {
+        const version = (key) => typeof versions[key] === "string" ? versions[key] : "unknown";
+        lines.push(`Python ${version("python")}; pandas ${version("pandas")}; NumPy ${version("numpy")}.`);
+      }
+      if (typeof data.provenance?.typescript_version === "string") {
+        lines.push(`Bun ${data.provenance.typescript_version} hosts TypeScript and Rust/Wasm measurements.`);
+      }
+      if (data.schema_version !== 3) lines.push("Legacy two-way report: Rust/Wasm was not measured.");
       lines.push("Measured timings are not proof of correctness, API parity, or overall performance parity.");
       return lines.join("\n");
+    }
+
+    function backendDisclosure(data, rows) {
+      if (data.schema_version !== 3) return "Rust/Wasm: Not measured in this legacy report.";
+      const lines = [];
+      for (const backend of backends) {
+        const counts = data.backend_summary?.[backend];
+        const fields = ["success", "failed", "unsupported", "not_selected"];
+        if (counts && fields.every((key) => Number.isSafeInteger(counts[key]) && counts[key] >= 0)
+          && fields.reduce((total, key) => total + counts[key], 0) === rows.length) {
+          lines.push(`${backendNames[backend]}: ${counts.success} successful; ${counts.failed} failed; ${counts.unsupported} unsupported; ${counts.not_selected} not selected.`);
+        } else lines.push(`${backendNames[backend]}: coverage counts unavailable.`);
+      }
+      if (rows.some((row) => row.rust_wasm.status === "unverified")) {
+        lines.push("Unverified Wasm receipts are excluded from displayed timings and ratios, regardless of reported counts.");
+      }
+      return lines.join("\n");
+    }
+
+    function appendText(parent, tag, text, className = "") {
+      const element = document.createElement(tag);
+      element.textContent = text;
+      element.className = className;
+      parent.appendChild(element);
+      return element;
+    }
+
+    function renderBackend(row, backend, tr) {
+      const side = row[backend];
+      const cell = appendText(tr, "td", side.status === "success" ? displayNumber(side.mean_ms) : statusNames[side.status]);
+      if (side.status !== "success") cell.className = ["unsupported", "not_selected", "not_measured"].includes(side.status) ? "result-unavailable" : "result-error";
+      if (side.reason) appendText(cell, "small", side.reason);
+      if (backend === "rust_wasm" && side.status === "success") {
+        const kernels = Object.entries(side.kernel_calls);
+        appendText(cell, "small", `Verified · ${kernels.length} kernel${kernels.length === 1 ? "" : "s"}`);
+        cell.title = `Kernel calls: ${kernels.map(([name, count]) => `${name}: ${count}`).join(", ")}\nWasm binary SHA-256: ${side.binary_sha256}`;
+      }
+    }
+
+    function renderRows(rows, tbody, options) {
+      const query = options.search.toLowerCase();
+      const visible = rows.filter((row) => {
+        const selected = backends.some((backend) => !["not_selected", "not_measured"].includes(row[backend].status));
+        const problem = backends.some((backend) => !["success", "unsupported", "not_selected", "not_measured"].includes(row[backend].status));
+        const searchable = [row.function, ...backends.map((backend) => row[backend].reason ?? "")].join(" ").toLowerCase();
+        return searchable.includes(query) && (options.scope === "all" || row.scope === options.scope)
+          && (options.status === "all" || (options.status === "selected" ? selected : problem));
+      });
+      visible.sort((a, b) => {
+        if (options.sort === "name") return a.function.localeCompare(b.function);
+        const left = timingRatio(a, options.sort);
+        const right = timingRatio(b, options.sort);
+        return (right ?? -1) - (left ?? -1) || a.function.localeCompare(b.function);
+      });
+      tbody.replaceChildren();
+      for (const row of visible) {
+        const tr = document.createElement("tr");
+        appendText(tr, "td", row.function);
+        const scopeCell = appendText(tr, "td", row.scope === "kernel" ? "Direct kernel" : "Existing workload");
+        if (row.fixtureMatched) {
+          appendText(scopeCell, "small", "Fixture matched");
+          scopeCell.title = "Fixture outputs match Python. Measured fixture only; not general API parity.";
+        }
+        for (const backend of backends) renderBackend(row, backend, tr);
+        for (const backend of ["tsb", "rust_wasm"]) {
+          const ratio = timingRatio(row, backend);
+          const cell = appendText(tr, "td", "");
+          appendText(cell, "span", ratio === null ? "Unavailable" : `${displayNumber(ratio)}×`,
+            ratio === null ? "result-unavailable" : `ratio-badge ${ratio < 1 ? "fast" : "slow"}`);
+        }
+        tbody.appendChild(tr);
+      }
+      return visible.length;
     }
 
     // Load benchmark results and render
@@ -240,10 +419,19 @@
         }
       }
 
+      if (data === null || typeof data !== "object" || Array.isArray(data)) {
+        measurementStatus.hidden = false;
+        measurementStatus.textContent = "Invalid benchmark report: expected a report object.";
+        noData.style.display = "block";
+        return;
+      }
       measurementStatus.hidden = false;
-      measurementStatus.textContent = measurementDisclosure(data);
-      const benchmarks = data.benchmarks || [];
-      if (benchmarks.length === 0) {
+      const rows = comparisonRows(data);
+      measurementStatus.textContent = measurementDisclosure(data, rows);
+      const backendSummary = document.getElementById("backend-summary");
+      backendSummary.hidden = false;
+      backendSummary.textContent = backendDisclosure(data, rows);
+      if (rows.length === 0) {
         noData.style.display = "block";
         return;
       }
@@ -251,32 +439,21 @@
       // Show sections
       tableHeading.style.display = "";
       benchTable.style.display = "";
-      if (data.timestamp) {
+      if (typeof data.timestamp === "string" && data.timestamp) {
         benchTimestamp.style.display = "";
         benchTimestamp.textContent = "Last updated: " + data.timestamp;
       }
 
-      // Render table
-      for (const b of benchmarks) {
-        const ratio = b.ratio;
-        const validRatio = typeof ratio === "number" && Number.isFinite(ratio) && ratio > 0
-          && [b.tsb.mean_ms, b.pandas.mean_ms].every((mean) => typeof mean === "number" && Number.isFinite(mean) && mean > 0);
-        const faster = !validRatio ? "unavailable" : ratio < 1 ? "tsb" : "pandas";
-        const badgeClass = !validRatio ? "" : ratio < 1 ? "fast" : "slow";
-        const fasterClass = !validRatio ? "" : ratio < 1 ? "faster-tsb" : "faster-pandas";
-        const displayRatio = !validRatio ? "unresolvable timing ratio" : ratio < 1
-          ? (Number.isFinite(1 / ratio) ? (1 / ratio).toFixed(2) + "x faster" : "speedup exceeds display range")
-          : ratio.toFixed(2) + "x slower";
-
-        const tr = document.createElement("tr");
-        tr.innerHTML =
-          "<td>" + b.function.replace(/_/g, " ") + "</td>" +
-          "<td>" + b.tsb.mean_ms + "</td>" +
-          "<td>" + b.pandas.mean_ms + "</td>" +
-          '<td><span class="ratio-badge ' + badgeClass + '">' + (validRatio ? ratio + "x" : "unavailable") + "</span></td>" +
-          '<td class="' + fasterClass + '">' + faster + " (" + displayRatio + ")</td>";
-        benchTbody.appendChild(tr);
-      }
+      document.getElementById("bench-controls").hidden = false;
+      const controls = Object.fromEntries(["search", "scope", "status", "sort"].map((name) => [name, document.getElementById(`bench-${name}`)]));
+      const visibleCount = document.getElementById("visible-count");
+      visibleCount.hidden = false;
+      const redraw = () => {
+        const count = renderRows(rows, benchTbody, Object.fromEntries(Object.entries(controls).map(([name, element]) => [name, element.value])));
+        visibleCount.textContent = `${count} of ${rows.length} comparisons shown. Missing measurements never count as faster.`;
+      };
+      for (const [name, element] of Object.entries(controls)) element.addEventListener(name === "search" ? "input" : "change", redraw);
+      redraw();
     })();
   </script>
 </body>

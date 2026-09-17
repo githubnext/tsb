@@ -14,6 +14,13 @@ on:
       - benchmarks/pandas/**
       - benchmarks/runner.py
       - benchmarks/run_benchmarks.sh
+      - benchmarks/backend.ts
+      - benchmarks/kernel-workloads.ts
+      - benchmarks/pandas/wasm_helpers.py
+      - benchmarks/helpers/**
+      - benchmarks/wasm-support.json
+      - rust/**
+      - src/wasm/**
       - .github/workflows/benchmark-verification.yml
       - .github/workflows/scripts/benchmark_selection.py
       - .github/workflows/scripts/test_benchmark_selection.py
@@ -75,6 +82,33 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/benchmark-verification/bun-install.log"
           python -m pip install pandas==2.2.3 numpy==2.1.3 \
             2>&1 | tee "$RUNNER_TEMP/benchmark-verification/python-install.log"
+
+      - name: Setup Rust for selected Wasm kernels
+        if: steps.select.outputs.needs_wasm == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install pinned Wasm build tooling
+        if: steps.select.outputs.needs_wasm == 'true'
+        run: npm install --global wasm-pack@0.15.0
+
+      - name: Build selected Wasm kernels from source
+        if: steps.select.outputs.needs_wasm == 'true'
+        run: |
+          if [ -d rust/pkg ]; then
+            mv rust/pkg "$RUNNER_TEMP/benchmark-committed-wasm-pkg"
+          fi
+          wasm-pack build --target nodejs --out-dir pkg rust/ -- --locked \
+            2>&1 | tee "$RUNNER_TEMP/benchmark-verification/wasm-build.log"
+          test -s rust/pkg/tsb_wasm_bg.wasm
+          {
+            git rev-parse HEAD
+            rustc --version
+            cargo --version
+            wasm-pack --version
+            sha256sum rust/pkg/tsb_wasm_bg.wasm
+          } | tee "$RUNNER_TEMP/benchmark-verification/wasm-provenance.txt"
 
       - name: Measure every selected pair serially
         if: steps.select.outputs.should_run == 'true'
