@@ -698,7 +698,9 @@ for (const workflow of ["autoloop", "goal"]) {
     assert.equal(entry.dispatch, undefined);
     assert.deepEqual(
       [...entry.risk.permissions].sort(),
-      Object.entries(publisher.permissions).map(([scope, level]) => `${scope}:${level}`).sort(),
+      Object.entries(publisher.permissions)
+        .map(([scope, level]) => `${scope}:${level}`)
+        .sort(),
     );
     const secretNames = new Set(
       [...JSON.stringify({ env: definition.env, publisher }).matchAll(/secrets\.([A-Z0-9_]+)/g)]
