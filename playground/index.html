@@ -651,6 +651,16 @@
           <p><code>GaussianHMM</code>, <code>MultinomialHMM</code> — Baum-Welch EM parameter estimation, Viterbi decoding, forward-backward log-space algorithm. Regime detection, sequence labeling. Mirrors <code>hmmlearn</code>.</p>
           <div class="status done">✅ Complete</div>
         </div>
+        <div class="feature-card">
+          <h3><a href="at_time.html" style="color: var(--accent); text-decoration: none;">🕐 at_time / between_time — Time-of-Day Selection</a></h3>
+          <p><code>atTimeSeries</code>, <code>atTimeDataFrame</code>, <code>betweenTimeSeries</code>, <code>betweenTimeDataFrame</code> — select rows of a datetime-indexed Series/DataFrame at (or between) times of day, including overnight wraparound windows and inclusive/left/right/neither bounds. Mirrors <code>pandas.Series.at_time</code> / <code>pandas.Series.between_time</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
+        <div class="feature-card">
+          <h3><a href="asfreq.html" style="color: var(--accent); text-decoration: none;">📆 asfreq — Frequency Conversion</a></h3>
+          <p><code>asfreqSeries</code>, <code>asfreqDataFrame</code> — reindex a datetime-indexed Series/DataFrame onto a regular grid at a new frequency, with <code>method</code>/<code>fillValue</code> gap-filling for upsampling and <code>normalize</code> support. Mirrors <code>pandas.Series.asfreq</code> / <code>pandas.DataFrame.asfreq</code>.</p>
+          <div class="status done">✅ Complete</div>
+        </div>
       </div>
       <div class="features-grid">
         <div class="feature-card">

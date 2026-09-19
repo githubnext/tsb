@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tsb — Period &amp; PeriodIndex</title>
+  <title>tsb — asfreq — tsb playground</title>
   <style>
     :root {
       --bg: #0d1117;
@@ -142,19 +142,24 @@
 </head>
 <body>
 
+
   <div id="playground-loading">
     <div class="spinner"></div>
     <div id="playground-status">Initializing playground…</div>
   </div>
-
   <a class="back" href="index.html">← Back to roadmap</a>
-  <h1>Period &amp; PeriodIndex</h1>
-  <p class="subtitle">Fixed-frequency time spans — mirrors
-  <code>pandas.Period</code> and <code>pandas.PeriodIndex</code>.</p>
+  <h1>asfreq — tsb playground</h1>
+  <p class="subtitle">Convert a datetime-indexed Series or DataFrame to a specified
+      frequency. Mirrors <code>pandas.Series.asfreq</code> and
+      <code>pandas.DataFrame.asfreq</code>. Unlike <code>resample</code> (which groups
+      and aggregates), <code>asfreq</code> simply reindexes onto a regular grid at the
+      new frequency &mdash; upsampled gaps are <code>null</code> unless <code>method</code>
+      or <code>fillValue</code> is given, and downsampled rows not on the new grid are
+      dropped.</p>
 
   <div class="section">
-    <h2>2 — Creating periods</h2>
-      <p>Create periods from dates, strings, or directly from ordinals:</p>
+    <h2>asfreqSeries — upsampling introduces null gaps</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -163,31 +168,21 @@
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
-// From a Date object
-const m = Period.fromDate(new Date("2024-03-15T00:00:00Z"), "M");
-console.log(m.toString());            // "2024-03"
-console.log(m.startTime.toISOString());  // "2024-03-01T00:00:00.000Z"
-console.log(m.endTime.toISOString());    // "2024-03-31T23:59:59.999Z"
+idx = pd.date_range("2024-01-01", periods=3, freq="D")
+s = pd.Series([1, 2, 3], index=idx, name="vals")
 
-// From a string
-const q = Period.fromString("2024Q3", "Q");
-console.log(q.toString());            // "2024Q3"
-console.log(q.startTime.toISOString()); // "2024-07-01T00:00:00.000Z"
-
-// Direct construction from ordinal
-const p = new Period(54, "M");   // 54 months after Jan 1970 = July 2024
-console.log(p.toString());       // "2024-07"</textarea>
+print(s.asfreq("12h").values)
+# [1.0, nan, 2.0, nan, 3.0]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>3 — Period arithmetic</h2>
-      <p>Periods support shift (<code>add</code>), difference (<code>diff</code>),
-    and comparison. Arithmetic is always within the same frequency.</p>
+    <h2>asfreqSeries — upsampling introduces null gaps</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -196,34 +191,20 @@ console.log(p.toString());       // "2024-07"</textarea>
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import { Hour, Series, asfreqSeries, date_range } from "tsb";
 
-const jan = Period.fromDate(new Date("2024-01-01T00:00:00Z"), "M");
-const apr = jan.add(3);
-console.log(apr.toString());    // "2024-04"
+const idx = date_range({ start: "2024-01-01", periods: 3, freq: "D" }).toArray();
+const s = new Series({ data: [1, 2, 3], index: idx, name: "vals" });
 
-const dec = Period.fromDate(new Date("2024-12-01T00:00:00Z"), "M");
-console.log(dec.diff(jan));     // 11  (months between)
-
-// Comparison
-console.log(jan.compareTo(dec) &lt; 0);  // true  (jan is earlier)
-console.log(jan.equals(jan.add(0)));  // true
-
-// contains: does a Date fall within a Period?
-const march15 = new Date("2024-03-15T00:00:00Z");
-const march = Period.fromDate(march15, "M");
-console.log(march.contains(march15));   // true
-console.log(march.contains(new Date("2024-04-01T00:00:00Z"))); // false</textarea>
+console.log(asfreqSeries(s, new Hour(12)).values); // [1, null, 2, null, 3]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>4 — Frequency conversion with asfreq</h2>
-      <p><code>asfreq()</code> converts a period to a different frequency.
-    The <code>how</code> parameter picks the start or end of the current period
-    as the anchor point.</p>
+    <h2>asfreqSeries — method / fillValue fill gaps introduced by upsampling</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -232,29 +213,24 @@ console.log(march.contains(new Date("2024-04-01T00:00:00Z"))); // false</textare
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
-const q2 = Period.fromString("2024Q2", "Q");
+idx = pd.date_range("2024-01-01", periods=3, freq="D")
+s = pd.Series([1, 2, 3], index=idx)
 
-// "start": April (first month of Q2)
-console.log(q2.asfreq("M", "start").toString());  // "2024-04"
+print(s.asfreq("12h", method="ffill").values)
+# [1, 1, 2, 2, 3]
 
-// "end": June (last month of Q2)
-console.log(q2.asfreq("M", "end").toString());    // "2024-06"
-
-// Going coarser: month → year
-const aug = Period.fromString("2024-08", "M");
-console.log(aug.asfreq("A").toString());           // "2024"
-console.log(aug.asfreq("Q").toString());           // "2024Q3"</textarea>
+print(s.asfreq("12h", fill_value=-1).values)
+# [1, -1, 2, -1, 3]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>5 — PeriodIndex: building ranges</h2>
-      <p>A <code>PeriodIndex</code> is an ordered sequence of periods at a uniform
-    frequency, suitable for use as a row index.</p>
+    <h2>asfreqSeries — method / fillValue fill gaps introduced by upsampling</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -263,35 +239,21 @@ console.log(aug.asfreq("Q").toString());           // "2024Q3"</textarea>
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import { Hour, Series, asfreqSeries, date_range } from "tsb";
 
-// All four quarters of 2024
-const start = Period.fromDate(new Date("2024-01-01T00:00:00Z"), "Q");
-const end   = Period.fromDate(new Date("2024-12-31T00:00:00Z"), "Q");
-const quarters = PeriodIndex.fromRange(start, end);
-console.log(quarters.size);          // 4
-console.log(quarters.at(0).toString()); // "2024Q1"
-console.log(quarters.at(-1).toString()); // "2024Q4"
+const idx = date_range({ start: "2024-01-01", periods: 3, freq: "D" }).toArray();
+const s = new Series({ data: [1, 2, 3], index: idx });
 
-// periodRange: start + count
-const months = PeriodIndex.periodRange(
-  Period.fromDate(new Date("2024-01-01T00:00:00Z"), "M"),
-  12,
-);
-console.log(months.size);            // 12
-console.log(months.at(11).toString()); // "2024-12"
-
-// Iteration
-for (const q of quarters) {
-  console.log(q.toString());
-}</textarea>
+console.log(asfreqSeries(s, new Hour(12), { method: "ffill" }).values); // [1, 1, 2, 2, 3]
+console.log(asfreqSeries(s, new Hour(12), { fillValue: -1 }).values);  // [1, -1, 2, -1, 3]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>6 — PeriodIndex: lookup and transformation</h2>
+    <h2>asfreqSeries — downsampling drops rows not on the new grid</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -300,41 +262,21 @@ for (const q of quarters) {
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
-const idx = PeriodIndex.periodRange(
-  Period.fromDate(new Date("2024-01-01T00:00:00Z"), "M"),
-  6,  // Jan–Jun 2024
-);
+idx = pd.date_range("2024-01-01", periods=6, freq="D")
+s = pd.Series(range(6), index=idx)
 
-// Position lookup
-const mar = Period.fromString("2024-03", "M");
-console.log(idx.getLoc(mar));         // 2
-console.log(idx.contains(mar));       // true
-
-// Shift the whole index
-const shifted = idx.shift(6);
-console.log(shifted.at(0).toString()); // "2024-07"
-console.log(shifted.at(5).toString()); // "2024-12"
-
-// Convert to different frequency
-const asQtr = idx.asfreq("Q", "start");
-console.log(asQtr.freq);             // "Q"
-// Note: some months map to the same quarter → duplicates
-console.log(asQtr.unique().size);    // 2 (Q1 and Q2)
-
-// Get Date arrays
-const starts = idx.toDatetimeStart();
-console.log(starts[0]?.toISOString()); // "2024-01-01T00:00:00.000Z"</textarea>
+print(s.asfreq("2D").values)
+# [0, 2, 4]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>7 — Weekly periods</h2>
-      <p>Weekly periods span Monday–Sunday. The string representation shows the
-    full range: <code>YYYY-MM-DD/YYYY-MM-DD</code>.</p>
+    <h2>asfreqSeries — downsampling drops rows not on the new grid</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -343,30 +285,20 @@ console.log(starts[0]?.toISOString()); // "2024-01-01T00:00:00.000Z"</textarea>
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import { Day, Series, asfreqSeries, date_range } from "tsb";
 
-// 1970-01-01 is a Thursday — it belongs to week 0 (Mon 1969-12-29 → Sun 1970-01-04)
-const w0 = Period.fromDate(new Date("1970-01-01T00:00:00Z"), "W");
-console.log(w0.ordinal);               // 0
-console.log(w0.startTime.toISOString()); // "1969-12-29T00:00:00.000Z"
-console.log(w0.endTime.toISOString());   // "1970-01-04T23:59:59.999Z"
-console.log(w0.toString());            // "1969-12-29/1970-01-04"
+const idx = date_range({ start: "2024-01-01", periods: 6, freq: "D" }).toArray();
+const s = new Series({ data: [0, 1, 2, 3, 4, 5], index: idx });
 
-// Build a 4-week index
-const fourWeeks = PeriodIndex.periodRange(
-  Period.fromDate(new Date("2024-01-01T00:00:00Z"), "W"),
-  4,
-);
-for (const w of fourWeeks) {
-  console.log(w.toString());
-}</textarea>
+console.log(asfreqSeries(s, new Day(2)).values); // [0, 2, 4]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>8 — Sub-daily periods</h2>
+    <h2>asfreqDataFrame — applies to every column</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -375,35 +307,21 @@ for (const w of fourWeeks) {
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
-// Hourly
-const h = Period.fromDate(new Date("2024-03-15T14:35:00Z"), "H");
-console.log(h.toString());   // "2024-03-15 14:00"
-console.log(h.durationMs);  // 3_600_000
+idx = pd.date_range("2024-01-01", periods=3, freq="D")
+df = pd.DataFrame({"a": [1, 2, 3], "b": [10, 20, 30]}, index=idx)
 
-// Minutely (alias "min")
-const t = Period.fromDate(new Date("2024-03-15T14:35:42Z"), "min");
-console.log(t.toString());   // "2024-03-15 14:35"
-console.log(t.freq);         // "T"
-
-// Secondly
-const s = Period.fromDate(new Date("2024-03-15T14:35:42.500Z"), "S");
-console.log(s.toString());   // "2024-03-15 14:35:42"
-console.log(s.durationMs);  // 1_000</textarea>
+print(df.asfreq("12h", method="ffill").to_dict("list"))
+# {'a': [1, 1, 2, 2, 3], 'b': [10, 10, 20, 20, 30]}</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>9 — Converting to/from DatetimeIndex</h2>
-      <p><code>to_period()</code> converts a <code>DatetimeIndex</code> into a
-    <code>PeriodIndex</code>, mapping each date to the period that contains it —
-    mirrors <code>pandas.DatetimeIndex.to_period()</code>.
-    <code>PeriodIndex.to_timestamp()</code> and <code>Period.to_timestamp()</code>
-    go the other way, mirroring <code>pandas.PeriodIndex.to_timestamp()</code> /
-    <code>pandas.Period.to_timestamp()</code>.</p>
+    <h2>asfreqDataFrame — applies to every column</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -412,28 +330,14 @@ console.log(s.durationMs);  // 1_000</textarea>
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { date_range, Period, to_period } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, Hour, asfreqDataFrame, date_range } from "tsb";
 
-// DatetimeIndex -> PeriodIndex
-const idx = date_range({ start: "2024-01-15", periods: 5, freq: "D" });
-const months = to_period(idx, "M");
-console.log(months.freq);                     // "M"
-console.log(months.toArray().map(String));    // all "2024-01"
+const idx = date_range({ start: "2024-01-01", periods: 3, freq: "D" }).toArray();
+const df = DataFrame.fromColumns({ a: [1, 2, 3], b: [10, 20, 30] }, { index: idx });
 
-const quarters = to_period(idx, "Q");
-console.log(quarters.at(0).toString());       // "2024Q1"
-
-// PeriodIndex -> DatetimeIndex ("start" is the default)
-const back = months.to_timestamp();
-console.log(back.at(0).toISOString());        // "2024-01-01T00:00:00.000Z"
-
-const backEnd = months.to_timestamp("end");
-console.log(backEnd.at(0).toISOString());     // "2024-01-31T23:59:59.999Z"
-
-// Period.to_timestamp() works the same way on a single period
-const p = Period.fromString("2024-03", "M");
-console.log(p.to_timestamp().toISOString());       // "2024-03-01T00:00:00.000Z"
-console.log(p.to_timestamp("end").toISOString());  // "2024-03-31T23:59:59.999Z"</textarea>
+const r = asfreqDataFrame(df, new Hour(12), { method: "ffill" });
+console.log(r.col("a").values); // [1, 1, 2, 2, 3]
+console.log(r.col("b").values); // [10, 10, 20, 20, 30]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>

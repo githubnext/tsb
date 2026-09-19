@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tsb — Period &amp; PeriodIndex</title>
+  <title>tsb — at_time / between_time — tsb playground</title>
   <style>
     :root {
       --bg: #0d1117;
@@ -142,19 +142,22 @@
 </head>
 <body>
 
+
   <div id="playground-loading">
     <div class="spinner"></div>
     <div id="playground-status">Initializing playground…</div>
   </div>
 
   <a class="back" href="index.html">← Back to roadmap</a>
-  <h1>Period &amp; PeriodIndex</h1>
-  <p class="subtitle">Fixed-frequency time spans — mirrors
-  <code>pandas.Period</code> and <code>pandas.PeriodIndex</code>.</p>
+  <h1>at_time / between_time — tsb playground</h1>
+  <p class="subtitle">Select rows of a datetime-indexed Series or DataFrame that fall
+      at (or between) particular times of day. Mirrors
+      <code>pandas.Series.at_time</code>, <code>pandas.Series.between_time</code>,
+      and their <code>DataFrame</code> equivalents.</p>
 
   <div class="section">
-    <h2>2 — Creating periods</h2>
-      <p>Create periods from dates, strings, or directly from ordinals:</p>
+    <h2>atTimeSeries — rows at an exact time of day</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -163,31 +166,21 @@
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
-// From a Date object
-const m = Period.fromDate(new Date("2024-03-15T00:00:00Z"), "M");
-console.log(m.toString());            // "2024-03"
-console.log(m.startTime.toISOString());  // "2024-03-01T00:00:00.000Z"
-console.log(m.endTime.toISOString());    // "2024-03-31T23:59:59.999Z"
+idx = pd.date_range("2024-01-01", periods=8, freq="3h")
+s = pd.Series(range(8), index=idx)
 
-// From a string
-const q = Period.fromString("2024Q3", "Q");
-console.log(q.toString());            // "2024Q3"
-console.log(q.startTime.toISOString()); // "2024-07-01T00:00:00.000Z"
-
-// Direct construction from ordinal
-const p = new Period(54, "M");   // 54 months after Jan 1970 = July 2024
-console.log(p.toString());       // "2024-07"</textarea>
+print(s.at_time("06:00"))
+# 2024-01-01 06:00:00    2</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>3 — Period arithmetic</h2>
-      <p>Periods support shift (<code>add</code>), difference (<code>diff</code>),
-    and comparison. Arithmetic is always within the same frequency.</p>
+    <h2>atTimeSeries — rows at an exact time of day</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -196,34 +189,21 @@ console.log(p.toString());       // "2024-07"</textarea>
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import { Series, atTimeSeries } from "tsb";
 
-const jan = Period.fromDate(new Date("2024-01-01T00:00:00Z"), "M");
-const apr = jan.add(3);
-console.log(apr.toString());    // "2024-04"
+const base = new Date("2024-01-01T00:00:00Z").getTime();
+const idx = Array.from({ length: 8 }, (_, i) => new Date(base + i * 3 * 60 * 60 * 1000));
+const s = new Series({ data: [0, 1, 2, 3, 4, 5, 6, 7], index: idx });
 
-const dec = Period.fromDate(new Date("2024-12-01T00:00:00Z"), "M");
-console.log(dec.diff(jan));     // 11  (months between)
-
-// Comparison
-console.log(jan.compareTo(dec) &lt; 0);  // true  (jan is earlier)
-console.log(jan.equals(jan.add(0)));  // true
-
-// contains: does a Date fall within a Period?
-const march15 = new Date("2024-03-15T00:00:00Z");
-const march = Period.fromDate(march15, "M");
-console.log(march.contains(march15));   // true
-console.log(march.contains(new Date("2024-04-01T00:00:00Z"))); // false</textarea>
+console.log(atTimeSeries(s, "06:00").values); // [2]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>4 — Frequency conversion with asfreq</h2>
-      <p><code>asfreq()</code> converts a period to a different frequency.
-    The <code>how</code> parameter picks the start or end of the current period
-    as the anchor point.</p>
+    <h2>betweenTimeSeries — rows within a time-of-day window</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -232,29 +212,24 @@ console.log(march.contains(new Date("2024-04-01T00:00:00Z"))); // false</textare
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
 
-const q2 = Period.fromString("2024Q2", "Q");
+idx = pd.date_range("2024-01-01", periods=8, freq="3h")
+s = pd.Series(range(8), index=idx)
 
-// "start": April (first month of Q2)
-console.log(q2.asfreq("M", "start").toString());  // "2024-04"
+print(s.between_time("09:00", "18:00"))
+# [3, 4, 5, 6]
 
-// "end": June (last month of Q2)
-console.log(q2.asfreq("M", "end").toString());    // "2024-06"
-
-// Going coarser: month → year
-const aug = Period.fromString("2024-08", "M");
-console.log(aug.asfreq("A").toString());           // "2024"
-console.log(aug.asfreq("Q").toString());           // "2024Q3"</textarea>
+print(s.between_time("09:00", "18:00", inclusive="left"))
+# [3, 4, 5]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>
   </div>
 
   <div class="section">
-    <h2>5 — PeriodIndex: building ranges</h2>
-      <p>A <code>PeriodIndex</code> is an ordered sequence of periods at a uniform
-    frequency, suitable for use as a row index.</p>
+    <h2>betweenTimeSeries — rows within a time-of-day window</h2>
+      <p>Python pandas equivalent:</p>
     <div class="playground-block">
       <div class="playground-header">
         <span class="playground-label">TypeScript</span>
@@ -263,177 +238,112 @@ console.log(aug.asfreq("Q").toString());           // "2024Q3"</textarea>
           <button class="playground-reset">↺ Reset</button>
         </div>
       </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
+      <textarea class="playground-editor" spellcheck="false">import { Series, betweenTimeSeries } from "tsb";
 
-// All four quarters of 2024
-const start = Period.fromDate(new Date("2024-01-01T00:00:00Z"), "Q");
-const end   = Period.fromDate(new Date("2024-12-31T00:00:00Z"), "Q");
-const quarters = PeriodIndex.fromRange(start, end);
-console.log(quarters.size);          // 4
-console.log(quarters.at(0).toString()); // "2024Q1"
-console.log(quarters.at(-1).toString()); // "2024Q4"
+const base = new Date("2024-01-01T00:00:00Z").getTime();
+const idx = Array.from({ length: 8 }, (_, i) => new Date(base + i * 3 * 60 * 60 * 1000));
+const s = new Series({ data: [0, 1, 2, 3, 4, 5, 6, 7], index: idx });
 
-// periodRange: start + count
-const months = PeriodIndex.periodRange(
-  Period.fromDate(new Date("2024-01-01T00:00:00Z"), "M"),
-  12,
+console.log(betweenTimeSeries(s, "09:00", "18:00").values);          // [3, 4, 5, 6]
+console.log(betweenTimeSeries(s, "09:00", "18:00", "left").values);  // [3, 4, 5]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>betweenTimeSeries — wraparound window (e.g. overnight 18:00–03:00)</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
+
+idx = pd.date_range("2024-01-01", periods=8, freq="3h")
+s = pd.Series(range(8), index=idx)
+
+print(s.between_time("18:00", "03:00"))
+# [0, 1, 6, 7]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>betweenTimeSeries — wraparound window (e.g. overnight 18:00–03:00)</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { Series, betweenTimeSeries } from "tsb";
+
+const base = new Date("2024-01-01T00:00:00Z").getTime();
+const idx = Array.from({ length: 8 }, (_, i) => new Date(base + i * 3 * 60 * 60 * 1000));
+const s = new Series({ data: [0, 1, 2, 3, 4, 5, 6, 7], index: idx });
+
+console.log(betweenTimeSeries(s, "18:00", "03:00").values); // [0, 1, 6, 7]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>atTimeDataFrame / betweenTimeDataFrame</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import pandas as pd
+
+idx = pd.date_range("2024-01-01", periods=8, freq="3h")
+df = pd.DataFrame({"a": range(8), "b": range(8, 16)}, index=idx)
+
+print(df.at_time("06:00")["a"])
+# [2]
+print(df.between_time("09:00", "18:00")["a"])
+# [3, 4, 5, 6]</textarea>
+      <div class="playground-output">Click ▶ Run to execute</div>
+      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>atTimeDataFrame / betweenTimeDataFrame</h2>
+      <p>Python pandas equivalent:</p>
+    <div class="playground-block">
+      <div class="playground-header">
+        <span class="playground-label">TypeScript</span>
+        <div class="playground-actions">
+          <button class="playground-run" disabled>▶ Run</button>
+          <button class="playground-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea class="playground-editor" spellcheck="false">import { DataFrame, atTimeDataFrame, betweenTimeDataFrame } from "tsb";
+
+const base = new Date("2024-01-01T00:00:00Z").getTime();
+const idx = Array.from({ length: 8 }, (_, i) => new Date(base + i * 3 * 60 * 60 * 1000));
+const df = DataFrame.fromColumns(
+  { a: [0, 1, 2, 3, 4, 5, 6, 7], b: [8, 9, 10, 11, 12, 13, 14, 15] },
+  { index: idx },
 );
-console.log(months.size);            // 12
-console.log(months.at(11).toString()); // "2024-12"
 
-// Iteration
-for (const q of quarters) {
-  console.log(q.toString());
-}</textarea>
-      <div class="playground-output">Click ▶ Run to execute</div>
-      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>6 — PeriodIndex: lookup and transformation</h2>
-    <div class="playground-block">
-      <div class="playground-header">
-        <span class="playground-label">TypeScript</span>
-        <div class="playground-actions">
-          <button class="playground-run" disabled>▶ Run</button>
-          <button class="playground-reset">↺ Reset</button>
-        </div>
-      </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
-
-const idx = PeriodIndex.periodRange(
-  Period.fromDate(new Date("2024-01-01T00:00:00Z"), "M"),
-  6,  // Jan–Jun 2024
-);
-
-// Position lookup
-const mar = Period.fromString("2024-03", "M");
-console.log(idx.getLoc(mar));         // 2
-console.log(idx.contains(mar));       // true
-
-// Shift the whole index
-const shifted = idx.shift(6);
-console.log(shifted.at(0).toString()); // "2024-07"
-console.log(shifted.at(5).toString()); // "2024-12"
-
-// Convert to different frequency
-const asQtr = idx.asfreq("Q", "start");
-console.log(asQtr.freq);             // "Q"
-// Note: some months map to the same quarter → duplicates
-console.log(asQtr.unique().size);    // 2 (Q1 and Q2)
-
-// Get Date arrays
-const starts = idx.toDatetimeStart();
-console.log(starts[0]?.toISOString()); // "2024-01-01T00:00:00.000Z"</textarea>
-      <div class="playground-output">Click ▶ Run to execute</div>
-      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>7 — Weekly periods</h2>
-      <p>Weekly periods span Monday–Sunday. The string representation shows the
-    full range: <code>YYYY-MM-DD/YYYY-MM-DD</code>.</p>
-    <div class="playground-block">
-      <div class="playground-header">
-        <span class="playground-label">TypeScript</span>
-        <div class="playground-actions">
-          <button class="playground-run" disabled>▶ Run</button>
-          <button class="playground-reset">↺ Reset</button>
-        </div>
-      </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period, PeriodIndex } from "tsb";
-
-// 1970-01-01 is a Thursday — it belongs to week 0 (Mon 1969-12-29 → Sun 1970-01-04)
-const w0 = Period.fromDate(new Date("1970-01-01T00:00:00Z"), "W");
-console.log(w0.ordinal);               // 0
-console.log(w0.startTime.toISOString()); // "1969-12-29T00:00:00.000Z"
-console.log(w0.endTime.toISOString());   // "1970-01-04T23:59:59.999Z"
-console.log(w0.toString());            // "1969-12-29/1970-01-04"
-
-// Build a 4-week index
-const fourWeeks = PeriodIndex.periodRange(
-  Period.fromDate(new Date("2024-01-01T00:00:00Z"), "W"),
-  4,
-);
-for (const w of fourWeeks) {
-  console.log(w.toString());
-}</textarea>
-      <div class="playground-output">Click ▶ Run to execute</div>
-      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>8 — Sub-daily periods</h2>
-    <div class="playground-block">
-      <div class="playground-header">
-        <span class="playground-label">TypeScript</span>
-        <div class="playground-actions">
-          <button class="playground-run" disabled>▶ Run</button>
-          <button class="playground-reset">↺ Reset</button>
-        </div>
-      </div>
-      <textarea class="playground-editor" spellcheck="false">import { Period } from "tsb";
-
-// Hourly
-const h = Period.fromDate(new Date("2024-03-15T14:35:00Z"), "H");
-console.log(h.toString());   // "2024-03-15 14:00"
-console.log(h.durationMs);  // 3_600_000
-
-// Minutely (alias "min")
-const t = Period.fromDate(new Date("2024-03-15T14:35:42Z"), "min");
-console.log(t.toString());   // "2024-03-15 14:35"
-console.log(t.freq);         // "T"
-
-// Secondly
-const s = Period.fromDate(new Date("2024-03-15T14:35:42.500Z"), "S");
-console.log(s.toString());   // "2024-03-15 14:35:42"
-console.log(s.durationMs);  // 1_000</textarea>
-      <div class="playground-output">Click ▶ Run to execute</div>
-      <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>9 — Converting to/from DatetimeIndex</h2>
-      <p><code>to_period()</code> converts a <code>DatetimeIndex</code> into a
-    <code>PeriodIndex</code>, mapping each date to the period that contains it —
-    mirrors <code>pandas.DatetimeIndex.to_period()</code>.
-    <code>PeriodIndex.to_timestamp()</code> and <code>Period.to_timestamp()</code>
-    go the other way, mirroring <code>pandas.PeriodIndex.to_timestamp()</code> /
-    <code>pandas.Period.to_timestamp()</code>.</p>
-    <div class="playground-block">
-      <div class="playground-header">
-        <span class="playground-label">TypeScript</span>
-        <div class="playground-actions">
-          <button class="playground-run" disabled>▶ Run</button>
-          <button class="playground-reset">↺ Reset</button>
-        </div>
-      </div>
-      <textarea class="playground-editor" spellcheck="false">import { date_range, Period, to_period } from "tsb";
-
-// DatetimeIndex -> PeriodIndex
-const idx = date_range({ start: "2024-01-15", periods: 5, freq: "D" });
-const months = to_period(idx, "M");
-console.log(months.freq);                     // "M"
-console.log(months.toArray().map(String));    // all "2024-01"
-
-const quarters = to_period(idx, "Q");
-console.log(quarters.at(0).toString());       // "2024Q1"
-
-// PeriodIndex -> DatetimeIndex ("start" is the default)
-const back = months.to_timestamp();
-console.log(back.at(0).toISOString());        // "2024-01-01T00:00:00.000Z"
-
-const backEnd = months.to_timestamp("end");
-console.log(backEnd.at(0).toISOString());     // "2024-01-31T23:59:59.999Z"
-
-// Period.to_timestamp() works the same way on a single period
-const p = Period.fromString("2024-03", "M");
-console.log(p.to_timestamp().toISOString());       // "2024-03-01T00:00:00.000Z"
-console.log(p.to_timestamp("end").toISOString());  // "2024-03-31T23:59:59.999Z"</textarea>
+console.log(atTimeDataFrame(df, "06:00").col("a").values); // [2]
+console.log(betweenTimeDataFrame(df, "09:00", "18:00").col("a").values); // [3, 4, 5, 6]</textarea>
       <div class="playground-output">Click ▶ Run to execute</div>
       <div class="playground-hint">Ctrl+Enter to run · Tab to indent</div>
     </div>

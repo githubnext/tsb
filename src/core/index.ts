@@ -19,7 +19,7 @@ export { Interval, IntervalIndex } from "./interval.ts";
 export type { IntervalClosed, IntervalIndexOptions } from "./interval.ts";
 export { CategoricalIndex } from "./categorical_index.ts";
 export type { CategoricalIndexOptions } from "./categorical_index.ts";
-export { Period, PeriodIndex } from "./period.ts";
+export { Period, PeriodIndex, to_period } from "./period.ts";
 export type { PeriodFreq, PeriodIndexOptions } from "./period.ts";
 export { Timedelta, TimedeltaIndex } from "./timedelta.ts";
 export type { TimedeltaComponents, TimedeltaIndexOptions } from "./timedelta.ts";

@@ -36,6 +36,8 @@
  * @module
  */
 
+import { DatetimeIndex } from "./date_range.ts";
+
 // ─── public types ─────────────────────────────────────────────────────────────
 
 /**
@@ -436,6 +438,16 @@ export class Period {
     return new Period(dateToOrdinal(new Date(ms), f), f);
   }
 
+  /**
+   * Convert this period to a `Date`.
+   *
+   * Mirrors `pandas.Period.to_timestamp()`: `how = "start"` (default) returns
+   * the first millisecond of the period; `how = "end"` returns the last.
+   */
+  to_timestamp(how: "start" | "end" = "start"): Date {
+    return how === "end" ? this.endTime : this.startTime;
+  }
+
   /** Human-readable string representation (matches pandas output). */
   toString(): string {
     return formatPeriod(this.ordinal, this.freq);
@@ -483,6 +495,16 @@ export class PeriodIndex {
   }
 
   // ─── factory methods ──────────────────────────────────────────────────────
+
+  /**
+   * Build an empty PeriodIndex at the given frequency.
+   *
+   * Useful as the result of converting an empty `DatetimeIndex` via
+   * {@link to_period}, mirroring `pandas.PeriodIndex([], freq=...)`.
+   */
+  static empty(freq: PeriodFreq | string, options?: PeriodIndexOptions): PeriodIndex {
+    return new PeriodIndex([], normFreq(freq as string), options?.name);
+  }
 
   /**
    * Build a PeriodIndex from an array of {@link Period} objects.
@@ -694,6 +716,23 @@ export class PeriodIndex {
     return this._ordinals.map((ord) => new Date(ordinalToEndMs(ord, this.freq)));
   }
 
+  /**
+   * Convert this `PeriodIndex` to a `DatetimeIndex`.
+   *
+   * Mirrors `pandas.PeriodIndex.to_timestamp()`: `how = "start"` (default)
+   * uses the first millisecond of each period; `how = "end"` uses the last.
+   *
+   * @example
+   * ```ts
+   * const idx = PeriodIndex.periodRange(Period.fromString("2024-01", "M"), 3);
+   * idx.to_timestamp().at(0).toISOString(); // "2024-01-01T00:00:00.000Z"
+   * ```
+   */
+  to_timestamp(how: "start" | "end" = "start"): DatetimeIndex {
+    const dates = how === "end" ? this.toDatetimeEnd() : this.toDatetimeStart();
+    return DatetimeIndex.fromDates(dates, this.name);
+  }
+
   // ─── iteration / serialisation ────────────────────────────────────────────
 
   /** Iterate over all periods in order. */
@@ -725,4 +764,29 @@ export class PeriodIndex {
     const suffix = this._ordinals.length > 4 ? ", ..." : "";
     return `PeriodIndex([${preview}${suffix}], freq="${this.freq}", length=${this._ordinals.length})`;
   }
+}
+
+// ─── to_period ─────────────────────────────────────────────────────────────────
+
+/**
+ * Convert a {@link DatetimeIndex} to a {@link PeriodIndex} at the given
+ * frequency.
+ *
+ * Mirrors `pandas.DatetimeIndex.to_period(freq)`. Each date is mapped to the
+ * period that contains it (i.e. `Period.fromDate(date, freq)`).
+ *
+ * @example
+ * ```ts
+ * const idx = date_range({ start: "2024-01-01", periods: 3, freq: "D" });
+ * const periods = to_period(idx, "M");
+ * periods.at(0).toString(); // "2024-01"
+ * periods.size;             // 3
+ * ```
+ */
+export function to_period(idx: DatetimeIndex, freq: PeriodFreq | string): PeriodIndex {
+  if (idx.size === 0) {
+    return PeriodIndex.empty(freq, { name: idx.name });
+  }
+  const periods = idx.values.map((d) => Period.fromDate(d, freq));
+  return PeriodIndex.fromPeriods(periods, { name: idx.name });
 }

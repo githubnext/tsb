@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "bun:test";
 import fc from "fast-check";
-import { Period, PeriodIndex } from "../../src/index.ts";
+import { DatetimeIndex, Period, PeriodIndex, date_range, to_period } from "../../src/index.ts";
 import type { PeriodFreq } from "../../src/index.ts";
 
 // ─── top-level regex ──────────────────────────────────────────────────────────
@@ -747,6 +747,116 @@ describe("PeriodIndex — property: fromRange size", () => {
           const end = new Period(startOrd + span, "M");
           const idx = PeriodIndex.fromRange(start, end);
           expect(idx.size).toBe(span + 1);
+        },
+      ),
+    );
+  });
+});
+
+describe("to_period — DatetimeIndex → PeriodIndex", () => {
+  // Reference values generated from Python pandas 2.2.3:
+  //   idx = pd.date_range("2024-01-15", periods=5, freq="D")
+  //   idx.to_period("M")  -> ['2024-01', '2024-01', '2024-01', '2024-01', '2024-01']
+  //   idx.to_period("Q")  -> ['2024Q1', '2024Q1', '2024Q1', '2024Q1', '2024Q1']
+  it("maps each date to the containing monthly period (matches pandas)", () => {
+    const idx = date_range({ start: "2024-01-15", periods: 5, freq: "D" });
+    const periods = to_period(idx, "M");
+    expect(periods.size).toBe(5);
+    expect(periods.toArray().map((p) => p.toString())).toEqual([
+      "2024-01",
+      "2024-01",
+      "2024-01",
+      "2024-01",
+      "2024-01",
+    ]);
+    expect(periods.freq).toBe("M");
+  });
+
+  it("maps each date to the containing quarterly period (matches pandas)", () => {
+    const idx = date_range({ start: "2024-01-15", periods: 5, freq: "D" });
+    const periods = to_period(idx, "Q");
+    expect(periods.toArray().map((p) => p.toString())).toEqual([
+      "2024Q1",
+      "2024Q1",
+      "2024Q1",
+      "2024Q1",
+      "2024Q1",
+    ]);
+  });
+
+  it("preserves the index name", () => {
+    const idx = DatetimeIndex.fromDates([new Date("2024-03-15T00:00:00Z")], "dates");
+    const periods = to_period(idx, "M");
+    expect(periods.name).toBe("dates");
+  });
+
+  // pd.DatetimeIndex([]).to_period("D") -> PeriodIndex([], dtype='period[D]'), len 0
+  it("returns an empty PeriodIndex for an empty DatetimeIndex (matches pandas)", () => {
+    const idx = DatetimeIndex.fromDates([]);
+    const periods = to_period(idx, "D");
+    expect(periods.size).toBe(0);
+    expect(periods.freq).toBe("D");
+  });
+});
+
+describe("PeriodIndex.to_timestamp — PeriodIndex → DatetimeIndex", () => {
+  // Reference values generated from Python pandas 2.2.3:
+  //   p = pd.date_range("2024-01-15", periods=5, freq="D").to_period("M")
+  //   p.to_timestamp()            -> all "2024-01-01"
+  //   p.to_timestamp(how="end")   -> all "2024-01-31 23:59:59.999999999"
+  it("'start' returns the first millisecond of each period (matches pandas)", () => {
+    const idx = date_range({ start: "2024-01-15", periods: 5, freq: "D" });
+    const periods = to_period(idx, "M");
+    const ts = periods.to_timestamp();
+    expect(ts.toStrings().every((s) => s === "2024-01-01T00:00:00.000Z")).toBe(true);
+  });
+
+  it("'end' returns the last millisecond of each period (matches pandas, ms precision)", () => {
+    const idx = date_range({ start: "2024-01-15", periods: 5, freq: "D" });
+    const periods = to_period(idx, "M");
+    const ts = periods.to_timestamp("end");
+    expect(ts.toStrings().every((s) => s === "2024-01-31T23:59:59.999Z")).toBe(true);
+  });
+
+  it("preserves the index name", () => {
+    const p = PeriodIndex.fromPeriods([Period.fromString("2024-03", "M")], { name: "p" });
+    expect(p.to_timestamp().name).toBe("p");
+  });
+});
+
+describe("Period.to_timestamp", () => {
+  // pd.Period("2024-03", freq="M").to_timestamp()             -> 2024-03-01 00:00:00
+  // pd.Period("2024-03", freq="M").to_timestamp(how="end")    -> 2024-03-31 23:59:59.999999999
+  it("'start' matches pandas", () => {
+    const p = Period.fromString("2024-03", "M");
+    expect(p.to_timestamp().toISOString()).toBe("2024-03-01T00:00:00.000Z");
+  });
+
+  it("'end' matches pandas (ms precision)", () => {
+    const p = Period.fromString("2024-03", "M");
+    expect(p.to_timestamp("end").toISOString()).toBe("2024-03-31T23:59:59.999Z");
+  });
+
+  it("defaults to startTime, matching the `how` default", () => {
+    const p = Period.fromString("2024-03", "M");
+    expect(p.to_timestamp().getTime()).toBe(p.startTime.getTime());
+  });
+});
+
+describe("to_period / to_timestamp — property: round-trip start", () => {
+  it("to_period(to_timestamp(idx)).at(i) equals the original period", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 1000 }),
+        fc.integer({ min: 1, max: 20 }),
+        fc.constantFrom<PeriodFreq>("M", "Q", "A", "D"),
+        (startOrd, count, freq) => {
+          const start = new Period(startOrd, freq);
+          const periods = PeriodIndex.periodRange(start, count);
+          const roundTripped = to_period(periods.to_timestamp(), freq);
+          expect(roundTripped.toArray().map((p) => p.toString())).toEqual(
+            periods.toArray().map((p) => p.toString()),
+          );
         },
       ),
     );
